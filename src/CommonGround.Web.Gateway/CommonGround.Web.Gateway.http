@@ -1,0 +1,6 @@
+@CommonGround.Web.Gateway_HostAddress = http://localhost:5240
+
+GET {{CommonGround.Web.Gateway_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

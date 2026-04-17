@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="CommonGround.API.IntegrationTests/CommonGround.API.IntegrationTests.csproj" />
+  <Project Path="CommonGround.API.Tests/CommonGround.API.Tests.csproj" />
+  <Project Path="CommonGround.API/CommonGround.API.csproj" />
+  <Project Path="CommonGround.Contracts/CommonGround.Contracts.csproj" />
+  <Project Path="CommonGround.SharedKernel.Tests/CommonGround.SharedKernel.Tests.csproj" />
+  <Project Path="CommonGround.SharedKernel/CommonGround.SharedKernel.csproj" />
+  <Project Path="CommonGround.Web.Gateway/CommonGround.Web.Gateway.csproj" />
+</Solution>
