@@ -3,7 +3,7 @@ namespace CommonGround.SharedKernel.Domain.Exceptions;
 /// <summary>
 /// Exception thrown when an aggregate root is not found in the repository.
 /// </summary>
-public class AggregateNotFoundException : Exception
+public sealed class AggregateNotFoundException : Exception
 {
     /// <summary>
     /// Initializes a new instance of the AggregateNotFoundException class.

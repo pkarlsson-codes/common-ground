@@ -3,7 +3,7 @@ namespace CommonGround.SharedKernel.Domain;
 /// <summary>
 /// Unique identifier for a User.
 /// </summary>
-public class UserId : EntityId<UserId>
+public sealed class UserId : EntityId<UserId>
 {
     private const string Prefix = "user";
 

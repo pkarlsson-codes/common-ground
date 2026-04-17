@@ -4,7 +4,7 @@ namespace CommonGround.SharedKernel.Domain.Exceptions;
 /// Exception thrown when a participant attempts an operation they are not permitted to perform.
 /// Maps to HTTP 403 Forbidden.
 /// </summary>
-public class ForbiddenException : Exception
+public sealed class ForbiddenException : Exception
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ForbiddenException"/> class.

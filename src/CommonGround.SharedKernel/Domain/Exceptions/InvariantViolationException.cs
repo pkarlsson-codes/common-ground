@@ -3,7 +3,7 @@ namespace CommonGround.SharedKernel.Domain.Exceptions;
 /// <summary>
 /// Exception thrown when an aggregate's invariants are violated.
 /// </summary>
-public class InvariantViolationException : DomainException
+public sealed class InvariantViolationException : DomainException
 {
     /// <summary>
     /// Initializes a new instance of the InvariantViolationException class.

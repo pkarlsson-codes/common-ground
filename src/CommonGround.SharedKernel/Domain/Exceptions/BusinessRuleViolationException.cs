@@ -3,7 +3,7 @@ namespace CommonGround.SharedKernel.Domain.Exceptions;
 /// <summary>
 /// Exception thrown when a business rule is violated during domain operations.
 /// </summary>
-public class BusinessRuleViolationException : DomainException
+public sealed class BusinessRuleViolationException : DomainException
 {
     /// <summary>
     /// Initializes a new instance of the BusinessRuleViolationException class.
