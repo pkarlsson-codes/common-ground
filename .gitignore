@@ -1,0 +1,26 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+logs/
+
+# Node
+node_modules/
+dist/
+.env.local
+
+# dotnet-format
+.dotnet-format/
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
