@@ -1,0 +1,2 @@
+npm run dotnet:build
+npm run dotnet:test -- --no-build
