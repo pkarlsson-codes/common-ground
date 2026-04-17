@@ -1,0 +1,55 @@
+.home {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 48px 20px 64px;
+}
+
+.home__header {
+  margin-bottom: 28px;
+}
+
+.kicker {
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  color: #1e4f45;
+}
+
+.home__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.card {
+  border: 1px solid #d4ddd9;
+  border-radius: 14px;
+  padding: 18px;
+  background: #f7faf8;
+}
+
+.card h2 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.card p {
+  margin: 0 0 12px;
+  color: #33413d;
+}
+
+.card pre {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #1f2937;
+  color: #f9fafb;
+  overflow-x: auto;
+}
+
+@media (max-width: 900px) {
+  .home__grid {
+    grid-template-columns: 1fr;
+  }
+}
