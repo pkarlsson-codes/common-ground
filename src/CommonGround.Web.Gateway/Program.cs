@@ -1,41 +1,43 @@
+using CommonGround.Web.Gateway.Configuration;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
 
-var app = builder.Build();
+builder.Host.ConfigureGatewayLogging();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+try
 {
-    app.MapOpenApi();
+    Log.Information(GatewayDefaults.Application.StartupMessage);
+
+    builder.Services.AddGatewayServices(builder.Configuration);
+    builder.Services.AddGatewayAuthentication(builder.Configuration);
+    builder.Services.AddGatewayInfrastructure(builder.Configuration, builder.Environment);
+
+    if (builder.Environment.IsDevelopment())
+    {
+        builder.Services.AddGatewayDevelopmentServices(builder.Configuration);
+    }
+
+    var app = builder.Build();
+
+    app.ValidateStartupRequirements();
+    app.ConfigureDevelopmentPipeline();
+    app.ConfigureSecurityPipeline();
+    app.ConfigureApiPipeline();
+
+    Log.Information(GatewayDefaults.Application.StartupCompleteMessage);
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-var summaries = new[]
+catch (Exception ex) when (ex is not OperationCanceledException)
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
+    Log.Fatal(ex, GatewayDefaults.Application.UnexpectedTerminationMessage);
+    throw;
+}
+finally
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
-app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    Log.CloseAndFlush();
 }

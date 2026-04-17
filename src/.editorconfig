@@ -124,6 +124,9 @@ dotnet_style_prefer_compound_assignment = true:suggestion
 
 dotnet_diagnostic.CA2007.severity = warning
 
+[**/Controllers/*.cs]
+dotnet_diagnostic.CA2007.severity = none
+
 [**/Migrations/*.cs]
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.SA1413.severity = none
