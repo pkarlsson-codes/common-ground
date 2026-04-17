@@ -1,4 +1,4 @@
-namespace CommonGround.Infrastructure.API;
+namespace CommonGround.SharedKernel.Infrastructure.API;
 
 /// <summary>
 /// Static factory methods for creating API responses.

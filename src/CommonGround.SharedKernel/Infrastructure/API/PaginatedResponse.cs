@@ -1,4 +1,4 @@
-namespace CommonGround.Infrastructure.API;
+namespace CommonGround.SharedKernel.Infrastructure.API;
 
 /// <summary>
 /// Extension methods for <see cref="PaginatedResponse{T}"/>.

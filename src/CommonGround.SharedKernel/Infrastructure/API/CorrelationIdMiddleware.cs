@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
-namespace CommonGround.Infrastructure.API;
+namespace CommonGround.SharedKernel.Infrastructure.API;
 
 /// <summary>
 /// Middleware to capture or generate a correlation ID from request headers and store it in HttpContext.Items.

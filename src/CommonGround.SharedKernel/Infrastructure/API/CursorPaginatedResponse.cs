@@ -1,4 +1,4 @@
-namespace CommonGround.Infrastructure.API;
+namespace CommonGround.SharedKernel.Infrastructure.API;
 
 /// <summary>
 /// Cursor-based paginated response wrapper for API endpoints.

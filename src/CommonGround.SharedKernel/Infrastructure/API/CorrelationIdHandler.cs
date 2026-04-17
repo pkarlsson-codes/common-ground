@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace CommonGround.Infrastructure.API;
+namespace CommonGround.SharedKernel.Infrastructure.API;
 
 /// <summary>
 /// DelegatingHandler that appends the correlation ID header to outgoing HTTP requests if available in the current HttpContext.

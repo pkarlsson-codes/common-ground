@@ -1,7 +1,7 @@
-using CommonGround.Infrastructure.API;
+using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.EntityFrameworkCore;
 
-namespace CommonGround.Infrastructure.Querying;
+namespace CommonGround.SharedKernel.Infrastructure.Querying;
 
 /// <summary>
 /// Extension methods for IQueryable pagination.

@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace CommonGround.Infrastructure.Querying;
+namespace CommonGround.SharedKernel.Infrastructure.Querying;
 
 /// <summary>
 /// Helper utility for encoding and decoding cursors used in cursor-based pagination.

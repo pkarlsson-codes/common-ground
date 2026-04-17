@@ -1,4 +1,4 @@
-namespace CommonGround.Infrastructure.Querying;
+namespace CommonGround.SharedKernel.Infrastructure.Querying;
 
 /// <summary>
 /// Describes a single sort operation against a logical field.

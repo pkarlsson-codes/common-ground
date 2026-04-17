@@ -2,7 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CommonGround.Infrastructure.Querying;
+namespace CommonGround.SharedKernel.Infrastructure.Querying;
 
 /// <summary>
 /// Query specification for HTTP querystring binding with offset pagination and sorting.

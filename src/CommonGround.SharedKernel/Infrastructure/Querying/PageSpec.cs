@@ -1,4 +1,4 @@
-namespace CommonGround.Infrastructure.Querying;
+namespace CommonGround.SharedKernel.Infrastructure.Querying;
 
 /// <summary>
 /// Page parameters for offset-based pagination (bound from querystring via page.* keys).

@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace CommonGround.Infrastructure.Querying;
+namespace CommonGround.SharedKernel.Infrastructure.Querying;
 
 /// <summary>
 /// Extensions for applying sorting to queryables using a provided sort mapping.

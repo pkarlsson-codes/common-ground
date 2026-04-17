@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace CommonGround.Infrastructure.Querying;
+namespace CommonGround.SharedKernel.Infrastructure.Querying;
 
 /// <summary>
 /// Query specification for HTTP querystring binding with offset pagination, sorting, and typed filters.

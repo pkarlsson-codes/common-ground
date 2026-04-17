@@ -1,4 +1,4 @@
-namespace CommonGround.Infrastructure.Querying;
+namespace CommonGround.SharedKernel.Infrastructure.Querying;
 
 /// <summary>
 /// Direction for cursor-based pagination.
