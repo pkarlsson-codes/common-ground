@@ -1,6 +1,7 @@
 using CommonGround.API;
 using CommonGround.API.Infrastructure;
 using CommonGround.API.Infrastructure.Configuration;
+using CommonGround.PropertyRegistry.Infrastructure;
 using Serilog;
 using Wolverine;
 using Wolverine.RabbitMQ;
@@ -41,6 +42,7 @@ try
         }
 
         opts.Discovery.IncludeAssembly(typeof(CommonGroundApiAssemblyReference).Assembly);
+        opts.Discovery.IncludeAssembly(typeof(PropertyRegistryAssemblyReference).Assembly);
     });
 
     var app = builder.Build();

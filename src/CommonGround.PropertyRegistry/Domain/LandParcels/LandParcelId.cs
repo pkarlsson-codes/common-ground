@@ -7,5 +7,5 @@ namespace CommonGround.PropertyRegistry.Domain.LandParcels;
 public sealed class LandParcelId(string value)
 : EntityId<LandParcelId>(value, Prefix)
 {
-    private const string Prefix = "landparcel";
+    private const string Prefix = "parcel";
 }    

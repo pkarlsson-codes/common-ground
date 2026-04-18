@@ -6,7 +6,7 @@ namespace CommonGround.API.IntegrationTests.Smoke;
 /// <summary>
 /// Basic smoke tests that verify the API starts and auth protections are active.
 /// </summary>
-[Collection("integration")]
+[Collection(IntegrationCollection.Name)]
 public sealed class SmokeTests(ApiFactory factory)
 {
     /// <summary>

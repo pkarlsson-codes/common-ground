@@ -1,7 +1,13 @@
 namespace CommonGround.PropertyRegistry.Infrastructure;
 
-internal sealed class PropertyRegistryAssemblyReference
+/// <summary>
+/// Assembly reference type for the PropertyRegistry module, used for assembly scanning and type discovery.
+/// </summary>
+public sealed class PropertyRegistryAssemblyReference
 {
-    internal static readonly System.Reflection.Assembly Assembly =
+    /// <summary>
+    /// Gets the assembly containing the PropertyRegistry module, used for assembly scanning and type discovery.
+    /// </summary>
+    public static readonly System.Reflection.Assembly Assembly =
         typeof(PropertyRegistryAssemblyReference).Assembly;
 }
