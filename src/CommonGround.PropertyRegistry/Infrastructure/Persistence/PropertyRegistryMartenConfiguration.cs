@@ -1,3 +1,6 @@
+using CommonGround.PropertyRegistry.Application.ReadModels;
+using CommonGround.PropertyRegistry.Infrastructure.Persistence.Projections;
+using JasperFx.Events.Projections;
 using Marten;
 
 namespace CommonGround.PropertyRegistry.Infrastructure.Persistence;
@@ -6,10 +9,25 @@ namespace CommonGround.PropertyRegistry.Infrastructure.Persistence;
 public static class PropertyRegistryMartenConfiguration
 {
     private const string SchemaName = "property_registry";
-
+    
     /// <summary>Configures Marten for PropertyRegistry.</summary>
     public static void Configure(StoreOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
+
+        ConfigureReadModels(options);
+        ConfigureProjections(options);
+    }
+
+    private static void ConfigureReadModels(StoreOptions options)
+    {
+        options.Schema.For<LandParcelView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<LandParcelListItemView>().DatabaseSchemaName(SchemaName);
+    }
+
+    private static void ConfigureProjections(StoreOptions options)
+    {
+        options.Projections.Add<LandParcelViewProjection>(ProjectionLifecycle.Async);
+        options.Projections.Add<LandParcelListItemViewProjection>(ProjectionLifecycle.Async);
     }
 }
