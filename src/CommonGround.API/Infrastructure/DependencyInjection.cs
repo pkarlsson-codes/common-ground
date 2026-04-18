@@ -1,5 +1,7 @@
 using System.Text;
 using CommonGround.API.Infrastructure.ExceptionHandling;
+using CommonGround.PropertyRegistry.Infrastructure;
+using CommonGround.PropertyRegistry.Infrastructure.Persistence;
 using CommonGround.SharedKernel.Extensions;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -28,6 +30,7 @@ internal static class CommonGroundServiceCollectionExtensions
         services.AddCommonGroundHealthChecks();
         services.AddCommonGroundAuthentication(configuration, environment);
         services.AddCommonGroundAuthorization();
+        services.AddPropertyRegistry();
         return services;
     }
 
@@ -53,7 +56,7 @@ internal static class CommonGroundServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString("Database")
             ?? throw new InvalidOperationException("Database connection string not found");
 
-        services.AddMartenServices(connectionString);
+        services.AddMartenServices(connectionString, PropertyRegistryMartenConfiguration.Configure);
         services.AddMartenUnitOfWork();
         return services;
     }
