@@ -23,11 +23,15 @@ public static class PropertyRegistryMartenConfiguration
     {
         options.Schema.For<LandParcelView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<LandParcelListItemView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<BuildingView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<BuildingListItemView>().DatabaseSchemaName(SchemaName);
     }
 
     private static void ConfigureProjections(StoreOptions options)
     {
         options.Projections.Add<LandParcelViewProjection>(ProjectionLifecycle.Async);
         options.Projections.Add<LandParcelListItemViewProjection>(ProjectionLifecycle.Async);
+        options.Projections.Add<BuildingViewProjection>(ProjectionLifecycle.Async);
+        options.Projections.Add<BuildingListItemViewProjection>(ProjectionLifecycle.Async);
     }
 }
