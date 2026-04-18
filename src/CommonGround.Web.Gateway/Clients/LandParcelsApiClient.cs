@@ -1,0 +1,50 @@
+using CommonGround.API.Contracts.PropertyRegistry.Requests;
+using CommonGround.API.Contracts.PropertyRegistry.Responses;
+using CommonGround.SharedKernel.Infrastructure.API;
+using Microsoft.Extensions.Logging;
+
+namespace CommonGround.Web.Gateway.Clients;
+
+/// <summary>
+/// HTTP client for land parcel API endpoints.
+/// All requests are automatically decorated with an internal JWT by <c>InternalGatewayAuthHandler</c>.
+/// </summary>
+public sealed class LandParcelsApiClient(
+    HttpClient httpClient,
+    ILogger<LandParcelsApiClient> logger) : BaseApiClient(httpClient, logger), ILandParcelsApiClient
+{
+    /// <inheritdoc/>
+    public async Task<string> RegisterLandParcelAsync(RegisterLandParcelRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return await PostAsync<RegisterLandParcelRequest, string>("api/land-parcels", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<LandParcelResponse> GetLandParcelAsync(string landParcelId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
+        return await GetAsync<LandParcelResponse>($"api/land-parcels/{landParcelId}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<PaginatedResponse<LandParcelListItemResponse>> GetLandParcelsAsync(
+        int page, int pageSize, string? status, CancellationToken cancellationToken)
+    {
+        var qs = $"?page.number={page}&page.size={pageSize}";
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            qs += $"&filter.statuses={Uri.EscapeDataString(status)}";
+        }
+
+        return await GetAsync<PaginatedResponse<LandParcelListItemResponse>>($"api/land-parcels{qs}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task UpdateLandParcelStatusAsync(string landParcelId, UpdateLandParcelStatusRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PatchAsync($"api/land-parcels/{landParcelId}/status", request, cancellationToken).ConfigureAwait(false);
+    }
+}

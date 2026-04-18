@@ -1,3 +1,4 @@
+using CommonGround.Web.Gateway.Clients;
 using CommonGround.Web.Gateway.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -34,6 +35,14 @@ internal static class CorePlatformClientExtensions
             client.BaseAddress = new Uri(options.Value.BaseAddress ?? corePlatformBaseAddress);
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         }).AddHttpMessageHandler<InternalServiceTokenHandler>();
+
+        services.AddHttpClient<ILandParcelsApiClient, LandParcelsApiClient>(client =>
+            client.BaseAddress = new Uri(corePlatformBaseAddress))
+            .AddHttpMessageHandler<InternalGatewayAuthHandler>();
+
+        services.AddHttpClient<IBuildingsApiClient, BuildingsApiClient>(client =>
+            client.BaseAddress = new Uri(corePlatformBaseAddress))
+            .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
         return services;
     }
