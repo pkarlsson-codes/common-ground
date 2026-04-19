@@ -3,6 +3,8 @@
   <Project Path="CommonGround.API.Tests/CommonGround.API.Tests.csproj" />
   <Project Path="CommonGround.API/CommonGround.API.csproj" />
   <Project Path="CommonGround.API.Contracts/CommonGround.API.Contracts.csproj" />
+  <Project Path="CommonGround.Homeownership.Tests/CommonGround.Homeownership.Tests.csproj" />
+  <Project Path="CommonGround.Homeownership/CommonGround.Homeownership.csproj" />
   <Project Path="CommonGround.PropertyRegistry.Tests/CommonGround.PropertyRegistry.Tests.csproj" />
   <Project Path="CommonGround.PropertyRegistry/CommonGround.PropertyRegistry.csproj" />
   <Project Path="CommonGround.SharedKernel.Tests/CommonGround.SharedKernel.Tests.csproj" />
