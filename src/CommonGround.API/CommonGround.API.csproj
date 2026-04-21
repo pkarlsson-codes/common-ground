@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CommonGround.SharedKernel\CommonGround.SharedKernel.csproj" />
     <ProjectReference Include="..\CommonGround.API.Contracts\CommonGround.API.Contracts.csproj" />
+    <ProjectReference Include="..\CommonGround.Homeownership\CommonGround.Homeownership.csproj" />
     <ProjectReference Include="..\CommonGround.PropertyRegistry\CommonGround.PropertyRegistry.csproj" />
   </ItemGroup>
 

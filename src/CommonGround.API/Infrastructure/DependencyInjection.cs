@@ -1,5 +1,7 @@
 using System.Text;
 using CommonGround.API.Infrastructure.ExceptionHandling;
+using CommonGround.Homeownership.Infrastructure;
+using CommonGround.Homeownership.Infrastructure.Persistence;
 using CommonGround.PropertyRegistry.Infrastructure;
 using CommonGround.PropertyRegistry.Infrastructure.Persistence;
 using CommonGround.SharedKernel.Extensions;
@@ -31,6 +33,7 @@ internal static class CommonGroundServiceCollectionExtensions
         services.AddCommonGroundAuthentication(configuration, environment);
         services.AddCommonGroundAuthorization();
         services.AddPropertyRegistry();
+        services.AddHomeownership();
         return services;
     }
 
@@ -56,7 +59,11 @@ internal static class CommonGroundServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString("Database")
             ?? throw new InvalidOperationException("Database connection string not found");
 
-        services.AddMartenServices(connectionString, PropertyRegistryMartenConfiguration.Configure);
+        services.AddMartenServices(connectionString, opts =>
+        {
+            PropertyRegistryMartenConfiguration.Configure(opts);
+            HomeownershipMartenConfiguration.Configure(opts);
+        });
         services.AddMartenUnitOfWork();
         return services;
     }
