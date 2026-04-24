@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
-using CommonGround.SharedKernel.Infrastructure.API;
 using FluentAssertions;
 
 namespace CommonGround.API.IntegrationTests.PropertyRegistry;
@@ -78,10 +77,9 @@ public class BuildingsTests(ApiFactory factory)
             new RegisterBuildingRequest(parcelId, "SingleFamily", 3, 2m, 1200m, 1990, 280000m));
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var envelope = await response.Content.ReadFromJsonAsync<ApiResponse<string>>();
-        envelope.Should().NotBeNull();
-        envelope!.Data.Should().NotBeNullOrWhiteSpace();
-        envelope.Data.Should().StartWith("building-");
+        var result = await response.Content.ReadFromJsonAsync<RegisterBuildingResponse>();
+        result!.BuildingId.Should().NotBeNullOrWhiteSpace();
+        result.BuildingId.Should().StartWith("building-");
     }
 
     [Fact]
@@ -93,15 +91,15 @@ public class BuildingsTests(ApiFactory factory)
         var createResponse = await client.PostAsJsonAsync("/api/buildings",
             new RegisterBuildingRequest(parcelId, "Duplex", 4, 2m, 1800m, 2005, 420000m));
         createResponse.EnsureSuccessStatusCode();
-        var envelope = await createResponse.Content.ReadFromJsonAsync<ApiResponse<string>>();
-        var buildingId = envelope!.Data!;
+        var created = await createResponse.Content.ReadFromJsonAsync<RegisterBuildingResponse>();
+        var buildingId = created!.BuildingId;
 
         var getResponse = await client.GetAsync($"/api/buildings/{buildingId}");
 
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var building = await getResponse.Content.ReadFromJsonAsync<ApiResponse<BuildingResponse>>();
-        building!.Data!.Id.Should().Be(buildingId);
-        building.Data.LandParcelId.Should().Be(parcelId);
+        var building = await getResponse.Content.ReadFromJsonAsync<BuildingResponse>();
+        building!.Id.Should().Be(buildingId);
+        building.LandParcelId.Should().Be(parcelId);
     }
 
     private async Task<string> CreateLandParcelAsync()
@@ -111,7 +109,7 @@ public class BuildingsTests(ApiFactory factory)
             new RegisterLandParcelRequest("APN-BLDG-001", "100 Building Ave", 0.5m,
                 new DateOnly(2022, 1, 1), "Purchase", null));
         response.EnsureSuccessStatusCode();
-        var envelope = await response.Content.ReadFromJsonAsync<ApiResponse<string>>();
-        return envelope!.Data!;
+        var result = await response.Content.ReadFromJsonAsync<RegisterLandParcelResponse>();
+        return result!.ParcelId;
     }
 }

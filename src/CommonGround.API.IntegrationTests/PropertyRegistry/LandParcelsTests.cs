@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
-using CommonGround.SharedKernel.Infrastructure.API;
+using CommonGround.API.Contracts.PropertyRegistry.Responses;
 using FluentAssertions;
 
 namespace CommonGround.API.IntegrationTests.PropertyRegistry;
@@ -58,10 +58,9 @@ public class LandParcelsTests(ApiFactory factory)
                 "Resale formula: appraisal-based, 25% share"));
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-            var envelope = await response.Content.ReadFromJsonAsync<ApiResponse<string>>();
-            envelope.Should().NotBeNull();
-            envelope!.Data.Should().NotBeNullOrWhiteSpace();
-            envelope.Data.Should().StartWith("parcel-");
+        var result = await response.Content.ReadFromJsonAsync<RegisterLandParcelResponse>();
+        result!.ParcelId.Should().NotBeNullOrWhiteSpace();
+        result.ParcelId.Should().StartWith("parcel-");
     }
 
     [Fact]
@@ -74,13 +73,11 @@ public class LandParcelsTests(ApiFactory factory)
             new RegisterLandParcelRequest("APN-TEST-002", "789 Elm St", 0.5m,
                 new DateOnly(2022, 1, 10), "Purchase", null));
         createResponse.EnsureSuccessStatusCode();
-        var envelope = await createResponse.Content.ReadFromJsonAsync<ApiResponse<string>>();
-        envelope.Should().NotBeNull();
-        envelope!.Data.Should().NotBeNullOrWhiteSpace();
-        var parcelId = envelope.Data!;
+        var created = await createResponse.Content.ReadFromJsonAsync<RegisterLandParcelResponse>();
+        created!.ParcelId.Should().NotBeNullOrWhiteSpace();
 
         // Fetch
-        var getResponse = await client.GetAsync($"/api/land-parcels/{parcelId}");
+        var getResponse = await client.GetAsync($"/api/land-parcels/{created.ParcelId}");
 
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }

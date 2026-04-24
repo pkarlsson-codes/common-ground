@@ -14,10 +14,10 @@ public sealed class BuildingsApiClient(
     ILogger<BuildingsApiClient> logger) : BaseApiClient(httpClient, logger), IBuildingsApiClient
 {
     /// <inheritdoc/>
-    public async Task<string> RegisterBuildingAsync(RegisterBuildingRequest request, CancellationToken cancellationToken)
+    public async Task<RegisterBuildingResponse> RegisterBuildingAsync(RegisterBuildingRequest request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        return await PostAsync<RegisterBuildingRequest, string>("api/buildings", request, cancellationToken).ConfigureAwait(false);
+        return await PostAsync<RegisterBuildingRequest, RegisterBuildingResponse>("api/buildings", request, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

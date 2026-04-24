@@ -83,7 +83,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfString"
+                  "$ref": "#/components/schemas/RegisterBuildingResponse"
                 }
               }
             }
@@ -321,7 +321,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfString"
+                  "$ref": "#/components/schemas/RegisterLandParcelResponse"
                 }
               }
             }
@@ -565,29 +565,15 @@
   },
   "components": {
     "schemas": {
-      "ApiResponseOfString": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ApiResponse"
-          },
-          {
-            "type": "object",
-            "description": "Standardized API response envelope as defined in ADR-00016.",
-            "additionalProperties": false,
-            "properties": {
-              "data": {
-                "type": "string",
-                "description": "Gets or sets the response data.",
-                "nullable": true
-              }
-            }
-          }
-        ]
-      },
-      "ApiResponse": {
+      "RegisterBuildingResponse": {
         "type": "object",
-        "description": "Static factory methods for creating API responses.",
-        "additionalProperties": false
+        "description": "Response returned when a building is successfully registered.",
+        "additionalProperties": false,
+        "properties": {
+          "buildingId": {
+            "type": "string"
+          }
+        }
       },
       "RegisterBuildingRequest": {
         "type": "object",
@@ -807,6 +793,16 @@
         "additionalProperties": false,
         "properties": {
           "newStatus": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterLandParcelResponse": {
+        "type": "object",
+        "description": "Response returned when a land parcel is successfully registered.",
+        "additionalProperties": false,
+        "properties": {
+          "parcelId": {
             "type": "string"
           }
         }

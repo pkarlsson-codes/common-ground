@@ -16,7 +16,7 @@ namespace CommonGround.API.PropertyRegistry;
 /// <param name="bus">The Wolverine message bus.</param>
 [ApiController]
 [Route("api/land-parcels")]
-public sealed class LandParcelsController(IMessageBus bus) : BaseApiController
+public sealed class LandParcelsController(IMessageBus bus) : ControllerBase
 {
     /// <summary>
     /// Registers a new land parcel in the CLT portfolio.
@@ -25,7 +25,7 @@ public sealed class LandParcelsController(IMessageBus bus) : BaseApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The ID of the newly registered land parcel.</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(ApiResponse<string>), 201)]
+    [ProducesResponseType(typeof(RegisterLandParcelResponse), 201)]
     [EndpointName("registerLandParcel")]
     public async Task<IActionResult> RegisterLandParcel(
         [FromBody] RegisterLandParcelRequest request,
@@ -48,7 +48,7 @@ public sealed class LandParcelsController(IMessageBus bus) : BaseApiController
 
         var id = await bus.InvokeAsync<LandParcelId>(command, cancellationToken);
 
-        return CreatedAtAction(nameof(GetLandParcel), new { landParcelId = id.Value }, id.Value);
+        return CreatedAtAction(nameof(GetLandParcel), new { landParcelId = id.Value }, new RegisterLandParcelResponse(id.Value));
     }
 
     /// <summary>
@@ -58,7 +58,7 @@ public sealed class LandParcelsController(IMessageBus bus) : BaseApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The detailed information of the land parcel.</returns>
     [HttpGet("{landParcelId}")]
-    [ProducesResponseType(typeof(ApiResponse<LandParcelResponse>), 200)]
+    [ProducesResponseType(typeof(LandParcelResponse), 200)]
     [ProducesResponseType(404)]
     [EndpointName("getLandParcel")]
     public async Task<IActionResult> GetLandParcel(
@@ -84,7 +84,7 @@ public sealed class LandParcelsController(IMessageBus bus) : BaseApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A paginated list of land parcels.</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(ApiResponse<PaginatedResponse<LandParcelListItemResponse>>), 200)]
+    [ProducesResponseType(typeof(PaginatedResponse<LandParcelListItemResponse>), 200)]
     [EndpointName("getLandParcels")]
     public async Task<IActionResult> GetLandParcels(
         [FromQuery] PaginationQuerySpec<GetLandParcelsFilter> request,

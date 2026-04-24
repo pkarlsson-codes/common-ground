@@ -17,7 +17,7 @@ namespace CommonGround.API.PropertyRegistry;
 /// <param name="bus">The Wolverine message bus.</param>
 [ApiController]
 [Route("api/buildings")]
-public sealed class BuildingsController(IMessageBus bus) : BaseApiController
+public sealed class BuildingsController(IMessageBus bus) : ControllerBase
 {
     /// <summary>
     /// Registers a new building in the CLT portfolio.
@@ -26,7 +26,7 @@ public sealed class BuildingsController(IMessageBus bus) : BaseApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The ID of the newly registered building.</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(ApiResponse<string>), 201)]
+    [ProducesResponseType(typeof(RegisterBuildingResponse), 201)]
     [EndpointName("registerBuilding")]
     public async Task<IActionResult> RegisterBuilding(
         [FromBody] RegisterBuildingRequest request,
@@ -48,7 +48,7 @@ public sealed class BuildingsController(IMessageBus bus) : BaseApiController
 
         var id = await bus.InvokeAsync<BuildingId>(command, cancellationToken);
 
-        return CreatedAtAction(nameof(GetBuilding), new { buildingId = id.Value }, id.Value);
+        return CreatedAtAction(nameof(GetBuilding), new { buildingId = id.Value }, new RegisterBuildingResponse(id.Value));
     }
 
     /// <summary>
@@ -58,7 +58,7 @@ public sealed class BuildingsController(IMessageBus bus) : BaseApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The detailed information of the building.</returns>
     [HttpGet("{buildingId}")]
-    [ProducesResponseType(typeof(ApiResponse<BuildingResponse>), 200)]
+    [ProducesResponseType(typeof(BuildingResponse), 200)]
     [ProducesResponseType(404)]
     [EndpointName("getBuilding")]
     public async Task<IActionResult> GetBuilding(
@@ -84,7 +84,7 @@ public sealed class BuildingsController(IMessageBus bus) : BaseApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A paginated list of buildings.</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(ApiResponse<PaginatedResponse<BuildingListItemResponse>>), 200)]
+    [ProducesResponseType(typeof(PaginatedResponse<BuildingListItemResponse>), 200)]
     [EndpointName("getBuildings")]
     public async Task<IActionResult> GetBuildings(
         [FromQuery] PaginationQuerySpec<GetBuildingsFilter> request,

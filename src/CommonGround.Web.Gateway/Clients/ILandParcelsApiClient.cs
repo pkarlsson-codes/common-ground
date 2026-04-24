@@ -10,8 +10,8 @@ public interface ILandParcelsApiClient
     /// <summary>Registers a new land parcel and returns its ID.</summary>
     /// <param name="request">The land parcel registration details.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>The ID of the newly registered land parcel.</returns>
-    Task<string> RegisterLandParcelAsync(RegisterLandParcelRequest request, CancellationToken cancellationToken);
+    /// <returns>The registration response containing the new land parcel ID.</returns>
+    Task<RegisterLandParcelResponse> RegisterLandParcelAsync(RegisterLandParcelRequest request, CancellationToken cancellationToken);
 
     /// <summary>Gets a land parcel by its ID.</summary>
     /// <param name="landParcelId">The ID of the land parcel to retrieve.</param>

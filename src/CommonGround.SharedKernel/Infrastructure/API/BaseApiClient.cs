@@ -81,17 +81,17 @@ public abstract partial class BaseApiClient
                     .ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
 
-                var apiResponse = await response.Content
-                    .ReadFromJsonAsync<ApiResponse<T>>(JsonOptions, cancellationToken)
+                var result = await response.Content
+                    .ReadFromJsonAsync<T>(JsonOptions, cancellationToken)
                     .ConfigureAwait(false);
 
-                if (apiResponse?.Data == null)
+                if (result == null)
                 {
                     Logs.ApiResponseDataNull(Logger, endpoint);
                     throw new InvalidOperationException($"API response data is null for endpoint: {endpoint}");
                 }
 
-                return apiResponse.Data;
+                return result;
             }
             finally
             {
@@ -143,17 +143,17 @@ public abstract partial class BaseApiClient
                     .ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
 
-                var apiResponse = await response.Content
-                    .ReadFromJsonAsync<ApiResponse<TResponse>>(JsonOptions, cancellationToken)
+                var result = await response.Content
+                    .ReadFromJsonAsync<TResponse>(JsonOptions, cancellationToken)
                     .ConfigureAwait(false);
 
-                if (apiResponse?.Data == null)
+                if (result == null)
                 {
                     Logs.ApiResponseDataNull(Logger, endpoint);
                     throw new InvalidOperationException($"API response data is null for endpoint: {endpoint}");
                 }
 
-                return apiResponse.Data!;
+                return result!;
             }
             finally
             {
@@ -202,17 +202,17 @@ public abstract partial class BaseApiClient
                     .ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
 
-                var apiResponse = await response.Content
-                    .ReadFromJsonAsync<ApiResponse<TResponse>>(JsonOptions, cancellationToken)
+                var result = await response.Content
+                    .ReadFromJsonAsync<TResponse>(JsonOptions, cancellationToken)
                     .ConfigureAwait(false);
 
-                if (apiResponse?.Data == null)
+                if (result == null)
                 {
                     Logs.ApiResponseDataNull(Logger, endpoint);
                     throw new InvalidOperationException($"API response data is null for endpoint: {endpoint}");
                 }
 
-                return apiResponse.Data!;
+                return result!;
             }
             finally
             {
@@ -361,17 +361,17 @@ public abstract partial class BaseApiClient
                     .ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
 
-                var apiResponse = await response.Content
-                    .ReadFromJsonAsync<ApiResponse<TResponse>>(JsonOptions, cancellationToken)
+                var result = await response.Content
+                    .ReadFromJsonAsync<TResponse>(JsonOptions, cancellationToken)
                     .ConfigureAwait(false);
 
-                if (apiResponse?.Data == null)
+                if (result == null)
                 {
                     Logs.ApiResponseDataNull(Logger, endpoint);
                     throw new InvalidOperationException($"API response data is null for endpoint: {endpoint}");
                 }
 
-                return apiResponse.Data!;
+                return result!;
             }
             finally
             {
@@ -448,16 +448,16 @@ public abstract partial class BaseApiClient
                         context)
                     .ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
-                var apiResponse = await response.Content
-                    .ReadFromJsonAsync<ApiResponse<TResponse>>(JsonOptions, cancellationToken)
+                var result = await response.Content
+                    .ReadFromJsonAsync<TResponse>(JsonOptions, cancellationToken)
                     .ConfigureAwait(false);
-                if (apiResponse?.Data == null)
+                if (result == null)
                 {
                     Logs.ApiResponseDataNull(Logger, endpoint);
                     throw new InvalidOperationException($"API response data is null for endpoint: {endpoint}");
                 }
 
-                return apiResponse.Data!;
+                return result!;
             }
             finally
             {
@@ -507,17 +507,17 @@ public abstract partial class BaseApiClient
                     .ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
 
-                var apiResponse = await response.Content
-                    .ReadFromJsonAsync<ApiResponse<TResponse>>(JsonOptions, cancellationToken)
+                var result = await response.Content
+                    .ReadFromJsonAsync<TResponse>(JsonOptions, cancellationToken)
                     .ConfigureAwait(false);
 
-                if (apiResponse?.Data == null)
+                if (result == null)
                 {
                     Logs.ApiResponseDataNull(Logger, endpoint);
                     throw new InvalidOperationException($"API response data is null for endpoint: {endpoint}");
                 }
 
-                return apiResponse.Data!;
+                return result!;
             }
             finally
             {

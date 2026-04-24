@@ -10,8 +10,8 @@ public interface IBuildingsApiClient
     /// <summary>Registers a new building and returns its ID.</summary>
     /// <param name="request">The building registration details.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>The ID of the newly registered building.</returns>
-    Task<string> RegisterBuildingAsync(RegisterBuildingRequest request, CancellationToken cancellationToken);
+    /// <returns>The registration response containing the new building ID.</returns>
+    Task<RegisterBuildingResponse> RegisterBuildingAsync(RegisterBuildingRequest request, CancellationToken cancellationToken);
 
     /// <summary>Gets a building by its ID.</summary>
     /// <param name="buildingId">The ID of the building to retrieve.</param>

@@ -14,10 +14,10 @@ public sealed class LandParcelsApiClient(
     ILogger<LandParcelsApiClient> logger) : BaseApiClient(httpClient, logger), ILandParcelsApiClient
 {
     /// <inheritdoc/>
-    public async Task<string> RegisterLandParcelAsync(RegisterLandParcelRequest request, CancellationToken cancellationToken)
+    public async Task<RegisterLandParcelResponse> RegisterLandParcelAsync(RegisterLandParcelRequest request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        return await PostAsync<RegisterLandParcelRequest, string>("api/land-parcels", request, cancellationToken).ConfigureAwait(false);
+        return await PostAsync<RegisterLandParcelRequest, RegisterLandParcelResponse>("api/land-parcels", request, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

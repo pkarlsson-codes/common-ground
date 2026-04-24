@@ -17,15 +17,15 @@ public sealed class BuildingsController(IBuildingsApiClient client) : Controller
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>201 Created with the new building ID.</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(ApiResponse<string>), 201)]
+    [ProducesResponseType(typeof(RegisterBuildingResponse), 201)]
     [EndpointName("registerBuilding")]
     public async Task<IActionResult> RegisterBuilding(
         [FromBody] RegisterBuildingRequest request,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var id = await client.RegisterBuildingAsync(request, cancellationToken).ConfigureAwait(false);
-        return CreatedAtAction(nameof(GetBuilding), new { buildingId = id }, id);
+        var result = await client.RegisterBuildingAsync(request, cancellationToken).ConfigureAwait(false);
+        return CreatedAtAction(nameof(GetBuilding), new { buildingId = result.BuildingId }, result);
     }
 
     /// <summary>Gets a building by ID.</summary>

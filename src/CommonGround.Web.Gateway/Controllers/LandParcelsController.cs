@@ -17,15 +17,15 @@ public sealed class LandParcelsController(ILandParcelsApiClient client) : Contro
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>201 Created with the new land parcel ID.</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(ApiResponse<string>), 201)]
+    [ProducesResponseType(typeof(RegisterLandParcelResponse), 201)]
     [EndpointName("registerLandParcel")]
     public async Task<IActionResult> RegisterLandParcel(
         [FromBody] RegisterLandParcelRequest request,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var id = await client.RegisterLandParcelAsync(request, cancellationToken).ConfigureAwait(false);
-        return CreatedAtAction(nameof(GetLandParcel), new { landParcelId = id }, id);
+        var result = await client.RegisterLandParcelAsync(request, cancellationToken).ConfigureAwait(false);
+        return CreatedAtAction(nameof(GetLandParcel), new { landParcelId = result.ParcelId }, result);
     }
 
     /// <summary>Gets a land parcel by ID.</summary>

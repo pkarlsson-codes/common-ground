@@ -15,16 +15,14 @@
 
 import * as runtime from '../runtime';
 import type {
-  ApiResponseOfString,
   LandParcelResponse,
   PaginatedResponseOfLandParcelResponse,
   ProblemDetails,
   RegisterLandParcelRequest,
+  RegisterLandParcelResponse,
   UpdateLandParcelStatusRequest,
 } from '../models/index';
 import {
-    ApiResponseOfStringFromJSON,
-    ApiResponseOfStringToJSON,
     LandParcelResponseFromJSON,
     LandParcelResponseToJSON,
     PaginatedResponseOfLandParcelResponseFromJSON,
@@ -33,6 +31,8 @@ import {
     ProblemDetailsToJSON,
     RegisterLandParcelRequestFromJSON,
     RegisterLandParcelRequestToJSON,
+    RegisterLandParcelResponseFromJSON,
+    RegisterLandParcelResponseToJSON,
     UpdateLandParcelStatusRequestFromJSON,
     UpdateLandParcelStatusRequestToJSON,
 } from '../models/index';
@@ -103,12 +103,12 @@ export interface LandParcelsApiInterface {
      * @throws {RequiredError}
      * @memberof LandParcelsApiInterface
      */
-    registerLandParcelRaw(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseOfString>>;
+    registerLandParcelRaw(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RegisterLandParcelResponse>>;
 
     /**
      * Registers a new land parcel.
      */
-    registerLandParcel(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseOfString>;
+    registerLandParcel(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RegisterLandParcelResponse>;
 
     /**
      * 
@@ -214,7 +214,7 @@ export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInt
     /**
      * Registers a new land parcel.
      */
-    async registerLandParcelRaw(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseOfString>> {
+    async registerLandParcelRaw(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RegisterLandParcelResponse>> {
         if (requestParameters['registerLandParcelRequest'] == null) {
             throw new runtime.RequiredError(
                 'registerLandParcelRequest',
@@ -239,13 +239,13 @@ export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInt
             body: RegisterLandParcelRequestToJSON(requestParameters['registerLandParcelRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseOfStringFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => RegisterLandParcelResponseFromJSON(jsonValue));
     }
 
     /**
      * Registers a new land parcel.
      */
-    async registerLandParcel(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseOfString> {
+    async registerLandParcel(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RegisterLandParcelResponse> {
         const response = await this.registerLandParcelRaw(requestParameters, initOverrides);
         return await response.value();
     }

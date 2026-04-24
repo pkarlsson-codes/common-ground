@@ -1,6 +1,7 @@
 using System.Text.Json;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
+using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace CommonGround.API.Infrastructure.Configuration;
 
@@ -19,6 +20,7 @@ internal static class ApiServicesExtensions
         services.AddControllers(options =>
         {
             options.ModelBinderProviders.Insert(0, new SortDescriptorsModelBinderProvider());
+            options.OutputFormatters.RemoveType<StringOutputFormatter>();
         })
         .AddJsonOptions(options =>
         {

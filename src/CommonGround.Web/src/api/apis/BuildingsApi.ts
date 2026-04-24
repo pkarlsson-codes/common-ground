@@ -15,17 +15,15 @@
 
 import * as runtime from '../runtime';
 import type {
-  ApiResponseOfString,
   BuildingResponse,
   PaginatedResponseOfBuildingListItemResponse,
   ProblemDetails,
   RecordBuildingAssessmentRequest,
   RegisterBuildingRequest,
+  RegisterBuildingResponse,
   UpdateBuildingStatusRequest,
 } from '../models/index';
 import {
-    ApiResponseOfStringFromJSON,
-    ApiResponseOfStringToJSON,
     BuildingResponseFromJSON,
     BuildingResponseToJSON,
     PaginatedResponseOfBuildingListItemResponseFromJSON,
@@ -36,6 +34,8 @@ import {
     RecordBuildingAssessmentRequestToJSON,
     RegisterBuildingRequestFromJSON,
     RegisterBuildingRequestToJSON,
+    RegisterBuildingResponseFromJSON,
+    RegisterBuildingResponseToJSON,
     UpdateBuildingStatusRequestFromJSON,
     UpdateBuildingStatusRequestToJSON,
 } from '../models/index';
@@ -129,12 +129,12 @@ export interface BuildingsApiInterface {
      * @throws {RequiredError}
      * @memberof BuildingsApiInterface
      */
-    registerBuildingRaw(requestParameters: RegisterBuildingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseOfString>>;
+    registerBuildingRaw(requestParameters: RegisterBuildingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RegisterBuildingResponse>>;
 
     /**
      * Registers a new building.
      */
-    registerBuilding(requestParameters: RegisterBuildingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseOfString>;
+    registerBuilding(requestParameters: RegisterBuildingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RegisterBuildingResponse>;
 
     /**
      * 
@@ -290,7 +290,7 @@ export class BuildingsApi extends runtime.BaseAPI implements BuildingsApiInterfa
     /**
      * Registers a new building.
      */
-    async registerBuildingRaw(requestParameters: RegisterBuildingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseOfString>> {
+    async registerBuildingRaw(requestParameters: RegisterBuildingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RegisterBuildingResponse>> {
         if (requestParameters['registerBuildingRequest'] == null) {
             throw new runtime.RequiredError(
                 'registerBuildingRequest',
@@ -315,13 +315,13 @@ export class BuildingsApi extends runtime.BaseAPI implements BuildingsApiInterfa
             body: RegisterBuildingRequestToJSON(requestParameters['registerBuildingRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseOfStringFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => RegisterBuildingResponseFromJSON(jsonValue));
     }
 
     /**
      * Registers a new building.
      */
-    async registerBuilding(requestParameters: RegisterBuildingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseOfString> {
+    async registerBuilding(requestParameters: RegisterBuildingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RegisterBuildingResponse> {
         const response = await this.registerBuildingRaw(requestParameters, initOverrides);
         return await response.value();
     }
