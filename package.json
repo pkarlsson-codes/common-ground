@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "infra:start": "docker compose up -d",
+    "infra:init": "bash ./scripts/infra-init-schemas.sh",
     "infra:down": "docker compose down",
     "dotnet:restore": "dotnet restore src/CommonGround.slnx",
     "dotnet:build": "dotnet build src/CommonGround.slnx",
