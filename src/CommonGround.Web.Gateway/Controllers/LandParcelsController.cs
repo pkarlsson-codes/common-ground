@@ -1,4 +1,5 @@
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
+using CommonGround.API.Contracts.PropertyRegistry.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.Web.Gateway.Clients;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ namespace CommonGround.Web.Gateway.Controllers;
 /// <param name="client">Typed client for the PropertyRegistry API.</param>
 [ApiController]
 [Route("api/v1/land-parcels")]
-public sealed class LandParcelsController(ILandParcelsApiClient client) : BaseApiController
+public sealed class LandParcelsController(ILandParcelsApiClient client) : ControllerBase
 {
     /// <summary>Registers a new land parcel.</summary>
     /// <param name="request">The land parcel registration details.</param>
@@ -32,7 +33,7 @@ public sealed class LandParcelsController(ILandParcelsApiClient client) : BaseAp
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>200 with the land parcel, or 404 if not found.</returns>
     [HttpGet("{landParcelId}")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(LandParcelResponse), 200)]
     [ProducesResponseType(404)]
     [EndpointName("getLandParcel")]
     public async Task<IActionResult> GetLandParcel(string landParcelId, CancellationToken cancellationToken)
@@ -49,7 +50,7 @@ public sealed class LandParcelsController(ILandParcelsApiClient client) : BaseAp
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>200 with a paginated list of land parcels.</returns>
     [HttpGet]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(PaginatedResponse<LandParcelResponse>), 200)]
     [EndpointName("getLandParcels")]
     public async Task<IActionResult> GetLandParcels(
         [FromQuery] int page = 1,

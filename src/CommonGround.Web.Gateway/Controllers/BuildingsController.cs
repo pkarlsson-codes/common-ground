@@ -1,4 +1,5 @@
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
+using CommonGround.API.Contracts.PropertyRegistry.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.Web.Gateway.Clients;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ namespace CommonGround.Web.Gateway.Controllers;
 /// <param name="client">Typed client for the PropertyRegistry API.</param>
 [ApiController]
 [Route("api/v1/buildings")]
-public sealed class BuildingsController(IBuildingsApiClient client) : BaseApiController
+public sealed class BuildingsController(IBuildingsApiClient client) : ControllerBase
 {
     /// <summary>Registers a new building.</summary>
     /// <param name="request">The building registration details.</param>
@@ -32,7 +33,7 @@ public sealed class BuildingsController(IBuildingsApiClient client) : BaseApiCon
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>200 with the building, or 404 if not found.</returns>
     [HttpGet("{buildingId}")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(BuildingResponse), 200)]
     [ProducesResponseType(404)]
     [EndpointName("getBuilding")]
     public async Task<IActionResult> GetBuilding(string buildingId, CancellationToken cancellationToken)
@@ -51,7 +52,7 @@ public sealed class BuildingsController(IBuildingsApiClient client) : BaseApiCon
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>200 with a paginated list of buildings.</returns>
     [HttpGet]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(PaginatedResponse<BuildingListItemResponse>), 200)]
     [EndpointName("getBuildings")]
     public async Task<IActionResult> GetBuildings(
         [FromQuery] int page = 1,

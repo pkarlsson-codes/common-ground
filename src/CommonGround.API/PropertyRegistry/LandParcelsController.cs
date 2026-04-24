@@ -98,14 +98,8 @@ public sealed class LandParcelsController(IMessageBus bus) : BaseApiController
             .InvokeAsync<PaginatedResponse<LandParcelListItemView>>(
                 query, cancellationToken);
 
-        var response = new PaginatedResponse<LandParcelListItemResponse>
-        {
-            Items = [..result.Items.Select(v => new LandParcelListItemResponse(
-                v.Id, v.LegalParcelNumber, v.Address, v.AreaAcres, v.Status, v.RegisteredAt))],
-            TotalCount = result.TotalCount,
-            PageSize = result.PageSize,
-            PageNumber = result.PageNumber,
-        };
+        var response = result.MapItems(v => new LandParcelListItemResponse(
+            v.Id, v.LegalParcelNumber, v.Address, v.AreaAcres, v.Status, v.RegisteredAt));
 
         return Ok(response);
     }

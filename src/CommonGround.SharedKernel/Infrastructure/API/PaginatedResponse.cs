@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace CommonGround.SharedKernel.Infrastructure.API;
 
 /// <summary>
@@ -51,20 +53,24 @@ public sealed class PaginatedResponse<T>
     /// <summary>
     /// The current page number (1-based).
     /// </summary>
+    [Required]
     public long PageNumber { get; set; }
 
     /// <summary>
     /// The number of items per page.
     /// </summary>
+    [Required]
     public long PageSize { get; set; }
 
     /// <summary>
     /// The total number of items across all pages.
     /// </summary>
+    [Required]
     public long TotalCount { get; set; }
 
     /// <summary>
     /// The total number of pages.
     /// </summary>
+    [Required]
     public long TotalPages { get; set; }
 }

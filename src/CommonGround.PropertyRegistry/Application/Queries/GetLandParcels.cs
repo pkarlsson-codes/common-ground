@@ -43,6 +43,7 @@ public static class GetLandParcelsHandler
             TotalCount = (int)page.TotalItemCount,
             PageSize = (int)page.PageSize,
             PageNumber = (int)page.PageNumber,
+            TotalPages = (int)page.PageCount,
         };
     }
 }

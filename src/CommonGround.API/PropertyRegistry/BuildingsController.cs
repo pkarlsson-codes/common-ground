@@ -100,14 +100,8 @@ public sealed class BuildingsController(IMessageBus bus) : BaseApiController
             .InvokeAsync<PaginatedResponse<BuildingListItemView>>(
                 query, cancellationToken);
 
-        var response = new PaginatedResponse<BuildingListItemResponse>
-        {
-            Items = [..result.Items.Select(v => new BuildingListItemResponse(
-                v.Id, v.LandParcelId, v.BuildingType, v.Bedrooms, v.Bathrooms, v.SquareFootage, v.AssessedValue, v.Status))],
-            TotalCount = result.TotalCount,
-            PageSize = result.PageSize,
-            PageNumber = result.PageNumber,
-        };
+        var response = result.MapItems(v => new BuildingListItemResponse(
+            v.Id, v.LandParcelId, v.BuildingType, v.Bedrooms, v.Bathrooms, v.SquareFootage, v.AssessedValue, v.Status));
 
         return Ok(response);
     }
