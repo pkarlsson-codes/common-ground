@@ -1,6 +1,7 @@
 using CommonGround.API;
 using CommonGround.API.Infrastructure;
 using CommonGround.API.Infrastructure.Configuration;
+using CommonGround.Homeownership.Infrastructure;
 using CommonGround.PropertyRegistry.Infrastructure;
 using Serilog;
 using Wolverine;
@@ -43,6 +44,7 @@ try
 
         opts.Discovery.IncludeAssembly(typeof(CommonGroundApiAssemblyReference).Assembly);
         opts.Discovery.IncludeAssembly(typeof(PropertyRegistryAssemblyReference).Assembly);
+        opts.Discovery.IncludeAssembly(typeof(HomeownershipAssemblyReference).Assembly);
     });
 
     var app = builder.Build();
