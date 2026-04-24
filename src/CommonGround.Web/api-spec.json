@@ -1,0 +1,939 @@
+{
+  "x-generator": "NSwag v14.7.0.0 (NJsonSchema v11.6.0.0 (Newtonsoft.Json v13.0.0.0))",
+  "openapi": "3.0.0",
+  "info": {
+    "title": "CommonGround.Web.Gateway",
+    "description": "CommonGround Web Gateway API",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000",
+      "description": "HTTP dev (default)"
+    }
+  ],
+  "paths": {
+    "/api/v1/Auth/csrf": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Issues a CSRF token cookie for anonymous visitors (double-submit cookie pattern).",
+        "operationId": "issueCsrfToken",
+        "responses": {
+          "200": {
+            "description": "200 OK and sets the cg_csrf cookie.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Auth/me": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Get current authenticated user.",
+        "operationId": "getCurrentUser",
+        "responses": {
+          "200": {
+            "description": "The current user if authenticated; otherwise unauthorized.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/buildings": {
+      "post": {
+        "tags": [
+          "Buildings"
+        ],
+        "summary": "Registers a new building.",
+        "operationId": "registerBuilding",
+        "requestBody": {
+          "x-name": "request",
+          "description": "The building registration details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterBuildingRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "201": {
+            "description": "201 Created with the new building ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfString"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Buildings"
+        ],
+        "summary": "Gets a paginated list of buildings.",
+        "operationId": "getBuildings",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number (1-based).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of items per page.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            },
+            "x-position": 2
+          },
+          {
+            "name": "landParcelId",
+            "in": "query",
+            "description": "Optional land parcel ID filter.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 3
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Optional status filter.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 4
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with a paginated list of buildings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfBuildingListItemResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/buildings/{buildingId}": {
+      "get": {
+        "tags": [
+          "Buildings"
+        ],
+        "summary": "Gets a building by ID.",
+        "operationId": "getBuilding",
+        "parameters": [
+          {
+            "name": "buildingId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the building to retrieve.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with the building, or 404 if not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildingResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/buildings/{buildingId}/assessments": {
+      "post": {
+        "tags": [
+          "Buildings"
+        ],
+        "summary": "Records an assessment for a building.",
+        "operationId": "recordBuildingAssessment",
+        "parameters": [
+          {
+            "name": "buildingId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the building to assess.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The assessment details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordBuildingAssessmentRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "201": {
+            "description": "201 Created, or 404 if not found."
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/buildings/{buildingId}/status": {
+      "patch": {
+        "tags": [
+          "Buildings"
+        ],
+        "summary": "Updates a building's status.",
+        "operationId": "updateBuildingStatus",
+        "parameters": [
+          {
+            "name": "buildingId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the building to update.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The new status details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBuildingStatusRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content, or 404 if not found."
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/land-parcels": {
+      "post": {
+        "tags": [
+          "LandParcels"
+        ],
+        "summary": "Registers a new land parcel.",
+        "operationId": "registerLandParcel",
+        "requestBody": {
+          "x-name": "request",
+          "description": "The land parcel registration details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterLandParcelRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "201": {
+            "description": "201 Created with the new land parcel ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfString"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "LandParcels"
+        ],
+        "summary": "Gets a paginated list of land parcels.",
+        "operationId": "getLandParcels",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number (1-based).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of items per page.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            },
+            "x-position": 2
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Optional status filter.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with a paginated list of land parcels.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfLandParcelResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/land-parcels/{landParcelId}": {
+      "get": {
+        "tags": [
+          "LandParcels"
+        ],
+        "summary": "Gets a land parcel by ID.",
+        "operationId": "getLandParcel",
+        "parameters": [
+          {
+            "name": "landParcelId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the land parcel to retrieve.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with the land parcel, or 404 if not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandParcelResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/land-parcels/{landParcelId}/status": {
+      "patch": {
+        "tags": [
+          "LandParcels"
+        ],
+        "summary": "Updates a land parcel's status.",
+        "operationId": "updateLandParcelStatus",
+        "parameters": [
+          {
+            "name": "landParcelId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the land parcel to update.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The new status details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLandParcelStatusRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content, or 404 if not found."
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "get": {
+        "tags": [
+          "Oidc"
+        ],
+        "summary": "Initiates the OIDC authorization request with PKCE and state.",
+        "operationId": "Oidc_Login",
+        "responses": {
+          "200": {
+            "description": "Redirect to the identity provider's authorize endpoint.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "get": {
+        "tags": [
+          "Oidc"
+        ],
+        "summary": "Initiates the OIDC authorization request with prompt=create to open the registration UI directly.",
+        "operationId": "Oidc_Register",
+        "responses": {
+          "200": {
+            "description": "Redirect to the identity provider's registration screen.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "get": {
+        "tags": [
+          "Oidc"
+        ],
+        "summary": "Signs the user out of both cookie and OIDC schemes, clears server-side tokens, and redirects to the app.",
+        "operationId": "Oidc_Logout",
+        "responses": {
+          "200": {
+            "description": "Redirect to post-logout location.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "Oidc"
+        ],
+        "summary": "Exchanges a refresh token for a new access token using the server-side token store.",
+        "operationId": "Oidc_Refresh",
+        "responses": {
+          "200": {
+            "description": "200 on success; 401 if session/refresh token missing; 502 on IdP error.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiResponseOfString": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "description": "Standardized API response envelope as defined in ADR-00016.",
+            "additionalProperties": false,
+            "properties": {
+              "data": {
+                "type": "string",
+                "description": "Gets or sets the response data.",
+                "nullable": true
+              }
+            }
+          }
+        ]
+      },
+      "ApiResponse": {
+        "type": "object",
+        "description": "Static factory methods for creating API responses.",
+        "additionalProperties": false
+      },
+      "RegisterBuildingRequest": {
+        "type": "object",
+        "description": "Request to register a new building on a land parcel.",
+        "additionalProperties": false,
+        "properties": {
+          "landParcelId": {
+            "type": "string"
+          },
+          "buildingType": {
+            "type": "string"
+          },
+          "bedrooms": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bathrooms": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "squareFootage": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "yearBuilt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "initialAssessedValue": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "BuildingResponse": {
+        "type": "object",
+        "description": "Response DTO for a building detail view.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "landParcelId": {
+            "type": "string"
+          },
+          "buildingType": {
+            "type": "string"
+          },
+          "bedrooms": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bathrooms": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "squareFootage": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "yearBuilt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "assessedValue": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "lastAssessedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "conditionNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PaginatedResponseOfBuildingListItemResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/BuildingListItemResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "BuildingListItemResponse": {
+        "type": "object",
+        "description": "Response DTO for a building list item.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "landParcelId": {
+            "type": "string"
+          },
+          "buildingType": {
+            "type": "string"
+          },
+          "bedrooms": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bathrooms": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "squareFootage": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "assessedValue": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "RecordBuildingAssessmentRequest": {
+        "type": "object",
+        "description": "Request to record a new building assessment.",
+        "additionalProperties": false,
+        "properties": {
+          "assessedValue": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "assessmentDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "conditionNotes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateBuildingStatusRequest": {
+        "type": "object",
+        "description": "Request to update a building's status.",
+        "additionalProperties": false,
+        "properties": {
+          "newStatus": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterLandParcelRequest": {
+        "type": "object",
+        "description": "Request to register a new land parcel.",
+        "additionalProperties": false,
+        "properties": {
+          "legalParcelNumber": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "areaAcres": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "acquisitionDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "acquisitionMethod": {
+            "type": "string"
+          },
+          "covenantTerms": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LandParcelResponse": {
+        "type": "object",
+        "description": "Response DTO for a land parcel detail view.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "legalParcelNumber": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "areaAcres": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "acquisitionDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "acquisitionMethod": {
+            "type": "string"
+          },
+          "covenantTerms": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "registeredBy": {
+            "type": "string"
+          }
+        }
+      },
+      "PaginatedResponseOfLandParcelResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/LandParcelResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "UpdateLandParcelStatusRequest": {
+        "type": "object",
+        "description": "Request to update a land parcel's status.",
+        "additionalProperties": false,
+        "properties": {
+          "newStatus": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
