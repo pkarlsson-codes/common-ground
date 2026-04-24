@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
 function IconMap() {
   return (
@@ -41,6 +42,8 @@ function IconWorkflow() {
 }
 
 export default function Layout() {
+  const { user, logout } = useAuth()
+
   return (
     <div className="app-layout">
       <aside className="sidebar">
@@ -82,6 +85,31 @@ export default function Layout() {
             Purchase Workflows
           </NavLink>
         </nav>
+        <div style={{ borderTop: '1px solid var(--border)', padding: '12px 20px' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {user?.username}
+          </div>
+          <button
+            onClick={logout}
+            style={{
+              width: '100%',
+              padding: '6px 10px',
+              background: 'transparent',
+              color: 'var(--text-dim)',
+              border: '1px solid var(--border)',
+              borderRadius: '6px',
+              fontFamily: 'var(--font-body)',
+              fontSize: '12px',
+              cursor: 'pointer',
+              textAlign: 'left',
+              transition: 'color var(--transition), border-color var(--transition)',
+            }}
+            onMouseEnter={e => { (e.target as HTMLButtonElement).style.color = 'var(--text-primary)'; (e.target as HTMLButtonElement).style.borderColor = 'var(--border-bright)' }}
+            onMouseLeave={e => { (e.target as HTMLButtonElement).style.color = 'var(--text-dim)'; (e.target as HTMLButtonElement).style.borderColor = 'var(--border)' }}
+          >
+            Log out
+          </button>
+        </div>
         <div className="sidebar-footer">Property Registry · v0.1</div>
       </aside>
       <main className="main-content">

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Configuration, GroundLeasesApi } from '../api'
+import { GroundLeasesApi } from '../api'
+import { apiConfig } from '../lib/apiConfig'
 import type {
   CreateGroundLeaseForm,
   OnboardHomeownerForm,
@@ -7,7 +8,7 @@ import type {
   ResaleEstimateForm,
 } from './types'
 
-const api = new GroundLeasesApi(new Configuration({ basePath: '' }))
+const api = new GroundLeasesApi(apiConfig)
 
 export function useGroundLeases(page: number, status?: string, landParcelId?: string, buildingId?: string) {
   return useQuery({

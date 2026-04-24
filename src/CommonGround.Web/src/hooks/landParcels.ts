@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Configuration, LandParcelsApi } from '../api'
+import { LandParcelsApi } from '../api'
+import { apiConfig } from '../lib/apiConfig'
 import type { RegisterLandParcelRequest } from './types'
 
-// Empty basePath so requests use relative URLs through Vite's /api proxy
-const api = new LandParcelsApi(new Configuration({ basePath: '' }))
+const api = new LandParcelsApi(apiConfig)
 
 const dateStr = (d: Date | null | undefined) =>
   d instanceof Date ? d.toISOString().substring(0, 10) : undefined

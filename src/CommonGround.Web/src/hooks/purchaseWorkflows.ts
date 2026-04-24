@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Configuration, PurchaseWorkflowsApi } from '../api'
+import { PurchaseWorkflowsApi } from '../api'
+import { apiConfig } from '../lib/apiConfig'
 import type {
   FailWorkflowForm,
   InitiateWorkflowForm,
@@ -14,7 +15,7 @@ import type {
   WithdrawWorkflowForm,
 } from './types'
 
-const api = new PurchaseWorkflowsApi(new Configuration({ basePath: '' }))
+const api = new PurchaseWorkflowsApi(apiConfig)
 
 export function usePurchaseWorkflows(page: number, groundLeaseId?: string, phase?: string) {
   return useQuery({
