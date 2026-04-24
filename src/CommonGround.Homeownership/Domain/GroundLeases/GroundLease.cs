@@ -138,6 +138,28 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             DateTimeOffset.UtcNow));
     }
 
+    /// <summary>Terminates this ground lease.</summary>
+    /// <param name="reason">The reason for termination.</param>
+    /// <param name="terminatedDate">The date of termination.</param>
+    /// <param name="terminatedBy">The user recording this action.</param>
+    public void Terminate(string reason, DateOnly terminatedDate, UserId terminatedBy)
+    {
+        ArgumentNullException.ThrowIfNull(terminatedBy);
+
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new BusinessRuleViolationException("Termination reason is required.");
+
+        if (Status != GroundLeaseStatus.Active)
+            throw new BusinessRuleViolationException("Only Active leases can be terminated.");
+
+        ApplyChange(new GroundLeaseTerminated(
+            Id.Value,
+            reason,
+            terminatedDate,
+            terminatedBy.Value,
+            DateTimeOffset.UtcNow));
+    }
+
     /// <summary>Records a stewardship check-in visit.</summary>
     /// <param name="checkInDate">Date of the check-in.</param>
     /// <param name="notes">Notes from the visit.</param>
@@ -168,6 +190,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             case HomeownerOnboarded e: Apply(e); break;
             case HomeownerChanged e: Apply(e); break;
             case StewardshipCheckInRecorded: break; // No state mutation needed
+            case GroundLeaseTerminated e: Apply(e); break;
             default: throw new InvalidOperationException(
                 $"Unknown event: {domainEvent?.GetType().Name}");
         }
@@ -204,6 +227,11 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     private void Apply(HomeownerChanged e)
     {
         CurrentHomeowner = new Homeowner(e.NewFullName, e.NewEmail, e.NewPhone);
+    }
+
+    private void Apply(GroundLeaseTerminated _)
+    {
+        Status = GroundLeaseStatus.Inactive;
     }
 
 }
