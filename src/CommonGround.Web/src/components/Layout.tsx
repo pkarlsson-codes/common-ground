@@ -19,6 +19,27 @@ function IconBuilding() {
   )
 }
 
+function IconLease() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <rect x="3" y="1" width="10" height="14" rx="1" stroke="currentColor" strokeWidth="1.2"/>
+      <path d="M6 5h4M6 8h4M6 11h2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
+function IconWorkflow() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <circle cx="3" cy="8" r="2" stroke="currentColor" strokeWidth="1.2"/>
+      <circle cx="13" cy="8" r="2" stroke="currentColor" strokeWidth="1.2"/>
+      <path d="M5 8h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+      <circle cx="8" cy="3" r="1.5" stroke="currentColor" strokeWidth="1.2"/>
+      <path d="M8 4.5v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
 export default function Layout() {
   return (
     <div className="app-layout">
@@ -43,6 +64,22 @@ export default function Layout() {
           >
             <IconBuilding />
             Buildings
+          </NavLink>
+
+          <div className="sidebar-nav__section">Homeownership</div>
+          <NavLink
+            to="/ground-leases"
+            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          >
+            <IconLease />
+            Ground Leases
+          </NavLink>
+          <NavLink
+            to="/purchase-workflows"
+            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          >
+            <IconWorkflow />
+            Purchase Workflows
           </NavLink>
         </nav>
         <div className="sidebar-footer">Property Registry · v0.1</div>

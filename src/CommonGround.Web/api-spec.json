@@ -295,6 +295,317 @@
         }
       }
     },
+    "/api/v1/ground-leases": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "summary": "Creates a new ground lease.",
+        "operationId": "createGroundLease",
+        "requestBody": {
+          "x-name": "request",
+          "description": "The ground lease creation details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroundLeaseRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "201": {
+            "description": "201 Created with the new ground lease ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateGroundLeaseResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "summary": "Gets a paginated list of ground leases.",
+        "operationId": "getGroundLeases",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number (1-based).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of items per page.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            },
+            "x-position": 2
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Optional status filter.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 3
+          },
+          {
+            "name": "landParcelId",
+            "in": "query",
+            "description": "Optional land parcel ID filter.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 4
+          },
+          {
+            "name": "buildingId",
+            "in": "query",
+            "description": "Optional building ID filter.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 5
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with a paginated list of ground leases.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfGroundLeaseListItemResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ground-leases/{groundLeaseId}": {
+      "get": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "summary": "Gets a ground lease by ID.",
+        "operationId": "getGroundLease",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the ground lease to retrieve.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with the ground lease, or 404 if not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroundLeaseResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ground-leases/{groundLeaseId}/homeowner": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "summary": "Onboards the first homeowner to a ground lease.",
+        "operationId": "onboardHomeowner",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the ground lease.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The homeowner details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardHomeownerRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "summary": "Changes the homeowner on a ground lease.",
+        "operationId": "changeHomeowner",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the ground lease.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The new homeowner details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeHomeownerRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/ground-leases/{groundLeaseId}/stewardship-check-ins": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "summary": "Records a stewardship check-in for a ground lease.",
+        "operationId": "recordStewardshipCheckIn",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the ground lease.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The check-in details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordStewardshipCheckInRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/ground-leases/{groundLeaseId}/resale-estimate": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "summary": "Calculates a resale price estimate for a ground lease.",
+        "operationId": "calculateResaleEstimate",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the ground lease.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The calculation inputs.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalculateResaleEstimateRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "200 with the estimated maximum resale price.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResaleEstimateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/land-parcels": {
       "post": {
         "tags": [
@@ -561,6 +872,536 @@
           }
         }
       }
+    },
+    "/api/v1/purchase-workflows": {
+      "post": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "summary": "Initiates a new purchase workflow.",
+        "operationId": "initiatePurchaseWorkflow",
+        "requestBody": {
+          "x-name": "request",
+          "description": "The purchase workflow initiation details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitiatePurchaseWorkflowRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "201": {
+            "description": "201 Created with the new purchase workflow ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitiatePurchaseWorkflowResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "summary": "Gets a paginated list of purchase workflows.",
+        "operationId": "getPurchaseWorkflows",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number (1-based).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of items per page.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            },
+            "x-position": 2
+          },
+          {
+            "name": "groundLeaseId",
+            "in": "query",
+            "description": "Optional ground lease ID filter.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 3
+          },
+          {
+            "name": "phase",
+            "in": "query",
+            "description": "Optional phase filter.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 4
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with a paginated list of purchase workflows.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfPurchaseWorkflowListItemResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/purchase-workflows/{workflowId}": {
+      "get": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "summary": "Gets a purchase workflow by ID.",
+        "operationId": "getPurchaseWorkflow",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the purchase workflow to retrieve.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with the purchase workflow, or 404 if not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseWorkflowResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/purchase-workflows/{workflowId}/eligibility": {
+      "post": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "summary": "Records buyer eligibility verified.",
+        "operationId": "recordEligibilityVerified",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the purchase workflow.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The eligibility verification details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordEligibilityVerifiedRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/purchase-workflows/{workflowId}/financing": {
+      "post": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "summary": "Records financing committed.",
+        "operationId": "recordFinancingCommitted",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the purchase workflow.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The financing commitment details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordFinancingCommittedRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/purchase-workflows/{workflowId}/inspection": {
+      "post": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "summary": "Records inspection completed.",
+        "operationId": "recordInspectionCompleted",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the purchase workflow.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The inspection completion details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordInspectionCompletedRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/purchase-workflows/{workflowId}/title": {
+      "post": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "summary": "Records title cleared.",
+        "operationId": "recordTitleCleared",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the purchase workflow.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The title clearance details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordTitleClearedRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/purchase-workflows/{workflowId}/lease-execution": {
+      "post": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "summary": "Records lease executed.",
+        "operationId": "recordLeaseExecuted",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the purchase workflow.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The lease execution details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordLeaseExecutedRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/purchase-workflows/{workflowId}/closing/schedule": {
+      "post": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "summary": "Schedules the closing date.",
+        "operationId": "scheduleClosing",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the purchase workflow.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The scheduled closing date.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleClosingRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/purchase-workflows/{workflowId}/closing/record": {
+      "post": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "summary": "Records the purchase closed.",
+        "operationId": "recordPurchaseClosed",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the purchase workflow.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The closing details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordPurchaseClosedRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/purchase-workflows/{workflowId}/fail": {
+      "post": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "summary": "Fails the purchase.",
+        "operationId": "failPurchase",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the purchase workflow.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The failure details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FailPurchaseRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/purchase-workflows/{workflowId}/withdraw": {
+      "post": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "summary": "Withdraws the purchase.",
+        "operationId": "withdrawPurchase",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the purchase workflow.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The withdrawal details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawPurchaseRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/purchase-workflows/{workflowId}/stall": {
+      "post": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "summary": "Stalls the workflow.",
+        "operationId": "stallWorkflow",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the purchase workflow.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The stall details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StallWorkflowRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
     }
   },
   "components": {
@@ -797,6 +1638,337 @@
           }
         }
       },
+      "CreateGroundLeaseResponse": {
+        "type": "object",
+        "description": "Response after creating a ground lease.",
+        "additionalProperties": false,
+        "properties": {
+          "groundLeaseId": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateGroundLeaseRequest": {
+        "type": "object",
+        "description": "Request to create a new ground lease.",
+        "additionalProperties": false,
+        "properties": {
+          "landParcelId": {
+            "type": "string"
+          },
+          "buildingId": {
+            "type": "string"
+          },
+          "leaseStartDate": {
+            "type": "string"
+          },
+          "termYears": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "covenantTerms": {
+            "type": "string"
+          },
+          "formulaKind": {
+            "type": "string"
+          },
+          "appreciationShare": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "indexType": {
+            "type": "string",
+            "nullable": true
+          },
+          "baselineIndexValue": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "annualPercentage": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "improvementsCap": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          }
+        }
+      },
+      "GroundLeaseResponse": {
+        "type": "object",
+        "description": "Detail response for a ground lease.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "landParcelId": {
+            "type": "string"
+          },
+          "buildingId": {
+            "type": "string"
+          },
+          "leaseStartDate": {
+            "type": "string"
+          },
+          "termYears": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "covenantTerms": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "formulaKind": {
+            "type": "string"
+          },
+          "appreciationShare": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "indexType": {
+            "type": "string",
+            "nullable": true
+          },
+          "baselineIndexValue": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "annualPercentage": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "improvementsCap": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "homeownerFullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "homeownerEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "homeownerPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "stewardshipCheckIns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StewardshipCheckInDto"
+            }
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          }
+        }
+      },
+      "StewardshipCheckInDto": {
+        "type": "object",
+        "description": "DTO for a stewardship check-in entry.",
+        "additionalProperties": false,
+        "properties": {
+          "checkInDate": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "recordedBy": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string"
+          }
+        }
+      },
+      "PaginatedResponseOfGroundLeaseListItemResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/GroundLeaseListItemResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "GroundLeaseListItemResponse": {
+        "type": "object",
+        "description": "Summary item for ground lease list responses.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "landParcelId": {
+            "type": "string"
+          },
+          "buildingId": {
+            "type": "string"
+          },
+          "leaseStartDate": {
+            "type": "string"
+          },
+          "termYears": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          },
+          "homeownerFullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "homeownerEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "OnboardHomeownerRequest": {
+        "type": "object",
+        "description": "Request to onboard the first homeowner to a ground lease.",
+        "additionalProperties": false,
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ChangeHomeownerRequest": {
+        "type": "object",
+        "description": "Request to change the homeowner on a ground lease.",
+        "additionalProperties": false,
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "RecordStewardshipCheckInRequest": {
+        "type": "object",
+        "description": "Request to record a stewardship check-in visit.",
+        "additionalProperties": false,
+        "properties": {
+          "checkInDate": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "ResaleEstimateResponse": {
+        "type": "object",
+        "description": "Response for a resale price estimate.",
+        "additionalProperties": false,
+        "properties": {
+          "maxResalePrice": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "CalculateResaleEstimateRequest": {
+        "type": "object",
+        "description": "Request to calculate a resale price estimate.",
+        "additionalProperties": false,
+        "properties": {
+          "originalPurchasePrice": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "currentAppraisalValue": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "originalAppraisalValue": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "ownershipYears": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "approvedImprovements": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "currentIndexValue": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          }
+        }
+      },
       "RegisterLandParcelResponse": {
         "type": "object",
         "description": "Response returned when a land parcel is successfully registered.",
@@ -926,6 +2098,440 @@
         "additionalProperties": false,
         "properties": {
           "newStatus": {
+            "type": "string"
+          }
+        }
+      },
+      "InitiatePurchaseWorkflowResponse": {
+        "type": "object",
+        "description": "Response after initiating a purchase workflow.",
+        "additionalProperties": false,
+        "properties": {
+          "purchaseWorkflowId": {
+            "type": "string"
+          }
+        }
+      },
+      "InitiatePurchaseWorkflowRequest": {
+        "type": "object",
+        "description": "Request to initiate a new purchase workflow.",
+        "additionalProperties": false,
+        "properties": {
+          "groundLeaseId": {
+            "type": "string"
+          },
+          "buyerFullName": {
+            "type": "string"
+          },
+          "buyerEmail": {
+            "type": "string"
+          },
+          "buyerPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "purchasePrice": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "PurchaseWorkflowResponse": {
+        "type": "object",
+        "description": "Detail response for a purchase workflow.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "groundLeaseId": {
+            "type": "string"
+          },
+          "phase": {
+            "type": "string"
+          },
+          "initiatedBy": {
+            "type": "string"
+          },
+          "buyerFullName": {
+            "type": "string"
+          },
+          "buyerEmail": {
+            "type": "string"
+          },
+          "buyerPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "purchasePrice": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "eligibilityDetails": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/EligibilityDetailsDto"
+              }
+            ]
+          },
+          "financingDetails": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FinancingDetailsDto"
+              }
+            ]
+          },
+          "inspectionResult": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/InspectionResultDto"
+              }
+            ]
+          },
+          "titleDetails": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TitleDetailsDto"
+              }
+            ]
+          },
+          "leaseExecutionDetails": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LeaseExecutionDetailsDto"
+              }
+            ]
+          },
+          "scheduledClosingDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "actualClosingDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "closingNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "failureReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "withdrawalReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "stalledReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "stalledDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "resolutionTargetDate": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "EligibilityDetailsDto": {
+        "type": "object",
+        "description": "Eligibility verification details.",
+        "additionalProperties": false,
+        "properties": {
+          "verifiedDate": {
+            "type": "string",
+            "description": "Date eligibility was verified."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes.",
+            "nullable": true
+          }
+        }
+      },
+      "FinancingDetailsDto": {
+        "type": "object",
+        "description": "Financing commitment details.",
+        "additionalProperties": false,
+        "properties": {
+          "lenderName": {
+            "type": "string",
+            "description": "Name of the lender."
+          },
+          "committedAmount": {
+            "type": "number",
+            "description": "Amount committed.",
+            "format": "decimal"
+          },
+          "preapprovalLetterDate": {
+            "type": "string",
+            "description": "Date of pre-approval letter."
+          }
+        }
+      },
+      "InspectionResultDto": {
+        "type": "object",
+        "description": "Inspection result details.",
+        "additionalProperties": false,
+        "properties": {
+          "inspectionDate": {
+            "type": "string",
+            "description": "Date of inspection."
+          },
+          "inspectorName": {
+            "type": "string",
+            "description": "Name of inspector."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes.",
+            "nullable": true
+          }
+        }
+      },
+      "TitleDetailsDto": {
+        "type": "object",
+        "description": "Title clearance details.",
+        "additionalProperties": false,
+        "properties": {
+          "clearedDate": {
+            "type": "string",
+            "description": "Date title was cleared."
+          },
+          "titleCompanyName": {
+            "type": "string",
+            "description": "Optional title company name.",
+            "nullable": true
+          }
+        }
+      },
+      "LeaseExecutionDetailsDto": {
+        "type": "object",
+        "description": "Lease execution details.",
+        "additionalProperties": false,
+        "properties": {
+          "signedDate": {
+            "type": "string",
+            "description": "Date lease was signed."
+          }
+        }
+      },
+      "PaginatedResponseOfPurchaseWorkflowListItemResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseWorkflowListItemResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "PurchaseWorkflowListItemResponse": {
+        "type": "object",
+        "description": "Summary item for purchase workflow list responses.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "groundLeaseId": {
+            "type": "string"
+          },
+          "buyerFullName": {
+            "type": "string"
+          },
+          "purchasePrice": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "phase": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "RecordEligibilityVerifiedRequest": {
+        "type": "object",
+        "description": "Request to record buyer eligibility verified.",
+        "additionalProperties": false,
+        "properties": {
+          "verifiedDate": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "RecordFinancingCommittedRequest": {
+        "type": "object",
+        "description": "Request to record financing committed by a lender.",
+        "additionalProperties": false,
+        "properties": {
+          "lenderName": {
+            "type": "string"
+          },
+          "committedAmount": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "preapprovalLetterDate": {
+            "type": "string"
+          }
+        }
+      },
+      "RecordInspectionCompletedRequest": {
+        "type": "object",
+        "description": "Request to record a completed home inspection.",
+        "additionalProperties": false,
+        "properties": {
+          "inspectionDate": {
+            "type": "string"
+          },
+          "inspectorName": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "RecordTitleClearedRequest": {
+        "type": "object",
+        "description": "Request to record title cleared.",
+        "additionalProperties": false,
+        "properties": {
+          "clearedDate": {
+            "type": "string"
+          },
+          "titleCompanyName": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "RecordLeaseExecutedRequest": {
+        "type": "object",
+        "description": "Request to record lease executed.",
+        "additionalProperties": false,
+        "properties": {
+          "signedDate": {
+            "type": "string"
+          }
+        }
+      },
+      "ScheduleClosingRequest": {
+        "type": "object",
+        "description": "Request to schedule the closing date.",
+        "additionalProperties": false,
+        "properties": {
+          "scheduledClosingDate": {
+            "type": "string"
+          }
+        }
+      },
+      "RecordPurchaseClosedRequest": {
+        "type": "object",
+        "description": "Request to record a purchase closed.",
+        "additionalProperties": false,
+        "properties": {
+          "actualClosingDate": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "FailPurchaseRequest": {
+        "type": "object",
+        "description": "Request to fail a purchase.",
+        "additionalProperties": false,
+        "properties": {
+          "failureReason": {
+            "type": "string"
+          },
+          "failedDate": {
+            "type": "string"
+          }
+        }
+      },
+      "WithdrawPurchaseRequest": {
+        "type": "object",
+        "description": "Request to withdraw a purchase.",
+        "additionalProperties": false,
+        "properties": {
+          "withdrawnDate": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "StallWorkflowRequest": {
+        "type": "object",
+        "description": "Request to stall a purchase workflow.",
+        "additionalProperties": false,
+        "properties": {
+          "stalledReason": {
+            "type": "string"
+          },
+          "stalledDate": {
+            "type": "string"
+          },
+          "resolutionTargetDate": {
             "type": "string"
           }
         }

@@ -386,6 +386,19 @@ body {
 .badge-underrenovation    { background: var(--sky-bg);    color: var(--sky-text);    }
 .badge-default            { background: rgba(120,140,160,.12); color: var(--text-secondary); }
 
+/* Ground lease statuses */
+.badge-active             { background: var(--green-bg);  color: var(--green-text);  }
+.badge-inactive           { background: rgba(120,140,160,.12); color: var(--text-secondary); }
+
+/* Purchase workflow phases */
+.badge-initiated          { background: var(--sky-bg);    color: var(--sky-text);    }
+.badge-inprogress         { background: var(--indigo-bg); color: var(--indigo-text); }
+.badge-closingscheduled   { background: var(--orange-bg); color: var(--orange-text); }
+.badge-closed             { background: var(--green-bg);  color: var(--green-text);  }
+.badge-failed             { background: var(--red-dim);   color: var(--red);         }
+.badge-withdrawn          { background: rgba(120,140,160,.12); color: var(--text-secondary); }
+.badge-stalled            { background: var(--orange-bg); color: var(--orange-text); }
+
 /* ── Pagination ───────────────────────────────────── */
 .pagination {
   display: flex;

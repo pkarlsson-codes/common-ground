@@ -35,3 +35,109 @@ export const PARCEL_STATUSES = ['Available', 'Occupied', 'UnderDevelopment'] as 
 export const ACQUISITION_METHODS = ['Purchase', 'Donation', 'Transfer'] as const
 
 export const statusLabel = (s: string) => s.replace(/([A-Z])/g, ' $1').trim()
+
+// ── Homeownership ──────────────────────────────────────────────────────────
+
+export const GROUND_LEASE_STATUSES = ['Active', 'Inactive'] as const
+export const FORMULA_KINDS = ['AppraisalBased', 'IndexBased', 'FixedPercentage'] as const
+export const FORMULA_KIND_LABELS: Record<string, string> = {
+  AppraisalBased:  'Appraisal Based',
+  IndexBased:      'Index Based',
+  FixedPercentage: 'Fixed Percentage',
+}
+export const INDEX_TYPES = ['CPI', 'AMI', 'Custom'] as const
+
+export const WORKFLOW_PHASES = [
+  'Initiated', 'InProgress', 'ClosingScheduled', 'Closed', 'Failed', 'Withdrawn', 'Stalled',
+] as const
+
+export interface CreateGroundLeaseForm {
+  landParcelId: string
+  buildingId: string
+  leaseStartDate: string
+  termYears: number
+  covenantTerms: string
+  formulaKind: string
+  appreciationShare: number
+  indexType: string
+  baselineIndexValue: number
+  annualPercentage: number
+  improvementsCap: number
+  hasImprovementsCap: boolean
+}
+
+export interface OnboardHomeownerForm {
+  fullName: string
+  email: string
+  phone: string
+}
+
+export interface RecordCheckInForm {
+  checkInDate: string
+  notes: string
+}
+
+export interface ResaleEstimateForm {
+  originalPurchasePrice: number
+  currentAppraisalValue: number
+  originalAppraisalValue: number
+  ownershipYears: number
+  approvedImprovements: number
+  currentIndexValue: number
+}
+
+export interface InitiateWorkflowForm {
+  groundLeaseId: string
+  buyerFullName: string
+  buyerEmail: string
+  buyerPhone: string
+  purchasePrice: number
+}
+
+export interface RecordEligibilityForm {
+  verifiedDate: string
+  notes: string
+}
+
+export interface RecordFinancingForm {
+  lenderName: string
+  committedAmount: number
+  preapprovalLetterDate: string
+}
+
+export interface RecordInspectionForm {
+  inspectionDate: string
+  inspectorName: string
+  notes: string
+}
+
+export interface RecordTitleForm {
+  clearedDate: string
+  titleCompanyName: string
+}
+
+export interface RecordLeaseExecutedForm {
+  signedDate: string
+}
+
+export interface ScheduleClosingForm {
+  scheduledDate: string
+}
+
+export interface RecordClosedForm {
+  actualClosingDate: string
+  closingNotes: string
+}
+
+export interface FailWorkflowForm {
+  reason: string
+}
+
+export interface WithdrawWorkflowForm {
+  reason: string
+}
+
+export interface StallWorkflowForm {
+  reason: string
+  resolutionTargetDate: string
+}
