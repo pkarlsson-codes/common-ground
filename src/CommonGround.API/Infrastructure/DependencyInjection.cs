@@ -2,9 +2,13 @@ using System.Text;
 using CommonGround.API.Infrastructure.ExceptionHandling;
 using CommonGround.Homeownership.Infrastructure;
 using CommonGround.Homeownership.Infrastructure.Persistence;
+using CommonGround.Identity.Infrastructure;
+using CommonGround.Identity.Infrastructure.Persistence;
 using CommonGround.PropertyRegistry.Infrastructure;
 using CommonGround.PropertyRegistry.Infrastructure.Persistence;
 using CommonGround.SharedKernel.Extensions;
+using CommonGround.Stewardship.Infrastructure;
+using CommonGround.Stewardship.Infrastructure.Persistence;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -34,6 +38,8 @@ internal static class CommonGroundServiceCollectionExtensions
         services.AddCommonGroundAuthorization();
         services.AddPropertyRegistry();
         services.AddHomeownership();
+        services.AddIdentity();
+        services.AddStewardship();
         return services;
     }
 
@@ -63,6 +69,8 @@ internal static class CommonGroundServiceCollectionExtensions
         {
             PropertyRegistryMartenConfiguration.Configure(opts);
             HomeownershipMartenConfiguration.Configure(opts);
+            IdentityMartenConfiguration.Configure(opts);
+            StewardshipMartenConfiguration.Configure(opts);
         });
         services.AddMartenUnitOfWork();
         return services;
