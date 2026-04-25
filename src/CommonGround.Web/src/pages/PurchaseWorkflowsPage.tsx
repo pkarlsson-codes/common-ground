@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import type { PurchaseWorkflowResponse } from '../api'
 import {
   useFailPurchase,
@@ -31,20 +32,56 @@ import {
   type WithdrawWorkflowForm,
 } from '../hooks/types'
 import EntityCombobox from '../components/EntityCombobox'
+import NavIdLink from '../components/NavIdLink'
 import Pagination from '../components/Pagination'
 import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
 import { GroundLeasesApi } from '../api'
+import { ResponseError } from '../api/runtime'
 import { apiConfig } from '../lib/apiConfig'
 import { getAvailableActions } from '../lib/transitionActions'
 import { trackTransitionEvent } from '../lib/telemetry'
 
 const groundLeasesApi = new GroundLeasesApi(apiConfig)
+const E164_PHONE_PATTERN = /^\+[1-9]\d{1,14}$/
 
 type Panel = 'detail' | 'initiate' | null
 
 const fmtCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
+
+const isValidE164Phone = (value: string) => E164_PHONE_PATTERN.test(value)
+
+async function getErrorMessage(error: unknown, fallback: string) {
+  if (!(error instanceof ResponseError)) {
+    return fallback
+  }
+
+  try {
+    const problem = await error.response.clone().json() as {
+      detail?: string
+      title?: string
+      errors?: Record<string, string[]>
+    }
+
+    if (problem.detail) {
+      return problem.detail
+    }
+
+    const firstError = Object.values(problem.errors ?? {}).flat()[0]
+    if (firstError) {
+      return firstError
+    }
+
+    if (problem.title) {
+      return problem.title
+    }
+  } catch {
+    return fallback
+  }
+
+  return fallback
+}
 
 function SkeletonRows() {
   return (
@@ -120,6 +157,9 @@ function TrackRow({
 }
 
 export default function PurchaseWorkflowsPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
+
   const [page, setPage] = useState(1)
   const [phaseFilter, setPhaseFilter] = useState('')
   const [groundLeaseFilter, setGroundLeaseFilter] = useState('')
@@ -140,6 +180,7 @@ export default function PurchaseWorkflowsPage() {
 
   const [toast, setToast] = useState<string | null>(null)
   const [toastKind, setToastKind] = useState<'success' | 'error'>('success')
+  const [initiateError, setInitiateError] = useState<string | null>(null)
 
   const { data, isLoading, isError } = usePurchaseWorkflows(page, groundLeaseFilter || undefined, phaseFilter || undefined)
   const { data: detail, isLoading: detailLoading } = usePurchaseWorkflow(
@@ -181,8 +222,22 @@ export default function PurchaseWorkflowsPage() {
 
   const openInitiate = () => {
     setInitiateForm(emptyInitiate())
+    setInitiateError(null)
     setPanel('initiate')
   }
+
+  useEffect(() => {
+    const openId = (location.state as { openId?: string } | null)?.openId
+    if (!openId) {
+      return
+    }
+
+    openDetail(openId)
+    navigate(
+      { pathname: location.pathname, search: location.search, hash: location.hash },
+      { replace: true, state: null },
+    )
+  }, [location, navigate])
 
   const closePanel = () => {
     setPanel(null)
@@ -191,11 +246,26 @@ export default function PurchaseWorkflowsPage() {
 
   const handleInitiate = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const buyerPhone = initiateForm.buyerPhone.trim()
+    if (buyerPhone && !isValidE164Phone(buyerPhone)) {
+      setInitiateError('Buyer phone must be in E.164 format, for example +11231231234.')
+      return
+    }
+
+    setInitiateError(null)
+
     try {
-      await initiateMutation.mutateAsync({ ...initiateForm, purchasePrice: Number(initiateForm.purchasePrice) })
+      await initiateMutation.mutateAsync({
+        ...initiateForm,
+        buyerPhone,
+        purchasePrice: Number(initiateForm.purchasePrice),
+      })
       closePanel()
       showToast('Purchase workflow initiated')
-    } catch { /* error shown inline */ }
+    } catch (error) {
+      setInitiateError(await getErrorMessage(error, 'Failed to initiate workflow.'))
+    }
   }
 
   const makeTrackHandler = <T,>(
@@ -425,8 +495,9 @@ export default function PurchaseWorkflowsPage() {
                   </div>
                 )}
                 <div className="detail-field full-span">
-                  <div className="detail-field__label">Ground Lease ID</div>
-                  <div className="detail-field__value"><span className="cell-id">{detail.groundLeaseId}</span></div>
+                  <div className="detail-field__value">
+                    <NavIdLink id={detail.groundLeaseId} to="/ground-leases" label="Open Ground Lease" />
+                  </div>
                 </div>
                 {detail.scheduledClosingDate && (
                   <div className="detail-field">
@@ -860,9 +931,15 @@ export default function PurchaseWorkflowsPage() {
                 <label className="form-label">Buyer Phone (optional)</label>
                 <input
                   className="form-input"
+                  type="tel"
+                  placeholder="+11231231234"
                   value={initiateForm.buyerPhone}
-                  onChange={e => setInitiateForm(f => ({ ...f, buyerPhone: e.target.value }))}
+                  onChange={e => {
+                    setInitiateError(null)
+                    setInitiateForm(f => ({ ...f, buyerPhone: e.target.value }))
+                  }}
                 />
+                <div className="form-help">Use E.164 format, for example +11231231234.</div>
               </div>
               <div className="form-field full">
                 <label className="form-label">Purchase Price ($)</label>
@@ -877,8 +954,8 @@ export default function PurchaseWorkflowsPage() {
                 />
               </div>
             </div>
-            {initiateMutation.isError && (
-              <div className="form-error">Failed to initiate workflow. Check the ground lease ID.</div>
+            {(initiateError || initiateMutation.isError) && (
+              <div className="form-error">{initiateError ?? 'Failed to initiate workflow.'}</div>
             )}
           </form>
         </SlideOver>

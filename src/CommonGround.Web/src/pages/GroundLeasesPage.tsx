@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   useCalculateResaleEstimate,
   useChangeHomeowner,
@@ -19,6 +20,7 @@ import {
   type ResaleEstimateForm,
 } from '../hooks/types'
 import EntityCombobox from '../components/EntityCombobox'
+import NavIdLink from '../components/NavIdLink'
 import Pagination from '../components/Pagination'
 import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
@@ -73,6 +75,9 @@ const emptyEstimate = (): ResaleEstimateForm => ({
 })
 
 export default function GroundLeasesPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
+
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -114,6 +119,19 @@ export default function GroundLeasesPage() {
     setCreateForm(emptyCreate())
     setPanel('create')
   }
+
+  useEffect(() => {
+    const openId = (location.state as { openId?: string } | null)?.openId
+    if (!openId) {
+      return
+    }
+
+    openDetail(openId)
+    navigate(
+      { pathname: location.pathname, search: location.search, hash: location.hash },
+      { replace: true, state: null },
+    )
+  }, [location, navigate])
 
   const closePanel = () => {
     setPanel(null)
@@ -337,16 +355,14 @@ export default function GroundLeasesPage() {
                   </div>
                 )}
                 <div className="detail-field full-span">
-                  <div className="detail-field__label">Lease ID</div>
-                  <div className="detail-field__value"><span className="cell-id">{detail.id}</span></div>
+                  <div className="detail-field__value">
+                    <NavIdLink id={detail.buildingId} to="/buildings" label="Open Building" />
+                  </div>
                 </div>
                 <div className="detail-field full-span">
-                  <div className="detail-field__label">Building ID</div>
-                  <div className="detail-field__value"><span className="cell-id">{detail.buildingId}</span></div>
-                </div>
-                <div className="detail-field full-span">
-                  <div className="detail-field__label">Land Parcel ID</div>
-                  <div className="detail-field__value"><span className="cell-id">{detail.landParcelId}</span></div>
+                  <div className="detail-field__value">
+                    <NavIdLink id={detail.landParcelId} to="/land-parcels" label="Open Land Parcel" />
+                  </div>
                 </div>
                 <div className="detail-field">
                   <div className="detail-field__label">Created</div>

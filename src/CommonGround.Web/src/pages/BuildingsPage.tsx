@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useBuilding, useBuildings, useRecordAssessment, useRegisterBuilding, useUpdateBuildingStatus } from '../hooks/buildings'
 import {
   BUILDING_STATUSES,
@@ -9,6 +10,7 @@ import {
   type RegisterBuildingRequest,
 } from '../hooks/types'
 import EntityCombobox from '../components/EntityCombobox'
+import NavIdLink from '../components/NavIdLink'
 import Pagination from '../components/Pagination'
 import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
@@ -51,6 +53,9 @@ const fmtCurrency = (n: number) =>
 const fmtNumber = (n: number) => new Intl.NumberFormat('en-US').format(n)
 
 export default function BuildingsPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
+
   const [page,           setPage]           = useState(1)
   const [statusFilter,   setStatusFilter]   = useState('')
   const [parcelFilter,   setParcelFilter]   = useState('')
@@ -84,6 +89,19 @@ export default function BuildingsPage() {
     setForm(emptyForm())
     setPanel('register')
   }
+
+  useEffect(() => {
+    const openId = (location.state as { openId?: string } | null)?.openId
+    if (!openId) {
+      return
+    }
+
+    openDetail(openId)
+    navigate(
+      { pathname: location.pathname, search: location.search, hash: location.hash },
+      { replace: true, state: null },
+    )
+  }, [location, navigate])
 
   const closePanel = () => {
     setPanel(null)
@@ -357,15 +375,8 @@ export default function BuildingsPage() {
                   </div>
                 )}
                 <div className="detail-field full-span">
-                  <div className="detail-field__label">Land Parcel ID</div>
                   <div className="detail-field__value">
-                    <span className="cell-id">{detail.landParcelId}</span>
-                  </div>
-                </div>
-                <div className="detail-field full-span">
-                  <div className="detail-field__label">Building ID</div>
-                  <div className="detail-field__value">
-                    <span className="cell-id">{detail.id}</span>
+                    <NavIdLink id={detail.landParcelId} to="/land-parcels" label="Open Land Parcel" />
                   </div>
                 </div>
                 <div className="detail-field full-span">

@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useLandParcel, useLandParcels, useRegisterLandParcel, useUpdateLandParcelStatus } from '../hooks/landParcels'
 import { ACQUISITION_METHODS, PARCEL_STATUSES, statusLabel, type RegisterLandParcelRequest } from '../hooks/types'
 import Pagination from '../components/Pagination'
@@ -27,6 +28,9 @@ function SkeletonRows() {
 }
 
 export default function LandParcelsPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
+
   const [page,         setPage]         = useState(1)
   const [statusFilter, setStatusFilter] = useState('')
   const [selectedId,   setSelectedId]   = useState<string | null>(null)
@@ -56,6 +60,19 @@ export default function LandParcelsPage() {
     setForm(emptyForm())
     setPanel('register')
   }
+
+  useEffect(() => {
+    const openId = (location.state as { openId?: string } | null)?.openId
+    if (!openId) {
+      return
+    }
+
+    openDetail(openId)
+    navigate(
+      { pathname: location.pathname, search: location.search, hash: location.hash },
+      { replace: true, state: null },
+    )
+  }, [location, navigate])
 
   const closePanel = () => {
     setPanel(null)
@@ -277,10 +294,6 @@ export default function LandParcelsPage() {
                     <div className="detail-field__value">{detail.covenantTerms}</div>
                   </div>
                 )}
-                <div className="detail-field full-span">
-                  <div className="detail-field__label">Parcel ID</div>
-                  <div className="detail-field__value"><span className="cell-id">{detail.id}</span></div>
-                </div>
                 <div className="detail-field full-span">
                   <div className="detail-field__label">Registered At</div>
                   <div className="detail-field__value mono">
