@@ -1,0 +1,42 @@
+[
+  {
+    "seedKey": "bld-downtown-civic-001",
+    "landParcelSeedKey": "lp-downtown-civic-001",
+    "type": "Townhouse",
+    "bedrooms": 3,
+    "bathrooms": 2.5,
+    "squareFootage": 1480,
+    "yearBuilt": 2021,
+    "initialAssessedValue": 346000
+  },
+  {
+    "seedKey": "bld-riverbend-002",
+    "landParcelSeedKey": "lp-riverbend-002",
+    "type": "Duplex",
+    "bedrooms": 4,
+    "bathrooms": 3.0,
+    "squareFootage": 2125,
+    "yearBuilt": 2020,
+    "initialAssessedValue": 421500
+  },
+  {
+    "seedKey": "bld-east-grove-003",
+    "landParcelSeedKey": "lp-east-grove-003",
+    "type": "SingleFamily",
+    "bedrooms": 2,
+    "bathrooms": 1.5,
+    "squareFootage": 1180,
+    "yearBuilt": 2022,
+    "initialAssessedValue": 287000
+  },
+  {
+    "seedKey": "bld-harbor-view-004",
+    "landParcelSeedKey": "lp-harbor-view-004",
+    "type": "CondoUnit",
+    "bedrooms": 2,
+    "bathrooms": 2.0,
+    "squareFootage": 1015,
+    "yearBuilt": 2019,
+    "initialAssessedValue": 305500
+  }
+]

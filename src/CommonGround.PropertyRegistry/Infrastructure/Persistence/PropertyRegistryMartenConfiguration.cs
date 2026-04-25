@@ -35,6 +35,9 @@ public static class PropertyRegistryMartenConfiguration
         options.Schema.For<LandParcelSeedLookup>()
             .DatabaseSchemaName(SeedSchemaName)
             .Index(x => x.SeedKey);
+        options.Schema.For<BuildingSeedLookup>()
+            .DatabaseSchemaName(SeedSchemaName)
+            .Index(x => x.SeedKey);
         options.Schema.For<BuildingView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<BuildingListItemView>().DatabaseSchemaName(SchemaName);
     }

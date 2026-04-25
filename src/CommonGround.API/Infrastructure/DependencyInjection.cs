@@ -75,6 +75,7 @@ internal static class CommonGroundServiceCollectionExtensions
         }, configureBuilder: marten =>
         {
             marten.InitializeWith<LandParcelsInitialData>();
+            marten.InitializeWith<BuildingsInitialData>();
         });
         services.AddMartenUnitOfWork();
         return services;
