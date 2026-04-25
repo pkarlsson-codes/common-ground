@@ -49,6 +49,7 @@ public sealed class GroundLeasesController(IGroundLeasesApiClient client) : Cont
     /// <param name="status">Optional status filter.</param>
     /// <param name="landParcelId">Optional land parcel ID filter.</param>
     /// <param name="buildingId">Optional building ID filter.</param>
+    /// <param name="search">Optional free-text search across homeowner name and email.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>200 with a paginated list of ground leases.</returns>
     [HttpGet]
@@ -60,9 +61,10 @@ public sealed class GroundLeasesController(IGroundLeasesApiClient client) : Cont
         [FromQuery] string? status = null,
         [FromQuery] string? landParcelId = null,
         [FromQuery] string? buildingId = null,
+        [FromQuery] string? search = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await client.GetGroundLeasesAsync(page, pageSize, status, landParcelId, buildingId, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetGroundLeasesAsync(page, pageSize, status, landParcelId, buildingId, search, cancellationToken).ConfigureAwait(false);
         return Ok(result);
     }
 

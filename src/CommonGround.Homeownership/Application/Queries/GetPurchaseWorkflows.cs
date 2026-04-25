@@ -4,6 +4,7 @@ using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
 using Marten;
 using Marten.Pagination;
+using System;
 
 namespace CommonGround.Homeownership.Application.Queries;
 
@@ -11,7 +12,8 @@ namespace CommonGround.Homeownership.Application.Queries;
 public sealed record GetPurchaseWorkflows(
     PageSpec Page,
     GroundLeaseId? GroundLeaseId = null,
-    string? Phase = null);
+    string? Phase = null,
+    string? Search = null);
 
 /// <summary>Handles <see cref="GetPurchaseWorkflows"/>.</summary>
 public static class GetPurchaseWorkflowsHandler
@@ -34,6 +36,12 @@ public static class GetPurchaseWorkflowsHandler
         if (!string.IsNullOrWhiteSpace(request.Phase))
         {
             query = query.Where(v => v.Phase == request.Phase);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var s = request.Search;
+            query = query.Where(v => v.BuyerFullName.Contains(s, StringComparison.OrdinalIgnoreCase));
         }
 
         var page = await query

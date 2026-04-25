@@ -6,6 +6,7 @@ using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
 using Marten;
 using Marten.Pagination;
+using System;
 
 namespace CommonGround.Homeownership.Application.Queries;
 
@@ -14,7 +15,8 @@ public sealed record GetGroundLeases(
     PageSpec Page,
     IReadOnlyList<GroundLeaseStatus>? Statuses = null,
     LandParcelId? LandParcelId = null,
-    BuildingId? BuildingId = null);
+    BuildingId? BuildingId = null,
+    string? Search = null);
 
 /// <summary>Handles <see cref="GetGroundLeases"/>.</summary>
 public static class GetGroundLeasesHandler
@@ -43,6 +45,14 @@ public static class GetGroundLeasesHandler
         if (request.BuildingId is not null)
         {
             query = query.Where(v => v.BuildingId == request.BuildingId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var s = request.Search;
+            query = query.Where(v =>
+                (v.HomeownerFullName != null && v.HomeownerFullName.Contains(s, StringComparison.OrdinalIgnoreCase)) ||
+                (v.HomeownerEmail != null && v.HomeownerEmail.Contains(s, StringComparison.OrdinalIgnoreCase)));
         }
 
         var page = await query

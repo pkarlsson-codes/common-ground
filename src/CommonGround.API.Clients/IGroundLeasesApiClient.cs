@@ -25,9 +25,10 @@ public interface IGroundLeasesApiClient
     /// <param name="status">Optional status filter.</param>
     /// <param name="landParcelId">Optional land parcel ID filter.</param>
     /// <param name="buildingId">Optional building ID filter.</param>
+    /// <param name="search">Optional free-text search across homeowner name and email.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A paginated list of ground lease summaries.</returns>
-    Task<PaginatedResponse<GroundLeaseListItemResponse>> GetGroundLeasesAsync(int page, int pageSize, string? status, string? landParcelId, string? buildingId, CancellationToken cancellationToken);
+    Task<PaginatedResponse<GroundLeaseListItemResponse>> GetGroundLeasesAsync(int page, int pageSize, string? status, string? landParcelId, string? buildingId, string? search, CancellationToken cancellationToken);
 
     /// <summary>Onboards the first homeowner to a ground lease.</summary>
     /// <param name="groundLeaseId">The ID of the ground lease.</param>

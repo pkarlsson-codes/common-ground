@@ -23,9 +23,10 @@ public interface ILandParcelsApiClient
     /// <param name="page">The page number (1-based).</param>
     /// <param name="pageSize">The number of items per page.</param>
     /// <param name="status">Optional status filter.</param>
+    /// <param name="search">Optional free-text search across address and legal parcel number.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A paginated list of land parcel summaries.</returns>
-    Task<PaginatedResponse<LandParcelListItemResponse>> GetLandParcelsAsync(int page, int pageSize, string? status, CancellationToken cancellationToken);
+    Task<PaginatedResponse<LandParcelListItemResponse>> GetLandParcelsAsync(int page, int pageSize, string? status, string? search, CancellationToken cancellationToken);
 
     /// <summary>Updates the status of a land parcel.</summary>
     /// <param name="landParcelId">The ID of the land parcel to update.</param>

@@ -48,6 +48,7 @@ public sealed class PurchaseWorkflowsController(IPurchaseWorkflowsApiClient clie
     /// <param name="pageSize">The number of items per page.</param>
     /// <param name="groundLeaseId">Optional ground lease ID filter.</param>
     /// <param name="phase">Optional phase filter.</param>
+    /// <param name="search">Optional free-text search across buyer name.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>200 with a paginated list of purchase workflows.</returns>
     [HttpGet]
@@ -58,9 +59,10 @@ public sealed class PurchaseWorkflowsController(IPurchaseWorkflowsApiClient clie
         [FromQuery] int pageSize = 20,
         [FromQuery] string? groundLeaseId = null,
         [FromQuery] string? phase = null,
+        [FromQuery] string? search = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await client.GetPurchaseWorkflowsAsync(page, pageSize, groundLeaseId, phase, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetPurchaseWorkflowsAsync(page, pageSize, groundLeaseId, phase, search, cancellationToken).ConfigureAwait(false);
         return Ok(result);
     }
 

@@ -2,6 +2,7 @@ using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Infrastructure.Persistence.Projections;
 using JasperFx.Events.Projections;
 using Marten;
+using Weasel.Postgresql.Tables;
 
 namespace CommonGround.Homeownership.Infrastructure.Persistence;
 
@@ -22,9 +23,14 @@ public static class HomeownershipMartenConfiguration
     private static void ConfigureReadModels(StoreOptions options)
     {
         options.Schema.For<GroundLeaseView>().DatabaseSchemaName(SchemaName);
-        options.Schema.For<GroundLeaseListItemView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<GroundLeaseListItemView>()
+            .DatabaseSchemaName(SchemaName)
+            .Index(x => x.HomeownerFullName)
+            .Index(x => x.HomeownerEmail);
         options.Schema.For<PurchaseWorkflowView>().DatabaseSchemaName(SchemaName);
-        options.Schema.For<PurchaseWorkflowListItemView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<PurchaseWorkflowListItemView>()
+            .DatabaseSchemaName(SchemaName)
+            .Index(x => x.BuyerFullName);
     }
 
     private static void ConfigureProjections(StoreOptions options)

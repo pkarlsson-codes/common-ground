@@ -61,7 +61,7 @@ public sealed class PurchaseWorkflowsController(IMessageBus bus) : ControllerBas
             ? GroundLeaseId.Create(request.Filter.GroundLeaseId)
             : null;
 
-        var query = new GetPurchaseWorkflows(request.Page, groundLeaseFilter, request.Filter?.Phase);
+        var query = new GetPurchaseWorkflows(request.Page, groundLeaseFilter, request.Filter?.Phase, request.Filter?.Search);
 
         var result = await bus.InvokeAsync<PaginatedResponse<PurchaseWorkflowListItemView>>(query, cancellationToken);
 

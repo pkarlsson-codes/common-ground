@@ -11,4 +11,7 @@ public sealed class GetGroundLeasesFilter
 
     /// <summary>Optional building ID filter.</summary>
     public string? BuildingId { get; init; }
+
+    /// <summary>Optional free-text search across homeowner name and email.</summary>
+    public string? Search { get; init; }
 }

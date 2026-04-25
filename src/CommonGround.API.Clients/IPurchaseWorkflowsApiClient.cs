@@ -24,9 +24,10 @@ public interface IPurchaseWorkflowsApiClient
     /// <param name="pageSize">The number of items per page.</param>
     /// <param name="groundLeaseId">Optional ground lease ID filter.</param>
     /// <param name="phase">Optional phase filter.</param>
+    /// <param name="search">Optional free-text search across buyer name.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A paginated list of purchase workflow summaries.</returns>
-    Task<PaginatedResponse<PurchaseWorkflowListItemResponse>> GetPurchaseWorkflowsAsync(int page, int pageSize, string? groundLeaseId, string? phase, CancellationToken cancellationToken);
+    Task<PaginatedResponse<PurchaseWorkflowListItemResponse>> GetPurchaseWorkflowsAsync(int page, int pageSize, string? groundLeaseId, string? phase, string? search, CancellationToken cancellationToken);
 
     /// <summary>Records buyer eligibility verified.</summary>
     /// <param name="workflowId">The ID of the purchase workflow.</param>

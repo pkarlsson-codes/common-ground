@@ -79,7 +79,7 @@ public sealed class GroundLeasesController(IMessageBus bus) : ControllerBase
             ? BuildingId.Create(request.Filter.BuildingId)
             : null;
 
-        var query = new GetGroundLeases(request.Page, statusFilter, landParcelFilter, buildingFilter);
+        var query = new GetGroundLeases(request.Page, statusFilter, landParcelFilter, buildingFilter, request.Filter?.Search);
 
         var result = await bus.InvokeAsync<PaginatedResponse<GroundLeaseListItemView>>(query, cancellationToken);
 

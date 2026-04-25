@@ -8,4 +8,7 @@ public sealed class GetPurchaseWorkflowsFilter
 
     /// <summary>Optional phase filter.</summary>
     public string? Phase { get; init; }
+
+    /// <summary>Optional free-text search across buyer full name.</summary>
+    public string? Search { get; init; }
 }

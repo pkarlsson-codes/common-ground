@@ -92,7 +92,7 @@ public sealed class LandParcelsController(IMessageBus bus) : ControllerBase
     {
         var statusFilter = request.Filter?.Statuses?
             .Select(ParcelStatus.FromDisplayName).ToList().AsReadOnly();
-        var query = new GetLandParcels(request.Page, statusFilter);
+        var query = new GetLandParcels(request.Page, statusFilter, request.Filter?.Search);
 
         var result = await bus
             .InvokeAsync<PaginatedResponse<LandParcelListItemView>>(

@@ -47,6 +47,7 @@ public sealed class LandParcelsController(ILandParcelsApiClient client) : Contro
     /// <param name="page">The page number (1-based).</param>
     /// <param name="pageSize">The number of items per page.</param>
     /// <param name="status">Optional status filter.</param>
+    /// <param name="search">Optional free-text search across address and legal parcel number.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>200 with a paginated list of land parcels.</returns>
     [HttpGet]
@@ -56,9 +57,10 @@ public sealed class LandParcelsController(ILandParcelsApiClient client) : Contro
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         [FromQuery] string? status = null,
+        [FromQuery] string? search = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await client.GetLandParcelsAsync(page, pageSize, status, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetLandParcelsAsync(page, pageSize, status, search, cancellationToken).ConfigureAwait(false);
         return Ok(result);
     }
 

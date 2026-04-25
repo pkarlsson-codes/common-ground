@@ -29,12 +29,17 @@ public sealed class LandParcelsApiClient(
 
     /// <inheritdoc/>
     public async Task<PaginatedResponse<LandParcelListItemResponse>> GetLandParcelsAsync(
-        int page, int pageSize, string? status, CancellationToken cancellationToken)
+        int page, int pageSize, string? status, string? search, CancellationToken cancellationToken)
     {
         var qs = $"?page.number={page}&page.size={pageSize}";
         if (!string.IsNullOrWhiteSpace(status))
         {
             qs += $"&filter.statuses={Uri.EscapeDataString(status)}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            qs += $"&filter.search={Uri.EscapeDataString(search)}";
         }
 
         return await GetAsync<PaginatedResponse<LandParcelListItemResponse>>($"api/land-parcels{qs}", cancellationToken).ConfigureAwait(false);
