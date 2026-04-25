@@ -1,7 +1,7 @@
 using CommonGround.API.Contracts.Identity.Requests;
 using CommonGround.API.Contracts.Identity.Responses;
 
-namespace CommonGround.Web.Gateway.Clients;
+namespace CommonGround.API.Clients;
 
 /// <summary>HTTP client for the identity/users API endpoints.</summary>
 public interface IUsersApiClient

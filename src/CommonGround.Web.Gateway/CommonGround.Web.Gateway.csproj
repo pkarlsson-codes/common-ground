@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../CommonGround.API.Clients/CommonGround.API.Clients.csproj" />
     <ProjectReference Include="..\CommonGround.API.Contracts\CommonGround.API.Contracts.csproj" />
     <ProjectReference Include="..\CommonGround.SharedKernel\CommonGround.SharedKernel.csproj" />
   </ItemGroup>

@@ -3,7 +3,7 @@ using CommonGround.API.Contracts.PropertyRegistry.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.Extensions.Logging;
 
-namespace CommonGround.Web.Gateway.Clients;
+namespace CommonGround.API.Clients;
 
 /// <summary>
 /// HTTP client for building API endpoints.

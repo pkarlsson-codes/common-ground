@@ -2,7 +2,7 @@ using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
 
-namespace CommonGround.Web.Gateway.Clients;
+namespace CommonGround.API.Clients;
 
 /// <summary>Typed HTTP client for the PropertyRegistry land parcel endpoints.</summary>
 public interface ILandParcelsApiClient

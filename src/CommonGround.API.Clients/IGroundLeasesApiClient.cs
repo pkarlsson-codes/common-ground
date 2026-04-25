@@ -2,7 +2,7 @@ using CommonGround.API.Contracts.Homeownership.Requests;
 using CommonGround.API.Contracts.Homeownership.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
 
-namespace CommonGround.Web.Gateway.Clients;
+namespace CommonGround.API.Clients;
 
 /// <summary>Typed HTTP client for the Homeownership ground lease endpoints.</summary>
 public interface IGroundLeasesApiClient

@@ -1,7 +1,7 @@
 using CommonGround.API.Contracts.Stewardship.Requests;
 using CommonGround.API.Contracts.Stewardship.Responses;
 
-namespace CommonGround.Web.Gateway.Clients;
+namespace CommonGround.API.Clients;
 
 /// <summary>Typed HTTP client for the Stewardship API endpoints.</summary>
 public interface IStewardshipApiClient

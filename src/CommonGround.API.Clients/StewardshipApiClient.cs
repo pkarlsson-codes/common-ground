@@ -3,7 +3,7 @@ using CommonGround.API.Contracts.Stewardship.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.Extensions.Logging;
 
-namespace CommonGround.Web.Gateway.Clients;
+namespace CommonGround.API.Clients;
 
 /// <summary>HTTP client for Stewardship API endpoints.</summary>
 public sealed class StewardshipApiClient(

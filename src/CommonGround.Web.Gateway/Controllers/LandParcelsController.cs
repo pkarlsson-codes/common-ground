@@ -1,7 +1,7 @@
+using CommonGround.API.Clients;
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
-using CommonGround.Web.Gateway.Clients;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CommonGround.Web.Gateway.Controllers;

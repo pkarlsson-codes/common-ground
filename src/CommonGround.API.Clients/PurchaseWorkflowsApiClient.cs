@@ -3,7 +3,7 @@ using CommonGround.API.Contracts.Homeownership.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.Extensions.Logging;
 
-namespace CommonGround.Web.Gateway.Clients;
+namespace CommonGround.API.Clients;
 
 /// <summary>HTTP client for purchase workflow API endpoints.</summary>
 public sealed class PurchaseWorkflowsApiClient(

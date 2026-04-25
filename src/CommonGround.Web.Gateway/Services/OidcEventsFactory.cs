@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
+using CommonGround.API.Clients;
 using CommonGround.API.Contracts.Identity.Requests;
-using CommonGround.Web.Gateway.Clients;
 using CommonGround.Web.Gateway.Configuration;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 

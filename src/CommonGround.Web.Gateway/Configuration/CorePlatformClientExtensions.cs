@@ -1,4 +1,4 @@
-using CommonGround.Web.Gateway.Clients;
+using CommonGround.API.Clients;
 using CommonGround.Web.Gateway.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
