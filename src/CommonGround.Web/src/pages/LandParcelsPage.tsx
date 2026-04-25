@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useLandParcel, useLandParcels, useRegisterLandParcel, useUpdateLandParcelStatus } from '../hooks/landParcels'
 import { ACQUISITION_METHODS, PARCEL_STATUSES, statusLabel, type RegisterLandParcelRequest } from '../hooks/types'
@@ -7,6 +7,7 @@ import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
 import { getAvailableActions } from '../lib/transitionActions'
 import { trackTransitionEvent } from '../lib/telemetry'
+import { useToast } from '../hooks/useToast'
 
 type Panel = 'detail' | 'register' | null
 
@@ -37,7 +38,7 @@ export default function LandParcelsPage() {
   const [panel,        setPanel]        = useState<Panel>(null)
   const [form,         setForm]         = useState<RegisterLandParcelRequest>(emptyForm)
   const [pendingActionId, setPendingActionId] = useState<string | null>(null)
-  const [toast,        setToast]        = useState<string | null>(null)
+  const { success } = useToast()
 
   const { data, isLoading, isError } = useLandParcels(page, statusFilter || undefined)
   const { data: detail, isLoading: detailLoading } = useLandParcel(
@@ -45,11 +46,6 @@ export default function LandParcelsPage() {
   )
   const registerMutation    = useRegisterLandParcel()
   const updateStatusMutation = useUpdateLandParcelStatus()
-
-  const showToast = useCallback((msg: string) => {
-    setToast(msg)
-    setTimeout(() => setToast(null), 3200)
-  }, [])
 
   const openDetail = (id: string) => {
     setSelectedId(id)
@@ -88,7 +84,7 @@ export default function LandParcelsPage() {
         covenantTerms: form.covenantTerms || undefined,
       })
       closePanel()
-      showToast('Land parcel registered successfully')
+      success('Land parcel registered successfully')
     } catch { /* error shown in form */ }
   }
 
@@ -113,7 +109,7 @@ export default function LandParcelsPage() {
 
     try {
       await updateStatusMutation.mutateAsync({ id: selectedId, newStatus: action.toState })
-      showToast(`${action.label} complete`)
+      success(`${action.label} complete`)
       trackTransitionEvent({
         event: 'ui.transition',
         aggregate: 'parcel',
@@ -398,15 +394,6 @@ export default function LandParcelsPage() {
         </SlideOver>
       )}
 
-      {toast && (
-        <div className="toast toast--success">
-          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-            <circle cx="7.5" cy="7.5" r="6.5" stroke="#4ec48a" strokeWidth="1.4"/>
-            <path d="M4.5 7.5l2 2 4-4" stroke="#4ec48a" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          {toast}
-        </div>
-      )}
     </div>
   )
 }

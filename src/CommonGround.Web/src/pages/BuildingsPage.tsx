@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useBuilding, useBuildings, useRecordAssessment, useRegisterBuilding, useUpdateBuildingStatus } from '../hooks/buildings'
 import {
@@ -18,6 +18,7 @@ import { LandParcelsApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
 import { getAvailableActions } from '../lib/transitionActions'
 import { trackTransitionEvent } from '../lib/telemetry'
+import { useToast } from '../hooks/useToast'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
 
@@ -64,7 +65,7 @@ export default function BuildingsPage() {
   const [form,           setForm]           = useState<RegisterBuildingRequest>(emptyForm)
   const [assessment,     setAssessment]     = useState<RecordBuildingAssessmentRequest>(emptyAssessment)
   const [pendingActionId, setPendingActionId] = useState<string | null>(null)
-  const [toast,          setToast]          = useState<string | null>(null)
+  const { success } = useToast()
 
   const { data, isLoading, isError } = useBuildings(page, parcelFilter || undefined, statusFilter || undefined)
   const { data: detail, isLoading: detailLoading } = useBuilding(
@@ -73,11 +74,6 @@ export default function BuildingsPage() {
   const registerMutation    = useRegisterBuilding()
   const assessmentMutation  = useRecordAssessment()
   const updateStatusMutation = useUpdateBuildingStatus()
-
-  const showToast = useCallback((msg: string) => {
-    setToast(msg)
-    setTimeout(() => setToast(null), 3200)
-  }, [])
 
   const openDetail = (id: string) => {
     setSelectedId(id)
@@ -120,7 +116,7 @@ export default function BuildingsPage() {
         initialAssessedValue: Number(form.initialAssessedValue),
       })
       closePanel()
-      showToast('Building registered successfully')
+      success('Building registered successfully')
     } catch { /* error shown in form */ }
   }
 
@@ -137,7 +133,7 @@ export default function BuildingsPage() {
         },
       })
       setAssessment(emptyAssessment())
-      showToast('Assessment recorded')
+      success('Assessment recorded')
     } catch { /* error shown inline */ }
   }
 
@@ -162,7 +158,7 @@ export default function BuildingsPage() {
 
     try {
       await updateStatusMutation.mutateAsync({ id: selectedId, newStatus: action.toState })
-      showToast(`${action.label} complete`)
+      success(`${action.label} complete`)
       trackTransitionEvent({
         event: 'ui.transition',
         aggregate: 'building',
@@ -556,15 +552,6 @@ export default function BuildingsPage() {
         </SlideOver>
       )}
 
-      {toast && (
-        <div className="toast toast--success">
-          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-            <circle cx="7.5" cy="7.5" r="6.5" stroke="#4ec48a" strokeWidth="1.4"/>
-            <path d="M4.5 7.5l2 2 4-4" stroke="#4ec48a" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          {toast}
-        </div>
-      )}
     </div>
   )
 }

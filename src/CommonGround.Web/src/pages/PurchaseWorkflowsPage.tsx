@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   useInitiatePurchaseWorkflow,
@@ -17,6 +17,7 @@ import { GroundLeasesApi } from '../api'
 import { ResponseError } from '../api/runtime'
 import { apiConfig } from '../lib/apiConfig'
 import PurchaseWorkflowDetailPanel from './purchase-workflows/PurchaseWorkflowDetailPanel'
+import { useToast } from '../hooks/useToast'
 
 const groundLeasesApi = new GroundLeasesApi(apiConfig)
 const E164_PHONE_PATTERN = /^\+[1-9]\d{1,14}$/
@@ -87,19 +88,21 @@ export default function PurchaseWorkflowsPage() {
 
   const [initiateForm, setInitiateForm] = useState<InitiateWorkflowForm>(emptyInitiate)
 
-  const [toast, setToast] = useState<string | null>(null)
-  const [toastKind, setToastKind] = useState<'success' | 'error'>('success')
   const [initiateError, setInitiateError] = useState<string | null>(null)
+  const { success, error } = useToast()
 
   const { data, isLoading, isError } = usePurchaseWorkflows(page, groundLeaseFilter || undefined, phaseFilter || undefined)
 
   const initiateMutation = useInitiatePurchaseWorkflow()
 
-  const showToast = useCallback((msg: string, kind: 'success' | 'error' = 'success') => {
-    setToast(msg)
-    setToastKind(kind)
-    setTimeout(() => setToast(null), 3200)
-  }, [])
+  const showToast = (msg: string, kind: 'success' | 'error' = 'success') => {
+    if (kind === 'error') {
+      error(msg)
+      return
+    }
+
+    success(msg)
+  }
 
   const openDetail = (id: string) => {
     setSelectedId(id)
@@ -378,22 +381,6 @@ export default function PurchaseWorkflowsPage() {
         </SlideOver>
       )}
 
-      {toast && (
-        <div className={`toast toast--${toastKind}`}>
-          {toastKind === 'success' ? (
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-              <circle cx="7.5" cy="7.5" r="6.5" stroke="#4ec48a" strokeWidth="1.4"/>
-              <path d="M4.5 7.5l2 2 4-4" stroke="#4ec48a" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          ) : (
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-              <circle cx="7.5" cy="7.5" r="6.5" stroke="#c44040" strokeWidth="1.4"/>
-              <path d="M5 5l5 5M10 5l-5 5" stroke="#c44040" strokeWidth="1.4" strokeLinecap="round"/>
-            </svg>
-          )}
-          {toast}
-        </div>
-      )}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   useCalculateResaleEstimate,
@@ -26,6 +26,7 @@ import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
 import { BuildingsApi, LandParcelsApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
+import { useToast } from '../hooks/useToast'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
 const buildingsApi = new BuildingsApi(apiConfig)
@@ -88,8 +89,7 @@ export default function GroundLeasesPage() {
   const [checkInForm, setCheckInForm] = useState<RecordCheckInForm>(emptyCheckIn)
   const [estimateForm, setEstimateForm] = useState<ResaleEstimateForm>(emptyEstimate)
   const [estimateResult, setEstimateResult] = useState<number | null>(null)
-
-  const [toast, setToast] = useState<string | null>(null)
+  const { success } = useToast()
 
   const { data, isLoading, isError } = useGroundLeases(page, statusFilter || undefined)
   const { data: detail, isLoading: detailLoading } = useGroundLease(
@@ -100,11 +100,6 @@ export default function GroundLeasesPage() {
   const changeMutation = useChangeHomeowner()
   const checkInMutation = useRecordStewardshipCheckIn()
   const estimateMutation = useCalculateResaleEstimate()
-
-  const showToast = useCallback((msg: string) => {
-    setToast(msg)
-    setTimeout(() => setToast(null), 3200)
-  }, [])
 
   const openDetail = (id: string) => {
     setSelectedId(id)
@@ -143,7 +138,7 @@ export default function GroundLeasesPage() {
     try {
       await createMutation.mutateAsync(createForm)
       closePanel()
-      showToast('Ground lease created')
+      success('Ground lease created')
     } catch { /* error shown inline */ }
   }
 
@@ -152,7 +147,7 @@ export default function GroundLeasesPage() {
     if (!selectedId) return
     try {
       await changeMutation.mutateAsync({ groundLeaseId: selectedId, form: homeownerForm })
-      showToast('Homeowner updated')
+      success('Homeowner updated')
       setHomeownerForm(emptyHomeowner())
     } catch { /* error shown inline */ }
   }
@@ -163,7 +158,7 @@ export default function GroundLeasesPage() {
     try {
       await checkInMutation.mutateAsync({ groundLeaseId: selectedId, form: checkInForm })
       setCheckInForm(emptyCheckIn())
-      showToast('Check-in recorded')
+      success('Check-in recorded')
     } catch { /* error shown inline */ }
   }
 
@@ -790,15 +785,6 @@ export default function GroundLeasesPage() {
         </SlideOver>
       )}
 
-      {toast && (
-        <div className="toast toast--success">
-          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-            <circle cx="7.5" cy="7.5" r="6.5" stroke="#4ec48a" strokeWidth="1.4"/>
-            <path d="M4.5 7.5l2 2 4-4" stroke="#4ec48a" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          {toast}
-        </div>
-      )}
     </div>
   )
 }

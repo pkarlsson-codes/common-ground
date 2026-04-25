@@ -704,27 +704,6 @@ body {
 }
 .error-state__sub { font-size: 13px; color: var(--text-secondary); }
 
-/* ── Toast ────────────────────────────────────────── */
-.toast {
-  position: fixed;
-  bottom: 24px;
-  right: 28px;
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 13px 18px;
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  z-index: 100;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
-  animation: toastIn 250ms ease;
-  font-size: 13.5px;
-  color: var(--text-primary);
-}
-.toast--success { border-color: rgba(78, 196, 138, 0.3); }
-.toast--error   { border-color: rgba(196, 64, 64, 0.3); }
-
 /* ── Divider ──────────────────────────────────────── */
 .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
 
@@ -737,6 +716,5 @@ body {
 /* ── Keyframes ────────────────────────────────────── */
 @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-@keyframes toastIn { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes shimmer { 0% { background-position: -400% 0; } 100% { background-position: 400% 0; } }
 @keyframes rowIn   { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
