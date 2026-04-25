@@ -48,25 +48,6 @@ export function useCreateGroundLease() {
   })
 }
 
-export function useOnboardHomeowner() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ groundLeaseId, form }: { groundLeaseId: string; form: OnboardHomeownerForm }) =>
-      api.onboardHomeowner({
-        groundLeaseId,
-        onboardHomeownerRequest: {
-          fullName: form.fullName,
-          email: form.email,
-          phone: form.phone || undefined,
-        },
-      }),
-    onSuccess: (_d, v) => {
-      qc.invalidateQueries({ queryKey: ['ground-lease', v.groundLeaseId] })
-      qc.invalidateQueries({ queryKey: ['ground-leases'] })
-    },
-  })
-}
-
 export function useChangeHomeowner() {
   const qc = useQueryClient()
   return useMutation({

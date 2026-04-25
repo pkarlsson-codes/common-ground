@@ -23,7 +23,6 @@ models/InitiatePurchaseWorkflowResponse.ts
 models/InspectionResultDto.ts
 models/LandParcelResponse.ts
 models/LeaseExecutionDetailsDto.ts
-models/OnboardHomeownerRequest.ts
 models/PaginatedResponseOfBuildingListItemResponse.ts
 models/PaginatedResponseOfGroundLeaseListItemResponse.ts
 models/PaginatedResponseOfLandParcelResponse.ts

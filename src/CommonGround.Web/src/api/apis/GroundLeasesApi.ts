@@ -20,7 +20,6 @@ import type {
   CreateGroundLeaseRequest,
   CreateGroundLeaseResponse,
   GroundLeaseResponse,
-  OnboardHomeownerRequest,
   PaginatedResponseOfGroundLeaseListItemResponse,
   ProblemDetails,
   RecordStewardshipCheckInRequest,
@@ -37,8 +36,6 @@ import {
     CreateGroundLeaseResponseToJSON,
     GroundLeaseResponseFromJSON,
     GroundLeaseResponseToJSON,
-    OnboardHomeownerRequestFromJSON,
-    OnboardHomeownerRequestToJSON,
     PaginatedResponseOfGroundLeaseListItemResponseFromJSON,
     PaginatedResponseOfGroundLeaseListItemResponseToJSON,
     ProblemDetailsFromJSON,
@@ -74,11 +71,6 @@ export interface GetGroundLeasesRequest {
     landParcelId?: string | null;
     buildingId?: string | null;
     search?: string | null;
-}
-
-export interface OnboardHomeownerOperationRequest {
-    groundLeaseId: string;
-    onboardHomeownerRequest: OnboardHomeownerRequest;
 }
 
 export interface RecordStewardshipCheckInOperationRequest {
@@ -174,22 +166,6 @@ export interface GroundLeasesApiInterface {
      * Gets a paginated list of ground leases.
      */
     getGroundLeases(requestParameters: GetGroundLeasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfGroundLeaseListItemResponse>;
-
-    /**
-     * 
-     * @summary Onboards the first homeowner to a ground lease.
-     * @param {string} groundLeaseId The ID of the ground lease.
-     * @param {OnboardHomeownerRequest} onboardHomeownerRequest The homeowner details.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof GroundLeasesApiInterface
-     */
-    onboardHomeownerRaw(requestParameters: OnboardHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
-
-    /**
-     * Onboards the first homeowner to a ground lease.
-     */
-    onboardHomeowner(requestParameters: OnboardHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
 
     /**
      * 
@@ -434,52 +410,6 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
     async getGroundLeases(requestParameters: GetGroundLeasesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfGroundLeaseListItemResponse> {
         const response = await this.getGroundLeasesRaw(requestParameters, initOverrides);
         return await response.value();
-    }
-
-    /**
-     * Onboards the first homeowner to a ground lease.
-     */
-    async onboardHomeownerRaw(requestParameters: OnboardHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters['groundLeaseId'] == null) {
-            throw new runtime.RequiredError(
-                'groundLeaseId',
-                'Required parameter "groundLeaseId" was null or undefined when calling onboardHomeowner().'
-            );
-        }
-
-        if (requestParameters['onboardHomeownerRequest'] == null) {
-            throw new runtime.RequiredError(
-                'onboardHomeownerRequest',
-                'Required parameter "onboardHomeownerRequest" was null or undefined when calling onboardHomeowner().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-
-        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/homeowner`;
-        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: OnboardHomeownerRequestToJSON(requestParameters['onboardHomeownerRequest']),
-        }, initOverrides);
-
-        return new runtime.VoidApiResponse(response);
-    }
-
-    /**
-     * Onboards the first homeowner to a ground lease.
-     */
-    async onboardHomeowner(requestParameters: OnboardHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.onboardHomeownerRaw(requestParameters, initOverrides);
     }
 
     /**

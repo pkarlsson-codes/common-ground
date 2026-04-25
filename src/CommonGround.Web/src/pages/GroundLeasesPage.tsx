@@ -5,7 +5,6 @@ import {
   useCreateGroundLease,
   useGroundLease,
   useGroundLeases,
-  useOnboardHomeowner,
   useRecordStewardshipCheckIn,
 } from '../hooks/groundLeases'
 import {
@@ -84,7 +83,6 @@ export default function GroundLeasesPage() {
   const [checkInForm, setCheckInForm] = useState<RecordCheckInForm>(emptyCheckIn)
   const [estimateForm, setEstimateForm] = useState<ResaleEstimateForm>(emptyEstimate)
   const [estimateResult, setEstimateResult] = useState<number | null>(null)
-  const [homeownerMode, setHomeownerMode] = useState<'onboard' | 'change'>('onboard')
 
   const [toast, setToast] = useState<string | null>(null)
 
@@ -94,7 +92,6 @@ export default function GroundLeasesPage() {
   )
 
   const createMutation = useCreateGroundLease()
-  const onboardMutation = useOnboardHomeowner()
   const changeMutation = useChangeHomeowner()
   const checkInMutation = useRecordStewardshipCheckIn()
   const estimateMutation = useCalculateResaleEstimate()
@@ -132,17 +129,12 @@ export default function GroundLeasesPage() {
     } catch { /* error shown inline */ }
   }
 
-  const handleOnboardHomeowner = async (e: React.FormEvent) => {
+  const handleChangeHomeowner = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedId) return
     try {
-      if (homeownerMode === 'onboard') {
-        await onboardMutation.mutateAsync({ groundLeaseId: selectedId, form: homeownerForm })
-        showToast('Homeowner onboarded')
-      } else {
-        await changeMutation.mutateAsync({ groundLeaseId: selectedId, form: homeownerForm })
-        showToast('Homeowner updated')
-      }
+      await changeMutation.mutateAsync({ groundLeaseId: selectedId, form: homeownerForm })
+      showToast('Homeowner updated')
       setHomeownerForm(emptyHomeowner())
     } catch { /* error shown inline */ }
   }
@@ -366,72 +358,54 @@ export default function GroundLeasesPage() {
 
               {/* Homeowner section */}
               <div className="detail-section">
-                <div className="detail-section__title">
-                  {detail.homeownerFullName ? 'Change Homeowner' : 'Onboard Homeowner'}
-                </div>
-                {detail.homeownerFullName && (
-                  <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                <div className="detail-section__title">Change Homeowner</div>
+                {detail.homeownerFullName ? (
+                  <form onSubmit={handleChangeHomeowner}>
+                    <div className="form-grid" style={{ marginBottom: 12 }}>
+                      <div className="form-field full">
+                        <label className="form-label">Full Name</label>
+                        <input
+                          className="form-input"
+                          value={homeownerForm.fullName}
+                          onChange={e => setHomeownerForm(f => ({ ...f, fullName: e.target.value }))}
+                          required
+                        />
+                      </div>
+                      <div className="form-field">
+                        <label className="form-label">Email</label>
+                        <input
+                          className="form-input"
+                          type="email"
+                          value={homeownerForm.email}
+                          onChange={e => setHomeownerForm(f => ({ ...f, email: e.target.value }))}
+                          required
+                        />
+                      </div>
+                      <div className="form-field">
+                        <label className="form-label">Phone (optional)</label>
+                        <input
+                          className="form-input"
+                          value={homeownerForm.phone}
+                          onChange={e => setHomeownerForm(f => ({ ...f, phone: e.target.value }))}
+                        />
+                      </div>
+                    </div>
                     <button
-                      className={`btn btn-sm ${homeownerMode === 'onboard' ? 'btn-secondary' : 'btn-ghost'}`}
-                      type="button"
-                      onClick={() => setHomeownerMode('onboard')}
+                      type="submit"
+                      className="btn btn-secondary"
+                      disabled={changeMutation.isPending}
                     >
-                      Onboard New
+                      {changeMutation.isPending ? 'Saving…' : 'Update Homeowner'}
                     </button>
-                    <button
-                      className={`btn btn-sm ${homeownerMode === 'change' ? 'btn-secondary' : 'btn-ghost'}`}
-                      type="button"
-                      onClick={() => setHomeownerMode('change')}
-                    >
-                      Update Current
-                    </button>
+                    {changeMutation.isError && (
+                      <div className="form-error">Failed to save homeowner.</div>
+                    )}
+                  </form>
+                ) : (
+                  <div className="detail-field__value">
+                    Homeowner onboarding is no longer supported from this page.
                   </div>
                 )}
-                <form onSubmit={handleOnboardHomeowner}>
-                  <div className="form-grid" style={{ marginBottom: 12 }}>
-                    <div className="form-field full">
-                      <label className="form-label">Full Name</label>
-                      <input
-                        className="form-input"
-                        value={homeownerForm.fullName}
-                        onChange={e => setHomeownerForm(f => ({ ...f, fullName: e.target.value }))}
-                        required
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label className="form-label">Email</label>
-                      <input
-                        className="form-input"
-                        type="email"
-                        value={homeownerForm.email}
-                        onChange={e => setHomeownerForm(f => ({ ...f, email: e.target.value }))}
-                        required
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label className="form-label">Phone (optional)</label>
-                      <input
-                        className="form-input"
-                        value={homeownerForm.phone}
-                        onChange={e => setHomeownerForm(f => ({ ...f, phone: e.target.value }))}
-                      />
-                    </div>
-                  </div>
-                  <button
-                    type="submit"
-                    className="btn btn-secondary"
-                    disabled={onboardMutation.isPending || changeMutation.isPending}
-                  >
-                    {onboardMutation.isPending || changeMutation.isPending
-                      ? 'Saving…'
-                      : detail.homeownerFullName
-                        ? (homeownerMode === 'change' ? 'Update Homeowner' : 'Onboard New Homeowner')
-                        : 'Onboard Homeowner'}
-                  </button>
-                  {(onboardMutation.isError || changeMutation.isError) && (
-                    <div className="form-error">Failed to save homeowner.</div>
-                  )}
-                </form>
               </div>
 
               {/* Stewardship check-ins */}

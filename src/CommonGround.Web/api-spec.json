@@ -456,43 +456,6 @@
       }
     },
     "/api/v1/ground-leases/{groundLeaseId}/homeowner": {
-      "post": {
-        "tags": [
-          "GroundLeases"
-        ],
-        "summary": "Onboards the first homeowner to a ground lease.",
-        "operationId": "onboardHomeowner",
-        "parameters": [
-          {
-            "name": "groundLeaseId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the ground lease.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "request",
-          "description": "The homeowner details.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OnboardHomeownerRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": "204 No Content."
-          }
-        }
-      },
       "patch": {
         "tags": [
           "GroundLeases"
@@ -1905,23 +1868,6 @@
           },
           "createdAt": {
             "type": "string"
-          }
-        }
-      },
-      "OnboardHomeownerRequest": {
-        "type": "object",
-        "description": "Request to onboard the first homeowner to a ground lease.",
-        "additionalProperties": false,
-        "properties": {
-          "fullName": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "phone": {
-            "type": "string",
-            "nullable": true
           }
         }
       },

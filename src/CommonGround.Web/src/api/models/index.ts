@@ -16,7 +16,6 @@ export * from './InitiatePurchaseWorkflowResponse';
 export * from './InspectionResultDto';
 export * from './LandParcelResponse';
 export * from './LeaseExecutionDetailsDto';
-export * from './OnboardHomeownerRequest';
 export * from './PaginatedResponseOfBuildingListItemResponse';
 export * from './PaginatedResponseOfGroundLeaseListItemResponse';
 export * from './PaginatedResponseOfLandParcelResponse';
