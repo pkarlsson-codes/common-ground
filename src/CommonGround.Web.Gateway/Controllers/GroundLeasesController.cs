@@ -68,25 +68,6 @@ public sealed class GroundLeasesController(IGroundLeasesApiClient client) : Cont
         return Ok(result);
     }
 
-    /// <summary>Onboards the first homeowner to a ground lease.</summary>
-    /// <param name="groundLeaseId">The ID of the ground lease.</param>
-    /// <param name="request">The homeowner details.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>204 No Content.</returns>
-    [HttpPost("{groundLeaseId}/homeowner")]
-    [ProducesResponseType(204)]
-    [EndpointName("onboardHomeowner")]
-    public async Task<IActionResult> OnboardHomeowner(
-        string groundLeaseId,
-        [FromBody] OnboardHomeownerRequest request,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
-        ArgumentNullException.ThrowIfNull(request);
-        await client.OnboardHomeownerAsync(groundLeaseId, request, cancellationToken).ConfigureAwait(false);
-        return NoContent();
-    }
-
     /// <summary>Changes the homeowner on a ground lease.</summary>
     /// <param name="groundLeaseId">The ID of the ground lease.</param>
     /// <param name="request">The new homeowner details.</param>

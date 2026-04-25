@@ -143,35 +143,6 @@ public sealed class GroundLeasesController(IMessageBus bus) : ControllerBase
         return Ok(response);
     }
 
-    /// <summary>Onboards the first homeowner to a ground lease.</summary>
-    /// <param name="groundLeaseId">The ID of the ground lease.</param>
-    /// <param name="request">The request containing homeowner details.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>No content if successful.</returns>
-    [HttpPost("{groundLeaseId}/homeowner")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(404)]
-    [EndpointName("onboardHomeowner")]
-    public async Task<IActionResult> OnboardHomeowner(
-        string groundLeaseId,
-        [FromBody] OnboardHomeownerRequest request,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
-        ArgumentNullException.ThrowIfNull(request);
-
-        var userId = HttpContext.GetUserId();
-
-        await bus.InvokeAsync(
-            new OnboardHomeowner(
-                GroundLeaseId.Create(groundLeaseId),
-                new Homeowner(request.FullName, request.Email, request.Phone),
-                userId),
-            cancellationToken);
-
-        return NoContent();
-    }
-
     /// <summary>Changes the homeowner on a ground lease.</summary>
     /// <param name="groundLeaseId">The ID of the ground lease.</param>
     /// <param name="request">The request containing the new homeowner details.</param>
