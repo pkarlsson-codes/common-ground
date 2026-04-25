@@ -36,6 +36,8 @@ import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
 import { GroundLeasesApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
+import { getAvailableActions } from '../lib/transitionActions'
+import { trackTransitionEvent } from '../lib/telemetry'
 
 const groundLeasesApi = new GroundLeasesApi(apiConfig)
 
@@ -198,26 +200,72 @@ export default function PurchaseWorkflowsPage() {
 
   const makeTrackHandler = <T,>(
     mutate: (args: { workflowId: string; form: T }) => Promise<unknown>,
+    actionId: string,
     successMsg: string,
+    options?: { toState?: string; requiresConfirmation?: boolean; confirmationMessage?: string },
   ) => async (e: React.FormEvent, form: T) => {
     e.preventDefault()
     if (!selectedId) return
+
+    if (options?.requiresConfirmation && !window.confirm(options.confirmationMessage ?? 'Are you sure?')) {
+      return
+    }
+
+    trackTransitionEvent({
+      event: 'ui.transition',
+      aggregate: 'workflow',
+      actionId,
+      entityId: selectedId,
+      fromState: detail?.phase ?? null,
+      toState: options?.toState ?? null,
+      outcome: 'attempt',
+    })
+
     try {
       await mutate({ workflowId: selectedId, form })
       showToast(successMsg)
-    } catch { showToast('Action failed', 'error') }
+      trackTransitionEvent({
+        event: 'ui.transition',
+        aggregate: 'workflow',
+        actionId,
+        entityId: selectedId,
+        fromState: detail?.phase ?? null,
+        toState: options?.toState ?? null,
+        outcome: 'success',
+      })
+    } catch (error) {
+      showToast('Action failed', 'error')
+      trackTransitionEvent({
+        event: 'ui.transition',
+        aggregate: 'workflow',
+        actionId,
+        entityId: selectedId,
+        fromState: detail?.phase ?? null,
+        toState: options?.toState ?? null,
+        outcome: 'failure',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
   }
 
-  const handleElig     = makeTrackHandler(eligMutation.mutateAsync,      'Eligibility recorded')
-  const handleFin      = makeTrackHandler(finMutation.mutateAsync,       'Financing committed')
-  const handleInsp     = makeTrackHandler(inspMutation.mutateAsync,      'Inspection recorded')
-  const handleTitle    = makeTrackHandler(titleMutation.mutateAsync,     'Title cleared')
-  const handleLeaseEx  = makeTrackHandler(leaseExecMutation.mutateAsync, 'Lease executed')
-  const handleSchedule = makeTrackHandler(scheduleMutation.mutateAsync,  'Closing scheduled')
-  const handleClose    = makeTrackHandler(closeMutation.mutateAsync,     'Purchase closed')
-  const handleFail     = makeTrackHandler(failMutation.mutateAsync,      'Workflow marked failed')
-  const handleWithdraw = makeTrackHandler(withdrawMutation.mutateAsync,  'Workflow withdrawn')
-  const handleStall    = makeTrackHandler(stallMutation.mutateAsync,     'Workflow stalled')
+  const handleElig     = makeTrackHandler(eligMutation.mutateAsync, 'workflow:record-eligibility', 'Eligibility recorded', { toState: 'InProgress' })
+  const handleFin      = makeTrackHandler(finMutation.mutateAsync, 'workflow:record-financing', 'Financing committed', { toState: 'InProgress' })
+  const handleInsp     = makeTrackHandler(inspMutation.mutateAsync, 'workflow:record-inspection', 'Inspection recorded', { toState: 'InProgress' })
+  const handleTitle    = makeTrackHandler(titleMutation.mutateAsync, 'workflow:record-title', 'Title cleared', { toState: 'InProgress' })
+  const handleLeaseEx  = makeTrackHandler(leaseExecMutation.mutateAsync, 'workflow:record-lease-executed', 'Lease executed', { toState: 'InProgress' })
+  const handleSchedule = makeTrackHandler(scheduleMutation.mutateAsync, 'workflow:schedule-closing', 'Closing scheduled', { toState: 'ClosingScheduled' })
+  const handleClose    = makeTrackHandler(closeMutation.mutateAsync, 'workflow:record-closed', 'Purchase closed', { toState: 'Closed' })
+  const handleFail     = makeTrackHandler(failMutation.mutateAsync, 'workflow:fail', 'Workflow marked failed', {
+    toState: 'Failed',
+    requiresConfirmation: true,
+    confirmationMessage: 'Mark this workflow as failed? This cannot be undone.',
+  })
+  const handleWithdraw = makeTrackHandler(withdrawMutation.mutateAsync, 'workflow:withdraw', 'Workflow withdrawn', {
+    toState: 'Withdrawn',
+    requiresConfirmation: true,
+    confirmationMessage: 'Withdraw this workflow? This cannot be undone.',
+  })
+  const handleStall    = makeTrackHandler(stallMutation.mutateAsync, 'workflow:stall', 'Workflow stalled', { toState: 'Stalled' })
 
   const clearGLFilter = () => {
     setGroundLeaseFilter('')
@@ -225,9 +273,11 @@ export default function PurchaseWorkflowsPage() {
   }
 
   const workflows = data?.items ?? []
-  const canSchedule = detail && allTracksComplete(detail) && detail.phase === 'InProgress'
-  const canClose    = detail?.phase === 'ClosingScheduled'
-  const canAct      = detail && !isTerminal(detail.phase)
+  const workflowActions = detail ? getAvailableActions('workflow', detail.phase ?? '') : []
+  const hasWorkflowAction = (id: string) => workflowActions.some(a => a.id === id)
+  const canSchedule = !!detail && hasWorkflowAction('workflow:schedule-closing') && allTracksComplete(detail)
+  const canClose    = !!detail && hasWorkflowAction('workflow:record-closed')
+  const canAct      = !!detail && !isTerminal(detail.phase)
 
   return (
     <div className="page">
@@ -660,6 +710,7 @@ export default function PurchaseWorkflowsPage() {
                 <div className="detail-section">
                   <div className="detail-section__title">Workflow Actions</div>
 
+                  {hasWorkflowAction('workflow:fail') && (
                   <form onSubmit={e => handleFail(e, failForm)} style={{ marginBottom: 16 }}>
                     <div className="form-grid" style={{ marginBottom: 8 }}>
                       <div className="form-field full">
@@ -682,7 +733,9 @@ export default function PurchaseWorkflowsPage() {
                       {failMutation.isPending ? 'Failing…' : 'Mark as Failed'}
                     </button>
                   </form>
+                  )}
 
+                  {hasWorkflowAction('workflow:withdraw') && (
                   <form onSubmit={e => handleWithdraw(e, withdrawForm)} style={{ marginBottom: 16 }}>
                     <div className="form-grid" style={{ marginBottom: 8 }}>
                       <div className="form-field full">
@@ -704,7 +757,9 @@ export default function PurchaseWorkflowsPage() {
                       {withdrawMutation.isPending ? 'Withdrawing…' : 'Withdraw Purchase'}
                     </button>
                   </form>
+                  )}
 
+                  {hasWorkflowAction('workflow:stall') && (
                   <form onSubmit={e => handleStall(e, stallForm)}>
                     <div className="form-grid" style={{ marginBottom: 8 }}>
                       <div className="form-field full">
@@ -736,6 +791,7 @@ export default function PurchaseWorkflowsPage() {
                       {stallMutation.isPending ? 'Stalling…' : 'Stall Workflow'}
                     </button>
                   </form>
+                  )}
                 </div>
               )}
             </>

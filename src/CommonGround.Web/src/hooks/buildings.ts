@@ -65,7 +65,41 @@ export function useUpdateBuildingStatus() {
         buildingId: id,
         updateBuildingStatusRequest: { newStatus },
       }),
-    onSuccess: (_d, v) => {
+    onMutate: async ({ id, newStatus }) => {
+      await qc.cancelQueries({ queryKey: ['building', id] })
+      await qc.cancelQueries({ queryKey: ['buildings'] })
+
+      const previousDetail = qc.getQueryData(['building', id])
+      const previousLists = qc.getQueriesData({ queryKey: ['buildings'] })
+
+      qc.setQueryData(['building', id], (current: any) =>
+        current ? { ...current, status: newStatus } : current,
+      )
+
+      previousLists.forEach(([queryKey]) => {
+        qc.setQueryData(queryKey, (current: any) => {
+          if (!current?.items) return current
+
+          return {
+            ...current,
+            items: current.items.map((item: any) =>
+              item.id === id ? { ...item, status: newStatus } : item,
+            ),
+          }
+        })
+      })
+
+      return { previousDetail, previousLists, id }
+    },
+    onError: (_error, _vars, context) => {
+      if (!context) return
+
+      qc.setQueryData(['building', context.id], context.previousDetail)
+      context.previousLists.forEach(([queryKey, data]) => {
+        qc.setQueryData(queryKey, data)
+      })
+    },
+    onSettled: (_d, _e, v) => {
       qc.invalidateQueries({ queryKey: ['building', v.id] })
       qc.invalidateQueries({ queryKey: ['buildings'] })
     },

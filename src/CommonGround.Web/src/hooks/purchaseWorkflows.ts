@@ -54,6 +54,47 @@ const invalidateWorkflow = (qc: ReturnType<typeof useQueryClient>, workflowId: s
   qc.invalidateQueries({ queryKey: ['purchase-workflows'] })
 }
 
+const applyOptimisticWorkflowPhase = (
+  qc: ReturnType<typeof useQueryClient>,
+  workflowId: string,
+  phase: string,
+) => {
+  const previousDetail = qc.getQueryData(['purchase-workflow', workflowId])
+  const previousLists = qc.getQueriesData({ queryKey: ['purchase-workflows'] })
+
+  qc.setQueryData(['purchase-workflow', workflowId], (current: any) =>
+    current ? { ...current, phase } : current,
+  )
+
+  previousLists.forEach(([queryKey]) => {
+    qc.setQueryData(queryKey, (current: any) => {
+      if (!current?.items) return current
+
+      return {
+        ...current,
+        items: current.items.map((item: any) =>
+          item.id === workflowId ? { ...item, phase } : item,
+        ),
+      }
+    })
+  })
+
+  return { previousDetail, previousLists }
+}
+
+const rollbackOptimisticWorkflowPhase = (
+  qc: ReturnType<typeof useQueryClient>,
+  workflowId: string,
+  context?: { previousDetail: unknown; previousLists: [readonly unknown[], unknown][] },
+) => {
+  if (!context) return
+
+  qc.setQueryData(['purchase-workflow', workflowId], context.previousDetail)
+  context.previousLists.forEach(([queryKey, data]) => {
+    qc.setQueryData(queryKey, data)
+  })
+}
+
 export function useRecordEligibilityVerified() {
   const qc = useQueryClient()
   return useMutation({
@@ -136,7 +177,17 @@ export function useScheduleClosing() {
         workflowId,
         scheduleClosingRequest: { scheduledDate: form.scheduledDate },
       }),
-    onSuccess: (_d, v) => invalidateWorkflow(qc, v.workflowId),
+    onMutate: async ({ workflowId }) => {
+      await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
+      await qc.cancelQueries({ queryKey: ['purchase-workflows'] })
+
+      const context = applyOptimisticWorkflowPhase(qc, workflowId, 'ClosingScheduled')
+      return { workflowId, ...context }
+    },
+    onError: (_e, vars, context) => {
+      rollbackOptimisticWorkflowPhase(qc, vars.workflowId, context)
+    },
+    onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
   })
 }
 
@@ -151,7 +202,17 @@ export function useRecordPurchaseClosed() {
           closingNotes: form.closingNotes || undefined,
         },
       }),
-    onSuccess: (_d, v) => invalidateWorkflow(qc, v.workflowId),
+    onMutate: async ({ workflowId }) => {
+      await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
+      await qc.cancelQueries({ queryKey: ['purchase-workflows'] })
+
+      const context = applyOptimisticWorkflowPhase(qc, workflowId, 'Closed')
+      return { workflowId, ...context }
+    },
+    onError: (_e, vars, context) => {
+      rollbackOptimisticWorkflowPhase(qc, vars.workflowId, context)
+    },
+    onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
   })
 }
 
@@ -163,7 +224,17 @@ export function useFailPurchase() {
         workflowId,
         failPurchaseRequest: { reason: form.reason },
       }),
-    onSuccess: (_d, v) => invalidateWorkflow(qc, v.workflowId),
+    onMutate: async ({ workflowId }) => {
+      await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
+      await qc.cancelQueries({ queryKey: ['purchase-workflows'] })
+
+      const context = applyOptimisticWorkflowPhase(qc, workflowId, 'Failed')
+      return { workflowId, ...context }
+    },
+    onError: (_e, vars, context) => {
+      rollbackOptimisticWorkflowPhase(qc, vars.workflowId, context)
+    },
+    onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
   })
 }
 
@@ -175,7 +246,17 @@ export function useWithdrawPurchase() {
         workflowId,
         withdrawPurchaseRequest: { reason: form.reason },
       }),
-    onSuccess: (_d, v) => invalidateWorkflow(qc, v.workflowId),
+    onMutate: async ({ workflowId }) => {
+      await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
+      await qc.cancelQueries({ queryKey: ['purchase-workflows'] })
+
+      const context = applyOptimisticWorkflowPhase(qc, workflowId, 'Withdrawn')
+      return { workflowId, ...context }
+    },
+    onError: (_e, vars, context) => {
+      rollbackOptimisticWorkflowPhase(qc, vars.workflowId, context)
+    },
+    onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
   })
 }
 
@@ -190,6 +271,16 @@ export function useStallWorkflow() {
           resolutionTargetDate: form.resolutionTargetDate || undefined,
         },
       }),
-    onSuccess: (_d, v) => invalidateWorkflow(qc, v.workflowId),
+    onMutate: async ({ workflowId }) => {
+      await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
+      await qc.cancelQueries({ queryKey: ['purchase-workflows'] })
+
+      const context = applyOptimisticWorkflowPhase(qc, workflowId, 'Stalled')
+      return { workflowId, ...context }
+    },
+    onError: (_e, vars, context) => {
+      rollbackOptimisticWorkflowPhase(qc, vars.workflowId, context)
+    },
+    onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
   })
 }

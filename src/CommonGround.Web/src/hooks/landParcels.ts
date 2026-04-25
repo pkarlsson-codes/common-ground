@@ -61,7 +61,41 @@ export function useUpdateLandParcelStatus() {
         landParcelId: id,
         updateLandParcelStatusRequest: { newStatus },
       }),
-    onSuccess: (_d, v) => {
+    onMutate: async ({ id, newStatus }) => {
+      await qc.cancelQueries({ queryKey: ['land-parcel', id] })
+      await qc.cancelQueries({ queryKey: ['land-parcels'] })
+
+      const previousDetail = qc.getQueryData(['land-parcel', id])
+      const previousLists = qc.getQueriesData({ queryKey: ['land-parcels'] })
+
+      qc.setQueryData(['land-parcel', id], (current: any) =>
+        current ? { ...current, status: newStatus } : current,
+      )
+
+      previousLists.forEach(([queryKey]) => {
+        qc.setQueryData(queryKey, (current: any) => {
+          if (!current?.items) return current
+
+          return {
+            ...current,
+            items: current.items.map((item: any) =>
+              item.id === id ? { ...item, status: newStatus } : item,
+            ),
+          }
+        })
+      })
+
+      return { previousDetail, previousLists, id }
+    },
+    onError: (_error, _vars, context) => {
+      if (!context) return
+
+      qc.setQueryData(['land-parcel', context.id], context.previousDetail)
+      context.previousLists.forEach(([queryKey, data]) => {
+        qc.setQueryData(queryKey, data)
+      })
+    },
+    onSettled: (_d, _e, v) => {
       qc.invalidateQueries({ queryKey: ['land-parcel', v.id] })
       qc.invalidateQueries({ queryKey: ['land-parcels'] })
     },

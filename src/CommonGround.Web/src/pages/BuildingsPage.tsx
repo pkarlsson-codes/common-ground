@@ -14,6 +14,8 @@ import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
 import { LandParcelsApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
+import { getAvailableActions } from '../lib/transitionActions'
+import { trackTransitionEvent } from '../lib/telemetry'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
 
@@ -56,7 +58,7 @@ export default function BuildingsPage() {
   const [panel,          setPanel]          = useState<Panel>(null)
   const [form,           setForm]           = useState<RegisterBuildingRequest>(emptyForm)
   const [assessment,     setAssessment]     = useState<RecordBuildingAssessmentRequest>(emptyAssessment)
-  const [detailStatus,   setDetailStatus]   = useState('')
+  const [pendingActionId, setPendingActionId] = useState<string | null>(null)
   const [toast,          setToast]          = useState<string | null>(null)
 
   const { data, isLoading, isError } = useBuildings(page, parcelFilter || undefined, statusFilter || undefined)
@@ -74,7 +76,6 @@ export default function BuildingsPage() {
 
   const openDetail = (id: string) => {
     setSelectedId(id)
-    setDetailStatus('')
     setAssessment(emptyAssessment())
     setPanel('detail')
   }
@@ -122,13 +123,51 @@ export default function BuildingsPage() {
     } catch { /* error shown inline */ }
   }
 
-  const handleStatusUpdate = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!selectedId || !detailStatus) return
+  const handleTransitionAction = async (action: { id: string; label: string; toState?: string; requiresConfirmation?: boolean; confirmationMessage?: string }) => {
+    if (!selectedId || !detail?.status || !action.toState) return
+
+    if (action.requiresConfirmation && !window.confirm(action.confirmationMessage ?? 'Are you sure?')) {
+      return
+    }
+
+    trackTransitionEvent({
+      event: 'ui.transition',
+      aggregate: 'building',
+      actionId: action.id,
+      entityId: selectedId,
+      fromState: detail.status,
+      toState: action.toState,
+      outcome: 'attempt',
+    })
+
+    setPendingActionId(action.id)
+
     try {
-      await updateStatusMutation.mutateAsync({ id: selectedId, newStatus: detailStatus })
-      showToast('Status updated')
-    } catch { /* error shown inline */ }
+      await updateStatusMutation.mutateAsync({ id: selectedId, newStatus: action.toState })
+      showToast(`${action.label} complete`)
+      trackTransitionEvent({
+        event: 'ui.transition',
+        aggregate: 'building',
+        actionId: action.id,
+        entityId: selectedId,
+        fromState: detail.status,
+        toState: action.toState,
+        outcome: 'success',
+      })
+    } catch (error) {
+      trackTransitionEvent({
+        event: 'ui.transition',
+        aggregate: 'building',
+        actionId: action.id,
+        entityId: selectedId,
+        fromState: detail.status,
+        toState: action.toState,
+        outcome: 'failure',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+    } finally {
+      setPendingActionId(null)
+    }
   }
 
   const clearParcelFilter = () => {
@@ -269,6 +308,31 @@ export default function BuildingsPage() {
         >
           {detailLoading || !detail ? <SkeletonRows /> : (
             <>
+              {(() => {
+                const actions = getAvailableActions('building', detail.status)
+                return actions.length > 0 ? (
+                  <div className="detail-section">
+                    <div className="detail-section__title">Available Actions</div>
+                    <div className="status-update" style={{ flexWrap: 'wrap', gap: 8 }}>
+                      {actions.map(action => (
+                        <button
+                          key={action.id}
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={() => handleTransitionAction(action)}
+                          disabled={updateStatusMutation.isPending}
+                        >
+                          {updateStatusMutation.isPending && pendingActionId === action.id ? 'Saving…' : action.label}
+                        </button>
+                      ))}
+                    </div>
+                    {updateStatusMutation.isError && (
+                      <div className="form-error">Failed to update status.</div>
+                    )}
+                  </div>
+                ) : null
+              })()}
+
               <div className="detail-grid">
                 <div className="detail-field">
                   <div className="detail-field__label">Status</div>
@@ -361,36 +425,6 @@ export default function BuildingsPage() {
                 </form>
               </div>
 
-              <div className="detail-section">
-                <div className="detail-section__title">Update Status</div>
-                <form onSubmit={handleStatusUpdate}>
-                  <div className="status-update">
-                    <select
-                      className="form-select"
-                      value={detailStatus || detail.status}
-                      onChange={e => setDetailStatus(e.target.value)}
-                    >
-                      {BUILDING_STATUSES.map(s => (
-                        <option key={s} value={s}>{statusLabel(s)}</option>
-                      ))}
-                    </select>
-                    <button
-                      type="submit"
-                      className="btn btn-secondary"
-                      disabled={
-                        updateStatusMutation.isPending ||
-                        !detailStatus ||
-                        detailStatus === detail.status
-                      }
-                    >
-                      {updateStatusMutation.isPending ? 'Saving…' : 'Apply'}
-                    </button>
-                  </div>
-                  {updateStatusMutation.isError && (
-                    <div className="form-error">Failed to update status.</div>
-                  )}
-                </form>
-              </div>
             </>
           )}
         </SlideOver>
