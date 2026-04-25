@@ -8,11 +8,11 @@ const api = new LandParcelsApi(apiConfig)
 const dateStr = (d: Date | null | undefined) =>
   d instanceof Date ? d.toISOString().substring(0, 10) : undefined
 
-export function useLandParcels(page: number, status?: string) {
+export function useLandParcels(page: number, status?: string, search?: string) {
   return useQuery({
-    queryKey: ['land-parcels', page, status],
+    queryKey: ['land-parcels', page, status, search],
     queryFn: async () => {
-      const result = await api.getLandParcels({ page, pageSize: 20, status })
+      const result = await api.getLandParcels({ page, pageSize: 20, status, search })
       return {
         ...result,
         items: result.items?.map(p => ({

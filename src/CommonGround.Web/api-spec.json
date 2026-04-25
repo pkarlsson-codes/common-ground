@@ -386,6 +386,16 @@
               "nullable": true
             },
             "x-position": 5
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Optional free-text search across homeowner name and email.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 6
           }
         ],
         "responses": {
@@ -677,6 +687,16 @@
               "nullable": true
             },
             "x-position": 3
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Optional free-text search across address and legal parcel number.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 4
           }
         ],
         "responses": {
@@ -954,6 +974,16 @@
               "nullable": true
             },
             "x-position": 4
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Optional free-text search across buyer name.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 5
           }
         ],
         "responses": {

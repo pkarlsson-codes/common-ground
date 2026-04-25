@@ -17,10 +17,10 @@ import type {
 
 const api = new PurchaseWorkflowsApi(apiConfig)
 
-export function usePurchaseWorkflows(page: number, groundLeaseId?: string, phase?: string) {
+export function usePurchaseWorkflows(page: number, groundLeaseId?: string, phase?: string, search?: string) {
   return useQuery({
-    queryKey: ['purchase-workflows', page, groundLeaseId, phase],
-    queryFn: () => api.getPurchaseWorkflows({ page, pageSize: 20, groundLeaseId, phase }),
+    queryKey: ['purchase-workflows', page, groundLeaseId, phase, search],
+    queryFn: () => api.getPurchaseWorkflows({ page, pageSize: 20, groundLeaseId, phase, search }),
   })
 }
 

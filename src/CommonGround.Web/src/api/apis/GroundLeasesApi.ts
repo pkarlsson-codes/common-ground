@@ -73,6 +73,7 @@ export interface GetGroundLeasesRequest {
     status?: string | null;
     landParcelId?: string | null;
     buildingId?: string | null;
+    search?: string | null;
 }
 
 export interface OnboardHomeownerOperationRequest {
@@ -162,6 +163,7 @@ export interface GroundLeasesApiInterface {
      * @param {string} [status] Optional status filter.
      * @param {string} [landParcelId] Optional land parcel ID filter.
      * @param {string} [buildingId] Optional building ID filter.
+     * @param {string} [search] Optional free-text search across homeowner name and email.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof GroundLeasesApiInterface
@@ -405,6 +407,10 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
 
         if (requestParameters['buildingId'] != null) {
             queryParameters['buildingId'] = requestParameters['buildingId'];
+        }
+
+        if (requestParameters['search'] != null) {
+            queryParameters['search'] = requestParameters['search'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

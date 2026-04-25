@@ -45,6 +45,7 @@ export interface GetLandParcelsRequest {
     page?: number;
     pageSize?: number;
     status?: string | null;
+    search?: string | null;
 }
 
 export interface RegisterLandParcelOperationRequest {
@@ -84,6 +85,7 @@ export interface LandParcelsApiInterface {
      * @param {number} [page] The page number (1-based).
      * @param {number} [pageSize] The number of items per page.
      * @param {string} [status] Optional status filter.
+     * @param {string} [search] Optional free-text search across address and legal parcel number.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof LandParcelsApiInterface
@@ -186,6 +188,10 @@ export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInt
 
         if (requestParameters['status'] != null) {
             queryParameters['status'] = requestParameters['status'];
+        }
+
+        if (requestParameters['search'] != null) {
+            queryParameters['search'] = requestParameters['search'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

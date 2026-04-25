@@ -78,6 +78,7 @@ export interface GetPurchaseWorkflowsRequest {
     pageSize?: number;
     groundLeaseId?: string | null;
     phase?: string | null;
+    search?: string | null;
 }
 
 export interface InitiatePurchaseWorkflowOperationRequest {
@@ -174,6 +175,7 @@ export interface PurchaseWorkflowsApiInterface {
      * @param {number} [pageSize] The number of items per page.
      * @param {string} [groundLeaseId] Optional ground lease ID filter.
      * @param {string} [phase] Optional phase filter.
+     * @param {string} [search] Optional free-text search across buyer name.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PurchaseWorkflowsApiInterface
@@ -454,6 +456,10 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
 
         if (requestParameters['phase'] != null) {
             queryParameters['phase'] = requestParameters['phase'];
+        }
+
+        if (requestParameters['search'] != null) {
+            queryParameters['search'] = requestParameters['search'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
