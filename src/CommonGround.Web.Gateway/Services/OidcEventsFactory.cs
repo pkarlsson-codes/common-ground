@@ -1,5 +1,7 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
+using CommonGround.API.Contracts.Identity.Requests;
+using CommonGround.Web.Gateway.Clients;
 using CommonGround.Web.Gateway.Configuration;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
@@ -10,7 +12,8 @@ namespace CommonGround.Web.Gateway.Services;
 /// </summary>
 public sealed class OidcEventsFactory(
     ITokenStore tokenStore,
-    IHostEnvironment env)
+    IHostEnvironment env,
+    IUsersApiClient usersApiClient)
 {
     /// <summary>
     /// Creates the <see cref="OpenIdConnectEvents"/> configured for the gateway.
@@ -69,8 +72,15 @@ public sealed class OidcEventsFactory(
             return;
         }
 
-        // In V1 the userId is the OIDC subject (Keycloak UUID).
-        var userId = subject;
+        var email = ctx.Principal?.FindFirst("email")?.Value;
+        var displayName = ctx.Principal?.FindFirst("name")?.Value
+                       ?? ctx.Principal?.FindFirst("preferred_username")?.Value;
+
+        var response = await usersApiClient.EnsureUserAsync(
+            new EnsureUserRequest(subject, email, displayName),
+            ctx.HttpContext.RequestAborted).ConfigureAwait(false);
+
+        var userId = response.UserId;
         AddUserIdClaim(ctx, userId);
         await PersistTokensAndIssueCookiesAsync(ctx, userId).ConfigureAwait(false);
     }
