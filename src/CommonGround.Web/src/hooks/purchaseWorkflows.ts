@@ -95,6 +95,30 @@ const rollbackOptimisticWorkflowPhase = (
   })
 }
 
+const applyOptimisticTrackDetails = (
+  qc: ReturnType<typeof useQueryClient>,
+  workflowId: string,
+  patch: Record<string, unknown>,
+) => {
+  const previousDetail = qc.getQueryData(['purchase-workflow', workflowId])
+
+  qc.setQueryData(['purchase-workflow', workflowId], (current: any) =>
+    current ? { ...current, ...patch } : current,
+  )
+
+  return { previousDetail }
+}
+
+const rollbackOptimisticTrackDetails = (
+  qc: ReturnType<typeof useQueryClient>,
+  workflowId: string,
+  context?: { previousDetail: unknown },
+) => {
+  if (!context) return
+
+  qc.setQueryData(['purchase-workflow', workflowId], context.previousDetail)
+}
+
 export function useRecordEligibilityVerified() {
   const qc = useQueryClient()
   return useMutation({
@@ -106,7 +130,22 @@ export function useRecordEligibilityVerified() {
           notes: form.notes || undefined,
         },
       }),
-    onSuccess: (_d, v) => invalidateWorkflow(qc, v.workflowId),
+    onMutate: async ({ workflowId, form }) => {
+      await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
+      await qc.cancelQueries({ queryKey: ['purchase-workflows'] })
+
+      const context = applyOptimisticTrackDetails(qc, workflowId, {
+        eligibilityDetails: {
+          verifiedDate: form.verifiedDate,
+          notes: form.notes || undefined,
+        },
+      })
+      return { workflowId, ...context }
+    },
+    onError: (_e, vars, context) => {
+      rollbackOptimisticTrackDetails(qc, vars.workflowId, context)
+    },
+    onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
   })
 }
 
@@ -122,7 +161,23 @@ export function useRecordFinancingCommitted() {
           preapprovalLetterDate: form.preapprovalLetterDate,
         },
       }),
-    onSuccess: (_d, v) => invalidateWorkflow(qc, v.workflowId),
+    onMutate: async ({ workflowId, form }) => {
+      await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
+      await qc.cancelQueries({ queryKey: ['purchase-workflows'] })
+
+      const context = applyOptimisticTrackDetails(qc, workflowId, {
+        financingDetails: {
+          lenderName: form.lenderName,
+          committedAmount: form.committedAmount,
+          preapprovalLetterDate: form.preapprovalLetterDate,
+        },
+      })
+      return { workflowId, ...context }
+    },
+    onError: (_e, vars, context) => {
+      rollbackOptimisticTrackDetails(qc, vars.workflowId, context)
+    },
+    onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
   })
 }
 
@@ -138,7 +193,23 @@ export function useRecordInspectionCompleted() {
           notes: form.notes || undefined,
         },
       }),
-    onSuccess: (_d, v) => invalidateWorkflow(qc, v.workflowId),
+    onMutate: async ({ workflowId, form }) => {
+      await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
+      await qc.cancelQueries({ queryKey: ['purchase-workflows'] })
+
+      const context = applyOptimisticTrackDetails(qc, workflowId, {
+        inspectionResult: {
+          inspectionDate: form.inspectionDate,
+          inspectorName: form.inspectorName,
+          notes: form.notes || undefined,
+        },
+      })
+      return { workflowId, ...context }
+    },
+    onError: (_e, vars, context) => {
+      rollbackOptimisticTrackDetails(qc, vars.workflowId, context)
+    },
+    onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
   })
 }
 
@@ -153,7 +224,22 @@ export function useRecordTitleCleared() {
           titleCompanyName: form.titleCompanyName || undefined,
         },
       }),
-    onSuccess: (_d, v) => invalidateWorkflow(qc, v.workflowId),
+    onMutate: async ({ workflowId, form }) => {
+      await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
+      await qc.cancelQueries({ queryKey: ['purchase-workflows'] })
+
+      const context = applyOptimisticTrackDetails(qc, workflowId, {
+        titleDetails: {
+          clearedDate: form.clearedDate,
+          titleCompanyName: form.titleCompanyName || undefined,
+        },
+      })
+      return { workflowId, ...context }
+    },
+    onError: (_e, vars, context) => {
+      rollbackOptimisticTrackDetails(qc, vars.workflowId, context)
+    },
+    onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
   })
 }
 
@@ -165,7 +251,19 @@ export function useRecordLeaseExecuted() {
         workflowId,
         recordLeaseExecutedRequest: { signedDate: form.signedDate },
       }),
-    onSuccess: (_d, v) => invalidateWorkflow(qc, v.workflowId),
+    onMutate: async ({ workflowId, form }) => {
+      await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
+      await qc.cancelQueries({ queryKey: ['purchase-workflows'] })
+
+      const context = applyOptimisticTrackDetails(qc, workflowId, {
+        leaseExecutionDetails: { signedDate: form.signedDate },
+      })
+      return { workflowId, ...context }
+    },
+    onError: (_e, vars, context) => {
+      rollbackOptimisticTrackDetails(qc, vars.workflowId, context)
+    },
+    onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
   })
 }
 
@@ -175,7 +273,7 @@ export function useScheduleClosing() {
     mutationFn: ({ workflowId, form }: { workflowId: string; form: ScheduleClosingForm }) =>
       api.scheduleClosing({
         workflowId,
-        scheduleClosingRequest: { scheduledDate: form.scheduledDate },
+        scheduleClosingRequest: { scheduledClosingDate: form.scheduledDate },
       }),
     onMutate: async ({ workflowId }) => {
       await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
@@ -199,7 +297,7 @@ export function useRecordPurchaseClosed() {
         workflowId,
         recordPurchaseClosedRequest: {
           actualClosingDate: form.actualClosingDate,
-          closingNotes: form.closingNotes || undefined,
+          notes: form.closingNotes || undefined,
         },
       }),
     onMutate: async ({ workflowId }) => {
@@ -222,7 +320,10 @@ export function useFailPurchase() {
     mutationFn: ({ workflowId, form }: { workflowId: string; form: FailWorkflowForm }) =>
       api.failPurchase({
         workflowId,
-        failPurchaseRequest: { reason: form.reason },
+        failPurchaseRequest: {
+          failureReason: form.reason,
+          failedDate: new Date().toISOString().slice(0, 10),
+        },
       }),
     onMutate: async ({ workflowId }) => {
       await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
@@ -244,7 +345,10 @@ export function useWithdrawPurchase() {
     mutationFn: ({ workflowId, form }: { workflowId: string; form: WithdrawWorkflowForm }) =>
       api.withdrawPurchase({
         workflowId,
-        withdrawPurchaseRequest: { reason: form.reason },
+        withdrawPurchaseRequest: {
+          reason: form.reason,
+          withdrawnDate: new Date().toISOString().slice(0, 10),
+        },
       }),
     onMutate: async ({ workflowId }) => {
       await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
@@ -267,7 +371,8 @@ export function useStallWorkflow() {
       api.stallWorkflow({
         workflowId,
         stallWorkflowRequest: {
-          reason: form.reason,
+          stalledReason: form.reason,
+          stalledDate: new Date().toISOString().slice(0, 10),
           resolutionTargetDate: form.resolutionTargetDate || undefined,
         },
       }),

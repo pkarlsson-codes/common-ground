@@ -9,11 +9,11 @@ import type {
   RecordLeaseExecutedForm,
   RecordTitleForm,
   ScheduleClosingForm,
-  StallWorkflowForm,
   WithdrawWorkflowForm,
 } from '../../hooks/types'
 import { getAvailableActions } from '../../lib/transitionActions'
 import { trackTransitionEvent } from '../../lib/telemetry'
+import type { TrackKey } from './usePurchaseWorkflowDetailController'
 
 type TrackMutation<T> = {
   mutateAsync: (args: { workflowId: string; form: T }) => Promise<unknown>
@@ -32,7 +32,7 @@ interface UsePurchaseWorkflowActionsParams {
   closeMutation: TrackMutation<RecordClosedForm>
   failMutation: TrackMutation<FailWorkflowForm>
   withdrawMutation: TrackMutation<WithdrawWorkflowForm>
-  stallMutation: TrackMutation<StallWorkflowForm>
+  onTrackSuccess?: (key: TrackKey) => void
 }
 
 const isTerminal = (phase?: string) =>
@@ -58,20 +58,16 @@ export function usePurchaseWorkflowActions({
   closeMutation,
   failMutation,
   withdrawMutation,
-  stallMutation,
+  onTrackSuccess,
 }: UsePurchaseWorkflowActionsParams) {
   const makeTrackHandler = <T,>(
     mutate: (args: { workflowId: string; form: T }) => Promise<unknown>,
     actionId: string,
     successMsg: string,
-    options?: { toState?: string; requiresConfirmation?: boolean; confirmationMessage?: string },
+    options?: { toState?: string; trackKey?: TrackKey },
   ) => async (e: FormEvent, form: T) => {
     e.preventDefault()
     if (!selectedId) return
-
-    if (options?.requiresConfirmation && !window.confirm(options.confirmationMessage ?? 'Are you sure?')) {
-      return
-    }
 
     trackTransitionEvent({
       event: 'ui.transition',
@@ -95,6 +91,9 @@ export function usePurchaseWorkflowActions({
         toState: options?.toState ?? null,
         outcome: 'success',
       })
+      if (options?.trackKey && onTrackSuccess) {
+        onTrackSuccess(options.trackKey)
+      }
     } catch (error) {
       showToast('Action failed', 'error')
       trackTransitionEvent({
@@ -110,24 +109,15 @@ export function usePurchaseWorkflowActions({
     }
   }
 
-  const handleElig = makeTrackHandler(eligMutation.mutateAsync, 'workflow:record-eligibility', 'Eligibility recorded', { toState: 'InProgress' })
-  const handleFin = makeTrackHandler(finMutation.mutateAsync, 'workflow:record-financing', 'Financing committed', { toState: 'InProgress' })
-  const handleInsp = makeTrackHandler(inspMutation.mutateAsync, 'workflow:record-inspection', 'Inspection recorded', { toState: 'InProgress' })
-  const handleTitle = makeTrackHandler(titleMutation.mutateAsync, 'workflow:record-title', 'Title cleared', { toState: 'InProgress' })
-  const handleLeaseEx = makeTrackHandler(leaseExecMutation.mutateAsync, 'workflow:record-lease-executed', 'Lease executed', { toState: 'InProgress' })
-  const handleSchedule = makeTrackHandler(scheduleMutation.mutateAsync, 'workflow:schedule-closing', 'Closing scheduled', { toState: 'ClosingScheduled' })
-  const handleClose = makeTrackHandler(closeMutation.mutateAsync, 'workflow:record-closed', 'Purchase closed', { toState: 'Closed' })
-  const handleFail = makeTrackHandler(failMutation.mutateAsync, 'workflow:fail', 'Workflow marked failed', {
-    toState: 'Failed',
-    requiresConfirmation: true,
-    confirmationMessage: 'Mark this workflow as failed? This cannot be undone.',
-  })
-  const handleWithdraw = makeTrackHandler(withdrawMutation.mutateAsync, 'workflow:withdraw', 'Workflow withdrawn', {
-    toState: 'Withdrawn',
-    requiresConfirmation: true,
-    confirmationMessage: 'Withdraw this workflow? This cannot be undone.',
-  })
-  const handleStall = makeTrackHandler(stallMutation.mutateAsync, 'workflow:stall', 'Workflow stalled', { toState: 'Stalled' })
+  const handleElig = makeTrackHandler(eligMutation.mutateAsync, 'workflow:record-eligibility', 'Eligibility recorded', { toState: 'InProgress', trackKey: 'eligibility' })
+  const handleFin = makeTrackHandler(finMutation.mutateAsync, 'workflow:record-financing', 'Financing committed', { toState: 'InProgress', trackKey: 'financing' })
+  const handleInsp = makeTrackHandler(inspMutation.mutateAsync, 'workflow:record-inspection', 'Inspection recorded', { toState: 'InProgress', trackKey: 'inspection' })
+  const handleTitle = makeTrackHandler(titleMutation.mutateAsync, 'workflow:record-title', 'Title cleared', { toState: 'InProgress', trackKey: 'title' })
+  const handleLeaseEx = makeTrackHandler(leaseExecMutation.mutateAsync, 'workflow:record-lease-executed', 'Lease executed', { toState: 'InProgress', trackKey: 'leaseExecution' })
+  const handleSchedule = makeTrackHandler(scheduleMutation.mutateAsync, 'workflow:schedule-closing', 'Closing scheduled', { toState: 'ClosingScheduled', trackKey: 'closing' })
+  const handleClose = makeTrackHandler(closeMutation.mutateAsync, 'workflow:record-closed', 'Purchase closed', { toState: 'Closed', trackKey: 'closing' })
+  const handleFail = makeTrackHandler(failMutation.mutateAsync, 'workflow:fail', 'Workflow marked failed', { toState: 'Failed' })
+  const handleWithdraw = makeTrackHandler(withdrawMutation.mutateAsync, 'workflow:withdraw', 'Workflow withdrawn', { toState: 'Withdrawn' })
 
   const workflowActions = detail ? getAvailableActions('workflow', detail.phase ?? '') : []
   const hasWorkflowAction = (id: string) => workflowActions.some(a => a.id === id)
@@ -145,7 +135,6 @@ export function usePurchaseWorkflowActions({
     handleClose,
     handleFail,
     handleWithdraw,
-    handleStall,
     hasWorkflowAction,
     canSchedule,
     canClose,

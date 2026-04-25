@@ -9,7 +9,6 @@ import {
   useRecordPurchaseClosed,
   useRecordTitleCleared,
   useScheduleClosing,
-  useStallWorkflow,
   useWithdrawPurchase,
 } from '../../hooks/purchaseWorkflows'
 import type {
@@ -21,10 +20,11 @@ import type {
   RecordLeaseExecutedForm,
   RecordTitleForm,
   ScheduleClosingForm,
-  StallWorkflowForm,
   WithdrawWorkflowForm,
 } from '../../hooks/types'
 import { usePurchaseWorkflowActions } from './usePurchaseWorkflowActions'
+
+export type TrackKey = 'eligibility' | 'financing' | 'inspection' | 'title' | 'leaseExecution' | 'closing'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
@@ -37,7 +37,6 @@ const emptySchedule = (): ScheduleClosingForm => ({ scheduledDate: today() })
 const emptyClose = (): RecordClosedForm => ({ actualClosingDate: today(), closingNotes: '' })
 const emptyFail = (): FailWorkflowForm => ({ reason: '' })
 const emptyWithdraw = (): WithdrawWorkflowForm => ({ reason: '' })
-const emptyStall = (): StallWorkflowForm => ({ reason: '', resolutionTargetDate: '' })
 
 interface UsePurchaseWorkflowDetailControllerParams {
   selectedId: string | null
@@ -61,7 +60,7 @@ export function usePurchaseWorkflowDetailController({
   const [closeForm, setCloseForm] = useState<RecordClosedForm>(emptyClose)
   const [failForm, setFailForm] = useState<FailWorkflowForm>(emptyFail)
   const [withdrawForm, setWithdrawForm] = useState<WithdrawWorkflowForm>(emptyWithdraw)
-  const [stallForm, setStallForm] = useState<StallWorkflowForm>(emptyStall)
+  const [expandedTracks, setExpandedTracks] = useState<Set<TrackKey>>(() => new Set())
 
   const eligMutation = useRecordEligibilityVerified()
   const finMutation = useRecordFinancingCommitted()
@@ -72,7 +71,6 @@ export function usePurchaseWorkflowDetailController({
   const closeMutation = useRecordPurchaseClosed()
   const failMutation = useFailPurchase()
   const withdrawMutation = useWithdrawPurchase()
-  const stallMutation = useStallWorkflow()
 
   useEffect(() => {
     if (!isDetailOpen) {
@@ -88,8 +86,29 @@ export function usePurchaseWorkflowDetailController({
     setCloseForm(emptyClose())
     setFailForm(emptyFail())
     setWithdrawForm(emptyWithdraw())
-    setStallForm(emptyStall())
+    setExpandedTracks(new Set())
   }, [isDetailOpen, selectedId])
+
+  const toggleTrack = (key: TrackKey) => {
+    setExpandedTracks(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) {
+        next.delete(key)
+      } else {
+        next.add(key)
+      }
+      return next
+    })
+  }
+
+  const collapseTrack = (key: TrackKey) => {
+    setExpandedTracks(prev => {
+      if (!prev.has(key)) return prev
+      const next = new Set(prev)
+      next.delete(key)
+      return next
+    })
+  }
 
   const actions = usePurchaseWorkflowActions({
     selectedId,
@@ -104,7 +123,7 @@ export function usePurchaseWorkflowDetailController({
     closeMutation,
     failMutation,
     withdrawMutation,
-    stallMutation,
+    onTrackSuccess: collapseTrack,
   })
 
   return {
@@ -112,6 +131,9 @@ export function usePurchaseWorkflowDetailController({
     canSchedule: actions.canSchedule,
     canClose: actions.canClose,
     hasWorkflowAction: actions.hasWorkflowAction,
+    expandedTracks,
+    toggleTrack,
+    collapseTrack,
     eligForm,
     setEligForm,
     finForm,
@@ -130,8 +152,6 @@ export function usePurchaseWorkflowDetailController({
     setFailForm,
     withdrawForm,
     setWithdrawForm,
-    stallForm,
-    setStallForm,
     handleElig: actions.handleElig,
     handleFin: actions.handleFin,
     handleInsp: actions.handleInsp,
@@ -141,7 +161,6 @@ export function usePurchaseWorkflowDetailController({
     handleClose: actions.handleClose,
     handleFail: actions.handleFail,
     handleWithdraw: actions.handleWithdraw,
-    handleStall: actions.handleStall,
     eligPending: eligMutation.isPending,
     finPending: finMutation.isPending,
     inspPending: inspMutation.isPending,
@@ -153,6 +172,5 @@ export function usePurchaseWorkflowDetailController({
     closeError: closeMutation.isError,
     failPending: failMutation.isPending,
     withdrawPending: withdrawMutation.isPending,
-    stallPending: stallMutation.isPending,
   }
 }
