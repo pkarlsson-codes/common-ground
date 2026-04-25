@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { BuildingsApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
 import type { RecordBuildingAssessmentRequest, RegisterBuildingRequest } from './types'
+import type { PaginatedResponseOfBuildingAssessmentItemResponse } from '../api'
 
 const api = new BuildingsApi(apiConfig)
 
@@ -30,6 +31,23 @@ export function useBuilding(id: string | null) {
   })
 }
 
+export function useBuildingAssessments(
+  buildingId: string | null,
+  page: number = 1,
+  pageSize: number = 20,
+) {
+  return useQuery<PaginatedResponseOfBuildingAssessmentItemResponse>({
+    queryKey: ['building-assessments', buildingId, page, pageSize],
+    queryFn: () =>
+      api.getBuildingAssessments({
+        buildingId: buildingId!,
+        page,
+        pageSize,
+      }),
+    enabled: !!buildingId,
+  })
+}
+
 export function useRegisterBuilding() {
   const qc = useQueryClient()
   return useMutation({
@@ -52,6 +70,7 @@ export function useRecordAssessment() {
       }),
     onSuccess: (_d, v) => {
       qc.invalidateQueries({ queryKey: ['building', v.buildingId] })
+      qc.invalidateQueries({ queryKey: ['building-assessments', v.buildingId] })
       qc.invalidateQueries({ queryKey: ['buildings'] })
     },
   })

@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import { useBuilding, useRecordAssessment, useUpdateBuildingStatus } from '../../hooks/buildings'
+import {
+  useBuilding,
+  useBuildingAssessments,
+  useRecordAssessment,
+  useUpdateBuildingStatus,
+} from '../../hooks/buildings'
 import { BUILDING_TYPE_LABELS, type RecordBuildingAssessmentRequest } from '../../hooks/types'
 import SlideOver from '../../components/SlideOver'
 import StatusBadge from '../../components/StatusBadge'
@@ -34,6 +39,7 @@ interface Props {
 
 export default function BuildingDetailPanel({ buildingId, onClose }: Props) {
   const { data: detail, isLoading: detailLoading } = useBuilding(buildingId)
+  const { data: assessments, isLoading: assessmentsLoading } = useBuildingAssessments(buildingId)
   const updateStatusMutation = useUpdateBuildingStatus()
   const assessmentMutation = useRecordAssessment()
   const [assessment, setAssessment] = useState<RecordBuildingAssessmentRequest>(emptyAssessment)
@@ -170,6 +176,29 @@ export default function BuildingDetailPanel({ buildingId, onClose }: Props) {
                 {new Date(detail.registeredAt).toLocaleString()}
               </div>
             </div>
+          </div>
+
+          <div className="detail-section">
+            <div className="detail-section__title">Assessments</div>
+            {assessmentsLoading ? (
+              <div className="detail-field__value">Loading assessments…</div>
+            ) : !assessments?.items?.length ? (
+              <div className="detail-field__value">No assessments yet.</div>
+            ) : (
+              <div className="detail-grid">
+                {assessments.items.map((item) => (
+                  <div className="detail-field full-span" key={item.id ?? `${item.assessmentDate?.toISOString() ?? ''}-${item.assessedValue ?? 0}`}>
+                    <div className="detail-field__value">
+                      {item.assessmentDate?.toLocaleDateString() ?? '—'} · {fmtCurrency(Number(item.assessedValue ?? 0))}
+                    </div>
+                    <div className="detail-field__label">Assessor: {item.assessedBy ?? '—'}</div>
+                    {item.conditionNotes ? (
+                      <div className="detail-field__value">{item.conditionNotes}</div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="detail-section">
