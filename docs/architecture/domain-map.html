@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CommonGround — Domain Map</title>
+  <script src="./diagram-panzoom.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    import elkLayouts from 'https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs';
+    mermaid.registerLayoutLoaders(elkLayouts);
+    mermaid.initialize({ startOnLoad: false, theme: 'dark', layout: 'elk' });
+    await mermaid.run();
+    setupPanZoom();
+  </script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: #f8fafc;
+    }
+    p.subtitle {
+      color: #94a3b8;
+      margin-top: 0;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+    }
+    .diagram-container {
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-radius: 0.75rem;
+      padding: 0;
+      flex: 1;
+      min-height: 600px;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+    }
+    .diagram-container:active {
+      cursor: grabbing;
+    }
+    .diagram-container .mermaid {
+      display: block;
+    }
+    .diagram-hint {
+      position: absolute;
+      bottom: 0.75rem;
+      right: 1rem;
+      font-size: 0.75rem;
+      color: #475569;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .legend {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .legend-swatch {
+      width: 1rem;
+      height: 1rem;
+      border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .legend-line {
+      width: 2rem;
+      height: 2px;
+      background: #64748b;
+    }
+    .legend-line.dashed {
+      background: repeating-linear-gradient(90deg, #64748b 0, #64748b 4px, transparent 4px, transparent 8px);
+    }
+    .decisions {
+      margin-top: 1.5rem;
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-left: 3px solid #34d399;
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.5rem;
+    }
+    .decisions h2 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #34d399;
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .decisions ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: #cbd5e1;
+      font-size: 0.875rem;
+      line-height: 1.7;
+    }
+    .open-questions {
+      margin-top: 1.5rem;
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-left: 3px solid #f59e0b;
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.5rem;
+    }
+    .open-questions h2 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #f59e0b;
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .open-questions ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: #cbd5e1;
+      font-size: 0.875rem;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>CommonGround — Domain Map</h1>
+  <p class="subtitle">Community Land Trust domain model. Event stormed April 2026.</p>
+
+  <div class="diagram-container">
+    <div class="diagram-hint">scroll to zoom · drag to pan</div>
+    <div class="mermaid">
+graph TB
+    subgraph PR["Property Registry  ✓"]
+        LP("LandParcel") --- BLD("Building")
+    end
+
+    subgraph AP["Applicant Pipeline"]
+        APPLICATION("Application")
+        WENTRY("WaitlistEntry")
+        APPLICATION -->|"ApplicantApproved"| WENTRY
+        WENTRY -->|"OfferDeclined — retry"| WENTRY
+    end
+
+    subgraph HO["Homeownership  ✓ + new"]
+        GL("GroundLease")
+        RS("ResaleRequest")
+        PW("PurchaseWorkflow [Saga]")
+        HIMP("ImprovementRequest")
+        GL -->|"ResaleIntentReceived"| RS
+        RS -->|"CLTFirstRefusalWaived\nor CLTFirstRefusalExercised"| PW
+        GL -->|"ImprovementRequested"| HIMP
+        HIMP -->|"ImprovementApproved\nupdates resale basis"| GL
+        PW -->|"PurchaseClosed\nHomeownerChanged"| GL
+    end
+
+    subgraph ST["Stewardship"]
+        SC("StewardshipCase")
+        VR("ViolationRecord")
+        SC -->|"ViolationIdentified"| VR
+        VR -->|"ViolationRemedied"| SC
+    end
+
+    subgraph FIN["Lease Finance"]
+        LFA("LeaseFeeAccount")
+    end
+
+    subgraph MEM["Membership"]
+        MBR("Member")
+    end
+
+    WENTRY -. "ApplicantAcceptedOffer\n→ PurchaseWorkflowInitiated" .-> PW
+    LP -. "LandParcelId  [ref]" .-> GL
+    BLD -. "BuildingId  [ref]" .-> GL
+    GL -. "GroundLeaseCreated\n→ AccountOpened" .-> LFA
+    GL -. "HomeownerOnboarded\n→ CaseOpened" .-> SC
+    MBR -. "identity correlation\n(homeowner is member)" .-> APPLICATION
+
+    classDef impl fill:#14532d,stroke:#4ade80,color:#dcfce7
+    classDef saga fill:#78350f,stroke:#fbbf24,color:#fef3c7
+    classDef planned fill:#1e3a8a,stroke:#60a5fa,color:#dbeafe
+
+    class LP,BLD,GL,PW impl
+    class RS,HIMP,APPLICATION,WENTRY,SC,VR,LFA,MBR planned
+    class PW saga
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:#14532d;border-color:#4ade80"></div>
+      <span>Implemented aggregate</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:#78350f;border-color:#fbbf24"></div>
+      <span>Process / Saga</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:#1e3a8a;border-color:#60a5fa"></div>
+      <span>Planned aggregate</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-line"></div>
+      <span>Intra-BC relationship</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-line dashed"></div>
+      <span>Cross-BC integration event / reference</span>
+    </div>
+  </div>
+
+  <div class="decisions">
+    <h2>Key Decisions</h2>
+    <ul>
+      <li><strong>ResaleRequest</strong> is a separate aggregate in Homeownership — right-of-first-refusal and resale price calculation happen before the PurchaseWorkflow starts, keeping the saga clean.</li>
+      <li><strong>PurchaseWorkflow</strong> handles both initial purchase and resale — the same 5 parallel tracks (eligibility, financing, inspection, title, lease execution) apply to both. Resale just has a ResaleRequest pre-step.</li>
+      <li><strong>ImprovementRequest</strong> lives in Homeownership (not Stewardship) because approval directly updates the resale price basis on GroundLease.</li>
+      <li><strong>Stewardship</strong> is a separate BC — different language (case, compliance, concern vs. lease, purchase, closing) and different operational team (housing counselors). Could fold into Homeownership for small orgs.</li>
+      <li><strong>LeaseFeeAccount</strong> is separate from GroundLease — financial operations (payment plans, late notices, waivers) have their own lifecycle independent of lease terms.</li>
+      <li>Property Registry is foundational — LandParcel and Building must exist before a GroundLease can be created. References are by ID only; Homeownership does not own those aggregates.</li>
+    </ul>
+  </div>
+
+  <div class="open-questions">
+    <h2>Open Questions</h2>
+    <ul>
+      <li>Should Stewardship fold into Homeownership, or is the team/language separation real enough to justify its own BC?</li>
+      <li>Does Membership warrant its own BC, or is a Member just a User with a role flag in an Identity context?</li>
+      <li>CLTFirstRefusalExercised path: when CLT buys back the home, does a new PurchaseWorkflow start with the CLT as buyer, or is that a separate aggregate/process?</li>
+      <li>LeaseFeeAccount — push model (scheduler emits MonthlyLeaseFeeDue) or pull model (homeowner portal queries overdue fees)? Impacts whether Finance BC needs an async scheduler.</li>
+      <li>RenovationStarted / RenovationCompleted on Building — should this be a separate RenovationProject aggregate in PropertyRegistry, or just status transitions on Building?</li>
+    </ul>
+  </div>
+
+</body>
+</html>

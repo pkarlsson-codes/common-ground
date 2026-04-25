@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CommonGround — Domain Map v2</title>
+  <script src="./diagram-panzoom.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    import elkLayouts from 'https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs';
+    mermaid.registerLayoutLoaders(elkLayouts);
+    mermaid.initialize({ startOnLoad: false, theme: 'dark', layout: 'elk' });
+    await mermaid.run();
+    setupPanZoom();
+  </script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;/contex
+      color: #f8fafc;
+    }
+    p.subtitle {
+      color: #94a3b8;
+      margin-top: 0;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+    }
+    .diagram-container {
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-radius: 0.75rem;
+      padding: 0;
+      flex: 1;
+      min-height: 700px;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+    }
+    .diagram-container:active {
+      cursor: grabbing;
+    }
+    .diagram-container .mermaid {
+      display: block;
+    }
+    .diagram-hint {
+      position: absolute;
+      bottom: 0.75rem;
+      right: 1rem;
+      font-size: 0.75rem;
+      color: #475569;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .legend {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .legend-swatch {
+      width: 1rem;
+      height: 1rem;
+      border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .legend-line {
+      width: 2rem;
+      height: 2px;
+      background: #64748b;
+    }
+    .legend-line.dashed {
+      background: repeating-linear-gradient(90deg, #64748b 0, #64748b 4px, transparent 4px, transparent 8px);
+    }
+    .decisions {
+      margin-top: 1.5rem;
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-left: 3px solid #34d399;
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.5rem;
+    }
+    .decisions h2 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #34d399;
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .decisions ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: #cbd5e1;
+      font-size: 0.875rem;
+      line-height: 1.7;
+    }
+    .open-questions {
+      margin-top: 1.5rem;
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-left: 3px solid #f59e0b;
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.5rem;
+    }
+    .open-questions h2 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #f59e0b;
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .open-questions ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: #cbd5e1;
+      font-size: 0.875rem;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>CommonGround — Domain Map <span style="color:#94a3b8;font-weight:400">v2</span></h1>
+  <p class="subtitle">Community Land Trust domain model. Event stormed April 2026, revised with CLT operational research.</p>
+
+  <div class="diagram-container">
+    <div class="diagram-hint">scroll to zoom · drag to pan</div>
+    <div class="mermaid">
+graph TB
+    subgraph PR["Property Registry  ✓"]
+        LP("LandParcel") --- BLD("Building")
+    end
+
+    subgraph MEM["Membership"]
+        MBR("Member")
+    end
+
+    subgraph AP["Applicant Pipeline"]
+        IR("InterestRegistration")
+        APPLICATION("Application")
+        WENTRY("WaitlistEntry")
+        IR -->|"HousingCounselingCompleted"| APPLICATION
+        APPLICATION -->|"ApplicationApproved"| WENTRY
+        WENTRY -->|"OfferDeclined — retry"| WENTRY
+    end
+
+    subgraph HO["Homeownership  ✓"]
+        GL("GroundLease")
+        PW("PurchaseWorkflow [Saga]")
+        NOIS("NoticeOfIntentToSell")
+        IMP("ImprovementRequest")
+        MC("MortgageConsent")
+        LRA("LenderRecognitionAgreement")
+        EST("EstoppelCertificate")
+        GL -->|"NoticeOfIntentToSellReceived\n(90-day ROFR clock)"| NOIS
+        NOIS -->|"ROFRWindowExpired\nor ROFRExercised"| PW
+        GL -->|"ImprovementRequested"| IMP
+        IMP -->|"ImprovementApproved\nupdates resale basis"| GL
+        PW -->|"PurchaseClosed\nGroundLeaseCreated / Transferred"| GL
+        GL -->|"MortgageConsentRequested\n(refinance review)"| MC
+        GL -->|"EstoppelCertificateRequested\n(lender demand)"| EST
+        LTR("LeaseTransferRequest")
+        GL -->|"LeaseTransferRequested\n(death / divorce / court order)"| LTR
+    end
+
+    subgraph ST["Stewardship"]
+        SC("StewardshipCase")
+        VR("ViolationRecord")
+        FPC("ForeclosurePreventionCase")
+        SC -->|"ViolationIdentified"| VR
+        VR -->|"ViolationRemedied"| SC
+        FPC -->|"CLTCurePeriodActivated\nor ForbearanceNegotiated"| FPC
+    end
+
+    subgraph FIN["Lease Finance"]
+        LFA("LeaseFeeAccount")
+    end
+
+    WENTRY -. "OfferAccepted\n→ PurchaseWorkflowInitiated" .-> PW
+    LP -. "LandParcelId  [ref]" .-> GL
+    BLD -. "BuildingId  [ref]" .-> GL
+    GL -. "GroundLeaseCreated\n→ LeaseFeeAccountOpened" .-> LFA
+    GL -. "HomeownerOnboarded\n→ StewardshipCaseOpened" .-> SC
+    LFA -. "LeaseFeeArrearsEscalated\n→ ForeclosurePreventionCaseOpened" .-> FPC
+    MBR -. "identity correlation\n(applicant is member)" .-> IR
+
+    classDef impl fill:#14532d,stroke:#4ade80,color:#dcfce7
+    classDef saga fill:#78350f,stroke:#fbbf24,color:#fef3c7
+    classDef planned fill:#1e3a8a,stroke:#60a5fa,color:#dbeafe
+
+    class LP,BLD,GL impl
+    class PW saga
+    class IR,APPLICATION,WENTRY,NOIS,IMP,MC,LRA,EST,LTR,SC,VR,FPC,LFA,MBR planned
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:#14532d;border-color:#4ade80"></div>
+      <span>Implemented aggregate</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:#78350f;border-color:#fbbf24"></div>
+      <span>Process / Saga</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:#1e3a8a;border-color:#60a5fa"></div>
+      <span>Planned aggregate</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-line"></div>
+      <span>Intra-BC relationship</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-line dashed"></div>
+      <span>Cross-BC integration event / reference</span>
+    </div>
+  </div>
+
+  <div class="decisions">
+    <h2>Key Decisions</h2>
+    <ul>
+      <li><strong>Two-stage applicant intake:</strong> <code>InterestRegistration</code> is a pre-application funnel — interest form, information session, housing counseling. Only after counseling completion does an <code>Application</code> open. CLTs universally require counseling before qualification; it belongs in the model.</li>
+      <li><strong>NoticeOfIntentToSell replaces ResaleRequest:</strong> The CLT's right-of-first-refusal process starts the moment a homeowner signals intent. This aggregate owns the ROFR clock (model ground lease: 90 days), the price negotiation, and the waive/exercise decision — before a PurchaseWorkflow ever starts.</li>
+      <li><strong>ROFRExercised path:</strong> When CLT exercises first refusal, a PurchaseWorkflow starts with CLT as buyer — same five-track saga, just CLT takes the buyer role. The home enters a brief CLT-owned period then a new sale to a waitlisted buyer. This is modelled as two sequential workflows, not a special case.</li>
+      <li><strong>ImprovementRequest is a per-item collection, not a scalar:</strong> Each improvement (deck, HVAC, solar) has its own approval, actual cost, and depreciation schedule. The depreciated total is computed at resale time by summing approved items. A single <code>decimal? ApprovedImprovements</code> field would lose all of this.</li>
+      <li><strong>MortgageConsent lives in Homeownership:</strong> When a homeowner refinances, the CLT must review the new loan terms against the ground lease's mortgage restrictions and issue written consent. Each consent is a discrete record — not a flag on GroundLease — because CLTs audit these for compliance with recognition agreements.</li>
+      <li><strong>LenderRecognitionAgreement is a standing tri-party instrument:</strong> Executed once per lender per lease. It grants the CLT a 60-day cure period on mortgage default before foreclosure can proceed. It sits in Homeownership (not Finance) because it governs the lease relationship, not payment terms.</li>
+      <li><strong>EstoppelCertificate is its own aggregate:</strong> Lenders demand this time-sensitive document (lease in good standing, no defaults, current fee payment) before any financing closes. It has a response deadline (typically 10 business days) and an audit trail — worth tracking as first-class objects.</li>
+      <li><strong>ForeclosurePreventionCase lives in Stewardship:</strong> CLTs intervene early when mortgage payments are distressed — counseling referrals, forbearance negotiation, activating the 60-day cure right. This is stewardship work (housing counselors) not finance work (fee collection). Triggered by <code>LeaseFeeArrearsEscalated</code> from Lease Finance or by servicer delinquency reports received directly.</li>
+      <li><strong>Stewardship is a separate BC:</strong> Different language (case, violation, cure vs. lease, purchase, closing), different operational team (housing counselors vs. finance staff), different cadence (annual visits vs. monthly fees). The overlap is in monitoring signals — those cross-BC events are explicitly modelled.</li>
+      <li><strong>Property Registry is foundational:</strong> LandParcel and Building must exist before a GroundLease can reference them. Homeownership holds IDs only — no ownership of those aggregates.</li>
+      <li><strong>LeaseFeeAccount is separate from GroundLease:</strong> Payment plans, late notices, hardship waivers, and arrears escalation have their own lifecycle independent of lease terms. Finance staff operate this BC; lease administrators operate Homeownership.</li>
+    </ul>
+  </div>
+
+  <div class="open-questions">
+    <h2>Open Questions</h2>
+    <ul>
+      <li><strong>Index formula and improvements:</strong> In the index-based resale formula (AMI or CPI), improvements generally do <em>not</em> directly add to the resale price — the index adjustment already tracks value growth. Only the appraisal-based formula uses a market appraisal delta where CLT-approved improvements can affect the appraisal outcome. The itemized formula explicitly credits improvement costs. Needs verification against the ground lease template before implementing <code>ResaleCalculationInput</code>.</li>
+      <li><strong>OriginalAppraisalValue vs OriginalPurchasePrice:</strong> The current <code>ResaleCalculationInput</code> conflates the subsidized purchase price (what the homeowner paid) with the original unencumbered market appraisal (the baseline for appraisal-based formula delta). These are two distinct values and must be stored separately.</li>
+      <li><strong>Fractional ownership years in fixed-percentage formula:</strong> Current model uses integer years. Should be <code>days / 365.25</code> to avoid rounding distortion on mid-year resales.</li>
+      <li><strong>Should Membership warrant its own BC?</strong> A Member may just be a User with a membership role in an Identity context. CLTs have voting membership (annual dues, meeting attendance) — enough lifecycle to argue for its own BC, but small orgs may fold this into a role flag.</li>
+      <li><strong>Servicer delinquency data feed:</strong> CLTs receive monthly mortgage payment reports from loan servicers. Does DistressSignalDetected come from a scheduled import job, a push from a servicer API, or manual entry? Impacts whether Finance BC needs an async scheduler or an inbound integration event.</li>
+      <li><strong>RenovationProject aggregate in PropertyRegistry:</strong> Building has <code>RenovationStarted / RenovationCompleted</code> transitions. For major rehabs, CLTs track contractor, scope, permits, and inspection outcomes over months. Worth a dedicated <code>RenovationProject</code> aggregate rather than status transitions on Building?</li>
+      <li><strong>CLT as buyer in ROFRExercised path:</strong> Two sequential PurchaseWorkflows (CLT buys, then CLT sells to waitlist buyer) implies a brief period where CLT appears as homeowner on the GroundLease. Does GroundLease support a <code>CLT_OWNED</code> phase between transfers, or is this modelled as lease termination + new lease creation?</li>
+    </ul>
+  </div>
+
+</body>
+</html>

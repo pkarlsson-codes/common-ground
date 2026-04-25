@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CommonGround — Applicant Pipeline BC</title>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    import elkLayouts from 'https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs';
+    mermaid.registerLayoutLoaders(elkLayouts);
+    mermaid.initialize({ startOnLoad: false, theme: 'dark', layout: 'elk' });
+    await mermaid.run();
+    document.querySelectorAll('.diagram-container').forEach(setupPanZoom);
+
+    function setupPanZoom(container) {
+      const el = container.querySelector('.mermaid');
+      if (!container || !el) return;
+      let scale = 1, tx = 0, ty = 0, dragging = false, startX, startY, startTx, startTy;
+      el.style.transformOrigin = '0 0';
+      function apply() { el.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`; }
+      container.addEventListener('mousedown', e => {
+        dragging = true; startX = e.clientX; startY = e.clientY; startTx = tx; startTy = ty;
+        e.preventDefault();
+      });
+      window.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        tx = startTx + (e.clientX - startX); ty = startTy + (e.clientY - startY); apply();
+      });
+      window.addEventListener('mouseup', () => { dragging = false; });
+      container.addEventListener('wheel', e => {
+        e.preventDefault();
+        const r = container.getBoundingClientRect();
+        const mx = e.clientX - r.left, my = e.clientY - r.top;
+        const factor = e.deltaY > 0 ? 0.9 : 1.1;
+        const newScale = Math.max(0.1, Math.min(10, scale * factor));
+        tx = mx - (mx - tx) * (newScale / scale);
+        ty = my - (my - ty) * (newScale / scale);
+        scale = newScale; apply();
+      }, { passive: false });
+    }
+  </script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-sizing: border-box;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem;
+      color: #f8fafc;
+    }
+    h2.section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #60a5fa;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0 0 0.75rem;
+    }
+    p.subtitle {
+      color: #94a3b8;
+      margin: 0;
+      font-size: 0.9rem;
+    }
+    p.subtitle a { color: #60a5fa; }
+    .diagram-container {
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+    }
+    .diagram-container:active { cursor: grabbing; }
+    .diagram-container .mermaid { display: block; }
+    .diagram-hint {
+      position: absolute;
+      bottom: 0.75rem;
+      right: 1rem;
+      font-size: 0.75rem;
+      color: #475569;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .flow-container { min-height: 220px; }
+    .state-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .state-container { min-height: 320px; }
+    .state-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.5rem 0.75rem 0;
+    }
+    .class-container { min-height: 520px; }
+    .panel {
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.5rem;
+    }
+    .panel.green { border-left: 3px solid #34d399; }
+    .panel.amber { border-left: 3px solid #f59e0b; }
+    .panel.blue  { border-left: 3px solid #60a5fa; }
+    .panel h2 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin: 0 0 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .panel.green h2 { color: #34d399; }
+    .panel.amber h2 { color: #f59e0b; }
+    .panel.blue  h2 { color: #60a5fa; }
+    .panel ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: #cbd5e1;
+      font-size: 0.875rem;
+      line-height: 1.75;
+    }
+    .panel ul li { margin-bottom: 0.1rem; }
+    table.events {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+    }
+    table.events thead th {
+      text-align: left;
+      color: #60a5fa;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid #2d3748;
+      padding: 0.4rem 0.6rem;
+    }
+    table.events tbody td {
+      padding: 0.4rem 0.6rem;
+      border-bottom: 1px solid #1e293b;
+      vertical-align: top;
+    }
+    table.events tbody tr:last-child td { border-bottom: none; }
+    table.events code {
+      font-family: ui-monospace, monospace;
+      font-size: 0.78rem;
+      color: #a5b4fc;
+    }
+    .tag {
+      display: inline-block;
+      font-size: 0.68rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+    .tag-cross { background: #1e3a4f; color: #67e8f9; border: 1px solid #0e7490; }
+  </style>
+</head>
+<body>
+
+  <div>
+    <h1>Applicant Pipeline <span style="color:#94a3b8;font-weight:400">— Bounded Context</span></h1>
+    <p class="subtitle">
+      Pre-application funnel, income qualification, and waitlist management. ·
+      <a href="./domain-map-v2.html">← Domain map</a>
+    </p>
+  </div>
+
+  <!-- ── SECTION 1: Event flow ─────────────────────────────────────────── -->
+  <div>
+    <h2 class="section-title">Aggregate &amp; Event Flow</h2>
+    <div class="diagram-container flow-container">
+      <div class="diagram-hint">scroll to zoom · drag to pan</div>
+      <div class="mermaid">
+graph LR
+    MBR(["Member\n[Membership BC]"])
+
+    subgraph AP["Applicant Pipeline"]
+        IR("InterestRegistration")
+        APPLICATION("Application")
+        WENTRY("WaitlistEntry")
+
+        IR -->|"HousingCounselingCompleted\n→ staff opens Application"| APPLICATION
+        APPLICATION -->|"ApplicationApproved\n→ staff creates WaitlistEntry"| WENTRY
+        WENTRY -->|"OfferDeclined — retry"| WENTRY
+    end
+
+    PW(["PurchaseWorkflow\n[Homeownership BC]"])
+
+    MBR -. "identity correlation\n(applicant is member)" .-> IR
+    WENTRY -. "OfferAccepted\n→ PurchaseWorkflowRequested\n[integration event]" .-> PW
+
+    classDef external fill:#1e293b,stroke:#475569,color:#94a3b8
+    classDef aggregate fill:#1e3a8a,stroke:#60a5fa,color:#dbeafe
+
+    class MBR,PW external
+    class IR,APPLICATION,WENTRY aggregate
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 2: State machines ────────────────────────────────────── -->
+  <div>
+    <h2 class="section-title">Lifecycle State Machines</h2>
+    <div class="state-grid">
+
+      <div>
+        <div class="state-label">InterestRegistration</div>
+        <div class="diagram-container state-container">
+          <div class="diagram-hint">scroll · drag</div>
+          <div class="mermaid">
+stateDiagram-v2
+    [*] --> Received : Register()
+    Received --> InformationSessionAttended : RecordInformationSessionAttended()
+    InformationSessionAttended --> CounselingCompleted : RecordHousingCounselingCompleted()
+    CounselingCompleted --> ApplicationOpened : [staff opens Application]
+
+    Received --> Withdrawn : Withdraw()
+    InformationSessionAttended --> Withdrawn : Withdraw()
+    CounselingCompleted --> Withdrawn : Withdraw()
+
+    ApplicationOpened --> [*]
+    Withdrawn --> [*]
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="state-label">Application</div>
+        <div class="diagram-container state-container">
+          <div class="diagram-hint">scroll · drag</div>
+          <div class="mermaid">
+stateDiagram-v2
+    [*] --> Open : Open()
+
+    note right of Open
+        DocumentsSubmitted event
+        recorded here (no status change)
+    end note
+
+    Open --> Approved : Approve() + AMI tier
+    Open --> Rejected : Reject() + reason
+    Open --> Withdrawn : Withdraw()
+
+    Approved --> [*]
+    Rejected --> [*]
+    Withdrawn --> [*]
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="state-label">WaitlistEntry</div>
+        <div class="diagram-container state-container">
+          <div class="diagram-hint">scroll · drag</div>
+          <div class="mermaid">
+stateDiagram-v2
+    [*] --> Active : Create()
+    Active --> OfferPending : ExtendOffer()
+    OfferPending --> Active : RecordOfferDeclined()\noffersDeclinedCount++
+    OfferPending --> Housed : RecordOfferAccepted()
+    Active --> Withdrawn : Withdraw()
+    OfferPending --> Withdrawn : Withdraw()
+    Active --> Deactivated : Deactivate()
+    OfferPending --> Deactivated : Deactivate()
+
+    Housed --> [*]
+    Withdrawn --> [*]
+    Deactivated --> [*]
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SECTION 3: Domain model ───────────────────────────────────────── -->
+  <div>
+    <h2 class="section-title">Domain Model</h2>
+    <div class="diagram-container class-container">
+      <div class="diagram-hint">scroll to zoom · drag to pan</div>
+      <div class="mermaid">
+classDiagram
+    direction LR
+
+    class InterestRegistration {
+        +InterestRegistrationId Id
+        +ApplicantContact Applicant
+        +InterestRegistrationStatus Status
+        +string? MemberId
+        +string? ReferralSource
+        +DateOnly? InformationSessionDate
+        +DateOnly? CounselingCompletedDate
+        +string? CounselorName
+        +Register(name, email, phone, referralSource, registeredBy)$
+        +RecordInformationSessionAttended(date, recordedBy)
+        +RecordHousingCounselingCompleted(counselorName, date, recordedBy)
+        +Withdraw(reason, withdrawnBy)
+    }
+
+    class Application {
+        +ApplicationId Id
+        +InterestRegistrationId SourceRegistrationId
+        +ApplicantContact Applicant
+        +ApplicationStatus Status
+        +AmiQualificationTier? QualifiedTier
+        +decimal? VerifiedHouseholdIncome
+        +decimal? AmiReferenceFigure
+        +DateOnly? DocumentsReceivedDate
+        +DateOnly? DecisionDate
+        +string? DecisionNotes
+        +Open(interestRegId, applicant, openedBy)$
+        +RecordDocumentsSubmitted(date, notes, recordedBy)
+        +Approve(amiTier, verifiedIncome, amiReference, date, notes, approvedBy)
+        +Reject(reason, rejectedBy)
+        +Withdraw(reason, withdrawnBy)
+    }
+
+    class WaitlistEntry {
+        +WaitlistEntryId Id
+        +ApplicationId SourceApplicationId
+        +ApplicantContact Applicant
+        +AmiQualificationTier AmiTier
+        +WaitlistPriorityTier PriorityTier
+        +WaitlistEntryStatus Status
+        +DateTimeOffset CreatedAt
+        +OfferDetails? CurrentOffer
+        +int OffersDeclinedCount
+        +Create(appId, applicant, amiTier, priorityTier, createdBy)$
+        +ExtendOffer(groundLeaseId, buildingId, price, expiry, recordedBy)
+        +RecordOfferAccepted(date, recordedBy)
+        +RecordOfferDeclined(reason, date, recordedBy)
+        +Withdraw(reason, withdrawnBy)
+        +Deactivate(reason, deactivatedBy)
+    }
+
+    class ApplicantContact {
+        &lt;&lt;value object&gt;&gt;
+        +string FullName
+        +string Email
+        +string? Phone
+    }
+
+    class OfferDetails {
+        &lt;&lt;value object&gt;&gt;
+        +string GroundLeaseId
+        +string BuildingId
+        +decimal OfferedPurchasePrice
+        +DateOnly OfferExpiryDate
+        +DateOnly ExtendedDate
+    }
+
+    class AmiQualificationTier {
+        &lt;&lt;enumeration&gt;&gt;
+        VeryLow
+        Low
+        Moderate
+    }
+
+    class WaitlistPriorityTier {
+        &lt;&lt;enumeration&gt;&gt;
+        Standard
+        LocalResident
+        CurrentRenter
+        Veteran
+    }
+
+    class InterestRegistrationStatus {
+        &lt;&lt;enumeration&gt;&gt;
+        Received
+        InformationSessionAttended
+        CounselingCompleted
+        ApplicationOpened
+        Withdrawn
+    }
+
+    class ApplicationStatus {
+        &lt;&lt;enumeration&gt;&gt;
+        Open
+        Approved
+        Rejected
+        Withdrawn
+    }
+
+    class WaitlistEntryStatus {
+        &lt;&lt;enumeration&gt;&gt;
+        Active
+        OfferPending
+        Housed
+        Withdrawn
+        Deactivated
+    }
+
+    InterestRegistration --> ApplicantContact : Applicant
+    Application --> ApplicantContact : Applicant
+    Application --> InterestRegistration : references SourceRegistrationId
+    WaitlistEntry --> ApplicantContact : Applicant
+    WaitlistEntry --> Application : references SourceApplicationId
+    WaitlistEntry "0..1" --> OfferDetails : CurrentOffer
+    Application --> AmiQualificationTier
+    WaitlistEntry --> AmiQualificationTier
+    WaitlistEntry --> WaitlistPriorityTier
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 4: Domain events ─────────────────────────────────────── -->
+  <div class="panel blue">
+    <h2>Domain Events</h2>
+    <table class="events">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Aggregate</th>
+          <th>Key payload fields</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>InterestRegistrationReceived</code></td>
+          <td>InterestRegistration</td>
+          <td>applicantName, email, phone?, referralSource?, registeredBy</td>
+        </tr>
+        <tr>
+          <td><code>InformationSessionAttended</code></td>
+          <td>InterestRegistration</td>
+          <td>sessionDate, recordedBy</td>
+        </tr>
+        <tr>
+          <td><code>HousingCounselingCompleted</code></td>
+          <td>InterestRegistration</td>
+          <td>counselorName, completionDate, certificationNumber?, recordedBy</td>
+        </tr>
+        <tr>
+          <td><code>InterestRegistrationWithdrawn</code></td>
+          <td>InterestRegistration</td>
+          <td>reason, withdrawnBy</td>
+        </tr>
+        <tr>
+          <td><code>ApplicationOpened</code></td>
+          <td>Application</td>
+          <td>interestRegistrationId, applicantName, email, phone?, openedBy</td>
+        </tr>
+        <tr>
+          <td><code>DocumentsSubmitted</code></td>
+          <td>Application</td>
+          <td>submissionDate, notes?, recordedBy</td>
+        </tr>
+        <tr>
+          <td><code>ApplicationApproved</code></td>
+          <td>Application</td>
+          <td>amiTier, verifiedHouseholdIncome, amiReferenceFigure, verifiedDate, notes?, approvedBy</td>
+        </tr>
+        <tr>
+          <td><code>ApplicationRejected</code></td>
+          <td>Application</td>
+          <td>reason, rejectedBy</td>
+        </tr>
+        <tr>
+          <td><code>ApplicationWithdrawn</code></td>
+          <td>Application</td>
+          <td>reason, withdrawnBy</td>
+        </tr>
+        <tr>
+          <td><code>WaitlistEntryCreated</code></td>
+          <td>WaitlistEntry</td>
+          <td>applicationId, applicantName, email, phone?, amiTier, priorityTier, createdBy</td>
+        </tr>
+        <tr>
+          <td><code>OfferExtended</code></td>
+          <td>WaitlistEntry</td>
+          <td>groundLeaseId, buildingId, offeredPurchasePrice, offerExpiryDate, extendedBy</td>
+        </tr>
+        <tr>
+          <td><code>OfferAccepted</code></td>
+          <td>WaitlistEntry</td>
+          <td>acceptedDate, recordedBy → fires <code>PurchaseWorkflowRequested</code> integration event</td>
+        </tr>
+        <tr>
+          <td><code>OfferDeclined</code></td>
+          <td>WaitlistEntry</td>
+          <td>reason?, declinedDate, recordedBy</td>
+        </tr>
+        <tr>
+          <td><code>WaitlistEntryWithdrawn</code></td>
+          <td>WaitlistEntry</td>
+          <td>reason, withdrawnBy</td>
+        </tr>
+        <tr>
+          <td><code>WaitlistEntryDeactivated</code></td>
+          <td>WaitlistEntry</td>
+          <td>reason, deactivatedBy</td>
+        </tr>
+        <tr>
+          <td><code>PurchaseWorkflowRequested</code> <span class="tag tag-cross">integration</span></td>
+          <td>→ Homeownership BC</td>
+          <td>waitlistEntryId, groundLeaseId, buildingId, purchasePrice, buyerName, buyerEmail, buyerPhone?</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Key Decisions ─────────────────────────────────────────────────── -->
+  <div class="panel green">
+    <h2>Key Decisions</h2>
+    <ul>
+      <li><strong>HousingCounselingCompleted gates the Application:</strong> CLTs universally require HUD-certified housing counseling before a formal application opens. This is a real gating precondition — not a checkbox — and belongs as an explicit state transition on InterestRegistration. Staff records counselor name, completion date, and optional certification number.</li>
+      <li><strong>InterestRegistration is a separate aggregate from Application:</strong> The pre-application funnel (interest form, information session, counseling) has its own lifecycle and can be withdrawn without ever producing an Application. Keeping them separate preserves that independent history and avoids a bloated Application aggregate.</li>
+      <li><strong>DocumentsSubmitted does not change ApplicationStatus:</strong> Applications stay Open until a staff decision (Approved/Rejected). DocumentsSubmitted is an audit event — it records when documents arrived and allows tracking of slow-moving applications without creating intermediate states that require handling.</li>
+      <li><strong>AMI tier recorded at approval, not at intake:</strong> Income is verified by staff during application review (pay stubs, tax returns). The tier determines which price-restricted units the applicant qualifies for and follows the WaitlistEntry to the PurchaseWorkflow. AmiQualificationTier values: VeryLow (≤50% AMI), Low (51–80% AMI), Moderate (81–120% AMI) — most CLT homeownership programs target Low tier. The tier name alone is not sufficient for audit: <code>ApplicationApproved</code> also captures <code>verifiedHouseholdIncome</code> (the applicant's actual verified income) and <code>amiReferenceFigure</code> (the HUD-published AMI for this region/year at time of approval). HUD publishes updated figures annually; recording the reference figure at approval time means the qualification decision is auditable even after HUD updates the number.</li>
+      <li><strong>WaitlistEntry holds denormalized applicant contact:</strong> The integration event to Homeownership BC needs buyer contact info. Denormalizing it onto WaitlistEntry avoids a cross-BC query at offer-acceptance time and keeps the event payload self-contained.</li>
+      <li><strong>OfferDeclined cycles back to Active, not to end of queue:</strong> Declining an offer does not terminate the WaitlistEntry. The entry stays active and can receive future offers. <code>OffersDeclinedCount</code> is tracked so staff can see repeated declinations (often a signal that the applicant's circumstances have changed).</li>
+      <li><strong>Withdrawn vs Deactivated on WaitlistEntry:</strong> Withdrawn is applicant-initiated (they've decided not to proceed). Deactivated is staff-initiated for administrative reasons (lost contact, moved out of area, income no longer qualifies, deceased). Both are terminal states but have different operational meaning for reporting.</li>
+      <li><strong>WaitlistPriorityTier is a four-value enum, not a score:</strong> CLTs implement preference criteria defined in their bylaws (local resident, existing land renter, veteran). A flat tier enum is sufficient for initial implementation — multi-criteria weighted scoring can be added later without breaking the aggregate's event model.</li>
+      <li><strong>Integration event named PurchaseWorkflowRequested, not OfferAccepted:</strong> The integration event crosses a BC boundary and carries buyer + property data that Homeownership BC needs. Naming it from the perspective of what Homeownership needs to do makes the contract explicit. OfferAccepted remains a domain event on WaitlistEntry; PurchaseWorkflowRequested is the outbound integration event derived from it.</li>
+      <li><strong>MemberId is an optional string reference, not a foreign key:</strong> The identity correlation between applicants and CLT members is loose. Membership BC is not yet implemented. InterestRegistration holds an optional MemberId (string) that can be populated if the applicant is also a member — no hard dependency on Membership BC.</li>
+    </ul>
+  </div>
+
+  <!-- ── Open Questions ────────────────────────────────────────────────── -->
+  <div class="panel amber">
+    <h2>Open Questions</h2>
+    <ul>
+      <li><strong>Waitlist position management:</strong> This model tracks each WaitlistEntry in isolation. The actual FIFO ordering (position 1, 2, 3… within a priority tier) is a query concern, not an aggregate concern. Where does the ordering live — a projection, a dedicated WaitlistQueue read model, or a managed list aggregate? Who sets priority tier — is it auto-derived from the Application's verified data or manually assigned by staff?</li>
+      <li><strong>Multiple active InterestRegistrations per person:</strong> Should a person be allowed to submit a new InterestRegistration if they already have an active one? Could happen if their previous Application was rejected (Rejected status is terminal) and they want to re-apply after improving their situation. Model currently has no guard against this — is that correct?</li>
+      <li><strong>Application after rejection — re-application pathway:</strong> If an Application is Rejected, the applicant must re-apply. Does that start a new InterestRegistration (going through counseling again) or a new Application directly (skipping counseling if recently certified)? HUD counseling certificates typically expire after 12 months.</li>
+      <li><strong>Offer expiry enforcement:</strong> OfferDetails carries an OfferExpiryDate but the model has no mechanism to enforce it. Who drives expiry — a scheduled job that deactivates OfferPending entries past their expiry date, or staff who manually record a declined/withdrawn decision? Impacts whether this BC needs an async scheduler.</li>
+      <li><strong>Multiple active WaitlistEntries per applicant:</strong> Can an approved applicant have more than one WaitlistEntry? Unlikely in normal operations, but could occur if the first entry is deactivated (staff error) and a new one is created. Should the Application guard against creating a second WaitlistEntry while one is still active?</li>
+      <li><strong>AmiTier at offer time vs at approval time:</strong> AMI qualification is recorded at application approval. By the time an offer is extended (potentially months or years later), the applicant's income may have changed. Do CLTs re-verify income at offer time? If so, should AmiTier be updateable on WaitlistEntry, or does re-verification produce a new Application?</li>
+      <li><strong>Per-home AMI eligibility constraints (Homeownership BC concern):</strong> Some units carry funding-source restrictions — a HOME-funded unit may require ≤60% AMI regardless of the program's default ≤80% ceiling. This BC records the applicant's qualified tier, but there is currently no model for which tiers a specific home accepts. That constraint likely belongs on the GroundLease or a property attribute in Homeownership BC, and the offer-matching logic must enforce it before <code>ExtendOffer()</code> is called.</li>
+    </ul>
+  </div>
+
+</body>
+</html>

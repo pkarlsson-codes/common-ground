@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CommonGround — Stewardship BC</title>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    import elkLayouts from 'https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs';
+    mermaid.registerLayoutLoaders(elkLayouts);
+    mermaid.initialize({ startOnLoad: false, theme: 'dark', layout: 'elk' });
+    await mermaid.run();
+    document.querySelectorAll('.diagram-container').forEach(setupPanZoom);
+
+    function setupPanZoom(container) {
+      const el = container.querySelector('.mermaid');
+      if (!container || !el) return;
+      let scale = 1, tx = 0, ty = 0, dragging = false, startX, startY, startTx, startTy;
+      el.style.transformOrigin = '0 0';
+      function apply() { el.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`; }
+      container.addEventListener('mousedown', e => {
+        dragging = true; startX = e.clientX; startY = e.clientY; startTx = tx; startTy = ty;
+        e.preventDefault();
+      });
+      window.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        tx = startTx + (e.clientX - startX); ty = startTy + (e.clientY - startY); apply();
+      });
+      window.addEventListener('mouseup', () => { dragging = false; });
+      container.addEventListener('wheel', e => {
+        e.preventDefault();
+        const r = container.getBoundingClientRect();
+        const mx = e.clientX - r.left, my = e.clientY - r.top;
+        const factor = e.deltaY > 0 ? 0.9 : 1.1;
+        const newScale = Math.max(0.1, Math.min(10, scale * factor));
+        tx = mx - (mx - tx) * (newScale / scale);
+        ty = my - (my - ty) * (newScale / scale);
+        scale = newScale; apply();
+      }, { passive: false });
+    }
+  </script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-sizing: border-box;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem;
+      color: #f8fafc;
+    }
+    h2.section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #60a5fa;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0 0 0.75rem;
+    }
+    p.subtitle {
+      color: #94a3b8;
+      margin: 0;
+      font-size: 0.9rem;
+    }
+    p.subtitle a { color: #60a5fa; }
+    .diagram-container {
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+    }
+    .diagram-container:active { cursor: grabbing; }
+    .diagram-container .mermaid { display: block; }
+    .diagram-hint {
+      position: absolute;
+      bottom: 0.75rem;
+      right: 1rem;
+      font-size: 0.75rem;
+      color: #475569;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .flow-container { min-height: 400px; }
+    .state-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .state-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .state-container-xl { min-height: 480px; }
+    .state-container-lg { min-height: 380px; }
+    .state-container-md { min-height: 320px; }
+    .state-container-sm { min-height: 260px; }
+    .state-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.5rem 0.75rem 0;
+    }
+    .class-container { min-height: 1100px; }
+    .panel {
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.5rem;
+    }
+    .panel.green { border-left: 3px solid #34d399; }
+    .panel.amber { border-left: 3px solid #f59e0b; }
+    .panel.blue  { border-left: 3px solid #60a5fa; }
+    .panel h2 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin: 0 0 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .panel.green h2 { color: #34d399; }
+    .panel.amber h2 { color: #f59e0b; }
+    .panel.blue  h2 { color: #60a5fa; }
+    .panel ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: #cbd5e1;
+      font-size: 0.875rem;
+      line-height: 1.75;
+    }
+    .panel ul li { margin-bottom: 0.1rem; }
+    table.events {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+    }
+    table.events thead th {
+      text-align: left;
+      color: #60a5fa;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid #2d3748;
+      padding: 0.4rem 0.6rem;
+    }
+    table.events tbody td {
+      padding: 0.4rem 0.6rem;
+      border-bottom: 1px solid #1e293b;
+      vertical-align: top;
+    }
+    table.events tbody tr:last-child td { border-bottom: none; }
+    table.events .agg-header td {
+      background: #1a2540;
+      color: #60a5fa;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.6rem;
+      border-bottom: 1px solid #2d3748;
+    }
+    table.events code {
+      font-family: ui-monospace, monospace;
+      font-size: 0.78rem;
+      color: #a5b4fc;
+    }
+    .tag {
+      display: inline-block;
+      font-size: 0.68rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+    .tag-cross { background: #1e3a4f; color: #67e8f9; border: 1px solid #0e7490; }
+    .tag-in    { background: #1f2d1e; color: #86efac; border: 1px solid #166534; }
+    .tag-gap   { background: #2d1f1f; color: #fca5a5; border: 1px solid #7f1d1d; }
+  </style>
+</head>
+<body>
+
+  <div>
+    <h1>Stewardship <span style="color:#94a3b8;font-weight:400">— Bounded Context</span></h1>
+    <p class="subtitle">
+      Ongoing homeowner relationship, occupancy compliance, lease violation management, and foreclosure prevention. Terminal BC — consumes events from Homeownership and Lease Finance, publishes none. ·
+      <a href="./domain-map-v2.html">← Domain map</a>
+    </p>
+  </div>
+
+  <!-- ── SECTION 1: Aggregate & Event Flow ────────────────────────────── -->
+  <div>
+    <h2 class="section-title">Aggregate &amp; Event Flow</h2>
+    <div class="diagram-container flow-container">
+      <div class="diagram-hint">scroll to zoom · drag to pan</div>
+      <div class="mermaid">
+graph TB
+    HOB(["HomeownerOnboarded\n[Homeownership BC]"])
+    GLT(["GroundLeaseTerminated\n[Homeownership BC]"])
+    LFAE(["LeaseFeeArrearsEscalated\n[Lease Finance BC]"])
+
+    subgraph ST["Stewardship"]
+        SC("StewardshipCase")
+        FPC("ForeclosurePreventionCase")
+
+        OV("OccupancyVerification\n[child entity]")
+        PI("PropertyInspection\n[child entity]")
+        LV("LeaseViolation\n[child entity]")
+
+        CR("CounselingReferral\n[child entity]")
+        FB("ForbearanceRequest\n[child entity]")
+        CPA("CurePeriodActivation\n[child entity]")
+
+        SC -->|"OccupancyVerificationInitiated"| OV
+        SC -->|"PropertyInspectionScheduled"| PI
+        SC -->|"LeaseViolationIdentified"| LV
+        FPC -->|"CounselingReferralMade"| CR
+        FPC -->|"ForbearanceRequested"| FB
+        FPC -->|"CurePeriodActivated"| CPA
+    end
+
+    LRA(["LenderRecognitionAgreement\n[Homeownership BC]"])
+
+    HOB -. "HomeownerOnboarded\n→ StewardshipCaseOpened" .-> SC
+    GLT -. "GroundLeaseTerminated\n→ StewardshipCaseClosed" .-> SC
+    LFAE -. "LeaseFeeArrearsEscalated\n→ ForeclosurePreventionCaseOpened" .-> FPC
+    LRA -. "LraId [ref]" .-> CPA
+
+    classDef external fill:#1e293b,stroke:#475569,color:#94a3b8
+    classDef aggregate fill:#1e3a8a,stroke:#60a5fa,color:#dbeafe
+    classDef child fill:#14532d,stroke:#4ade80,color:#dcfce7
+
+    class HOB,GLT,LFAE,LRA external
+    class SC,FPC aggregate
+    class OV,PI,LV,CR,FB,CPA child
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 2: State Machines ────────────────────────────────────── -->
+  <div>
+    <h2 class="section-title">Lifecycle State Machines</h2>
+
+    <!-- Row 1: OccupancyVerification + LeaseViolation -->
+    <div class="state-grid-2" style="margin-bottom:1rem">
+
+      <div>
+        <div class="state-label">OccupancyVerification — annual survey, homeowner-submitted or staff-recorded</div>
+        <div class="diagram-container state-container-lg">
+          <div class="diagram-hint">scroll · drag</div>
+          <div class="mermaid">
+stateDiagram-v2
+    [*] --> Pending : InitiateOccupancyVerification()
+    Pending --> Submitted : SubmitOccupancyVerification()\nhomeowner or staff submits
+    Pending --> Overdue : [deadline elapsed]
+    Overdue --> Submitted : SubmitOccupancyVerification()\nlate submission accepted
+    Submitted --> Verified : VerifyOccupancy()\nstaff confirms primary residence
+    Submitted --> Failed : FailOccupancy()\nresponse raises concern
+    Verified --> [*]
+    Failed --> [*]
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="state-label">LeaseViolation — per identified violation, all mutations via StewardshipCase</div>
+        <div class="diagram-container state-container-lg">
+          <div class="diagram-hint">scroll · drag</div>
+          <div class="mermaid">
+stateDiagram-v2
+    [*] --> Identified : IdentifyViolation()\ntype + description recorded
+    Identified --> NoticeIssued : IssueViolationNotice()\nformal cure notice sent, deadline set
+    NoticeIssued --> Cured : CureViolation()\nhomeowner remediated, staff verified
+    NoticeIssued --> Escalated : EscalateViolation()\ncure deadline passed or unresponsive
+    Cured --> [*]
+    Escalated --> [*]
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Row 2: StewardshipCase + PropertyInspection + ForeclosurePreventionCase -->
+    <div class="state-grid-3">
+
+      <div>
+        <div class="state-label">StewardshipCase — permanent file, one per ground lease</div>
+        <div class="diagram-container state-container-sm">
+          <div class="diagram-hint">scroll · drag</div>
+          <div class="mermaid">
+stateDiagram-v2
+    [*] --> Active : Open()\nfired on HomeownerOnboarded
+    Active --> Closed : Close(reason)\nfired on GroundLeaseTerminated
+    Closed --> [*]
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="state-label">PropertyInspection — staff-submitted after in-person visit</div>
+        <div class="diagram-container state-container-sm">
+          <div class="diagram-hint">scroll · drag</div>
+          <div class="mermaid">
+stateDiagram-v2
+    [*] --> Scheduled : SchedulePropertyInspection()\ndate + inspector recorded
+    Scheduled --> Completed : CompletePropertyInspection()\noccupancy confirmed, notes recorded
+    Scheduled --> Cancelled : CancelPropertyInspection()
+    Completed --> [*]
+    Cancelled --> [*]
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="state-label">ForeclosurePreventionCase — opened by arrears escalation or manual entry</div>
+        <div class="diagram-container state-container-sm">
+          <div class="diagram-hint">scroll · drag</div>
+          <div class="mermaid">
+stateDiagram-v2
+    [*] --> Opened : Open()\ntrigger: LeaseFeeArrears\nor ServicerDelinquency
+    Opened --> Active : first intervention recorded\n(counseling / forbearance / cure)
+    Active --> Resolved : Resolve(outcome)\nInterventionSuccessful / HomeownerSold\nCurePeriodExercised / LeaseTerminated
+    Resolved --> [*]
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SECTION 3: Domain Model ───────────────────────────────────────── -->
+  <div>
+    <h2 class="section-title">Domain Model</h2>
+    <div class="diagram-container class-container">
+      <div class="diagram-hint">scroll to zoom · drag to pan</div>
+      <div class="mermaid">
+classDiagram
+    direction LR
+
+    class StewardshipCase {
+        +StewardshipCaseId Id
+        +string GroundLeaseId
+        +StewardshipCaseStatus Status
+        +DateOnly OpenedDate
+        +DateOnly? ClosedDate
+        +Open(groundLeaseId, openedDate, openedBy)$
+        +InitiateOccupancyVerification(periodYear, deadline?)
+        +SubmitOccupancyVerification(id, isPrimaryResident, subletDisclosed, majorChanges?)
+        +VerifyOccupancy(id, verifiedBy)
+        +FailOccupancy(id, reason, recordedBy)
+        +SchedulePropertyInspection(date, inspector, scheduledBy)
+        +CompletePropertyInspection(id, occupancyConfirmed, conditionNotes?, recordedBy)
+        +CancelPropertyInspection(id, reason, cancelledBy)
+        +IdentifyViolation(type, description, identifiedBy)
+        +IssueViolationNotice(id, cureDeadline, issuedBy)
+        +CureViolation(id, curedDate, verifiedBy)
+        +EscalateViolation(id, reason, escalatedBy)
+        +Close(reason, closedBy)
+    }
+
+    class OccupancyVerification {
+        &lt;&lt;child entity&gt;&gt;
+        +OccupancyVerificationId Id
+        +int PeriodYear
+        +DateOnly? SurveyDeadline
+        +bool? IsPrimaryResident
+        +bool? SubletDisclosed
+        +string? MajorChanges
+        +OccupancyVerificationStatus Status
+        +DateOnly? SubmittedDate
+        +DateOnly? DecisionDate
+    }
+
+    class PropertyInspection {
+        &lt;&lt;child entity&gt;&gt;
+        +PropertyInspectionId Id
+        +DateOnly ScheduledDate
+        +string InspectorName
+        +bool? OccupancyConfirmed
+        +string? ConditionNotes
+        +PropertyInspectionStatus Status
+        +DateOnly? CompletedDate
+    }
+
+    class LeaseViolation {
+        &lt;&lt;child entity&gt;&gt;
+        +LeaseViolationId Id
+        +LeaseViolationType Type
+        +string Description
+        +DateOnly IdentifiedDate
+        +DateOnly? NoticeIssuedDate
+        +DateOnly? CureDeadline
+        +LeaseViolationStatus Status
+        +DateOnly? ResolutionDate
+        +string? ResolutionNotes
+    }
+
+    class ForeclosurePreventionCase {
+        +ForeclosurePreventionCaseId Id
+        +string GroundLeaseId
+        +ForeclosurePreventionTrigger Trigger
+        +ForeclosurePreventionCaseStatus Status
+        +ForeclosurePreventionOutcome? Outcome
+        +DateOnly OpenedDate
+        +DateOnly? ResolvedDate
+        +Open(groundLeaseId, trigger, openedDate, openedBy)$
+        +RecordServicerDelinquency(servicerName, delinquentMonths, recordedBy)
+        +MakeCounselingReferral(agency, date, referredBy)
+        +RecordCounselingOutcome(id, outcome, outcomeDate, recordedBy)
+        +RequestForbearance(lender, date, requestedBy)
+        +RecordForbearanceOutcome(id, outcome, outcomeDate, notes?, recordedBy)
+        +ActivateCurePeriod(lraId, activationDate, curePeriodDays, activatedBy)
+        +Resolve(outcome, date, resolvedBy)
+    }
+
+    class CounselingReferral {
+        &lt;&lt;child entity&gt;&gt;
+        +CounselingReferralId Id
+        +string AgencyName
+        +DateOnly ReferralDate
+        +string? Outcome
+        +DateOnly? OutcomeDate
+    }
+
+    class ForbearanceRequest {
+        &lt;&lt;child entity&gt;&gt;
+        +ForbearanceRequestId Id
+        +string LenderName
+        +DateOnly RequestedDate
+        +ForbearanceOutcome? Outcome
+        +DateOnly? OutcomeDate
+        +string? Notes
+    }
+
+    class CurePeriodActivation {
+        &lt;&lt;child entity&gt;&gt;
+        +CurePeriodActivationId Id
+        +string LraId
+        +DateOnly ActivationDate
+        +int CurePeriodDays
+        +DateOnly CureDeadline
+        +decimal? AmountCured
+        +bool? CureSuccessful
+    }
+
+    class StewardshipCaseStatus {
+        &lt;&lt;enumeration&gt;&gt;
+        Active
+        Closed
+    }
+
+    class OccupancyVerificationStatus {
+        &lt;&lt;enumeration&gt;&gt;
+        Pending
+        Submitted
+        Verified
+        Failed
+        Overdue
+    }
+
+    class PropertyInspectionStatus {
+        &lt;&lt;enumeration&gt;&gt;
+        Scheduled
+        Completed
+        Cancelled
+    }
+
+    class LeaseViolationType {
+        &lt;&lt;enumeration&gt;&gt;
+        Occupancy
+        UnpermittedAlteration
+        PhysicalCondition
+        LeaseTermViolation
+    }
+
+    class LeaseViolationStatus {
+        &lt;&lt;enumeration&gt;&gt;
+        Identified
+        NoticeIssued
+        Cured
+        Escalated
+    }
+
+    class ForeclosurePreventionTrigger {
+        &lt;&lt;enumeration&gt;&gt;
+        LeaseFeeArrears
+        ServicerDelinquency
+    }
+
+    class ForeclosurePreventionCaseStatus {
+        &lt;&lt;enumeration&gt;&gt;
+        Opened
+        Active
+        Resolved
+    }
+
+    class ForeclosurePreventionOutcome {
+        &lt;&lt;enumeration&gt;&gt;
+        InterventionSuccessful
+        HomeownerSold
+        CurePeriodExercised
+        LeaseTerminated
+    }
+
+    class ForbearanceOutcome {
+        &lt;&lt;enumeration&gt;&gt;
+        Granted
+        Denied
+    }
+
+    StewardshipCase "1" *-- "0..*" OccupancyVerification : verifications
+    StewardshipCase "1" *-- "0..*" PropertyInspection : inspections
+    StewardshipCase "1" *-- "0..*" LeaseViolation : violations
+    StewardshipCase --> StewardshipCaseStatus : Status
+
+    OccupancyVerification --> OccupancyVerificationStatus : Status
+    PropertyInspection --> PropertyInspectionStatus : Status
+    LeaseViolation --> LeaseViolationType : Type
+    LeaseViolation --> LeaseViolationStatus : Status
+
+    ForeclosurePreventionCase "1" *-- "0..*" CounselingReferral : referrals
+    ForeclosurePreventionCase "1" *-- "0..*" ForbearanceRequest : forbearanceRequests
+    ForeclosurePreventionCase "1" *-- "0..*" CurePeriodActivation : curePeriods
+    ForeclosurePreventionCase --> ForeclosurePreventionTrigger : Trigger
+    ForeclosurePreventionCase --> ForeclosurePreventionCaseStatus : Status
+    ForeclosurePreventionCase --> ForeclosurePreventionOutcome : Outcome
+
+    ForbearanceRequest --> ForbearanceOutcome : Outcome
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 4: Domain Events ─────────────────────────────────────── -->
+  <div class="panel blue">
+    <h2>Domain Events</h2>
+    <table class="events">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Aggregate</th>
+          <th>Key payload fields</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="agg-header"><td colspan="3">StewardshipCase</td></tr>
+        <tr>
+          <td><code>StewardshipCaseOpened</code></td>
+          <td>StewardshipCase</td>
+          <td>groundLeaseId, openedDate, openedBy</td>
+        </tr>
+        <tr>
+          <td><code>OccupancyVerificationInitiated</code></td>
+          <td>StewardshipCase</td>
+          <td>verificationId, periodYear, surveyDeadline?, initiatedBy</td>
+        </tr>
+        <tr>
+          <td><code>OccupancyVerificationSubmitted</code></td>
+          <td>StewardshipCase</td>
+          <td>verificationId, isPrimaryResident, subletDisclosed, majorChanges?, submittedDate</td>
+        </tr>
+        <tr>
+          <td><code>OccupancyVerified</code></td>
+          <td>StewardshipCase</td>
+          <td>verificationId, verifiedDate, verifiedBy</td>
+        </tr>
+        <tr>
+          <td><code>OccupancyVerificationFailed</code></td>
+          <td>StewardshipCase</td>
+          <td>verificationId, reason, recordedBy</td>
+        </tr>
+        <tr>
+          <td><code>OccupancyVerificationOverdue</code></td>
+          <td>StewardshipCase</td>
+          <td>verificationId, deadline</td>
+        </tr>
+        <tr>
+          <td><code>PropertyInspectionScheduled</code></td>
+          <td>StewardshipCase</td>
+          <td>inspectionId, scheduledDate, inspectorName, scheduledBy</td>
+        </tr>
+        <tr>
+          <td><code>PropertyInspectionCompleted</code></td>
+          <td>StewardshipCase</td>
+          <td>inspectionId, occupancyConfirmed, conditionNotes?, completedDate, recordedBy</td>
+        </tr>
+        <tr>
+          <td><code>PropertyInspectionCancelled</code></td>
+          <td>StewardshipCase</td>
+          <td>inspectionId, reason, cancelledBy</td>
+        </tr>
+        <tr>
+          <td><code>LeaseViolationIdentified</code></td>
+          <td>StewardshipCase</td>
+          <td>violationId, violationType, description, identifiedDate, identifiedBy</td>
+        </tr>
+        <tr>
+          <td><code>ViolationNoticeIssued</code></td>
+          <td>StewardshipCase</td>
+          <td>violationId, noticeDate, cureDeadline, issuedBy</td>
+        </tr>
+        <tr>
+          <td><code>LeaseViolationCured</code></td>
+          <td>StewardshipCase</td>
+          <td>violationId, curedDate, verifiedBy</td>
+        </tr>
+        <tr>
+          <td><code>LeaseViolationEscalated</code></td>
+          <td>StewardshipCase</td>
+          <td>violationId, reason, escalatedDate, escalatedBy</td>
+        </tr>
+        <tr>
+          <td><code>StewardshipCaseClosed</code></td>
+          <td>StewardshipCase</td>
+          <td>reason, closedDate, closedBy</td>
+        </tr>
+
+        <tr class="agg-header"><td colspan="3">ForeclosurePreventionCase</td></tr>
+        <tr>
+          <td><code>ForeclosurePreventionCaseOpened</code></td>
+          <td>ForeclosurePreventionCase</td>
+          <td>groundLeaseId, trigger (LeaseFeeArrears / ServicerDelinquency), openedDate, openedBy</td>
+        </tr>
+        <tr>
+          <td><code>ServicerDelinquencyRecorded</code></td>
+          <td>ForeclosurePreventionCase</td>
+          <td>servicerName, delinquentMonths, recordedDate, recordedBy</td>
+        </tr>
+        <tr>
+          <td><code>CounselingReferralMade</code></td>
+          <td>ForeclosurePreventionCase</td>
+          <td>referralId, agencyName, referralDate, referredBy</td>
+        </tr>
+        <tr>
+          <td><code>CounselingOutcomeRecorded</code></td>
+          <td>ForeclosurePreventionCase</td>
+          <td>referralId, outcome, outcomeDate, recordedBy</td>
+        </tr>
+        <tr>
+          <td><code>ForbearanceRequested</code></td>
+          <td>ForeclosurePreventionCase</td>
+          <td>requestId, lenderName, requestedDate, requestedBy</td>
+        </tr>
+        <tr>
+          <td><code>ForbearanceOutcomeRecorded</code></td>
+          <td>ForeclosurePreventionCase</td>
+          <td>requestId, outcome (Granted / Denied), outcomeDate, notes?, recordedBy</td>
+        </tr>
+        <tr>
+          <td><code>CurePeriodActivated</code></td>
+          <td>ForeclosurePreventionCase</td>
+          <td>activationId, lraId, activationDate, curePeriodDays, cureDeadline, activatedBy</td>
+        </tr>
+        <tr>
+          <td><code>ForeclosurePreventionCaseResolved</code></td>
+          <td>ForeclosurePreventionCase</td>
+          <td>outcome (InterventionSuccessful / HomeownerSold / CurePeriodExercised / LeaseTerminated), resolvedDate, resolvedBy</td>
+        </tr>
+
+        <tr class="agg-header"><td colspan="3">Integration events (cross-BC, inbound only)</td></tr>
+        <tr>
+          <td><code>HomeownerOnboarded</code> <span class="tag tag-in">inbound</span></td>
+          <td>← Homeownership BC</td>
+          <td>groundLeaseId, homeownerName, email, leaseStartDate → opens StewardshipCase</td>
+        </tr>
+        <tr>
+          <td><code>GroundLeaseTerminated</code> <span class="tag tag-in">inbound</span></td>
+          <td>← Homeownership BC</td>
+          <td>groundLeaseId, reason, terminatedBy → closes StewardshipCase</td>
+        </tr>
+        <tr>
+          <td><code>LeaseFeeArrearsEscalated</code> <span class="tag tag-in">inbound</span></td>
+          <td>← Lease Finance BC</td>
+          <td>groundLeaseId, arrearsAmount, escalatedDate → opens ForeclosurePreventionCase</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Key Decisions ─────────────────────────────────────────────────── -->
+  <div class="panel green">
+    <h2>Key Decisions</h2>
+    <ul>
+      <li><strong>ViolationRecord is not a top-level aggregate.</strong> CLT software (HomeKeeper, Public House) models violations as child records of a persistent stewardship file, not standalone cases. Violations do not exist independently — they arise within the context of an active homeowner relationship and are worked by the same coordinator managing that file. Elevating ViolationRecord to a top-level aggregate in the preliminary domain map was a modeling error; corrected here.</li>
+      <li><strong>Two OccupancyVerification types, one entity.</strong> Annual surveys submitted by the homeowner and occupancy visits performed by staff both produce an OccupancyVerification record. The source differs (homeowner self-report vs. in-person inspection) and the fields differ (SubletDisclosed / MajorChanges vs. OccupancyConfirmed / ConditionNotes), but the lifecycle is identical. Modeling them as the same entity keeps the aggregate interface simple; a future homeowner portal uses the same SubmitOccupancyVerification path, just submitted via a different surface.</li>
+      <li><strong>CurrentHomeowner is not denormalized into aggregates.</strong> Both StewardshipCase and ForeclosurePreventionCase hold GroundLeaseId only. Homeowner contact information is a read-model concern: the coordinator's view resolves it at query time via GroundLeaseId. Denormalizing creates a stale-data sync problem — if HomeownerChanged fires, every aggregate holding a Homeowner value object must be updated with no write-side benefit.</li>
+      <li><strong>ServicerDelinquency is manual-entry for now.</strong> Lender servicer feeds (Fannie Mae reporting, servicer portals) require integration work that is out of scope for the initial build. Staff manually enters the delinquency via RecordServicerDelinquency(). The domain event <code>ServicerDelinquencyRecorded</code> is clean enough that an automated servicer feed can drive the same command later with no model changes.</li>
+      <li><strong>ForeclosurePreventionCase uses typed child entities (Approach B).</strong> CurePeriodActivation is a legal action: it references a specific LenderRecognitionAgreement (LraId), sets a cure deadline, and tracks the cured amount and outcome. This record is referenced in compliance reporting and must stand as a first-class audit entry. ForbearanceRequest and CounselingReferral also warrant individual outcome tracking for CLT compliance reporting — not just aggregate counts.</li>
+    </ul>
+  </div>
+
+  <!-- ── Open Questions ────────────────────────────────────────────────── -->
+  <div class="panel amber">
+    <h2>Open Questions</h2>
+    <ul>
+      <li><strong>OccupancyVerification auto-initiation cadence.</strong> Who or what creates the annual OccupancyVerification record? Options: a scheduled Wolverine saga that fires annually per active StewardshipCase, a batch job on a Hangfire-style scheduler, or manual staff action. The domain model is neutral on this — InitiateOccupancyVerification() is a command that any caller can issue — but the infrastructure and scheduling approach must be decided before building the feature. A Wolverine saga keyed off anniversary of OpenedDate is the most event-native approach.</li>
+      <li><strong>ForeclosurePreventionCase deduplication.</strong> If both a LeaseFeeArrearsEscalated integration event and a manual ServicerDelinquency entry arrive for the same GroundLeaseId within a short window, should the system open one case or two? Likely one — the coordinator works a single file regardless of how the distress was first detected — but the merge/deduplication rule must be defined: check for an open ForeclosurePreventionCase on the same GroundLeaseId before opening a second, and if one exists, record the additional trigger on it rather than creating a duplicate.</li>
+    </ul>
+  </div>
+
+</body>
+</html>
