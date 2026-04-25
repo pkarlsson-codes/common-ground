@@ -41,6 +41,7 @@ export default function EntityCombobox({
   const listRef = useRef<HTMLUListElement>(null)
 
   useEffect(() => {
+    isMountedRef.current = true
     return () => {
       isMountedRef.current = false
       if (debounceRef.current) {
