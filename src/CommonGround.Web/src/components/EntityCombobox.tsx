@@ -35,8 +35,19 @@ export default function EntityCombobox({
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null)
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const fetchSequenceRef = useRef(0)
+  const isMountedRef = useRef(true)
   const containerRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
+    }
+  }, [])
 
   // When value is cleared externally, reset display
   useEffect(() => {
@@ -47,11 +58,18 @@ export default function EntityCombobox({
   }, [value])
 
   const runFetch = (q: string) => {
+    const fetchSequence = ++fetchSequenceRef.current
     setDropdown({ status: 'loading' })
     setActiveIndex(-1)
     fetchOptions(q)
-      .then(options => setDropdown({ status: 'ready', options }))
-      .catch(() => setDropdown({ status: 'error' }))
+      .then(options => {
+        if (!isMountedRef.current || fetchSequence !== fetchSequenceRef.current) return
+        setDropdown({ status: 'ready', options })
+      })
+      .catch(() => {
+        if (!isMountedRef.current || fetchSequence !== fetchSequenceRef.current) return
+        setDropdown({ status: 'error' })
+      })
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
