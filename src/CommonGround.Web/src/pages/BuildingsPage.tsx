@@ -8,9 +8,14 @@ import {
   type RecordBuildingAssessmentRequest,
   type RegisterBuildingRequest,
 } from '../hooks/types'
+import EntityCombobox from '../components/EntityCombobox'
 import Pagination from '../components/Pagination'
 import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
+import { LandParcelsApi } from '../api'
+import { apiConfig } from '../lib/apiConfig'
+
+const landParcelsApi = new LandParcelsApi(apiConfig)
 
 type Panel = 'detail' | 'register' | null
 
@@ -47,7 +52,6 @@ export default function BuildingsPage() {
   const [page,           setPage]           = useState(1)
   const [statusFilter,   setStatusFilter]   = useState('')
   const [parcelFilter,   setParcelFilter]   = useState('')
-  const [parcelInput,    setParcelInput]    = useState('')
   const [selectedId,     setSelectedId]     = useState<string | null>(null)
   const [panel,          setPanel]          = useState<Panel>(null)
   const [form,           setForm]           = useState<RegisterBuildingRequest>(emptyForm)
@@ -127,15 +131,8 @@ export default function BuildingsPage() {
     } catch { /* error shown inline */ }
   }
 
-  const applyParcelFilter = (e: React.FormEvent) => {
-    e.preventDefault()
-    setParcelFilter(parcelInput.trim())
-    setPage(1)
-  }
-
   const clearParcelFilter = () => {
     setParcelFilter('')
-    setParcelInput('')
     setPage(1)
   }
 
@@ -173,21 +170,25 @@ export default function BuildingsPage() {
           ))}
         </select>
 
-        <form onSubmit={applyParcelFilter} style={{ display: 'flex', gap: 6 }}>
-          <input
-            className="form-input"
-            style={{ width: 280 }}
-            placeholder="Filter by parcel ID…"
-            value={parcelInput}
-            onChange={e => setParcelInput(e.target.value)}
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <EntityCombobox
+            value={parcelFilter || null}
+            onChange={id => { setParcelFilter(id ?? ''); setPage(1) }}
+            fetchOptions={async q => {
+              const result = await landParcelsApi.getLandParcels({ search: q, pageSize: 10 })
+              return (result.items ?? []).map(p => ({
+                id: p.id!,
+                label: [p.legalParcelNumber, p.address].filter(Boolean).join(' — '),
+              }))
+            }}
+            placeholder="Filter by parcel…"
           />
-          <button type="submit" className="btn btn-secondary btn-sm">Filter</button>
           {parcelFilter && (
             <button type="button" className="btn btn-ghost btn-sm" onClick={clearParcelFilter}>
               Clear
             </button>
           )}
-        </form>
+        </div>
       </div>
 
       <div className="registry-table-wrap">
@@ -408,7 +409,7 @@ export default function BuildingsPage() {
                 className="btn btn-primary"
                 type="submit"
                 form="register-building-form"
-                disabled={registerMutation.isPending}
+                disabled={registerMutation.isPending || !form.landParcelId}
               >
                 {registerMutation.isPending ? 'Registering…' : 'Register Building'}
               </button>
@@ -418,13 +419,18 @@ export default function BuildingsPage() {
           <form id="register-building-form" onSubmit={handleRegister}>
             <div className="form-grid">
               <div className="form-field full">
-                <label className="form-label">Land Parcel ID</label>
-                <input
-                  className="form-input"
-                  value={form.landParcelId}
-                  onChange={e => setForm(f => ({ ...f, landParcelId: e.target.value }))}
-                  placeholder="Paste the parcel UUID"
-                  required
+                <label className="form-label">Land Parcel</label>
+                <EntityCombobox
+                  value={form.landParcelId || null}
+                  onChange={id => setForm(f => ({ ...f, landParcelId: id ?? '' }))}
+                  fetchOptions={async q => {
+                    const result = await landParcelsApi.getLandParcels({ search: q, pageSize: 10 })
+                    return (result.items ?? []).map(p => ({
+                      id: p.id!,
+                      label: [p.legalParcelNumber, p.address].filter(Boolean).join(' — '),
+                    }))
+                  }}
+                  placeholder="Search parcels…"
                 />
               </div>
               <div className="form-field full">

@@ -594,6 +594,50 @@ body {
   cursor: pointer;
 }
 .form-select option { background: #1a2438; }
+
+/* ── EntityCombobox ───────────────────────────────── */
+.entity-combobox {
+  position: relative;
+  width: 100%;
+}
+.entity-combobox__input {
+  width: 100%;
+}
+.entity-combobox__dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-bright);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.entity-combobox__option {
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.entity-combobox__option:hover,
+.entity-combobox__option--active {
+  background: var(--amber-dim);
+  color: var(--text-bright);
+}
+.entity-combobox__option--disabled {
+  color: var(--text-dim);
+  cursor: default;
+  pointer-events: none;
+}
+
 .form-error {
   margin-top: 12px;
   padding: 10px 12px;

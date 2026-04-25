@@ -30,9 +30,14 @@ import {
   type StallWorkflowForm,
   type WithdrawWorkflowForm,
 } from '../hooks/types'
+import EntityCombobox from '../components/EntityCombobox'
 import Pagination from '../components/Pagination'
 import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
+import { GroundLeasesApi } from '../api'
+import { apiConfig } from '../lib/apiConfig'
+
+const groundLeasesApi = new GroundLeasesApi(apiConfig)
 
 type Panel = 'detail' | 'initiate' | null
 
@@ -116,7 +121,6 @@ export default function PurchaseWorkflowsPage() {
   const [page, setPage] = useState(1)
   const [phaseFilter, setPhaseFilter] = useState('')
   const [groundLeaseFilter, setGroundLeaseFilter] = useState('')
-  const [groundLeaseInput, setGroundLeaseInput] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [panel, setPanel] = useState<Panel>(null)
 
@@ -215,15 +219,8 @@ export default function PurchaseWorkflowsPage() {
   const handleWithdraw = makeTrackHandler(withdrawMutation.mutateAsync,  'Workflow withdrawn')
   const handleStall    = makeTrackHandler(stallMutation.mutateAsync,     'Workflow stalled')
 
-  const applyGLFilter = (e: React.FormEvent) => {
-    e.preventDefault()
-    setGroundLeaseFilter(groundLeaseInput.trim())
-    setPage(1)
-  }
-
   const clearGLFilter = () => {
     setGroundLeaseFilter('')
-    setGroundLeaseInput('')
     setPage(1)
   }
 
@@ -264,21 +261,26 @@ export default function PurchaseWorkflowsPage() {
           ))}
         </select>
 
-        <form onSubmit={applyGLFilter} style={{ display: 'flex', gap: 6 }}>
-          <input
-            className="form-input"
-            style={{ width: 280 }}
-            placeholder="Filter by ground lease ID…"
-            value={groundLeaseInput}
-            onChange={e => setGroundLeaseInput(e.target.value)}
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <EntityCombobox
+            value={groundLeaseFilter || null}
+            onChange={id => { setGroundLeaseFilter(id ?? ''); setPage(1) }}
+            fetchOptions={async q => {
+              const result = await groundLeasesApi.getGroundLeases({ search: q, pageSize: 10 })
+              return (result.items ?? []).map(l => ({
+                id: l.id!,
+                label: [l.homeownerFullName, (l as { parcelAddress?: string }).parcelAddress]
+                  .filter(Boolean).join(' — '),
+              }))
+            }}
+            placeholder="Filter by ground lease…"
           />
-          <button type="submit" className="btn btn-secondary btn-sm">Filter</button>
           {groundLeaseFilter && (
             <button type="button" className="btn btn-ghost btn-sm" onClick={clearGLFilter}>
               Clear
             </button>
           )}
-        </form>
+        </div>
       </div>
 
       <div className="registry-table-wrap">
@@ -754,7 +756,7 @@ export default function PurchaseWorkflowsPage() {
                 className="btn btn-primary"
                 type="submit"
                 form="initiate-workflow-form"
-                disabled={initiateMutation.isPending}
+                disabled={initiateMutation.isPending || !initiateForm.groundLeaseId}
               >
                 {initiateMutation.isPending ? 'Initiating…' : 'Initiate Workflow'}
               </button>
@@ -764,13 +766,19 @@ export default function PurchaseWorkflowsPage() {
           <form id="initiate-workflow-form" onSubmit={handleInitiate}>
             <div className="form-grid">
               <div className="form-field full">
-                <label className="form-label">Ground Lease ID</label>
-                <input
-                  className="form-input"
-                  value={initiateForm.groundLeaseId}
-                  onChange={e => setInitiateForm(f => ({ ...f, groundLeaseId: e.target.value }))}
-                  placeholder="Paste the ground lease UUID"
-                  required
+                <label className="form-label">Ground Lease</label>
+                <EntityCombobox
+                  value={initiateForm.groundLeaseId || null}
+                  onChange={id => setInitiateForm(f => ({ ...f, groundLeaseId: id ?? '' }))}
+                  fetchOptions={async q => {
+                    const result = await groundLeasesApi.getGroundLeases({ search: q, pageSize: 10 })
+                    return (result.items ?? []).map(l => ({
+                      id: l.id!,
+                      label: [l.homeownerFullName, (l as { parcelAddress?: string }).parcelAddress]
+                        .filter(Boolean).join(' — '),
+                    }))
+                  }}
+                  placeholder="Search ground leases…"
                 />
               </div>
               <div className="form-field full">

@@ -19,9 +19,15 @@ import {
   type RecordCheckInForm,
   type ResaleEstimateForm,
 } from '../hooks/types'
+import EntityCombobox from '../components/EntityCombobox'
 import Pagination from '../components/Pagination'
 import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
+import { BuildingsApi, LandParcelsApi } from '../api'
+import { apiConfig } from '../lib/apiConfig'
+
+const landParcelsApi = new LandParcelsApi(apiConfig)
+const buildingsApi = new BuildingsApi(apiConfig)
 
 type Panel = 'detail' | 'create' | null
 
@@ -611,7 +617,7 @@ export default function GroundLeasesPage() {
                 className="btn btn-primary"
                 type="submit"
                 form="create-ground-lease-form"
-                disabled={createMutation.isPending}
+                disabled={createMutation.isPending || !createForm.landParcelId || !createForm.buildingId}
               >
                 {createMutation.isPending ? 'Creating…' : 'Create Lease'}
               </button>
@@ -621,23 +627,39 @@ export default function GroundLeasesPage() {
           <form id="create-ground-lease-form" onSubmit={handleCreate}>
             <div className="form-grid">
               <div className="form-field full">
-                <label className="form-label">Land Parcel ID</label>
-                <input
-                  className="form-input"
-                  value={createForm.landParcelId}
-                  onChange={e => setCreateForm(f => ({ ...f, landParcelId: e.target.value }))}
-                  placeholder="Paste the parcel UUID"
-                  required
+                <label className="form-label">Land Parcel</label>
+                <EntityCombobox
+                  value={createForm.landParcelId || null}
+                  onChange={id => setCreateForm(f => ({ ...f, landParcelId: id ?? '', buildingId: '' }))}
+                  fetchOptions={async q => {
+                    const result = await landParcelsApi.getLandParcels({ search: q, pageSize: 10 })
+                    return (result.items ?? []).map(p => ({
+                      id: p.id!,
+                      label: [p.legalParcelNumber, p.address].filter(Boolean).join(' — '),
+                    }))
+                  }}
+                  placeholder="Search parcels…"
                 />
               </div>
               <div className="form-field full">
-                <label className="form-label">Building ID</label>
-                <input
-                  className="form-input"
-                  value={createForm.buildingId}
-                  onChange={e => setCreateForm(f => ({ ...f, buildingId: e.target.value }))}
-                  placeholder="Paste the building UUID"
-                  required
+                <label className="form-label">Building</label>
+                <EntityCombobox
+                  value={createForm.buildingId || null}
+                  onChange={id => setCreateForm(f => ({ ...f, buildingId: id ?? '' }))}
+                  fetchOptions={async q => {
+                    const result = await buildingsApi.getBuildings({ landParcelId: createForm.landParcelId, pageSize: 10 })
+                    const lower = q.toLowerCase()
+                    const items = result.items ?? []
+                    const filtered = lower ? items.filter(b =>
+                      `${b.buildingType} ${b.bedrooms} ${b.bathrooms} ${b.squareFootage}`.toLowerCase().includes(lower)
+                    ) : items
+                    return filtered.map(b => ({
+                      id: b.id!,
+                      label: `${b.buildingType}, ${b.bedrooms}bd/${b.bathrooms}ba, ${b.squareFootage} sqft`,
+                    }))
+                  }}
+                  placeholder={createForm.landParcelId ? 'Search buildings on this parcel…' : 'Select a parcel first'}
+                  disabled={!createForm.landParcelId}
                 />
               </div>
               <div className="form-field">
