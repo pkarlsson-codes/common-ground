@@ -16,6 +16,7 @@
 import * as runtime from '../runtime';
 import type {
   BuildingResponse,
+  PaginatedResponseOfBuildingAssessmentItemResponse,
   PaginatedResponseOfBuildingListItemResponse,
   ProblemDetails,
   RecordBuildingAssessmentRequest,
@@ -26,6 +27,8 @@ import type {
 import {
     BuildingResponseFromJSON,
     BuildingResponseToJSON,
+    PaginatedResponseOfBuildingAssessmentItemResponseFromJSON,
+    PaginatedResponseOfBuildingAssessmentItemResponseToJSON,
     PaginatedResponseOfBuildingListItemResponseFromJSON,
     PaginatedResponseOfBuildingListItemResponseToJSON,
     ProblemDetailsFromJSON,
@@ -42,6 +45,12 @@ import {
 
 export interface GetBuildingRequest {
     buildingId: string;
+}
+
+export interface GetBuildingAssessmentsRequest {
+    buildingId: string;
+    page?: number;
+    pageSize?: number;
 }
 
 export interface GetBuildingsRequest {
@@ -86,6 +95,23 @@ export interface BuildingsApiInterface {
      * Gets a building by ID.
      */
     getBuilding(requestParameters: GetBuildingRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<BuildingResponse>;
+
+    /**
+     * 
+     * @summary Gets a paginated list of assessments for a building.
+     * @param {string} buildingId The ID of the building.
+     * @param {number} [page] The page number (1-based).
+     * @param {number} [pageSize] The number of items per page.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BuildingsApiInterface
+     */
+    getBuildingAssessmentsRaw(requestParameters: GetBuildingAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfBuildingAssessmentItemResponse>>;
+
+    /**
+     * Gets a paginated list of assessments for a building.
+     */
+    getBuildingAssessments(requestParameters: GetBuildingAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfBuildingAssessmentItemResponse>;
 
     /**
      * 
@@ -193,6 +219,51 @@ export class BuildingsApi extends runtime.BaseAPI implements BuildingsApiInterfa
      */
     async getBuilding(requestParameters: GetBuildingRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<BuildingResponse> {
         const response = await this.getBuildingRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Gets a paginated list of assessments for a building.
+     */
+    async getBuildingAssessmentsRaw(requestParameters: GetBuildingAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfBuildingAssessmentItemResponse>> {
+        if (requestParameters['buildingId'] == null) {
+            throw new runtime.RequiredError(
+                'buildingId',
+                'Required parameter "buildingId" was null or undefined when calling getBuildingAssessments().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['page'] != null) {
+            queryParameters['page'] = requestParameters['page'];
+        }
+
+        if (requestParameters['pageSize'] != null) {
+            queryParameters['pageSize'] = requestParameters['pageSize'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/buildings/{buildingId}/assessments`;
+        urlPath = urlPath.replace(`{${"buildingId"}}`, encodeURIComponent(String(requestParameters['buildingId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedResponseOfBuildingAssessmentItemResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets a paginated list of assessments for a building.
+     */
+    async getBuildingAssessments(requestParameters: GetBuildingAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfBuildingAssessmentItemResponse> {
+        const response = await this.getBuildingAssessmentsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

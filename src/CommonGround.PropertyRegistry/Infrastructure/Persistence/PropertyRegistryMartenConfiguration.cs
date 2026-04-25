@@ -40,6 +40,9 @@ public static class PropertyRegistryMartenConfiguration
             .Index(x => x.SeedKey);
         options.Schema.For<BuildingView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<BuildingListItemView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<BuildingAssessmentView>()
+            .DatabaseSchemaName(SchemaName)
+            .Index(x => x.BuildingId);
     }
 
     private static void ConfigureProjections(StoreOptions options)
@@ -48,5 +51,6 @@ public static class PropertyRegistryMartenConfiguration
         options.Projections.Add<LandParcelListItemViewProjection>(ProjectionLifecycle.Async);
         options.Projections.Add<BuildingViewProjection>(ProjectionLifecycle.Async);
         options.Projections.Add<BuildingListItemViewProjection>(ProjectionLifecycle.Async);
+        options.Projections.Add<BuildingAssessmentViewProjection>(ProjectionLifecycle.Async);
     }
 }

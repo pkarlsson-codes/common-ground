@@ -41,4 +41,12 @@ public interface IBuildingsApiClient
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task UpdateBuildingStatusAsync(string buildingId, UpdateBuildingStatusRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Gets a paginated list of assessments for a building, newest first.</summary>
+    /// <param name="buildingId">The ID of the building.</param>
+    /// <param name="page">The page number (1-based).</param>
+    /// <param name="pageSize">The number of items per page.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A paginated list of assessment items.</returns>
+    Task<PaginatedResponse<BuildingAssessmentItemResponse>> GetBuildingAssessmentsAsync(string buildingId, int page, int pageSize, CancellationToken cancellationToken);
 }

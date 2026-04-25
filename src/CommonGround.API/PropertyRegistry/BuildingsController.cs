@@ -138,6 +138,31 @@ public sealed class BuildingsController(IMessageBus bus) : ControllerBase
         return Created();
     }
 
+    /// <summary>Gets a paginated list of assessments for a building.</summary>
+    /// <param name="buildingId">The ID of the building.</param>
+    /// <param name="request">Pagination parameters.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A paginated list of assessments, newest first.</returns>
+    [HttpGet("{buildingId}/assessments")]
+    [ProducesResponseType(typeof(PaginatedResponse<BuildingAssessmentItemResponse>), 200)]
+    [ProducesResponseType(404)]
+    [EndpointName("getBuildingAssessments")]
+    public async Task<IActionResult> GetBuildingAssessments(
+        string buildingId,
+        [FromQuery] PaginationQuerySpec<object> request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(buildingId);
+
+        var query = new GetBuildingAssessments(BuildingId.Create(buildingId), request.Page);
+        var result = await bus.InvokeAsync<PaginatedResponse<BuildingAssessmentView>>(query, cancellationToken);
+
+        var response = result.MapItems(v => new BuildingAssessmentItemResponse(
+            v.Id.ToString(), v.BuildingId, v.AssessedValue, v.AssessmentDate, v.ConditionNotes, v.AssessedBy, v.RecordedAt));
+
+        return Ok(response);
+    }
+
     /// <summary>Updates a building's status.</summary>
     /// <param name="buildingId">The ID of the building to update.</param>
     /// <param name="request">The request containing the new status.</param>

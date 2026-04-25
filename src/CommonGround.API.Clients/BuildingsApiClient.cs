@@ -60,4 +60,14 @@ public sealed class BuildingsApiClient(
         ArgumentNullException.ThrowIfNull(request);
         await PatchAsync($"api/buildings/{buildingId}/status", request, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task<PaginatedResponse<BuildingAssessmentItemResponse>> GetBuildingAssessmentsAsync(
+        string buildingId, int page, int pageSize, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(buildingId);
+        var qs = $"?page.number={page}&page.size={pageSize}";
+        return await GetAsync<PaginatedResponse<BuildingAssessmentItemResponse>>(
+            $"api/buildings/{buildingId}/assessments{qs}", cancellationToken).ConfigureAwait(false);
+    }
 }

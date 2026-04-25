@@ -7,6 +7,7 @@ apis/OidcApi.ts
 apis/PurchaseWorkflowsApi.ts
 apis/index.ts
 index.ts
+models/BuildingAssessmentItemResponse.ts
 models/BuildingListItemResponse.ts
 models/BuildingResponse.ts
 models/CalculateResaleEstimateRequest.ts
@@ -23,6 +24,7 @@ models/InitiatePurchaseWorkflowResponse.ts
 models/InspectionResultDto.ts
 models/LandParcelResponse.ts
 models/LeaseExecutionDetailsDto.ts
+models/PaginatedResponseOfBuildingAssessmentItemResponse.ts
 models/PaginatedResponseOfBuildingListItemResponse.ts
 models/PaginatedResponseOfGroundLeaseListItemResponse.ts
 models/PaginatedResponseOfLandParcelResponse.ts

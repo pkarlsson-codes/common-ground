@@ -244,6 +244,69 @@
             }
           }
         }
+      },
+      "get": {
+        "tags": [
+          "Buildings"
+        ],
+        "summary": "Gets a paginated list of assessments for a building.",
+        "operationId": "getBuildingAssessments",
+        "parameters": [
+          {
+            "name": "buildingId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the building.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number (1-based).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "x-position": 2
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of items per page.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            },
+            "x-position": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with a paginated list of assessments, or 404 if not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfBuildingAssessmentItemResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/buildings/{buildingId}/status": {
@@ -1618,6 +1681,82 @@
           "conditionNotes": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "PaginatedResponseOfBuildingAssessmentItemResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/BuildingAssessmentItemResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "BuildingAssessmentItemResponse": {
+        "type": "object",
+        "description": "Response DTO for a building assessment list item.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "buildingId": {
+            "type": "string"
+          },
+          "assessedValue": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "assessmentDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "conditionNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "assessedBy": {
+            "type": "string"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

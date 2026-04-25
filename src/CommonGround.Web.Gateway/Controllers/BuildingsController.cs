@@ -89,6 +89,27 @@ public sealed class BuildingsController(IBuildingsApiClient client) : Controller
         return Created();
     }
 
+    /// <summary>Gets a paginated list of assessments for a building.</summary>
+    /// <param name="buildingId">The ID of the building.</param>
+    /// <param name="page">The page number (1-based).</param>
+    /// <param name="pageSize">The number of items per page.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>200 with a paginated list of assessments, or 404 if not found.</returns>
+    [HttpGet("{buildingId}/assessments")]
+    [ProducesResponseType(typeof(PaginatedResponse<BuildingAssessmentItemResponse>), 200)]
+    [ProducesResponseType(404)]
+    [EndpointName("getBuildingAssessments")]
+    public async Task<IActionResult> GetBuildingAssessments(
+        string buildingId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(buildingId);
+        var result = await client.GetBuildingAssessmentsAsync(buildingId, page, pageSize, cancellationToken);
+        return Ok(result);
+    }
+
     /// <summary>Updates a building's status.</summary>
     /// <param name="buildingId">The ID of the building to update.</param>
     /// <param name="request">The new status details.</param>

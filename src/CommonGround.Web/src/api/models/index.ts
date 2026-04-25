@@ -1,5 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
+export * from './BuildingAssessmentItemResponse';
 export * from './BuildingListItemResponse';
 export * from './BuildingResponse';
 export * from './CalculateResaleEstimateRequest';
@@ -16,6 +17,7 @@ export * from './InitiatePurchaseWorkflowResponse';
 export * from './InspectionResultDto';
 export * from './LandParcelResponse';
 export * from './LeaseExecutionDetailsDto';
+export * from './PaginatedResponseOfBuildingAssessmentItemResponse';
 export * from './PaginatedResponseOfBuildingListItemResponse';
 export * from './PaginatedResponseOfGroundLeaseListItemResponse';
 export * from './PaginatedResponseOfLandParcelResponse';
