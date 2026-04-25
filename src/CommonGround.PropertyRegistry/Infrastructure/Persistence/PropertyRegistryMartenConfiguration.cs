@@ -1,5 +1,6 @@
 using CommonGround.PropertyRegistry.Application.ReadModels;
 using CommonGround.PropertyRegistry.Infrastructure.Persistence.Projections;
+using CommonGround.PropertyRegistry.Infrastructure.Seeding;
 using JasperFx.Events.Projections;
 using Marten;
 using Weasel.Postgresql;
@@ -11,6 +12,7 @@ namespace CommonGround.PropertyRegistry.Infrastructure.Persistence;
 public static class PropertyRegistryMartenConfiguration
 {
     private const string SchemaName = "property_registry";
+    private const string SeedSchemaName = "property_registry_seed";
 
     /// <summary>Configures Marten for PropertyRegistry.</summary>
     public static void Configure(StoreOptions options)
@@ -30,6 +32,9 @@ public static class PropertyRegistryMartenConfiguration
             .DatabaseSchemaName(SchemaName)
             .Index(x => x.Address)
             .Index(x => x.LegalParcelNumber);
+        options.Schema.For<LandParcelSeedLookup>()
+            .DatabaseSchemaName(SeedSchemaName)
+            .Index(x => x.SeedKey);
         options.Schema.For<BuildingView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<BuildingListItemView>().DatabaseSchemaName(SchemaName);
     }

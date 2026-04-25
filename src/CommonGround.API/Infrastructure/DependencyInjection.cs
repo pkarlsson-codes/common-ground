@@ -6,6 +6,7 @@ using CommonGround.Identity.Infrastructure;
 using CommonGround.Identity.Infrastructure.Persistence;
 using CommonGround.PropertyRegistry.Infrastructure;
 using CommonGround.PropertyRegistry.Infrastructure.Persistence;
+using CommonGround.PropertyRegistry.Infrastructure.Seeding;
 using CommonGround.SharedKernel.Extensions;
 using CommonGround.Stewardship.Infrastructure;
 using CommonGround.Stewardship.Infrastructure.Persistence;
@@ -71,6 +72,9 @@ internal static class CommonGroundServiceCollectionExtensions
             HomeownershipMartenConfiguration.Configure(opts);
             IdentityMartenConfiguration.Configure(opts);
             StewardshipMartenConfiguration.Configure(opts);
+        }, configureBuilder: marten =>
+        {
+            marten.InitializeWith<LandParcelsInitialData>();
         });
         services.AddMartenUnitOfWork();
         return services;

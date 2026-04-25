@@ -1,0 +1,38 @@
+[
+  {
+    "seedKey": "lp-downtown-civic-001",
+    "legalParcelNumber": "APN-217-44-019",
+    "address": "1458 Cedar Avenue, Riverton, OR 97211",
+    "areaAcres": 0.83,
+    "acquisitionDate": "2021-09-15",
+    "acquisitionMethod": "Purchase",
+    "covenantTerms": "99-year ground lease with permanent affordability restrictions."
+  },
+  {
+    "seedKey": "lp-riverbend-002",
+    "legalParcelNumber": "APN-332-08-114",
+    "address": "902 Riverbend Lane, Riverton, OR 97212",
+    "areaAcres": 1.27,
+    "acquisitionDate": "2020-04-03",
+    "acquisitionMethod": "Donation",
+    "covenantTerms": "Land use limited to owner-occupied affordable housing units."
+  },
+  {
+    "seedKey": "lp-east-grove-003",
+    "legalParcelNumber": "APN-118-73-221",
+    "address": "3770 East Grove Street, Riverton, OR 97210",
+    "areaAcres": 0.64,
+    "acquisitionDate": "2022-11-29",
+    "acquisitionMethod": "Transfer",
+    "covenantTerms": "Transferred from city land bank with resale formula protections."
+  },
+  {
+    "seedKey": "lp-harbor-view-004",
+    "legalParcelNumber": "APN-501-12-008",
+    "address": "64 Harbor View Court, Riverton, OR 97209",
+    "areaAcres": 1.91,
+    "acquisitionDate": "2019-06-21",
+    "acquisitionMethod": "Purchase",
+    "covenantTerms": "Ground lease requires perpetual affordability and stewardship compliance."
+  }
+]

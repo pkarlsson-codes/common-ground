@@ -1,6 +1,7 @@
 using CommonGround.API;
 using CommonGround.API.Infrastructure;
 using CommonGround.API.Infrastructure.Configuration;
+using CommonGround.API.Infrastructure.Seeding;
 using CommonGround.Homeownership.Infrastructure;
 using CommonGround.Identity.Infrastructure;
 using CommonGround.PropertyRegistry.Infrastructure;
@@ -58,6 +59,7 @@ try
     app.ConfigureEndpoints();
 
     await app.StartAsync().ConfigureAwait(false);
+    await DevelopmentSeeder.RunAsync(app).ConfigureAwait(false);
     await app.WaitForShutdownAsync().ConfigureAwait(false);
 }
 catch (Exception ex) when (ex is not OperationCanceledException)
