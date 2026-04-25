@@ -1,0 +1,158 @@
+import { useEffect, useState } from 'react'
+import type { PurchaseWorkflowResponse } from '../../api'
+import {
+  useFailPurchase,
+  useRecordEligibilityVerified,
+  useRecordFinancingCommitted,
+  useRecordInspectionCompleted,
+  useRecordLeaseExecuted,
+  useRecordPurchaseClosed,
+  useRecordTitleCleared,
+  useScheduleClosing,
+  useStallWorkflow,
+  useWithdrawPurchase,
+} from '../../hooks/purchaseWorkflows'
+import type {
+  FailWorkflowForm,
+  RecordClosedForm,
+  RecordEligibilityForm,
+  RecordFinancingForm,
+  RecordInspectionForm,
+  RecordLeaseExecutedForm,
+  RecordTitleForm,
+  ScheduleClosingForm,
+  StallWorkflowForm,
+  WithdrawWorkflowForm,
+} from '../../hooks/types'
+import { usePurchaseWorkflowActions } from './usePurchaseWorkflowActions'
+
+const today = () => new Date().toISOString().slice(0, 10)
+
+const emptyEligibility = (): RecordEligibilityForm => ({ verifiedDate: today(), notes: '' })
+const emptyFinancing = (): RecordFinancingForm => ({ lenderName: '', committedAmount: 0, preapprovalLetterDate: today() })
+const emptyInspection = (): RecordInspectionForm => ({ inspectionDate: today(), inspectorName: '', notes: '' })
+const emptyTitle = (): RecordTitleForm => ({ clearedDate: today(), titleCompanyName: '' })
+const emptyLeaseExec = (): RecordLeaseExecutedForm => ({ signedDate: today() })
+const emptySchedule = (): ScheduleClosingForm => ({ scheduledDate: today() })
+const emptyClose = (): RecordClosedForm => ({ actualClosingDate: today(), closingNotes: '' })
+const emptyFail = (): FailWorkflowForm => ({ reason: '' })
+const emptyWithdraw = (): WithdrawWorkflowForm => ({ reason: '' })
+const emptyStall = (): StallWorkflowForm => ({ reason: '', resolutionTargetDate: '' })
+
+interface UsePurchaseWorkflowDetailControllerParams {
+  selectedId: string | null
+  detail: PurchaseWorkflowResponse | undefined
+  showToast: (msg: string, kind?: 'success' | 'error') => void
+  isDetailOpen: boolean
+}
+
+export function usePurchaseWorkflowDetailController({
+  selectedId,
+  detail,
+  showToast,
+  isDetailOpen,
+}: UsePurchaseWorkflowDetailControllerParams) {
+  const [eligForm, setEligForm] = useState<RecordEligibilityForm>(emptyEligibility)
+  const [finForm, setFinForm] = useState<RecordFinancingForm>(emptyFinancing)
+  const [inspForm, setInspForm] = useState<RecordInspectionForm>(emptyInspection)
+  const [titleForm, setTitleForm] = useState<RecordTitleForm>(emptyTitle)
+  const [leaseExecForm, setLeaseExecForm] = useState<RecordLeaseExecutedForm>(emptyLeaseExec)
+  const [scheduleForm, setScheduleForm] = useState<ScheduleClosingForm>(emptySchedule)
+  const [closeForm, setCloseForm] = useState<RecordClosedForm>(emptyClose)
+  const [failForm, setFailForm] = useState<FailWorkflowForm>(emptyFail)
+  const [withdrawForm, setWithdrawForm] = useState<WithdrawWorkflowForm>(emptyWithdraw)
+  const [stallForm, setStallForm] = useState<StallWorkflowForm>(emptyStall)
+
+  const eligMutation = useRecordEligibilityVerified()
+  const finMutation = useRecordFinancingCommitted()
+  const inspMutation = useRecordInspectionCompleted()
+  const titleMutation = useRecordTitleCleared()
+  const leaseExecMutation = useRecordLeaseExecuted()
+  const scheduleMutation = useScheduleClosing()
+  const closeMutation = useRecordPurchaseClosed()
+  const failMutation = useFailPurchase()
+  const withdrawMutation = useWithdrawPurchase()
+  const stallMutation = useStallWorkflow()
+
+  useEffect(() => {
+    if (!isDetailOpen) {
+      return
+    }
+
+    setEligForm(emptyEligibility())
+    setFinForm(emptyFinancing())
+    setInspForm(emptyInspection())
+    setTitleForm(emptyTitle())
+    setLeaseExecForm(emptyLeaseExec())
+    setScheduleForm(emptySchedule())
+    setCloseForm(emptyClose())
+    setFailForm(emptyFail())
+    setWithdrawForm(emptyWithdraw())
+    setStallForm(emptyStall())
+  }, [isDetailOpen, selectedId])
+
+  const actions = usePurchaseWorkflowActions({
+    selectedId,
+    detail,
+    showToast,
+    eligMutation,
+    finMutation,
+    inspMutation,
+    titleMutation,
+    leaseExecMutation,
+    scheduleMutation,
+    closeMutation,
+    failMutation,
+    withdrawMutation,
+    stallMutation,
+  })
+
+  return {
+    canAct: actions.canAct,
+    canSchedule: actions.canSchedule,
+    canClose: actions.canClose,
+    hasWorkflowAction: actions.hasWorkflowAction,
+    eligForm,
+    setEligForm,
+    finForm,
+    setFinForm,
+    inspForm,
+    setInspForm,
+    titleForm,
+    setTitleForm,
+    leaseExecForm,
+    setLeaseExecForm,
+    scheduleForm,
+    setScheduleForm,
+    closeForm,
+    setCloseForm,
+    failForm,
+    setFailForm,
+    withdrawForm,
+    setWithdrawForm,
+    stallForm,
+    setStallForm,
+    handleElig: actions.handleElig,
+    handleFin: actions.handleFin,
+    handleInsp: actions.handleInsp,
+    handleTitle: actions.handleTitle,
+    handleLeaseEx: actions.handleLeaseEx,
+    handleSchedule: actions.handleSchedule,
+    handleClose: actions.handleClose,
+    handleFail: actions.handleFail,
+    handleWithdraw: actions.handleWithdraw,
+    handleStall: actions.handleStall,
+    eligPending: eligMutation.isPending,
+    finPending: finMutation.isPending,
+    inspPending: inspMutation.isPending,
+    titlePending: titleMutation.isPending,
+    leaseExecPending: leaseExecMutation.isPending,
+    schedulePending: scheduleMutation.isPending,
+    scheduleError: scheduleMutation.isError,
+    closePending: closeMutation.isPending,
+    closeError: closeMutation.isError,
+    failPending: failMutation.isPending,
+    withdrawPending: withdrawMutation.isPending,
+    stallPending: stallMutation.isPending,
+  }
+}
