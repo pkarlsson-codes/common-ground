@@ -109,8 +109,11 @@ public sealed class Document : AggregateRoot<DocumentId>
         if (existing is not null)
             return;
 
+        var current = _versions[^1];
         ApplyChange(new DocumentAttached(
-            Id.Value, entityType, entityId, role, attachedBy.Value, DateTimeOffset.UtcNow));
+            Id.Value, entityType, entityId, role,
+            Title, current.FileName, current.ContentType, current.SizeBytes,
+            attachedBy.Value, DateTimeOffset.UtcNow));
     }
 
     /// <summary>Detaches this document from an entity. Idempotent if not attached.</summary>
