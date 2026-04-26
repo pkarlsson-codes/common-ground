@@ -55,7 +55,9 @@ public sealed class Document : AggregateRoot<DocumentId>
         long sizeBytes,
         string sha256,
         UserId uploadedBy,
-        (string EntityType, Guid EntityId, string? Role)? initialAttachment = null)
+        (string EntityType, Guid EntityId, string? Role)? initialAttachment = null,
+        DocumentId? documentId = null,
+        DocumentVersionId? versionId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
         ArgumentNullException.ThrowIfNull(sensitivity);
@@ -71,11 +73,12 @@ public sealed class Document : AggregateRoot<DocumentId>
 
         var doc = new Document();
         var now = DateTimeOffset.UtcNow;
-        var versionId = DocumentVersionId.Generate();
+        var actualVersionId = versionId ?? DocumentVersionId.Generate();
+        var actualDocumentId = documentId ?? DocumentId.Generate();
 
         doc.ApplyChange(new DocumentUploaded(
-            DocumentId.Generate().Value,
-            versionId.Value,
+            actualDocumentId.Value,
+            actualVersionId.Value,
             title,
             sensitivity.DisplayName,
             retention.DisplayName,

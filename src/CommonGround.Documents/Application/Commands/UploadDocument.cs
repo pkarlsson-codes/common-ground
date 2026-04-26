@@ -15,6 +15,8 @@ namespace CommonGround.Documents.Application.Commands;
 /// <param name="Sha256">Hex-encoded SHA-256 of the blob contents.</param>
 /// <param name="UploadedBy">The staff user uploading.</param>
 /// <param name="InitialAttachment">Optional entity to attach on creation.</param>
+/// <param name="DocumentId">Optional pre-computed document ID (used for deterministic blob keys).</param>
+/// <param name="VersionId">Optional pre-computed version ID (used for deterministic blob keys).</param>
 public sealed record UploadDocument(
     string Title,
     SensitivityLevel Sensitivity,
@@ -25,7 +27,9 @@ public sealed record UploadDocument(
     long SizeBytes,
     string Sha256,
     UserId UploadedBy,
-    UploadDocumentAttachment? InitialAttachment = null);
+    UploadDocumentAttachment? InitialAttachment = null,
+    DocumentId? DocumentId = null,
+    DocumentVersionId? VersionId = null);
 
 /// <summary>Initial attachment to apply when uploading a new document.</summary>
 public sealed record UploadDocumentAttachment(string EntityType, Guid EntityId, string? Role);
@@ -54,7 +58,9 @@ public static class UploadDocumentHandler
             command.UploadedBy,
             command.InitialAttachment is { } a
                 ? (a.EntityType, a.EntityId, a.Role)
-                : null);
+                : null,
+            command.DocumentId,
+            command.VersionId);
 
         repository.Stage(doc);
         await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
