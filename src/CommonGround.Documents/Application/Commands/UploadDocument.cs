@@ -1,0 +1,64 @@
+using CommonGround.Documents.Domain.Documents;
+using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Persistence;
+
+namespace CommonGround.Documents.Application.Commands;
+
+/// <summary>Uploads a brand-new document with its first version, optionally attaching it on creation.</summary>
+/// <param name="Title">Human-readable title.</param>
+/// <param name="Sensitivity">Sensitivity classification.</param>
+/// <param name="Retention">Retention class.</param>
+/// <param name="BlobKey">The MinIO object key produced by the uploader.</param>
+/// <param name="FileName">Original filename as submitted.</param>
+/// <param name="ContentType">MIME type.</param>
+/// <param name="SizeBytes">Observed byte length.</param>
+/// <param name="Sha256">Hex-encoded SHA-256 of the blob contents.</param>
+/// <param name="UploadedBy">The staff user uploading.</param>
+/// <param name="InitialAttachment">Optional entity to attach on creation.</param>
+public sealed record UploadDocument(
+    string Title,
+    SensitivityLevel Sensitivity,
+    RetentionClass Retention,
+    string BlobKey,
+    string FileName,
+    string ContentType,
+    long SizeBytes,
+    string Sha256,
+    UserId UploadedBy,
+    UploadDocumentAttachment? InitialAttachment = null);
+
+/// <summary>Initial attachment to apply when uploading a new document.</summary>
+public sealed record UploadDocumentAttachment(string EntityType, Guid EntityId, string? Role);
+
+/// <summary>Handles <see cref="UploadDocument"/>.</summary>
+public static class UploadDocumentHandler
+{
+    /// <summary>Creates the aggregate and persists.</summary>
+    public static async Task<DocumentId> Handle(
+        UploadDocument command,
+        IDocumentRepository repository,
+        IUnitOfWork unitOfWork,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+
+        var doc = Document.Upload(
+            command.Title,
+            command.Sensitivity,
+            command.Retention,
+            command.BlobKey,
+            command.FileName,
+            command.ContentType,
+            command.SizeBytes,
+            command.Sha256,
+            command.UploadedBy,
+            command.InitialAttachment is { } a
+                ? (a.EntityType, a.EntityId, a.Role)
+                : null);
+
+        repository.Stage(doc);
+        await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
+
+        return doc.Id;
+    }
+}
