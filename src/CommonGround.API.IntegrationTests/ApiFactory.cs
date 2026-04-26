@@ -1,3 +1,5 @@
+using CommonGround.API.IntegrationTests.Documents;
+using CommonGround.Documents.Domain.Documents;
 using JasperFx.Events.Projections;
 using Marten;
 using Microsoft.AspNetCore.Hosting;
@@ -97,6 +99,8 @@ public class ApiFactory : WebApplicationFactory<Program>
                     source.Lifecycle = ProjectionLifecycle.Inline;
                 }
             });
+
+            services.AddSingleton<IDocumentBlobStore, InMemoryDocumentBlobStore>();
 
             services.AddWolverineExtension<MediatorOnlyExtension>();
         });
