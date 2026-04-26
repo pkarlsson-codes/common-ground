@@ -1,12 +1,14 @@
 .openapi-generator-ignore
 apis/AuthApi.ts
 apis/BuildingsApi.ts
+apis/DocumentsApi.ts
 apis/GroundLeasesApi.ts
 apis/LandParcelsApi.ts
 apis/OidcApi.ts
 apis/PurchaseWorkflowsApi.ts
 apis/index.ts
 index.ts
+models/AttachDocumentRequest.ts
 models/BuildingAssessmentItemResponse.ts
 models/BuildingListItemResponse.ts
 models/BuildingResponse.ts
@@ -14,7 +16,10 @@ models/CalculateResaleEstimateRequest.ts
 models/ChangeHomeownerRequest.ts
 models/CreateGroundLeaseRequest.ts
 models/CreateGroundLeaseResponse.ts
+models/DocumentAttachmentResponse.ts
+models/DocumentResponse.ts
 models/EligibilityDetailsDto.ts
+models/EntityDocumentItemResponse.ts
 models/FailPurchaseRequest.ts
 models/FinancingDetailsDto.ts
 models/GroundLeaseListItemResponse.ts
@@ -26,6 +31,7 @@ models/LandParcelResponse.ts
 models/LeaseExecutionDetailsDto.ts
 models/PaginatedResponseOfBuildingAssessmentItemResponse.ts
 models/PaginatedResponseOfBuildingListItemResponse.ts
+models/PaginatedResponseOfEntityDocumentItemResponse.ts
 models/PaginatedResponseOfGroundLeaseListItemResponse.ts
 models/PaginatedResponseOfLandParcelResponse.ts
 models/PaginatedResponseOfPurchaseWorkflowListItemResponse.ts
@@ -46,11 +52,13 @@ models/RegisterLandParcelRequest.ts
 models/RegisterLandParcelResponse.ts
 models/ResaleEstimateResponse.ts
 models/ScheduleClosingRequest.ts
+models/SoftDeleteDocumentRequest.ts
 models/StallWorkflowRequest.ts
 models/StewardshipCheckInDto.ts
 models/TitleDetailsDto.ts
 models/UpdateBuildingStatusRequest.ts
 models/UpdateLandParcelStatusRequest.ts
+models/UploadDocumentResponse.ts
 models/WithdrawPurchaseRequest.ts
 models/index.ts
 runtime.ts

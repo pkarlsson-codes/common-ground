@@ -358,6 +358,228 @@
         }
       }
     },
+    "/api/v1/documents": {
+      "post": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Uploads a new document. Forwards multipart body to the API without buffering.",
+        "operationId": "uploadDocument",
+        "responses": {
+          "201": {
+            "description": "201 Created with the uploaded document response, or 400 if multipart/form-data is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadDocumentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{documentId}": {
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Gets a document by ID.",
+        "operationId": "getDocument",
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the document to retrieve.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with the document response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Soft-deletes a document.",
+        "operationId": "softDeleteDocument",
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the document to delete.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The soft delete request details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SoftDeleteDocumentRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{documentId}/attachments": {
+      "post": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Attaches a document to an entity.",
+        "operationId": "attachDocument",
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the document to attach.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The attachment request details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachDocumentRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{documentId}/download": {
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Redirects to the download URL for a document.",
+        "operationId": "downloadDocument",
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the document to download.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/entities/{entityType}/{entityId}/documents": {
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Lists documents attached to an entity.",
+        "operationId": "getEntityDocuments",
+        "parameters": [
+          {
+            "name": "entityType",
+            "in": "path",
+            "required": true,
+            "description": "The type of entity.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the entity.",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number (1-based).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "x-position": 3
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of items per page.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            },
+            "x-position": 4
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with a paginated response of entity documents.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfEntityDocumentItemResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ground-leases": {
       "post": {
         "tags": [
@@ -1767,6 +1989,189 @@
         "properties": {
           "newStatus": {
             "type": "string"
+          }
+        }
+      },
+      "UploadDocumentResponse": {
+        "type": "object",
+        "description": "Returned from POST /api/documents.",
+        "additionalProperties": false,
+        "properties": {
+          "documentId": {
+            "type": "string"
+          }
+        }
+      },
+      "DocumentResponse": {
+        "type": "object",
+        "description": "Detail response for a document.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "sensitivity": {
+            "type": "string"
+          },
+          "retention": {
+            "type": "string"
+          },
+          "currentVersionId": {
+            "type": "string"
+          },
+          "currentFileName": {
+            "type": "string"
+          },
+          "currentContentType": {
+            "type": "string"
+          },
+          "currentSizeBytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "uploadedBy": {
+            "type": "string"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isDeleted": {
+            "type": "boolean"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentAttachmentResponse"
+            }
+          }
+        }
+      },
+      "DocumentAttachmentResponse": {
+        "type": "object",
+        "description": "Single attachment in a document response.",
+        "additionalProperties": false,
+        "properties": {
+          "entityType": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "role": {
+            "type": "string",
+            "nullable": true
+          },
+          "attachedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AttachDocumentRequest": {
+        "type": "object",
+        "description": "Attaches an existing document to an entity in another BC.",
+        "additionalProperties": false,
+        "properties": {
+          "entityType": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "role": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SoftDeleteDocumentRequest": {
+        "type": "object",
+        "description": "Soft-deletes a document with a reason.",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PaginatedResponseOfEntityDocumentItemResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/EntityDocumentItemResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "EntityDocumentItemResponse": {
+        "type": "object",
+        "description": "An item in the per-entity document listing.",
+        "additionalProperties": false,
+        "properties": {
+          "documentId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "currentFileName": {
+            "type": "string"
+          },
+          "currentContentType": {
+            "type": "string"
+          },
+          "currentSizeBytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "role": {
+            "type": "string",
+            "nullable": true
+          },
+          "attachedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
