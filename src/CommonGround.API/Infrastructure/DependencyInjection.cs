@@ -1,5 +1,7 @@
 using System.Text;
 using CommonGround.API.Infrastructure.ExceptionHandling;
+using CommonGround.Documents.Infrastructure;
+using CommonGround.Documents.Infrastructure.Persistence;
 using CommonGround.Homeownership.Infrastructure;
 using CommonGround.Homeownership.Infrastructure.Persistence;
 using CommonGround.Identity.Infrastructure;
@@ -41,6 +43,7 @@ internal static class CommonGroundServiceCollectionExtensions
         services.AddHomeownership();
         services.AddIdentity();
         services.AddStewardship();
+        services.AddDocuments(configuration);
         return services;
     }
 
@@ -72,6 +75,7 @@ internal static class CommonGroundServiceCollectionExtensions
             HomeownershipMartenConfiguration.Configure(opts);
             IdentityMartenConfiguration.Configure(opts);
             StewardshipMartenConfiguration.Configure(opts);
+            DocumentsMartenConfiguration.Configure(opts);
         }, configureBuilder: marten =>
         {
             marten.InitializeWith<LandParcelsInitialData>();

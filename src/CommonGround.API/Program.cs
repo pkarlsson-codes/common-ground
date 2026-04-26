@@ -2,6 +2,7 @@ using CommonGround.API;
 using CommonGround.API.Infrastructure;
 using CommonGround.API.Infrastructure.Configuration;
 using CommonGround.API.Infrastructure.Seeding;
+using CommonGround.Documents.Infrastructure;
 using CommonGround.Homeownership.Infrastructure;
 using CommonGround.Identity.Infrastructure;
 using CommonGround.PropertyRegistry.Infrastructure;
@@ -50,6 +51,7 @@ try
         opts.Discovery.IncludeAssembly(typeof(HomeownershipAssemblyReference).Assembly);
         opts.Discovery.IncludeAssembly(typeof(IdentityAssemblyReference).Assembly);
         opts.Discovery.IncludeAssembly(typeof(StewardshipAssemblyReference).Assembly);
+        opts.Discovery.IncludeAssembly(typeof(DocumentsAssemblyReference).Assembly);
     });
 
     var app = builder.Build();
