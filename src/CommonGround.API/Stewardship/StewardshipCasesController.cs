@@ -27,16 +27,18 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
         return result is null ? NotFound() : Ok(result);
     }
 
-    /// <summary>Gets stewardship cases for a ground lease.</summary>
-    /// <param name="groundLeaseId">The ground lease identifier.</param>
+    /// <summary>Gets stewardship cases. Returns all active cases when groundLeaseId is omitted.</summary>
+    /// <param name="groundLeaseId">Optional ground lease identifier filter.</param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns>A list of stewardship cases for the ground lease.</returns>
+    /// <returns>A list of stewardship cases.</returns>
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<StewardshipCaseView>), 200)]
-    public async Task<IActionResult> GetByGroundLease([FromQuery] string groundLeaseId, CancellationToken ct)
+    public async Task<IActionResult> GetByGroundLease([FromQuery] string? groundLeaseId, CancellationToken ct)
     {
-        var result = await bus.InvokeAsync<IReadOnlyList<StewardshipCaseView>>(
-            new GetStewardshipCasesByGroundLeaseQuery(groundLeaseId), ct);
+        IReadOnlyList<StewardshipCaseView> result = string.IsNullOrWhiteSpace(groundLeaseId)
+            ? await bus.InvokeAsync<IReadOnlyList<StewardshipCaseView>>(new GetAllStewardshipCasesQuery(), ct)
+            : await bus.InvokeAsync<IReadOnlyList<StewardshipCaseView>>(
+                new GetStewardshipCasesByGroundLeaseQuery(groundLeaseId), ct);
         return Ok(result);
     }
 

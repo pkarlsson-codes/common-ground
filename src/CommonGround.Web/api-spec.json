@@ -1911,6 +1911,1145 @@
           }
         }
       }
+    },
+    "/api/v1/stewardship/cases": {
+      "get": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Lists all active stewardship cases.",
+        "operationId": "getAllStewardshipCases",
+        "responses": {
+          "200": {
+            "description": "200 with a list of active stewardship cases.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StewardshipCaseResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/cases/by-ground-lease/{groundLeaseId}": {
+      "get": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Gets stewardship cases for a specific ground lease.",
+        "operationId": "getStewardshipCasesByGroundLease",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "description": "The ground lease identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with the list of stewardship cases.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StewardshipCaseResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/cases/{caseId}": {
+      "get": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Gets a stewardship case by ID.",
+        "operationId": "getStewardshipCase",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The stewardship case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with the stewardship case, or 404 if not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StewardshipCaseResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/cases/{caseId}/occupancy-verifications": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Initiates an annual occupancy verification.",
+        "operationId": "initiateOccupancyVerification",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The stewardship case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The verification initiation details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitiateOccupancyVerificationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/cases/{caseId}/occupancy-verifications/{verificationId}/submit": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Submits homeowner responses to an occupancy verification.",
+        "operationId": "submitOccupancyVerification",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The stewardship case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "verificationId",
+            "in": "path",
+            "required": true,
+            "description": "The occupancy verification identifier.",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The submission details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitOccupancyVerificationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 3
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/cases/{caseId}/occupancy-verifications/{verificationId}/verify": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Records staff approval of an occupancy verification.",
+        "operationId": "verifyOccupancy",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The stewardship case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "verificationId",
+            "in": "path",
+            "required": true,
+            "description": "The occupancy verification identifier.",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The verification approval details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyOccupancyRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 3
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/cases/{caseId}/occupancy-verifications/{verificationId}/fail": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Records a failed occupancy verification.",
+        "operationId": "failOccupancy",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The stewardship case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "verificationId",
+            "in": "path",
+            "required": true,
+            "description": "The occupancy verification identifier.",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The failure details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FailOccupancyRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 3
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/cases/{caseId}/occupancy-verifications/{verificationId}/overdue": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Marks an occupancy verification as overdue.",
+        "operationId": "markOccupancyVerificationOverdue",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The stewardship case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "verificationId",
+            "in": "path",
+            "required": true,
+            "description": "The occupancy verification identifier.",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The overdue details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkOccupancyVerificationOverdueRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 3
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/cases/{caseId}/inspections": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Schedules a property inspection.",
+        "operationId": "schedulePropertyInspection",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The stewardship case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The inspection scheduling details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchedulePropertyInspectionRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/cases/{caseId}/inspections/{inspectionId}/complete": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Records the completion of a property inspection.",
+        "operationId": "completePropertyInspection",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The stewardship case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "inspectionId",
+            "in": "path",
+            "required": true,
+            "description": "The property inspection identifier.",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The inspection completion details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompletePropertyInspectionRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 3
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/cases/{caseId}/inspections/{inspectionId}/cancel": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Cancels a scheduled property inspection.",
+        "operationId": "cancelPropertyInspection",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The stewardship case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "inspectionId",
+            "in": "path",
+            "required": true,
+            "description": "The property inspection identifier.",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The cancellation details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelPropertyInspectionRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 3
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/cases/{caseId}/violations": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Identifies a new lease violation.",
+        "operationId": "identifyViolation",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The stewardship case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The violation identification details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentifyViolationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/cases/{caseId}/violations/{violationId}/notice": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Issues a formal notice for a lease violation.",
+        "operationId": "issueViolationNotice",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The stewardship case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "violationId",
+            "in": "path",
+            "required": true,
+            "description": "The lease violation identifier.",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The notice details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueViolationNoticeRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 3
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/cases/{caseId}/violations/{violationId}/cure": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Records that a lease violation has been cured.",
+        "operationId": "cureViolation",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The stewardship case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "violationId",
+            "in": "path",
+            "required": true,
+            "description": "The lease violation identifier.",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The cure details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CureViolationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 3
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/cases/{caseId}/violations/{violationId}/escalate": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Escalates an unresolved lease violation.",
+        "operationId": "escalateViolation",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The stewardship case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "violationId",
+            "in": "path",
+            "required": true,
+            "description": "The lease violation identifier.",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The escalation details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EscalateViolationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 3
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/cases/{caseId}/close": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Closes a stewardship case.",
+        "operationId": "closeStewardshipCase",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The stewardship case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The closure details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseStewardshipCaseRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/foreclosure-prevention": {
+      "get": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Lists all non-resolved foreclosure prevention cases.",
+        "operationId": "getAllForeclosurePreventionCases",
+        "responses": {
+          "200": {
+            "description": "200 with a list of open/active foreclosure prevention cases.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ForeclosurePreventionCaseResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Opens a new foreclosure prevention case.",
+        "operationId": "openForeclosurePreventionCase",
+        "requestBody": {
+          "x-name": "request",
+          "description": "The case opening details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenForeclosurePreventionCaseRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "202": {
+            "description": "202 Accepted with the new case ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenForeclosurePreventionCaseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/foreclosure-prevention/by-ground-lease/{groundLeaseId}": {
+      "get": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Gets foreclosure prevention cases for a specific ground lease.",
+        "operationId": "getForeclosurePreventionCasesByGroundLease",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "description": "The ground lease identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with the list of foreclosure prevention cases.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ForeclosurePreventionCaseResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/foreclosure-prevention/{caseId}": {
+      "get": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Gets a foreclosure prevention case by ID.",
+        "operationId": "getForeclosurePreventionCase",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The foreclosure prevention case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with the case, or 404 if not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForeclosurePreventionCaseResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/foreclosure-prevention/{caseId}/servicer-delinquency": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Records a servicer delinquency.",
+        "operationId": "recordServicerDelinquency",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The foreclosure prevention case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The delinquency details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordServicerDelinquencyRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/foreclosure-prevention/{caseId}/counseling-referrals": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Makes a housing counseling referral.",
+        "operationId": "makeCounselingReferral",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The foreclosure prevention case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The referral details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MakeCounselingReferralRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/foreclosure-prevention/{caseId}/counseling-referrals/{referralId}/outcome": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Records the outcome of a counseling referral.",
+        "operationId": "recordCounselingOutcome",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The foreclosure prevention case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "referralId",
+            "in": "path",
+            "required": true,
+            "description": "The counseling referral identifier.",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The outcome details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordCounselingOutcomeRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 3
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/foreclosure-prevention/{caseId}/forbearance-requests": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Submits a mortgage forbearance request.",
+        "operationId": "requestForbearance",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The foreclosure prevention case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The forbearance request details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestForbearanceRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/foreclosure-prevention/{caseId}/forbearance-requests/{requestId}/outcome": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Records the outcome of a forbearance request.",
+        "operationId": "recordForbearanceOutcome",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The foreclosure prevention case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "description": "The forbearance request identifier.",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The outcome details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordForbearanceOutcomeRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 3
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/foreclosure-prevention/{caseId}/cure-period": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Activates an LRA cure period.",
+        "operationId": "activateCurePeriod",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The foreclosure prevention case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The cure period activation details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivateCurePeriodRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/foreclosure-prevention/{caseId}/resolve": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "summary": "Resolves a foreclosure prevention case.",
+        "operationId": "resolveForeclosurePreventionCase",
+        "parameters": [
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "description": "The foreclosure prevention case identifier.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The resolution details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveForeclosurePreventionCaseRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3484,6 +4623,634 @@
           },
           "resolutionTargetDate": {
             "type": "string"
+          }
+        }
+      },
+      "StewardshipCaseResponse": {
+        "type": "object",
+        "description": "Detail response for a stewardship case.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "groundLeaseId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "openedDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "closedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "occupancyVerifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OccupancyVerificationResponse"
+            }
+          },
+          "propertyInspections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PropertyInspectionResponse"
+            }
+          },
+          "leaseViolations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeaseViolationResponse"
+            }
+          }
+        }
+      },
+      "OccupancyVerificationResponse": {
+        "type": "object",
+        "description": "Occupancy verification entry within a stewardship case.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "periodYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "surveyDeadline": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "isPrimaryResident": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "subletDisclosed": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "majorChanges": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "decisionDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PropertyInspectionResponse": {
+        "type": "object",
+        "description": "Property inspection entry within a stewardship case.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "scheduledDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "inspectorName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "occupancyConfirmed": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "conditionNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "completedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "cancellationReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LeaseViolationResponse": {
+        "type": "object",
+        "description": "Lease violation entry within a stewardship case.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "violationType": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "identifiedDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "noticeIssuedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "cureDeadline": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "resolutionDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "resolutionNotes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "InitiateOccupancyVerificationRequest": {
+        "type": "object",
+        "description": "Request to initiate an annual occupancy verification.",
+        "additionalProperties": false,
+        "properties": {
+          "periodYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "surveyDeadline": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
+      "SubmitOccupancyVerificationRequest": {
+        "type": "object",
+        "description": "Request to submit homeowner responses to an occupancy verification.",
+        "additionalProperties": false,
+        "properties": {
+          "isPrimaryResident": {
+            "type": "boolean"
+          },
+          "subletDisclosed": {
+            "type": "boolean"
+          },
+          "majorChanges": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "VerifyOccupancyRequest": {
+        "type": "object",
+        "description": "Request to record staff approval of an occupancy verification submission.",
+        "additionalProperties": false,
+        "properties": {
+          "verifiedDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "FailOccupancyRequest": {
+        "type": "object",
+        "description": "Request to fail an occupancy verification.",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "failedDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "MarkOccupancyVerificationOverdueRequest": {
+        "type": "object",
+        "description": "Request to mark an occupancy verification as overdue.",
+        "additionalProperties": false,
+        "properties": {
+          "deadline": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "SchedulePropertyInspectionRequest": {
+        "type": "object",
+        "description": "Request to schedule a property inspection on a stewardship case.",
+        "additionalProperties": false,
+        "properties": {
+          "scheduledDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "inspectorName": {
+            "type": "string"
+          }
+        }
+      },
+      "CompletePropertyInspectionRequest": {
+        "type": "object",
+        "description": "Request to record the completion of a property inspection.",
+        "additionalProperties": false,
+        "properties": {
+          "occupancyConfirmed": {
+            "type": "boolean"
+          },
+          "conditionNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "completedDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "CancelPropertyInspectionRequest": {
+        "type": "object",
+        "description": "Request to cancel a scheduled property inspection.",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "IdentifyViolationRequest": {
+        "type": "object",
+        "description": "Request to identify a new lease violation on a stewardship case.",
+        "additionalProperties": false,
+        "properties": {
+          "violationType": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "identifiedDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "IssueViolationNoticeRequest": {
+        "type": "object",
+        "description": "Request to issue a formal notice for a lease violation.",
+        "additionalProperties": false,
+        "properties": {
+          "noticeDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "cureDeadline": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "CureViolationRequest": {
+        "type": "object",
+        "description": "Request to record that a lease violation has been cured.",
+        "additionalProperties": false,
+        "properties": {
+          "curedDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "EscalateViolationRequest": {
+        "type": "object",
+        "description": "Request to escalate an unresolved lease violation.",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "escalatedDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "CloseStewardshipCaseRequest": {
+        "type": "object",
+        "description": "Request to close a stewardship case.",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "closedDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "ForeclosurePreventionCaseResponse": {
+        "type": "object",
+        "description": "Detail response for a foreclosure prevention case.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "groundLeaseId": {
+            "type": "string"
+          },
+          "trigger": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string",
+            "nullable": true
+          },
+          "openedDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "resolvedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "counselingReferrals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CounselingReferralResponse"
+            }
+          },
+          "forbearanceRequests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForbearanceRequestResponse"
+            }
+          },
+          "curePeriodActivations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CurePeriodActivationResponse"
+            }
+          }
+        }
+      },
+      "CounselingReferralResponse": {
+        "type": "object",
+        "description": "Counseling referral entry within a foreclosure prevention case.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "agencyName": {
+            "type": "string"
+          },
+          "referralDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "outcome": {
+            "type": "string",
+            "nullable": true
+          },
+          "outcomeDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
+      "ForbearanceRequestResponse": {
+        "type": "object",
+        "description": "Forbearance request entry within a foreclosure prevention case.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lenderName": {
+            "type": "string"
+          },
+          "requestedDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "outcome": {
+            "type": "string",
+            "nullable": true
+          },
+          "outcomeDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CurePeriodActivationResponse": {
+        "type": "object",
+        "description": "Cure period activation entry within a foreclosure prevention case.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lraId": {
+            "type": "string"
+          },
+          "activationDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "curePeriodDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cureDeadline": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "OpenForeclosurePreventionCaseResponse": {
+        "type": "object",
+        "description": "Response returned when a foreclosure prevention case is opened.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "OpenForeclosurePreventionCaseRequest": {
+        "type": "object",
+        "description": "Request to open a new foreclosure prevention case for servicer delinquency.",
+        "additionalProperties": false,
+        "properties": {
+          "groundLeaseId": {
+            "type": "string"
+          },
+          "servicerName": {
+            "type": "string"
+          },
+          "delinquentMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recordedDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "RecordServicerDelinquencyRequest": {
+        "type": "object",
+        "description": "Request to record a servicer delinquency report on a foreclosure prevention case.",
+        "additionalProperties": false,
+        "properties": {
+          "servicerName": {
+            "type": "string"
+          },
+          "delinquentMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recordedDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "MakeCounselingReferralRequest": {
+        "type": "object",
+        "description": "Request to make a housing counseling referral on a foreclosure prevention case.",
+        "additionalProperties": false,
+        "properties": {
+          "agencyName": {
+            "type": "string"
+          },
+          "referralDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "RecordCounselingOutcomeRequest": {
+        "type": "object",
+        "description": "Request to record the outcome of a counseling referral.",
+        "additionalProperties": false,
+        "properties": {
+          "outcome": {
+            "type": "string"
+          },
+          "outcomeDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "RequestForbearanceRequest": {
+        "type": "object",
+        "description": "Request to submit a mortgage forbearance request to a lender.",
+        "additionalProperties": false,
+        "properties": {
+          "lenderName": {
+            "type": "string"
+          },
+          "requestedDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "RecordForbearanceOutcomeRequest": {
+        "type": "object",
+        "description": "Request to record the outcome of a forbearance request.",
+        "additionalProperties": false,
+        "properties": {
+          "outcome": {
+            "type": "string"
+          },
+          "outcomeDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ActivateCurePeriodRequest": {
+        "type": "object",
+        "description": "Request to activate an LRA cure period on a foreclosure prevention case.",
+        "additionalProperties": false,
+        "properties": {
+          "lraId": {
+            "type": "string"
+          },
+          "activationDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "curePeriodDays": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ResolveForeclosurePreventionCaseRequest": {
+        "type": "object",
+        "description": "Request to resolve a foreclosure prevention case with a final outcome.",
+        "additionalProperties": false,
+        "properties": {
+          "outcome": {
+            "type": "string"
+          },
+          "resolvedDate": {
+            "type": "string",
+            "format": "date"
           }
         }
       }

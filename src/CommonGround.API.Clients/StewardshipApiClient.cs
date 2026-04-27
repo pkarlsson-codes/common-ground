@@ -28,6 +28,10 @@ public sealed class StewardshipApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<StewardshipCaseResponse>> GetAllStewardshipCasesAsync(CancellationToken cancellationToken)
+        => await GetAsync<IReadOnlyList<StewardshipCaseResponse>>("api/stewardship/cases", cancellationToken).ConfigureAwait(false);
+
+    /// <inheritdoc/>
     public async Task InitiateOccupancyVerificationAsync(string caseId, InitiateOccupancyVerificationRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(caseId);
@@ -155,6 +159,10 @@ public sealed class StewardshipApiClient(
         return await GetAsync<IReadOnlyList<ForeclosurePreventionCaseResponse>>(
             $"api/stewardship/foreclosure-prevention?groundLeaseId={Uri.EscapeDataString(groundLeaseId)}", cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<ForeclosurePreventionCaseResponse>> GetAllForeclosurePreventionCasesAsync(CancellationToken cancellationToken)
+        => await GetAsync<IReadOnlyList<ForeclosurePreventionCaseResponse>>("api/stewardship/foreclosure-prevention", cancellationToken).ConfigureAwait(false);
 
     /// <inheritdoc/>
     public async Task RecordServicerDelinquencyAsync(string caseId, RecordServicerDelinquencyRequest request, CancellationToken cancellationToken)

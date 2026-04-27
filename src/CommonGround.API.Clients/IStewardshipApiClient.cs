@@ -20,6 +20,11 @@ public interface IStewardshipApiClient
     /// <returns>The list of stewardship cases.</returns>
     Task<IReadOnlyList<StewardshipCaseResponse>> GetStewardshipCasesByGroundLeaseAsync(string groundLeaseId, CancellationToken cancellationToken);
 
+    /// <summary>Gets all active stewardship cases.</summary>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The list of all active stewardship cases.</returns>
+    Task<IReadOnlyList<StewardshipCaseResponse>> GetAllStewardshipCasesAsync(CancellationToken cancellationToken);
+
     /// <summary>Initiates an annual occupancy verification.</summary>
     /// <param name="caseId">The ID of the stewardship case.</param>
     /// <param name="request">The verification initiation details.</param>
@@ -139,6 +144,11 @@ public interface IStewardshipApiClient
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>The list of foreclosure prevention cases.</returns>
     Task<IReadOnlyList<ForeclosurePreventionCaseResponse>> GetForeclosurePreventionCasesByGroundLeaseAsync(string groundLeaseId, CancellationToken cancellationToken);
+
+    /// <summary>Gets all non-resolved foreclosure prevention cases.</summary>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The list of all open and active foreclosure prevention cases.</returns>
+    Task<IReadOnlyList<ForeclosurePreventionCaseResponse>> GetAllForeclosurePreventionCasesAsync(CancellationToken cancellationToken);
 
     /// <summary>Records a servicer delinquency on a foreclosure prevention case.</summary>
     /// <param name="caseId">The ID of the foreclosure prevention case.</param>

@@ -33,16 +33,19 @@ public sealed class ForeclosurePreventionCasesController(
         return result is null ? NotFound() : Ok(result);
     }
 
-    /// <summary>Gets foreclosure prevention cases for a ground lease.</summary>
-    /// <param name="groundLeaseId">The ground lease identifier.</param>
+    /// <summary>Gets foreclosure prevention cases. Returns all non-resolved cases when groundLeaseId is omitted.</summary>
+    /// <param name="groundLeaseId">Optional ground lease identifier filter.</param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns>A list of foreclosure prevention cases for the ground lease.</returns>
+    /// <returns>A list of foreclosure prevention cases.</returns>
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<ForeclosurePreventionCaseView>), 200)]
-    public async Task<IActionResult> GetByGroundLease([FromQuery] string groundLeaseId, CancellationToken ct)
+    public async Task<IActionResult> GetByGroundLease([FromQuery] string? groundLeaseId, CancellationToken ct)
     {
-        var result = await bus.InvokeAsync<IReadOnlyList<ForeclosurePreventionCaseView>>(
-            new GetForeclosurePreventionCasesByGroundLeaseQuery(groundLeaseId), ct);
+        IReadOnlyList<ForeclosurePreventionCaseView> result = string.IsNullOrWhiteSpace(groundLeaseId)
+            ? await bus.InvokeAsync<IReadOnlyList<ForeclosurePreventionCaseView>>(
+                new GetAllForeclosurePreventionCasesQuery(), ct)
+            : await bus.InvokeAsync<IReadOnlyList<ForeclosurePreventionCaseView>>(
+                new GetForeclosurePreventionCasesByGroundLeaseQuery(groundLeaseId), ct);
         return Ok(result);
     }
 

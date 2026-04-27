@@ -16,6 +16,11 @@ public sealed record GetStewardshipCaseQuery(string StewardshipCaseId);
 public sealed record GetStewardshipCasesByGroundLeaseQuery(string GroundLeaseId);
 
 /// <summary>
+/// Query to get all active stewardship cases across all ground leases.
+/// </summary>
+public sealed record GetAllStewardshipCasesQuery;
+
+/// <summary>
 /// Handles queries for stewardship cases.
 /// </summary>
 public sealed class StewardshipCaseQueryHandler(IQuerySession session)
@@ -32,6 +37,16 @@ public sealed class StewardshipCaseQueryHandler(IQuerySession session)
     public async Task<IReadOnlyList<StewardshipCaseView>> Handle(GetStewardshipCasesByGroundLeaseQuery query, CancellationToken ct)
         => await session.Query<StewardshipCaseView>()
             .Where(x => x.GroundLeaseId == query.GroundLeaseId)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+    /// <summary>
+    /// Handles the GetAllStewardshipCasesQuery.
+    /// Returns all cases whose status is Active (i.e. not yet closed).
+    /// </summary>
+    public async Task<IReadOnlyList<StewardshipCaseView>> Handle(GetAllStewardshipCasesQuery query, CancellationToken ct)
+        => await session.Query<StewardshipCaseView>()
+            .Where(x => x.Status == "Active")
             .ToListAsync(ct)
             .ConfigureAwait(false);
 }
