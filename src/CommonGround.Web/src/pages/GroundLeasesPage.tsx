@@ -8,6 +8,7 @@ import {
   useGroundLeases,
   useRecordStewardshipCheckIn,
 } from '../hooks/groundLeases'
+import { useStewardshipCase } from '../hooks/stewardship'
 import {
   FORMULA_KIND_LABELS,
   FORMULA_KINDS,
@@ -24,6 +25,10 @@ import NavIdLink from '../components/NavIdLink'
 import Pagination from '../components/Pagination'
 import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
+import OccupancyVerificationSection from '../components/stewardship/OccupancyVerificationSection'
+import PropertyInspectionSection from '../components/stewardship/PropertyInspectionSection'
+import LeaseViolationSection from '../components/stewardship/LeaseViolationSection'
+import ForeclosurePreventionSection from '../components/stewardship/ForeclosurePreventionSection'
 import { BuildingsApi, LandParcelsApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
 import { useToast } from '../hooks/useToast'
@@ -74,6 +79,35 @@ const emptyEstimate = (): ResaleEstimateForm => ({
   approvedImprovements: 0,
   currentIndexValue: 0,
 })
+
+function StewardshipCaseSections({ groundLeaseId }: { groundLeaseId: string }) {
+  const { data: sc, isLoading } = useStewardshipCase(groundLeaseId)
+
+  if (isLoading) {
+    return (
+      <div className="detail-section">
+        <div style={{ color: 'var(--text-dim)', fontSize: 13 }}>Loading stewardship case…</div>
+      </div>
+    )
+  }
+
+  if (!sc) {
+    return (
+      <div className="detail-section">
+        <div className="detail-section__title">Stewardship</div>
+        <div style={{ color: 'var(--text-dim)', fontSize: 13 }}>No active stewardship case.</div>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <OccupancyVerificationSection groundLeaseId={groundLeaseId} caseId={sc.id!} />
+      <PropertyInspectionSection groundLeaseId={groundLeaseId} caseId={sc.id!} />
+      <LeaseViolationSection groundLeaseId={groundLeaseId} caseId={sc.id!} />
+    </>
+  )
+}
 
 export default function GroundLeasesPage() {
   const location = useLocation()
@@ -584,6 +618,12 @@ export default function GroundLeasesPage() {
                   )}
                 </form>
               </div>
+
+              {/* Stewardship Case sections */}
+              {detail?.id && <StewardshipCaseSections groundLeaseId={detail.id} />}
+
+              {/* Foreclosure Prevention */}
+              {detail?.id && <ForeclosurePreventionSection groundLeaseId={detail.id} />}
             </>
           )}
         </SlideOver>
