@@ -20,6 +20,13 @@ import {
     DocumentAttachmentResponseToJSON,
     DocumentAttachmentResponseToJSONTyped,
 } from './DocumentAttachmentResponse';
+import type { DocumentVersionResponse } from './DocumentVersionResponse';
+import {
+    DocumentVersionResponseFromJSON,
+    DocumentVersionResponseFromJSONTyped,
+    DocumentVersionResponseToJSON,
+    DocumentVersionResponseToJSONTyped,
+} from './DocumentVersionResponse';
 
 /**
  * Detail response for a document.
@@ -95,6 +102,24 @@ export interface DocumentResponse {
     isDeleted?: boolean;
     /**
      * 
+     * @type {Date}
+     * @memberof DocumentResponse
+     */
+    expiresAt?: Date | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof DocumentResponse
+     */
+    tags?: Array<string>;
+    /**
+     * 
+     * @type {Array<DocumentVersionResponse>}
+     * @memberof DocumentResponse
+     */
+    versions?: Array<DocumentVersionResponse>;
+    /**
+     * 
      * @type {Array<DocumentAttachmentResponse>}
      * @memberof DocumentResponse
      */
@@ -129,6 +154,9 @@ export function DocumentResponseFromJSONTyped(json: any, ignoreDiscriminator: bo
         'uploadedBy': json['uploadedBy'] == null ? undefined : json['uploadedBy'],
         'uploadedAt': json['uploadedAt'] == null ? undefined : (new Date(json['uploadedAt'])),
         'isDeleted': json['isDeleted'] == null ? undefined : json['isDeleted'],
+        'expiresAt': json['expiresAt'] == null ? undefined : (new Date(json['expiresAt'])),
+        'tags': json['tags'] == null ? undefined : json['tags'],
+        'versions': json['versions'] == null ? undefined : ((json['versions'] as Array<any>).map(DocumentVersionResponseFromJSON)),
         'attachments': json['attachments'] == null ? undefined : ((json['attachments'] as Array<any>).map(DocumentAttachmentResponseFromJSON)),
     };
 }
@@ -155,6 +183,9 @@ export function DocumentResponseToJSONTyped(value?: DocumentResponse | null, ign
         'uploadedBy': value['uploadedBy'],
         'uploadedAt': value['uploadedAt'] == null ? undefined : ((value['uploadedAt']).toISOString()),
         'isDeleted': value['isDeleted'],
+        'expiresAt': value['expiresAt'] === null ? null : ((value['expiresAt'] as any)?.toISOString()),
+        'tags': value['tags'],
+        'versions': value['versions'] == null ? undefined : ((value['versions'] as Array<any>).map(DocumentVersionResponseToJSON)),
         'attachments': value['attachments'] == null ? undefined : ((value['attachments'] as Array<any>).map(DocumentAttachmentResponseToJSON)),
     };
 }

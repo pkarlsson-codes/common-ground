@@ -9,9 +9,12 @@ import { BUILDING_TYPE_LABELS, type RecordBuildingAssessmentRequest } from '../.
 import SlideOver from '../../components/SlideOver'
 import StatusBadge from '../../components/StatusBadge'
 import NavIdLink from '../../components/NavIdLink'
+import DocumentList from '../../components/DocumentList'
 import { getAvailableActions } from '../../lib/transitionActions'
 import { trackTransitionEvent } from '../../lib/telemetry'
 import { useToast } from '../../hooks/useToast'
+
+type Tab = 'details' | 'documents'
 
 function SkeletonRows() {
   return (
@@ -45,6 +48,7 @@ export default function BuildingDetailPanel({ buildingId, onClose }: Props) {
   const [assessment, setAssessment] = useState<RecordBuildingAssessmentRequest>(emptyAssessment)
   const [pendingActionId, setPendingActionId] = useState<string | null>(null)
   const [showAssessmentForm, setShowAssessmentForm] = useState(false)
+  const [activeTab, setActiveTab] = useState<Tab>('details')
   const { success } = useToast()
   const sortedAssessments = assessments?.items
     ? [...assessments.items].sort((a, b) => {
@@ -126,6 +130,42 @@ export default function BuildingDetailPanel({ buildingId, onClose }: Props) {
     >
       {detailLoading || !detail ? <SkeletonRows /> : (
         <>
+          {/* Tab bar */}
+          <div style={{
+            display: 'flex',
+            gap: 4,
+            borderBottom: '1px solid var(--border)',
+            marginBottom: 16,
+          }}>
+            {(['details', 'documents'] as Tab[]).map(tab => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                style={{
+                  padding: '6px 16px',
+                  fontSize: 12,
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: activeTab === tab ? 'var(--amber-bright)' : 'var(--text-secondary)',
+                  borderBottom: activeTab === tab ? '2px solid var(--amber)' : '2px solid transparent',
+                  marginBottom: -1,
+                  transition: 'var(--transition)',
+                }}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {activeTab === 'documents' ? (
+            <DocumentList entityType="Building" entityId={buildingId} />
+          ) : (
+          <>
           {(() => {
             const actions = getAvailableActions('building', detail.status ?? '')
             return actions.length > 0 ? (
@@ -299,6 +339,8 @@ export default function BuildingDetailPanel({ buildingId, onClose }: Props) {
               )}
             </div>
           </div>
+          </>
+          )}
         </>
       )}
     </SlideOver>

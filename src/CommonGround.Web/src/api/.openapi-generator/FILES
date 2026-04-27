@@ -8,6 +8,7 @@ apis/OidcApi.ts
 apis/PurchaseWorkflowsApi.ts
 apis/index.ts
 index.ts
+models/AddDocumentVersionResponse.ts
 models/AttachDocumentRequest.ts
 models/BuildingAssessmentItemResponse.ts
 models/BuildingListItemResponse.ts
@@ -17,7 +18,9 @@ models/ChangeHomeownerRequest.ts
 models/CreateGroundLeaseRequest.ts
 models/CreateGroundLeaseResponse.ts
 models/DocumentAttachmentResponse.ts
+models/DocumentLibraryItemResponse.ts
 models/DocumentResponse.ts
+models/DocumentVersionResponse.ts
 models/EligibilityDetailsDto.ts
 models/EntityDocumentItemResponse.ts
 models/FailPurchaseRequest.ts
@@ -31,6 +34,7 @@ models/LandParcelResponse.ts
 models/LeaseExecutionDetailsDto.ts
 models/PaginatedResponseOfBuildingAssessmentItemResponse.ts
 models/PaginatedResponseOfBuildingListItemResponse.ts
+models/PaginatedResponseOfDocumentLibraryItemResponse.ts
 models/PaginatedResponseOfEntityDocumentItemResponse.ts
 models/PaginatedResponseOfGroundLeaseListItemResponse.ts
 models/PaginatedResponseOfLandParcelResponse.ts
@@ -55,8 +59,10 @@ models/ScheduleClosingRequest.ts
 models/SoftDeleteDocumentRequest.ts
 models/StallWorkflowRequest.ts
 models/StewardshipCheckInDto.ts
+models/TagDocumentRequest.ts
 models/TitleDetailsDto.ts
 models/UpdateBuildingStatusRequest.ts
+models/UpdateDocumentMetadataRequest.ts
 models/UpdateLandParcelStatusRequest.ts
 models/UploadDocumentResponse.ts
 models/WithdrawPurchaseRequest.ts

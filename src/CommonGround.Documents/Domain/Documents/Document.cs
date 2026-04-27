@@ -12,6 +12,7 @@ public sealed class Document : AggregateRoot<DocumentId>
 {
     private readonly List<DocumentVersion> _versions = [];
     private readonly List<DocumentAttachment> _attachments = [];
+    private readonly SortedSet<string> _tags = new(StringComparer.Ordinal);
 
 #pragma warning disable CS8618
     private Document() { }
@@ -43,6 +44,15 @@ public sealed class Document : AggregateRoot<DocumentId>
 
     /// <summary>Gets a value indicating whether this document is soft-deleted.</summary>
     public bool IsDeleted { get; private set; }
+
+    /// <summary>Gets the optional expiry timestamp.</summary>
+    public DateTimeOffset? ExpiresAt { get; private set; }
+
+    /// <summary>Gets the lowercase, deduplicated set of tags applied to this document.</summary>
+    public IReadOnlyCollection<string> Tags => _tags;
+
+    /// <summary>Gets a value indicating whether this document is on legal hold.</summary>
+    public bool IsOnLegalHold { get; private set; }
 
     /// <summary>Uploads a brand-new document with its first version, and optionally attaches it to an entity.</summary>
     public static Document Upload(
@@ -135,6 +145,11 @@ public sealed class Document : AggregateRoot<DocumentId>
     }
 
     /// <summary>Soft-deletes this document. Idempotent if already deleted.</summary>
+    /// <remarks>
+    /// Raises one <see cref="DocumentSoftDeleted"/> aggregate-stream event followed by one
+    /// <see cref="DocumentSoftDeletedForAttachment"/> per active attachment so the per-entity
+    /// projection can flag the row as deleted without a cross-stream lookup.
+    /// </remarks>
     public void SoftDelete(string reason, UserId deletedBy)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
@@ -143,7 +158,128 @@ public sealed class Document : AggregateRoot<DocumentId>
         if (IsDeleted)
             return;
 
-        ApplyChange(new DocumentSoftDeleted(Id.Value, reason, deletedBy.Value, DateTimeOffset.UtcNow));
+        if (IsOnLegalHold)
+            throw new BusinessRuleViolationException("Cannot soft-delete a document on legal hold.");
+
+        var now = DateTimeOffset.UtcNow;
+        ApplyChange(new DocumentSoftDeleted(Id.Value, reason, deletedBy.Value, now));
+
+        // Snapshot before raising fanout events — the apply paths don't mutate _attachments here.
+        foreach (var att in _attachments.ToArray())
+        {
+            ApplyChange(new DocumentSoftDeletedForAttachment(
+                Id.Value, att.EntityType, att.EntityId, att.Role, now));
+        }
+    }
+
+    /// <summary>Adds a new version to this document.</summary>
+    public void AddVersion(
+        string blobKey,
+        string fileName,
+        string contentType,
+        long sizeBytes,
+        string sha256,
+        string? note,
+        UserId uploadedBy,
+        DocumentVersionId? versionId = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(blobKey);
+        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(contentType);
+        ArgumentException.ThrowIfNullOrWhiteSpace(sha256);
+        ArgumentNullException.ThrowIfNull(uploadedBy);
+
+        if (sizeBytes <= 0)
+            throw new BusinessRuleViolationException("Uploaded blob must have non-zero size.");
+
+        if (IsDeleted)
+            throw new BusinessRuleViolationException("Cannot add a version to a deleted document.");
+
+        var actualVersionId = versionId ?? DocumentVersionId.Generate();
+        var nextNumber = _versions[^1].VersionNumber + 1;
+
+        ApplyChange(new DocumentVersionAdded(
+            Id.Value,
+            actualVersionId.Value,
+            nextNumber,
+            blobKey,
+            fileName,
+            contentType,
+            sizeBytes,
+            sha256,
+            note,
+            uploadedBy.Value,
+            DateTimeOffset.UtcNow));
+    }
+
+    /// <summary>Updates editable metadata fields. Nulls leave the corresponding field untouched.</summary>
+    public void UpdateMetadata(
+        string? title,
+        SensitivityLevel? sensitivity,
+        DateTimeOffset? expiresAt,
+        bool clearExpiresAt,
+        UserId updatedBy)
+    {
+        ArgumentNullException.ThrowIfNull(updatedBy);
+
+        if (IsDeleted)
+            throw new BusinessRuleViolationException("Cannot update metadata of a deleted document.");
+
+        if (title is not null && string.IsNullOrWhiteSpace(title))
+            throw new BusinessRuleViolationException("Title cannot be blank.");
+
+        var newTitle = title ?? Title;
+        var newSensitivity = sensitivity?.DisplayName ?? Sensitivity.DisplayName;
+        var newExpiresAt = clearExpiresAt ? (DateTimeOffset?)null : (expiresAt ?? ExpiresAt);
+
+        if (newTitle == Title
+            && newSensitivity == Sensitivity.DisplayName
+            && newExpiresAt == ExpiresAt)
+        {
+            return;
+        }
+
+        ApplyChange(new DocumentMetadataUpdated(
+            Id.Value, newTitle, newSensitivity, newExpiresAt, clearExpiresAt,
+            updatedBy.Value, DateTimeOffset.UtcNow));
+    }
+
+    /// <summary>Adds a tag (lowercased, trimmed). Idempotent.</summary>
+    public void Tag(string tag, UserId taggedBy)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(tag);
+        ArgumentNullException.ThrowIfNull(taggedBy);
+
+        if (IsDeleted)
+            throw new BusinessRuleViolationException("Cannot tag a deleted document.");
+
+        var normalised = NormaliseTag(tag);
+        if (_tags.Contains(normalised))
+            return;
+
+        ApplyChange(new DocumentTagged(
+            Id.Value, normalised, taggedBy.Value, DateTimeOffset.UtcNow));
+    }
+
+    /// <summary>Removes a tag. Idempotent.</summary>
+    public void Untag(string tag, UserId untaggedBy)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(tag);
+        ArgumentNullException.ThrowIfNull(untaggedBy);
+
+        var normalised = NormaliseTag(tag);
+        if (!_tags.Contains(normalised))
+            return;
+
+        ApplyChange(new DocumentUntagged(
+            Id.Value, normalised, untaggedBy.Value, DateTimeOffset.UtcNow));
+    }
+
+    /// <summary>Normalises a tag string to lowercase, trimmed.</summary>
+    public static string NormaliseTag(string tag)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(tag);
+        return tag.Trim().ToLowerInvariant();
     }
 
     /// <inheritdoc/>
@@ -156,6 +292,10 @@ public sealed class Document : AggregateRoot<DocumentId>
             case DocumentAttached e: Apply(e); break;
             case DocumentDetached e: Apply(e); break;
             case DocumentSoftDeleted e: Apply(e); break;
+            case DocumentSoftDeletedForAttachment _: break; // fanout-only, no aggregate state change
+            case DocumentMetadataUpdated e: Apply(e); break;
+            case DocumentTagged e: Apply(e); break;
+            case DocumentUntagged e: Apply(e); break;
             default: throw new InvalidOperationException($"Unknown event: {domainEvent?.GetType().Name}");
         }
     }
@@ -208,5 +348,22 @@ public sealed class Document : AggregateRoot<DocumentId>
     private void Apply(DocumentSoftDeleted _)
     {
         IsDeleted = true;
+    }
+
+    private void Apply(DocumentMetadataUpdated e)
+    {
+        Title = e.Title;
+        Sensitivity = SensitivityLevel.FromDisplayName(e.Sensitivity);
+        ExpiresAt = e.ClearExpiresAt ? null : e.ExpiresAt;
+    }
+
+    private void Apply(DocumentTagged e)
+    {
+        _tags.Add(e.Tag);
+    }
+
+    private void Apply(DocumentUntagged e)
+    {
+        _tags.Remove(e.Tag);
     }
 }

@@ -2,6 +2,7 @@ import './App.css'
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import BuildingsPage from './pages/BuildingsPage'
+import DocumentsPage from './pages/documents/DocumentsPage'
 import GroundLeasesPage from './pages/GroundLeasesPage'
 import LandParcelsPage from './pages/LandParcelsPage'
 import LoginPage from './pages/LoginPage'
@@ -34,6 +35,7 @@ export default function App() {
               <Route path="/buildings"           element={<BuildingsPage />} />
               <Route path="/ground-leases"       element={<GroundLeasesPage />} />
               <Route path="/purchase-workflows"  element={<PurchaseWorkflowsPage />} />
+              <Route path="/documents"           element={<DocumentsPage />} />
             </Route>
           </Route>
         </Routes>

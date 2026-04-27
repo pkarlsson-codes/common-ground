@@ -117,6 +117,11 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
         var view = await bus.InvokeAsync<DocumentView>(
             new GetDocument(DocumentId.Create(documentId)), cancellationToken).ConfigureAwait(false);
 
+        DocumentVersionResponse[] versions = [.. view.Versions.Select(v => new DocumentVersionResponse(
+            v.VersionId, v.VersionNumber, v.FileName, v.ContentType, v.SizeBytes, v.Sha256, v.UploadedAt))];
+        DocumentAttachmentResponse[] attachments = [.. view.Attachments.Select(a => new DocumentAttachmentResponse(
+            a.EntityType, a.EntityId, a.Role, a.AttachedAt))];
+
         var response = new DocumentResponse(
             view.Id,
             view.Title,
@@ -129,7 +134,10 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
             view.UploadedBy,
             view.UploadedAt,
             view.IsDeleted,
-            [.. view.Attachments.Select(a => new DocumentAttachmentResponse(a.EntityType, a.EntityId, a.Role, a.AttachedAt))]);
+            view.ExpiresAt,
+            [.. view.Tags],
+            versions,
+            attachments);
 
         return Ok(response);
     }
@@ -208,10 +216,197 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
         return Redirect(url.ToString());
     }
 
+    /// <summary>Adds a new version to an existing document. Multipart/form-data identical to upload.</summary>
+    /// <param name="documentId">The document ID to add the version to.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>201 Created with the new version ID.</returns>
+    [HttpPost("/api/documents/{documentId}/versions")]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(AddDocumentVersionResponse), 201)]
+    [ProducesResponseType(404)]
+    [RequestSizeLimit(1L << 30)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 1L << 30)]
+    [EndpointName("addDocumentVersion")]
+    public async Task<IActionResult> AddDocumentVersion(string documentId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
+
+        if (!Request.HasFormContentType)
+        {
+            return BadRequest("multipart/form-data required");
+        }
+
+        var form = await Request.ReadFormAsync(cancellationToken).ConfigureAwait(false);
+        var metadataPart = form["metadata"].ToString();
+        var metadata = string.IsNullOrWhiteSpace(metadataPart)
+            ? new AddDocumentVersionMetadata()
+            : JsonSerializer.Deserialize<AddDocumentVersionMetadata>(metadataPart, MetadataJson)
+                ?? new AddDocumentVersionMetadata();
+
+        var file = form.Files["file"]
+            ?? throw new InvalidOperationException("'file' part missing");
+
+        var userId = HttpContext.GetUserId();
+        var docId = DocumentId.Create(documentId);
+        var versionId = DocumentVersionId.Generate();
+        var ext = Path.GetExtension(file.FileName);
+        var blobKey = $"documents/{docId.Value}/{versionId.Value}{ext}";
+
+        await using var stream = file.OpenReadStream();
+        var uploadResult = await blobs.UploadAsync(stream, file.ContentType, blobKey, cancellationToken).ConfigureAwait(false);
+
+        var command = new AddDocumentVersion(
+            docId,
+            uploadResult.BlobKey,
+            file.FileName,
+            file.ContentType,
+            uploadResult.SizeBytes,
+            uploadResult.Sha256,
+            metadata.Note,
+            userId,
+            versionId);
+
+        var assignedVersionId = await bus.InvokeAsync<DocumentVersionId>(command, cancellationToken).ConfigureAwait(false);
+
+        return CreatedAtAction(
+            nameof(GetDocument),
+            new { documentId = docId.Value },
+            new AddDocumentVersionResponse(docId.Value, assignedVersionId.Value));
+    }
+
+    /// <summary>Updates editable metadata fields on a document.</summary>
+    /// <param name="documentId">The document ID.</param>
+    /// <param name="request">The metadata update request.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>No content on success.</returns>
+    [HttpPatch("/api/documents/{documentId}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    [EndpointName("updateDocumentMetadata")]
+    public async Task<IActionResult> UpdateDocumentMetadata(
+        string documentId,
+        [FromBody] UpdateDocumentMetadataRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        var userId = HttpContext.GetUserId();
+        var sensitivity = string.IsNullOrWhiteSpace(request.Sensitivity)
+            ? null
+            : SensitivityLevel.FromDisplayName(request.Sensitivity);
+
+        await bus.InvokeAsync(
+            new UpdateDocumentMetadata(
+                DocumentId.Create(documentId),
+                request.Title,
+                sensitivity,
+                request.ExpiresAt,
+                request.ClearExpiresAt,
+                userId),
+            cancellationToken).ConfigureAwait(false);
+
+        return NoContent();
+    }
+
+    /// <summary>Adds a tag to a document. Tag is normalised to lowercase and deduped.</summary>
+    /// <param name="documentId">The document ID.</param>
+    /// <param name="request">The tag request.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>No content on success.</returns>
+    [HttpPost("/api/documents/{documentId}/tags")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    [EndpointName("tagDocument")]
+    public async Task<IActionResult> TagDocument(
+        string documentId,
+        [FromBody] TagDocumentRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        var userId = HttpContext.GetUserId();
+        await bus.InvokeAsync(
+            new TagDocument(DocumentId.Create(documentId), request.Tag, userId),
+            cancellationToken).ConfigureAwait(false);
+
+        return NoContent();
+    }
+
+    /// <summary>Removes a tag from a document. Idempotent.</summary>
+    /// <param name="documentId">The document ID.</param>
+    /// <param name="tag">The tag to remove (normalised lowercase).</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>No content on success.</returns>
+    [HttpDelete("/api/documents/{documentId}/tags/{tag}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    [EndpointName("untagDocument")]
+    public async Task<IActionResult> UntagDocument(
+        string documentId,
+        string tag,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(tag);
+
+        var userId = HttpContext.GetUserId();
+        await bus.InvokeAsync(
+            new UntagDocument(DocumentId.Create(documentId), tag, userId),
+            cancellationToken).ConfigureAwait(false);
+
+        return NoContent();
+    }
+
+    /// <summary>Lists documents in the library, paginated with optional filters.</summary>
+    /// <param name="includeDeleted">When true, includes soft-deleted documents.</param>
+    /// <param name="contentType">Optional MIME content-type filter.</param>
+    /// <param name="tag">Optional tag filter.</param>
+    /// <param name="expiringBefore">When provided, restricts results to documents expiring before this date.</param>
+    /// <param name="page">The 1-based page number.</param>
+    /// <param name="pageSize">The page size.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>Paginated list of library items.</returns>
+    [HttpGet("/api/documents")]
+    [ProducesResponseType(typeof(PaginatedResponse<DocumentLibraryItemResponse>), 200)]
+    [EndpointName("listDocuments")]
+    public async Task<IActionResult> ListDocuments(
+        [FromQuery(Name = "includeDeleted")] bool includeDeleted = false,
+        [FromQuery(Name = "contentType")] string? contentType = null,
+        [FromQuery(Name = "tag")] string? tag = null,
+        [FromQuery(Name = "expiringBefore")] DateTimeOffset? expiringBefore = null,
+        [FromQuery(Name = "page.number")] int page = 1,
+        [FromQuery(Name = "page.size")] int pageSize = PaginationQuerySpec.DefaultPageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var pageSpec = new PageSpec
+        {
+            Number = page < 1 ? 1 : page,
+            Size = pageSize switch
+            {
+                < 1 => PaginationQuerySpec.DefaultPageSize,
+                > PaginationQuerySpec.MaxPageSize => PaginationQuerySpec.MaxPageSize,
+                _ => pageSize,
+            },
+        };
+
+        var result = await bus.InvokeAsync<PaginatedResponse<DocumentLibraryItemView>>(
+            new ListDocuments(pageSpec, includeDeleted, contentType, tag, expiringBefore),
+            cancellationToken).ConfigureAwait(false);
+
+        return Ok(result.MapItems(d => new DocumentLibraryItemResponse(
+            d.Id, d.Title, d.Sensitivity, d.Retention,
+            d.CurrentFileName, d.CurrentContentType, d.CurrentSizeBytes, d.CurrentVersionNumber,
+            d.UploadedBy, d.UploadedAt, d.LastModifiedAt, d.IsDeleted, d.ExpiresAt,
+            [.. d.Tags])));
+    }
+
     /// <summary>Lists documents attached to a given entity.</summary>
     /// <param name="entityType">Opaque entity type (e.g. "Building"). Case-sensitive.</param>
     /// <param name="entityId">The entity's GUID identifier.</param>
     /// <param name="request">The pagination query spec.</param>
+    /// <param name="includeDeleted">When true, includes soft-deleted attachments.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A paginated list of attached documents for the entity.</returns>
     [HttpGet("/api/entities/{entityType}/{entityId}/documents")]
@@ -221,12 +416,13 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
         string entityType,
         Guid entityId,
         [FromQuery] PaginationQuerySpec<object> request,
-        CancellationToken cancellationToken)
+        [FromQuery(Name = "includeDeleted")] bool includeDeleted = false,
+        CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(entityType);
 
         var result = await bus.InvokeAsync<PaginatedResponse<EntityDocumentAttachmentItem>>(
-            new GetEntityDocuments(entityType, entityId, request.Page),
+            new GetEntityDocuments(entityType, entityId, request.Page, includeDeleted),
             cancellationToken).ConfigureAwait(false);
 
         return Ok(result.MapItems(i => new EntityDocumentItemResponse(

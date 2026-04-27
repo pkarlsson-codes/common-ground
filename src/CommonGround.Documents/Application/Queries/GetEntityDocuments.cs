@@ -7,13 +7,15 @@ namespace CommonGround.Documents.Application.Queries;
 
 /// <summary>Returns the paginated current attachments for a given entity.</summary>
 /// <remarks>
-/// Filters out soft-deleted documents by joining each item's <see cref="EntityDocumentAttachmentItem.DocumentId"/>
-/// against <see cref="DocumentView.IsDeleted"/>.
+/// Soft-deleted attachments are flagged inline by <see cref="EntityDocumentAttachmentItem.IsDeleted"/>
+/// (set by the per-entity projection via <c>DocumentSoftDeletedForAttachment</c>) and excluded from
+/// results unless <paramref name="IncludeDeleted"/> is true.
 /// </remarks>
 /// <param name="EntityType">Opaque entity type (e.g. "Building"). Case-sensitive.</param>
 /// <param name="EntityId">The entity's GUID identifier.</param>
 /// <param name="Page">Pagination spec.</param>
-public sealed record GetEntityDocuments(string EntityType, Guid EntityId, PageSpec Page);
+/// <param name="IncludeDeleted">When true, includes soft-deleted attachments in the result.</param>
+public sealed record GetEntityDocuments(string EntityType, Guid EntityId, PageSpec Page, bool IncludeDeleted = false);
 
 /// <summary>Handles <see cref="GetEntityDocuments"/>.</summary>
 public static class GetEntityDocumentsHandler
@@ -41,16 +43,8 @@ public static class GetEntityDocumentsHandler
             };
         }
 
-        // Filter out items whose source document is soft-deleted by lookup.
-        var docIds = view.Items.Select(i => i.DocumentId).Distinct().ToArray();
-        var deletedIds = await session.Query<DocumentView>()
-            .Where(d => docIds.Contains(d.Id) && d.IsDeleted)
-            .Select(d => d.Id)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
-        var deleted = deletedIds.ToHashSet(StringComparer.Ordinal);
-
         var ordered = view.Items
-            .Where(i => !deleted.Contains(i.DocumentId))
+            .Where(i => request.IncludeDeleted || !i.IsDeleted)
             .OrderByDescending(i => i.AttachedAt)
             .ToList();
 

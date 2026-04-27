@@ -377,6 +377,92 @@
             }
           }
         }
+      },
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Lists documents in the library, paginated with optional filters.",
+        "operationId": "listDocuments",
+        "parameters": [
+          {
+            "name": "page.number",
+            "x-originalName": "page",
+            "in": "query",
+            "description": "The 1-based page number.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "x-position": 1
+          },
+          {
+            "name": "page.size",
+            "x-originalName": "pageSize",
+            "in": "query",
+            "description": "The page size.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            },
+            "x-position": 2
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "description": "When true, includes soft-deleted documents.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "x-position": 3
+          },
+          {
+            "name": "contentType",
+            "in": "query",
+            "description": "Optional MIME content-type filter.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 4
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "description": "Optional tag filter.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 5
+          },
+          {
+            "name": "expiringBefore",
+            "in": "query",
+            "description": "When provided, restricts results to documents expiring before this date.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "x-position": 6
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with the paginated library list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfDocumentLibraryItemResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/documents/{documentId}": {
@@ -436,6 +522,43 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SoftDeleteDocumentRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Updates editable metadata fields on a document.",
+        "operationId": "updateDocumentMetadata",
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "description": "The document ID.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The metadata update request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDocumentMetadataRequest"
               }
             }
           },
@@ -510,6 +633,114 @@
         "responses": {
           "302": {
             "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{documentId}/versions": {
+      "post": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Adds a new version to an existing document. Multipart/form-data identical to upload.",
+        "operationId": "addDocumentVersion",
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "description": "The document ID.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "201 Created with the new version response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddDocumentVersionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{documentId}/tags": {
+      "post": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Adds a tag to a document.",
+        "operationId": "tagDocument",
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "description": "The document ID.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The tag request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagDocumentRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content."
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{documentId}/tags/{tag}": {
+      "delete": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Removes a tag from a document.",
+        "operationId": "untagDocument",
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "description": "The document ID.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "tag",
+            "in": "path",
+            "required": true,
+            "description": "The tag to remove.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "204 No Content."
           }
         }
       }
@@ -2042,11 +2273,59 @@
           "isDeleted": {
             "type": "boolean"
           },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentVersionResponse"
+            }
+          },
           "attachments": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/DocumentAttachmentResponse"
             }
+          }
+        }
+      },
+      "DocumentVersionResponse": {
+        "type": "object",
+        "description": "Single version snapshot in a document response.",
+        "additionalProperties": false,
+        "properties": {
+          "versionId": {
+            "type": "string"
+          },
+          "versionNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -2097,6 +2376,158 @@
         "properties": {
           "reason": {
             "type": "string"
+          }
+        }
+      },
+      "AddDocumentVersionResponse": {
+        "type": "object",
+        "description": "Response from a successful add-version request.",
+        "additionalProperties": false,
+        "properties": {
+          "documentId": {
+            "type": "string"
+          },
+          "versionId": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateDocumentMetadataRequest": {
+        "type": "object",
+        "description": "Request body for editing a document's metadata. Null fields leave existing values untouched.",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "New title, or null to leave unchanged.",
+            "nullable": true
+          },
+          "sensitivity": {
+            "type": "string",
+            "description": "New sensitivity display name, or null to leave unchanged.",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "New expiry timestamp, or null to leave unchanged (combined with ClearExpiresAt).",
+            "format": "date-time",
+            "nullable": true
+          },
+          "clearExpiresAt": {
+            "type": "boolean",
+            "description": "When true, explicitly clears the expiry instead of leaving it."
+          }
+        }
+      },
+      "TagDocumentRequest": {
+        "type": "object",
+        "description": "Request body for adding a tag to a document.",
+        "additionalProperties": false,
+        "properties": {
+          "tag": {
+            "type": "string"
+          }
+        }
+      },
+      "PaginatedResponseOfDocumentLibraryItemResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/DocumentLibraryItemResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "DocumentLibraryItemResponse": {
+        "type": "object",
+        "description": "One row in the document library listing response.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "sensitivity": {
+            "type": "string"
+          },
+          "retention": {
+            "type": "string"
+          },
+          "currentFileName": {
+            "type": "string"
+          },
+          "currentContentType": {
+            "type": "string"
+          },
+          "currentSizeBytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "currentVersionNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "uploadedBy": {
+            "type": "string"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isDeleted": {
+            "type": "boolean"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },

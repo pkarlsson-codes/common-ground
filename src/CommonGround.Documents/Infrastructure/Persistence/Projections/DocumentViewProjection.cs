@@ -84,4 +84,27 @@ internal sealed class DocumentViewProjection : SingleStreamProjection<DocumentVi
     {
         view.IsDeleted = true;
     }
+
+    /// <summary>Updates editable metadata fields.</summary>
+    public static void Apply(DocumentView view, DocumentMetadataUpdated e)
+    {
+        view.Title = e.Title;
+        view.Sensitivity = e.Sensitivity;
+        view.ExpiresAt = e.ClearExpiresAt ? null : e.ExpiresAt;
+    }
+
+    /// <summary>Adds a tag to the view (deduped).</summary>
+    public static void Apply(DocumentView view, DocumentTagged e)
+    {
+        if (!view.Tags.Contains(e.Tag, StringComparer.Ordinal))
+        {
+            view.Tags.Add(e.Tag);
+        }
+    }
+
+    /// <summary>Removes a tag from the view.</summary>
+    public static void Apply(DocumentView view, DocumentUntagged e)
+    {
+        view.Tags.RemoveAll(t => string.Equals(t, e.Tag, StringComparison.Ordinal));
+    }
 }

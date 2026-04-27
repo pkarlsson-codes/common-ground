@@ -20,8 +20,13 @@ public static class DocumentsMartenConfiguration
             .DatabaseSchemaName(SchemaName)
             .Index(x => x.EntityType)
             .Index(x => x.EntityId);
+        options.Schema.For<DocumentLibraryItemView>()
+            .DatabaseSchemaName(SchemaName)
+            .Index(x => x.IsDeleted)
+            .Index(x => x.UploadedAt);
 
         options.Projections.Add<DocumentViewProjection>(ProjectionLifecycle.Async);
         options.Projections.Add<EntityDocumentsViewProjection>(ProjectionLifecycle.Async);
+        options.Projections.Add<DocumentLibraryItemViewProjection>(ProjectionLifecycle.Async);
     }
 }

@@ -41,6 +41,15 @@ function IconWorkflow() {
   )
 }
 
+function IconDocuments() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <rect x="3" y="1" width="10" height="14" rx="1" stroke="currentColor" strokeWidth="1.2"/>
+      <path d="M6 5h4M6 8h4M6 11h2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
 export default function Layout() {
   const { user, logout } = useAuth()
 
@@ -83,6 +92,15 @@ export default function Layout() {
           >
             <IconWorkflow />
             Purchase Workflows
+          </NavLink>
+
+          <div className="sidebar-nav__section">Documents</div>
+          <NavLink
+            to="/documents"
+            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          >
+            <IconDocuments />
+            Document Library
           </NavLink>
         </nav>
         <div style={{ borderTop: '1px solid var(--border)', padding: '12px 20px' }}>

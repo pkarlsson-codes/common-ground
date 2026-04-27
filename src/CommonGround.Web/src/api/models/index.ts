@@ -1,5 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
+export * from './AddDocumentVersionResponse';
 export * from './AttachDocumentRequest';
 export * from './BuildingAssessmentItemResponse';
 export * from './BuildingListItemResponse';
@@ -9,7 +10,9 @@ export * from './ChangeHomeownerRequest';
 export * from './CreateGroundLeaseRequest';
 export * from './CreateGroundLeaseResponse';
 export * from './DocumentAttachmentResponse';
+export * from './DocumentLibraryItemResponse';
 export * from './DocumentResponse';
+export * from './DocumentVersionResponse';
 export * from './EligibilityDetailsDto';
 export * from './EntityDocumentItemResponse';
 export * from './FailPurchaseRequest';
@@ -23,6 +26,7 @@ export * from './LandParcelResponse';
 export * from './LeaseExecutionDetailsDto';
 export * from './PaginatedResponseOfBuildingAssessmentItemResponse';
 export * from './PaginatedResponseOfBuildingListItemResponse';
+export * from './PaginatedResponseOfDocumentLibraryItemResponse';
 export * from './PaginatedResponseOfEntityDocumentItemResponse';
 export * from './PaginatedResponseOfGroundLeaseListItemResponse';
 export * from './PaginatedResponseOfLandParcelResponse';
@@ -47,8 +51,10 @@ export * from './ScheduleClosingRequest';
 export * from './SoftDeleteDocumentRequest';
 export * from './StallWorkflowRequest';
 export * from './StewardshipCheckInDto';
+export * from './TagDocumentRequest';
 export * from './TitleDetailsDto';
 export * from './UpdateBuildingStatusRequest';
+export * from './UpdateDocumentMetadataRequest';
 export * from './UpdateLandParcelStatusRequest';
 export * from './UploadDocumentResponse';
 export * from './WithdrawPurchaseRequest';

@@ -93,6 +93,103 @@ public sealed class DocumentsController(IDocumentsApiClient client) : Controller
         return Redirect(url.ToString());
     }
 
+    /// <summary>Adds a new version to an existing document. Multipart/form-data identical to upload.</summary>
+    /// <param name="documentId">The document ID.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>201 Created with the new version response.</returns>
+    [HttpPost("documents/{documentId}/versions")]
+    [DisableRequestSizeLimit]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(AddDocumentVersionResponse), 201)]
+    [EndpointName("addDocumentVersion")]
+    public async Task<IActionResult> AddDocumentVersion(string documentId, CancellationToken cancellationToken)
+    {
+        if (!Request.HasFormContentType)
+        {
+            return BadRequest("multipart/form-data required");
+        }
+
+        var form = await Request.ReadFormAsync(cancellationToken).ConfigureAwait(false);
+        var metaJson = form["metadata"].ToString();
+        var meta = string.IsNullOrWhiteSpace(metaJson)
+            ? new AddDocumentVersionMetadata()
+            : System.Text.Json.JsonSerializer.Deserialize<AddDocumentVersionMetadata>(metaJson) ?? new AddDocumentVersionMetadata();
+        var file = form.Files["file"]
+            ?? throw new InvalidOperationException("file part missing");
+
+        await using var stream = file.OpenReadStream();
+        var result = await client.AddDocumentVersionAsync(
+            documentId, meta, stream, file.FileName, file.ContentType, cancellationToken).ConfigureAwait(false);
+        return CreatedAtAction(nameof(GetDocument), new { documentId }, result);
+    }
+
+    /// <summary>Updates editable metadata fields on a document.</summary>
+    /// <param name="documentId">The document ID.</param>
+    /// <param name="request">The metadata update request.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>204 No Content.</returns>
+    [HttpPatch("documents/{documentId}")]
+    [ProducesResponseType(204)]
+    [EndpointName("updateDocumentMetadata")]
+    public async Task<IActionResult> UpdateDocumentMetadata(
+        string documentId, [FromBody] UpdateDocumentMetadataRequest request, CancellationToken cancellationToken)
+    {
+        await client.UpdateDocumentMetadataAsync(documentId, request, cancellationToken).ConfigureAwait(false);
+        return NoContent();
+    }
+
+    /// <summary>Adds a tag to a document.</summary>
+    /// <param name="documentId">The document ID.</param>
+    /// <param name="request">The tag request.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>204 No Content.</returns>
+    [HttpPost("documents/{documentId}/tags")]
+    [ProducesResponseType(204)]
+    [EndpointName("tagDocument")]
+    public async Task<IActionResult> TagDocument(
+        string documentId, [FromBody] TagDocumentRequest request, CancellationToken cancellationToken)
+    {
+        await client.TagDocumentAsync(documentId, request, cancellationToken).ConfigureAwait(false);
+        return NoContent();
+    }
+
+    /// <summary>Removes a tag from a document.</summary>
+    /// <param name="documentId">The document ID.</param>
+    /// <param name="tag">The tag to remove.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>204 No Content.</returns>
+    [HttpDelete("documents/{documentId}/tags/{tag}")]
+    [ProducesResponseType(204)]
+    [EndpointName("untagDocument")]
+    public async Task<IActionResult> UntagDocument(
+        string documentId, string tag, CancellationToken cancellationToken)
+    {
+        await client.UntagDocumentAsync(documentId, tag, cancellationToken).ConfigureAwait(false);
+        return NoContent();
+    }
+
+    /// <summary>Lists documents in the library, paginated with optional filters.</summary>
+    /// <param name="page">The 1-based page number.</param>
+    /// <param name="pageSize">The page size.</param>
+    /// <param name="includeDeleted">When true, includes soft-deleted documents.</param>
+    /// <param name="contentType">Optional MIME content-type filter.</param>
+    /// <param name="tag">Optional tag filter.</param>
+    /// <param name="expiringBefore">When provided, restricts results to documents expiring before this date.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>200 with the paginated library list.</returns>
+    [HttpGet("documents")]
+    [ProducesResponseType(typeof(PaginatedResponse<DocumentLibraryItemResponse>), 200)]
+    [EndpointName("listDocuments")]
+    public async Task<IActionResult> ListDocuments(
+        [FromQuery(Name = "page.number")] int page = 1,
+        [FromQuery(Name = "page.size")] int pageSize = 20,
+        [FromQuery(Name = "includeDeleted")] bool includeDeleted = false,
+        [FromQuery(Name = "contentType")] string? contentType = null,
+        [FromQuery(Name = "tag")] string? tag = null,
+        [FromQuery(Name = "expiringBefore")] DateTimeOffset? expiringBefore = null,
+        CancellationToken cancellationToken = default)
+        => Ok(await client.ListDocumentsAsync(page, pageSize, includeDeleted, contentType, tag, expiringBefore, cancellationToken).ConfigureAwait(false));
+
     /// <summary>Lists documents attached to an entity.</summary>
     /// <param name="entityType">The type of entity.</param>
     /// <param name="entityId">The ID of the entity.</param>

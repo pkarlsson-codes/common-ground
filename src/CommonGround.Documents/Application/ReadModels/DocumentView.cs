@@ -36,6 +36,12 @@ public class DocumentView
     /// <summary>Gets or sets a value indicating whether this document is soft-deleted.</summary>
     public bool IsDeleted { get; set; }
 
+    /// <summary>Gets or sets the optional expiry date for this document.</summary>
+    public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>Gets the lowercased, deduplicated tag list.</summary>
+    public List<string> Tags { get; set; } = [];
+
     /// <summary>Gets the version snapshots, oldest first.</summary>
     public List<DocumentVersionSnapshot> Versions { get; set; } = [];
 

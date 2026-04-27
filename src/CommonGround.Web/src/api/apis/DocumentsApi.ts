@@ -15,24 +15,40 @@
 
 import * as runtime from '../runtime';
 import type {
+  AddDocumentVersionResponse,
   AttachDocumentRequest,
   DocumentResponse,
+  PaginatedResponseOfDocumentLibraryItemResponse,
   PaginatedResponseOfEntityDocumentItemResponse,
   SoftDeleteDocumentRequest,
+  TagDocumentRequest,
+  UpdateDocumentMetadataRequest,
   UploadDocumentResponse,
 } from '../models/index';
 import {
+    AddDocumentVersionResponseFromJSON,
+    AddDocumentVersionResponseToJSON,
     AttachDocumentRequestFromJSON,
     AttachDocumentRequestToJSON,
     DocumentResponseFromJSON,
     DocumentResponseToJSON,
+    PaginatedResponseOfDocumentLibraryItemResponseFromJSON,
+    PaginatedResponseOfDocumentLibraryItemResponseToJSON,
     PaginatedResponseOfEntityDocumentItemResponseFromJSON,
     PaginatedResponseOfEntityDocumentItemResponseToJSON,
     SoftDeleteDocumentRequestFromJSON,
     SoftDeleteDocumentRequestToJSON,
+    TagDocumentRequestFromJSON,
+    TagDocumentRequestToJSON,
+    UpdateDocumentMetadataRequestFromJSON,
+    UpdateDocumentMetadataRequestToJSON,
     UploadDocumentResponseFromJSON,
     UploadDocumentResponseToJSON,
 } from '../models/index';
+
+export interface AddDocumentVersionRequest {
+    documentId: string;
+}
 
 export interface AttachDocumentOperationRequest {
     documentId: string;
@@ -54,9 +70,33 @@ export interface GetEntityDocumentsRequest {
     pageSize?: number;
 }
 
+export interface ListDocumentsRequest {
+    pageNumber?: number;
+    pageSize?: number;
+    includeDeleted?: boolean;
+    contentType?: string | null;
+    tag?: string | null;
+    expiringBefore?: Date | null;
+}
+
 export interface SoftDeleteDocumentOperationRequest {
     documentId: string;
     softDeleteDocumentRequest: SoftDeleteDocumentRequest;
+}
+
+export interface TagDocumentOperationRequest {
+    documentId: string;
+    tagDocumentRequest: TagDocumentRequest;
+}
+
+export interface UntagDocumentRequest {
+    documentId: string;
+    tag: string;
+}
+
+export interface UpdateDocumentMetadataOperationRequest {
+    documentId: string;
+    updateDocumentMetadataRequest: UpdateDocumentMetadataRequest;
 }
 
 /**
@@ -66,6 +106,21 @@ export interface SoftDeleteDocumentOperationRequest {
  * @interface DocumentsApiInterface
  */
 export interface DocumentsApiInterface {
+    /**
+     * 
+     * @summary Adds a new version to an existing document. Multipart/form-data identical to upload.
+     * @param {string} documentId The document ID.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DocumentsApiInterface
+     */
+    addDocumentVersionRaw(requestParameters: AddDocumentVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AddDocumentVersionResponse>>;
+
+    /**
+     * Adds a new version to an existing document. Multipart/form-data identical to upload.
+     */
+    addDocumentVersion(requestParameters: AddDocumentVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AddDocumentVersionResponse>;
+
     /**
      * 
      * @summary Attaches a document to an entity.
@@ -132,6 +187,26 @@ export interface DocumentsApiInterface {
 
     /**
      * 
+     * @summary Lists documents in the library, paginated with optional filters.
+     * @param {number} [pageNumber] The 1-based page number.
+     * @param {number} [pageSize] The page size.
+     * @param {boolean} [includeDeleted] When true, includes soft-deleted documents.
+     * @param {string} [contentType] Optional MIME content-type filter.
+     * @param {string} [tag] Optional tag filter.
+     * @param {Date} [expiringBefore] When provided, restricts results to documents expiring before this date.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DocumentsApiInterface
+     */
+    listDocumentsRaw(requestParameters: ListDocumentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfDocumentLibraryItemResponse>>;
+
+    /**
+     * Lists documents in the library, paginated with optional filters.
+     */
+    listDocuments(requestParameters: ListDocumentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfDocumentLibraryItemResponse>;
+
+    /**
+     * 
      * @summary Soft-deletes a document.
      * @param {string} documentId The ID of the document to delete.
      * @param {SoftDeleteDocumentRequest} softDeleteDocumentRequest The soft delete request details.
@@ -145,6 +220,54 @@ export interface DocumentsApiInterface {
      * Soft-deletes a document.
      */
     softDeleteDocument(requestParameters: SoftDeleteDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+
+    /**
+     * 
+     * @summary Adds a tag to a document.
+     * @param {string} documentId The document ID.
+     * @param {TagDocumentRequest} tagDocumentRequest The tag request.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DocumentsApiInterface
+     */
+    tagDocumentRaw(requestParameters: TagDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+
+    /**
+     * Adds a tag to a document.
+     */
+    tagDocument(requestParameters: TagDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+
+    /**
+     * 
+     * @summary Removes a tag from a document.
+     * @param {string} documentId The document ID.
+     * @param {string} tag The tag to remove.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DocumentsApiInterface
+     */
+    untagDocumentRaw(requestParameters: UntagDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+
+    /**
+     * Removes a tag from a document.
+     */
+    untagDocument(requestParameters: UntagDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+
+    /**
+     * 
+     * @summary Updates editable metadata fields on a document.
+     * @param {string} documentId The document ID.
+     * @param {UpdateDocumentMetadataRequest} updateDocumentMetadataRequest The metadata update request.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DocumentsApiInterface
+     */
+    updateDocumentMetadataRaw(requestParameters: UpdateDocumentMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+
+    /**
+     * Updates editable metadata fields on a document.
+     */
+    updateDocumentMetadata(requestParameters: UpdateDocumentMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
 
     /**
      * 
@@ -166,6 +289,43 @@ export interface DocumentsApiInterface {
  * 
  */
 export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterface {
+
+    /**
+     * Adds a new version to an existing document. Multipart/form-data identical to upload.
+     */
+    async addDocumentVersionRaw(requestParameters: AddDocumentVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AddDocumentVersionResponse>> {
+        if (requestParameters['documentId'] == null) {
+            throw new runtime.RequiredError(
+                'documentId',
+                'Required parameter "documentId" was null or undefined when calling addDocumentVersion().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/documents/{documentId}/versions`;
+        urlPath = urlPath.replace(`{${"documentId"}}`, encodeURIComponent(String(requestParameters['documentId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => AddDocumentVersionResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Adds a new version to an existing document. Multipart/form-data identical to upload.
+     */
+    async addDocumentVersion(requestParameters: AddDocumentVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AddDocumentVersionResponse> {
+        const response = await this.addDocumentVersionRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      * Attaches a document to an entity.
@@ -340,6 +500,59 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
     }
 
     /**
+     * Lists documents in the library, paginated with optional filters.
+     */
+    async listDocumentsRaw(requestParameters: ListDocumentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfDocumentLibraryItemResponse>> {
+        const queryParameters: any = {};
+
+        if (requestParameters['pageNumber'] != null) {
+            queryParameters['page.number'] = requestParameters['pageNumber'];
+        }
+
+        if (requestParameters['pageSize'] != null) {
+            queryParameters['page.size'] = requestParameters['pageSize'];
+        }
+
+        if (requestParameters['includeDeleted'] != null) {
+            queryParameters['includeDeleted'] = requestParameters['includeDeleted'];
+        }
+
+        if (requestParameters['contentType'] != null) {
+            queryParameters['contentType'] = requestParameters['contentType'];
+        }
+
+        if (requestParameters['tag'] != null) {
+            queryParameters['tag'] = requestParameters['tag'];
+        }
+
+        if (requestParameters['expiringBefore'] != null) {
+            queryParameters['expiringBefore'] = (requestParameters['expiringBefore'] as any).toISOString();
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/documents`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedResponseOfDocumentLibraryItemResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Lists documents in the library, paginated with optional filters.
+     */
+    async listDocuments(requestParameters: ListDocumentsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfDocumentLibraryItemResponse> {
+        const response = await this.listDocumentsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Soft-deletes a document.
      */
     async softDeleteDocumentRaw(requestParameters: SoftDeleteDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
@@ -383,6 +596,142 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
      */
     async softDeleteDocument(requestParameters: SoftDeleteDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.softDeleteDocumentRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Adds a tag to a document.
+     */
+    async tagDocumentRaw(requestParameters: TagDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['documentId'] == null) {
+            throw new runtime.RequiredError(
+                'documentId',
+                'Required parameter "documentId" was null or undefined when calling tagDocument().'
+            );
+        }
+
+        if (requestParameters['tagDocumentRequest'] == null) {
+            throw new runtime.RequiredError(
+                'tagDocumentRequest',
+                'Required parameter "tagDocumentRequest" was null or undefined when calling tagDocument().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/documents/{documentId}/tags`;
+        urlPath = urlPath.replace(`{${"documentId"}}`, encodeURIComponent(String(requestParameters['documentId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: TagDocumentRequestToJSON(requestParameters['tagDocumentRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Adds a tag to a document.
+     */
+    async tagDocument(requestParameters: TagDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.tagDocumentRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Removes a tag from a document.
+     */
+    async untagDocumentRaw(requestParameters: UntagDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['documentId'] == null) {
+            throw new runtime.RequiredError(
+                'documentId',
+                'Required parameter "documentId" was null or undefined when calling untagDocument().'
+            );
+        }
+
+        if (requestParameters['tag'] == null) {
+            throw new runtime.RequiredError(
+                'tag',
+                'Required parameter "tag" was null or undefined when calling untagDocument().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/documents/{documentId}/tags/{tag}`;
+        urlPath = urlPath.replace(`{${"documentId"}}`, encodeURIComponent(String(requestParameters['documentId'])));
+        urlPath = urlPath.replace(`{${"tag"}}`, encodeURIComponent(String(requestParameters['tag'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Removes a tag from a document.
+     */
+    async untagDocument(requestParameters: UntagDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.untagDocumentRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Updates editable metadata fields on a document.
+     */
+    async updateDocumentMetadataRaw(requestParameters: UpdateDocumentMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['documentId'] == null) {
+            throw new runtime.RequiredError(
+                'documentId',
+                'Required parameter "documentId" was null or undefined when calling updateDocumentMetadata().'
+            );
+        }
+
+        if (requestParameters['updateDocumentMetadataRequest'] == null) {
+            throw new runtime.RequiredError(
+                'updateDocumentMetadataRequest',
+                'Required parameter "updateDocumentMetadataRequest" was null or undefined when calling updateDocumentMetadata().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/documents/{documentId}`;
+        urlPath = urlPath.replace(`{${"documentId"}}`, encodeURIComponent(String(requestParameters['documentId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PATCH',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdateDocumentMetadataRequestToJSON(requestParameters['updateDocumentMetadataRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Updates editable metadata fields on a document.
+     */
+    async updateDocumentMetadata(requestParameters: UpdateDocumentMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.updateDocumentMetadataRaw(requestParameters, initOverrides);
     }
 
     /**

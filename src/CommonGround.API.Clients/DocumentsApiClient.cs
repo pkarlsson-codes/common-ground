@@ -56,6 +56,77 @@ public sealed class DocumentsApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task<AddDocumentVersionResponse> AddDocumentVersionAsync(
+        string documentId,
+        AddDocumentVersionMetadata metadata,
+        Stream content,
+        string fileName,
+        string contentType,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
+        ArgumentNullException.ThrowIfNull(metadata);
+        ArgumentNullException.ThrowIfNull(content);
+
+        using var form = new MultipartFormDataContent();
+        form.Add(JsonContent.Create(metadata), "metadata");
+        var fileContent = new StreamContent(content);
+        fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+        form.Add(fileContent, "file", fileName);
+
+        using var response = await HttpClient.PostAsync(
+            $"api/documents/{documentId}/versions", form, cancellationToken).ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<AddDocumentVersionResponse>(cancellationToken).ConfigureAwait(false))!;
+    }
+
+    /// <inheritdoc/>
+    public Task UpdateDocumentMetadataAsync(string documentId, UpdateDocumentMetadataRequest request, CancellationToken cancellationToken)
+        => PatchAsync($"api/documents/{documentId}", request, cancellationToken);
+
+    /// <inheritdoc/>
+    public Task TagDocumentAsync(string documentId, TagDocumentRequest request, CancellationToken cancellationToken)
+        => PostAsync($"api/documents/{documentId}/tags", request, cancellationToken);
+
+    /// <inheritdoc/>
+    public Task UntagDocumentAsync(string documentId, string tag, CancellationToken cancellationToken)
+        => DeleteAsync($"api/documents/{documentId}/tags/{Uri.EscapeDataString(tag)}", cancellationToken);
+
+    /// <inheritdoc/>
+    public Task<PaginatedResponse<DocumentLibraryItemResponse>> ListDocumentsAsync(
+        int page, int pageSize, bool includeDeleted, string? contentType, string? tag,
+        DateTimeOffset? expiringBefore, CancellationToken cancellationToken)
+    {
+        var query = new List<string>(capacity: 6)
+        {
+            $"page.number={page}",
+            $"page.size={pageSize}",
+        };
+        if (includeDeleted)
+        {
+            query.Add("includeDeleted=true");
+        }
+
+        if (!string.IsNullOrWhiteSpace(contentType))
+        {
+            query.Add($"contentType={Uri.EscapeDataString(contentType)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(tag))
+        {
+            query.Add($"tag={Uri.EscapeDataString(tag)}");
+        }
+
+        if (expiringBefore.HasValue)
+        {
+            query.Add($"expiringBefore={Uri.EscapeDataString(expiringBefore.Value.ToString("O"))}");
+        }
+
+        return GetAsync<PaginatedResponse<DocumentLibraryItemResponse>>(
+            $"api/documents?{string.Join('&', query)}", cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public Task<PaginatedResponse<EntityDocumentItemResponse>> GetEntityDocumentsAsync(
         string entityType, Guid entityId, int page, int pageSize, CancellationToken cancellationToken)
         => GetAsync<PaginatedResponse<EntityDocumentItemResponse>>(

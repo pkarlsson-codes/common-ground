@@ -13,7 +13,20 @@ public sealed record DocumentResponse(
     string UploadedBy,
     DateTimeOffset UploadedAt,
     bool IsDeleted,
+    DateTimeOffset? ExpiresAt,
+    IReadOnlyList<string> Tags,
+    IReadOnlyList<DocumentVersionResponse> Versions,
     IReadOnlyList<DocumentAttachmentResponse> Attachments);
+
+/// <summary>Single version snapshot in a document response.</summary>
+public sealed record DocumentVersionResponse(
+    string VersionId,
+    int VersionNumber,
+    string FileName,
+    string ContentType,
+    long SizeBytes,
+    string Sha256,
+    DateTimeOffset UploadedAt);
 
 /// <summary>Single attachment in a document response.</summary>
 public sealed record DocumentAttachmentResponse(

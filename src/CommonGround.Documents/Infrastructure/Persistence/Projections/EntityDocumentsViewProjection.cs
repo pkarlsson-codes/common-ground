@@ -6,7 +6,7 @@ namespace CommonGround.Documents.Infrastructure.Persistence.Projections;
 
 /// <summary>
 /// Aggregates per-entity document lists from <see cref="DocumentAttached"/> /
-/// <see cref="DocumentDetached"/> / <see cref="DocumentSoftDeleted"/> events.
+/// <see cref="DocumentDetached"/> / <see cref="DocumentSoftDeletedForAttachment"/> events.
 ///
 /// Identity is the composite string key produced by <see cref="EntityDocumentKey.Encode"/>.
 /// </summary>
@@ -15,23 +15,13 @@ internal sealed class EntityDocumentsViewProjection : MultiStreamProjection<Enti
     /// <summary>Configures the per-event identity selectors.</summary>
     public EntityDocumentsViewProjection()
     {
-        // DocumentAttached/Detached carry both halves of the composite — encode them here.
         Identity<DocumentAttached>(e => EntityDocumentKey.Encode(e.EntityType, e.EntityId));
         Identity<DocumentDetached>(e => EntityDocumentKey.Encode(e.EntityType, e.EntityId));
 
-        // DocumentSoftDeleted does not carry an entity ref; route to *all* entities the doc is
-        // currently attached to using Identities (returns multiple keys per event).
-        Identities<DocumentSoftDeleted>(SoftDeleteFanout);
+        // Soft-delete is fanned out by the aggregate into a per-attachment event so we can
+        // route via Identity<> here without a cross-stream lookup.
+        Identity<DocumentSoftDeletedForAttachment>(e => EntityDocumentKey.Encode(e.EntityType, e.EntityId));
     }
-
-    /// <summary>
-    /// Fans a soft-delete event out to every <see cref="EntityDocumentsView"/> the document is
-    /// currently attached to. We do not have access to the doc's attachment list here, so we
-    /// rely on the in-memory view state via the daemon's session — implemented via the dedicated
-    /// <c>Apply</c> overload below that receives the projection's existing rows.
-    /// </summary>
-    private static IReadOnlyList<string> SoftDeleteFanout(DocumentSoftDeleted e)
-        => []; // see ApplyAsync below — Marten will call Apply for any view containing the doc
 
     /// <summary>Adds a new attachment row.</summary>
     public static void Apply(EntityDocumentsView view, DocumentAttached e)
@@ -63,5 +53,14 @@ internal sealed class EntityDocumentsViewProjection : MultiStreamProjection<Enti
     {
         view.Items.RemoveAll(i =>
             i.DocumentId == e.AggregateId && i.Role == e.Role);
+    }
+
+    /// <summary>Marks the matching attachment row as soft-deleted.</summary>
+    public static void Apply(EntityDocumentsView view, DocumentSoftDeletedForAttachment e)
+    {
+        foreach (var item in view.Items.Where(i => i.DocumentId == e.AggregateId && i.Role == e.Role))
+        {
+            item.IsDeleted = true;
+        }
     }
 }
