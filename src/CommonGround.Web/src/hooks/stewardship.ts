@@ -488,3 +488,38 @@ export function useResolveForeclosurePreventionCase(groundLeaseId: string) {
     onSuccess: () => qc.invalidateQueries({ queryKey: FPC_KEY(groundLeaseId) }),
   })
 }
+
+// ── Slice 2: list-all queries for the queue page ──────────────────────────────
+
+export function useAllStewardshipCases() {
+  return useQuery({
+    queryKey: ['stewardship', 'cases', 'all'],
+    queryFn: () => api.getAllStewardshipCases(),
+  })
+}
+
+export function useAllForeclosurePreventionCases(_includeResolved: boolean) {
+  return useQuery({
+    queryKey: ['stewardship', 'fpc', 'all'],
+    queryFn: () => api.getAllForeclosurePreventionCases(),
+  })
+}
+
+/** Opens an FPC case for any ground lease (used from the global queue page). */
+export function useOpenFpcCase() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: {
+      groundLeaseId: string
+      servicerName: string
+      delinquentMonths: number
+      recordedDate: string
+    }) =>
+      api.openForeclosurePreventionCase({
+        openForeclosurePreventionCaseRequest: body,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['stewardship', 'fpc', 'all'] })
+    },
+  })
+}

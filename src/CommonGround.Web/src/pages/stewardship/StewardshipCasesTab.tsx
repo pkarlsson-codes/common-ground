@@ -1,0 +1,152 @@
+import { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAllStewardshipCases } from '../../hooks/stewardship'
+import { useAllActiveGroundLeases } from '../../hooks/groundLeases'
+import type { GroundLeaseListItemResponse } from '../../api'
+import type { OccupancyVerificationResponse } from '../../api/models/OccupancyVerificationResponse'
+import {
+  buildStewardshipQueue,
+  type StewardshipQueueRow,
+  type UrgencyLevel,
+} from './stewardshipSortUtils'
+
+// ── Urgency styling ──────────────────────────────────────────────────────────
+
+const URGENCY_ROW_CLASS: Record<UrgencyLevel, string> = {
+  red: 'queue-row--red',
+  orange: 'queue-row--orange',
+  yellow: 'queue-row--yellow',
+  neutral: '',
+}
+
+const OCCUPANCY_BADGE_CLASS: Record<string, string> = {
+  Pending:   'badge badge-initiated',
+  Submitted: 'badge badge-inprogress',
+  Verified:  'badge badge-active',
+  Failed:    'badge badge-failed',
+  Overdue:   'badge badge-failed',
+}
+
+// ── Sub-components ───────────────────────────────────────────────────────────
+
+function SkeletonRows() {
+  return (
+    <div className="skeleton-rows">
+      {Array.from({ length: 8 }).map((_, i) => <div key={i} className="skeleton-row" />)}
+    </div>
+  )
+}
+
+function OccupancyCell({
+  verification,
+}: {
+  verification: OccupancyVerificationResponse | null
+}) {
+  if (!verification) {
+    return <span style={{ color: 'var(--text-dim)' }}>—</span>
+  }
+  const cls = OCCUPANCY_BADGE_CLASS[verification.status ?? ''] ?? 'badge badge-default'
+  return <span className={cls}>{verification.status}</span>
+}
+
+function ViolationCell({ count }: { count: number }) {
+  if (count === 0) {
+    return <span style={{ color: 'var(--text-dim)' }}>—</span>
+  }
+  return (
+    <span className="badge badge-failed" style={{ fontVariantNumeric: 'tabular-nums' }}>
+      {count}
+    </span>
+  )
+}
+
+// ── Main component ───────────────────────────────────────────────────────────
+
+export default function StewardshipCasesTab() {
+  const navigate = useNavigate()
+  const currentYear = new Date().getFullYear()
+
+  const { data: cases, isLoading: casesLoading, isError: casesError } = useAllStewardshipCases()
+  const { data: leasePage, isLoading: leasesLoading } = useAllActiveGroundLeases()
+
+  const isLoading = casesLoading || leasesLoading
+  const isError = casesError
+
+  const leaseIndex = useMemo(() => {
+    const map = new Map<string, GroundLeaseListItemResponse>()
+    for (const l of leasePage?.items ?? []) {
+      if (l.id) map.set(l.id, l)
+    }
+    return map
+  }, [leasePage])
+
+  const rows = useMemo(
+    () => buildStewardshipQueue(cases ?? [], leaseIndex as Map<string, { homeownerFullName?: string | null; parcelAddress?: string | null }>),
+    [cases, leaseIndex],
+  )
+
+  const handleRowClick = (row: StewardshipQueueRow) => {
+    navigate('/ground-leases', { state: { openId: row.groundLeaseId } })
+  }
+
+  if (isLoading) return <SkeletonRows />
+
+  if (isError) {
+    return (
+      <div className="error-state">
+        <div className="error-state__title">Could not load stewardship cases</div>
+        <div className="error-state__sub">Ensure the API and gateway are running.</div>
+      </div>
+    )
+  }
+
+  if (rows.length === 0) {
+    return (
+      <div className="empty-state">
+        <div className="empty-state__glyph">⊟</div>
+        <div className="empty-state__title">No active stewardship cases</div>
+        <div className="empty-state__sub">
+          Cases are opened automatically when a purchase closes.
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="registry-table-wrap">
+      <table className="registry-table">
+        <thead>
+          <tr>
+            <th>Homeowner</th>
+            <th>Address</th>
+            <th>Occupancy {currentYear}</th>
+            <th>Active violations</th>
+            <th>Next inspection</th>
+            <th>Opened</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(row => (
+            <tr
+              key={row.caseId}
+              className={URGENCY_ROW_CLASS[row.urgency]}
+              onClick={() => handleRowClick(row)}
+              style={{ cursor: 'pointer' }}
+            >
+              <td>{row.homeownerName}</td>
+              <td>{row.address}</td>
+              <td><OccupancyCell verification={row.currentVerification} /></td>
+              <td><ViolationCell count={row.activeViolationCount} /></td>
+              <td>
+                {row.nextInspectionDate
+                  ? <span className="cell-mono">{row.nextInspectionDate.toISOString().slice(0, 10)}</span>
+                  : <span style={{ color: 'var(--text-dim)' }}>—</span>}
+              </td>
+              <td><span className="cell-mono">{row.openedDate.toISOString().slice(0, 10)}</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}

@@ -50,6 +50,16 @@ function IconDocuments() {
   )
 }
 
+function IconStewardship() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M5 11l2 2 4-4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export default function Layout() {
   const { user, logout } = useAuth()
 
@@ -101,6 +111,15 @@ export default function Layout() {
           >
             <IconDocuments />
             Document Library
+          </NavLink>
+
+          <div className="sidebar-nav__section">Stewardship</div>
+          <NavLink
+            to="/stewardship"
+            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          >
+            <IconStewardship />
+            Stewardship Queue
           </NavLink>
         </nav>
         <div style={{ borderTop: '1px solid var(--border)', padding: '12px 20px' }}>

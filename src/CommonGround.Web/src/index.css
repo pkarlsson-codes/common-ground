@@ -718,3 +718,23 @@ body {
 @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 @keyframes shimmer { 0% { background-position: -400% 0; } 100% { background-position: 400% 0; } }
 @keyframes rowIn   { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Stewardship queue urgency row tints ──────────── */
+.registry-table tbody tr.queue-row--red {
+  background: color-mix(in srgb, var(--red) 8%, transparent);
+}
+.registry-table tbody tr.queue-row--red:hover {
+  background: color-mix(in srgb, var(--red) 14%, transparent);
+}
+.registry-table tbody tr.queue-row--orange {
+  background: color-mix(in srgb, var(--amber) 8%, transparent);
+}
+.registry-table tbody tr.queue-row--orange:hover {
+  background: color-mix(in srgb, var(--amber) 14%, transparent);
+}
+.registry-table tbody tr.queue-row--yellow {
+  background: color-mix(in srgb, var(--amber-dim) 40%, transparent);
+}
+.registry-table tbody tr.queue-row--yellow:hover {
+  background: color-mix(in srgb, var(--amber-dim) 60%, transparent);
+}

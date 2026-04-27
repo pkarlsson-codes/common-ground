@@ -7,6 +7,7 @@ import GroundLeasesPage from './pages/GroundLeasesPage'
 import LandParcelsPage from './pages/LandParcelsPage'
 import LoginPage from './pages/LoginPage'
 import PurchaseWorkflowsPage from './pages/PurchaseWorkflowsPage'
+import StewardshipPage from './pages/stewardship/StewardshipPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 
 function ProtectedRoute() {
@@ -36,6 +37,7 @@ export default function App() {
               <Route path="/ground-leases"       element={<GroundLeasesPage />} />
               <Route path="/purchase-workflows"  element={<PurchaseWorkflowsPage />} />
               <Route path="/documents"           element={<DocumentsPage />} />
+              <Route path="/stewardship"          element={<StewardshipPage />} />
             </Route>
           </Route>
         </Routes>

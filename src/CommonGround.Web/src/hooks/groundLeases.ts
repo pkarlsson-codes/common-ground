@@ -17,6 +17,13 @@ export function useGroundLeases(page: number, status?: string, landParcelId?: st
   })
 }
 
+export function useAllActiveGroundLeases() {
+  return useQuery({
+    queryKey: ['ground-leases', 'all-active'],
+    queryFn: () => api.getGroundLeases({ pageSize: 1000, status: 'Active' }),
+  })
+}
+
 export function useGroundLease(id: string | null) {
   return useQuery({
     queryKey: ['ground-lease', id],
