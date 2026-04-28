@@ -66,9 +66,9 @@ public class LandParcelTests
         var parcel = LandParcel.Register("APN-001", "123 Main St", 0.25m,
             new DateOnly(2024, 3, 15), AcquisitionMethod.Purchase, null, StaffUser);
 
-        parcel.ChangeStatus(ParcelStatus.UnderDevelopment, StaffUser);
+        parcel.ChangeStatus(ParcelStatus.UnderConstruction, StaffUser);
 
-        parcel.Status.Should().Be(ParcelStatus.UnderDevelopment);
+        parcel.Status.Should().Be(ParcelStatus.UnderConstruction);
     }
 
     [Fact]
