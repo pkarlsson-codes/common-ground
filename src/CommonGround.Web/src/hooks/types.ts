@@ -31,7 +31,15 @@ export const BUILDING_TYPE_LABELS: Record<string, string> = {
   Duplex: 'Duplex',
   Townhouse: 'Townhouse',
 }
-export const PARCEL_STATUSES = ['Available', 'Occupied', 'UnderDevelopment'] as const
+export const PARCEL_STATUSES = [
+  'Available',
+  'Predevelopment',
+  'UnderConstruction',
+  'ReadyForOccupancy',
+  'Occupied',
+  'Transitioning',
+  'Decommissioned',
+] as const
 export const ACQUISITION_METHODS = ['Purchase', 'Donation', 'Transfer'] as const
 
 export const statusLabel = (s: string) => s.replace(/([A-Z])/g, ' $1').trim()

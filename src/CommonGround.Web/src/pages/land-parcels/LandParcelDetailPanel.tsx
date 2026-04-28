@@ -5,6 +5,7 @@ import StatusBadge from '../../components/StatusBadge'
 import { getAvailableActions, type TransitionAction } from '../../lib/transitionActions'
 import { trackTransitionEvent } from '../../lib/telemetry'
 import { useToast } from '../../hooks/useToast'
+import ChangeStatusSelector from './ChangeStatusSelector'
 
 function SkeletonRows() {
   return (
@@ -24,13 +25,14 @@ export default function LandParcelDetailPanel({ parcelId, onClose }: Props) {
   const updateStatusMutation = useUpdateLandParcelStatus()
   const [pendingActionId, setPendingActionId] = useState<string | null>(null)
   const { success } = useToast()
+  const actions = getAvailableActions('parcel', detail?.status)
+
+  const mutationErrorMessage = updateStatusMutation.error instanceof Error
+    ? updateStatusMutation.error.message
+    : 'Failed to update status. Please try again.'
 
   const handleTransitionAction = async (action: TransitionAction) => {
     if (!detail?.status || !action.toState) return
-
-    if (action.requiresConfirmation && !window.confirm(action.confirmationMessage ?? 'Are you sure?')) {
-      return
-    }
 
     trackTransitionEvent({
       event: 'ui.transition',
@@ -80,30 +82,14 @@ export default function LandParcelDetailPanel({ parcelId, onClose }: Props) {
     >
       {detailLoading || !detail ? <SkeletonRows /> : (
         <>
-          {(() => {
-            const actions = getAvailableActions('parcel', detail.status)
-            return actions.length > 0 ? (
-              <div className="detail-section">
-                <div className="detail-section__title">Available Actions</div>
-                <div className="status-update" style={{ flexWrap: 'wrap', gap: 8 }}>
-                  {actions.map(action => (
-                    <button
-                      key={action.id}
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => handleTransitionAction(action)}
-                      disabled={updateStatusMutation.isPending}
-                    >
-                      {updateStatusMutation.isPending && pendingActionId === action.id ? 'Saving…' : action.label}
-                    </button>
-                  ))}
-                </div>
-                {updateStatusMutation.isError && (
-                  <div className="form-error">Failed to update status.</div>
-                )}
-              </div>
-            ) : null
-          })()}
+          <ChangeStatusSelector
+            actions={actions}
+            isPending={updateStatusMutation.isPending}
+            pendingActionId={pendingActionId}
+            isError={updateStatusMutation.isError}
+            errorMessage={mutationErrorMessage}
+            onSelectAction={handleTransitionAction}
+          />
 
           <div className="detail-grid">
             <div className="detail-field">

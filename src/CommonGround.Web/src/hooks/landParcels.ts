@@ -95,9 +95,24 @@ export function useUpdateLandParcelStatus() {
         qc.setQueryData(queryKey, data)
       })
     },
-    onSettled: (_d, _e, v) => {
-      qc.invalidateQueries({ queryKey: ['land-parcel', v.id] })
-      qc.invalidateQueries({ queryKey: ['land-parcels'] })
+    onSuccess: (_data, { id, newStatus }) => {
+      qc.setQueryData(['land-parcel', id], (current: any) =>
+        current ? { ...current, status: newStatus } : current,
+      )
+
+      const listQueries = qc.getQueriesData({ queryKey: ['land-parcels'] })
+      listQueries.forEach(([queryKey]) => {
+        qc.setQueryData(queryKey, (current: any) => {
+          if (!current?.items) return current
+
+          return {
+            ...current,
+            items: current.items.map((item: any) =>
+              item.id === id ? { ...item, status: newStatus } : item,
+            ),
+          }
+        })
+      })
     },
   })
 }

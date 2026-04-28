@@ -37,6 +37,16 @@ import {
     UpdateLandParcelStatusRequestToJSON,
 } from '../models/index';
 
+export interface DecommissionLandParcelRequest {
+    landParcelId: string;
+    body: object;
+}
+
+export interface EnterLandParcelTransitioningRequest {
+    landParcelId: string;
+    body: object;
+}
+
 export interface GetLandParcelRequest {
     landParcelId: string;
 }
@@ -48,8 +58,38 @@ export interface GetLandParcelsRequest {
     search?: string | null;
 }
 
+export interface MarkLandParcelOccupiedRequest {
+    landParcelId: string;
+    body: object;
+}
+
+export interface MarkLandParcelReadyForOccupancyRequest {
+    landParcelId: string;
+    body: object;
+}
+
+export interface RecommissionLandParcelRequest {
+    landParcelId: string;
+    body: object;
+}
+
 export interface RegisterLandParcelOperationRequest {
     registerLandParcelRequest: RegisterLandParcelRequest;
+}
+
+export interface ReturnLandParcelToAvailableRequest {
+    landParcelId: string;
+    body: object;
+}
+
+export interface StartLandParcelConstructionRequest {
+    landParcelId: string;
+    body: object;
+}
+
+export interface StartLandParcelPredevelopmentRequest {
+    landParcelId: string;
+    body: object;
 }
 
 export interface UpdateLandParcelStatusOperationRequest {
@@ -64,6 +104,38 @@ export interface UpdateLandParcelStatusOperationRequest {
  * @interface LandParcelsApiInterface
  */
 export interface LandParcelsApiInterface {
+    /**
+     * 
+     * @summary Decommissions a land parcel.
+     * @param {string} landParcelId The ID of the land parcel to transition.
+     * @param {object} body The transition request.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof LandParcelsApiInterface
+     */
+    decommissionLandParcelRaw(requestParameters: DecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+
+    /**
+     * Decommissions a land parcel.
+     */
+    decommissionLandParcel(requestParameters: DecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+
+    /**
+     * 
+     * @summary Enters transitioning state for a land parcel.
+     * @param {string} landParcelId The ID of the land parcel to transition.
+     * @param {object} body The transition request.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof LandParcelsApiInterface
+     */
+    enterLandParcelTransitioningRaw(requestParameters: EnterLandParcelTransitioningRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+
+    /**
+     * Enters transitioning state for a land parcel.
+     */
+    enterLandParcelTransitioning(requestParameters: EnterLandParcelTransitioningRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+
     /**
      * 
      * @summary Gets a land parcel by ID.
@@ -99,6 +171,54 @@ export interface LandParcelsApiInterface {
 
     /**
      * 
+     * @summary Marks a land parcel occupied.
+     * @param {string} landParcelId The ID of the land parcel to transition.
+     * @param {object} body The transition request.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof LandParcelsApiInterface
+     */
+    markLandParcelOccupiedRaw(requestParameters: MarkLandParcelOccupiedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+
+    /**
+     * Marks a land parcel occupied.
+     */
+    markLandParcelOccupied(requestParameters: MarkLandParcelOccupiedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+
+    /**
+     * 
+     * @summary Marks a land parcel ready for occupancy.
+     * @param {string} landParcelId The ID of the land parcel to transition.
+     * @param {object} body The transition request.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof LandParcelsApiInterface
+     */
+    markLandParcelReadyForOccupancyRaw(requestParameters: MarkLandParcelReadyForOccupancyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+
+    /**
+     * Marks a land parcel ready for occupancy.
+     */
+    markLandParcelReadyForOccupancy(requestParameters: MarkLandParcelReadyForOccupancyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+
+    /**
+     * 
+     * @summary Recommissions a land parcel.
+     * @param {string} landParcelId The ID of the land parcel to transition.
+     * @param {object} body The transition request.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof LandParcelsApiInterface
+     */
+    recommissionLandParcelRaw(requestParameters: RecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+
+    /**
+     * Recommissions a land parcel.
+     */
+    recommissionLandParcel(requestParameters: RecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+
+    /**
+     * 
      * @summary Registers a new land parcel.
      * @param {RegisterLandParcelRequest} registerLandParcelRequest The land parcel registration details.
      * @param {*} [options] Override http request option.
@@ -114,17 +234,67 @@ export interface LandParcelsApiInterface {
 
     /**
      * 
-     * @summary Updates a land parcel\'s status.
+     * @summary Returns a land parcel to available status.
+     * @param {string} landParcelId The ID of the land parcel to transition.
+     * @param {object} body The transition request.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof LandParcelsApiInterface
+     */
+    returnLandParcelToAvailableRaw(requestParameters: ReturnLandParcelToAvailableRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+
+    /**
+     * Returns a land parcel to available status.
+     */
+    returnLandParcelToAvailable(requestParameters: ReturnLandParcelToAvailableRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+
+    /**
+     * 
+     * @summary Starts construction for a land parcel.
+     * @param {string} landParcelId The ID of the land parcel to transition.
+     * @param {object} body The transition request.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof LandParcelsApiInterface
+     */
+    startLandParcelConstructionRaw(requestParameters: StartLandParcelConstructionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+
+    /**
+     * Starts construction for a land parcel.
+     */
+    startLandParcelConstruction(requestParameters: StartLandParcelConstructionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+
+    /**
+     * 
+     * @summary Starts predevelopment for a land parcel.
+     * @param {string} landParcelId The ID of the land parcel to transition.
+     * @param {object} body The transition request.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof LandParcelsApiInterface
+     */
+    startLandParcelPredevelopmentRaw(requestParameters: StartLandParcelPredevelopmentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+
+    /**
+     * Starts predevelopment for a land parcel.
+     */
+    startLandParcelPredevelopment(requestParameters: StartLandParcelPredevelopmentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+
+    /**
+     * 
+     * @summary Legacy status mutation endpoint retained for backward compatibility. Prefer explicit transition endpoints.
      * @param {string} landParcelId The ID of the land parcel to update.
      * @param {UpdateLandParcelStatusRequest} updateLandParcelStatusRequest The new status details.
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      * @memberof LandParcelsApiInterface
      */
     updateLandParcelStatusRaw(requestParameters: UpdateLandParcelStatusOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
 
     /**
-     * Updates a land parcel\'s status.
+     * Legacy status mutation endpoint retained for backward compatibility. Prefer explicit transition endpoints.
+     * @deprecated
      */
     updateLandParcelStatus(requestParameters: UpdateLandParcelStatusOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
 
@@ -134,6 +304,98 @@ export interface LandParcelsApiInterface {
  * 
  */
 export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInterface {
+
+    /**
+     * Decommissions a land parcel.
+     */
+    async decommissionLandParcelRaw(requestParameters: DecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['landParcelId'] == null) {
+            throw new runtime.RequiredError(
+                'landParcelId',
+                'Required parameter "landParcelId" was null or undefined when calling decommissionLandParcel().'
+            );
+        }
+
+        if (requestParameters['body'] == null) {
+            throw new runtime.RequiredError(
+                'body',
+                'Required parameter "body" was null or undefined when calling decommissionLandParcel().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/land-parcels/{landParcelId}/decommission`;
+        urlPath = urlPath.replace(`{${"landParcelId"}}`, encodeURIComponent(String(requestParameters['landParcelId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['body'] as any,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Decommissions a land parcel.
+     */
+    async decommissionLandParcel(requestParameters: DecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.decommissionLandParcelRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Enters transitioning state for a land parcel.
+     */
+    async enterLandParcelTransitioningRaw(requestParameters: EnterLandParcelTransitioningRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['landParcelId'] == null) {
+            throw new runtime.RequiredError(
+                'landParcelId',
+                'Required parameter "landParcelId" was null or undefined when calling enterLandParcelTransitioning().'
+            );
+        }
+
+        if (requestParameters['body'] == null) {
+            throw new runtime.RequiredError(
+                'body',
+                'Required parameter "body" was null or undefined when calling enterLandParcelTransitioning().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/land-parcels/{landParcelId}/transitioning/enter`;
+        urlPath = urlPath.replace(`{${"landParcelId"}}`, encodeURIComponent(String(requestParameters['landParcelId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['body'] as any,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Enters transitioning state for a land parcel.
+     */
+    async enterLandParcelTransitioning(requestParameters: EnterLandParcelTransitioningRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.enterLandParcelTransitioningRaw(requestParameters, initOverrides);
+    }
 
     /**
      * Gets a land parcel by ID.
@@ -218,6 +480,144 @@ export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInt
     }
 
     /**
+     * Marks a land parcel occupied.
+     */
+    async markLandParcelOccupiedRaw(requestParameters: MarkLandParcelOccupiedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['landParcelId'] == null) {
+            throw new runtime.RequiredError(
+                'landParcelId',
+                'Required parameter "landParcelId" was null or undefined when calling markLandParcelOccupied().'
+            );
+        }
+
+        if (requestParameters['body'] == null) {
+            throw new runtime.RequiredError(
+                'body',
+                'Required parameter "body" was null or undefined when calling markLandParcelOccupied().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/land-parcels/{landParcelId}/occupied/mark`;
+        urlPath = urlPath.replace(`{${"landParcelId"}}`, encodeURIComponent(String(requestParameters['landParcelId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['body'] as any,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Marks a land parcel occupied.
+     */
+    async markLandParcelOccupied(requestParameters: MarkLandParcelOccupiedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.markLandParcelOccupiedRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Marks a land parcel ready for occupancy.
+     */
+    async markLandParcelReadyForOccupancyRaw(requestParameters: MarkLandParcelReadyForOccupancyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['landParcelId'] == null) {
+            throw new runtime.RequiredError(
+                'landParcelId',
+                'Required parameter "landParcelId" was null or undefined when calling markLandParcelReadyForOccupancy().'
+            );
+        }
+
+        if (requestParameters['body'] == null) {
+            throw new runtime.RequiredError(
+                'body',
+                'Required parameter "body" was null or undefined when calling markLandParcelReadyForOccupancy().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/land-parcels/{landParcelId}/ready-for-occupancy/mark`;
+        urlPath = urlPath.replace(`{${"landParcelId"}}`, encodeURIComponent(String(requestParameters['landParcelId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['body'] as any,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Marks a land parcel ready for occupancy.
+     */
+    async markLandParcelReadyForOccupancy(requestParameters: MarkLandParcelReadyForOccupancyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.markLandParcelReadyForOccupancyRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Recommissions a land parcel.
+     */
+    async recommissionLandParcelRaw(requestParameters: RecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['landParcelId'] == null) {
+            throw new runtime.RequiredError(
+                'landParcelId',
+                'Required parameter "landParcelId" was null or undefined when calling recommissionLandParcel().'
+            );
+        }
+
+        if (requestParameters['body'] == null) {
+            throw new runtime.RequiredError(
+                'body',
+                'Required parameter "body" was null or undefined when calling recommissionLandParcel().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/land-parcels/{landParcelId}/recommission`;
+        urlPath = urlPath.replace(`{${"landParcelId"}}`, encodeURIComponent(String(requestParameters['landParcelId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['body'] as any,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Recommissions a land parcel.
+     */
+    async recommissionLandParcel(requestParameters: RecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.recommissionLandParcelRaw(requestParameters, initOverrides);
+    }
+
+    /**
      * Registers a new land parcel.
      */
     async registerLandParcelRaw(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RegisterLandParcelResponse>> {
@@ -257,7 +657,146 @@ export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInt
     }
 
     /**
-     * Updates a land parcel\'s status.
+     * Returns a land parcel to available status.
+     */
+    async returnLandParcelToAvailableRaw(requestParameters: ReturnLandParcelToAvailableRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['landParcelId'] == null) {
+            throw new runtime.RequiredError(
+                'landParcelId',
+                'Required parameter "landParcelId" was null or undefined when calling returnLandParcelToAvailable().'
+            );
+        }
+
+        if (requestParameters['body'] == null) {
+            throw new runtime.RequiredError(
+                'body',
+                'Required parameter "body" was null or undefined when calling returnLandParcelToAvailable().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/land-parcels/{landParcelId}/available/return`;
+        urlPath = urlPath.replace(`{${"landParcelId"}}`, encodeURIComponent(String(requestParameters['landParcelId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['body'] as any,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Returns a land parcel to available status.
+     */
+    async returnLandParcelToAvailable(requestParameters: ReturnLandParcelToAvailableRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.returnLandParcelToAvailableRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Starts construction for a land parcel.
+     */
+    async startLandParcelConstructionRaw(requestParameters: StartLandParcelConstructionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['landParcelId'] == null) {
+            throw new runtime.RequiredError(
+                'landParcelId',
+                'Required parameter "landParcelId" was null or undefined when calling startLandParcelConstruction().'
+            );
+        }
+
+        if (requestParameters['body'] == null) {
+            throw new runtime.RequiredError(
+                'body',
+                'Required parameter "body" was null or undefined when calling startLandParcelConstruction().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/land-parcels/{landParcelId}/construction/start`;
+        urlPath = urlPath.replace(`{${"landParcelId"}}`, encodeURIComponent(String(requestParameters['landParcelId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['body'] as any,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Starts construction for a land parcel.
+     */
+    async startLandParcelConstruction(requestParameters: StartLandParcelConstructionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.startLandParcelConstructionRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Starts predevelopment for a land parcel.
+     */
+    async startLandParcelPredevelopmentRaw(requestParameters: StartLandParcelPredevelopmentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['landParcelId'] == null) {
+            throw new runtime.RequiredError(
+                'landParcelId',
+                'Required parameter "landParcelId" was null or undefined when calling startLandParcelPredevelopment().'
+            );
+        }
+
+        if (requestParameters['body'] == null) {
+            throw new runtime.RequiredError(
+                'body',
+                'Required parameter "body" was null or undefined when calling startLandParcelPredevelopment().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/land-parcels/{landParcelId}/predevelopment/start`;
+        urlPath = urlPath.replace(`{${"landParcelId"}}`, encodeURIComponent(String(requestParameters['landParcelId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['body'] as any,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Starts predevelopment for a land parcel.
+     */
+    async startLandParcelPredevelopment(requestParameters: StartLandParcelPredevelopmentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.startLandParcelPredevelopmentRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Legacy status mutation endpoint retained for backward compatibility. Prefer explicit transition endpoints.
+     * @deprecated
      */
     async updateLandParcelStatusRaw(requestParameters: UpdateLandParcelStatusOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
         if (requestParameters['landParcelId'] == null) {
@@ -296,7 +835,8 @@ export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInt
     }
 
     /**
-     * Updates a land parcel\'s status.
+     * Legacy status mutation endpoint retained for backward compatibility. Prefer explicit transition endpoints.
+     * @deprecated
      */
     async updateLandParcelStatus(requestParameters: UpdateLandParcelStatusOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.updateLandParcelStatusRaw(requestParameters, initOverrides);

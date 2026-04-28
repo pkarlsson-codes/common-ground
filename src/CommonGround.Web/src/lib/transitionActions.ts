@@ -12,17 +12,20 @@ type TransitionMap = Record<string, TransitionAction[]>
 
 const parcelTransitions: TransitionMap = {
   Available: [
-    { id: 'parcel:start-development', label: 'Start Development', toState: 'UnderDevelopment' },
+    { id: 'parcel:start-predevelopment', label: 'Start Predevelopment', toState: 'Predevelopment' },
+  ],
+  Predevelopment: [
+    { id: 'parcel:start-construction', label: 'Start Construction', toState: 'UnderConstruction' },
+  ],
+  UnderConstruction: [
+    { id: 'parcel:mark-ready-for-occupancy', label: 'Mark Ready for Occupancy', toState: 'ReadyForOccupancy' },
+  ],
+  ReadyForOccupancy: [
     { id: 'parcel:mark-occupied', label: 'Mark Occupied', toState: 'Occupied' },
   ],
-  UnderDevelopment: [
-    { id: 'parcel:mark-available', label: 'Mark Available', toState: 'Available' },
-    { id: 'parcel:mark-occupied', label: 'Mark Occupied', toState: 'Occupied' },
-  ],
-  Occupied: [
-    { id: 'parcel:mark-available', label: 'Mark Available', toState: 'Available' },
-    { id: 'parcel:start-redevelopment', label: 'Start Redevelopment', toState: 'UnderDevelopment' },
-  ],
+  Occupied: [],
+  Transitioning: [],
+  Decommissioned: [],
 }
 
 const buildingTransitions: TransitionMap = {
@@ -134,5 +137,13 @@ export function getAvailableActions(aggregate: TransitionAggregate, currentState
     return []
   }
 
-  return transitionMaps[aggregate][currentState] ?? []
+  const actionMap = transitionMaps[aggregate]
+  const exact = actionMap[currentState]
+
+  if (exact) {
+    return exact
+  }
+
+  const normalized = currentState.replace(/\s+/g, '')
+  return actionMap[normalized] ?? []
 }
