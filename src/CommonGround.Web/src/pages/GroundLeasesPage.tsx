@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
-  useChangeHomeowner,
   useCreateGroundLease,
   useGroundLease,
   useGroundLeases,
@@ -14,7 +13,6 @@ import {
   INDEX_TYPES,
   statusLabel,
   type CreateGroundLeaseForm,
-  type OnboardHomeownerForm,
   type RecordCheckInForm,
 } from '../hooks/types'
 import EntityCombobox from '../components/EntityCombobox'
@@ -60,7 +58,6 @@ const emptyCreate = (): CreateGroundLeaseForm => ({
   hasImprovementsCap: false,
 })
 
-const emptyHomeowner = (): OnboardHomeownerForm => ({ fullName: '', email: '', phone: '' })
 const emptyCheckIn = (): RecordCheckInForm => ({
   checkInDate: new Date().toISOString().slice(0, 10),
   notes: '',
@@ -75,10 +72,8 @@ export default function GroundLeasesPage() {
   const [panel, setPanel] = useState<Panel>(null)
 
   const [createForm, setCreateForm] = useState<CreateGroundLeaseForm>(emptyCreate)
-  const [homeownerForm, setHomeownerForm] = useState<OnboardHomeownerForm>(emptyHomeowner)
   const [checkInForm, setCheckInForm] = useState<RecordCheckInForm>(emptyCheckIn)
   const [createError, setCreateError] = useState<string | null>(null)
-  const [changeError, setChangeError] = useState<string | null>(null)
   const [checkInError, setCheckInError] = useState<string | null>(null)
   const { success } = useToast()
 
@@ -88,14 +83,11 @@ export default function GroundLeasesPage() {
   )
 
   const createMutation = useCreateGroundLease()
-  const changeMutation = useChangeHomeowner()
   const checkInMutation = useRecordStewardshipCheckIn()
 
   const openDetail = (id: string) => {
     setSelectedId(id)
-    setHomeownerForm(emptyHomeowner())
     setCheckInForm(emptyCheckIn())
-    setChangeError(null)
     setCheckInError(null)
     setPanel('detail')
   }
@@ -133,19 +125,6 @@ export default function GroundLeasesPage() {
       success('Ground lease created')
     } catch (error) {
       setCreateError(await getErrorMessage(error, 'Failed to create ground lease.'))
-    }
-  }
-
-  const handleChangeHomeowner = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!selectedId) return
-    setChangeError(null)
-    try {
-      await changeMutation.mutateAsync({ groundLeaseId: selectedId, form: homeownerForm })
-      success('Homeowner updated')
-      setHomeownerForm(emptyHomeowner())
-    } catch (error) {
-      setChangeError(await getErrorMessage(error, 'Failed to save homeowner.'))
     }
   }
 
@@ -356,58 +335,6 @@ export default function GroundLeasesPage() {
                     {new Date(detail.createdAt!).toLocaleString()}
                   </div>
                 </div>
-              </div>
-
-              {/* Homeowner section */}
-              <div className="detail-section">
-                <div className="detail-section__title">Change Homeowner</div>
-                {detail.homeownerFullName ? (
-                  <form onSubmit={handleChangeHomeowner}>
-                    <div className="form-grid" style={{ marginBottom: 12 }}>
-                      <div className="form-field full">
-                        <label className="form-label">Full Name</label>
-                        <input
-                          className="form-input"
-                          value={homeownerForm.fullName}
-                          onChange={e => setHomeownerForm(f => ({ ...f, fullName: e.target.value }))}
-                          required
-                        />
-                      </div>
-                      <div className="form-field">
-                        <label className="form-label">Email</label>
-                        <input
-                          className="form-input"
-                          type="email"
-                          value={homeownerForm.email}
-                          onChange={e => setHomeownerForm(f => ({ ...f, email: e.target.value }))}
-                          required
-                        />
-                      </div>
-                      <div className="form-field">
-                        <label className="form-label">Phone (optional)</label>
-                        <input
-                          className="form-input"
-                          value={homeownerForm.phone}
-                          onChange={e => setHomeownerForm(f => ({ ...f, phone: e.target.value }))}
-                        />
-                      </div>
-                    </div>
-                    <button
-                      type="submit"
-                      className="btn btn-secondary"
-                      disabled={changeMutation.isPending}
-                    >
-                      {changeMutation.isPending ? 'Saving…' : 'Update Homeowner'}
-                    </button>
-                    {changeError && (
-                      <div className="form-error">{changeError}</div>
-                    )}
-                  </form>
-                ) : (
-                  <div className="detail-field__value">
-                    Homeowner onboarding is no longer supported from this page.
-                  </div>
-                )}
               </div>
 
               {/* Stewardship check-ins */}
