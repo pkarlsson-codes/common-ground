@@ -53,14 +53,34 @@ export function useRegisterLandParcel() {
   })
 }
 
+function dispatchParcelTransition(id: string, newStatus: string): Promise<void> {
+  const body = {}
+  switch (newStatus) {
+    case 'Predevelopment':
+      return api.startLandParcelPredevelopment({ landParcelId: id, body })
+    case 'UnderConstruction':
+      return api.startLandParcelConstruction({ landParcelId: id, body })
+    case 'ReadyForOccupancy':
+      return api.markLandParcelReadyForOccupancy({ landParcelId: id, body })
+    case 'Occupied':
+      return api.markLandParcelOccupied({ landParcelId: id, body })
+    case 'Decommissioned':
+      return api.decommissionLandParcel({ landParcelId: id, body })
+    case 'Available':
+      return api.recommissionLandParcel({ landParcelId: id, body })
+    default:
+      return api.updateLandParcelStatus({
+        landParcelId: id,
+        updateLandParcelStatusRequest: { newStatus },
+      })
+  }
+}
+
 export function useUpdateLandParcelStatus() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id, newStatus }: { id: string; newStatus: string }) =>
-      api.updateLandParcelStatus({
-        landParcelId: id,
-        updateLandParcelStatusRequest: { newStatus },
-      }),
+      dispatchParcelTransition(id, newStatus),
     onMutate: async ({ id, newStatus }) => {
       await qc.cancelQueries({ queryKey: ['land-parcel', id] })
       await qc.cancelQueries({ queryKey: ['land-parcels'] })
