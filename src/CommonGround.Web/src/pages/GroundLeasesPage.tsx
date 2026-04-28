@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
-  useCalculateResaleEstimate,
   useChangeHomeowner,
   useCreateGroundLease,
   useGroundLease,
   useGroundLeases,
   useRecordStewardshipCheckIn,
 } from '../hooks/groundLeases'
-import { useStewardshipCase } from '../hooks/stewardship'
 import {
   FORMULA_KIND_LABELS,
   FORMULA_KINDS,
@@ -18,19 +16,15 @@ import {
   type CreateGroundLeaseForm,
   type OnboardHomeownerForm,
   type RecordCheckInForm,
-  type ResaleEstimateForm,
 } from '../hooks/types'
 import EntityCombobox from '../components/EntityCombobox'
 import NavIdLink from '../components/NavIdLink'
 import Pagination from '../components/Pagination'
 import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
-import OccupancyVerificationSection from '../components/stewardship/OccupancyVerificationSection'
-import PropertyInspectionSection from '../components/stewardship/PropertyInspectionSection'
-import LeaseViolationSection from '../components/stewardship/LeaseViolationSection'
-import ForeclosurePreventionSection from '../components/stewardship/ForeclosurePreventionSection'
 import { BuildingsApi, LandParcelsApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
+import { getErrorMessage } from '../lib/getErrorMessage'
 import { useToast } from '../hooks/useToast'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
@@ -71,44 +65,6 @@ const emptyCheckIn = (): RecordCheckInForm => ({
   checkInDate: new Date().toISOString().slice(0, 10),
   notes: '',
 })
-const emptyEstimate = (): ResaleEstimateForm => ({
-  originalPurchasePrice: 0,
-  currentAppraisalValue: 0,
-  originalAppraisalValue: 0,
-  ownershipYears: 0,
-  approvedImprovements: 0,
-  currentIndexValue: 0,
-})
-
-function StewardshipCaseSections({ groundLeaseId }: { groundLeaseId: string }) {
-  const { data: sc, isLoading } = useStewardshipCase(groundLeaseId)
-
-  if (isLoading) {
-    return (
-      <div className="detail-section">
-        <div style={{ color: 'var(--text-dim)', fontSize: 13 }}>Loading stewardship case…</div>
-      </div>
-    )
-  }
-
-  if (!sc) {
-    return (
-      <div className="detail-section">
-        <div className="detail-section__title">Stewardship</div>
-        <div style={{ color: 'var(--text-dim)', fontSize: 13 }}>No active stewardship case.</div>
-      </div>
-    )
-  }
-
-  return (
-    <>
-      <OccupancyVerificationSection groundLeaseId={groundLeaseId} caseId={sc.id!} />
-      <PropertyInspectionSection groundLeaseId={groundLeaseId} caseId={sc.id!} />
-      <LeaseViolationSection groundLeaseId={groundLeaseId} caseId={sc.id!} />
-    </>
-  )
-}
-
 export default function GroundLeasesPage() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -121,8 +77,9 @@ export default function GroundLeasesPage() {
   const [createForm, setCreateForm] = useState<CreateGroundLeaseForm>(emptyCreate)
   const [homeownerForm, setHomeownerForm] = useState<OnboardHomeownerForm>(emptyHomeowner)
   const [checkInForm, setCheckInForm] = useState<RecordCheckInForm>(emptyCheckIn)
-  const [estimateForm, setEstimateForm] = useState<ResaleEstimateForm>(emptyEstimate)
-  const [estimateResult, setEstimateResult] = useState<number | null>(null)
+  const [createError, setCreateError] = useState<string | null>(null)
+  const [changeError, setChangeError] = useState<string | null>(null)
+  const [checkInError, setCheckInError] = useState<string | null>(null)
   const { success } = useToast()
 
   const { data, isLoading, isError } = useGroundLeases(page, statusFilter || undefined)
@@ -133,19 +90,19 @@ export default function GroundLeasesPage() {
   const createMutation = useCreateGroundLease()
   const changeMutation = useChangeHomeowner()
   const checkInMutation = useRecordStewardshipCheckIn()
-  const estimateMutation = useCalculateResaleEstimate()
 
   const openDetail = (id: string) => {
     setSelectedId(id)
     setHomeownerForm(emptyHomeowner())
     setCheckInForm(emptyCheckIn())
-    setEstimateForm(emptyEstimate())
-    setEstimateResult(null)
+    setChangeError(null)
+    setCheckInError(null)
     setPanel('detail')
   }
 
   const openCreate = () => {
     setCreateForm(emptyCreate())
+    setCreateError(null)
     setPanel('create')
   }
 
@@ -169,40 +126,40 @@ export default function GroundLeasesPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
+    setCreateError(null)
     try {
       await createMutation.mutateAsync(createForm)
       closePanel()
       success('Ground lease created')
-    } catch { /* error shown inline */ }
+    } catch (error) {
+      setCreateError(await getErrorMessage(error, 'Failed to create ground lease.'))
+    }
   }
 
   const handleChangeHomeowner = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedId) return
+    setChangeError(null)
     try {
       await changeMutation.mutateAsync({ groundLeaseId: selectedId, form: homeownerForm })
       success('Homeowner updated')
       setHomeownerForm(emptyHomeowner())
-    } catch { /* error shown inline */ }
+    } catch (error) {
+      setChangeError(await getErrorMessage(error, 'Failed to save homeowner.'))
+    }
   }
 
   const handleCheckIn = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedId) return
+    setCheckInError(null)
     try {
       await checkInMutation.mutateAsync({ groundLeaseId: selectedId, form: checkInForm })
       setCheckInForm(emptyCheckIn())
       success('Check-in recorded')
-    } catch { /* error shown inline */ }
-  }
-
-  const handleEstimate = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!selectedId) return
-    try {
-      const result = await estimateMutation.mutateAsync({ groundLeaseId: selectedId, form: estimateForm })
-      setEstimateResult(result.maxResalePrice ?? null)
-    } catch { /* error shown inline */ }
+    } catch (error) {
+      setCheckInError(await getErrorMessage(error, 'Failed to record check-in.'))
+    }
   }
 
   const leases = data?.items ?? []
@@ -442,8 +399,8 @@ export default function GroundLeasesPage() {
                     >
                       {changeMutation.isPending ? 'Saving…' : 'Update Homeowner'}
                     </button>
-                    {changeMutation.isError && (
-                      <div className="form-error">Failed to save homeowner.</div>
+                    {changeError && (
+                      <div className="form-error">{changeError}</div>
                     )}
                   </form>
                 ) : (
@@ -509,121 +466,23 @@ export default function GroundLeasesPage() {
                   >
                     {checkInMutation.isPending ? 'Recording…' : 'Record Check-In'}
                   </button>
-                  {checkInMutation.isError && (
-                    <div className="form-error">Failed to record check-in.</div>
+                  {checkInError && (
+                    <div className="form-error">{checkInError}</div>
                   )}
                 </form>
               </div>
 
-              {/* Resale estimate calculator */}
+              {/* Resale */}
               <div className="detail-section">
-                <div className="detail-section__title">Resale Price Estimate</div>
-                {estimateResult !== null && (
-                  <div
-                    style={{
-                      padding: '12px 16px',
-                      background: 'var(--amber-dim)',
-                      borderRadius: 6,
-                      marginBottom: 14,
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 20,
-                      color: 'var(--amber-bright)',
-                    }}
-                  >
-                    Max resale: {fmtCurrency(estimateResult)}
-                  </div>
-                )}
-                <form onSubmit={handleEstimate}>
-                  <div className="form-grid" style={{ marginBottom: 12 }}>
-                    <div className="form-field">
-                      <label className="form-label">Original Purchase Price ($)</label>
-                      <input
-                        className="form-input"
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={estimateForm.originalPurchasePrice || ''}
-                        onChange={e => setEstimateForm(f => ({ ...f, originalPurchasePrice: parseFloat(e.target.value) || 0 }))}
-                        required
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label className="form-label">Current Appraisal Value ($)</label>
-                      <input
-                        className="form-input"
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={estimateForm.currentAppraisalValue || ''}
-                        onChange={e => setEstimateForm(f => ({ ...f, currentAppraisalValue: parseFloat(e.target.value) || 0 }))}
-                        required
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label className="form-label">Original Appraisal Value ($)</label>
-                      <input
-                        className="form-input"
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={estimateForm.originalAppraisalValue || ''}
-                        onChange={e => setEstimateForm(f => ({ ...f, originalAppraisalValue: parseFloat(e.target.value) || 0 }))}
-                        required
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label className="form-label">Ownership Years</label>
-                      <input
-                        className="form-input"
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        value={estimateForm.ownershipYears || ''}
-                        onChange={e => setEstimateForm(f => ({ ...f, ownershipYears: parseFloat(e.target.value) || 0 }))}
-                        required
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label className="form-label">Approved Improvements ($)</label>
-                      <input
-                        className="form-input"
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={estimateForm.approvedImprovements || ''}
-                        onChange={e => setEstimateForm(f => ({ ...f, approvedImprovements: parseFloat(e.target.value) || 0 }))}
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label className="form-label">Current Index Value</label>
-                      <input
-                        className="form-input"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={estimateForm.currentIndexValue || ''}
-                        onChange={e => setEstimateForm(f => ({ ...f, currentIndexValue: parseFloat(e.target.value) || 0 }))}
-                      />
-                    </div>
-                  </div>
-                  <button
-                    type="submit"
-                    className="btn btn-secondary"
-                    disabled={estimateMutation.isPending}
-                  >
-                    {estimateMutation.isPending ? 'Calculating…' : 'Calculate Estimate'}
-                  </button>
-                  {estimateMutation.isError && (
-                    <div className="form-error">Calculation failed. Check your inputs.</div>
-                  )}
-                </form>
+                <div className="detail-section__title">Resale</div>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => navigate('/resale-workflows', { state: { openLeaseId: selectedId } })}
+                >
+                  Start Resale Workflow
+                </button>
               </div>
 
-              {/* Stewardship Case sections */}
-              {detail?.id && <StewardshipCaseSections groundLeaseId={detail.id} />}
-
-              {/* Foreclosure Prevention */}
-              {detail?.id && <ForeclosurePreventionSection groundLeaseId={detail.id} />}
             </>
           )}
         </SlideOver>
@@ -734,7 +593,7 @@ export default function GroundLeasesPage() {
 
               {createForm.formulaKind === 'AppraisalBased' && (
                 <div className="form-field">
-                  <label className="form-label">Appreciation Share (0–1)</label>
+                  <label className="form-label">Appreciation Share</label>
                   <input
                     className="form-input"
                     type="number"
@@ -745,6 +604,7 @@ export default function GroundLeasesPage() {
                     onChange={e => setCreateForm(f => ({ ...f, appreciationShare: parseFloat(e.target.value) || 0 }))}
                     required
                   />
+                  <div className="form-help">Decimal fraction, e.g. 0.25 = 25%</div>
                 </div>
               )}
 
@@ -777,7 +637,7 @@ export default function GroundLeasesPage() {
 
               {createForm.formulaKind === 'FixedPercentage' && (
                 <div className="form-field">
-                  <label className="form-label">Annual Percentage (0–1)</label>
+                  <label className="form-label">Annual Percentage</label>
                   <input
                     className="form-input"
                     type="number"
@@ -788,6 +648,7 @@ export default function GroundLeasesPage() {
                     onChange={e => setCreateForm(f => ({ ...f, annualPercentage: parseFloat(e.target.value) || 0 }))}
                     required
                   />
+                  <div className="form-help">Decimal fraction, e.g. 0.03 = 3%</div>
                 </div>
               )}
 
@@ -818,8 +679,8 @@ export default function GroundLeasesPage() {
                 </div>
               )}
             </div>
-            {createMutation.isError && (
-              <div className="form-error">Failed to create ground lease. Check IDs and try again.</div>
+            {createError && (
+              <div className="form-error">{createError}</div>
             )}
           </form>
         </SlideOver>

@@ -97,6 +97,13 @@ export default function Layout() {
             Ground Leases
           </NavLink>
           <NavLink
+            to="/resale-workflows"
+            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          >
+            <IconWorkflow />
+            Resale Workflows
+          </NavLink>
+          <NavLink
             to="/purchase-workflows"
             className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
           >

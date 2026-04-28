@@ -1,5 +1,4 @@
-import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useMemo, useState } from 'react'
 import { useAllStewardshipCases } from '../../hooks/stewardship'
 import { useAllActiveGroundLeases } from '../../hooks/groundLeases'
 import type { GroundLeaseListItemResponse } from '../../api'
@@ -9,6 +8,7 @@ import {
   type StewardshipQueueRow,
   type UrgencyLevel,
 } from './stewardshipSortUtils'
+import StewardshipCaseDetailPanel from '../../components/stewardship/StewardshipCaseDetailPanel'
 
 // ── Urgency styling ──────────────────────────────────────────────────────────
 
@@ -63,7 +63,6 @@ function ViolationCell({ count }: { count: number }) {
 // ── Main component ───────────────────────────────────────────────────────────
 
 export default function StewardshipCasesTab() {
-  const navigate = useNavigate()
   const currentYear = new Date().getFullYear()
 
   const { data: cases, isLoading: casesLoading, isError: casesError } = useAllStewardshipCases()
@@ -71,6 +70,8 @@ export default function StewardshipCasesTab() {
 
   const isLoading = casesLoading || leasesLoading
   const isError = casesError
+
+  const [selectedRow, setSelectedRow] = useState<StewardshipQueueRow | null>(null)
 
   const leaseIndex = useMemo(() => {
     const map = new Map<string, GroundLeaseListItemResponse>()
@@ -84,10 +85,6 @@ export default function StewardshipCasesTab() {
     () => buildStewardshipQueue(cases ?? [], leaseIndex as Map<string, { homeownerFullName?: string | null; parcelAddress?: string | null }>),
     [cases, leaseIndex],
   )
-
-  const handleRowClick = (row: StewardshipQueueRow) => {
-    navigate('/ground-leases', { state: { openId: row.groundLeaseId } })
-  }
 
   if (isLoading) return <SkeletonRows />
 
@@ -113,40 +110,50 @@ export default function StewardshipCasesTab() {
   }
 
   return (
-    <div className="registry-table-wrap">
-      <table className="registry-table">
-        <thead>
-          <tr>
-            <th>Homeowner</th>
-            <th>Address</th>
-            <th>Occupancy {currentYear}</th>
-            <th>Active violations</th>
-            <th>Next inspection</th>
-            <th>Opened</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map(row => (
-            <tr
-              key={row.caseId}
-              className={URGENCY_ROW_CLASS[row.urgency]}
-              onClick={() => handleRowClick(row)}
-              style={{ cursor: 'pointer' }}
-            >
-              <td>{row.homeownerName}</td>
-              <td>{row.address}</td>
-              <td><OccupancyCell verification={row.currentVerification} /></td>
-              <td><ViolationCell count={row.activeViolationCount} /></td>
-              <td>
-                {row.nextInspectionDate
-                  ? <span className="cell-mono">{row.nextInspectionDate.toISOString().slice(0, 10)}</span>
-                  : <span style={{ color: 'var(--text-dim)' }}>—</span>}
-              </td>
-              <td><span className="cell-mono">{row.openedDate.toISOString().slice(0, 10)}</span></td>
+    <>
+      <div className="registry-table-wrap">
+        <table className="registry-table">
+          <thead>
+            <tr>
+              <th>Homeowner</th>
+              <th>Address</th>
+              <th>Occupancy {currentYear}</th>
+              <th>Active violations</th>
+              <th>Next inspection</th>
+              <th>Opened</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {rows.map(row => (
+              <tr
+                key={row.caseId}
+                className={URGENCY_ROW_CLASS[row.urgency]}
+                onClick={() => setSelectedRow(row)}
+                style={{ cursor: 'pointer' }}
+              >
+                <td>{row.homeownerName}</td>
+                <td>{row.address}</td>
+                <td><OccupancyCell verification={row.currentVerification} /></td>
+                <td><ViolationCell count={row.activeViolationCount} /></td>
+                <td>
+                  {row.nextInspectionDate
+                    ? <span className="cell-mono">{row.nextInspectionDate.toISOString().slice(0, 10)}</span>
+                    : <span style={{ color: 'var(--text-dim)' }}>—</span>}
+                </td>
+                <td><span className="cell-mono">{row.openedDate.toISOString().slice(0, 10)}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {selectedRow && (
+        <StewardshipCaseDetailPanel
+          row={selectedRow}
+          lease={leaseIndex.get(selectedRow.groundLeaseId)}
+          onClose={() => setSelectedRow(null)}
+        />
+      )}
+    </>
   )
 }

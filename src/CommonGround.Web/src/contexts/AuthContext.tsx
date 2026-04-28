@@ -10,6 +10,7 @@ interface AuthContextValue {
   user: User | null
   isLoading: boolean
   isAuthenticated: boolean
+  error: string | null
   logout: () => void
 }
 
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/v1/Auth/me', { credentials: 'include' })
@@ -27,7 +29,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(data.user)
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        setError('Could not reach the server. Check your connection and reload.')
+      })
       .finally(() => setIsLoading(false))
   }, [])
 
@@ -36,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, error, logout }}>
       {children}
     </AuthContext.Provider>
   )

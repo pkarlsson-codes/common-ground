@@ -189,7 +189,6 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
               <div className="form-field">
                 <label className="form-label">Primary Resident</label>
                 <input
-                  className="form-input"
                   type="checkbox"
                   checked={submitForm.isPrimaryResident}
                   onChange={e => setSubmitForm(f => ({ ...f, isPrimaryResident: e.target.checked }))}
@@ -198,7 +197,6 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
               <div className="form-field">
                 <label className="form-label">Sublet Disclosed</label>
                 <input
-                  className="form-input"
                   type="checkbox"
                   checked={submitForm.subletDisclosed}
                   onChange={e => setSubmitForm(f => ({ ...f, subletDisclosed: e.target.checked }))}

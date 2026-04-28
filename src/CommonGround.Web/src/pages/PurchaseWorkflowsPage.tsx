@@ -14,8 +14,8 @@ import Pagination from '../components/Pagination'
 import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
 import { GroundLeasesApi } from '../api'
-import { ResponseError } from '../api/runtime'
 import { apiConfig } from '../lib/apiConfig'
+import { getErrorMessage } from '../lib/getErrorMessage'
 import PurchaseWorkflowDetailPanel from './purchase-workflows/PurchaseWorkflowDetailPanel'
 import { useToast } from '../hooks/useToast'
 
@@ -29,36 +29,6 @@ const fmtCurrency = (n: number) =>
 
 const isValidE164Phone = (value: string) => E164_PHONE_PATTERN.test(value)
 
-async function getErrorMessage(error: unknown, fallback: string) {
-  if (!(error instanceof ResponseError)) {
-    return fallback
-  }
-
-  try {
-    const problem = await error.response.clone().json() as {
-      detail?: string
-      title?: string
-      errors?: Record<string, string[]>
-    }
-
-    if (problem.detail) {
-      return problem.detail
-    }
-
-    const firstError = Object.values(problem.errors ?? {}).flat()[0]
-    if (firstError) {
-      return firstError
-    }
-
-    if (problem.title) {
-      return problem.title
-    }
-  } catch {
-    return fallback
-  }
-
-  return fallback
-}
 
 function SkeletonRows() {
   return (

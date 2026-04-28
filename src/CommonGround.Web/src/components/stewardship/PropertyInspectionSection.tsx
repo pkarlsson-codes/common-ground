@@ -164,7 +164,6 @@ export default function PropertyInspectionSection({ groundLeaseId, caseId }: Pro
                 <div className="form-field">
                   <label className="form-label">Occupancy Confirmed</label>
                   <input
-                    className="form-input"
                     type="checkbox"
                     checked={completeForm.occupancyConfirmed}
                     onChange={e =>
