@@ -24,9 +24,43 @@ internal sealed class LandParcelViewProjection : SingleStreamProjection<LandParc
             RegisteredBy = e.Data.RegisteredBy,
         };
 
-    /// <summary>Applies a status change event.</summary>
-    public static void Apply(LandParcelView view, LandParcelStatusChanged e)
+    public static void Apply(LandParcelView view, ParcelEnteredPredevelopment e)
     {
-        view.Status = e.NewStatus;
+        view.Status = "Predevelopment";
+    }
+
+    public static void Apply(LandParcelView view, ParcelConstructionStarted e)
+    {
+        view.Status = "Under Construction";
+    }
+
+    public static void Apply(LandParcelView view, ParcelMarkedReadyForOccupancy e)
+    {
+        view.Status = "Ready for Occupancy";
+    }
+
+    public static void Apply(LandParcelView view, ParcelOccupied e)
+    {
+        view.Status = "Occupied";
+    }
+
+    public static void Apply(LandParcelView view, ParcelEnteredTransitioning e)
+    {
+        view.Status = "Transitioning";
+    }
+
+    public static void Apply(LandParcelView view, ParcelReturnedToAvailable e)
+    {
+        view.Status = "Available";
+    }
+
+    public static void Apply(LandParcelView view, ParcelDecommissioned e)
+    {
+        view.Status = "Decommissioned";
+    }
+
+    public static void Apply(LandParcelView view, ParcelRecommissioned e)
+    {
+        view.Status = "Available";
     }
 }

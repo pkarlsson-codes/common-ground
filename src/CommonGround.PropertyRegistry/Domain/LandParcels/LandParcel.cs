@@ -71,22 +71,105 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
             acquisitionDate,
             acquisitionMethod.DisplayName,
             covenantTerms,
-            registeredBy.Value,
-            DateTimeOffset.UtcNow));
+            registeredBy.Value));
 
         return parcel;
     }
 
-    /// <summary>Changes the parcel status. Idempotent if already in the target status.</summary>
-    public void ChangeStatus(ParcelStatus newStatus, UserId changedBy)
+    /// <summary>Transitions a parcel from Available or Transitioning to Predevelopment.</summary>
+    public void StartPredevelopment(UserId changedBy)
     {
-        ArgumentNullException.ThrowIfNull(newStatus);
         ArgumentNullException.ThrowIfNull(changedBy);
 
-        if (Status == newStatus)
+        if (Status == ParcelStatus.Predevelopment)
             return;
 
-        ApplyChange(new LandParcelStatusChanged(Id.Value, newStatus.DisplayName, changedBy.Value, DateTimeOffset.UtcNow));
+        EnsureTransitionAllowed(ParcelStatus.Predevelopment, ParcelStatus.Available, ParcelStatus.Transitioning);
+        ApplyChange(new ParcelEnteredPredevelopment(Id.Value, changedBy.Value));
+    }
+
+    /// <summary>Transitions a parcel from Predevelopment to UnderConstruction.</summary>
+    public void StartConstruction(UserId changedBy)
+    {
+        ArgumentNullException.ThrowIfNull(changedBy);
+
+        if (Status == ParcelStatus.UnderConstruction)
+            return;
+
+        EnsureTransitionAllowed(ParcelStatus.UnderConstruction, ParcelStatus.Predevelopment);
+        ApplyChange(new ParcelConstructionStarted(Id.Value, changedBy.Value));
+    }
+
+    /// <summary>Transitions a parcel from UnderConstruction or Transitioning to ReadyForOccupancy.</summary>
+    public void MarkReadyForOccupancy(UserId changedBy)
+    {
+        ArgumentNullException.ThrowIfNull(changedBy);
+
+        if (Status == ParcelStatus.ReadyForOccupancy)
+            return;
+
+        EnsureTransitionAllowed(ParcelStatus.ReadyForOccupancy, ParcelStatus.UnderConstruction, ParcelStatus.Transitioning);
+        ApplyChange(new ParcelMarkedReadyForOccupancy(Id.Value, changedBy.Value));
+    }
+
+    /// <summary>Transitions a parcel from ReadyForOccupancy to Occupied.</summary>
+    public void MarkOccupied(UserId changedBy)
+    {
+        ArgumentNullException.ThrowIfNull(changedBy);
+
+        if (Status == ParcelStatus.Occupied)
+            return;
+
+        EnsureTransitionAllowed(ParcelStatus.Occupied, ParcelStatus.ReadyForOccupancy);
+        ApplyChange(new ParcelOccupied(Id.Value, changedBy.Value));
+    }
+
+    /// <summary>Transitions a parcel from Occupied to Transitioning.</summary>
+    public void EnterTransitioning(UserId changedBy)
+    {
+        ArgumentNullException.ThrowIfNull(changedBy);
+
+        if (Status == ParcelStatus.Transitioning)
+            return;
+
+        EnsureTransitionAllowed(ParcelStatus.Transitioning, ParcelStatus.Occupied);
+        ApplyChange(new ParcelEnteredTransitioning(Id.Value, changedBy.Value));
+    }
+
+    /// <summary>Transitions a parcel from Transitioning to Available.</summary>
+    public void ReturnToAvailable(UserId changedBy)
+    {
+        ArgumentNullException.ThrowIfNull(changedBy);
+
+        if (Status == ParcelStatus.Available)
+            return;
+
+        EnsureTransitionAllowed(ParcelStatus.Available, ParcelStatus.Transitioning);
+        ApplyChange(new ParcelReturnedToAvailable(Id.Value, changedBy.Value));
+    }
+
+    /// <summary>Transitions a parcel to Decommissioned from Available, Predevelopment, or Transitioning.</summary>
+    public void Decommission(UserId changedBy)
+    {
+        ArgumentNullException.ThrowIfNull(changedBy);
+
+        if (Status == ParcelStatus.Decommissioned)
+            return;
+
+        EnsureTransitionAllowed(ParcelStatus.Decommissioned, ParcelStatus.Available, ParcelStatus.Predevelopment, ParcelStatus.Transitioning);
+        ApplyChange(new ParcelDecommissioned(Id.Value, changedBy.Value));
+    }
+
+    /// <summary>Transitions a parcel from Decommissioned to Available.</summary>
+    public void Recommission(UserId changedBy)
+    {
+        ArgumentNullException.ThrowIfNull(changedBy);
+
+        if (Status == ParcelStatus.Available)
+            return;
+
+        EnsureTransitionAllowed(ParcelStatus.Available, ParcelStatus.Decommissioned);
+        ApplyChange(new ParcelRecommissioned(Id.Value, changedBy.Value));
     }
 
     /// <inheritdoc/>
@@ -95,7 +178,14 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         switch (domainEvent)
         {
             case LandParcelRegistered e: Apply(e); break;
-            case LandParcelStatusChanged e: Apply(e); break;
+            case ParcelEnteredPredevelopment e: Apply(e); break;
+            case ParcelConstructionStarted e: Apply(e); break;
+            case ParcelMarkedReadyForOccupancy e: Apply(e); break;
+            case ParcelOccupied e: Apply(e); break;
+            case ParcelEnteredTransitioning e: Apply(e); break;
+            case ParcelReturnedToAvailable e: Apply(e); break;
+            case ParcelDecommissioned e: Apply(e); break;
+            case ParcelRecommissioned e: Apply(e); break;
             default: throw new InvalidOperationException($"Unknown event: {domainEvent?.GetType().Name}");
         }
     }
@@ -113,8 +203,55 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         RegisteredBy = UserId.Create(e.RegisteredBy);
     }
 
-    private void Apply(LandParcelStatusChanged e)
+    private void Apply(ParcelEnteredPredevelopment e)
     {
-        Status = ParcelStatus.FromDisplayName(e.NewStatus);
+        Status = ParcelStatus.Predevelopment;
+    }
+
+    private void Apply(ParcelConstructionStarted e)
+    {
+        Status = ParcelStatus.UnderConstruction;
+    }
+
+    private void Apply(ParcelMarkedReadyForOccupancy e)
+    {
+        Status = ParcelStatus.ReadyForOccupancy;
+    }
+
+    private void Apply(ParcelOccupied e)
+    {
+        Status = ParcelStatus.Occupied;
+    }
+
+    private void Apply(ParcelEnteredTransitioning e)
+    {
+        Status = ParcelStatus.Transitioning;
+    }
+
+    private void Apply(ParcelReturnedToAvailable e)
+    {
+        Status = ParcelStatus.Available;
+    }
+
+    private void Apply(ParcelDecommissioned e)
+    {
+        Status = ParcelStatus.Decommissioned;
+    }
+
+    private void Apply(ParcelRecommissioned e)
+    {
+        Status = ParcelStatus.Available;
+    }
+
+    private void EnsureTransitionAllowed(ParcelStatus targetStatus, params ParcelStatus[] allowedFrom)
+    {
+        foreach (var fromStatus in allowedFrom)
+        {
+            if (Status == fromStatus)
+                return;
+        }
+
+        throw new BusinessRuleViolationException(
+            $"Cannot transition parcel from '{Status.DisplayName}' to '{targetStatus.DisplayName}'.");
     }
 }

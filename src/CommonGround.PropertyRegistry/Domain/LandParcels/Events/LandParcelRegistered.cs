@@ -11,5 +11,4 @@ public sealed record LandParcelRegistered(
     DateOnly AcquisitionDate,
     string AcquisitionMethod,
     string? CovenantTerms,
-    string RegisteredBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RegisteredBy) : DomainEvent(AggregateId);

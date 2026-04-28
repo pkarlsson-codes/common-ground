@@ -29,7 +29,36 @@ public static class UpdateLandParcelStatusHandler
         var parcel = await repository.GetByIdAsync(command.LandParcelId, cancellationToken).ConfigureAwait(false)
             ?? throw new AggregateNotFoundException(command.LandParcelId.Value);
 
-        parcel.ChangeStatus(command.NewStatus, command.ChangedBy);
+        switch (command.NewStatus)
+        {
+            case var _ when command.NewStatus == ParcelStatus.Predevelopment:
+                parcel.StartPredevelopment(command.ChangedBy);
+                break;
+            case var _ when command.NewStatus == ParcelStatus.UnderConstruction:
+                parcel.StartConstruction(command.ChangedBy);
+                break;
+            case var _ when command.NewStatus == ParcelStatus.ReadyForOccupancy:
+                parcel.MarkReadyForOccupancy(command.ChangedBy);
+                break;
+            case var _ when command.NewStatus == ParcelStatus.Occupied:
+                parcel.MarkOccupied(command.ChangedBy);
+                break;
+            case var _ when command.NewStatus == ParcelStatus.Transitioning:
+                parcel.EnterTransitioning(command.ChangedBy);
+                break;
+            case var _ when command.NewStatus == ParcelStatus.Available:
+                if (parcel.Status == ParcelStatus.Decommissioned)
+                    parcel.Recommission(command.ChangedBy);
+                else
+                    parcel.ReturnToAvailable(command.ChangedBy);
+
+                break;
+            case var _ when command.NewStatus == ParcelStatus.Decommissioned:
+                parcel.Decommission(command.ChangedBy);
+                break;
+            default:
+                throw new BusinessRuleViolationException($"Unsupported parcel status '{command.NewStatus.DisplayName}'.");
+        }
 
         repository.Stage(parcel);
         await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);

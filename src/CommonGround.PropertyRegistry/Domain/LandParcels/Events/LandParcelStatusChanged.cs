@@ -6,5 +6,4 @@ namespace CommonGround.PropertyRegistry.Domain.LandParcels.Events;
 public sealed record LandParcelStatusChanged(
     string AggregateId,
     string NewStatus,
-    string ChangedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string ChangedBy) : DomainEvent(AggregateId);
