@@ -1158,16 +1158,6 @@
             "x-position": 2
           },
           {
-            "name": "status",
-            "in": "query",
-            "description": "Optional status filter.",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 3
-          },
-          {
             "name": "search",
             "in": "query",
             "description": "Optional free-text search across address and legal parcel number.",
@@ -1175,7 +1165,7 @@
               "type": "string",
               "nullable": true
             },
-            "x-position": 4
+            "x-position": 3
           }
         ],
         "responses": {
@@ -1184,7 +1174,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponseOfLandParcelResponse"
+                  "$ref": "#/components/schemas/PaginatedResponseOfLandParcelListItemResponse"
                 }
               }
             }
@@ -1221,55 +1211,6 @@
                 }
               }
             }
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/land-parcels/{landParcelId}/predevelopment/start": {
-      "post": {
-        "tags": [
-          "LandParcels"
-        ],
-        "summary": "Starts predevelopment for a land parcel.",
-        "operationId": "startLandParcelPredevelopment",
-        "parameters": [
-          {
-            "name": "landParcelId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the land parcel to transition.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "request",
-          "description": "The transition request.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/StartParcelPredevelopmentRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": "204 No Content, or 404 if not found."
           },
           "404": {
             "description": "",
@@ -1333,13 +1274,13 @@
         }
       }
     },
-    "/api/v1/land-parcels/{landParcelId}/ready-for-occupancy/mark": {
+    "/api/v1/land-parcels/{landParcelId}/construction/complete": {
       "post": {
         "tags": [
           "LandParcels"
         ],
-        "summary": "Marks a land parcel ready for occupancy.",
-        "operationId": "markLandParcelReadyForOccupancy",
+        "summary": "Completes construction for a land parcel.",
+        "operationId": "completeLandParcelConstruction",
         "parameters": [
           {
             "name": "landParcelId",
@@ -1358,7 +1299,154 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MarkParcelReadyForOccupancyRequest"
+                "$ref": "#/components/schemas/CompleteParcelConstructionRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content, or 404 if not found."
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/land-parcels/{landParcelId}/construction/suspend": {
+      "post": {
+        "tags": [
+          "LandParcels"
+        ],
+        "summary": "Suspends construction for a land parcel.",
+        "operationId": "suspendLandParcelConstruction",
+        "parameters": [
+          {
+            "name": "landParcelId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the land parcel to transition.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The transition request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuspendParcelConstructionRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content, or 404 if not found."
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/land-parcels/{landParcelId}/placement/list": {
+      "post": {
+        "tags": [
+          "LandParcels"
+        ],
+        "summary": "Lists a land parcel for placement.",
+        "operationId": "listLandParcelForPlacement",
+        "parameters": [
+          {
+            "name": "landParcelId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the land parcel to transition.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The transition request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListParcelForPlacementRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content, or 404 if not found."
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/land-parcels/{landParcelId}/redevelopment/withdraw": {
+      "post": {
+        "tags": [
+          "LandParcels"
+        ],
+        "summary": "Withdraws a land parcel for redevelopment.",
+        "operationId": "withdrawLandParcelForRedevelopment",
+        "parameters": [
+          {
+            "name": "landParcelId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the land parcel to transition.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The transition request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawParcelForRedevelopmentRequest"
               }
             }
           },
@@ -1478,203 +1566,6 @@
             }
           }
         }
-      }
-    },
-    "/api/v1/land-parcels/{landParcelId}/occupied/mark": {
-      "post": {
-        "tags": [
-          "LandParcels"
-        ],
-        "summary": "Marks a land parcel occupied.",
-        "operationId": "markLandParcelOccupied",
-        "parameters": [
-          {
-            "name": "landParcelId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the land parcel to transition.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "request",
-          "description": "The transition request.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MarkParcelOccupiedRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": "204 No Content, or 404 if not found."
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/land-parcels/{landParcelId}/transitioning/enter": {
-      "post": {
-        "tags": [
-          "LandParcels"
-        ],
-        "summary": "Enters transitioning state for a land parcel.",
-        "operationId": "enterLandParcelTransitioning",
-        "parameters": [
-          {
-            "name": "landParcelId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the land parcel to transition.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "request",
-          "description": "The transition request.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EnterParcelTransitioningRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": "204 No Content, or 404 if not found."
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/land-parcels/{landParcelId}/available/return": {
-      "post": {
-        "tags": [
-          "LandParcels"
-        ],
-        "summary": "Returns a land parcel to available status.",
-        "operationId": "returnLandParcelToAvailable",
-        "parameters": [
-          {
-            "name": "landParcelId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the land parcel to transition.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "request",
-          "description": "The transition request.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReturnParcelToAvailableRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": "204 No Content, or 404 if not found."
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/land-parcels/{landParcelId}/status": {
-      "patch": {
-        "tags": [
-          "LandParcels"
-        ],
-        "summary": "Legacy status mutation endpoint retained for backward compatibility. Prefer explicit transition endpoints.",
-        "operationId": "updateLandParcelStatus",
-        "parameters": [
-          {
-            "name": "landParcelId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the land parcel to update.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "request",
-          "description": "The new status details.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateLandParcelStatusRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": "204 No Content, or 404 if not found."
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
       }
     },
     "/auth/login": {
@@ -4519,8 +4410,8 @@
             "type": "string",
             "nullable": true
           },
-          "status": {
-            "type": "string"
+          "isDecommissioned": {
+            "type": "boolean"
           },
           "registeredAt": {
             "type": "string",
@@ -4531,7 +4422,7 @@
           }
         }
       },
-      "PaginatedResponseOfLandParcelResponse": {
+      "PaginatedResponseOfLandParcelListItemResponse": {
         "type": "object",
         "description": "Generic paginated response wrapper for API endpoints.",
         "additionalProperties": false,
@@ -4546,7 +4437,7 @@
             "type": "array",
             "description": "The items for the current page.",
             "items": {
-              "$ref": "#/components/schemas/LandParcelResponse"
+              "$ref": "#/components/schemas/LandParcelListItemResponse"
             }
           },
           "hasNextPage": {
@@ -4575,19 +4466,56 @@
           }
         }
       },
-      "StartParcelPredevelopmentRequest": {
+      "LandParcelListItemResponse": {
         "type": "object",
-        "description": "Request to start parcel predevelopment.",
-        "additionalProperties": false
+        "description": "Response DTO for a land parcel list item.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "legalParcelNumber": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "areaAcres": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "isDecommissioned": {
+            "type": "boolean"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "StartParcelConstructionRequest": {
         "type": "object",
         "description": "Request to start parcel construction.",
         "additionalProperties": false
       },
-      "MarkParcelReadyForOccupancyRequest": {
+      "CompleteParcelConstructionRequest": {
         "type": "object",
-        "description": "Request to mark a parcel ready for occupancy.",
+        "description": "Request to complete parcel construction.",
+        "additionalProperties": false
+      },
+      "SuspendParcelConstructionRequest": {
+        "type": "object",
+        "description": "Request to suspend parcel construction.",
+        "additionalProperties": false
+      },
+      "ListParcelForPlacementRequest": {
+        "type": "object",
+        "description": "Request to list a parcel for placement.",
+        "additionalProperties": false
+      },
+      "WithdrawParcelForRedevelopmentRequest": {
+        "type": "object",
+        "description": "Request to withdraw a parcel for redevelopment.",
         "additionalProperties": false
       },
       "DecommissionParcelRequest": {
@@ -4599,31 +4527,6 @@
         "type": "object",
         "description": "Request to recommission a parcel.",
         "additionalProperties": false
-      },
-      "MarkParcelOccupiedRequest": {
-        "type": "object",
-        "description": "Request to mark a parcel occupied.",
-        "additionalProperties": false
-      },
-      "EnterParcelTransitioningRequest": {
-        "type": "object",
-        "description": "Request to enter parcel transitioning.",
-        "additionalProperties": false
-      },
-      "ReturnParcelToAvailableRequest": {
-        "type": "object",
-        "description": "Request to return a parcel to available.",
-        "additionalProperties": false
-      },
-      "UpdateLandParcelStatusRequest": {
-        "type": "object",
-        "description": "Request to update a land parcel's status.",
-        "additionalProperties": false,
-        "properties": {
-          "newStatus": {
-            "type": "string"
-          }
-        }
       },
       "InitiatePurchaseWorkflowResponse": {
         "type": "object",

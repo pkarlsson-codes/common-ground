@@ -63,10 +63,10 @@ export interface LandParcelResponse {
     covenantTerms?: string | null;
     /**
      * 
-     * @type {string}
+     * @type {boolean}
      * @memberof LandParcelResponse
      */
-    status?: string;
+    isDecommissioned?: boolean;
     /**
      * 
      * @type {Date}
@@ -105,7 +105,7 @@ export function LandParcelResponseFromJSONTyped(json: any, ignoreDiscriminator: 
         'acquisitionDate': json['acquisitionDate'] == null ? undefined : (new Date(json['acquisitionDate'])),
         'acquisitionMethod': json['acquisitionMethod'] == null ? undefined : json['acquisitionMethod'],
         'covenantTerms': json['covenantTerms'] == null ? undefined : json['covenantTerms'],
-        'status': json['status'] == null ? undefined : json['status'],
+        'isDecommissioned': json['isDecommissioned'] == null ? undefined : json['isDecommissioned'],
         'registeredAt': json['registeredAt'] == null ? undefined : (new Date(json['registeredAt'])),
         'registeredBy': json['registeredBy'] == null ? undefined : json['registeredBy'],
     };
@@ -129,7 +129,7 @@ export function LandParcelResponseToJSONTyped(value?: LandParcelResponse | null,
         'acquisitionDate': value['acquisitionDate'] == null ? undefined : ((value['acquisitionDate']).toISOString().substring(0,10)),
         'acquisitionMethod': value['acquisitionMethod'],
         'covenantTerms': value['covenantTerms'],
-        'status': value['status'],
+        'isDecommissioned': value['isDecommissioned'],
         'registeredAt': value['registeredAt'] == null ? undefined : ((value['registeredAt']).toISOString()),
         'registeredBy': value['registeredBy'],
     };
