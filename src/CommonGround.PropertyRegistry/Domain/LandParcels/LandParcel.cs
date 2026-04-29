@@ -1,4 +1,5 @@
 using CommonGround.PropertyRegistry.Domain.LandParcels.Events;
+
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 using CommonGround.SharedKernel.Domain.Exceptions;
@@ -33,11 +34,11 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
     /// <summary>Gets optional free-text description of the affordability covenant terms.</summary>
     public string? CovenantTerms { get; private set; }
 
-    /// <summary>Gets the current status of the parcel.</summary>
-    public ParcelStatus Status { get; private set; }
-
     /// <summary>Gets the ID of the user who registered this parcel.</summary>
     public UserId RegisteredBy { get; private set; }
+
+    /// <summary>Gets whether the parcel is decommissioned.</summary>
+    public bool IsDecommissioned { get; private set; }
 
     /// <summary>Registers a new land parcel in the CLT portfolio.</summary>
     public static LandParcel Register(
@@ -76,99 +77,47 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         return parcel;
     }
 
-    /// <summary>Transitions a parcel from Available or Transitioning to Predevelopment.</summary>
-    public void StartPredevelopment(UserId changedBy)
+    /// <summary>Lists the parcel for placement.</summary>
+    public void ListForPlacement(UserId changedBy)
     {
         ArgumentNullException.ThrowIfNull(changedBy);
 
-        if (Status == ParcelStatus.Predevelopment)
-            return;
+        if (IsDecommissioned)
+            throw new BusinessRuleViolationException("Cannot list a decommissioned parcel for placement.");
 
-        EnsureTransitionAllowed(ParcelStatus.Predevelopment, ParcelStatus.Registered, ParcelStatus.Resale);
-        ApplyChange(new ParcelEnteredPredevelopment(Id.Value, changedBy.Value));
+        ApplyChange(new ParcelListedForPlacement(Id.Value, changedBy.Value));
     }
 
-    /// <summary>Transitions a parcel from Predevelopment to UnderConstruction.</summary>
-    public void StartConstruction(UserId changedBy)
+    /// <summary>Withdraws the parcel for redevelopment.</summary>
+    public void WithdrawForRedevelopment(UserId changedBy)
     {
         ArgumentNullException.ThrowIfNull(changedBy);
 
-        if (Status == ParcelStatus.UnderConstruction)
-            return;
+        if (IsDecommissioned)
+            throw new BusinessRuleViolationException("Cannot withdraw a decommissioned parcel.");
 
-        EnsureTransitionAllowed(ParcelStatus.UnderConstruction, ParcelStatus.Predevelopment);
-        ApplyChange(new ParcelConstructionStarted(Id.Value, changedBy.Value));
+        ApplyChange(new ParcelWithdrawnForRedevelopment(Id.Value, changedBy.Value));
     }
 
-    /// <summary>Transitions a parcel from UnderConstruction or Transitioning to ReadyForOccupancy.</summary>
-    public void MarkReadyForOccupancy(UserId changedBy)
-    {
-        ArgumentNullException.ThrowIfNull(changedBy);
-
-        if (Status == ParcelStatus.Available)
-            return;
-
-        EnsureTransitionAllowed(ParcelStatus.Available, ParcelStatus.UnderConstruction, ParcelStatus.Resale);
-        ApplyChange(new ParcelMarkedReadyForOccupancy(Id.Value, changedBy.Value));
-    }
-
-    /// <summary>Transitions a parcel from ReadyForOccupancy to Occupied.</summary>
-    public void MarkOccupied(UserId changedBy)
-    {
-        ArgumentNullException.ThrowIfNull(changedBy);
-
-        if (Status == ParcelStatus.Occupied)
-            return;
-
-        EnsureTransitionAllowed(ParcelStatus.Occupied, ParcelStatus.Available);
-        ApplyChange(new ParcelOccupied(Id.Value, changedBy.Value));
-    }
-
-    /// <summary>Transitions a parcel from Occupied to Transitioning.</summary>
-    public void EnterTransitioning(UserId changedBy)
-    {
-        ArgumentNullException.ThrowIfNull(changedBy);
-
-        if (Status == ParcelStatus.Resale)
-            return;
-
-        EnsureTransitionAllowed(ParcelStatus.Resale, ParcelStatus.Occupied);
-        ApplyChange(new ParcelEnteredTransitioning(Id.Value, changedBy.Value));
-    }
-
-    /// <summary>Transitions a parcel from Transitioning to Available.</summary>
-    public void ReturnToAvailable(UserId changedBy)
-    {
-        ArgumentNullException.ThrowIfNull(changedBy);
-
-        if (Status == ParcelStatus.Registered)
-            return;
-
-        EnsureTransitionAllowed(ParcelStatus.Registered, ParcelStatus.Resale);
-        ApplyChange(new ParcelReturnedToAvailable(Id.Value, changedBy.Value));
-    }
-
-    /// <summary>Transitions a parcel to Decommissioned from Available, Predevelopment, or Transitioning.</summary>
+    /// <summary>Decommissions the parcel.</summary>
     public void Decommission(UserId changedBy)
     {
         ArgumentNullException.ThrowIfNull(changedBy);
 
-        if (Status == ParcelStatus.Decommissioned)
+        if (IsDecommissioned)
             return;
 
-        EnsureTransitionAllowed(ParcelStatus.Decommissioned, ParcelStatus.Registered, ParcelStatus.Predevelopment, ParcelStatus.Resale);
         ApplyChange(new ParcelDecommissioned(Id.Value, changedBy.Value));
     }
 
-    /// <summary>Transitions a parcel from Decommissioned to Available.</summary>
+    /// <summary>Recommissions a decommissioned parcel. Idempotent if already active.</summary>
     public void Recommission(UserId changedBy)
     {
         ArgumentNullException.ThrowIfNull(changedBy);
 
-        if (Status == ParcelStatus.Registered)
+        if (!IsDecommissioned)
             return;
 
-        EnsureTransitionAllowed(ParcelStatus.Registered, ParcelStatus.Decommissioned);
         ApplyChange(new ParcelRecommissioned(Id.Value, changedBy.Value));
     }
 
@@ -178,12 +127,8 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         switch (domainEvent)
         {
             case LandParcelRegistered e: Apply(e); break;
-            case ParcelEnteredPredevelopment e: Apply(e); break;
-            case ParcelConstructionStarted e: Apply(e); break;
-            case ParcelMarkedReadyForOccupancy e: Apply(e); break;
-            case ParcelOccupied e: Apply(e); break;
-            case ParcelEnteredTransitioning e: Apply(e); break;
-            case ParcelReturnedToAvailable e: Apply(e); break;
+            case ParcelListedForPlacement: break;
+            case ParcelWithdrawnForRedevelopment: break;
             case ParcelDecommissioned e: Apply(e); break;
             case ParcelRecommissioned e: Apply(e); break;
             default: throw new InvalidOperationException($"Unknown event: {domainEvent?.GetType().Name}");
@@ -199,59 +144,16 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         AcquisitionDate = e.AcquisitionDate;
         AcquisitionMethod = AcquisitionMethod.FromDisplayName(e.AcquisitionMethod);
         CovenantTerms = e.CovenantTerms;
-        Status = ParcelStatus.Registered;
         RegisteredBy = UserId.Create(e.RegisteredBy);
     }
 
-    private void Apply(ParcelEnteredPredevelopment e)
+    private void Apply(ParcelDecommissioned _)
     {
-        Status = ParcelStatus.Predevelopment;
+        IsDecommissioned = true;
     }
 
-    private void Apply(ParcelConstructionStarted e)
+    private void Apply(ParcelRecommissioned _)
     {
-        Status = ParcelStatus.UnderConstruction;
-    }
-
-    private void Apply(ParcelMarkedReadyForOccupancy e)
-    {
-        Status = ParcelStatus.Available;
-    }
-
-    private void Apply(ParcelOccupied e)
-    {
-        Status = ParcelStatus.Occupied;
-    }
-
-    private void Apply(ParcelEnteredTransitioning e)
-    {
-        Status = ParcelStatus.Resale;
-    }
-
-    private void Apply(ParcelReturnedToAvailable e)
-    {
-        Status = ParcelStatus.Registered;
-    }
-
-    private void Apply(ParcelDecommissioned e)
-    {
-        Status = ParcelStatus.Decommissioned;
-    }
-
-    private void Apply(ParcelRecommissioned e)
-    {
-        Status = ParcelStatus.Registered;
-    }
-
-    private void EnsureTransitionAllowed(ParcelStatus targetStatus, params ParcelStatus[] allowedFrom)
-    {
-        foreach (var fromStatus in allowedFrom)
-        {
-            if (Status == fromStatus)
-                return;
-        }
-
-        throw new BusinessRuleViolationException(
-            $"Cannot transition parcel from '{Status.DisplayName}' to '{targetStatus.DisplayName}'.");
+        IsDecommissioned = false;
     }
 }

@@ -19,48 +19,19 @@ internal sealed class LandParcelViewProjection : SingleStreamProjection<LandParc
             AcquisitionDate = e.Data.AcquisitionDate,
             AcquisitionMethod = e.Data.AcquisitionMethod,
             CovenantTerms = e.Data.CovenantTerms,
-            Status = "Available",
             RegisteredAt = e.Data.OccurredAt,
             RegisteredBy = e.Data.RegisteredBy,
         };
 
-    public static void Apply(LandParcelView view, ParcelEnteredPredevelopment e)
+    /// <summary>Marks the view as decommissioned.</summary>
+    public static void Apply(LandParcelView view, ParcelDecommissioned _)
     {
-        view.Status = "Predevelopment";
+        view.IsDecommissioned = true;
     }
 
-    public static void Apply(LandParcelView view, ParcelConstructionStarted e)
+    /// <summary>Clears the decommissioned flag on recommission.</summary>
+    public static void Apply(LandParcelView view, ParcelRecommissioned _)
     {
-        view.Status = "Under Construction";
-    }
-
-    public static void Apply(LandParcelView view, ParcelMarkedReadyForOccupancy e)
-    {
-        view.Status = "Ready for Occupancy";
-    }
-
-    public static void Apply(LandParcelView view, ParcelOccupied e)
-    {
-        view.Status = "Occupied";
-    }
-
-    public static void Apply(LandParcelView view, ParcelEnteredTransitioning e)
-    {
-        view.Status = "Transitioning";
-    }
-
-    public static void Apply(LandParcelView view, ParcelReturnedToAvailable e)
-    {
-        view.Status = "Available";
-    }
-
-    public static void Apply(LandParcelView view, ParcelDecommissioned e)
-    {
-        view.Status = "Decommissioned";
-    }
-
-    public static void Apply(LandParcelView view, ParcelRecommissioned e)
-    {
-        view.Status = "Available";
+        view.IsDecommissioned = false;
     }
 }

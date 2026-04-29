@@ -1,8 +1,8 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
-using CommonGround.PropertyRegistry.Domain.Buildings;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
+using CommonGround.PropertyRegistry.Domain.LeasableUnits;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using FluentAssertions;
@@ -13,13 +13,13 @@ public class GroundLeaseTests
 {
     private static readonly UserId StaffUser = UserId.Generate();
     private static readonly LandParcelId ParcelId = LandParcelId.Generate();
-    private static readonly BuildingId TestBuildingId = BuildingId.Generate();
+    private static readonly LeasableUnitId TestUnitId = LeasableUnitId.Generate();
 
     private static GroundLease CreateLease()
     {
         return GroundLease.Create(
             ParcelId,
-            TestBuildingId,
+            TestUnitId,
             new DateOnly(2025, 1, 1),
             99,
             "Standard affordability covenant",
@@ -31,7 +31,7 @@ public class GroundLeaseTests
     {
         return GroundLease.Create(
             ParcelId,
-            TestBuildingId,
+            TestUnitId,
             new DateOnly(2025, 1, 1),
             99,
             "Standard affordability covenant",
@@ -45,7 +45,7 @@ public class GroundLeaseTests
         var lease = CreateLease();
 
         lease.LandParcelId.Should().Be(ParcelId);
-        lease.BuildingId.Should().Be(TestBuildingId);
+        lease.UnitId.Should().Be(TestUnitId);
         lease.LeaseStartDate.Should().Be(new DateOnly(2025, 1, 1));
         lease.TermYears.Should().Be(99);
         lease.CovenantTerms.Should().Be("Standard affordability covenant");
@@ -58,7 +58,7 @@ public class GroundLeaseTests
     public void Create_ZeroTermYears_Throws()
     {
         var act = () => GroundLease.Create(
-            ParcelId, TestBuildingId, new DateOnly(2025, 1, 1),
+            ParcelId, TestUnitId, new DateOnly(2025, 1, 1),
             0, "Terms", ResalePolicyTerms.AppraisalBased(0.25m), StaffUser);
 
         act.Should().Throw<BusinessRuleViolationException>();
@@ -68,7 +68,7 @@ public class GroundLeaseTests
     public void Create_EmptyCovenantTerms_Throws()
     {
         var act = () => GroundLease.Create(
-            ParcelId, TestBuildingId, new DateOnly(2025, 1, 1),
+            ParcelId, TestUnitId, new DateOnly(2025, 1, 1),
             99, "", ResalePolicyTerms.AppraisalBased(0.25m), StaffUser);
 
         act.Should().Throw<BusinessRuleViolationException>();

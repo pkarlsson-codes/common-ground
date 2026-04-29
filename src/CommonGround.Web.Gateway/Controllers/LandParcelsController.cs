@@ -46,42 +46,20 @@ public sealed class LandParcelsController(ILandParcelsApiClient client) : Contro
     /// <summary>Gets a paginated list of land parcels.</summary>
     /// <param name="page">The page number (1-based).</param>
     /// <param name="pageSize">The number of items per page.</param>
-    /// <param name="status">Optional status filter.</param>
     /// <param name="search">Optional free-text search across address and legal parcel number.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>200 with a paginated list of land parcels.</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(PaginatedResponse<LandParcelResponse>), 200)]
+    [ProducesResponseType(typeof(PaginatedResponse<LandParcelListItemResponse>), 200)]
     [EndpointName("getLandParcels")]
     public async Task<IActionResult> GetLandParcels(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
-        [FromQuery] string? status = null,
         [FromQuery] string? search = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await client.GetLandParcelsAsync(page, pageSize, status, search, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetLandParcelsAsync(page, pageSize, search, cancellationToken).ConfigureAwait(false);
         return Ok(result);
-    }
-
-    /// <summary>Starts predevelopment for a land parcel.</summary>
-    /// <param name="landParcelId">The ID of the land parcel to transition.</param>
-    /// <param name="request">The transition request.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>204 No Content, or 404 if not found.</returns>
-    [HttpPost("{landParcelId}/predevelopment/start")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(404)]
-    [EndpointName("startLandParcelPredevelopment")]
-    public async Task<IActionResult> StartParcelPredevelopment(
-        string landParcelId,
-        [FromBody] StartParcelPredevelopmentRequest request,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
-        ArgumentNullException.ThrowIfNull(request);
-        await client.StartParcelPredevelopmentAsync(landParcelId, request, cancellationToken).ConfigureAwait(false);
-        return NoContent();
     }
 
     /// <summary>Starts construction for a land parcel.</summary>
@@ -104,23 +82,83 @@ public sealed class LandParcelsController(ILandParcelsApiClient client) : Contro
         return NoContent();
     }
 
-    /// <summary>Marks a land parcel ready for occupancy.</summary>
+    /// <summary>Completes construction for a land parcel.</summary>
     /// <param name="landParcelId">The ID of the land parcel to transition.</param>
     /// <param name="request">The transition request.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>204 No Content, or 404 if not found.</returns>
-    [HttpPost("{landParcelId}/ready-for-occupancy/mark")]
+    [HttpPost("{landParcelId}/construction/complete")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
-    [EndpointName("markLandParcelReadyForOccupancy")]
-    public async Task<IActionResult> MarkParcelReadyForOccupancy(
+    [EndpointName("completeLandParcelConstruction")]
+    public async Task<IActionResult> CompleteParcelConstruction(
         string landParcelId,
-        [FromBody] MarkParcelReadyForOccupancyRequest request,
+        [FromBody] CompleteParcelConstructionRequest request,
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
         ArgumentNullException.ThrowIfNull(request);
-        await client.MarkParcelReadyForOccupancyAsync(landParcelId, request, cancellationToken).ConfigureAwait(false);
+        await client.CompleteParcelConstructionAsync(landParcelId, request, cancellationToken).ConfigureAwait(false);
+        return NoContent();
+    }
+
+    /// <summary>Suspends construction for a land parcel.</summary>
+    /// <param name="landParcelId">The ID of the land parcel to transition.</param>
+    /// <param name="request">The transition request.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>204 No Content, or 404 if not found.</returns>
+    [HttpPost("{landParcelId}/construction/suspend")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    [EndpointName("suspendLandParcelConstruction")]
+    public async Task<IActionResult> SuspendParcelConstruction(
+        string landParcelId,
+        [FromBody] SuspendParcelConstructionRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.SuspendParcelConstructionAsync(landParcelId, request, cancellationToken).ConfigureAwait(false);
+        return NoContent();
+    }
+
+    /// <summary>Lists a land parcel for placement.</summary>
+    /// <param name="landParcelId">The ID of the land parcel to transition.</param>
+    /// <param name="request">The transition request.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>204 No Content, or 404 if not found.</returns>
+    [HttpPost("{landParcelId}/placement/list")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    [EndpointName("listLandParcelForPlacement")]
+    public async Task<IActionResult> ListParcelForPlacement(
+        string landParcelId,
+        [FromBody] ListParcelForPlacementRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.ListParcelForPlacementAsync(landParcelId, request, cancellationToken).ConfigureAwait(false);
+        return NoContent();
+    }
+
+    /// <summary>Withdraws a land parcel for redevelopment.</summary>
+    /// <param name="landParcelId">The ID of the land parcel to transition.</param>
+    /// <param name="request">The transition request.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>204 No Content, or 404 if not found.</returns>
+    [HttpPost("{landParcelId}/redevelopment/withdraw")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    [EndpointName("withdrawLandParcelForRedevelopment")]
+    public async Task<IActionResult> WithdrawParcelForRedevelopment(
+        string landParcelId,
+        [FromBody] WithdrawParcelForRedevelopmentRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.WithdrawParcelForRedevelopmentAsync(landParcelId, request, cancellationToken).ConfigureAwait(false);
         return NoContent();
     }
 
@@ -161,87 +199,6 @@ public sealed class LandParcelsController(ILandParcelsApiClient client) : Contro
         ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
         ArgumentNullException.ThrowIfNull(request);
         await client.RecommissionParcelAsync(landParcelId, request, cancellationToken).ConfigureAwait(false);
-        return NoContent();
-    }
-
-    /// <summary>Marks a land parcel occupied.</summary>
-    /// <param name="landParcelId">The ID of the land parcel to transition.</param>
-    /// <param name="request">The transition request.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>204 No Content, or 404 if not found.</returns>
-    [HttpPost("{landParcelId}/occupied/mark")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(404)]
-    [EndpointName("markLandParcelOccupied")]
-    public async Task<IActionResult> MarkParcelOccupied(
-        string landParcelId,
-        [FromBody] MarkParcelOccupiedRequest request,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
-        ArgumentNullException.ThrowIfNull(request);
-        await client.MarkParcelOccupiedAsync(landParcelId, request, cancellationToken).ConfigureAwait(false);
-        return NoContent();
-    }
-
-    /// <summary>Enters transitioning state for a land parcel.</summary>
-    /// <param name="landParcelId">The ID of the land parcel to transition.</param>
-    /// <param name="request">The transition request.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>204 No Content, or 404 if not found.</returns>
-    [HttpPost("{landParcelId}/transitioning/enter")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(404)]
-    [EndpointName("enterLandParcelTransitioning")]
-    public async Task<IActionResult> EnterParcelTransitioning(
-        string landParcelId,
-        [FromBody] EnterParcelTransitioningRequest request,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
-        ArgumentNullException.ThrowIfNull(request);
-        await client.EnterParcelTransitioningAsync(landParcelId, request, cancellationToken).ConfigureAwait(false);
-        return NoContent();
-    }
-
-    /// <summary>Returns a land parcel to available status.</summary>
-    /// <param name="landParcelId">The ID of the land parcel to transition.</param>
-    /// <param name="request">The transition request.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>204 No Content, or 404 if not found.</returns>
-    [HttpPost("{landParcelId}/available/return")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(404)]
-    [EndpointName("returnLandParcelToAvailable")]
-    public async Task<IActionResult> ReturnParcelToAvailable(
-        string landParcelId,
-        [FromBody] ReturnParcelToAvailableRequest request,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
-        ArgumentNullException.ThrowIfNull(request);
-        await client.ReturnParcelToAvailableAsync(landParcelId, request, cancellationToken).ConfigureAwait(false);
-        return NoContent();
-    }
-
-    /// <summary>Legacy status mutation endpoint retained for backward compatibility. Prefer explicit transition endpoints.</summary>
-    /// <param name="landParcelId">The ID of the land parcel to update.</param>
-    /// <param name="request">The new status details.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>204 No Content, or 404 if not found.</returns>
-    [Obsolete("Use explicit land parcel transition endpoints.")]
-    [HttpPatch("{landParcelId}/status")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(404)]
-    [EndpointName("updateLandParcelStatus")]
-    public async Task<IActionResult> UpdateLandParcelStatus(
-        string landParcelId,
-        [FromBody] UpdateLandParcelStatusRequest request,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
-        ArgumentNullException.ThrowIfNull(request);
-        await client.UpdateLandParcelStatusAsync(landParcelId, request, cancellationToken).ConfigureAwait(false);
         return NoContent();
     }
 }

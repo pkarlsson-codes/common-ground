@@ -4,8 +4,8 @@ using CommonGround.API.Infrastructure.Auth;
 using CommonGround.PropertyRegistry.Application.Commands;
 using CommonGround.PropertyRegistry.Application.Queries;
 using CommonGround.PropertyRegistry.Application.ReadModels;
-using CommonGround.PropertyRegistry.Domain.Buildings;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
+using CommonGround.PropertyRegistry.Domain.LeasableUnits;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
 using Microsoft.AspNetCore.Mvc;
@@ -13,18 +13,18 @@ using Wolverine;
 
 namespace CommonGround.API.PropertyRegistry;
 
-/// <summary>API controller for building management.</summary>
+/// <summary>API controller for dwelling unit management.</summary>
 /// <param name="bus">The Wolverine message bus.</param>
 [ApiController]
 [Route("api/buildings")]
 public sealed class BuildingsController(IMessageBus bus) : ControllerBase
 {
     /// <summary>
-    /// Registers a new building in the CLT portfolio.
+    /// Registers a new dwelling unit in the CLT portfolio.
     /// </summary>
-    /// <param name="request">The request containing building details.</param>
+    /// <param name="request">The request containing unit details.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The ID of the newly registered building.</returns>
+    /// <returns>The ID of the newly registered unit.</returns>
     [HttpPost]
     [ProducesResponseType(typeof(RegisterBuildingResponse), 201)]
     [EndpointName("registerBuilding")]
@@ -36,9 +36,9 @@ public sealed class BuildingsController(IMessageBus bus) : ControllerBase
 
         var userId = HttpContext.GetUserId();
 
-        var command = new RegisterBuilding(
+        var command = new RegisterDwellingUnit(
             LandParcelId.Create(request.LandParcelId),
-            BuildingType.FromDisplayName(request.BuildingType),
+            DwellingUnitType.FromDisplayName(request.BuildingType),
             request.Bedrooms,
             request.Bathrooms,
             request.SquareFootage,
@@ -46,17 +46,17 @@ public sealed class BuildingsController(IMessageBus bus) : ControllerBase
             request.InitialAssessedValue,
             userId);
 
-        var id = await bus.InvokeAsync<BuildingId>(command, cancellationToken);
+        var id = await bus.InvokeAsync<LeasableUnitId>(command, cancellationToken);
 
         return CreatedAtAction(nameof(GetBuilding), new { buildingId = id.Value }, new RegisterBuildingResponse(id.Value));
     }
 
     /// <summary>
-    /// Retrieves detailed information about a specific building by its ID.
+    /// Retrieves detailed information about a specific dwelling unit by its ID.
     /// </summary>
-    /// <param name="buildingId">The ID of the building to retrieve.</param>
+    /// <param name="buildingId">The ID of the unit to retrieve.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The detailed information of the building.</returns>
+    /// <returns>The detailed information of the unit.</returns>
     [HttpGet("{buildingId}")]
     [ProducesResponseType(typeof(BuildingResponse), 200)]
     [ProducesResponseType(404)]
@@ -67,22 +67,22 @@ public sealed class BuildingsController(IMessageBus bus) : ControllerBase
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(buildingId);
 
-        var view = await bus.InvokeAsync<BuildingView>(
-            new GetBuilding(BuildingId.Create(buildingId)),
+        var view = await bus.InvokeAsync<DwellingUnitView>(
+            new GetDwellingUnit(LeasableUnitId.Create(buildingId)),
             cancellationToken);
 
         var response = new BuildingResponse(view.Id, view.LandParcelId,
-            view.BuildingType, view.Bedrooms, view.Bathrooms, view.SquareFootage,
+            view.UnitType, view.Bedrooms, view.Bathrooms, view.SquareFootage,
             view.YearBuilt, view.AssessedValue, view.LastAssessedDate,
             view.ConditionNotes, view.Status, view.RegisteredAt);
 
         return Ok(response);
     }
 
-    /// <summary>Gets a paginated list of buildings.</summary>
+    /// <summary>Gets a paginated list of dwelling units.</summary>
     /// <param name="request">The pagination and filter parameters.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A paginated list of buildings.</returns>
+    /// <returns>A paginated list of dwelling units.</returns>
     [HttpGet]
     [ProducesResponseType(typeof(PaginatedResponse<BuildingListItemResponse>), 200)]
     [EndpointName("getBuildings")]
@@ -93,26 +93,26 @@ public sealed class BuildingsController(IMessageBus bus) : ControllerBase
         var landParcelFilter = request.Filter?.LandParcelIds?
             .Select(LandParcelId.Create).ToList().AsReadOnly();
         var statusFilter = request.Filter?.Statuses?
-            .Select(BuildingStatus.FromDisplayName).ToList().AsReadOnly();
-        var query = new GetBuildings(request.Page, landParcelFilter, statusFilter);
+            .Select(UnitStatus.FromDisplayName).ToList().AsReadOnly();
+        var query = new GetDwellingUnits(request.Page, landParcelFilter, statusFilter);
 
         var result = await bus
-            .InvokeAsync<PaginatedResponse<BuildingListItemView>>(
+            .InvokeAsync<PaginatedResponse<DwellingUnitListItemView>>(
                 query, cancellationToken);
 
         var response = result.MapItems(v => new BuildingListItemResponse(
-            v.Id, v.LandParcelId, v.BuildingType, v.Bedrooms, v.Bathrooms, v.SquareFootage, v.AssessedValue, v.Status));
+            v.Id, v.LandParcelId, v.UnitType, v.Bedrooms, v.Bathrooms, v.SquareFootage, v.AssessedValue, v.Status));
 
         return Ok(response);
     }
 
     /// <summary>
-    /// Records a new assessment for a building, including the assessed value and any relevant notes.
+    /// Records a new assessment for a dwelling unit, including the assessed value and any relevant notes.
     /// </summary>
-    /// <param name="buildingId">The ID of the building to assess.</param>
+    /// <param name="buildingId">The ID of the unit to assess.</param>
     /// <param name="request">The request containing the assessment details.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The ID of the newly created building assessment.</returns>
+    /// <returns>No content if the assessment is recorded successfully.</returns>
     [HttpPost("{buildingId}/assessments")]
     [ProducesResponseType(201)]
     [EndpointName("recordBuildingAssessment")]
@@ -126,8 +126,8 @@ public sealed class BuildingsController(IMessageBus bus) : ControllerBase
 
         var userId = HttpContext.GetUserId();
 
-        var command = new RecordBuildingAssessment(
-            BuildingId.Create(buildingId),
+        var command = new RecordUnitAssessment(
+            LeasableUnitId.Create(buildingId),
             request.AssessedValue,
             request.AssessmentDate,
             request.ConditionNotes,
@@ -138,8 +138,8 @@ public sealed class BuildingsController(IMessageBus bus) : ControllerBase
         return Created();
     }
 
-    /// <summary>Gets a paginated list of assessments for a building.</summary>
-    /// <param name="buildingId">The ID of the building.</param>
+    /// <summary>Gets a paginated list of assessments for a dwelling unit.</summary>
+    /// <param name="buildingId">The ID of the unit.</param>
     /// <param name="request">Pagination parameters.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A paginated list of assessments, newest first.</returns>
@@ -154,39 +154,12 @@ public sealed class BuildingsController(IMessageBus bus) : ControllerBase
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(buildingId);
 
-        var query = new GetBuildingAssessments(BuildingId.Create(buildingId), request.Page);
-        var result = await bus.InvokeAsync<PaginatedResponse<BuildingAssessmentView>>(query, cancellationToken);
+        var query = new GetDwellingUnitAssessments(LeasableUnitId.Create(buildingId), request.Page);
+        var result = await bus.InvokeAsync<PaginatedResponse<DwellingUnitAssessmentView>>(query, cancellationToken);
 
         var response = result.MapItems(v => new BuildingAssessmentItemResponse(
-            v.Id.ToString(), v.BuildingId, v.AssessedValue, v.AssessmentDate, v.ConditionNotes, v.AssessedBy, v.RecordedAt));
+            v.Id.ToString(), v.UnitId, v.AssessedValue, v.AssessmentDate, v.ConditionNotes, v.AssessedBy, v.RecordedAt));
 
         return Ok(response);
-    }
-
-    /// <summary>Updates a building's status.</summary>
-    /// <param name="buildingId">The ID of the building to update.</param>
-    /// <param name="request">The request containing the new status.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>No content if the update is successful.</returns>
-    [HttpPatch("{buildingId}/status")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(404)]
-    [EndpointName("updateBuildingStatus")]
-    public async Task<IActionResult> UpdateBuildingStatus(
-        string buildingId,
-        [FromBody] UpdateBuildingStatusRequest request,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(buildingId);
-        ArgumentNullException.ThrowIfNull(request);
-
-        var userId = HttpContext.GetUserId();
-        var newStatus = BuildingStatus.FromDisplayName(request.NewStatus);
-
-        await bus.InvokeAsync(
-            new UpdateBuildingStatus(BuildingId.Create(buildingId), newStatus, userId),
-            cancellationToken).ConfigureAwait(false);
-
-        return NoContent();
     }
 }

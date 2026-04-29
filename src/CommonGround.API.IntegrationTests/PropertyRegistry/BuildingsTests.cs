@@ -80,7 +80,7 @@ public class BuildingsTests(ApiFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var result = await response.Content.ReadFromJsonAsync<RegisterBuildingResponse>();
         result!.BuildingId.Should().NotBeNullOrWhiteSpace();
-        result.BuildingId.Should().StartWith("building-");
+        result.BuildingId.Should().StartWith("unit-");
     }
 
     [Fact]

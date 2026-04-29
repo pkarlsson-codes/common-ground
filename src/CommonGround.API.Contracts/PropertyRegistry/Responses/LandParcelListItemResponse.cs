@@ -6,5 +6,5 @@ public sealed record LandParcelListItemResponse(
     string LegalParcelNumber,
     string Address,
     decimal AreaAcres,
-    string Status,
+    bool IsDecommissioned,
     DateTimeOffset RegisteredAt);

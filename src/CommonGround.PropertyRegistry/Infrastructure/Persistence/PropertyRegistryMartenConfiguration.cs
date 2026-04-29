@@ -35,22 +35,22 @@ public static class PropertyRegistryMartenConfiguration
         options.Schema.For<LandParcelSeedLookup>()
             .DatabaseSchemaName(SeedSchemaName)
             .Index(x => x.SeedKey);
-        options.Schema.For<BuildingSeedLookup>()
+        options.Schema.For<DwellingUnitSeedLookup>()
             .DatabaseSchemaName(SeedSchemaName)
             .Index(x => x.SeedKey);
-        options.Schema.For<BuildingView>().DatabaseSchemaName(SchemaName);
-        options.Schema.For<BuildingListItemView>().DatabaseSchemaName(SchemaName);
-        options.Schema.For<BuildingAssessmentView>()
+        options.Schema.For<DwellingUnitView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<DwellingUnitListItemView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<DwellingUnitAssessmentView>()
             .DatabaseSchemaName(SchemaName)
-            .Index(x => x.BuildingId);
+            .Index(x => x.UnitId);
     }
 
     private static void ConfigureProjections(StoreOptions options)
     {
         options.Projections.Add<LandParcelViewProjection>(ProjectionLifecycle.Async);
         options.Projections.Add<LandParcelListItemViewProjection>(ProjectionLifecycle.Async);
-        options.Projections.Add<BuildingViewProjection>(ProjectionLifecycle.Async);
-        options.Projections.Add<BuildingListItemViewProjection>(ProjectionLifecycle.Async);
-        options.Projections.Add<BuildingAssessmentViewProjection>(ProjectionLifecycle.Async);
+        options.Projections.Add<DwellingUnitViewProjection>(ProjectionLifecycle.Async);
+        options.Projections.Add<DwellingUnitListItemViewProjection>(ProjectionLifecycle.Async);
+        options.Projections.Add<DwellingUnitAssessmentViewProjection>(ProjectionLifecycle.Async);
     }
 }

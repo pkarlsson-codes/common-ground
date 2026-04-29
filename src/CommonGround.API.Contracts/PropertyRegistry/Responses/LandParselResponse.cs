@@ -9,6 +9,6 @@ public sealed record LandParcelResponse(
     DateOnly AcquisitionDate,
     string AcquisitionMethod,
     string? CovenantTerms,
-    string Status,
+    bool IsDecommissioned,
     DateTimeOffset RegisteredAt,
     string RegisteredBy);

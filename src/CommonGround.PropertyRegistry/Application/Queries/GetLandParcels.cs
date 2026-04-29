@@ -10,11 +10,9 @@ namespace CommonGround.PropertyRegistry.Application.Queries;
 
 /// <summary>Returns a paginated list of land parcels with optional filters.</summary>
 /// <param name="Page">Pagination spec (page number + size).</param>
-/// <param name="Statuses">Optional statuses to filter by.</param>
 /// <param name="Search">Optional text search across legal parcel number and address.</param>
 public sealed record GetLandParcels(
     PageSpec Page,
-    IReadOnlyList<ParcelStatus>? Statuses = null,
     string? Search = null);
 
 /// <summary>Handles <see cref="GetLandParcels"/>.</summary>
@@ -29,12 +27,6 @@ public static class GetLandParcelsHandler
         ArgumentNullException.ThrowIfNull(request);
 
         IQueryable<LandParcelListItemView> query = session.Query<LandParcelListItemView>();
-
-        if (request.Statuses is { Count: > 0 })
-        {
-            var statusNames = request.Statuses.Select(s => s.DisplayName).ToList();
-            query = query.Where(p => statusNames.Contains(p.Status));
-        }
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {

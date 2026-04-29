@@ -1,7 +1,7 @@
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
-using CommonGround.PropertyRegistry.Domain.Buildings;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
+using CommonGround.PropertyRegistry.Domain.LeasableUnits;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 using CommonGround.SharedKernel.Domain.Exceptions;
@@ -21,8 +21,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <summary>Gets the ID of the land parcel this lease is for.</summary>
     public LandParcelId LandParcelId { get; private set; }
 
-    /// <summary>Gets the ID of the building on this leased parcel.</summary>
-    public BuildingId BuildingId { get; private set; }
+    /// <summary>Gets the ID of the leasable unit on this leased parcel.</summary>
+    public LeasableUnitId UnitId { get; private set; }
 
     /// <summary>Gets the start date of the lease.</summary>
     public DateOnly LeaseStartDate { get; private set; }
@@ -51,7 +51,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <summary>Creates a new ground lease.</summary>
     public static GroundLease Create(
         LandParcelId landParcelId,
-        BuildingId buildingId,
+        LeasableUnitId unitId,
         DateOnly leaseStartDate,
         int termYears,
         string covenantTerms,
@@ -59,7 +59,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         UserId createdBy)
     {
         ArgumentNullException.ThrowIfNull(landParcelId);
-        ArgumentNullException.ThrowIfNull(buildingId);
+        ArgumentNullException.ThrowIfNull(unitId);
         ArgumentNullException.ThrowIfNull(resalePolicyTerms);
         ArgumentNullException.ThrowIfNull(createdBy);
 
@@ -73,7 +73,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         lease.ApplyChange(new GroundLeaseCreated(
             GroundLeaseId.Generate().Value,
             landParcelId.Value,
-            buildingId.Value,
+            unitId.Value,
             leaseStartDate,
             termYears,
             covenantTerms,
@@ -200,7 +200,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     {
         Id = GroundLeaseId.Create(e.AggregateId);
         LandParcelId = LandParcelId.Create(e.LandParcelId);
-        BuildingId = BuildingId.Create(e.BuildingId);
+        UnitId = LeasableUnitId.Create(e.BuildingId);
         LeaseStartDate = e.LeaseStartDate;
         TermYears = e.TermYears;
         CovenantTerms = e.CovenantTerms;

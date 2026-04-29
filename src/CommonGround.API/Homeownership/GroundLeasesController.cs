@@ -7,8 +7,8 @@ using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
-using CommonGround.PropertyRegistry.Domain.Buildings;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
+using CommonGround.PropertyRegistry.Domain.LeasableUnits;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
 using Microsoft.AspNetCore.Mvc;
@@ -47,7 +47,7 @@ public sealed class GroundLeasesController(IMessageBus bus) : ControllerBase
 
         var command = new CreateGroundLease(
             LandParcelId.Create(request.LandParcelId),
-            BuildingId.Create(request.BuildingId),
+            LeasableUnitId.Create(request.BuildingId),
             DateOnly.Parse(request.LeaseStartDate, CultureInfo.InvariantCulture),
             request.TermYears,
             request.CovenantTerms,
@@ -75,11 +75,11 @@ public sealed class GroundLeasesController(IMessageBus bus) : ControllerBase
         var landParcelFilter = request.Filter?.LandParcelId is not null
             ? LandParcelId.Create(request.Filter.LandParcelId)
             : null;
-        var buildingFilter = request.Filter?.BuildingId is not null
-            ? BuildingId.Create(request.Filter.BuildingId)
+        var unitFilter = request.Filter?.BuildingId is not null
+            ? LeasableUnitId.Create(request.Filter.BuildingId)
             : null;
 
-        var query = new GetGroundLeases(request.Page, statusFilter, landParcelFilter, buildingFilter, request.Filter?.Search);
+        var query = new GetGroundLeases(request.Page, statusFilter, landParcelFilter, unitFilter, request.Filter?.Search);
 
         var result = await bus.InvokeAsync<PaginatedResponse<GroundLeaseListItemView>>(query, cancellationToken);
 

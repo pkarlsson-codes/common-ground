@@ -24,8 +24,8 @@ public class LandParcelView
     /// <summary>Gets or sets optional covenant terms.</summary>
     public string? CovenantTerms { get; set; }
 
-    /// <summary>Gets or sets the current status display name.</summary>
-    public string Status { get; set; } = string.Empty;
+    /// <summary>Gets or sets whether this parcel is decommissioned.</summary>
+    public bool IsDecommissioned { get; set; }
 
     /// <summary>Gets or sets when this parcel was registered.</summary>
     public DateTimeOffset RegisteredAt { get; set; }
