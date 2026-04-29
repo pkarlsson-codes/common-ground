@@ -84,7 +84,7 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         if (Status == ParcelStatus.Predevelopment)
             return;
 
-        EnsureTransitionAllowed(ParcelStatus.Predevelopment, ParcelStatus.Available, ParcelStatus.Transitioning);
+        EnsureTransitionAllowed(ParcelStatus.Predevelopment, ParcelStatus.Registered, ParcelStatus.Resale);
         ApplyChange(new ParcelEnteredPredevelopment(Id.Value, changedBy.Value));
     }
 
@@ -105,10 +105,10 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
     {
         ArgumentNullException.ThrowIfNull(changedBy);
 
-        if (Status == ParcelStatus.ReadyForOccupancy)
+        if (Status == ParcelStatus.Available)
             return;
 
-        EnsureTransitionAllowed(ParcelStatus.ReadyForOccupancy, ParcelStatus.UnderConstruction, ParcelStatus.Transitioning);
+        EnsureTransitionAllowed(ParcelStatus.Available, ParcelStatus.UnderConstruction, ParcelStatus.Resale);
         ApplyChange(new ParcelMarkedReadyForOccupancy(Id.Value, changedBy.Value));
     }
 
@@ -120,7 +120,7 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         if (Status == ParcelStatus.Occupied)
             return;
 
-        EnsureTransitionAllowed(ParcelStatus.Occupied, ParcelStatus.ReadyForOccupancy);
+        EnsureTransitionAllowed(ParcelStatus.Occupied, ParcelStatus.Available);
         ApplyChange(new ParcelOccupied(Id.Value, changedBy.Value));
     }
 
@@ -129,10 +129,10 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
     {
         ArgumentNullException.ThrowIfNull(changedBy);
 
-        if (Status == ParcelStatus.Transitioning)
+        if (Status == ParcelStatus.Resale)
             return;
 
-        EnsureTransitionAllowed(ParcelStatus.Transitioning, ParcelStatus.Occupied);
+        EnsureTransitionAllowed(ParcelStatus.Resale, ParcelStatus.Occupied);
         ApplyChange(new ParcelEnteredTransitioning(Id.Value, changedBy.Value));
     }
 
@@ -141,10 +141,10 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
     {
         ArgumentNullException.ThrowIfNull(changedBy);
 
-        if (Status == ParcelStatus.Available)
+        if (Status == ParcelStatus.Registered)
             return;
 
-        EnsureTransitionAllowed(ParcelStatus.Available, ParcelStatus.Transitioning);
+        EnsureTransitionAllowed(ParcelStatus.Registered, ParcelStatus.Resale);
         ApplyChange(new ParcelReturnedToAvailable(Id.Value, changedBy.Value));
     }
 
@@ -156,7 +156,7 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         if (Status == ParcelStatus.Decommissioned)
             return;
 
-        EnsureTransitionAllowed(ParcelStatus.Decommissioned, ParcelStatus.Available, ParcelStatus.Predevelopment, ParcelStatus.Transitioning);
+        EnsureTransitionAllowed(ParcelStatus.Decommissioned, ParcelStatus.Registered, ParcelStatus.Predevelopment, ParcelStatus.Resale);
         ApplyChange(new ParcelDecommissioned(Id.Value, changedBy.Value));
     }
 
@@ -165,10 +165,10 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
     {
         ArgumentNullException.ThrowIfNull(changedBy);
 
-        if (Status == ParcelStatus.Available)
+        if (Status == ParcelStatus.Registered)
             return;
 
-        EnsureTransitionAllowed(ParcelStatus.Available, ParcelStatus.Decommissioned);
+        EnsureTransitionAllowed(ParcelStatus.Registered, ParcelStatus.Decommissioned);
         ApplyChange(new ParcelRecommissioned(Id.Value, changedBy.Value));
     }
 
@@ -199,7 +199,7 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         AcquisitionDate = e.AcquisitionDate;
         AcquisitionMethod = AcquisitionMethod.FromDisplayName(e.AcquisitionMethod);
         CovenantTerms = e.CovenantTerms;
-        Status = ParcelStatus.Available;
+        Status = ParcelStatus.Registered;
         RegisteredBy = UserId.Create(e.RegisteredBy);
     }
 
@@ -215,7 +215,7 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
 
     private void Apply(ParcelMarkedReadyForOccupancy e)
     {
-        Status = ParcelStatus.ReadyForOccupancy;
+        Status = ParcelStatus.Available;
     }
 
     private void Apply(ParcelOccupied e)
@@ -225,12 +225,12 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
 
     private void Apply(ParcelEnteredTransitioning e)
     {
-        Status = ParcelStatus.Transitioning;
+        Status = ParcelStatus.Resale;
     }
 
     private void Apply(ParcelReturnedToAvailable e)
     {
-        Status = ParcelStatus.Available;
+        Status = ParcelStatus.Registered;
     }
 
     private void Apply(ParcelDecommissioned e)
@@ -240,7 +240,7 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
 
     private void Apply(ParcelRecommissioned e)
     {
-        Status = ParcelStatus.Available;
+        Status = ParcelStatus.Registered;
     }
 
     private void EnsureTransitionAllowed(ParcelStatus targetStatus, params ParcelStatus[] allowedFrom)

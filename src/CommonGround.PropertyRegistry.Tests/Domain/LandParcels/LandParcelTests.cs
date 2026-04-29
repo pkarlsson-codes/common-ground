@@ -25,7 +25,7 @@ public class LandParcelTests
         parcel.LegalParcelNumber.Should().Be("APN-001-234-567");
         parcel.Address.Should().Be("123 Main St, Springfield");
         parcel.AreaAcres.Should().Be(0.25m);
-        parcel.Status.Should().Be(ParcelStatus.Available);
+        parcel.Status.Should().Be(ParcelStatus.Registered);
         parcel.AcquisitionMethod.Should().Be(AcquisitionMethod.Purchase);
         parcel.RegisteredBy.Should().Be(StaffUser);
     }
@@ -96,7 +96,7 @@ public class LandParcelTests
         parcel.MarkOccupied(StaffUser);
         parcel.EnterTransitioning(StaffUser);
 
-        parcel.Status.Should().Be(ParcelStatus.Transitioning);
+        parcel.Status.Should().Be(ParcelStatus.Resale);
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public class LandParcelTests
 
         parcel.MarkReadyForOccupancy(StaffUser);
 
-        parcel.Status.Should().Be(ParcelStatus.ReadyForOccupancy);
+        parcel.Status.Should().Be(ParcelStatus.Available);
     }
 
     [Fact]
@@ -183,7 +183,7 @@ public class LandParcelTests
         parcel.Decommission(StaffUser);
         parcel.Recommission(StaffUser);
 
-        parcel.Status.Should().Be(ParcelStatus.Available);
+        parcel.Status.Should().Be(ParcelStatus.Registered);
     }
 
     [Fact]
@@ -194,7 +194,7 @@ public class LandParcelTests
 
         parcel.Recommission(StaffUser);
 
-        parcel.Status.Should().Be(ParcelStatus.Available);
+        parcel.Status.Should().Be(ParcelStatus.Registered);
         parcel.UncommittedEvents.Should().HaveCount(1);
     }
 }

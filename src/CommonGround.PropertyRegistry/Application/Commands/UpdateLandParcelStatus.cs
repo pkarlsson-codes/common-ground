@@ -37,16 +37,16 @@ public static class UpdateLandParcelStatusHandler
             case var _ when command.NewStatus == ParcelStatus.UnderConstruction:
                 parcel.StartConstruction(command.ChangedBy);
                 break;
-            case var _ when command.NewStatus == ParcelStatus.ReadyForOccupancy:
+            case var _ when command.NewStatus == ParcelStatus.Available:
                 parcel.MarkReadyForOccupancy(command.ChangedBy);
                 break;
             case var _ when command.NewStatus == ParcelStatus.Occupied:
                 parcel.MarkOccupied(command.ChangedBy);
                 break;
-            case var _ when command.NewStatus == ParcelStatus.Transitioning:
+            case var _ when command.NewStatus == ParcelStatus.Resale:
                 parcel.EnterTransitioning(command.ChangedBy);
                 break;
-            case var _ when command.NewStatus == ParcelStatus.Available:
+            case var _ when command.NewStatus == ParcelStatus.Registered:
                 if (parcel.Status == ParcelStatus.Decommissioned)
                     parcel.Recommission(command.ChangedBy);
                 else
