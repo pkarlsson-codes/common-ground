@@ -38,7 +38,7 @@ export function useCreateGroundLease() {
       api.createGroundLease({
         createGroundLeaseRequest: {
           landParcelId: form.landParcelId,
-          buildingId: form.homeId,
+          homeId: form.homeId,
           leaseStartDate: form.leaseStartDate,
           termYears: form.termYears,
           covenantTerms: form.covenantTerms || undefined,

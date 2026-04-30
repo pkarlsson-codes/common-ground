@@ -26,7 +26,7 @@ import { getErrorMessage } from '../lib/getErrorMessage'
 import { useToast } from '../hooks/useToast'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
-const buildingsApi = new HomesApi(apiConfig)
+const homesApi = new HomesApi(apiConfig)
 
 type Panel = 'detail' | 'create' | null
 
@@ -219,8 +219,8 @@ export default function GroundLeasesPage() {
                     <td><span className="cell-mono">{l.termYears} yr</span></td>
                     <td><StatusBadge status={l.status ?? ''} /></td>
                     <td>
-                      <span className="cell-id" title={l.buildingId}>
-                        {l.buildingId?.slice(0, 8)}…
+                      <span className="cell-id" title={l.homeId}>
+                        {l.homeId?.slice(0, 8)}…
                       </span>
                     </td>
                     <td>
@@ -458,15 +458,15 @@ export default function GroundLeasesPage() {
                   value={createForm.homeId || null}
                   onChange={id => setCreateForm(f => ({ ...f, homeId: id ?? '' }))}
                   fetchOptions={async q => {
-                    const result = await buildingsApi.getHomes({ landParcelId: createForm.landParcelId, pageSize: 10 })
+                    const result = await homesApi.getHomes({ landParcelId: createForm.landParcelId, pageSize: 10 })
                     const lower = q.toLowerCase()
                     const items = result.items ?? []
                     const filtered = lower ? items.filter(b =>
-                      `${b.buildingType} ${b.bedrooms} ${b.bathrooms} ${b.squareFootage}`.toLowerCase().includes(lower)
+                      `${b.homeType} ${b.bedrooms} ${b.bathrooms} ${b.squareFootage}`.toLowerCase().includes(lower)
                     ) : items
                     return filtered.map(b => ({
                       id: b.id!,
-                      label: `${b.buildingType}, ${b.bedrooms}bd/${b.bathrooms}ba, ${b.squareFootage} sqft`,
+                      label: `${b.homeType}, ${b.bedrooms}bd/${b.bathrooms}ba, ${b.squareFootage} sqft`,
                     }))
                   }}
                   placeholder={createForm.landParcelId ? 'Search homes on this parcel…' : 'Select a parcel first'}
