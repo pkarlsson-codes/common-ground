@@ -7,25 +7,25 @@ using Xunit;
 
 namespace CommonGround.PropertyRegistry.Tests.Domain.LeasableUnits;
 
-public class DwellingUnitTests
+public class HomeTests
 {
     private static readonly UserId StaffUser = UserId.Generate();
     private static readonly LandParcelId ParcelId = LandParcelId.Generate();
 
-    private static DwellingUnit RegisterUnit() =>
-        DwellingUnit.Register(
+    private static Home RegisterHome() =>
+        Home.Register(
             ParcelId,
-            DwellingUnitType.SingleFamily,
+            HomeType.SingleFamily,
             3, 2m, 1200m, 1985, 280000m,
             StaffUser);
 
     [Fact]
-    public void Register_ValidInputs_CreatesDwellingUnitWithAvailableStatus()
+    public void Register_ValidInputs_CreatesHomeWithAvailableStatus()
     {
-        var unit = RegisterUnit();
+        var unit = RegisterHome();
 
         unit.LandParcelId.Should().Be(ParcelId);
-        unit.UnitType.Should().Be(DwellingUnitType.SingleFamily);
+        unit.UnitType.Should().Be(HomeType.SingleFamily);
         unit.Bedrooms.Should().Be(3);
         unit.Bathrooms.Should().Be(2m);
         unit.SquareFootage.Should().Be(1200m);
@@ -38,7 +38,7 @@ public class DwellingUnitTests
     [Fact]
     public void ExecuteGroundLease_FromAvailable_SetsPendingOccupancy()
     {
-        var unit = RegisterUnit();
+        var unit = RegisterHome();
 
         unit.ExecuteGroundLease(StaffUser);
 
@@ -48,7 +48,7 @@ public class DwellingUnitTests
     [Fact]
     public void ConfirmMoveIn_FromPendingOccupancy_SetsOccupied()
     {
-        var unit = RegisterUnit();
+        var unit = RegisterHome();
         unit.ExecuteGroundLease(StaffUser);
 
         unit.ConfirmMoveIn(StaffUser);
@@ -59,7 +59,7 @@ public class DwellingUnitTests
     [Fact]
     public void InitiateResale_FromOccupied_SetsResale()
     {
-        var unit = RegisterUnit();
+        var unit = RegisterHome();
         unit.ExecuteGroundLease(StaffUser);
         unit.ConfirmMoveIn(StaffUser);
 
@@ -71,7 +71,7 @@ public class DwellingUnitTests
     [Fact]
     public void CompleteResaleClosing_FromResale_SetsPendingOccupancy()
     {
-        var unit = RegisterUnit();
+        var unit = RegisterHome();
         unit.ExecuteGroundLease(StaffUser);
         unit.ConfirmMoveIn(StaffUser);
         unit.InitiateResale(StaffUser);
@@ -84,7 +84,7 @@ public class DwellingUnitTests
     [Fact]
     public void CancelOccupancy_FromPendingOccupancy_SetsAvailable()
     {
-        var unit = RegisterUnit();
+        var unit = RegisterHome();
         unit.ExecuteGroundLease(StaffUser);
 
         unit.CancelOccupancy(StaffUser);
@@ -95,7 +95,7 @@ public class DwellingUnitTests
     [Fact]
     public void ReopenResaleListing_FromResale_SetsAvailable()
     {
-        var unit = RegisterUnit();
+        var unit = RegisterHome();
         unit.ExecuteGroundLease(StaffUser);
         unit.ConfirmMoveIn(StaffUser);
         unit.InitiateResale(StaffUser);
@@ -108,7 +108,7 @@ public class DwellingUnitTests
     [Fact]
     public void AbandonResaleForRedevelopment_FromResale_SetsAvailable()
     {
-        var unit = RegisterUnit();
+        var unit = RegisterHome();
         unit.ExecuteGroundLease(StaffUser);
         unit.ConfirmMoveIn(StaffUser);
         unit.InitiateResale(StaffUser);
@@ -121,7 +121,7 @@ public class DwellingUnitTests
     [Fact]
     public void AbandonResaleForRedevelopment_FromPendingOccupancy_SetsAvailable()
     {
-        var unit = RegisterUnit();
+        var unit = RegisterHome();
         unit.ExecuteGroundLease(StaffUser);
 
         unit.AbandonResaleForRedevelopment(StaffUser);
@@ -132,7 +132,7 @@ public class DwellingUnitTests
     [Fact]
     public void ExecuteGroundLease_FromOccupied_ThrowsBusinessRuleViolation()
     {
-        var unit = RegisterUnit();
+        var unit = RegisterHome();
         unit.ExecuteGroundLease(StaffUser);
         unit.ConfirmMoveIn(StaffUser);
 
@@ -145,7 +145,7 @@ public class DwellingUnitTests
     public void FullLifecycle_HappyPath()
     {
         // Available → PendingOccupancy → Occupied → Resale → PendingOccupancy → Occupied
-        var unit = RegisterUnit();
+        var unit = RegisterHome();
 
         unit.Status.Should().Be(UnitStatus.Available);
 

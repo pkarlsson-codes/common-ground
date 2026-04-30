@@ -1,4 +1,4 @@
-using CommonGround.PropertyRegistry.Domain.DevelopmentPlans;
+using CommonGround.PropertyRegistry.Domain.DevelopmentProjects;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.PropertyRegistry.Domain.LeasableUnits;
 using CommonGround.PropertyRegistry.Infrastructure.Persistence;
@@ -14,7 +14,7 @@ public static class PropertyRegistryServiceCollectionExtensions
     {
         services.AddScoped<ILandParcelRepository, LandParcelRepository>();
         services.AddScoped<ILeasableUnitRepository, LeasableUnitRepository>();
-        services.AddScoped<IDevelopmentPlanRepository, DevelopmentPlanRepository>();
+        services.AddScoped<IDevelopmentProjectRepository, DevelopmentProjectRepository>();
         return services;
     }
 }

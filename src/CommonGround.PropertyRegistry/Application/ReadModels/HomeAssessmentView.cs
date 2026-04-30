@@ -1,7 +1,7 @@
 namespace CommonGround.PropertyRegistry.Application.ReadModels;
 
-/// <summary>Read model for a single dwelling unit assessment event.</summary>
-public class DwellingUnitAssessmentView
+/// <summary>Read model for a single home assessment event.</summary>
+public class HomeAssessmentView
 {
     /// <summary>The Marten event ID for this assessment record.</summary>
     public Guid Id { get; set; }

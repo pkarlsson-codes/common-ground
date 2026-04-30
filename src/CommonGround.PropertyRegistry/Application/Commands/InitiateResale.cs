@@ -5,7 +5,7 @@ using CommonGround.SharedKernel.Persistence;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
 
-/// <summary>Initiates resale for a dwelling unit.</summary>
+/// <summary>Initiates resale for a home.</summary>
 /// <param name="UnitId">The unit to transition.</param>
 /// <param name="ChangedBy">The staff user making the change.</param>
 public sealed record InitiateResale(LeasableUnitId UnitId, UserId ChangedBy);
@@ -25,7 +25,7 @@ public static class InitiateResaleHandler
         var unit = await repository.GetByIdAsync(command.UnitId, cancellationToken).ConfigureAwait(false)
             ?? throw new AggregateNotFoundException(command.UnitId.Value);
 
-        ((DwellingUnit)unit).InitiateResale(command.ChangedBy);
+        ((Home)unit).InitiateResale(command.ChangedBy);
 
         repository.Stage(unit);
         await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);

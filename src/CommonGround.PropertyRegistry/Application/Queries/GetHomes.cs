@@ -8,27 +8,27 @@ using Marten.Pagination;
 
 namespace CommonGround.PropertyRegistry.Application.Queries;
 
-/// <summary>Returns a paginated list of dwelling units with optional filters.</summary>
+/// <summary>Returns a paginated list of homes with optional filters.</summary>
 /// <param name="Page">Pagination spec.</param>
 /// <param name="LandParcelIds">Optional land parcels to filter by.</param>
 /// <param name="Statuses">Optional statuses to filter by.</param>
-public sealed record GetDwellingUnits(
+public sealed record GetHomes(
     PageSpec Page,
     IReadOnlyList<LandParcelId>? LandParcelIds = null,
     IReadOnlyList<UnitStatus>? Statuses = null);
 
-/// <summary>Handles <see cref="GetDwellingUnits"/>.</summary>
-public static class GetDwellingUnitsHandler
+/// <summary>Handles <see cref="GetHomes"/>.</summary>
+public static class GetHomesHandler
 {
-    /// <summary>Returns a paginated list of <see cref="DwellingUnitListItemView"/>.</summary>
-    public static async Task<PaginatedResponse<DwellingUnitListItemView>> Handle(
-        GetDwellingUnits request,
+    /// <summary>Returns a paginated list of <see cref="HomeListItemView"/>.</summary>
+    public static async Task<PaginatedResponse<HomeListItemView>> Handle(
+        GetHomes request,
         IQuerySession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        IQueryable<DwellingUnitListItemView> query = session.Query<DwellingUnitListItemView>();
+        IQueryable<HomeListItemView> query = session.Query<HomeListItemView>();
 
         if (request.LandParcelIds is { Count: > 0 })
         {
@@ -46,7 +46,7 @@ public static class GetDwellingUnitsHandler
             .ToPagedListAsync(request.Page.Number, request.Page.Size, cancellationToken)
             .ConfigureAwait(false);
 
-        return new PaginatedResponse<DwellingUnitListItemView>
+        return new PaginatedResponse<HomeListItemView>
         {
             Items = [.. page],
             TotalCount = (int)page.TotalItemCount,

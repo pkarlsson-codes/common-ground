@@ -1,7 +1,7 @@
 namespace CommonGround.PropertyRegistry.Application.ReadModels;
 
-/// <summary>Detail read model for a dwelling unit.</summary>
-public class DwellingUnitView
+/// <summary>Detail read model for a home.</summary>
+public class HomeView
 {
     /// <summary>Gets or sets the unit ID.</summary>
     public string Id { get; set; } = string.Empty;

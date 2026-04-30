@@ -5,7 +5,7 @@ using CommonGround.SharedKernel.Persistence;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
 
-/// <summary>Cancels pending occupancy for a dwelling unit.</summary>
+/// <summary>Cancels pending occupancy for a home.</summary>
 /// <param name="UnitId">The unit to transition.</param>
 /// <param name="ChangedBy">The staff user making the change.</param>
 public sealed record CancelOccupancy(LeasableUnitId UnitId, UserId ChangedBy);
@@ -25,7 +25,7 @@ public static class CancelOccupancyHandler
         var unit = await repository.GetByIdAsync(command.UnitId, cancellationToken).ConfigureAwait(false)
             ?? throw new AggregateNotFoundException(command.UnitId.Value);
 
-        ((DwellingUnit)unit).CancelOccupancy(command.ChangedBy);
+        ((Home)unit).CancelOccupancy(command.ChangedBy);
 
         repository.Stage(unit);
         await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);

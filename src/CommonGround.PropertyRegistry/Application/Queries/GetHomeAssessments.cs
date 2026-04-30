@@ -7,30 +7,30 @@ using Marten.Pagination;
 
 namespace CommonGround.PropertyRegistry.Application.Queries;
 
-/// <summary>Returns a paginated list of assessments for a dwelling unit, newest first.</summary>
-/// <param name="UnitId">The ID of the unit whose assessments to retrieve.</param>
+/// <summary>Returns a paginated list of assessments for a home, newest first.</summary>
+/// <param name="UnitId">The ID of the home whose assessments to retrieve.</param>
 /// <param name="Page">The pagination spec.</param>
-public sealed record GetDwellingUnitAssessments(LeasableUnitId UnitId, PageSpec Page);
+public sealed record GetHomeAssessments(LeasableUnitId UnitId, PageSpec Page);
 
-/// <summary>Handles <see cref="GetDwellingUnitAssessments"/>.</summary>
-public static class GetDwellingUnitAssessmentsHandler
+/// <summary>Handles <see cref="GetHomeAssessments"/>.</summary>
+public static class GetHomeAssessmentsHandler
 {
-    /// <summary>Returns a paginated list of <see cref="DwellingUnitAssessmentView"/>, ordered newest first.</summary>
-    public static async Task<PaginatedResponse<DwellingUnitAssessmentView>> Handle(
-        GetDwellingUnitAssessments request,
+    /// <summary>Returns a paginated list of <see cref="HomeAssessmentView"/>, ordered newest first.</summary>
+    public static async Task<PaginatedResponse<HomeAssessmentView>> Handle(
+        GetHomeAssessments request,
         IQuerySession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var page = await session.Query<DwellingUnitAssessmentView>()
+        var page = await session.Query<HomeAssessmentView>()
             .Where(x => x.UnitId == request.UnitId.Value)
             .OrderByDescending(x => x.AssessmentDate)
             .ThenByDescending(x => x.RecordedAt)
             .ToPagedListAsync(request.Page.Number, request.Page.Size, cancellationToken)
             .ConfigureAwait(false);
 
-        return new PaginatedResponse<DwellingUnitAssessmentView>
+        return new PaginatedResponse<HomeAssessmentView>
         {
             Items = [.. page],
             TotalCount = (int)page.TotalItemCount,

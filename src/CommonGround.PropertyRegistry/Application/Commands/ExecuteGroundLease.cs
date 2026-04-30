@@ -5,7 +5,7 @@ using CommonGround.SharedKernel.Persistence;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
 
-/// <summary>Executes a ground lease on a dwelling unit.</summary>
+/// <summary>Executes a ground lease on a home.</summary>
 /// <param name="UnitId">The unit to transition.</param>
 /// <param name="ChangedBy">The staff user making the change.</param>
 public sealed record ExecuteGroundLease(LeasableUnitId UnitId, UserId ChangedBy);
@@ -25,7 +25,7 @@ public static class ExecuteGroundLeaseHandler
         var unit = await repository.GetByIdAsync(command.UnitId, cancellationToken).ConfigureAwait(false)
             ?? throw new AggregateNotFoundException(command.UnitId.Value);
 
-        ((DwellingUnit)unit).ExecuteGroundLease(command.ChangedBy);
+        ((Home)unit).ExecuteGroundLease(command.ChangedBy);
 
         repository.Stage(unit);
         await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);

@@ -1,9 +1,9 @@
 namespace CommonGround.PropertyRegistry.Infrastructure.Seeding;
 
 /// <summary>
-/// Deterministic lookup from dwelling unit seed keys to created aggregate IDs.
+/// Deterministic lookup from home seed keys to created aggregate IDs.
 /// </summary>
-public sealed class DwellingUnitSeedLookup
+public sealed class HomeSeedLookup
 {
     /// <summary>
     /// Gets or sets the deterministic document identifier.
@@ -16,7 +16,7 @@ public sealed class DwellingUnitSeedLookup
     public string SeedKey { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the created dwelling unit aggregate ID.
+    /// Gets or sets the created home aggregate ID.
     /// </summary>
     public string UnitId { get; set; } = string.Empty;
 
@@ -26,11 +26,11 @@ public sealed class DwellingUnitSeedLookup
     public DateTimeOffset SeededAt { get; set; }
 
     /// <summary>
-    /// Creates a deterministic document ID for a dwelling unit seed key.
+    /// Creates a deterministic document ID for a home seed key.
     /// </summary>
     public static string BuildId(string seedKey)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(seedKey);
-        return $"dwelling-unit-seed:{seedKey}";
+        return $"home-seed:{seedKey}";
     }
 }

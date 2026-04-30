@@ -5,9 +5,9 @@ using Marten.Events.Projections;
 
 namespace CommonGround.PropertyRegistry.Infrastructure.Persistence.Projections;
 
-internal sealed class DwellingUnitAssessmentViewProjection : EventProjection
+internal sealed class HomeAssessmentViewProjection : EventProjection
 {
-    public static DwellingUnitAssessmentView Create(IEvent<LeasableUnitAssessed> e) =>
+    public static HomeAssessmentView Create(IEvent<LeasableUnitAssessed> e) =>
         new()
         {
             Id = e.Id,

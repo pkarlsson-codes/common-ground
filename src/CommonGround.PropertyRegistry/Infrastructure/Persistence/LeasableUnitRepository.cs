@@ -19,14 +19,14 @@ internal sealed class LeasableUnitRepository : MartenRepository<LeasableUnit, Le
 
     /// <inheritdoc/>
     /// <remarks>
-    /// Tries to reconstruct a <see cref="DwellingUnit"/> first; falls back to <see cref="CommercialUnit"/>.
+    /// Tries to reconstruct a <see cref="Home"/> first; falls back to <see cref="CommercialUnit"/>.
     /// Returns null if neither stream exists for the given ID.
     /// </remarks>
     public override async Task<LeasableUnit?> GetByIdAsync(LeasableUnitId id, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(id);
 
-        var dwelling = await _session.Events.FetchForWriting<DwellingUnit>(id.Value, cancellationToken).ConfigureAwait(false);
+        var dwelling = await _session.Events.FetchForWriting<Home>(id.Value, cancellationToken).ConfigureAwait(false);
         if (dwelling.Aggregate is not null)
         {
             return dwelling.Aggregate;

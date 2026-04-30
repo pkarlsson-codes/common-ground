@@ -6,55 +6,55 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CommonGround.Web.Gateway.Controllers;
 
-/// <summary>Gateway proxy for building endpoints.</summary>
+/// <summary>Gateway proxy for home endpoints.</summary>
 /// <param name="client">Typed client for the PropertyRegistry API.</param>
 [ApiController]
-[Route("api/v1/buildings")]
-public sealed class BuildingsController(IBuildingsApiClient client) : ControllerBase
+[Route("api/v1/homes")]
+public sealed class HomesController(IHomesApiClient client) : ControllerBase
 {
-    /// <summary>Registers a new building.</summary>
-    /// <param name="request">The building registration details.</param>
+    /// <summary>Registers a new home.</summary>
+    /// <param name="request">The home registration details.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>201 Created with the new building ID.</returns>
+    /// <returns>201 Created with the new home ID.</returns>
     [HttpPost]
     [ProducesResponseType(typeof(RegisterBuildingResponse), 201)]
-    [EndpointName("registerBuilding")]
-    public async Task<IActionResult> RegisterBuilding(
+    [EndpointName("registerHome")]
+    public async Task<IActionResult> RegisterHome(
         [FromBody] RegisterBuildingRequest request,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var result = await client.RegisterBuildingAsync(request, cancellationToken).ConfigureAwait(false);
-        return CreatedAtAction(nameof(GetBuilding), new { buildingId = result.BuildingId }, result);
+        var result = await client.RegisterHomeAsync(request, cancellationToken).ConfigureAwait(false);
+        return CreatedAtAction(nameof(GetHome), new { homeId = result.BuildingId }, result);
     }
 
-    /// <summary>Gets a building by ID.</summary>
-    /// <param name="buildingId">The ID of the building to retrieve.</param>
+    /// <summary>Gets a home by ID.</summary>
+    /// <param name="homeId">The ID of the home to retrieve.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>200 with the building, or 404 if not found.</returns>
-    [HttpGet("{buildingId}")]
+    /// <returns>200 with the home, or 404 if not found.</returns>
+    [HttpGet("{homeId}")]
     [ProducesResponseType(typeof(BuildingResponse), 200)]
     [ProducesResponseType(404)]
-    [EndpointName("getBuilding")]
-    public async Task<IActionResult> GetBuilding(string buildingId, CancellationToken cancellationToken)
+    [EndpointName("getHome")]
+    public async Task<IActionResult> GetHome(string homeId, CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(buildingId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
         var result = await client
-            .GetBuildingAsync(buildingId, cancellationToken);
+            .GetHomeAsync(homeId, cancellationToken);
         return Ok(result);
     }
 
-    /// <summary>Gets a paginated list of buildings.</summary>
+    /// <summary>Gets a paginated list of homes.</summary>
     /// <param name="page">The page number (1-based).</param>
     /// <param name="pageSize">The number of items per page.</param>
     /// <param name="landParcelId">Optional land parcel ID filter.</param>
     /// <param name="status">Optional status filter.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>200 with a paginated list of buildings.</returns>
+    /// <returns>200 with a paginated list of homes.</returns>
     [HttpGet]
     [ProducesResponseType(typeof(PaginatedResponse<BuildingListItemResponse>), 200)]
-    [EndpointName("getBuildings")]
-    public async Task<IActionResult> GetBuildings(
+    [EndpointName("getHomes")]
+    public async Task<IActionResult> GetHomes(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         [FromQuery] string? landParcelId = null,
@@ -62,71 +62,71 @@ public sealed class BuildingsController(IBuildingsApiClient client) : Controller
         CancellationToken cancellationToken = default)
     {
         var result = await client
-            .GetBuildingsAsync(
+            .GetHomesAsync(
                 page, pageSize, landParcelId,
                 status, cancellationToken);
         return Ok(result);
     }
 
-    /// <summary>Records an assessment for a building.</summary>
-    /// <param name="buildingId">The ID of the building to assess.</param>
+    /// <summary>Records an assessment for a home.</summary>
+    /// <param name="homeId">The ID of the home to assess.</param>
     /// <param name="request">The assessment details.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>201 Created, or 404 if not found.</returns>
-    [HttpPost("{buildingId}/assessments")]
+    [HttpPost("{homeId}/assessments")]
     [ProducesResponseType(201)]
     [ProducesResponseType(404)]
-    [EndpointName("recordBuildingAssessment")]
-    public async Task<IActionResult> RecordBuildingAssessment(
-        string buildingId,
+    [EndpointName("recordHomeAssessment")]
+    public async Task<IActionResult> RecordHomeAssessment(
+        string homeId,
         [FromBody] RecordBuildingAssessmentRequest request,
         CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(buildingId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
         ArgumentNullException.ThrowIfNull(request);
-        await client.RecordBuildingAssessmentAsync(
-            buildingId, request, cancellationToken);
+        await client.RecordHomeAssessmentAsync(
+            homeId, request, cancellationToken);
         return Created();
     }
 
-    /// <summary>Gets a paginated list of assessments for a building.</summary>
-    /// <param name="buildingId">The ID of the building.</param>
+    /// <summary>Gets a paginated list of assessments for a home.</summary>
+    /// <param name="homeId">The ID of the home.</param>
     /// <param name="page">The page number (1-based).</param>
     /// <param name="pageSize">The number of items per page.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>200 with a paginated list of assessments, or 404 if not found.</returns>
-    [HttpGet("{buildingId}/assessments")]
+    [HttpGet("{homeId}/assessments")]
     [ProducesResponseType(typeof(PaginatedResponse<BuildingAssessmentItemResponse>), 200)]
     [ProducesResponseType(404)]
-    [EndpointName("getBuildingAssessments")]
-    public async Task<IActionResult> GetBuildingAssessments(
-        string buildingId,
+    [EndpointName("getHomeAssessments")]
+    public async Task<IActionResult> GetHomeAssessments(
+        string homeId,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(buildingId);
-        var result = await client.GetBuildingAssessmentsAsync(buildingId, page, pageSize, cancellationToken);
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+        var result = await client.GetHomeAssessmentsAsync(homeId, page, pageSize, cancellationToken);
         return Ok(result);
     }
 
-    /// <summary>Updates a building's status.</summary>
-    /// <param name="buildingId">The ID of the building to update.</param>
+    /// <summary>Updates a home's status.</summary>
+    /// <param name="homeId">The ID of the home to update.</param>
     /// <param name="request">The new status details.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>204 No Content, or 404 if not found.</returns>
-    [HttpPatch("{buildingId}/status")]
+    [HttpPatch("{homeId}/status")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
-    [EndpointName("updateBuildingStatus")]
-    public async Task<IActionResult> UpdateBuildingStatus(
-        string buildingId,
+    [EndpointName("updateHomeStatus")]
+    public async Task<IActionResult> UpdateHomeStatus(
+        string homeId,
         [FromBody] UpdateBuildingStatusRequest request,
         CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(buildingId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
         ArgumentNullException.ThrowIfNull(request);
-        await client.UpdateBuildingStatusAsync(buildingId, request, cancellationToken);
+        await client.UpdateHomeStatusAsync(homeId, request, cancellationToken);
         return NoContent();
     }
 }

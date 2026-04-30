@@ -10,9 +10,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace CommonGround.PropertyRegistry.Infrastructure.Seeding;
 
 /// <summary>
-/// Seeds development dwelling units from JSON and persists deterministic seed-key mappings.
+/// Seeds development homes from JSON and persists deterministic seed-key mappings.
 /// </summary>
-public sealed class DwellingUnitsInitialData : IInitialData
+public sealed class HomesInitialData : IInitialData
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -57,8 +57,8 @@ public sealed class DwellingUnitsInitialData : IInitialData
                     $"Land parcel stream '{landParcelLookup.LandParcelId}' does not exist for unit seed key '{entry.SeedKey}'.");
             }
 
-            var lookupId = DwellingUnitSeedLookup.BuildId(entry.SeedKey);
-            var lookup = await session.LoadAsync<DwellingUnitSeedLookup>(lookupId, cancellation).ConfigureAwait(false);
+            var lookupId = HomeSeedLookup.BuildId(entry.SeedKey);
+            var lookup = await session.LoadAsync<HomeSeedLookup>(lookupId, cancellation).ConfigureAwait(false);
             if (lookup is not null)
             {
                 var streamState = await session.Events.FetchStreamStateAsync(lookup.UnitId, cancellation).ConfigureAwait(false);
@@ -68,9 +68,9 @@ public sealed class DwellingUnitsInitialData : IInitialData
                 }
             }
 
-            var unit = DwellingUnit.Register(
+            var unit = Home.Register(
                 LandParcelId.Create(landParcelLookup.LandParcelId),
-                DwellingUnitType.FromDisplayName(entry.Type),
+                HomeType.FromDisplayName(entry.Type),
                 entry.Bedrooms,
                 entry.Bathrooms,
                 entry.SquareFootage,
@@ -80,7 +80,7 @@ public sealed class DwellingUnitsInitialData : IInitialData
 
             repository.Stage(unit);
 
-            session.Store(new DwellingUnitSeedLookup
+            session.Store(new HomeSeedLookup
             {
                 Id = lookupId,
                 SeedKey = entry.SeedKey,
@@ -92,16 +92,16 @@ public sealed class DwellingUnitsInitialData : IInitialData
         }
     }
 
-    private static async Task<IReadOnlyList<DwellingUnitSeedEntry>> LoadEntriesAsync(CancellationToken cancellation)
+    private static async Task<IReadOnlyList<HomeSeedEntry>> LoadEntriesAsync(CancellationToken cancellation)
     {
-        var assembly = typeof(DwellingUnitsInitialData).Assembly;
+        var assembly = typeof(HomesInitialData).Assembly;
         var resourceName = assembly
             .GetManifestResourceNames()
-            .SingleOrDefault(name => name.EndsWith("buildings.seed.json", StringComparison.OrdinalIgnoreCase));
+            .SingleOrDefault(name => name.EndsWith("homes.seed.json", StringComparison.OrdinalIgnoreCase));
 
         if (resourceName is null)
         {
-            throw new InvalidOperationException("Could not find embedded building seed resource 'buildings.seed.json'.");
+            throw new InvalidOperationException("Could not find embedded home seed resource 'homes.seed.json'.");
         }
 
         var stream = assembly.GetManifestResourceStream(resourceName)
@@ -109,7 +109,7 @@ public sealed class DwellingUnitsInitialData : IInitialData
 
         using (stream)
         {
-            var entries = await JsonSerializer.DeserializeAsync<List<DwellingUnitSeedEntry>>(stream, JsonOptions, cancellation)
+            var entries = await JsonSerializer.DeserializeAsync<List<HomeSeedEntry>>(stream, JsonOptions, cancellation)
                 .ConfigureAwait(false)
                 ?? [];
 
@@ -119,14 +119,14 @@ public sealed class DwellingUnitsInitialData : IInitialData
 
             if (duplicateSeedKey is not null)
             {
-                throw new InvalidOperationException($"Duplicate dwelling unit seed key '{duplicateSeedKey.Key}' in seed JSON.");
+                throw new InvalidOperationException($"Duplicate home seed key '{duplicateSeedKey.Key}' in seed JSON.");
             }
 
             return entries;
         }
     }
 
-    private sealed record DwellingUnitSeedEntry(
+    private sealed record HomeSeedEntry(
         string SeedKey,
         string LandParcelSeedKey,
         string Type,
