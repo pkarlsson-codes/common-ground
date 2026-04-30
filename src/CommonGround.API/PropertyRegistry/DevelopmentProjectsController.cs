@@ -1,6 +1,11 @@
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
+using CommonGround.API.Infrastructure.Auth;
+using CommonGround.PropertyRegistry.Application.Commands;
+using CommonGround.PropertyRegistry.Application.Queries;
 using CommonGround.PropertyRegistry.Application.ReadModels;
+using CommonGround.PropertyRegistry.Domain.DevelopmentProjects;
+using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +33,7 @@ public sealed class DevelopmentProjectsController(IMessageBus bus) : ControllerB
         [FromQuery] PaginationQuerySpec<GetDevelopmentProjectsFilter> request,
         CancellationToken cancellationToken)
     {
-        var query = new CommonGround.PropertyRegistry.Application.Queries.GetDevelopmentProjects(
+        var query = new GetDevelopmentProjects(
             request.Page,
             request.Filter?.Search);
 
@@ -38,5 +43,34 @@ public sealed class DevelopmentProjectsController(IMessageBus bus) : ControllerB
             v.Id, v.LandParcelId, v.Description, v.Status));
 
         return Ok(response);
+    }
+
+    /// <summary>
+    /// Initiates a new development project for a land parcel.
+    /// </summary>
+    /// <param name="request">The initiation request.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The ID of the newly created development project.</returns>
+    [HttpPost]
+    [ProducesResponseType(typeof(InitiateDevelopmentProjectResponse), 201)]
+    [EndpointName("initiateDevelopmentProject")]
+    public async Task<IActionResult> InitiateDevelopmentProject(
+        [FromBody] InitiateDevelopmentProjectRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var userId = HttpContext.GetUserId();
+        var command = new InitiateDevelopmentProject(
+            new LandParcelId(request.LandParcelId),
+            request.Description,
+            userId);
+
+        var id = await bus.InvokeAsync<DevelopmentProjectId>(command, cancellationToken);
+
+        return CreatedAtAction(
+            nameof(GetDevelopmentProjects),
+            new { },
+            new InitiateDevelopmentProjectResponse(id.Value));
     }
 }
