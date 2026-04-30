@@ -1,11 +1,9 @@
 import { useState } from 'react'
-import { useLandParcel, useUpdateLandParcelStatus } from '../../hooks/landParcels'
+import { useLandParcel, useDecommissionParcel, useRecommissionParcel } from '../../hooks/landParcels'
 import SlideOver from '../../components/SlideOver'
-import StatusBadge from '../../components/StatusBadge'
-import { getAvailableActions, type TransitionAction } from '../../lib/transitionActions'
-import { trackTransitionEvent } from '../../lib/telemetry'
 import { useToast } from '../../hooks/useToast'
-import ChangeStatusSelector from './ChangeStatusSelector'
+import HomesSection from './HomesSection'
+import DevelopmentProjectsSection from './DevelopmentProjectsSection'
 
 function SkeletonRows() {
   return (
@@ -15,6 +13,13 @@ function SkeletonRows() {
   )
 }
 
+function ParcelStatusBadge({ isDecommissioned }: { isDecommissioned?: boolean }) {
+  if (isDecommissioned) {
+    return <span className="badge badge-failed">Decommissioned</span>
+  }
+  return <span className="badge badge-active">Active</span>
+}
+
 interface Props {
   parcelId: string
   onClose: () => void
@@ -22,57 +27,28 @@ interface Props {
 
 export default function LandParcelDetailPanel({ parcelId, onClose }: Props) {
   const { data: detail, isLoading: detailLoading } = useLandParcel(parcelId)
-  const updateStatusMutation = useUpdateLandParcelStatus()
-  const [pendingActionId, setPendingActionId] = useState<string | null>(null)
+  const decommission = useDecommissionParcel()
+  const recommission = useRecommissionParcel()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [confirmAction, setConfirmAction] = useState<'decommission' | 'recommission' | null>(null)
   const { success } = useToast()
-  const actions = getAvailableActions('parcel', detail?.status)
 
-  const mutationErrorMessage = updateStatusMutation.error instanceof Error
-    ? updateStatusMutation.error.message
-    : 'Failed to update status. Please try again.'
-
-  const handleTransitionAction = async (action: TransitionAction) => {
-    if (!detail?.status || !action.toState) return
-
-    trackTransitionEvent({
-      event: 'ui.transition',
-      aggregate: 'parcel',
-      actionId: action.id,
-      entityId: parcelId,
-      fromState: detail.status,
-      toState: action.toState,
-      outcome: 'attempt',
-    })
-
-    setPendingActionId(action.id)
-
+  const handleConfirm = async () => {
+    if (!confirmAction) return
     try {
-      await updateStatusMutation.mutateAsync({ id: parcelId, newStatus: action.toState })
-      success(`${action.label} complete`)
-      trackTransitionEvent({
-        event: 'ui.transition',
-        aggregate: 'parcel',
-        actionId: action.id,
-        entityId: parcelId,
-        fromState: detail.status,
-        toState: action.toState,
-        outcome: 'success',
-      })
-    } catch (error) {
-      trackTransitionEvent({
-        event: 'ui.transition',
-        aggregate: 'parcel',
-        actionId: action.id,
-        entityId: parcelId,
-        fromState: detail.status,
-        toState: action.toState,
-        outcome: 'failure',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      })
-    } finally {
-      setPendingActionId(null)
-    }
+      if (confirmAction === 'decommission') {
+        await decommission.mutateAsync(parcelId)
+        success('Parcel decommissioned')
+      } else {
+        await recommission.mutateAsync(parcelId)
+        success('Parcel recommissioned')
+      }
+    } catch { /* error visible via mutation state */ }
+    setConfirmAction(null)
   }
+
+  const isPending = decommission.isPending || recommission.isPending
+  const isError = decommission.isError || recommission.isError
 
   return (
     <SlideOver
@@ -82,19 +58,98 @@ export default function LandParcelDetailPanel({ parcelId, onClose }: Props) {
     >
       {detailLoading || !detail ? <SkeletonRows /> : (
         <>
-          <ChangeStatusSelector
-            actions={actions}
-            isPending={updateStatusMutation.isPending}
-            pendingActionId={pendingActionId}
-            isError={updateStatusMutation.isError}
-            errorMessage={mutationErrorMessage}
-            onSelectAction={handleTransitionAction}
-          />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8, position: 'relative' }}>
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={() => setMenuOpen(o => !o)}
+              aria-label="Actions"
+            >
+              ···
+            </button>
+            {menuOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  zIndex: 10,
+                  background: 'var(--surface-1)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 8,
+                  padding: '4px 0',
+                  minWidth: 160,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                }}
+              >
+                {detail.isDecommissioned ? (
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    style={{ width: '100%', textAlign: 'left', borderRadius: 0, padding: '8px 16px' }}
+                    onClick={() => { setMenuOpen(false); setConfirmAction('recommission') }}
+                  >
+                    Recommission
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    style={{ width: '100%', textAlign: 'left', borderRadius: 0, padding: '8px 16px' }}
+                    onClick={() => { setMenuOpen(false); setConfirmAction('decommission') }}
+                  >
+                    Decommission
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {confirmAction && (
+            <div
+              style={{
+                border: '1px solid var(--border)',
+                borderRadius: 8,
+                padding: 12,
+                marginBottom: 16,
+                background: 'var(--surface-1)',
+              }}
+            >
+              <div style={{ fontSize: 13, marginBottom: 10 }}>
+                {confirmAction === 'decommission'
+                  ? 'Decommission this parcel? It will be marked inactive.'
+                  : 'Recommission this parcel? It will be marked active again.'}
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleConfirm}
+                  disabled={isPending}
+                >
+                  {isPending ? 'Saving…' : 'Confirm'}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={() => setConfirmAction(null)}
+                  disabled={isPending}
+                >
+                  Cancel
+                </button>
+              </div>
+              {isError && (
+                <div className="form-error" style={{ marginTop: 8 }}>Action failed. Please try again.</div>
+              )}
+            </div>
+          )}
 
           <div className="detail-grid">
             <div className="detail-field">
               <div className="detail-field__label">Status</div>
-              <div className="detail-field__value"><StatusBadge status={detail.status ?? ''} /></div>
+              <div className="detail-field__value">
+                <ParcelStatusBadge isDecommissioned={detail.isDecommissioned} />
+              </div>
             </div>
             <div className="detail-field">
               <div className="detail-field__label">Area</div>
@@ -125,6 +180,9 @@ export default function LandParcelDetailPanel({ parcelId, onClose }: Props) {
               </div>
             </div>
           </div>
+
+          <HomesSection parcelId={parcelId} />
+          <DevelopmentProjectsSection parcelId={parcelId} />
         </>
       )}
     </SlideOver>

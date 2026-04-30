@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useRegisterBuilding } from '../../hooks/buildings'
-import { BUILDING_TYPES, BUILDING_TYPE_LABELS, type RegisterBuildingRequest } from '../../hooks/types'
+import { useRegisterHome } from '../../hooks/homes'
+import { BUILDING_TYPES, HOME_TYPE_LABELS, type RegisterHomeRequest } from '../../hooks/types'
 import EntityCombobox from '../../components/EntityCombobox'
 import SlideOver from '../../components/SlideOver'
 import { LandParcelsApi } from '../../api'
@@ -9,8 +9,8 @@ import { useToast } from '../../hooks/useToast'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
 
-const emptyForm = (): RegisterBuildingRequest => ({
-  landParcelId: '',
+const emptyForm = (parcelId = ''): RegisterHomeRequest => ({
+  landParcelId: parcelId,
   buildingType: 'SingleFamily',
   bedrooms: 3,
   bathrooms: 2,
@@ -21,11 +21,12 @@ const emptyForm = (): RegisterBuildingRequest => ({
 
 interface Props {
   onClose: () => void
+  initialParcelId?: string
 }
 
-export default function BuildingRegisterPanel({ onClose }: Props) {
-  const [form, setForm] = useState<RegisterBuildingRequest>(emptyForm)
-  const registerMutation = useRegisterBuilding()
+export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
+  const [form, setForm] = useState<RegisterHomeRequest>(() => emptyForm(initialParcelId))
+  const registerMutation = useRegisterHome()
   const { success } = useToast()
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -39,15 +40,15 @@ export default function BuildingRegisterPanel({ onClose }: Props) {
         yearBuilt:            Number(form.yearBuilt),
         initialAssessedValue: Number(form.initialAssessedValue),
       })
-      success('Building registered successfully')
+      success('Home registered successfully')
       onClose()
     } catch { /* error shown in form */ }
   }
 
   return (
     <SlideOver
-      title="Register Building"
-      subtitle="Add a new building to an existing land parcel"
+      title="Register Home"
+      subtitle="Add a new home to an existing land parcel"
       onClose={onClose}
       footer={
         <>
@@ -55,15 +56,15 @@ export default function BuildingRegisterPanel({ onClose }: Props) {
           <button
             className="btn btn-primary"
             type="submit"
-            form="register-building-form"
+            form="register-home-form"
             disabled={registerMutation.isPending || !form.landParcelId}
           >
-            {registerMutation.isPending ? 'Registering…' : 'Register Building'}
+            {registerMutation.isPending ? 'Registering…' : 'Register Home'}
           </button>
         </>
       }
     >
-      <form id="register-building-form" onSubmit={handleRegister}>
+      <form id="register-home-form" onSubmit={handleRegister}>
         <div className="form-grid">
           <div className="form-field full">
             <label className="form-label">Land Parcel</label>
@@ -81,14 +82,14 @@ export default function BuildingRegisterPanel({ onClose }: Props) {
             />
           </div>
           <div className="form-field full">
-            <label className="form-label">Building Type</label>
+            <label className="form-label">Home Type</label>
             <select
               className="form-select"
               value={form.buildingType}
               onChange={e => setForm(f => ({ ...f, buildingType: e.target.value }))}
             >
               {BUILDING_TYPES.map(t => (
-                <option key={t} value={t}>{BUILDING_TYPE_LABELS[t]}</option>
+                <option key={t} value={t}>{HOME_TYPE_LABELS[t]}</option>
               ))}
             </select>
           </div>

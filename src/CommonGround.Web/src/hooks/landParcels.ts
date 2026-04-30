@@ -8,11 +8,15 @@ const api = new LandParcelsApi(apiConfig)
 const dateStr = (d: Date | null | undefined) =>
   d instanceof Date ? d.toISOString().substring(0, 10) : undefined
 
-export function useLandParcels(page: number, status?: string, search?: string) {
+export function useLandParcels(page: number, isDecommissioned?: boolean, search?: string) {
   return useQuery({
-    queryKey: ['land-parcels', page, status, search],
+    queryKey: ['land-parcels', page, isDecommissioned, search],
     queryFn: async () => {
-      const result = await api.getLandParcels({ page, pageSize: 20, status, search })
+      const params: Parameters<typeof api.getLandParcels>[0] = { page, pageSize: 20, search }
+      if (isDecommissioned !== undefined) {
+        (params as Record<string, unknown>)['isDecommissioned'] = isDecommissioned
+      }
+      const result = await api.getLandParcels(params)
       return {
         ...result,
         items: result.items?.map(p => ({
@@ -53,86 +57,30 @@ export function useRegisterLandParcel() {
   })
 }
 
-function dispatchParcelTransition(id: string, newStatus: string): Promise<void> {
-  const body = {}
-  switch (newStatus) {
-    case 'Predevelopment':
-      return api.startLandParcelPredevelopment({ landParcelId: id, body })
-    case 'UnderConstruction':
-      return api.startLandParcelConstruction({ landParcelId: id, body })
-    case 'ReadyForOccupancy':
-      return api.markLandParcelReadyForOccupancy({ landParcelId: id, body })
-    case 'Occupied':
-      return api.markLandParcelOccupied({ landParcelId: id, body })
-    case 'Decommissioned':
-      return api.decommissionLandParcel({ landParcelId: id, body })
-    case 'Available':
-      return api.recommissionLandParcel({ landParcelId: id, body })
-    default:
-      return api.updateLandParcelStatus({
-        landParcelId: id,
-        updateLandParcelStatusRequest: { newStatus },
-      })
-  }
-}
-
-export function useUpdateLandParcelStatus() {
+export function useDecommissionParcel() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, newStatus }: { id: string; newStatus: string }) =>
-      dispatchParcelTransition(id, newStatus),
-    onMutate: async ({ id, newStatus }) => {
-      await qc.cancelQueries({ queryKey: ['land-parcel', id] })
-      await qc.cancelQueries({ queryKey: ['land-parcels'] })
-
-      const previousDetail = qc.getQueryData(['land-parcel', id])
-      const previousLists = qc.getQueriesData({ queryKey: ['land-parcels'] })
-
-      qc.setQueryData(['land-parcel', id], (current: any) =>
-        current ? { ...current, status: newStatus } : current,
-      )
-
-      previousLists.forEach(([queryKey]) => {
-        qc.setQueryData(queryKey, (current: any) => {
-          if (!current?.items) return current
-
-          return {
-            ...current,
-            items: current.items.map((item: any) =>
-              item.id === id ? { ...item, status: newStatus } : item,
-            ),
-          }
-        })
-      })
-
-      return { previousDetail, previousLists, id }
+    mutationFn: (id: string) =>
+      fetch(`/api/land-parcels/${id}/decommission`, { method: 'POST' }).then(r => {
+        if (!r.ok) throw new Error(`${r.status}`)
+      }),
+    onSuccess: (_d, id) => {
+      qc.invalidateQueries({ queryKey: ['land-parcel', id] })
+      qc.invalidateQueries({ queryKey: ['land-parcels'] })
     },
-    onError: (_error, _vars, context) => {
-      if (!context) return
+  })
+}
 
-      qc.setQueryData(['land-parcel', context.id], context.previousDetail)
-      context.previousLists.forEach(([queryKey, data]) => {
-        qc.setQueryData(queryKey, data)
-      })
-    },
-    onSuccess: (_data, { id, newStatus }) => {
-      qc.setQueryData(['land-parcel', id], (current: any) =>
-        current ? { ...current, status: newStatus } : current,
-      )
-
-      const listQueries = qc.getQueriesData({ queryKey: ['land-parcels'] })
-      listQueries.forEach(([queryKey]) => {
-        qc.setQueryData(queryKey, (current: any) => {
-          if (!current?.items) return current
-
-          return {
-            ...current,
-            items: current.items.map((item: any) =>
-              item.id === id ? { ...item, status: newStatus } : item,
-            ),
-          }
-        })
-      })
+export function useRecommissionParcel() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      fetch(`/api/land-parcels/${id}/recommission`, { method: 'POST' }).then(r => {
+        if (!r.ok) throw new Error(`${r.status}`)
+      }),
+    onSuccess: (_d, id) => {
+      qc.invalidateQueries({ queryKey: ['land-parcel', id] })
+      qc.invalidateQueries({ queryKey: ['land-parcels'] })
     },
   })
 }

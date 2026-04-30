@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useBuildings } from '../hooks/buildings'
-import { BUILDING_STATUSES, statusLabel } from '../hooks/types'
+import { useHomes } from '../hooks/homes'
+import { HOME_STATUSES, statusLabel } from '../hooks/types'
 import EntityCombobox from '../components/EntityCombobox'
 import { LandParcelsApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
-import BuildingsTable from './buildings/BuildingsTable'
-import BuildingDetailPanel from './buildings/BuildingDetailPanel'
-import BuildingRegisterPanel from './buildings/BuildingRegisterPanel'
+import HomesTable from './homes/HomesTable'
+import HomeDetailPanel from './homes/HomeDetailPanel'
+import HomeRegisterPanel from './homes/HomeRegisterPanel'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
 
 type Panel = 'detail' | 'register' | null
 
-export default function BuildingsPage() {
+export default function HomesPage() {
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -23,23 +23,20 @@ export default function BuildingsPage() {
   const [selectedId,   setSelectedId]   = useState<string | null>(null)
   const [panel,        setPanel]        = useState<Panel>(null)
 
-  const { data, isLoading, isError } = useBuildings(page, parcelFilter || undefined, statusFilter || undefined)
+  const { data, isLoading, isError } = useHomes({
+    page,
+    landParcelId: parcelFilter || undefined,
+    status: statusFilter || undefined,
+  })
 
   const openDetail = (id: string) => {
     setSelectedId(id)
     setPanel('detail')
   }
 
-  const openRegister = () => {
-    setPanel('register')
-  }
-
   useEffect(() => {
     const openId = (location.state as { openId?: string } | null)?.openId
-    if (!openId) {
-      return
-    }
-
+    if (!openId) return
     openDetail(openId)
     navigate(
       { pathname: location.pathname, search: location.search, hash: location.hash },
@@ -57,25 +54,25 @@ export default function BuildingsPage() {
     setPage(1)
   }
 
-  const buildings = data?.items ?? []
+  const homes = data?.items ?? []
 
   return (
     <div className="page">
       <div className="page-header">
         <div>
           <div className="page-header__eyebrow">Property Registry</div>
-          <h1 className="page-header__title">Buildings</h1>
+          <h1 className="page-header__title">Homes</h1>
           {data && (
             <div className="page-header__count">
-              {data.totalCount.toLocaleString()} building{data.totalCount !== 1 ? 's' : ''} in registry
+              {data.totalCount?.toLocaleString()} home{data.totalCount !== 1 ? 's' : ''} in registry
             </div>
           )}
         </div>
-        <button className="btn btn-primary" onClick={openRegister}>
+        <button className="btn btn-primary" onClick={() => setPanel('register')}>
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
             <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
           </svg>
-          Register Building
+          Register Home
         </button>
       </div>
 
@@ -86,7 +83,7 @@ export default function BuildingsPage() {
           onChange={e => { setStatusFilter(e.target.value); setPage(1) }}
         >
           <option value="">All Statuses</option>
-          {BUILDING_STATUSES.map(s => (
+          {HOME_STATUSES.map(s => (
             <option key={s} value={s}>{statusLabel(s)}</option>
           ))}
         </select>
@@ -112,8 +109,8 @@ export default function BuildingsPage() {
         </div>
       </div>
 
-      <BuildingsTable
-        buildings={buildings}
+      <HomesTable
+        homes={homes}
         isLoading={isLoading}
         isError={isError}
         selectedId={selectedId}
@@ -126,11 +123,11 @@ export default function BuildingsPage() {
       />
 
       {panel === 'detail' && selectedId && (
-        <BuildingDetailPanel buildingId={selectedId} onClose={closePanel} />
+        <HomeDetailPanel homeId={selectedId} onClose={closePanel} />
       )}
 
       {panel === 'register' && (
-        <BuildingRegisterPanel onClose={closePanel} />
+        <HomeRegisterPanel onClose={closePanel} />
       )}
     </div>
   )

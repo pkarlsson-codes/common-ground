@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useLandParcels } from '../hooks/landParcels'
-import { PARCEL_STATUSES, statusLabel } from '../hooks/types'
 import LandParcelsTable from './land-parcels/LandParcelsTable'
 import LandParcelDetailPanel from './land-parcels/LandParcelDetailPanel'
 import LandParcelRegisterPanel from './land-parcels/LandParcelRegisterPanel'
@@ -12,12 +11,12 @@ export default function LandParcelsPage() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const [page,         setPage]         = useState(1)
-  const [statusFilter, setStatusFilter] = useState('')
-  const [selectedId,   setSelectedId]   = useState<string | null>(null)
-  const [panel,        setPanel]        = useState<Panel>(null)
+  const [page,               setPage]               = useState(1)
+  const [showDecommissioned, setShowDecommissioned] = useState(false)
+  const [selectedId,         setSelectedId]         = useState<string | null>(null)
+  const [panel,              setPanel]              = useState<Panel>(null)
 
-  const { data, isLoading, isError } = useLandParcels(page, statusFilter || undefined)
+  const { data, isLoading, isError } = useLandParcels(page, showDecommissioned ? true : undefined)
 
   const openDetail = (id: string) => {
     setSelectedId(id)
@@ -65,16 +64,14 @@ export default function LandParcelsPage() {
       </div>
 
       <div className="filter-bar">
-        <select
-          className="select"
-          value={statusFilter}
-          onChange={e => { setStatusFilter(e.target.value); setPage(1) }}
-        >
-          <option value="">All Statuses</option>
-          {PARCEL_STATUSES.map(s => (
-            <option key={s} value={s}>{statusLabel(s)}</option>
-          ))}
-        </select>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={showDecommissioned}
+            onChange={e => { setShowDecommissioned(e.target.checked); setPage(1) }}
+          />
+          Show decommissioned
+        </label>
       </div>
 
       <LandParcelsTable

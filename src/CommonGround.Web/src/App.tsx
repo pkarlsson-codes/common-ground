@@ -1,9 +1,10 @@
 import './App.css'
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
-import BuildingsPage from './pages/BuildingsPage'
+import DevelopmentProjectsPage from './pages/DevelopmentProjectsPage'
 import DocumentsPage from './pages/documents/DocumentsPage'
 import GroundLeasesPage from './pages/GroundLeasesPage'
+import HomesPage from './pages/HomesPage'
 import LandParcelsPage from './pages/LandParcelsPage'
 import LoginPage from './pages/LoginPage'
 import PurchaseWorkflowsPage from './pages/PurchaseWorkflowsPage'
@@ -42,7 +43,8 @@ export default function App() {
             <Route element={<Layout />}>
               <Route index element={<Navigate to="/land-parcels" replace />} />
               <Route path="/land-parcels"        element={<LandParcelsPage />} />
-              <Route path="/buildings"           element={<BuildingsPage />} />
+              <Route path="/homes"               element={<HomesPage />} />
+              <Route path="/development"         element={<DevelopmentProjectsPage />} />
               <Route path="/ground-leases"       element={<GroundLeasesPage />} />
               <Route path="/resale-workflows"    element={<ResaleWorkflowsPage />} />
               <Route path="/purchase-workflows"  element={<PurchaseWorkflowsPage />} />

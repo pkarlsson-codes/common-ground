@@ -81,11 +81,18 @@ export default function Layout() {
             Land Parcels
           </NavLink>
           <NavLink
-            to="/buildings"
+            to="/homes"
             className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
           >
             <IconBuilding />
-            Buildings
+            Homes
+          </NavLink>
+          <NavLink
+            to="/development"
+            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          >
+            <IconBuilding />
+            Development
           </NavLink>
 
           <div className="sidebar-nav__section">Homeownership</div>

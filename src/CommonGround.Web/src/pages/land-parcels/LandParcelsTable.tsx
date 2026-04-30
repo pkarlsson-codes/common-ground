@@ -1,6 +1,5 @@
 import type { useLandParcels } from '../../hooks/landParcels'
 import Pagination from '../../components/Pagination'
-import StatusBadge from '../../components/StatusBadge'
 
 type LandParcel = NonNullable<NonNullable<ReturnType<typeof useLandParcels>['data']>['items']>[number]
 
@@ -12,6 +11,13 @@ function SkeletonRows() {
       {Array.from({ length: 7 }).map((_, i) => <div key={i} className="skeleton-row" />)}
     </div>
   )
+}
+
+function ParcelStatusBadge({ isDecommissioned }: { isDecommissioned?: boolean }) {
+  if (isDecommissioned) {
+    return <span className="badge badge-failed">Decommissioned</span>
+  }
+  return <span className="badge badge-active">Active</span>
 }
 
 interface Props {
@@ -80,7 +86,7 @@ export default function LandParcelsTable({
                   <td><span className="cell-mono">{p.legalParcelNumber}</span></td>
                   <td>{p.address}</td>
                   <td><span className="cell-mono">{Number(p.areaAcres).toFixed(2)}</span></td>
-                  <td><StatusBadge status={p.status ?? ''} /></td>
+                  <td><ParcelStatusBadge isDecommissioned={p.isDecommissioned} /></td>
                   <td><span className="cell-mono">{new Date(p.registeredAt!).toLocaleDateString()}</span></td>
                 </tr>
               ))}

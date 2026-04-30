@@ -1,9 +1,9 @@
-import type { useBuildings } from '../../hooks/buildings'
+import type { useHomes } from '../../hooks/homes'
 import Pagination from '../../components/Pagination'
 import StatusBadge from '../../components/StatusBadge'
-import { BUILDING_TYPE_LABELS } from '../../hooks/types'
+import { HOME_TYPE_LABELS } from '../../hooks/types'
 
-type Building = NonNullable<NonNullable<ReturnType<typeof useBuildings>['data']>['items']>[number]
+type Home = NonNullable<NonNullable<ReturnType<typeof useHomes>['data']>['items']>[number]
 
 const PAGE_SIZE = 20
 
@@ -21,7 +21,7 @@ const fmtCurrency = (n: number) =>
 const fmtNumber = (n: number) => new Intl.NumberFormat('en-US').format(n)
 
 interface Props {
-  buildings: Building[]
+  homes: Home[]
   isLoading: boolean
   isError: boolean
   selectedId: string | null
@@ -33,8 +33,8 @@ interface Props {
   onPage: (page: number) => void
 }
 
-export default function BuildingsTable({
-  buildings,
+export default function HomesTable({
+  homes,
   isLoading,
   isError,
   selectedId,
@@ -51,20 +51,20 @@ export default function BuildingsTable({
 
       {isError && (
         <div className="error-state">
-          <div className="error-state__title">Could not load buildings</div>
+          <div className="error-state__title">Could not load homes</div>
           <div className="error-state__sub">Ensure the API and gateway are running.</div>
         </div>
       )}
 
-      {!isLoading && !isError && buildings.length === 0 && (
+      {!isLoading && !isError && homes.length === 0 && (
         <div className="empty-state">
           <div className="empty-state__glyph">⌂</div>
-          <div className="empty-state__title">No buildings registered</div>
-          <div className="empty-state__sub">Register a building on an existing land parcel.</div>
+          <div className="empty-state__title">No homes registered</div>
+          <div className="empty-state__sub">Register a home on an existing land parcel.</div>
         </div>
       )}
 
-      {!isLoading && !isError && buildings.length > 0 && (
+      {!isLoading && !isError && homes.length > 0 && (
         <>
           <table className="registry-table">
             <thead>
@@ -78,24 +78,24 @@ export default function BuildingsTable({
               </tr>
             </thead>
             <tbody>
-              {buildings.map(b => (
+              {homes.map(h => (
                 <tr
-                  key={b.id!}
-                  onClick={() => onRowClick(b.id!)}
-                  className={selectedId === b.id && panel === 'detail' ? 'row--selected' : ''}
+                  key={h.id!}
+                  onClick={() => onRowClick(h.id!)}
+                  className={selectedId === h.id && panel === 'detail' ? 'row--selected' : ''}
                 >
-                  <td>{BUILDING_TYPE_LABELS[b.buildingType ?? ''] ?? b.buildingType}</td>
+                  <td>{HOME_TYPE_LABELS[h.buildingType ?? ''] ?? h.buildingType}</td>
                   <td>
                     <span className="cell-mono">
-                      {b.bedrooms} bd / {Number(b.bathrooms).toFixed(1)} ba
+                      {h.bedrooms} bd / {Number(h.bathrooms).toFixed(1)} ba
                     </span>
                   </td>
-                  <td><span className="cell-mono">{fmtNumber(Number(b.squareFootage))}</span></td>
-                  <td><span className="cell-mono">{fmtCurrency(Number(b.assessedValue))}</span></td>
-                  <td><StatusBadge status={b.status ?? ''} /></td>
+                  <td><span className="cell-mono">{fmtNumber(Number(h.squareFootage))}</span></td>
+                  <td><span className="cell-mono">{fmtCurrency(Number(h.assessedValue))}</span></td>
+                  <td><StatusBadge status={h.status ?? ''} /></td>
                   <td>
-                    <span className="cell-id" title={b.landParcelId ?? ''}>
-                      {(b.landParcelId ?? '').slice(0, 8)}…
+                    <span className="cell-id" title={h.landParcelId ?? ''}>
+                      {(h.landParcelId ?? '').slice(0, 8)}…
                     </span>
                   </td>
                 </tr>

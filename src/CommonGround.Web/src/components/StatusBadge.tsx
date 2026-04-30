@@ -3,6 +3,9 @@ import { statusLabel } from '../utils/statusLabel'
 const CSS_CLASS: Record<string, string> = {
   // Property Registry
   Available:        'badge-available',
+  PendingOccupancy: 'badge-initiated',
+  Resale:           'badge-stalled',
+  Abandoned:        'badge-failed',
   Predevelopment:   'badge-underdevelopment',
   UnderConstruction:'badge-underdevelopment',
   ReadyForOccupancy:'badge-available',

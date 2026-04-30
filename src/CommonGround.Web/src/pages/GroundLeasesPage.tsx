@@ -45,7 +45,7 @@ function SkeletonRows() {
 
 const emptyCreate = (): CreateGroundLeaseForm => ({
   landParcelId: '',
-  buildingId: '',
+  homeId: '',
   leaseStartDate: new Date().toISOString().slice(0, 10),
   termYears: 99,
   covenantTerms: '',
@@ -203,7 +203,7 @@ export default function GroundLeasesPage() {
                   <th>Start Date</th>
                   <th>Term</th>
                   <th>Status</th>
-                  <th>Building</th>
+                  <th>Home</th>
                   <th>Parcel</th>
                 </tr>
               </thead>
@@ -321,7 +321,7 @@ export default function GroundLeasesPage() {
                 )}
                 <div className="detail-field full-span">
                   <div className="detail-field__value">
-                    <NavIdLink id={detail.buildingId} to="/buildings" label="Open Building" />
+                    <NavIdLink id={detail.buildingId} to="/homes" label="Open Home" />
                   </div>
                 </div>
                 <div className="detail-field full-span">
@@ -428,7 +428,7 @@ export default function GroundLeasesPage() {
                 className="btn btn-primary"
                 type="submit"
                 form="create-ground-lease-form"
-                disabled={createMutation.isPending || !createForm.landParcelId || !createForm.buildingId}
+                disabled={createMutation.isPending || !createForm.landParcelId || !createForm.homeId}
               >
                 {createMutation.isPending ? 'Creating…' : 'Create Lease'}
               </button>
@@ -441,7 +441,7 @@ export default function GroundLeasesPage() {
                 <label className="form-label">Land Parcel</label>
                 <EntityCombobox
                   value={createForm.landParcelId || null}
-                  onChange={id => setCreateForm(f => ({ ...f, landParcelId: id ?? '', buildingId: '' }))}
+                  onChange={id => setCreateForm(f => ({ ...f, landParcelId: id ?? '', homeId: '' }))}
                   fetchOptions={async q => {
                     const result = await landParcelsApi.getLandParcels({ search: q, pageSize: 10 })
                     return (result.items ?? []).map(p => ({
@@ -453,10 +453,10 @@ export default function GroundLeasesPage() {
                 />
               </div>
               <div className="form-field full">
-                <label className="form-label">Building</label>
+                <label className="form-label">Home</label>
                 <EntityCombobox
-                  value={createForm.buildingId || null}
-                  onChange={id => setCreateForm(f => ({ ...f, buildingId: id ?? '' }))}
+                  value={createForm.homeId || null}
+                  onChange={id => setCreateForm(f => ({ ...f, homeId: id ?? '' }))}
                   fetchOptions={async q => {
                     const result = await buildingsApi.getBuildings({ landParcelId: createForm.landParcelId, pageSize: 10 })
                     const lower = q.toLowerCase()
@@ -469,7 +469,7 @@ export default function GroundLeasesPage() {
                       label: `${b.buildingType}, ${b.bedrooms}bd/${b.bathrooms}ba, ${b.squareFootage} sqft`,
                     }))
                   }}
-                  placeholder={createForm.landParcelId ? 'Search buildings on this parcel…' : 'Select a parcel first'}
+                  placeholder={createForm.landParcelId ? 'Search homes on this parcel…' : 'Select a parcel first'}
                   disabled={!createForm.landParcelId}
                 />
               </div>

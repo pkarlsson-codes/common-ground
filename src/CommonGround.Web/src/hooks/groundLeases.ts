@@ -3,7 +3,6 @@ import { GroundLeasesApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
 import type {
   CreateGroundLeaseForm,
-  OnboardHomeownerForm,
   RecordCheckInForm,
   ResaleEstimateForm,
 } from './types'
@@ -39,7 +38,7 @@ export function useCreateGroundLease() {
       api.createGroundLease({
         createGroundLeaseRequest: {
           landParcelId: form.landParcelId,
-          buildingId: form.buildingId,
+          buildingId: form.homeId,
           leaseStartDate: form.leaseStartDate,
           termYears: form.termYears,
           covenantTerms: form.covenantTerms || undefined,

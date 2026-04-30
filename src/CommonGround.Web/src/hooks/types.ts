@@ -1,4 +1,4 @@
-export interface RegisterBuildingRequest {
+export interface RegisterHomeRequest {
   landParcelId: string
   buildingType: string
   bedrooms: number
@@ -8,7 +8,7 @@ export interface RegisterBuildingRequest {
   initialAssessedValue: number
 }
 
-export interface RecordBuildingAssessmentRequest {
+export interface RecordHomeAssessmentRequest {
   assessedValue: number
   assessmentDate: string
   conditionNotes?: string
@@ -23,7 +23,6 @@ export interface RegisterLandParcelRequest {
   covenantTerms?: string
 }
 
-export const BUILDING_STATUSES = ['Available', 'Occupied', 'UnderRenovation'] as const
 export const BUILDING_TYPES = ['SingleFamily', 'CondoUnit', 'Duplex', 'Townhouse'] as const
 export const BUILDING_TYPE_LABELS: Record<string, string> = {
   SingleFamily: 'Single Family',
@@ -31,15 +30,14 @@ export const BUILDING_TYPE_LABELS: Record<string, string> = {
   Duplex: 'Duplex',
   Townhouse: 'Townhouse',
 }
-export const PARCEL_STATUSES = [
-  'Available',
-  'Predevelopment',
-  'UnderConstruction',
-  'ReadyForOccupancy',
-  'Occupied',
-  'Transitioning',
-  'Decommissioned',
-] as const
+export const HOME_TYPE_LABELS: Record<string, string> = {
+  SingleFamily: 'Single Family',
+  CondoUnit: 'Condo Unit',
+  Duplex: 'Duplex',
+  Townhouse: 'Townhouse',
+}
+export const HOME_STATUSES = ['Available', 'PendingOccupancy', 'Occupied', 'Resale'] as const
+export const DEVELOPMENT_PROJECT_STATUSES = ['Initiated', 'Active', 'Completed', 'Abandoned'] as const
 export const ACQUISITION_METHODS = ['Purchase', 'Donation', 'Transfer'] as const
 
 export const statusLabel = (s: string) => s.replace(/([A-Z])/g, ' $1').trim()
@@ -59,9 +57,19 @@ export const WORKFLOW_PHASES = [
   'Initiated', 'InProgress', 'ClosingScheduled', 'Closed', 'Failed', 'Withdrawn', 'Stalled',
 ] as const
 
+export interface InitiateDevelopmentProjectRequest {
+  landParcelId: string
+  name: string
+  description?: string
+  projectedStartDate?: string
+  projectedEndDate?: string
+  budget?: number
+  homeIds?: string[]
+}
+
 export interface CreateGroundLeaseForm {
   landParcelId: string
-  buildingId: string
+  homeId: string
   leaseStartDate: string
   termYears: number
   covenantTerms: string
