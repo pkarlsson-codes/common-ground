@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Drops all Marten-managed schemas, wiping all application data.
+set -euo pipefail
+
+POSTGRES_CONTAINER="${POSTGRES_CONTAINER:-commonground_postgres}"
+POSTGRES_DB="${POSTGRES_DB:-commonground}"
+POSTGRES_USER="${POSTGRES_USER:-postgres}"
+POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-postgres}"
+
+psql_exec() {
+    local sql="$1"
+    docker exec -e PGPASSWORD="$POSTGRES_PASSWORD" "$POSTGRES_CONTAINER" \
+        psql -w -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "$sql"
+}
+
+SCHEMAS=(
+    commonground_events
+    documents
+    homeownership
+    identity
+    property_registry
+    property_registry_seed
+    stewardship
+)
+
+echo "[db-reset-marten] Dropping Marten schemas..."
+for schema in "${SCHEMAS[@]}"; do
+    echo "[db-reset-marten]   DROP SCHEMA IF EXISTS $schema CASCADE"
+    psql_exec "DROP SCHEMA IF EXISTS $schema CASCADE;"
+done
+
+# public holds Wolverine inbox/outbox tables — drop and recreate so the schema itself remains valid
+echo "[db-reset-marten]   DROP SCHEMA IF EXISTS public CASCADE + recreate"
+psql_exec "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;"
+
+echo "[db-reset-marten] Done. Restart the API to recreate schemas."
