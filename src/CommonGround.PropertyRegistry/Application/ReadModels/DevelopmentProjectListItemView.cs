@@ -1,0 +1,17 @@
+namespace CommonGround.PropertyRegistry.Application.ReadModels;
+
+/// <summary>Summary read model for development project list displays.</summary>
+public class DevelopmentProjectListItemView
+{
+    /// <summary>Gets or sets the project ID.</summary>
+    public string Id { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the land parcel ID.</summary>
+    public string LandParcelId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the project description.</summary>
+    public string Description { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the current status.</summary>
+    public string Status { get; set; } = string.Empty;
+}
