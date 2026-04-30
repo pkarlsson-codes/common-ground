@@ -16,32 +16,29 @@
 
 import * as runtime from '../runtime';
 import type {
-  BuildingResponse,
-  PaginatedResponseOfBuildingAssessmentItemResponse,
-  PaginatedResponseOfBuildingListItemResponse,
+  HomeResponse,
+  PaginatedResponseOfHomeAssessmentItemResponse,
+  PaginatedResponseOfHomeListItemResponse,
   ProblemDetails,
-  RecordBuildingAssessmentRequest,
-  RegisterBuildingRequest,
-  RegisterBuildingResponse,
-  UpdateBuildingStatusRequest,
+  RecordHomeAssessmentRequest,
+  RegisterHomeRequest,
+  RegisterHomeResponse,
 } from '../models/index';
 import {
-    BuildingResponseFromJSON,
-    BuildingResponseToJSON,
-    PaginatedResponseOfBuildingAssessmentItemResponseFromJSON,
-    PaginatedResponseOfBuildingAssessmentItemResponseToJSON,
-    PaginatedResponseOfBuildingListItemResponseFromJSON,
-    PaginatedResponseOfBuildingListItemResponseToJSON,
+    HomeResponseFromJSON,
+    HomeResponseToJSON,
+    PaginatedResponseOfHomeAssessmentItemResponseFromJSON,
+    PaginatedResponseOfHomeAssessmentItemResponseToJSON,
+    PaginatedResponseOfHomeListItemResponseFromJSON,
+    PaginatedResponseOfHomeListItemResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
-    RecordBuildingAssessmentRequestFromJSON,
-    RecordBuildingAssessmentRequestToJSON,
-    RegisterBuildingRequestFromJSON,
-    RegisterBuildingRequestToJSON,
-    RegisterBuildingResponseFromJSON,
-    RegisterBuildingResponseToJSON,
-    UpdateBuildingStatusRequestFromJSON,
-    UpdateBuildingStatusRequestToJSON,
+    RecordHomeAssessmentRequestFromJSON,
+    RecordHomeAssessmentRequestToJSON,
+    RegisterHomeRequestFromJSON,
+    RegisterHomeRequestToJSON,
+    RegisterHomeResponseFromJSON,
+    RegisterHomeResponseToJSON,
 } from '../models/index';
 
 export interface GetHomeRequest {
@@ -61,18 +58,13 @@ export interface GetHomesRequest {
     status?: string | null;
 }
 
-export interface RecordHomeAssessmentRequest {
+export interface RecordHomeAssessmentOperationRequest {
     homeId: string;
-    recordBuildingAssessmentRequest: RecordBuildingAssessmentRequest;
+    recordHomeAssessmentRequest: RecordHomeAssessmentRequest;
 }
 
-export interface RegisterHomeRequest {
-    registerBuildingRequest: RegisterBuildingRequest;
-}
-
-export interface UpdateHomeStatusRequest {
-    homeId: string;
-    updateBuildingStatusRequest: UpdateBuildingStatusRequest;
+export interface RegisterHomeOperationRequest {
+    registerHomeRequest: RegisterHomeRequest;
 }
 
 /**
@@ -90,12 +82,12 @@ export interface HomesApiInterface {
      * @throws {RequiredError}
      * @memberof HomesApiInterface
      */
-    getHomeRaw(requestParameters: GetHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<BuildingResponse>>;
+    getHomeRaw(requestParameters: GetHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HomeResponse>>;
 
     /**
      * Gets a home by ID.
      */
-    getHome(requestParameters: GetHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<BuildingResponse>;
+    getHome(requestParameters: GetHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HomeResponse>;
 
     /**
      * 
@@ -107,12 +99,12 @@ export interface HomesApiInterface {
      * @throws {RequiredError}
      * @memberof HomesApiInterface
      */
-    getHomeAssessmentsRaw(requestParameters: GetHomeAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfBuildingAssessmentItemResponse>>;
+    getHomeAssessmentsRaw(requestParameters: GetHomeAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfHomeAssessmentItemResponse>>;
 
     /**
      * Gets a paginated list of assessments for a home.
      */
-    getHomeAssessments(requestParameters: GetHomeAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfBuildingAssessmentItemResponse>;
+    getHomeAssessments(requestParameters: GetHomeAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeAssessmentItemResponse>;
 
     /**
      * 
@@ -125,59 +117,43 @@ export interface HomesApiInterface {
      * @throws {RequiredError}
      * @memberof HomesApiInterface
      */
-    getHomesRaw(requestParameters: GetHomesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfBuildingListItemResponse>>;
+    getHomesRaw(requestParameters: GetHomesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfHomeListItemResponse>>;
 
     /**
      * Gets a paginated list of homes.
      */
-    getHomes(requestParameters: GetHomesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfBuildingListItemResponse>;
+    getHomes(requestParameters: GetHomesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeListItemResponse>;
 
     /**
      * 
      * @summary Records an assessment for a home.
      * @param {string} homeId The ID of the home to assess.
-     * @param {RecordBuildingAssessmentRequest} recordBuildingAssessmentRequest The assessment details.
+     * @param {RecordHomeAssessmentRequest} recordHomeAssessmentRequest The assessment details.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HomesApiInterface
      */
-    recordHomeAssessmentRaw(requestParameters: RecordHomeAssessmentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    recordHomeAssessmentRaw(requestParameters: RecordHomeAssessmentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
 
     /**
      * Records an assessment for a home.
      */
-    recordHomeAssessment(requestParameters: RecordHomeAssessmentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    recordHomeAssessment(requestParameters: RecordHomeAssessmentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
 
     /**
      * 
      * @summary Registers a new home.
-     * @param {RegisterBuildingRequest} registerBuildingRequest The home registration details.
+     * @param {RegisterHomeRequest} registerHomeRequest The home registration details.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HomesApiInterface
      */
-    registerHomeRaw(requestParameters: RegisterHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RegisterBuildingResponse>>;
+    registerHomeRaw(requestParameters: RegisterHomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RegisterHomeResponse>>;
 
     /**
      * Registers a new home.
      */
-    registerHome(requestParameters: RegisterHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RegisterBuildingResponse>;
-
-    /**
-     * 
-     * @summary Updates a home\'s status.
-     * @param {string} homeId The ID of the home to update.
-     * @param {UpdateBuildingStatusRequest} updateBuildingStatusRequest The new status details.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof HomesApiInterface
-     */
-    updateHomeStatusRaw(requestParameters: UpdateHomeStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
-
-    /**
-     * Updates a home\'s status.
-     */
-    updateHomeStatus(requestParameters: UpdateHomeStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    registerHome(requestParameters: RegisterHomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RegisterHomeResponse>;
 
 }
 
@@ -189,7 +165,7 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
     /**
      * Gets a home by ID.
      */
-    async getHomeRaw(requestParameters: GetHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<BuildingResponse>> {
+    async getHomeRaw(requestParameters: GetHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HomeResponse>> {
         if (requestParameters['homeId'] == null) {
             throw new runtime.RequiredError(
                 'homeId',
@@ -212,13 +188,13 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => BuildingResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => HomeResponseFromJSON(jsonValue));
     }
 
     /**
      * Gets a home by ID.
      */
-    async getHome(requestParameters: GetHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<BuildingResponse> {
+    async getHome(requestParameters: GetHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HomeResponse> {
         const response = await this.getHomeRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -226,7 +202,7 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
     /**
      * Gets a paginated list of assessments for a home.
      */
-    async getHomeAssessmentsRaw(requestParameters: GetHomeAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfBuildingAssessmentItemResponse>> {
+    async getHomeAssessmentsRaw(requestParameters: GetHomeAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfHomeAssessmentItemResponse>> {
         if (requestParameters['homeId'] == null) {
             throw new runtime.RequiredError(
                 'homeId',
@@ -257,13 +233,13 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedResponseOfBuildingAssessmentItemResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedResponseOfHomeAssessmentItemResponseFromJSON(jsonValue));
     }
 
     /**
      * Gets a paginated list of assessments for a home.
      */
-    async getHomeAssessments(requestParameters: GetHomeAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfBuildingAssessmentItemResponse> {
+    async getHomeAssessments(requestParameters: GetHomeAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeAssessmentItemResponse> {
         const response = await this.getHomeAssessmentsRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -271,7 +247,7 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
     /**
      * Gets a paginated list of homes.
      */
-    async getHomesRaw(requestParameters: GetHomesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfBuildingListItemResponse>> {
+    async getHomesRaw(requestParameters: GetHomesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfHomeListItemResponse>> {
         const queryParameters: any = {};
 
         if (requestParameters['page'] != null) {
@@ -302,13 +278,13 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedResponseOfBuildingListItemResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedResponseOfHomeListItemResponseFromJSON(jsonValue));
     }
 
     /**
      * Gets a paginated list of homes.
      */
-    async getHomes(requestParameters: GetHomesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfBuildingListItemResponse> {
+    async getHomes(requestParameters: GetHomesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeListItemResponse> {
         const response = await this.getHomesRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -316,7 +292,7 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
     /**
      * Records an assessment for a home.
      */
-    async recordHomeAssessmentRaw(requestParameters: RecordHomeAssessmentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async recordHomeAssessmentRaw(requestParameters: RecordHomeAssessmentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
         if (requestParameters['homeId'] == null) {
             throw new runtime.RequiredError(
                 'homeId',
@@ -324,10 +300,10 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
             );
         }
 
-        if (requestParameters['recordBuildingAssessmentRequest'] == null) {
+        if (requestParameters['recordHomeAssessmentRequest'] == null) {
             throw new runtime.RequiredError(
-                'recordBuildingAssessmentRequest',
-                'Required parameter "recordBuildingAssessmentRequest" was null or undefined when calling recordHomeAssessment().'
+                'recordHomeAssessmentRequest',
+                'Required parameter "recordHomeAssessmentRequest" was null or undefined when calling recordHomeAssessment().'
             );
         }
 
@@ -346,7 +322,7 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: RecordBuildingAssessmentRequestToJSON(requestParameters['recordBuildingAssessmentRequest']),
+            body: RecordHomeAssessmentRequestToJSON(requestParameters['recordHomeAssessmentRequest']),
         }, initOverrides);
 
         return new runtime.VoidApiResponse(response);
@@ -355,18 +331,18 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
     /**
      * Records an assessment for a home.
      */
-    async recordHomeAssessment(requestParameters: RecordHomeAssessmentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+    async recordHomeAssessment(requestParameters: RecordHomeAssessmentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.recordHomeAssessmentRaw(requestParameters, initOverrides);
     }
 
     /**
      * Registers a new home.
      */
-    async registerHomeRaw(requestParameters: RegisterHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RegisterBuildingResponse>> {
-        if (requestParameters['registerBuildingRequest'] == null) {
+    async registerHomeRaw(requestParameters: RegisterHomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RegisterHomeResponse>> {
+        if (requestParameters['registerHomeRequest'] == null) {
             throw new runtime.RequiredError(
-                'registerBuildingRequest',
-                'Required parameter "registerBuildingRequest" was null or undefined when calling registerHome().'
+                'registerHomeRequest',
+                'Required parameter "registerHomeRequest" was null or undefined when calling registerHome().'
             );
         }
 
@@ -384,64 +360,18 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: RegisterBuildingRequestToJSON(requestParameters['registerBuildingRequest']),
+            body: RegisterHomeRequestToJSON(requestParameters['registerHomeRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => RegisterBuildingResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => RegisterHomeResponseFromJSON(jsonValue));
     }
 
     /**
      * Registers a new home.
      */
-    async registerHome(requestParameters: RegisterHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RegisterBuildingResponse> {
+    async registerHome(requestParameters: RegisterHomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RegisterHomeResponse> {
         const response = await this.registerHomeRaw(requestParameters, initOverrides);
         return await response.value();
-    }
-
-    /**
-     * Updates a home\'s status.
-     */
-    async updateHomeStatusRaw(requestParameters: UpdateHomeStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters['homeId'] == null) {
-            throw new runtime.RequiredError(
-                'homeId',
-                'Required parameter "homeId" was null or undefined when calling updateHomeStatus().'
-            );
-        }
-
-        if (requestParameters['updateBuildingStatusRequest'] == null) {
-            throw new runtime.RequiredError(
-                'updateBuildingStatusRequest',
-                'Required parameter "updateBuildingStatusRequest" was null or undefined when calling updateHomeStatus().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-
-        let urlPath = `/api/v1/homes/{homeId}/status`;
-        urlPath = urlPath.replace(`{${"homeId"}}`, encodeURIComponent(String(requestParameters['homeId'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'PATCH',
-            headers: headerParameters,
-            query: queryParameters,
-            body: UpdateBuildingStatusRequestToJSON(requestParameters['updateBuildingStatusRequest']),
-        }, initOverrides);
-
-        return new runtime.VoidApiResponse(response);
-    }
-
-    /**
-     * Updates a home\'s status.
-     */
-    async updateHomeStatus(requestParameters: UpdateHomeStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.updateHomeStatusRaw(requestParameters, initOverrides);
     }
 
 }

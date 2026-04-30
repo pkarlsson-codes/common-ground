@@ -15,74 +15,74 @@
 
 import { mapValues } from '../runtime';
 /**
- * Response DTO for a building assessment list item.
+ * Response DTO for a home assessment list item.
  * @export
- * @interface BuildingAssessmentItemResponse
+ * @interface HomeAssessmentItemResponse
  */
-export interface BuildingAssessmentItemResponse {
+export interface HomeAssessmentItemResponse {
     /**
      * 
      * @type {string}
-     * @memberof BuildingAssessmentItemResponse
+     * @memberof HomeAssessmentItemResponse
      */
     id?: string;
     /**
      * 
      * @type {string}
-     * @memberof BuildingAssessmentItemResponse
+     * @memberof HomeAssessmentItemResponse
      */
-    buildingId?: string;
+    homeId?: string;
     /**
      * 
      * @type {number}
-     * @memberof BuildingAssessmentItemResponse
+     * @memberof HomeAssessmentItemResponse
      */
     assessedValue?: number;
     /**
      * 
      * @type {Date}
-     * @memberof BuildingAssessmentItemResponse
+     * @memberof HomeAssessmentItemResponse
      */
     assessmentDate?: Date;
     /**
      * 
      * @type {string}
-     * @memberof BuildingAssessmentItemResponse
+     * @memberof HomeAssessmentItemResponse
      */
     conditionNotes?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof BuildingAssessmentItemResponse
+     * @memberof HomeAssessmentItemResponse
      */
     assessedBy?: string;
     /**
      * 
      * @type {Date}
-     * @memberof BuildingAssessmentItemResponse
+     * @memberof HomeAssessmentItemResponse
      */
     recordedAt?: Date;
 }
 
 /**
- * Check if a given object implements the BuildingAssessmentItemResponse interface.
+ * Check if a given object implements the HomeAssessmentItemResponse interface.
  */
-export function instanceOfBuildingAssessmentItemResponse(value: object): value is BuildingAssessmentItemResponse {
+export function instanceOfHomeAssessmentItemResponse(value: object): value is HomeAssessmentItemResponse {
     return true;
 }
 
-export function BuildingAssessmentItemResponseFromJSON(json: any): BuildingAssessmentItemResponse {
-    return BuildingAssessmentItemResponseFromJSONTyped(json, false);
+export function HomeAssessmentItemResponseFromJSON(json: any): HomeAssessmentItemResponse {
+    return HomeAssessmentItemResponseFromJSONTyped(json, false);
 }
 
-export function BuildingAssessmentItemResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): BuildingAssessmentItemResponse {
+export function HomeAssessmentItemResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): HomeAssessmentItemResponse {
     if (json == null) {
         return json;
     }
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
-        'buildingId': json['buildingId'] == null ? undefined : json['buildingId'],
+        'homeId': json['homeId'] == null ? undefined : json['homeId'],
         'assessedValue': json['assessedValue'] == null ? undefined : json['assessedValue'],
         'assessmentDate': json['assessmentDate'] == null ? undefined : (new Date(json['assessmentDate'])),
         'conditionNotes': json['conditionNotes'] == null ? undefined : json['conditionNotes'],
@@ -91,11 +91,11 @@ export function BuildingAssessmentItemResponseFromJSONTyped(json: any, ignoreDis
     };
 }
 
-export function BuildingAssessmentItemResponseToJSON(json: any): BuildingAssessmentItemResponse {
-    return BuildingAssessmentItemResponseToJSONTyped(json, false);
+export function HomeAssessmentItemResponseToJSON(json: any): HomeAssessmentItemResponse {
+    return HomeAssessmentItemResponseToJSONTyped(json, false);
 }
 
-export function BuildingAssessmentItemResponseToJSONTyped(value?: BuildingAssessmentItemResponse | null, ignoreDiscriminator: boolean = false): any {
+export function HomeAssessmentItemResponseToJSONTyped(value?: HomeAssessmentItemResponse | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -103,7 +103,7 @@ export function BuildingAssessmentItemResponseToJSONTyped(value?: BuildingAssess
     return {
         
         'id': value['id'],
-        'buildingId': value['buildingId'],
+        'homeId': value['homeId'],
         'assessedValue': value['assessedValue'],
         'assessmentDate': value['assessmentDate'] == null ? undefined : ((value['assessmentDate']).toISOString().substring(0,10)),
         'conditionNotes': value['conditionNotes'],

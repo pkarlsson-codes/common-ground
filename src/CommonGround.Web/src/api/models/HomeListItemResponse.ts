@@ -15,73 +15,73 @@
 
 import { mapValues } from '../runtime';
 /**
- * Response DTO for a building list item.
+ * Response DTO for a home list item.
  * @export
- * @interface BuildingListItemResponse
+ * @interface HomeListItemResponse
  */
-export interface BuildingListItemResponse {
+export interface HomeListItemResponse {
     /**
      * 
      * @type {string}
-     * @memberof BuildingListItemResponse
+     * @memberof HomeListItemResponse
      */
     id?: string;
     /**
      * 
      * @type {string}
-     * @memberof BuildingListItemResponse
+     * @memberof HomeListItemResponse
      */
     landParcelId?: string;
     /**
      * 
      * @type {string}
-     * @memberof BuildingListItemResponse
+     * @memberof HomeListItemResponse
      */
-    buildingType?: string;
+    homeType?: string;
     /**
      * 
      * @type {number}
-     * @memberof BuildingListItemResponse
+     * @memberof HomeListItemResponse
      */
     bedrooms?: number;
     /**
      * 
      * @type {number}
-     * @memberof BuildingListItemResponse
+     * @memberof HomeListItemResponse
      */
     bathrooms?: number;
     /**
      * 
      * @type {number}
-     * @memberof BuildingListItemResponse
+     * @memberof HomeListItemResponse
      */
     squareFootage?: number;
     /**
      * 
      * @type {number}
-     * @memberof BuildingListItemResponse
+     * @memberof HomeListItemResponse
      */
     assessedValue?: number;
     /**
      * 
      * @type {string}
-     * @memberof BuildingListItemResponse
+     * @memberof HomeListItemResponse
      */
     status?: string;
 }
 
 /**
- * Check if a given object implements the BuildingListItemResponse interface.
+ * Check if a given object implements the HomeListItemResponse interface.
  */
-export function instanceOfBuildingListItemResponse(value: object): value is BuildingListItemResponse {
+export function instanceOfHomeListItemResponse(value: object): value is HomeListItemResponse {
     return true;
 }
 
-export function BuildingListItemResponseFromJSON(json: any): BuildingListItemResponse {
-    return BuildingListItemResponseFromJSONTyped(json, false);
+export function HomeListItemResponseFromJSON(json: any): HomeListItemResponse {
+    return HomeListItemResponseFromJSONTyped(json, false);
 }
 
-export function BuildingListItemResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): BuildingListItemResponse {
+export function HomeListItemResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): HomeListItemResponse {
     if (json == null) {
         return json;
     }
@@ -89,7 +89,7 @@ export function BuildingListItemResponseFromJSONTyped(json: any, ignoreDiscrimin
         
         'id': json['id'] == null ? undefined : json['id'],
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
-        'buildingType': json['buildingType'] == null ? undefined : json['buildingType'],
+        'homeType': json['homeType'] == null ? undefined : json['homeType'],
         'bedrooms': json['bedrooms'] == null ? undefined : json['bedrooms'],
         'bathrooms': json['bathrooms'] == null ? undefined : json['bathrooms'],
         'squareFootage': json['squareFootage'] == null ? undefined : json['squareFootage'],
@@ -98,11 +98,11 @@ export function BuildingListItemResponseFromJSONTyped(json: any, ignoreDiscrimin
     };
 }
 
-export function BuildingListItemResponseToJSON(json: any): BuildingListItemResponse {
-    return BuildingListItemResponseToJSONTyped(json, false);
+export function HomeListItemResponseToJSON(json: any): HomeListItemResponse {
+    return HomeListItemResponseToJSONTyped(json, false);
 }
 
-export function BuildingListItemResponseToJSONTyped(value?: BuildingListItemResponse | null, ignoreDiscriminator: boolean = false): any {
+export function HomeListItemResponseToJSONTyped(value?: HomeListItemResponse | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -111,7 +111,7 @@ export function BuildingListItemResponseToJSONTyped(value?: BuildingListItemResp
         
         'id': value['id'],
         'landParcelId': value['landParcelId'],
-        'buildingType': value['buildingType'],
+        'homeType': value['homeType'],
         'bedrooms': value['bedrooms'],
         'bathrooms': value['bathrooms'],
         'squareFootage': value['squareFootage'],

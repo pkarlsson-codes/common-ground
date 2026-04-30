@@ -807,7 +807,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RegisterBuildingRequest"
+                "$ref": "#/components/schemas/RegisterHomeRequest"
               }
             }
           },
@@ -820,7 +820,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RegisterBuildingResponse"
+                  "$ref": "#/components/schemas/RegisterHomeResponse"
                 }
               }
             }
@@ -883,7 +883,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponseOfBuildingListItemResponse"
+                  "$ref": "#/components/schemas/PaginatedResponseOfHomeListItemResponse"
                 }
               }
             }
@@ -916,7 +916,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BuildingResponse"
+                  "$ref": "#/components/schemas/HomeResponse"
                 }
               }
             }
@@ -959,7 +959,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RecordBuildingAssessmentRequest"
+                "$ref": "#/components/schemas/RecordHomeAssessmentRequest"
               }
             }
           },
@@ -1028,59 +1028,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponseOfBuildingAssessmentItemResponse"
+                  "$ref": "#/components/schemas/PaginatedResponseOfHomeAssessmentItemResponse"
                 }
               }
             }
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/homes/{homeId}/status": {
-      "patch": {
-        "tags": [
-          "Homes"
-        ],
-        "summary": "Updates a home's status.",
-        "operationId": "updateHomeStatus",
-        "parameters": [
-          {
-            "name": "homeId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the home to update.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "request",
-          "description": "The new status details.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateBuildingStatusRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": "204 No Content, or 404 if not found."
           },
           "404": {
             "description": "",
@@ -1211,251 +1162,6 @@
                 }
               }
             }
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/land-parcels/{landParcelId}/construction/start": {
-      "post": {
-        "tags": [
-          "LandParcels"
-        ],
-        "summary": "Starts construction for a land parcel.",
-        "operationId": "startLandParcelConstruction",
-        "parameters": [
-          {
-            "name": "landParcelId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the land parcel to transition.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "request",
-          "description": "The transition request.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/StartParcelConstructionRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": "204 No Content, or 404 if not found."
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/land-parcels/{landParcelId}/construction/complete": {
-      "post": {
-        "tags": [
-          "LandParcels"
-        ],
-        "summary": "Completes construction for a land parcel.",
-        "operationId": "completeLandParcelConstruction",
-        "parameters": [
-          {
-            "name": "landParcelId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the land parcel to transition.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "request",
-          "description": "The transition request.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CompleteParcelConstructionRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": "204 No Content, or 404 if not found."
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/land-parcels/{landParcelId}/construction/suspend": {
-      "post": {
-        "tags": [
-          "LandParcels"
-        ],
-        "summary": "Suspends construction for a land parcel.",
-        "operationId": "suspendLandParcelConstruction",
-        "parameters": [
-          {
-            "name": "landParcelId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the land parcel to transition.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "request",
-          "description": "The transition request.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SuspendParcelConstructionRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": "204 No Content, or 404 if not found."
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/land-parcels/{landParcelId}/placement/list": {
-      "post": {
-        "tags": [
-          "LandParcels"
-        ],
-        "summary": "Lists a land parcel for placement.",
-        "operationId": "listLandParcelForPlacement",
-        "parameters": [
-          {
-            "name": "landParcelId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the land parcel to transition.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "request",
-          "description": "The transition request.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ListParcelForPlacementRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": "204 No Content, or 404 if not found."
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/land-parcels/{landParcelId}/redevelopment/withdraw": {
-      "post": {
-        "tags": [
-          "LandParcels"
-        ],
-        "summary": "Withdraws a land parcel for redevelopment.",
-        "operationId": "withdrawLandParcelForRedevelopment",
-        "parameters": [
-          {
-            "name": "landParcelId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the land parcel to transition.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "request",
-          "description": "The transition request.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WithdrawParcelForRedevelopmentRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": "204 No Content, or 404 if not found."
           },
           "404": {
             "description": "",
@@ -3739,7 +3445,7 @@
           "landParcelId": {
             "type": "string"
           },
-          "buildingId": {
+          "homeId": {
             "type": "string"
           },
           "leaseStartDate": {
@@ -3964,7 +3670,7 @@
           "landParcelId": {
             "type": "string"
           },
-          "buildingId": {
+          "homeId": {
             "type": "string"
           },
           "leaseStartDate": {
@@ -4064,17 +3770,17 @@
           }
         }
       },
-      "RegisterBuildingResponse": {
+      "RegisterHomeResponse": {
         "type": "object",
-        "description": "Response returned when a building is successfully registered.",
+        "description": "Response returned when a home is successfully registered.",
         "additionalProperties": false,
         "properties": {
-          "buildingId": {
+          "homeId": {
             "type": "string"
           }
         }
       },
-      "RegisterBuildingRequest": {
+      "RegisterHomeRequest": {
         "type": "object",
         "description": "Request to register a new building on a land parcel.",
         "additionalProperties": false,
@@ -4082,7 +3788,7 @@
           "landParcelId": {
             "type": "string"
           },
-          "buildingType": {
+          "homeType": {
             "type": "string"
           },
           "bedrooms": {
@@ -4101,15 +3807,22 @@
             "type": "integer",
             "format": "int32"
           },
+          "appraiserName": {
+            "type": "string"
+          },
+          "initialAssessedDate": {
+            "type": "string",
+            "format": "date"
+          },
           "initialAssessedValue": {
             "type": "number",
             "format": "decimal"
           }
         }
       },
-      "BuildingResponse": {
+      "HomeResponse": {
         "type": "object",
-        "description": "Response DTO for a building detail view.",
+        "description": "Response DTO for a home detail view.",
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -4118,7 +3831,7 @@
           "landParcelId": {
             "type": "string"
           },
-          "buildingType": {
+          "homeType": {
             "type": "string"
           },
           "bedrooms": {
@@ -4159,7 +3872,7 @@
           }
         }
       },
-      "PaginatedResponseOfBuildingListItemResponse": {
+      "PaginatedResponseOfHomeListItemResponse": {
         "type": "object",
         "description": "Generic paginated response wrapper for API endpoints.",
         "additionalProperties": false,
@@ -4174,7 +3887,7 @@
             "type": "array",
             "description": "The items for the current page.",
             "items": {
-              "$ref": "#/components/schemas/BuildingListItemResponse"
+              "$ref": "#/components/schemas/HomeListItemResponse"
             }
           },
           "hasNextPage": {
@@ -4203,9 +3916,9 @@
           }
         }
       },
-      "BuildingListItemResponse": {
+      "HomeListItemResponse": {
         "type": "object",
-        "description": "Response DTO for a building list item.",
+        "description": "Response DTO for a home list item.",
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -4214,7 +3927,7 @@
           "landParcelId": {
             "type": "string"
           },
-          "buildingType": {
+          "homeType": {
             "type": "string"
           },
           "bedrooms": {
@@ -4238,14 +3951,17 @@
           }
         }
       },
-      "RecordBuildingAssessmentRequest": {
+      "RecordHomeAssessmentRequest": {
         "type": "object",
-        "description": "Request to record a new building assessment.",
+        "description": "Request to record a new home assessment.",
         "additionalProperties": false,
         "properties": {
           "assessedValue": {
             "type": "number",
             "format": "decimal"
+          },
+          "appraiserName": {
+            "type": "string"
           },
           "assessmentDate": {
             "type": "string",
@@ -4257,7 +3973,7 @@
           }
         }
       },
-      "PaginatedResponseOfBuildingAssessmentItemResponse": {
+      "PaginatedResponseOfHomeAssessmentItemResponse": {
         "type": "object",
         "description": "Generic paginated response wrapper for API endpoints.",
         "additionalProperties": false,
@@ -4272,7 +3988,7 @@
             "type": "array",
             "description": "The items for the current page.",
             "items": {
-              "$ref": "#/components/schemas/BuildingAssessmentItemResponse"
+              "$ref": "#/components/schemas/HomeAssessmentItemResponse"
             }
           },
           "hasNextPage": {
@@ -4301,15 +4017,15 @@
           }
         }
       },
-      "BuildingAssessmentItemResponse": {
+      "HomeAssessmentItemResponse": {
         "type": "object",
-        "description": "Response DTO for a building assessment list item.",
+        "description": "Response DTO for a home assessment list item.",
         "additionalProperties": false,
         "properties": {
           "id": {
             "type": "string"
           },
-          "buildingId": {
+          "homeId": {
             "type": "string"
           },
           "assessedValue": {
@@ -4330,16 +4046,6 @@
           "recordedAt": {
             "type": "string",
             "format": "date-time"
-          }
-        }
-      },
-      "UpdateBuildingStatusRequest": {
-        "type": "object",
-        "description": "Request to update a building's status.",
-        "additionalProperties": false,
-        "properties": {
-          "newStatus": {
-            "type": "string"
           }
         }
       },
@@ -4492,31 +4198,6 @@
             "format": "date-time"
           }
         }
-      },
-      "StartParcelConstructionRequest": {
-        "type": "object",
-        "description": "Request to start parcel construction.",
-        "additionalProperties": false
-      },
-      "CompleteParcelConstructionRequest": {
-        "type": "object",
-        "description": "Request to complete parcel construction.",
-        "additionalProperties": false
-      },
-      "SuspendParcelConstructionRequest": {
-        "type": "object",
-        "description": "Request to suspend parcel construction.",
-        "additionalProperties": false
-      },
-      "ListParcelForPlacementRequest": {
-        "type": "object",
-        "description": "Request to list a parcel for placement.",
-        "additionalProperties": false
-      },
-      "WithdrawParcelForRedevelopmentRequest": {
-        "type": "object",
-        "description": "Request to withdraw a parcel for redevelopment.",
-        "additionalProperties": false
       },
       "DecommissionParcelRequest": {
         "type": "object",

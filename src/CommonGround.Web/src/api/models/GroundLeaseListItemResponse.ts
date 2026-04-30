@@ -37,7 +37,7 @@ export interface GroundLeaseListItemResponse {
      * @type {string}
      * @memberof GroundLeaseListItemResponse
      */
-    buildingId?: string;
+    homeId?: string;
     /**
      * 
      * @type {string}
@@ -95,7 +95,7 @@ export function GroundLeaseListItemResponseFromJSONTyped(json: any, ignoreDiscri
         
         'id': json['id'] == null ? undefined : json['id'],
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
-        'buildingId': json['buildingId'] == null ? undefined : json['buildingId'],
+        'homeId': json['homeId'] == null ? undefined : json['homeId'],
         'leaseStartDate': json['leaseStartDate'] == null ? undefined : json['leaseStartDate'],
         'termYears': json['termYears'] == null ? undefined : json['termYears'],
         'status': json['status'] == null ? undefined : json['status'],
@@ -118,7 +118,7 @@ export function GroundLeaseListItemResponseToJSONTyped(value?: GroundLeaseListIt
         
         'id': value['id'],
         'landParcelId': value['landParcelId'],
-        'buildingId': value['buildingId'],
+        'homeId': value['homeId'],
         'leaseStartDate': value['leaseStartDate'],
         'termYears': value['termYears'],
         'status': value['status'],

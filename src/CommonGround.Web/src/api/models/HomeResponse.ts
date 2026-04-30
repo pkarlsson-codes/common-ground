@@ -15,97 +15,97 @@
 
 import { mapValues } from '../runtime';
 /**
- * Response DTO for a building detail view.
+ * Response DTO for a home detail view.
  * @export
- * @interface BuildingResponse
+ * @interface HomeResponse
  */
-export interface BuildingResponse {
+export interface HomeResponse {
     /**
      * 
      * @type {string}
-     * @memberof BuildingResponse
+     * @memberof HomeResponse
      */
     id?: string;
     /**
      * 
      * @type {string}
-     * @memberof BuildingResponse
+     * @memberof HomeResponse
      */
     landParcelId?: string;
     /**
      * 
      * @type {string}
-     * @memberof BuildingResponse
+     * @memberof HomeResponse
      */
-    buildingType?: string;
+    homeType?: string;
     /**
      * 
      * @type {number}
-     * @memberof BuildingResponse
+     * @memberof HomeResponse
      */
     bedrooms?: number;
     /**
      * 
      * @type {number}
-     * @memberof BuildingResponse
+     * @memberof HomeResponse
      */
     bathrooms?: number;
     /**
      * 
      * @type {number}
-     * @memberof BuildingResponse
+     * @memberof HomeResponse
      */
     squareFootage?: number;
     /**
      * 
      * @type {number}
-     * @memberof BuildingResponse
+     * @memberof HomeResponse
      */
     yearBuilt?: number;
     /**
      * 
      * @type {number}
-     * @memberof BuildingResponse
+     * @memberof HomeResponse
      */
     assessedValue?: number;
     /**
      * 
      * @type {Date}
-     * @memberof BuildingResponse
+     * @memberof HomeResponse
      */
     lastAssessedDate?: Date | null;
     /**
      * 
      * @type {string}
-     * @memberof BuildingResponse
+     * @memberof HomeResponse
      */
     conditionNotes?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof BuildingResponse
+     * @memberof HomeResponse
      */
     status?: string;
     /**
      * 
      * @type {Date}
-     * @memberof BuildingResponse
+     * @memberof HomeResponse
      */
     registeredAt?: Date;
 }
 
 /**
- * Check if a given object implements the BuildingResponse interface.
+ * Check if a given object implements the HomeResponse interface.
  */
-export function instanceOfBuildingResponse(value: object): value is BuildingResponse {
+export function instanceOfHomeResponse(value: object): value is HomeResponse {
     return true;
 }
 
-export function BuildingResponseFromJSON(json: any): BuildingResponse {
-    return BuildingResponseFromJSONTyped(json, false);
+export function HomeResponseFromJSON(json: any): HomeResponse {
+    return HomeResponseFromJSONTyped(json, false);
 }
 
-export function BuildingResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): BuildingResponse {
+export function HomeResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): HomeResponse {
     if (json == null) {
         return json;
     }
@@ -113,7 +113,7 @@ export function BuildingResponseFromJSONTyped(json: any, ignoreDiscriminator: bo
         
         'id': json['id'] == null ? undefined : json['id'],
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
-        'buildingType': json['buildingType'] == null ? undefined : json['buildingType'],
+        'homeType': json['homeType'] == null ? undefined : json['homeType'],
         'bedrooms': json['bedrooms'] == null ? undefined : json['bedrooms'],
         'bathrooms': json['bathrooms'] == null ? undefined : json['bathrooms'],
         'squareFootage': json['squareFootage'] == null ? undefined : json['squareFootage'],
@@ -126,11 +126,11 @@ export function BuildingResponseFromJSONTyped(json: any, ignoreDiscriminator: bo
     };
 }
 
-export function BuildingResponseToJSON(json: any): BuildingResponse {
-    return BuildingResponseToJSONTyped(json, false);
+export function HomeResponseToJSON(json: any): HomeResponse {
+    return HomeResponseToJSONTyped(json, false);
 }
 
-export function BuildingResponseToJSONTyped(value?: BuildingResponse | null, ignoreDiscriminator: boolean = false): any {
+export function HomeResponseToJSONTyped(value?: HomeResponse | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -139,7 +139,7 @@ export function BuildingResponseToJSONTyped(value?: BuildingResponse | null, ign
         
         'id': value['id'],
         'landParcelId': value['landParcelId'],
-        'buildingType': value['buildingType'],
+        'homeType': value['homeType'],
         'bedrooms': value['bedrooms'],
         'bathrooms': value['bathrooms'],
         'squareFootage': value['squareFootage'],

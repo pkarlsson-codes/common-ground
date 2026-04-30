@@ -31,7 +31,7 @@ export interface CreateGroundLeaseRequest {
      * @type {string}
      * @memberof CreateGroundLeaseRequest
      */
-    buildingId?: string;
+    homeId?: string;
     /**
      * 
      * @type {string}
@@ -106,7 +106,7 @@ export function CreateGroundLeaseRequestFromJSONTyped(json: any, ignoreDiscrimin
     return {
         
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
-        'buildingId': json['buildingId'] == null ? undefined : json['buildingId'],
+        'homeId': json['homeId'] == null ? undefined : json['homeId'],
         'leaseStartDate': json['leaseStartDate'] == null ? undefined : json['leaseStartDate'],
         'termYears': json['termYears'] == null ? undefined : json['termYears'],
         'covenantTerms': json['covenantTerms'] == null ? undefined : json['covenantTerms'],
@@ -131,7 +131,7 @@ export function CreateGroundLeaseRequestToJSONTyped(value?: CreateGroundLeaseReq
     return {
         
         'landParcelId': value['landParcelId'],
-        'buildingId': value['buildingId'],
+        'homeId': value['homeId'],
         'leaseStartDate': value['leaseStartDate'],
         'termYears': value['termYears'],
         'covenantTerms': value['covenantTerms'],

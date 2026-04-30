@@ -17,85 +17,99 @@ import { mapValues } from '../runtime';
 /**
  * Request to register a new building on a land parcel.
  * @export
- * @interface RegisterBuildingRequest
+ * @interface RegisterHomeRequest
  */
-export interface RegisterBuildingRequest {
+export interface RegisterHomeRequest {
     /**
      * 
      * @type {string}
-     * @memberof RegisterBuildingRequest
+     * @memberof RegisterHomeRequest
      */
     landParcelId?: string;
     /**
      * 
      * @type {string}
-     * @memberof RegisterBuildingRequest
+     * @memberof RegisterHomeRequest
      */
-    buildingType?: string;
+    homeType?: string;
     /**
      * 
      * @type {number}
-     * @memberof RegisterBuildingRequest
+     * @memberof RegisterHomeRequest
      */
     bedrooms?: number;
     /**
      * 
      * @type {number}
-     * @memberof RegisterBuildingRequest
+     * @memberof RegisterHomeRequest
      */
     bathrooms?: number;
     /**
      * 
      * @type {number}
-     * @memberof RegisterBuildingRequest
+     * @memberof RegisterHomeRequest
      */
     squareFootage?: number;
     /**
      * 
      * @type {number}
-     * @memberof RegisterBuildingRequest
+     * @memberof RegisterHomeRequest
      */
     yearBuilt?: number;
     /**
      * 
+     * @type {string}
+     * @memberof RegisterHomeRequest
+     */
+    appraiserName?: string;
+    /**
+     * 
+     * @type {Date}
+     * @memberof RegisterHomeRequest
+     */
+    initialAssessedDate?: Date;
+    /**
+     * 
      * @type {number}
-     * @memberof RegisterBuildingRequest
+     * @memberof RegisterHomeRequest
      */
     initialAssessedValue?: number;
 }
 
 /**
- * Check if a given object implements the RegisterBuildingRequest interface.
+ * Check if a given object implements the RegisterHomeRequest interface.
  */
-export function instanceOfRegisterBuildingRequest(value: object): value is RegisterBuildingRequest {
+export function instanceOfRegisterHomeRequest(value: object): value is RegisterHomeRequest {
     return true;
 }
 
-export function RegisterBuildingRequestFromJSON(json: any): RegisterBuildingRequest {
-    return RegisterBuildingRequestFromJSONTyped(json, false);
+export function RegisterHomeRequestFromJSON(json: any): RegisterHomeRequest {
+    return RegisterHomeRequestFromJSONTyped(json, false);
 }
 
-export function RegisterBuildingRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): RegisterBuildingRequest {
+export function RegisterHomeRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): RegisterHomeRequest {
     if (json == null) {
         return json;
     }
     return {
         
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
-        'buildingType': json['buildingType'] == null ? undefined : json['buildingType'],
+        'homeType': json['homeType'] == null ? undefined : json['homeType'],
         'bedrooms': json['bedrooms'] == null ? undefined : json['bedrooms'],
         'bathrooms': json['bathrooms'] == null ? undefined : json['bathrooms'],
         'squareFootage': json['squareFootage'] == null ? undefined : json['squareFootage'],
         'yearBuilt': json['yearBuilt'] == null ? undefined : json['yearBuilt'],
+        'appraiserName': json['appraiserName'] == null ? undefined : json['appraiserName'],
+        'initialAssessedDate': json['initialAssessedDate'] == null ? undefined : (new Date(json['initialAssessedDate'])),
         'initialAssessedValue': json['initialAssessedValue'] == null ? undefined : json['initialAssessedValue'],
     };
 }
 
-export function RegisterBuildingRequestToJSON(json: any): RegisterBuildingRequest {
-    return RegisterBuildingRequestToJSONTyped(json, false);
+export function RegisterHomeRequestToJSON(json: any): RegisterHomeRequest {
+    return RegisterHomeRequestToJSONTyped(json, false);
 }
 
-export function RegisterBuildingRequestToJSONTyped(value?: RegisterBuildingRequest | null, ignoreDiscriminator: boolean = false): any {
+export function RegisterHomeRequestToJSONTyped(value?: RegisterHomeRequest | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -103,11 +117,13 @@ export function RegisterBuildingRequestToJSONTyped(value?: RegisterBuildingReque
     return {
         
         'landParcelId': value['landParcelId'],
-        'buildingType': value['buildingType'],
+        'homeType': value['homeType'],
         'bedrooms': value['bedrooms'],
         'bathrooms': value['bathrooms'],
         'squareFootage': value['squareFootage'],
         'yearBuilt': value['yearBuilt'],
+        'appraiserName': value['appraiserName'],
+        'initialAssessedDate': value['initialAssessedDate'] == null ? undefined : ((value['initialAssessedDate']).toISOString().substring(0,10)),
         'initialAssessedValue': value['initialAssessedValue'],
     };
 }

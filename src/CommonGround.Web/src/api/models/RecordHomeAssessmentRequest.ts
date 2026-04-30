@@ -15,59 +15,66 @@
 
 import { mapValues } from '../runtime';
 /**
- * Request to record a new building assessment.
+ * Request to record a new home assessment.
  * @export
- * @interface RecordBuildingAssessmentRequest
+ * @interface RecordHomeAssessmentRequest
  */
-export interface RecordBuildingAssessmentRequest {
+export interface RecordHomeAssessmentRequest {
     /**
      * 
      * @type {number}
-     * @memberof RecordBuildingAssessmentRequest
+     * @memberof RecordHomeAssessmentRequest
      */
     assessedValue?: number;
     /**
      * 
+     * @type {string}
+     * @memberof RecordHomeAssessmentRequest
+     */
+    appraiserName?: string;
+    /**
+     * 
      * @type {Date}
-     * @memberof RecordBuildingAssessmentRequest
+     * @memberof RecordHomeAssessmentRequest
      */
     assessmentDate?: Date;
     /**
      * 
      * @type {string}
-     * @memberof RecordBuildingAssessmentRequest
+     * @memberof RecordHomeAssessmentRequest
      */
     conditionNotes?: string | null;
 }
 
 /**
- * Check if a given object implements the RecordBuildingAssessmentRequest interface.
+ * Check if a given object implements the RecordHomeAssessmentRequest interface.
  */
-export function instanceOfRecordBuildingAssessmentRequest(value: object): value is RecordBuildingAssessmentRequest {
+export function instanceOfRecordHomeAssessmentRequest(value: object): value is RecordHomeAssessmentRequest {
     return true;
 }
 
-export function RecordBuildingAssessmentRequestFromJSON(json: any): RecordBuildingAssessmentRequest {
-    return RecordBuildingAssessmentRequestFromJSONTyped(json, false);
+export function RecordHomeAssessmentRequestFromJSON(json: any): RecordHomeAssessmentRequest {
+    return RecordHomeAssessmentRequestFromJSONTyped(json, false);
 }
 
-export function RecordBuildingAssessmentRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): RecordBuildingAssessmentRequest {
+export function RecordHomeAssessmentRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): RecordHomeAssessmentRequest {
     if (json == null) {
         return json;
     }
     return {
         
         'assessedValue': json['assessedValue'] == null ? undefined : json['assessedValue'],
+        'appraiserName': json['appraiserName'] == null ? undefined : json['appraiserName'],
         'assessmentDate': json['assessmentDate'] == null ? undefined : (new Date(json['assessmentDate'])),
         'conditionNotes': json['conditionNotes'] == null ? undefined : json['conditionNotes'],
     };
 }
 
-export function RecordBuildingAssessmentRequestToJSON(json: any): RecordBuildingAssessmentRequest {
-    return RecordBuildingAssessmentRequestToJSONTyped(json, false);
+export function RecordHomeAssessmentRequestToJSON(json: any): RecordHomeAssessmentRequest {
+    return RecordHomeAssessmentRequestToJSONTyped(json, false);
 }
 
-export function RecordBuildingAssessmentRequestToJSONTyped(value?: RecordBuildingAssessmentRequest | null, ignoreDiscriminator: boolean = false): any {
+export function RecordHomeAssessmentRequestToJSONTyped(value?: RecordHomeAssessmentRequest | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -75,6 +82,7 @@ export function RecordBuildingAssessmentRequestToJSONTyped(value?: RecordBuildin
     return {
         
         'assessedValue': value['assessedValue'],
+        'appraiserName': value['appraiserName'],
         'assessmentDate': value['assessmentDate'] == null ? undefined : ((value['assessmentDate']).toISOString().substring(0,10)),
         'conditionNotes': value['conditionNotes'],
     };
