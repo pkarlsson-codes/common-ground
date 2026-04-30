@@ -14,6 +14,8 @@ import type {
   StallWorkflowForm,
   WithdrawWorkflowForm,
 } from './types'
+import type { PurchaseWorkflowResponse } from '../api/models/PurchaseWorkflowResponse'
+import type { PurchaseWorkflowListItemResponse } from '../api/models/PurchaseWorkflowListItemResponse'
 
 const api = new PurchaseWorkflowsApi(apiConfig)
 
@@ -59,20 +61,20 @@ const applyOptimisticWorkflowPhase = (
   workflowId: string,
   phase: string,
 ) => {
-  const previousDetail = qc.getQueryData(['purchase-workflow', workflowId])
+  const previousDetail = qc.getQueryData<PurchaseWorkflowResponse | undefined>(['purchase-workflow', workflowId])
   const previousLists = qc.getQueriesData({ queryKey: ['purchase-workflows'] })
 
-  qc.setQueryData(['purchase-workflow', workflowId], (current: any) =>
+  qc.setQueryData<PurchaseWorkflowResponse | undefined>(['purchase-workflow', workflowId], (current) =>
     current ? { ...current, phase } : current,
   )
 
   previousLists.forEach(([queryKey]) => {
-    qc.setQueryData(queryKey, (current: any) => {
+    qc.setQueryData(queryKey, (current: { items?: PurchaseWorkflowListItemResponse[] } | undefined) => {
       if (!current?.items) return current
 
       return {
         ...current,
-        items: current.items.map((item: any) =>
+        items: current.items.map((item) =>
           item.id === workflowId ? { ...item, phase } : item,
         ),
       }
@@ -100,9 +102,9 @@ const applyOptimisticTrackDetails = (
   workflowId: string,
   patch: Record<string, unknown>,
 ) => {
-  const previousDetail = qc.getQueryData(['purchase-workflow', workflowId])
+  const previousDetail = qc.getQueryData<PurchaseWorkflowResponse | undefined>(['purchase-workflow', workflowId])
 
-  qc.setQueryData(['purchase-workflow', workflowId], (current: any) =>
+  qc.setQueryData<PurchaseWorkflowResponse | undefined>(['purchase-workflow', workflowId], (current) =>
     current ? { ...current, ...patch } : current,
   )
 
