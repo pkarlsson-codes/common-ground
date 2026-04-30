@@ -84,7 +84,7 @@ export default function HomesTable({
                   onClick={() => onRowClick(h.id!)}
                   className={selectedId === h.id && panel === 'detail' ? 'row--selected' : ''}
                 >
-                  <td>{HOME_TYPE_LABELS[h.buildingType ?? ''] ?? h.buildingType}</td>
+                  <td>{HOME_TYPE_LABELS[h.homeType ?? ''] ?? h.homeType}</td>
                   <td>
                     <span className="cell-mono">
                       {h.bedrooms} bd / {Number(h.bathrooms).toFixed(1)} ba
