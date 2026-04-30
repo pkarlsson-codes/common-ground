@@ -57,6 +57,73 @@
         }
       }
     },
+    "/api/v1/development-projects": {
+      "get": {
+        "tags": [
+          "DevelopmentProjects"
+        ],
+        "summary": "Gets a paginated list of development projects.",
+        "operationId": "getDevelopmentProjects",
+        "parameters": [
+          {
+            "name": "Filter.Search",
+            "in": "query",
+            "description": "Optional free-text search across description.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 1
+          },
+          {
+            "name": "Page.Number",
+            "in": "query",
+            "description": "The current page number (1-based).",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "Page.Size",
+            "in": "query",
+            "description": "The requested page size.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 3
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "style": "form",
+            "explode": true,
+            "description": "Parsed sort descriptors bound from the querystring parameter named 'sort'.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/SortDescriptor"
+              }
+            },
+            "x-position": 4
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with a paginated list of development projects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfDevelopmentProjectListItemResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/documents": {
       "post": {
         "tags": [
@@ -3044,6 +3111,100 @@
   },
   "components": {
     "schemas": {
+      "PaginatedResponseOfDevelopmentProjectListItemResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentProjectListItemResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "DevelopmentProjectListItemResponse": {
+        "type": "object",
+        "description": "Response DTO for a development project list item.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "landParcelId": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "SortDescriptor": {
+        "type": "object",
+        "description": "Describes a single sort operation against a logical field.",
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Logical field name to sort by. Mapping to actual data model is responsibility of the consumer."
+          },
+          "direction": {
+            "description": "Sort direction.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SortDirection"
+              }
+            ]
+          }
+        }
+      },
+      "SortDirection": {
+        "type": "string",
+        "description": "Sort direction for a field.",
+        "x-enumNames": [
+          "Asc",
+          "Desc"
+        ],
+        "enum": [
+          "Asc",
+          "Desc"
+        ]
+      },
       "UploadDocumentResponse": {
         "type": "object",
         "description": "Returned from POST /api/documents.",

@@ -1,5 +1,6 @@
 .openapi-generator-ignore
 apis/AuthApi.ts
+apis/DevelopmentProjectsApi.ts
 apis/DocumentsApi.ts
 apis/GroundLeasesApi.ts
 apis/HomesApi.ts
@@ -22,6 +23,7 @@ models/CreateGroundLeaseRequest.ts
 models/CreateGroundLeaseResponse.ts
 models/CurePeriodActivationResponse.ts
 models/CureViolationRequest.ts
+models/DevelopmentProjectListItemResponse.ts
 models/DocumentAttachmentResponse.ts
 models/DocumentLibraryItemResponse.ts
 models/DocumentResponse.ts
@@ -54,6 +56,7 @@ models/MarkOccupancyVerificationOverdueRequest.ts
 models/OccupancyVerificationResponse.ts
 models/OpenForeclosurePreventionCaseRequest.ts
 models/OpenForeclosurePreventionCaseResponse.ts
+models/PaginatedResponseOfDevelopmentProjectListItemResponse.ts
 models/PaginatedResponseOfDocumentLibraryItemResponse.ts
 models/PaginatedResponseOfEntityDocumentItemResponse.ts
 models/PaginatedResponseOfGroundLeaseListItemResponse.ts
@@ -86,6 +89,8 @@ models/ResolveForeclosurePreventionCaseRequest.ts
 models/ScheduleClosingRequest.ts
 models/SchedulePropertyInspectionRequest.ts
 models/SoftDeleteDocumentRequest.ts
+models/SortDescriptor.ts
+models/SortDirection.ts
 models/StallWorkflowRequest.ts
 models/StewardshipCaseResponse.ts
 models/StewardshipCheckInDto.ts
