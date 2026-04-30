@@ -27,4 +27,19 @@ public sealed class DevelopmentProjectsController(IDevelopmentProjectsApiClient 
         var result = await client.GetDevelopmentProjectsAsync(request, cancellationToken);
         return Ok(result);
     }
+
+    /// <summary>Initiates a new development project for a land parcel.</summary>
+    /// <param name="request">The initiation request.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>201 with the ID of the newly created development project.</returns>
+    [HttpPost]
+    [ProducesResponseType(typeof(InitiateDevelopmentProjectResponse), 201)]
+    [EndpointName("initiateDevelopmentProject")]
+    public async Task<IActionResult> InitiateDevelopmentProject(
+        [FromBody] InitiateDevelopmentProjectRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await client.InitiateDevelopmentProjectAsync(request, cancellationToken);
+        return CreatedAtAction(nameof(GetDevelopmentProjects), new { }, result);
+    }
 }

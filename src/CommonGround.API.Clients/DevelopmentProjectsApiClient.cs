@@ -21,4 +21,14 @@ public sealed class DevelopmentProjectsApiClient(
         var qs = query?.ToQueryString() ?? string.Empty;
         return await GetAsync<PaginatedResponse<DevelopmentProjectListItemResponse>>($"api/development-projects{qs}", cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task<InitiateDevelopmentProjectResponse> InitiateDevelopmentProjectAsync(
+        InitiateDevelopmentProjectRequest request, CancellationToken cancellationToken)
+    {
+        return await PostAsync<InitiateDevelopmentProjectRequest, InitiateDevelopmentProjectResponse>(
+            "api/development-projects",
+            request,
+            cancellationToken).ConfigureAwait(false);
+    }
 }

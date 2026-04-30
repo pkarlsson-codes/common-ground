@@ -16,4 +16,11 @@ public interface IDevelopmentProjectsApiClient
     /// <returns>Paginated list of development projects.</returns>
     Task<PaginatedResponse<DevelopmentProjectListItemResponse>> GetDevelopmentProjectsAsync(
         PaginationQuerySpec<GetDevelopmentProjectsFilter> query, CancellationToken cancellationToken);
+
+    /// <summary>Initiates a new development project for a land parcel.</summary>
+    /// <param name="request">The initiation request.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The ID of the newly created development project.</returns>
+    Task<InitiateDevelopmentProjectResponse> InitiateDevelopmentProjectAsync(
+        InitiateDevelopmentProjectRequest request, CancellationToken cancellationToken);
 }
