@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { HomesApi } from '../api'
+import { HomesApi, type RegisterHomeRequest } from '../api'
 import { apiConfig } from '../lib/apiConfig'
-import type { RecordHomeAssessmentRequest, RegisterHomeRequest } from './types'
+import type { RecordHomeAssessmentRequest } from './types'
 import type { PaginatedResponseOfBuildingAssessmentItemResponse } from '../api'
 
 const api = new HomesApi(apiConfig)
@@ -52,17 +52,7 @@ export function useRegisterHome() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (req: RegisterHomeRequest) =>
-      api.registerHome({
-        registerBuildingRequest: {
-          landParcelId: req.landParcelId,
-          buildingType: req.buildingType,
-          bedrooms: req.bedrooms,
-          bathrooms: req.bathrooms,
-          squareFootage: req.squareFootage,
-          yearBuilt: req.yearBuilt,
-          initialAssessedValue: req.initialAssessedValue,
-        },
-      }),
+      api.registerHome({ registerHomeRequest: req }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['homes'] }),
   })
 }

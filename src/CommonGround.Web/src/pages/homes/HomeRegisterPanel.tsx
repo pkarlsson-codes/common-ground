@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useRegisterHome } from '../../hooks/homes'
-import { BUILDING_TYPES, HOME_TYPE_LABELS, type RegisterHomeRequest } from '../../hooks/types'
+import { BUILDING_TYPES, HOME_TYPE_LABELS } from '../../hooks/types'
+
 import EntityCombobox from '../../components/EntityCombobox'
 import SlideOver from '../../components/SlideOver'
 import { LandParcelsApi } from '../../api'
@@ -9,14 +10,28 @@ import { useToast } from '../../hooks/useToast'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
 
-const emptyForm = (parcelId = ''): RegisterHomeRequest => ({
+interface FormState {
+  landParcelId: string
+  homeType: string
+  bedrooms: number
+  bathrooms: number
+  squareFootage: number
+  yearBuilt: number
+  initialAssessedValue: number
+  initialAssessedDate: string
+  appraiserName: string
+}
+
+const emptyForm = (parcelId = ''): FormState => ({
   landParcelId: parcelId,
-  buildingType: 'SingleFamily',
+  homeType: 'SingleFamily',
   bedrooms: 3,
   bathrooms: 2,
   squareFootage: 1200,
   yearBuilt: new Date().getFullYear(),
   initialAssessedValue: 150000,
+  initialAssessedDate: new Date().toISOString().substring(0, 10),
+  appraiserName: '',
 })
 
 interface Props {
@@ -25,7 +40,7 @@ interface Props {
 }
 
 export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
-  const [form, setForm] = useState<RegisterHomeRequest>(() => emptyForm(initialParcelId))
+  const [form, setForm] = useState<FormState>(() => emptyForm(initialParcelId))
   const registerMutation = useRegisterHome()
   const { success } = useToast()
 
@@ -39,6 +54,8 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
         squareFootage:        Number(form.squareFootage),
         yearBuilt:            Number(form.yearBuilt),
         initialAssessedValue: Number(form.initialAssessedValue),
+        initialAssessedDate:  new Date(form.initialAssessedDate),
+        appraiserName:        form.appraiserName || undefined,
       })
       success('Home registered successfully')
       onClose()
@@ -85,8 +102,8 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
             <label className="form-label">Home Type</label>
             <select
               className="form-select"
-              value={form.buildingType}
-              onChange={e => setForm(f => ({ ...f, buildingType: e.target.value }))}
+              value={form.homeType}
+              onChange={e => setForm(f => ({ ...f, homeType: e.target.value }))}
             >
               {BUILDING_TYPES.map(t => (
                 <option key={t} value={t}>{HOME_TYPE_LABELS[t]}</option>
@@ -139,7 +156,7 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
               required
             />
           </div>
-          <div className="form-field full">
+          <div className="form-field">
             <label className="form-label">Initial Assessed Value ($)</label>
             <input
               className="form-input"
@@ -149,6 +166,26 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
               value={form.initialAssessedValue}
               onChange={e => setForm(f => ({ ...f, initialAssessedValue: parseFloat(e.target.value) || 0 }))}
               required
+            />
+          </div>
+          <div className="form-field">
+            <label className="form-label">Assessment Date</label>
+            <input
+              className="form-input"
+              type="date"
+              value={form.initialAssessedDate}
+              onChange={e => setForm(f => ({ ...f, initialAssessedDate: e.target.value }))}
+              required
+            />
+          </div>
+          <div className="form-field full">
+            <label className="form-label">Appraiser Name</label>
+            <input
+              className="form-input"
+              type="text"
+              value={form.appraiserName}
+              onChange={e => setForm(f => ({ ...f, appraiserName: e.target.value }))}
+              placeholder="Optional"
             />
           </div>
         </div>

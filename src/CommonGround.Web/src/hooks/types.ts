@@ -1,13 +1,3 @@
-export interface RegisterHomeRequest {
-  landParcelId: string
-  buildingType: string
-  bedrooms: number
-  bathrooms: number
-  squareFootage: number
-  yearBuilt: number
-  initialAssessedValue: number
-}
-
 export interface RecordHomeAssessmentRequest {
   assessedValue: number
   assessmentDate: string
