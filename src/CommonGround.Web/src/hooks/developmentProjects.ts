@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { DevelopmentProjectsApi } from '../api'
+import type { InitiateDevelopmentProjectRequest } from '../api'
 import { apiConfig } from '../lib/apiConfig'
-import type { InitiateDevelopmentProjectRequest } from './types'
 
 const api = new DevelopmentProjectsApi(apiConfig)
 
@@ -47,11 +47,7 @@ export function useInitiateDevelopmentProject() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (req: InitiateDevelopmentProjectRequest) =>
-      fetchJson<{ id: string }>('/api/development-projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(req),
-      }),
+      api.initiateDevelopmentProject({ initiateDevelopmentProjectRequest: req }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['development-projects'] }),
   })
 }

@@ -47,16 +47,6 @@ export const WORKFLOW_PHASES = [
   'Initiated', 'InProgress', 'ClosingScheduled', 'Closed', 'Failed', 'Withdrawn', 'Stalled',
 ] as const
 
-export interface InitiateDevelopmentProjectRequest {
-  landParcelId: string
-  name: string
-  description?: string
-  projectedStartDate?: string
-  projectedEndDate?: string
-  budget?: number
-  homeIds?: string[]
-}
-
 export interface CreateGroundLeaseForm {
   landParcelId: string
   homeId: string

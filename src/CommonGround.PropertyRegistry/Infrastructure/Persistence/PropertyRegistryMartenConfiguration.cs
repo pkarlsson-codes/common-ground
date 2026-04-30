@@ -42,6 +42,7 @@ public static class PropertyRegistryMartenConfiguration
         options.Schema.For<HomeAssessmentView>()
             .DatabaseSchemaName(SchemaName)
             .Index(x => x.UnitId);
+        options.Schema.For<DevelopmentProjectListItemView>().DatabaseSchemaName(SchemaName);
     }
 
     private static void ConfigureProjections(StoreOptions options)
@@ -51,5 +52,6 @@ public static class PropertyRegistryMartenConfiguration
         options.Projections.Add<HomeViewProjection>(ProjectionLifecycle.Async);
         options.Projections.Add<HomeListItemViewProjection>(ProjectionLifecycle.Async);
         options.Projections.Add<HomeAssessmentViewProjection>(ProjectionLifecycle.Async);
+        options.Projections.Add<DevelopmentProjectListItemViewProjection>(ProjectionLifecycle.Async);
     }
 }
