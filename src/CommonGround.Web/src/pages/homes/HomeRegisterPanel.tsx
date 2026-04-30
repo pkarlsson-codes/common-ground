@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRegisterHome } from '../../hooks/homes'
 import { BUILDING_TYPES, HOME_TYPE_LABELS } from '../../hooks/types'
 
@@ -43,6 +43,21 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
   const [form, setForm] = useState<FormState>(() => emptyForm(initialParcelId))
   const registerMutation = useRegisterHome()
   const { success } = useToast()
+  const parcelLocked = Boolean(initialParcelId)
+  const [parcelLabel, setParcelLabel] = useState<string>('')
+
+  useEffect(() => {
+    if (parcelLocked && initialParcelId) {
+      landParcelsApi.getLandParcel({ landParcelId: initialParcelId })
+        .then(p => {
+          setParcelLabel([
+            p.legalParcelNumber,
+            p.address
+          ].filter(Boolean).join(' — '))
+        })
+        .catch(() => setParcelLabel('(Parcel details unavailable)'))
+    }
+  }, [parcelLocked, initialParcelId])
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -85,18 +100,24 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
         <div className="form-grid">
           <div className="form-field full">
             <label className="form-label">Land Parcel</label>
-            <EntityCombobox
-              value={form.landParcelId || null}
-              onChange={id => setForm(f => ({ ...f, landParcelId: id ?? '' }))}
-              fetchOptions={async q => {
-                const result = await landParcelsApi.getLandParcels({ search: q, pageSize: 10 })
-                return (result.items ?? []).map(p => ({
-                  id: p.id!,
-                  label: [p.legalParcelNumber, p.address].filter(Boolean).join(' — '),
-                }))
-              }}
-              placeholder="Search parcels…"
-            />
+            {parcelLocked ? (
+              <div className="form-input" style={{ cursor: 'not-allowed' }}>
+                {parcelLabel || 'Loading…'}
+              </div>
+            ) : (
+              <EntityCombobox
+                value={form.landParcelId || null}
+                onChange={id => setForm(f => ({ ...f, landParcelId: id ?? '' }))}
+                fetchOptions={async q => {
+                  const result = await landParcelsApi.getLandParcels({ search: q, pageSize: 10 })
+                  return (result.items ?? []).map(p => ({
+                    id: p.id!,
+                    label: [p.legalParcelNumber, p.address].filter(Boolean).join(' — '),
+                  }))
+                }}
+                placeholder="Search parcels…"
+              />
+            )}
           </div>
           <div className="form-field full">
             <label className="form-label">Home Type</label>
