@@ -57,307 +57,6 @@
         }
       }
     },
-    "/api/v1/buildings": {
-      "post": {
-        "tags": [
-          "Buildings"
-        ],
-        "summary": "Registers a new building.",
-        "operationId": "registerBuilding",
-        "requestBody": {
-          "x-name": "request",
-          "description": "The building registration details.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterBuildingRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 1
-        },
-        "responses": {
-          "201": {
-            "description": "201 Created with the new building ID.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RegisterBuildingResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "Buildings"
-        ],
-        "summary": "Gets a paginated list of buildings.",
-        "operationId": "getBuildings",
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "description": "The page number (1-based).",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 1
-            },
-            "x-position": 1
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "description": "The number of items per page.",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            },
-            "x-position": 2
-          },
-          {
-            "name": "landParcelId",
-            "in": "query",
-            "description": "Optional land parcel ID filter.",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 3
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "description": "Optional status filter.",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 4
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "200 with a paginated list of buildings.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponseOfBuildingListItemResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/buildings/{buildingId}": {
-      "get": {
-        "tags": [
-          "Buildings"
-        ],
-        "summary": "Gets a building by ID.",
-        "operationId": "getBuilding",
-        "parameters": [
-          {
-            "name": "buildingId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the building to retrieve.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "200 with the building, or 404 if not found.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BuildingResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/buildings/{buildingId}/assessments": {
-      "post": {
-        "tags": [
-          "Buildings"
-        ],
-        "summary": "Records an assessment for a building.",
-        "operationId": "recordBuildingAssessment",
-        "parameters": [
-          {
-            "name": "buildingId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the building to assess.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "request",
-          "description": "The assessment details.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RecordBuildingAssessmentRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "201": {
-            "description": "201 Created, or 404 if not found."
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "Buildings"
-        ],
-        "summary": "Gets a paginated list of assessments for a building.",
-        "operationId": "getBuildingAssessments",
-        "parameters": [
-          {
-            "name": "buildingId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the building.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "description": "The page number (1-based).",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 1
-            },
-            "x-position": 2
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "description": "The number of items per page.",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            },
-            "x-position": 3
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "200 with a paginated list of assessments, or 404 if not found.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponseOfBuildingAssessmentItemResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/buildings/{buildingId}/status": {
-      "patch": {
-        "tags": [
-          "Buildings"
-        ],
-        "summary": "Updates a building's status.",
-        "operationId": "updateBuildingStatus",
-        "parameters": [
-          {
-            "name": "buildingId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the building to update.",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "request",
-          "description": "The new status details.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateBuildingStatusRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": "204 No Content, or 404 if not found."
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/documents": {
       "post": {
         "tags": [
@@ -1088,6 +787,307 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ResaleEstimateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homes": {
+      "post": {
+        "tags": [
+          "Homes"
+        ],
+        "summary": "Registers a new home.",
+        "operationId": "registerHome",
+        "requestBody": {
+          "x-name": "request",
+          "description": "The home registration details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterBuildingRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "201": {
+            "description": "201 Created with the new home ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterBuildingResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Homes"
+        ],
+        "summary": "Gets a paginated list of homes.",
+        "operationId": "getHomes",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number (1-based).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of items per page.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            },
+            "x-position": 2
+          },
+          {
+            "name": "landParcelId",
+            "in": "query",
+            "description": "Optional land parcel ID filter.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 3
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Optional status filter.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 4
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with a paginated list of homes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfBuildingListItemResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homes/{homeId}": {
+      "get": {
+        "tags": [
+          "Homes"
+        ],
+        "summary": "Gets a home by ID.",
+        "operationId": "getHome",
+        "parameters": [
+          {
+            "name": "homeId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the home to retrieve.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with the home, or 404 if not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildingResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homes/{homeId}/assessments": {
+      "post": {
+        "tags": [
+          "Homes"
+        ],
+        "summary": "Records an assessment for a home.",
+        "operationId": "recordHomeAssessment",
+        "parameters": [
+          {
+            "name": "homeId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the home to assess.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The assessment details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordBuildingAssessmentRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "201": {
+            "description": "201 Created, or 404 if not found."
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Homes"
+        ],
+        "summary": "Gets a paginated list of assessments for a home.",
+        "operationId": "getHomeAssessments",
+        "parameters": [
+          {
+            "name": "homeId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the home.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number (1-based).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "x-position": 2
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of items per page.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            },
+            "x-position": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 with a paginated list of assessments, or 404 if not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfBuildingAssessmentItemResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homes/{homeId}/status": {
+      "patch": {
+        "tags": [
+          "Homes"
+        ],
+        "summary": "Updates a home's status.",
+        "operationId": "updateHomeStatus",
+        "parameters": [
+          {
+            "name": "homeId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the home to update.",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "description": "The new status details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBuildingStatusRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": "204 No Content, or 404 if not found."
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -3338,314 +3338,6 @@
   },
   "components": {
     "schemas": {
-      "RegisterBuildingResponse": {
-        "type": "object",
-        "description": "Response returned when a building is successfully registered.",
-        "additionalProperties": false,
-        "properties": {
-          "buildingId": {
-            "type": "string"
-          }
-        }
-      },
-      "RegisterBuildingRequest": {
-        "type": "object",
-        "description": "Request to register a new building on a land parcel.",
-        "additionalProperties": false,
-        "properties": {
-          "landParcelId": {
-            "type": "string"
-          },
-          "buildingType": {
-            "type": "string"
-          },
-          "bedrooms": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "bathrooms": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "squareFootage": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "yearBuilt": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "initialAssessedValue": {
-            "type": "number",
-            "format": "decimal"
-          }
-        }
-      },
-      "BuildingResponse": {
-        "type": "object",
-        "description": "Response DTO for a building detail view.",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "landParcelId": {
-            "type": "string"
-          },
-          "buildingType": {
-            "type": "string"
-          },
-          "bedrooms": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "bathrooms": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "squareFootage": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "yearBuilt": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "assessedValue": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "lastAssessedDate": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "conditionNotes": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string"
-          },
-          "registeredAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ProblemDetails": {
-        "type": "object",
-        "additionalProperties": {
-          "nullable": true
-        },
-        "properties": {
-          "type": {
-            "type": "string",
-            "nullable": true
-          },
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "detail": {
-            "type": "string",
-            "nullable": true
-          },
-          "instance": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "PaginatedResponseOfBuildingListItemResponse": {
-        "type": "object",
-        "description": "Generic paginated response wrapper for API endpoints.",
-        "additionalProperties": false,
-        "required": [
-          "pageNumber",
-          "pageSize",
-          "totalCount",
-          "totalPages"
-        ],
-        "properties": {
-          "items": {
-            "type": "array",
-            "description": "The items for the current page.",
-            "items": {
-              "$ref": "#/components/schemas/BuildingListItemResponse"
-            }
-          },
-          "hasNextPage": {
-            "type": "boolean",
-            "description": "Indicates whether there is a next page of results."
-          },
-          "pageNumber": {
-            "type": "integer",
-            "description": "The current page number (1-based).",
-            "format": "int64"
-          },
-          "pageSize": {
-            "type": "integer",
-            "description": "The number of items per page.",
-            "format": "int64"
-          },
-          "totalCount": {
-            "type": "integer",
-            "description": "The total number of items across all pages.",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "description": "The total number of pages.",
-            "format": "int64"
-          }
-        }
-      },
-      "BuildingListItemResponse": {
-        "type": "object",
-        "description": "Response DTO for a building list item.",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "landParcelId": {
-            "type": "string"
-          },
-          "buildingType": {
-            "type": "string"
-          },
-          "bedrooms": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "bathrooms": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "squareFootage": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "assessedValue": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "status": {
-            "type": "string"
-          }
-        }
-      },
-      "RecordBuildingAssessmentRequest": {
-        "type": "object",
-        "description": "Request to record a new building assessment.",
-        "additionalProperties": false,
-        "properties": {
-          "assessedValue": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "assessmentDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "conditionNotes": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "PaginatedResponseOfBuildingAssessmentItemResponse": {
-        "type": "object",
-        "description": "Generic paginated response wrapper for API endpoints.",
-        "additionalProperties": false,
-        "required": [
-          "pageNumber",
-          "pageSize",
-          "totalCount",
-          "totalPages"
-        ],
-        "properties": {
-          "items": {
-            "type": "array",
-            "description": "The items for the current page.",
-            "items": {
-              "$ref": "#/components/schemas/BuildingAssessmentItemResponse"
-            }
-          },
-          "hasNextPage": {
-            "type": "boolean",
-            "description": "Indicates whether there is a next page of results."
-          },
-          "pageNumber": {
-            "type": "integer",
-            "description": "The current page number (1-based).",
-            "format": "int64"
-          },
-          "pageSize": {
-            "type": "integer",
-            "description": "The number of items per page.",
-            "format": "int64"
-          },
-          "totalCount": {
-            "type": "integer",
-            "description": "The total number of items across all pages.",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "description": "The total number of pages.",
-            "format": "int64"
-          }
-        }
-      },
-      "BuildingAssessmentItemResponse": {
-        "type": "object",
-        "description": "Response DTO for a building assessment list item.",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "buildingId": {
-            "type": "string"
-          },
-          "assessedValue": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "assessmentDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "conditionNotes": {
-            "type": "string",
-            "nullable": true
-          },
-          "assessedBy": {
-            "type": "string"
-          },
-          "recordedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "UpdateBuildingStatusRequest": {
-        "type": "object",
-        "description": "Request to update a building's status.",
-        "additionalProperties": false,
-        "properties": {
-          "newStatus": {
-            "type": "string"
-          }
-        }
-      },
       "UploadDocumentResponse": {
         "type": "object",
         "description": "Returned from POST /api/documents.",
@@ -4188,6 +3880,35 @@
           }
         }
       },
+      "ProblemDetails": {
+        "type": "object",
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "PaginatedResponseOfGroundLeaseListItemResponse": {
         "type": "object",
         "description": "Generic paginated response wrapper for API endpoints.",
@@ -4340,6 +4061,285 @@
             "type": "number",
             "format": "decimal",
             "nullable": true
+          }
+        }
+      },
+      "RegisterBuildingResponse": {
+        "type": "object",
+        "description": "Response returned when a building is successfully registered.",
+        "additionalProperties": false,
+        "properties": {
+          "buildingId": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterBuildingRequest": {
+        "type": "object",
+        "description": "Request to register a new building on a land parcel.",
+        "additionalProperties": false,
+        "properties": {
+          "landParcelId": {
+            "type": "string"
+          },
+          "buildingType": {
+            "type": "string"
+          },
+          "bedrooms": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bathrooms": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "squareFootage": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "yearBuilt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "initialAssessedValue": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "BuildingResponse": {
+        "type": "object",
+        "description": "Response DTO for a building detail view.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "landParcelId": {
+            "type": "string"
+          },
+          "buildingType": {
+            "type": "string"
+          },
+          "bedrooms": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bathrooms": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "squareFootage": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "yearBuilt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "assessedValue": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "lastAssessedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "conditionNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PaginatedResponseOfBuildingListItemResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/BuildingListItemResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "BuildingListItemResponse": {
+        "type": "object",
+        "description": "Response DTO for a building list item.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "landParcelId": {
+            "type": "string"
+          },
+          "buildingType": {
+            "type": "string"
+          },
+          "bedrooms": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bathrooms": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "squareFootage": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "assessedValue": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "RecordBuildingAssessmentRequest": {
+        "type": "object",
+        "description": "Request to record a new building assessment.",
+        "additionalProperties": false,
+        "properties": {
+          "assessedValue": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "assessmentDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "conditionNotes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PaginatedResponseOfBuildingAssessmentItemResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/BuildingAssessmentItemResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "BuildingAssessmentItemResponse": {
+        "type": "object",
+        "description": "Response DTO for a building assessment list item.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "buildingId": {
+            "type": "string"
+          },
+          "assessedValue": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "assessmentDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "conditionNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "assessedBy": {
+            "type": "string"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UpdateBuildingStatusRequest": {
+        "type": "object",
+        "description": "Request to update a building's status.",
+        "additionalProperties": false,
+        "properties": {
+          "newStatus": {
+            "type": "string"
           }
         }
       },

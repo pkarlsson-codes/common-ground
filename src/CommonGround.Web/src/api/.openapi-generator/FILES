@@ -1,8 +1,8 @@
 .openapi-generator-ignore
 apis/AuthApi.ts
-apis/BuildingsApi.ts
 apis/DocumentsApi.ts
 apis/GroundLeasesApi.ts
+apis/HomesApi.ts
 apis/LandParcelsApi.ts
 apis/OidcApi.ts
 apis/PurchaseWorkflowsApi.ts
