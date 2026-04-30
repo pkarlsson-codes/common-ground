@@ -295,7 +295,7 @@ export default function DocumentList({ entityType, entityId }: Props) {
                 </div>
               </div>
               {expandedId === item.documentId && (
-                <DocumentVersionPanel documentId={item.documentId ?? ''} entityType={entityType} entityId={entityId} />
+                <DocumentVersionPanel documentId={item.documentId ?? ''} entityId={entityId} />
               )}
             </div>
           ))}
@@ -334,11 +334,10 @@ export default function DocumentList({ entityType, entityId }: Props) {
 
 interface VersionPanelProps {
   documentId: string
-  entityType: string
   entityId: string
 }
 
-function DocumentVersionPanel({ documentId, entityType, entityId }: VersionPanelProps) {
+function DocumentVersionPanel({ documentId }: VersionPanelProps) {
   const { data: doc, isLoading } = useDocument(documentId)
   const addVersionMutation = useAddDocumentVersion()
   const { success, error: toastError } = useToast()

@@ -319,7 +319,7 @@ function ExpiringDocumentsPanel({ items = [], isLoading }: ExpiringProps) {
             </span>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
               <span style={{ color: isExpiringSoon(item.expiresAt!) ? 'var(--amber-bright)' : 'inherit', fontWeight: 500 }}>
-                Expires {fmtDate(item.expiresAt)}
+                Expires {fmtDate(item.expiresAt ?? undefined)}
               </span>
               {' · '}
               <span style={{ fontFamily: 'var(--font-mono)' }}>{item.currentFileName}</span>

@@ -20,13 +20,13 @@ import NavIdLink from '../components/NavIdLink'
 import Pagination from '../components/Pagination'
 import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
-import { BuildingsApi, LandParcelsApi } from '../api'
+import { HomesApi, LandParcelsApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
 import { getErrorMessage } from '../lib/getErrorMessage'
 import { useToast } from '../hooks/useToast'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
-const buildingsApi = new BuildingsApi(apiConfig)
+const buildingsApi = new HomesApi(apiConfig)
 
 type Panel = 'detail' | 'create' | null
 
@@ -458,7 +458,7 @@ export default function GroundLeasesPage() {
                   value={createForm.homeId || null}
                   onChange={id => setCreateForm(f => ({ ...f, homeId: id ?? '' }))}
                   fetchOptions={async q => {
-                    const result = await buildingsApi.getBuildings({ landParcelId: createForm.landParcelId, pageSize: 10 })
+                    const result = await buildingsApi.getHomes({ landParcelId: createForm.landParcelId, pageSize: 10 })
                     const lower = q.toLowerCase()
                     const items = result.items ?? []
                     const filtered = lower ? items.filter(b =>

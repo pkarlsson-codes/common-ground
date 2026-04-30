@@ -39,7 +39,7 @@ export function useInitiateOccupancyVerification(groundLeaseId: string) {
         caseId,
         initiateOccupancyVerificationRequest: {
           periodYear,
-          surveyDeadline,
+          surveyDeadline: surveyDeadline ? new Date(surveyDeadline) : undefined,
         },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: CASE_KEY(groundLeaseId) }),
@@ -71,7 +71,7 @@ export function useSubmitOccupancyVerification(groundLeaseId: string) {
           isPrimaryResident,
           subletDisclosed,
           majorChanges,
-          submittedDate,
+          submittedDate: new Date(submittedDate),
         },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: CASE_KEY(groundLeaseId) }),
@@ -93,7 +93,7 @@ export function useMarkOccupancyVerificationOverdue(groundLeaseId: string) {
       api.markOccupancyVerificationOverdue({
         caseId,
         verificationId,
-        markOccupancyVerificationOverdueRequest: { deadline },
+        markOccupancyVerificationOverdueRequest: { deadline: new Date(deadline) },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: CASE_KEY(groundLeaseId) }),
   })
@@ -114,7 +114,7 @@ export function useVerifyOccupancy(groundLeaseId: string) {
       api.verifyOccupancy({
         caseId,
         verificationId,
-        verifyOccupancyRequest: { verifiedDate },
+        verifyOccupancyRequest: { verifiedDate: new Date(verifiedDate) },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: CASE_KEY(groundLeaseId) }),
   })
@@ -137,7 +137,7 @@ export function useFailOccupancy(groundLeaseId: string) {
       api.failOccupancy({
         caseId,
         verificationId,
-        failOccupancyRequest: { reason, failedDate },
+        failOccupancyRequest: { reason, failedDate: new Date(failedDate) },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: CASE_KEY(groundLeaseId) }),
   })
@@ -159,7 +159,7 @@ export function useSchedulePropertyInspection(groundLeaseId: string) {
     }) =>
       api.schedulePropertyInspection({
         caseId,
-        schedulePropertyInspectionRequest: { scheduledDate, inspectorName },
+        schedulePropertyInspectionRequest: { scheduledDate: new Date(scheduledDate), inspectorName },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: CASE_KEY(groundLeaseId) }),
   })
@@ -187,7 +187,7 @@ export function useCompletePropertyInspection(groundLeaseId: string) {
         completePropertyInspectionRequest: {
           occupancyConfirmed,
           conditionNotes,
-          completedDate,
+          completedDate: new Date(completedDate),
         },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: CASE_KEY(groundLeaseId) }),
@@ -233,7 +233,7 @@ export function useIdentifyViolation(groundLeaseId: string) {
     }) =>
       api.identifyViolation({
         caseId,
-        identifyViolationRequest: { violationType, description, identifiedDate },
+        identifyViolationRequest: { violationType, description, identifiedDate: new Date(identifiedDate) },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: CASE_KEY(groundLeaseId) }),
   })
@@ -256,7 +256,7 @@ export function useIssueViolationNotice(groundLeaseId: string) {
       api.issueViolationNotice({
         caseId,
         violationId,
-        issueViolationNoticeRequest: { noticeDate, cureDeadline },
+        issueViolationNoticeRequest: { noticeDate: new Date(noticeDate), cureDeadline: new Date(cureDeadline) },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: CASE_KEY(groundLeaseId) }),
   })
@@ -277,7 +277,7 @@ export function useCureViolation(groundLeaseId: string) {
       api.cureViolation({
         caseId,
         violationId,
-        cureViolationRequest: { curedDate },
+        cureViolationRequest: { curedDate: new Date(curedDate) },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: CASE_KEY(groundLeaseId) }),
   })
@@ -300,7 +300,7 @@ export function useEscalateViolation(groundLeaseId: string) {
       api.escalateViolation({
         caseId,
         violationId,
-        escalateViolationRequest: { reason, escalatedDate },
+        escalateViolationRequest: { reason, escalatedDate: new Date(escalatedDate) },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: CASE_KEY(groundLeaseId) }),
   })
@@ -329,6 +329,7 @@ export function useOpenForeclosurePreventionCase(groundLeaseId: string) {
         openForeclosurePreventionCaseRequest: {
           groundLeaseId,
           ...body,
+          recordedDate: new Date(body.recordedDate),
         },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: FPC_KEY(groundLeaseId) }),
@@ -349,7 +350,7 @@ export function useRecordServicerDelinquency(groundLeaseId: string) {
     }) =>
       api.recordServicerDelinquency({
         caseId,
-        recordServicerDelinquencyRequest: body,
+        recordServicerDelinquencyRequest: { ...body, recordedDate: new Date(body.recordedDate) },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: FPC_KEY(groundLeaseId) }),
   })
@@ -369,7 +370,7 @@ export function useMakeCounselingReferral(groundLeaseId: string) {
     }) =>
       api.makeCounselingReferral({
         caseId,
-        makeCounselingReferralRequest: { agencyName, referralDate },
+        makeCounselingReferralRequest: { agencyName, referralDate: new Date(referralDate) },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: FPC_KEY(groundLeaseId) }),
   })
@@ -392,7 +393,7 @@ export function useRecordCounselingOutcome(groundLeaseId: string) {
       api.recordCounselingOutcome({
         caseId,
         referralId,
-        recordCounselingOutcomeRequest: { outcome, outcomeDate },
+        recordCounselingOutcomeRequest: { outcome, outcomeDate: new Date(outcomeDate) },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: FPC_KEY(groundLeaseId) }),
   })
@@ -412,7 +413,7 @@ export function useRequestForbearance(groundLeaseId: string) {
     }) =>
       api.requestForbearance({
         caseId,
-        requestForbearanceRequest: { lenderName, requestedDate },
+        requestForbearanceRequest: { lenderName, requestedDate: new Date(requestedDate) },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: FPC_KEY(groundLeaseId) }),
   })
@@ -437,7 +438,7 @@ export function useRecordForbearanceOutcome(groundLeaseId: string) {
       api.recordForbearanceOutcome({
         caseId,
         requestId,
-        recordForbearanceOutcomeRequest: { outcome, outcomeDate, notes },
+        recordForbearanceOutcomeRequest: { outcome, outcomeDate: new Date(outcomeDate), notes },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: FPC_KEY(groundLeaseId) }),
   })
@@ -461,7 +462,7 @@ export function useActivateCurePeriod(groundLeaseId: string) {
         caseId,
         activateCurePeriodRequest: {
           lraId,
-          activationDate,
+          activationDate: new Date(activationDate),
           curePeriodDays,
         },
       }),
@@ -483,7 +484,7 @@ export function useResolveForeclosurePreventionCase(groundLeaseId: string) {
     }) =>
       api.resolveForeclosurePreventionCase({
         caseId,
-        resolveForeclosurePreventionCaseRequest: { outcome, resolvedDate },
+        resolveForeclosurePreventionCaseRequest: { outcome, resolvedDate: new Date(resolvedDate) },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: FPC_KEY(groundLeaseId) }),
   })
@@ -516,7 +517,7 @@ export function useOpenFpcCase() {
       recordedDate: string
     }) =>
       api.openForeclosurePreventionCase({
-        openForeclosurePreventionCaseRequest: body,
+        openForeclosurePreventionCaseRequest: { ...body, recordedDate: new Date(body.recordedDate) },
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['stewardship', 'fpc', 'all'] })

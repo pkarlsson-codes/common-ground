@@ -81,8 +81,8 @@ export default function ExpiringDocumentsWidget({ daysAhead = 30 }: Props) {
                       ? 'Expired'
                       : days === 1
                         ? 'Expires tomorrow'
-                        : `Expires in ${days} days · ${fmtDate(item.expiresAt)}`
-                    : fmtDate(item.expiresAt)}
+                        : `Expires in ${days} days · ${fmtDate(item.expiresAt ?? undefined)}`
+                    : fmtDate(item.expiresAt ?? undefined)}
                 </div>
               </div>
               <button

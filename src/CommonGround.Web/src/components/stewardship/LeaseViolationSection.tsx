@@ -10,6 +10,8 @@ import {
 import type { LeaseViolationResponse } from '../../api/models'
 import { useToast } from '../../hooks/useToast'
 
+const fmtD = (d: Date | null | undefined) => d ? d.toISOString().slice(0, 10) : undefined
+
 interface Props {
   groundLeaseId: string
   caseId: string
@@ -40,7 +42,7 @@ export default function LeaseViolationSection({ groundLeaseId, caseId }: Props) 
   const active = violations.filter(v => ACTIVE_STATUSES.has(v.status ?? ''))
   const history = violations
     .filter(v => TERMINAL_STATUSES.has(v.status ?? ''))
-    .sort((a, b) => (b.identifiedDate?.localeCompare(a.identifiedDate ?? '') ?? 0))
+    .sort((a, b) => ((b.identifiedDate?.getTime() ?? 0) - (a.identifiedDate?.getTime() ?? 0)))
 
   const [identifyOpen, setIdentifyOpen] = useState(false)
   const [identifyForm, setIdentifyForm] = useState({
@@ -251,9 +253,9 @@ function ViolationCard({
       </div>
       <div style={{ fontSize: 13, marginBottom: 6 }}>{v.description}</div>
       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-dim)', marginBottom: 10 }}>
-        Identified {v.identifiedDate}
-        {v.noticeIssuedDate && ` · Notice ${v.noticeIssuedDate}`}
-        {v.cureDeadline && ` · Cure by ${v.cureDeadline}`}
+        Identified {fmtD(v.identifiedDate)}
+        {v.noticeIssuedDate && ` · Notice ${fmtD(v.noticeIssuedDate)}`}
+        {v.cureDeadline && ` · Cure by ${fmtD(v.cureDeadline)}`}
         {isCureOverdue && ' · OVERDUE'}
       </div>
 
@@ -367,7 +369,7 @@ function ViolationHistoryRow({ v }: { v: LeaseViolationResponse }) {
       }}
     >
       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-secondary)' }}>
-        {v.violationType} · {v.identifiedDate} · <StatusBadge status={v.status ?? ''} />
+        {v.violationType} · {fmtD(v.identifiedDate)} · <StatusBadge status={v.status ?? ''} />
       </div>
       <div style={{ color: 'var(--text-dim)', marginTop: 2 }}>{v.description}</div>
       {v.resolutionNotes && (

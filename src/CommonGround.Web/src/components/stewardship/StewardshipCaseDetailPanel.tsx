@@ -25,7 +25,7 @@ export default function StewardshipCaseDetailPanel({ row, lease, onClose }: Prop
       : row.groundLeaseId)
 
   const subtitleParts = [
-    lease?.parcelAddress ?? row.address,
+    row.address,
     URGENCY_LABEL[row.urgency],
     `Opened ${row.openedDate.toISOString().slice(0, 10)}`,
   ].filter(Boolean)

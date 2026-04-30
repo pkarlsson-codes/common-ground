@@ -12,6 +12,8 @@ import {
 import type { ForeclosurePreventionCaseResponse } from '../../api/models'
 import { useToast } from '../../hooks/useToast'
 
+const fmtD = (d: Date | null | undefined) => d ? d.toISOString().slice(0, 10) : undefined
+
 interface Props {
   fpc: ForeclosurePreventionCaseResponse
   groundLeaseId: string
@@ -147,8 +149,8 @@ export default function ForeclosurePreventionCaseCard({
             {fpc.trigger} · <StatusBadge status={fpc.status ?? ''} />
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>
-            Opened {fpc.openedDate}
-            {fpc.resolvedDate && ` · Resolved ${fpc.resolvedDate}`}
+            Opened {fmtD(fpc.openedDate)}
+            {fpc.resolvedDate && ` · Resolved ${fmtD(fpc.resolvedDate)}`}
           </div>
         </div>
         <span style={{ fontSize: 14, color: 'var(--text-dim)' }}>{expanded ? '↑' : '↓'}</span>
@@ -264,7 +266,7 @@ export default function ForeclosurePreventionCaseCard({
                   {r.agencyName}
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--text-dim)', marginBottom: 4 }}>
-                  Referred {r.referralDate}
+                  Referred {fmtD(r.referralDate)}
                 </div>
                 {r.outcome ? (
                   <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>
@@ -338,7 +340,7 @@ export default function ForeclosurePreventionCaseCard({
                   {req.lenderName}
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--text-dim)', marginBottom: 4 }}>
-                  Requested {req.requestedDate}
+                  Requested {fmtD(req.requestedDate)}
                 </div>
                 {req.outcome ? (
                   <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>
@@ -427,7 +429,7 @@ export default function ForeclosurePreventionCaseCard({
                   LRA: {cp.lraId}
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>
-                  {cp.curePeriodDays} days from {cp.activationDate} to {cp.cureDeadline}
+                  {cp.curePeriodDays} days from {fmtD(cp.activationDate)} to {fmtD(cp.cureDeadline)}
                 </div>
               </div>
             ))}

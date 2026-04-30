@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useHomes } from '../../hooks/homes'
+import type { BuildingListItemResponse } from '../../api'
 import { HOME_TYPE_LABELS } from '../../hooks/types'
 import StatusBadge from '../../components/StatusBadge'
 import HomeRegisterPanel from '../homes/HomeRegisterPanel'
@@ -45,7 +46,7 @@ export default function HomesSection({ parcelId }: Props) {
             {!isLoading && homes.length === 0 && (
               <div className="detail-field__value">No homes registered on this parcel.</div>
             )}
-            {!isLoading && homes.map(h => (
+            {!isLoading && homes.map((h: BuildingListItemResponse) => (
               <div
                 key={h.id}
                 style={{

@@ -5,6 +5,7 @@ import { HOME_TYPE_LABELS, type InitiateDevelopmentProjectRequest } from '../../
 import EntityCombobox from '../../components/EntityCombobox'
 import SlideOver from '../../components/SlideOver'
 import { LandParcelsApi } from '../../api'
+import type { BuildingListItemResponse } from '../../api'
 import { apiConfig } from '../../lib/apiConfig'
 import { useToast } from '../../hooks/useToast'
 
@@ -153,7 +154,7 @@ export default function DevelopmentProjectInitiatePanel({ onClose, initialParcel
             <div className="form-field full">
               <label className="form-label">Associated Homes (optional)</label>
               <div style={{ display: 'grid', gap: 6 }}>
-                {parcelHomes.map(h => (
+                {parcelHomes.map((h: BuildingListItemResponse) => (
                   <label
                     key={h.id}
                     style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, cursor: 'pointer' }}
