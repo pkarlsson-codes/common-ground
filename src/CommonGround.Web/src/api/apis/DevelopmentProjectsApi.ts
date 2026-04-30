@@ -16,10 +16,16 @@
 
 import * as runtime from '../runtime';
 import type {
+  InitiateDevelopmentProjectRequest,
+  InitiateDevelopmentProjectResponse,
   PaginatedResponseOfDevelopmentProjectListItemResponse,
   SortDescriptor,
 } from '../models/index';
 import {
+    InitiateDevelopmentProjectRequestFromJSON,
+    InitiateDevelopmentProjectRequestToJSON,
+    InitiateDevelopmentProjectResponseFromJSON,
+    InitiateDevelopmentProjectResponseToJSON,
     PaginatedResponseOfDevelopmentProjectListItemResponseFromJSON,
     PaginatedResponseOfDevelopmentProjectListItemResponseToJSON,
     SortDescriptorFromJSON,
@@ -31,6 +37,10 @@ export interface GetDevelopmentProjectsRequest {
     pageNumber?: number;
     pageSize?: number;
     sort?: Array<SortDescriptor>;
+}
+
+export interface InitiateDevelopmentProjectOperationRequest {
+    initiateDevelopmentProjectRequest: InitiateDevelopmentProjectRequest;
 }
 
 /**
@@ -57,6 +67,21 @@ export interface DevelopmentProjectsApiInterface {
      * Gets a paginated list of development projects.
      */
     getDevelopmentProjects(requestParameters: GetDevelopmentProjectsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfDevelopmentProjectListItemResponse>;
+
+    /**
+     * 
+     * @summary Initiates a new development project for a land parcel.
+     * @param {InitiateDevelopmentProjectRequest} initiateDevelopmentProjectRequest The initiation request.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DevelopmentProjectsApiInterface
+     */
+    initiateDevelopmentProjectRaw(requestParameters: InitiateDevelopmentProjectOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<InitiateDevelopmentProjectResponse>>;
+
+    /**
+     * Initiates a new development project for a land parcel.
+     */
+    initiateDevelopmentProject(requestParameters: InitiateDevelopmentProjectOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<InitiateDevelopmentProjectResponse>;
 
 }
 
@@ -107,6 +132,45 @@ export class DevelopmentProjectsApi extends runtime.BaseAPI implements Developme
      */
     async getDevelopmentProjects(requestParameters: GetDevelopmentProjectsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfDevelopmentProjectListItemResponse> {
         const response = await this.getDevelopmentProjectsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Initiates a new development project for a land parcel.
+     */
+    async initiateDevelopmentProjectRaw(requestParameters: InitiateDevelopmentProjectOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<InitiateDevelopmentProjectResponse>> {
+        if (requestParameters['initiateDevelopmentProjectRequest'] == null) {
+            throw new runtime.RequiredError(
+                'initiateDevelopmentProjectRequest',
+                'Required parameter "initiateDevelopmentProjectRequest" was null or undefined when calling initiateDevelopmentProject().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/development-projects`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: InitiateDevelopmentProjectRequestToJSON(requestParameters['initiateDevelopmentProjectRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => InitiateDevelopmentProjectResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Initiates a new development project for a land parcel.
+     */
+    async initiateDevelopmentProject(requestParameters: InitiateDevelopmentProjectOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<InitiateDevelopmentProjectResponse> {
+        const response = await this.initiateDevelopmentProjectRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

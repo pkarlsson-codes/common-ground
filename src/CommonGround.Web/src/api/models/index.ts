@@ -33,6 +33,8 @@ export * from './HomeAssessmentItemResponse';
 export * from './HomeListItemResponse';
 export * from './HomeResponse';
 export * from './IdentifyViolationRequest';
+export * from './InitiateDevelopmentProjectRequest';
+export * from './InitiateDevelopmentProjectResponse';
 export * from './InitiateOccupancyVerificationRequest';
 export * from './InitiatePurchaseWorkflowRequest';
 export * from './InitiatePurchaseWorkflowResponse';

@@ -122,6 +122,38 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "DevelopmentProjects"
+        ],
+        "summary": "Initiates a new development project for a land parcel.",
+        "operationId": "initiateDevelopmentProject",
+        "requestBody": {
+          "x-name": "request",
+          "description": "The initiation request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitiateDevelopmentProjectRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "201": {
+            "description": "201 with the ID of the newly created development project.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitiateDevelopmentProjectResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/documents": {
@@ -3204,6 +3236,29 @@
           "Asc",
           "Desc"
         ]
+      },
+      "InitiateDevelopmentProjectResponse": {
+        "type": "object",
+        "description": "Response returned when a development project is successfully initiated.",
+        "additionalProperties": false,
+        "properties": {
+          "projectId": {
+            "type": "string"
+          }
+        }
+      },
+      "InitiateDevelopmentProjectRequest": {
+        "type": "object",
+        "description": "Request to initiate a new development project for a land parcel.",
+        "additionalProperties": false,
+        "properties": {
+          "landParcelId": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
       },
       "UploadDocumentResponse": {
         "type": "object",
