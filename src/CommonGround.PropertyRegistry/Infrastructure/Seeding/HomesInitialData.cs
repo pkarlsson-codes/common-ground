@@ -68,6 +68,14 @@ public sealed class HomesInitialData : IInitialData
                 }
             }
 
+            var initialAssessment = UnitAssessment.Create(
+                entry.InitialAssessedValue,
+                new DateOnly(entry.YearBuilt, 1, 1),
+                appraiserName: null,
+                conditionNotes: null,
+                SeederUserId,
+                DateTimeOffset.UtcNow);
+
             var unit = Home.Register(
                 LandParcelId.Create(landParcelLookup.LandParcelId),
                 HomeType.FromDisplayName(entry.Type),
@@ -75,7 +83,7 @@ public sealed class HomesInitialData : IInitialData
                 entry.Bathrooms,
                 entry.SquareFootage,
                 entry.YearBuilt,
-                entry.InitialAssessedValue,
+                initialAssessment,
                 SeederUserId);
 
             repository.Stage(unit);

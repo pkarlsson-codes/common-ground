@@ -11,11 +11,15 @@ public class HomeTests
     private static readonly UserId StaffUser = UserId.Generate();
     private static readonly LandParcelId ParcelId = LandParcelId.Generate();
 
+    private static readonly UnitAssessment _initialAssessment =
+        UnitAssessment.Create(280000m, new DateOnly(2024, 1, 1), null, null, StaffUser, DateTimeOffset.UtcNow);
+
     private static Home RegisterHome() =>
         Home.Register(
             ParcelId,
             HomeType.SingleFamily,
-            3, 2m, 1200m, 1985, 280000m,
+            3, 2m, 1200m, 1985,
+            _initialAssessment,
             StaffUser);
 
     [Fact]
@@ -31,6 +35,8 @@ public class HomeTests
         unit.YearBuilt.Should().Be(1985);
         unit.Status.Should().Be(HomeStatus.Available);
         unit.RegisteredBy.Should().Be(StaffUser);
+        unit.Assessments.Should().HaveCount(1);
+        unit.Assessments[0].AssessedValue.Should().Be(280000m);
     }
 
 }

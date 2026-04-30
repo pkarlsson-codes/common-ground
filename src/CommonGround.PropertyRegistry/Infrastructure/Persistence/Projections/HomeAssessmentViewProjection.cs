@@ -15,7 +15,6 @@ internal sealed class HomeAssessmentViewProjection : EventProjection
             AssessedValue = e.Data.AssessedValue,
             AssessmentDate = e.Data.AssessmentDate,
             ConditionNotes = e.Data.ConditionNotes,
-            AssessedBy = e.Data.AssessedBy,
             RecordedAt = e.Data.OccurredAt,
         };
 }

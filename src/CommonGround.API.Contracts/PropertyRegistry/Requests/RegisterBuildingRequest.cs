@@ -8,4 +8,8 @@ public sealed record RegisterHomeRequest(
     decimal Bathrooms,
     decimal SquareFootage,
     int YearBuilt,
-    decimal InitialAssessedValue);
+    string AppraiserName,
+    DateOnly InitialAssessedDate,
+    decimal InitialAssessedValue)
+{
+}

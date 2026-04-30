@@ -13,6 +13,8 @@ namespace CommonGround.PropertyRegistry.Application.Commands;
 /// <param name="SquareFootage">Total square footage.</param>
 /// <param name="YearBuilt">Year the home was built.</param>
 /// <param name="InitialAssessedValue">Initial assessed value in dollars.</param>
+/// <param name="InitialAssessmentDate">The date of the initial assessment.</param>
+/// <param name="AppraiserName">The name of the appraiser.</param>
 /// <param name="RegisteredBy">The staff user registering the home.</param>
 public sealed record RegisterHome(
     LandParcelId LandParcelId,
@@ -22,6 +24,8 @@ public sealed record RegisterHome(
     decimal SquareFootage,
     int YearBuilt,
     decimal InitialAssessedValue,
+    DateOnly InitialAssessmentDate,
+    string? AppraiserName,
     UserId RegisteredBy);
 
 /// <summary>Handles <see cref="RegisterHome"/> by creating and persisting a new Home.</summary>
@@ -36,6 +40,14 @@ public static class RegisterHomeHandler
     {
         ArgumentNullException.ThrowIfNull(command);
 
+        var initialAssessment = UnitAssessment.Create(
+            command.InitialAssessedValue,
+            command.InitialAssessmentDate,
+            command.AppraiserName,
+            conditionNotes: null,
+            command.RegisteredBy,
+            DateTimeOffset.UtcNow);
+
         var unit = Home.Register(
             command.LandParcelId,
             command.UnitType,
@@ -43,7 +55,7 @@ public static class RegisterHomeHandler
             command.Bathrooms,
             command.SquareFootage,
             command.YearBuilt,
-            command.InitialAssessedValue,
+            initialAssessment,
             command.RegisteredBy);
 
         repository.Stage(unit);

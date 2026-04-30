@@ -12,5 +12,7 @@ public sealed record HomeRegistered(
     decimal SquareFootage,
     int YearBuilt,
     decimal InitialAssessedValue,
+    DateOnly InitiallyAssessedAt,
+    string? InitialAppraiserName,
     string RegisteredBy,
     DateTimeOffset OccurredAt) : IDomainEvent;

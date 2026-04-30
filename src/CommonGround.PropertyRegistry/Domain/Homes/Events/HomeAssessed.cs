@@ -7,6 +7,7 @@ public sealed record HomeAssessed(
     string AggregateId,
     decimal AssessedValue,
     DateOnly AssessmentDate,
+    string? AppraiserName,
     string? ConditionNotes,
-    string AssessedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RecordedById)
+: DomainEvent(AggregateId);

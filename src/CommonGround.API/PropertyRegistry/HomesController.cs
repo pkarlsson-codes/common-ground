@@ -44,6 +44,8 @@ public sealed class HomesController(IMessageBus bus) : ControllerBase
             request.SquareFootage,
             request.YearBuilt,
             request.InitialAssessedValue,
+            request.InitialAssessedDate,
+            request.AppraiserName,
             userId);
 
         var id = await bus.InvokeAsync<HomeId>(command, cancellationToken);
@@ -130,6 +132,7 @@ public sealed class HomesController(IMessageBus bus) : ControllerBase
             HomeId.Create(homeId),
             request.AssessedValue,
             request.AssessmentDate,
+            request.AppraiserName,
             request.ConditionNotes,
             userId);
 

@@ -52,11 +52,12 @@ public sealed class Home : AggregateRoot<HomeId>
         decimal bathrooms,
         decimal squareFootage,
         int yearBuilt,
-        decimal initialAssessedValue,
+        UnitAssessment initialAssessment,
         UserId registeredBy)
     {
         ArgumentNullException.ThrowIfNull(landParcelId);
         ArgumentNullException.ThrowIfNull(unitType);
+        ArgumentNullException.ThrowIfNull(initialAssessment);
         ArgumentNullException.ThrowIfNull(registeredBy);
 
         if (bedrooms < 0)
@@ -71,9 +72,6 @@ public sealed class Home : AggregateRoot<HomeId>
         if (yearBuilt < 1800 || yearBuilt > DateTimeOffset.UtcNow.Year + 5)
             throw new BusinessRuleViolationException($"Year built must be between 1800 and {DateTimeOffset.UtcNow.Year + 5}.");
 
-        if (initialAssessedValue < 0)
-            throw new BusinessRuleViolationException("Assessed value cannot be negative.");
-
         var home = new Home();
 
         home.ApplyChange(new HomeRegistered(
@@ -84,7 +82,9 @@ public sealed class Home : AggregateRoot<HomeId>
             bathrooms,
             squareFootage,
             yearBuilt,
-            initialAssessedValue,
+            initialAssessment.AssessedValue,
+            initialAssessment.AssessedAt,
+            initialAssessment.AppraiserName,
             registeredBy.Value,
             DateTimeOffset.UtcNow));
 
@@ -92,14 +92,14 @@ public sealed class Home : AggregateRoot<HomeId>
     }
 
     /// <summary>Records a new assessed value for this unit.</summary>
-    public void RecordAssessment(decimal assessedValue, DateOnly assessmentDate, string? conditionNotes, UserId assessedBy)
+    public void RecordAssessment(decimal assessedValue, DateOnly assessmentDate, string? appraiserName, string? conditionNotes, UserId recordedById)
     {
-        ArgumentNullException.ThrowIfNull(assessedBy);
+        ArgumentNullException.ThrowIfNull(recordedById);
 
         if (assessedValue < 0)
             throw new BusinessRuleViolationException("Assessed value cannot be negative.");
 
-        ApplyChange(new HomeAssessed(Id.Value, assessedValue, assessmentDate, conditionNotes, assessedBy.Value, DateTimeOffset.UtcNow));
+        ApplyChange(new HomeAssessed(Id.Value, assessedValue, assessmentDate, appraiserName, conditionNotes, recordedById.Value));
     }
 
     /// <inheritdoc/>
@@ -124,10 +124,17 @@ public sealed class Home : AggregateRoot<HomeId>
         YearBuilt = e.YearBuilt;
         Status = HomeStatus.Available;
         RegisteredBy = UserId.Create(e.RegisteredBy);
+        _assessments.Add(UnitAssessment.Reconstitute(
+            e.InitialAssessedValue,
+            e.InitiallyAssessedAt,
+            e.InitialAppraiserName,
+            conditionNotes: null,
+            RegisteredBy,
+            e.OccurredAt));
     }
 
     private void Apply(HomeAssessed e)
     {
-        _assessments.Add(new UnitAssessment(e.AssessedValue, e.AssessmentDate, e.ConditionNotes, UserId.Create(e.AssessedBy), e.OccurredAt));
+        _assessments.Add(UnitAssessment.Reconstitute(e.AssessedValue, e.AssessmentDate, e.AppraiserName, e.ConditionNotes, UserId.Create(e.RecordedById), e.OccurredAt));
     }
 }
