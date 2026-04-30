@@ -1,28 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { DevelopmentProjectsApi } from '../api'
+import { apiConfig } from '../lib/apiConfig'
 import type { InitiateDevelopmentProjectRequest } from './types'
 
-interface DevelopmentProjectListItem {
+const api = new DevelopmentProjectsApi(apiConfig)
+
+interface DevelopmentProjectDetail {
   id: string
   landParcelId: string
-  name: string
-  status: string
-  projectedEndDate?: string
-}
-
-interface DevelopmentProjectDetail extends DevelopmentProjectListItem {
   description?: string
+  status: string
   projectedStartDate?: string
+  projectedEndDate?: string
   actualCompletionDate?: string
   budget?: number
   homeIds?: string[]
-}
-
-interface PaginatedResponse<T> {
-  items: T[]
-  totalCount: number
-  totalPages: number
-  page: number
-  pageSize: number
 }
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
@@ -32,16 +24,14 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   return res.json()
 }
 
-export function useDevelopmentProjects(params: { page: number; pageSize?: number; landParcelId?: string; status?: string }) {
-  const qs = new URLSearchParams()
-  qs.set('page', String(params.page))
-  qs.set('pageSize', String(params.pageSize ?? 20))
-  if (params.landParcelId) qs.set('landParcelId', params.landParcelId)
-  if (params.status) qs.set('status', params.status)
-
-  return useQuery<PaginatedResponse<DevelopmentProjectListItem>>({
-    queryKey: ['development-projects', params.page, params.landParcelId, params.status],
-    queryFn: () => fetchJson(`/api/development-projects?${qs}`),
+export function useDevelopmentProjects(params: { pageNumber: number; pageSize?: number; filterSearch?: string }) {
+  return useQuery({
+    queryKey: ['development-projects', params.pageNumber, params.filterSearch],
+    queryFn: () => api.getDevelopmentProjects({
+      pageNumber: params.pageNumber,
+      pageSize: params.pageSize ?? 20,
+      filterSearch: params.filterSearch,
+    }),
   })
 }
 
