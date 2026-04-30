@@ -49,3 +49,6 @@ echo "Generating TypeScript API clients..."
 npm --prefix "$FRONTEND_PATH" run generate-api-from-spec
 
 echo "OpenAPI specification and API clients generation completed successfully!"
+echo "Adding // @ts-nocheck to all generated API files..."
+find "$FRONTEND_PATH/src/api" -type f -name "*.ts" -exec \
+    sed -i '1s;^;// @ts-nocheck\n;' {} +
