@@ -17,15 +17,15 @@ public sealed class HomesController(IHomesApiClient client) : ControllerBase
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>201 Created with the new home ID.</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(RegisterBuildingResponse), 201)]
+    [ProducesResponseType(typeof(RegisterHomeResponse), 201)]
     [EndpointName("registerHome")]
     public async Task<IActionResult> RegisterHome(
-        [FromBody] RegisterBuildingRequest request,
+        [FromBody] RegisterHomeRequest request,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
         var result = await client.RegisterHomeAsync(request, cancellationToken).ConfigureAwait(false);
-        return CreatedAtAction(nameof(GetHome), new { homeId = result.BuildingId }, result);
+        return CreatedAtAction(nameof(GetHome), new { homeId = result.HomeId }, result);
     }
 
     /// <summary>Gets a home by ID.</summary>
@@ -33,7 +33,7 @@ public sealed class HomesController(IHomesApiClient client) : ControllerBase
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>200 with the home, or 404 if not found.</returns>
     [HttpGet("{homeId}")]
-    [ProducesResponseType(typeof(BuildingResponse), 200)]
+    [ProducesResponseType(typeof(HomeResponse), 200)]
     [ProducesResponseType(404)]
     [EndpointName("getHome")]
     public async Task<IActionResult> GetHome(string homeId, CancellationToken cancellationToken)
@@ -52,7 +52,7 @@ public sealed class HomesController(IHomesApiClient client) : ControllerBase
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>200 with a paginated list of homes.</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(PaginatedResponse<BuildingListItemResponse>), 200)]
+    [ProducesResponseType(typeof(PaginatedResponse<HomeListItemResponse>), 200)]
     [EndpointName("getHomes")]
     public async Task<IActionResult> GetHomes(
         [FromQuery] int page = 1,
@@ -79,7 +79,7 @@ public sealed class HomesController(IHomesApiClient client) : ControllerBase
     [EndpointName("recordHomeAssessment")]
     public async Task<IActionResult> RecordHomeAssessment(
         string homeId,
-        [FromBody] RecordBuildingAssessmentRequest request,
+        [FromBody] RecordHomeAssessmentRequest request,
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
@@ -96,7 +96,7 @@ public sealed class HomesController(IHomesApiClient client) : ControllerBase
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>200 with a paginated list of assessments, or 404 if not found.</returns>
     [HttpGet("{homeId}/assessments")]
-    [ProducesResponseType(typeof(PaginatedResponse<BuildingAssessmentItemResponse>), 200)]
+    [ProducesResponseType(typeof(PaginatedResponse<HomeAssessmentItemResponse>), 200)]
     [ProducesResponseType(404)]
     [EndpointName("getHomeAssessments")]
     public async Task<IActionResult> GetHomeAssessments(
@@ -108,25 +108,5 @@ public sealed class HomesController(IHomesApiClient client) : ControllerBase
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
         var result = await client.GetHomeAssessmentsAsync(homeId, page, pageSize, cancellationToken);
         return Ok(result);
-    }
-
-    /// <summary>Updates a home's status.</summary>
-    /// <param name="homeId">The ID of the home to update.</param>
-    /// <param name="request">The new status details.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>204 No Content, or 404 if not found.</returns>
-    [HttpPatch("{homeId}/status")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(404)]
-    [EndpointName("updateHomeStatus")]
-    public async Task<IActionResult> UpdateHomeStatus(
-        string homeId,
-        [FromBody] UpdateBuildingStatusRequest request,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
-        ArgumentNullException.ThrowIfNull(request);
-        await client.UpdateHomeStatusAsync(homeId, request, cancellationToken);
-        return NoContent();
     }
 }

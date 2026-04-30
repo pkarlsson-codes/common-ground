@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
 using CommonGround.API.Contracts.Stewardship.Requests;
-using CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
 using CommonGround.Stewardship.Infrastructure.Persistence;
 using FluentAssertions;
 

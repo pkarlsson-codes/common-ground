@@ -1,9 +1,9 @@
 namespace CommonGround.API.Contracts.PropertyRegistry.Responses;
 
-/// <summary>Response DTO for a building assessment list item.</summary>
-public sealed record BuildingAssessmentItemResponse(
+/// <summary>Response DTO for a home assessment list item.</summary>
+public sealed record HomeAssessmentItemResponse(
     string Id,
-    string BuildingId,
+    string HomeId,
     decimal AssessedValue,
     DateOnly AssessmentDate,
     string? ConditionNotes,

@@ -1,6 +1,5 @@
 using CommonGround.API.Contracts.Stewardship.Requests;
 using CommonGround.API.Infrastructure.Auth;
-using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Persistence;
 using CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
 using CommonGround.Stewardship.Application.Queries;

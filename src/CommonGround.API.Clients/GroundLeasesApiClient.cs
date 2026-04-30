@@ -26,7 +26,7 @@ public sealed class GroundLeasesApiClient(
 
     /// <inheritdoc/>
     public async Task<PaginatedResponse<GroundLeaseListItemResponse>> GetGroundLeasesAsync(
-        int page, int pageSize, string? status, string? landParcelId, string? buildingId, string? search, CancellationToken cancellationToken)
+        int page, int pageSize, string? status, string? landParcelId, string? homeId, string? search, CancellationToken cancellationToken)
     {
         var qs = $"?page.number={page}&page.size={pageSize}";
         if (!string.IsNullOrWhiteSpace(status))
@@ -39,9 +39,9 @@ public sealed class GroundLeasesApiClient(
             qs += $"&filter.landParcelId={Uri.EscapeDataString(landParcelId)}";
         }
 
-        if (!string.IsNullOrWhiteSpace(buildingId))
+        if (!string.IsNullOrWhiteSpace(homeId))
         {
-            qs += $"&filter.buildingId={Uri.EscapeDataString(buildingId)}";
+            qs += $"&filter.homeId={Uri.EscapeDataString(homeId)}";
         }
 
         if (!string.IsNullOrWhiteSpace(search))

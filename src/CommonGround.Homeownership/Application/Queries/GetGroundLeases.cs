@@ -1,12 +1,11 @@
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
-using CommonGround.PropertyRegistry.Domain.LeasableUnits;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
 using Marten;
 using Marten.Pagination;
-using System;
 
 namespace CommonGround.Homeownership.Application.Queries;
 
@@ -15,7 +14,7 @@ public sealed record GetGroundLeases(
     PageSpec Page,
     IReadOnlyList<GroundLeaseStatus>? Statuses = null,
     LandParcelId? LandParcelId = null,
-    LeasableUnitId? UnitId = null,
+    HomeId? UnitId = null,
     string? Search = null);
 
 /// <summary>Handles <see cref="GetGroundLeases"/>.</summary>
@@ -44,7 +43,7 @@ public static class GetGroundLeasesHandler
 
         if (request.UnitId is not null)
         {
-            query = query.Where(v => v.BuildingId == request.UnitId.Value);
+            query = query.Where(v => v.HomeId == request.UnitId.Value);
         }
 
         if (!string.IsNullOrWhiteSpace(request.Search))

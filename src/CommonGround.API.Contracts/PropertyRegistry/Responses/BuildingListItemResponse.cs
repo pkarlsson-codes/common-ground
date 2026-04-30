@@ -1,10 +1,10 @@
 namespace CommonGround.API.Contracts.PropertyRegistry.Responses;
 
-/// <summary>Response DTO for a building list item.</summary>
-public sealed record BuildingListItemResponse(
+/// <summary>Response DTO for a home list item.</summary>
+public sealed record HomeListItemResponse(
     string Id,
     string LandParcelId,
-    string BuildingType,
+    string HomeType,
     int Bedrooms,
     decimal Bathrooms,
     decimal SquareFootage,

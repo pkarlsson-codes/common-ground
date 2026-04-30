@@ -1,4 +1,3 @@
-using CommonGround.PropertyRegistry.Domain.DevelopmentProjects;
 using CommonGround.PropertyRegistry.Domain.DevelopmentProjects.Events;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;

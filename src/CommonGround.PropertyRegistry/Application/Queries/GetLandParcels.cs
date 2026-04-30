@@ -1,6 +1,5 @@
 using CommonGround.PropertyRegistry.Application.ReadModels;
 using System.Globalization;
-using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
 using Marten;

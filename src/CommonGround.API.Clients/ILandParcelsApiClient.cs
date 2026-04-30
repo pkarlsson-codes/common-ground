@@ -27,41 +27,6 @@ public interface ILandParcelsApiClient
     /// <returns>A paginated list of land parcel summaries.</returns>
     Task<PaginatedResponse<LandParcelListItemResponse>> GetLandParcelsAsync(int page, int pageSize, string? search, CancellationToken cancellationToken);
 
-    /// <summary>Starts construction for a land parcel.</summary>
-    /// <param name="landParcelId">The ID of the land parcel to transition.</param>
-    /// <param name="request">The transition request.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    Task StartParcelConstructionAsync(string landParcelId, StartParcelConstructionRequest request, CancellationToken cancellationToken);
-
-    /// <summary>Completes construction for a land parcel.</summary>
-    /// <param name="landParcelId">The ID of the land parcel to transition.</param>
-    /// <param name="request">The transition request.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    Task CompleteParcelConstructionAsync(string landParcelId, CompleteParcelConstructionRequest request, CancellationToken cancellationToken);
-
-    /// <summary>Suspends construction for a land parcel.</summary>
-    /// <param name="landParcelId">The ID of the land parcel to transition.</param>
-    /// <param name="request">The transition request.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    Task SuspendParcelConstructionAsync(string landParcelId, SuspendParcelConstructionRequest request, CancellationToken cancellationToken);
-
-    /// <summary>Lists a land parcel for placement.</summary>
-    /// <param name="landParcelId">The ID of the land parcel to transition.</param>
-    /// <param name="request">The transition request.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    Task ListParcelForPlacementAsync(string landParcelId, ListParcelForPlacementRequest request, CancellationToken cancellationToken);
-
-    /// <summary>Withdraws a land parcel for redevelopment.</summary>
-    /// <param name="landParcelId">The ID of the land parcel to transition.</param>
-    /// <param name="request">The transition request.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    Task WithdrawParcelForRedevelopmentAsync(string landParcelId, WithdrawParcelForRedevelopmentRequest request, CancellationToken cancellationToken);
-
     /// <summary>Decommissions a land parcel.</summary>
     /// <param name="landParcelId">The ID of the land parcel to transition.</param>
     /// <param name="request">The transition request.</param>

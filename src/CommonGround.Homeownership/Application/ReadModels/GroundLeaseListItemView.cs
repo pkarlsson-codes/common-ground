@@ -10,7 +10,7 @@ public class GroundLeaseListItemView
     public string LandParcelId { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the building ID.</summary>
-    public string BuildingId { get; set; } = string.Empty;
+    public string HomeId { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the lease start date.</summary>
     public DateOnly LeaseStartDate { get; set; }

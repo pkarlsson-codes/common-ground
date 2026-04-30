@@ -1,5 +1,5 @@
 using CommonGround.PropertyRegistry.Application.ReadModels;
-using CommonGround.PropertyRegistry.Domain.LeasableUnits;
+using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
 using Marten;
@@ -10,7 +10,7 @@ namespace CommonGround.PropertyRegistry.Application.Queries;
 /// <summary>Returns a paginated list of assessments for a home, newest first.</summary>
 /// <param name="UnitId">The ID of the home whose assessments to retrieve.</param>
 /// <param name="Page">The pagination spec.</param>
-public sealed record GetHomeAssessments(LeasableUnitId UnitId, PageSpec Page);
+public sealed record GetHomeAssessments(HomeId UnitId, PageSpec Page);
 
 /// <summary>Handles <see cref="GetHomeAssessments"/>.</summary>
 public static class GetHomeAssessmentsHandler

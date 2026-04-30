@@ -9,8 +9,8 @@ public sealed class GetGroundLeasesFilter
     /// <summary>Optional land parcel ID filter.</summary>
     public string? LandParcelId { get; init; }
 
-    /// <summary>Optional building ID filter.</summary>
-    public string? BuildingId { get; init; }
+    /// <summary>Optional home ID filter.</summary>
+    public string? HomeId { get; init; }
 
     /// <summary>Optional free-text search across homeowner name and email.</summary>
     public string? Search { get; init; }

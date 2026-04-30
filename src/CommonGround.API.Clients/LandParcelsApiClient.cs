@@ -41,46 +41,6 @@ public sealed class LandParcelsApiClient(
     }
 
     /// <inheritdoc/>
-    public async Task StartParcelConstructionAsync(string landParcelId, StartParcelConstructionRequest request, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
-        ArgumentNullException.ThrowIfNull(request);
-        await PostAsync($"api/land-parcels/{landParcelId}/construction/start", request, cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
-    public async Task CompleteParcelConstructionAsync(string landParcelId, CompleteParcelConstructionRequest request, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
-        ArgumentNullException.ThrowIfNull(request);
-        await PostAsync($"api/land-parcels/{landParcelId}/construction/complete", request, cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
-    public async Task SuspendParcelConstructionAsync(string landParcelId, SuspendParcelConstructionRequest request, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
-        ArgumentNullException.ThrowIfNull(request);
-        await PostAsync($"api/land-parcels/{landParcelId}/construction/suspend", request, cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
-    public async Task ListParcelForPlacementAsync(string landParcelId, ListParcelForPlacementRequest request, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
-        ArgumentNullException.ThrowIfNull(request);
-        await PostAsync($"api/land-parcels/{landParcelId}/placement/list", request, cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
-    public async Task WithdrawParcelForRedevelopmentAsync(string landParcelId, WithdrawParcelForRedevelopmentRequest request, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
-        ArgumentNullException.ThrowIfNull(request);
-        await PostAsync($"api/land-parcels/{landParcelId}/redevelopment/withdraw", request, cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
     public async Task DecommissionParcelAsync(string landParcelId, DecommissionParcelRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);

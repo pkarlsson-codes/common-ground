@@ -101,58 +101,6 @@ public sealed class LandParcelsController(IMessageBus bus) : ControllerBase
         return Ok(response);
     }
 
-    /// <summary>Lists a land parcel for placement.</summary>
-    /// <param name="landParcelId">The ID of the land parcel to transition.</param>
-    /// <param name="request">The transition request.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>No content if successful.</returns>
-    [HttpPost("{landParcelId}/placement/list")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(404)]
-    [EndpointName("listLandParcelForPlacement")]
-    public async Task<IActionResult> ListLandParcelForPlacement(
-        string landParcelId,
-        [FromBody] ListParcelForPlacementRequest request,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
-        ArgumentNullException.ThrowIfNull(request);
-
-        var userId = HttpContext.GetUserId();
-
-        await bus.InvokeAsync(
-            new ListParcelForPlacement(LandParcelId.Create(landParcelId), userId),
-            cancellationToken).ConfigureAwait(false);
-
-        return NoContent();
-    }
-
-    /// <summary>Withdraws a land parcel for redevelopment.</summary>
-    /// <param name="landParcelId">The ID of the land parcel to transition.</param>
-    /// <param name="request">The transition request.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>No content if successful.</returns>
-    [HttpPost("{landParcelId}/redevelopment/withdraw")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(404)]
-    [EndpointName("withdrawLandParcelForRedevelopment")]
-    public async Task<IActionResult> WithdrawLandParcelForRedevelopment(
-        string landParcelId,
-        [FromBody] WithdrawParcelForRedevelopmentRequest request,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
-        ArgumentNullException.ThrowIfNull(request);
-
-        var userId = HttpContext.GetUserId();
-
-        await bus.InvokeAsync(
-            new WithdrawParcelForRedevelopment(LandParcelId.Create(landParcelId), userId),
-            cancellationToken).ConfigureAwait(false);
-
-        return NoContent();
-    }
-
     /// <summary>Decommissions a land parcel.</summary>
     /// <param name="landParcelId">The ID of the land parcel to transition.</param>
     /// <param name="request">The transition request.</param>

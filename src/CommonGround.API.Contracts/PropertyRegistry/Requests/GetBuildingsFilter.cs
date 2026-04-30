@@ -3,7 +3,7 @@ namespace CommonGround.API.Contracts.PropertyRegistry.Requests;
 /// <summary>
 /// Filter parameters for retrieving buildings.
 /// </summary>
-public sealed class GetBuildingsFilter
+public sealed class GetHomesFilter
 {
     /// <summary>
     /// Optional filter for land parcel IDs.
@@ -11,7 +11,7 @@ public sealed class GetBuildingsFilter
     public IReadOnlyList<string>? LandParcelIds { get; init; }
 
     /// <summary>
-    /// Optional status filter for buildings.
+    /// Optional status filter.
     /// </summary>
     public IReadOnlyList<string>? Statuses { get; init; }
 }

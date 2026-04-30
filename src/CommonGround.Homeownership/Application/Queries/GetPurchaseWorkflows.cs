@@ -4,7 +4,6 @@ using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
 using Marten;
 using Marten.Pagination;
-using System;
 
 namespace CommonGround.Homeownership.Application.Queries;
 

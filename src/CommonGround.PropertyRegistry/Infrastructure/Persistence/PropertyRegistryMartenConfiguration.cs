@@ -4,7 +4,6 @@ using CommonGround.PropertyRegistry.Infrastructure.Seeding;
 using JasperFx.Events.Projections;
 using Marten;
 using Weasel.Postgresql;
-using Weasel.Postgresql.Tables;
 
 namespace CommonGround.PropertyRegistry.Infrastructure.Persistence;
 

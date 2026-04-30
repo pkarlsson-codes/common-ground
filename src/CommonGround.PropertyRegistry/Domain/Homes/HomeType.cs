@@ -1,6 +1,6 @@
 using CommonGround.SharedKernel.Domain;
 
-namespace CommonGround.PropertyRegistry.Domain.LeasableUnits;
+namespace CommonGround.PropertyRegistry.Domain.Homes;
 
 /// <summary>Physical type of a CLT home.</summary>
 public sealed class HomeType : Enumeration<HomeType>

@@ -1,6 +1,6 @@
 using CommonGround.PropertyRegistry.Domain.DevelopmentProjects;
+using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
-using CommonGround.PropertyRegistry.Domain.LeasableUnits;
 using CommonGround.PropertyRegistry.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,7 +13,7 @@ public static class PropertyRegistryServiceCollectionExtensions
     public static IServiceCollection AddPropertyRegistry(this IServiceCollection services)
     {
         services.AddScoped<ILandParcelRepository, LandParcelRepository>();
-        services.AddScoped<ILeasableUnitRepository, LeasableUnitRepository>();
+        services.AddScoped<IHomeRepository, HomeRepository>();
         services.AddScoped<IDevelopmentProjectRepository, DevelopmentProjectRepository>();
         return services;
     }

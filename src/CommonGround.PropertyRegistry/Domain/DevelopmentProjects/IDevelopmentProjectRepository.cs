@@ -1,4 +1,3 @@
-using CommonGround.PropertyRegistry.Domain.DevelopmentProjects;
 using CommonGround.SharedKernel.Persistence;
 
 namespace CommonGround.PropertyRegistry.Domain.DevelopmentProjects;

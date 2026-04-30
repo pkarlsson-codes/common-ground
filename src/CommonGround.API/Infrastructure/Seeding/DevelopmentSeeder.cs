@@ -1,6 +1,5 @@
 using Marten;
 using Marten.Schema;
-using Microsoft.Extensions.Logging;
 
 namespace CommonGround.API.Infrastructure.Seeding;
 

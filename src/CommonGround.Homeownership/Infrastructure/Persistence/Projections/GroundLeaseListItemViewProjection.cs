@@ -13,7 +13,7 @@ internal sealed class GroundLeaseListItemViewProjection : SingleStreamProjection
         {
             Id = e.Data.AggregateId,
             LandParcelId = e.Data.LandParcelId,
-            BuildingId = e.Data.BuildingId,
+            HomeId = e.Data.BuildingId,
             LeaseStartDate = e.Data.LeaseStartDate,
             TermYears = e.Data.TermYears,
             Status = "Active",

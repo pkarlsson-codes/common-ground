@@ -1,6 +1,6 @@
 using System.Text.Json;
+using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
-using CommonGround.PropertyRegistry.Domain.LeasableUnits;
 using CommonGround.PropertyRegistry.Infrastructure.Persistence;
 using CommonGround.SharedKernel.Domain;
 using Marten;
@@ -33,7 +33,7 @@ public sealed class HomesInitialData : IInitialData
         }
 
         using var session = store.LightweightSession();
-        var repository = new LeasableUnitRepository(session, NullLogger<LeasableUnitRepository>.Instance);
+        var repository = new HomeRepository(session, NullLogger<HomeRepository>.Instance);
 
         foreach (var entry in entries)
         {

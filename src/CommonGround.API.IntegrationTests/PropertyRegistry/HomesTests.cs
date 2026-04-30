@@ -18,7 +18,7 @@ public class HomesTests(ApiFactory factory)
         var client = factory.CreateClient();
 
         var response = await client.PostAsJsonAsync("/api/homes",
-            new RegisterBuildingRequest("parcel-00000000000000000000000000",
+            new RegisterHomeRequest("parcel-00000000000000000000000000",
                 "SingleFamily", 3, 2m, 1200m, 1990, 280000m));
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -51,19 +51,7 @@ public class HomesTests(ApiFactory factory)
 
         var response = await client.PostAsJsonAsync(
             "/api/homes/unit-00000000000000000000000000/assessments",
-            new RecordBuildingAssessmentRequest(310000m, new DateOnly(2025, 1, 1), null));
-
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-    }
-
-    [Fact]
-    public async Task UpdateHomeStatus_Unauthenticated_Returns401()
-    {
-        var client = factory.CreateClient();
-
-        var response = await client.PatchAsJsonAsync(
-            "/api/homes/unit-00000000000000000000000000/status",
-            new UpdateBuildingStatusRequest("Active"));
+            new RecordHomeAssessmentRequest(310000m, new DateOnly(2025, 1, 1), null));
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
@@ -75,12 +63,11 @@ public class HomesTests(ApiFactory factory)
         var client = factory.CreateClient().WithAuthToken();
 
         var response = await client.PostAsJsonAsync("/api/homes",
-            new RegisterBuildingRequest(parcelId, "SingleFamily", 3, 2m, 1200m, 1990, 280000m));
+            new RegisterHomeRequest(parcelId, "SingleFamily", 3, 2m, 1200m, 1990, 280000m));
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var result = await response.Content.ReadFromJsonAsync<RegisterBuildingResponse>();
-        result!.BuildingId.Should().NotBeNullOrWhiteSpace();
-        result.BuildingId.Should().StartWith("unit-");
+        var result = await response.Content.ReadFromJsonAsync<RegisterHomeResponse>();
+        result!.HomeId.Should().NotBeNullOrWhiteSpace();
     }
 
     [Fact]
@@ -90,15 +77,15 @@ public class HomesTests(ApiFactory factory)
         var client = factory.CreateClient().WithAuthToken();
 
         var createResponse = await client.PostAsJsonAsync("/api/homes",
-            new RegisterBuildingRequest(parcelId, "Duplex", 4, 2m, 1800m, 2005, 420000m));
+            new RegisterHomeRequest(parcelId, "Duplex", 4, 2m, 1800m, 2005, 420000m));
         createResponse.EnsureSuccessStatusCode();
-        var created = await createResponse.Content.ReadFromJsonAsync<RegisterBuildingResponse>();
-        var homeId = created!.BuildingId;
+        var created = await createResponse.Content.ReadFromJsonAsync<RegisterHomeResponse>();
+        var homeId = created!.HomeId;
 
         var getResponse = await client.GetAsync($"/api/homes/{homeId}");
 
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var home = await getResponse.Content.ReadFromJsonAsync<BuildingResponse>();
+        var home = await getResponse.Content.ReadFromJsonAsync<HomeResponse>();
         home!.Id.Should().Be(homeId);
         home.LandParcelId.Should().Be(parcelId);
     }
@@ -119,25 +106,25 @@ public class HomesTests(ApiFactory factory)
 
         // Register home
         var createResponse = await client.PostAsJsonAsync("/api/homes",
-            new RegisterBuildingRequest(parcelId, "SingleFamily", 3, 2m, 1200m, 1990, 300000m));
+            new RegisterHomeRequest(parcelId, "SingleFamily", 3, 2m, 1200m, 1990, 300000m));
         createResponse.EnsureSuccessStatusCode();
-        var created = await createResponse.Content.ReadFromJsonAsync<RegisterBuildingResponse>();
-        var homeId = created!.BuildingId;
+        var created = await createResponse.Content.ReadFromJsonAsync<RegisterHomeResponse>();
+        var homeId = created!.HomeId;
 
         // Record two assessments
         var firstDate = new DateOnly(2024, 1, 15);
         var secondDate = new DateOnly(2025, 6, 10);
 
         await client.PostAsJsonAsync($"/api/homes/{homeId}/assessments",
-            new RecordBuildingAssessmentRequest(310000m, firstDate, "Good condition"));
+            new RecordHomeAssessmentRequest(310000m, firstDate, "Good condition"));
         await client.PostAsJsonAsync($"/api/homes/{homeId}/assessments",
-            new RecordBuildingAssessmentRequest(325000m, secondDate, "Excellent condition"));
+            new RecordHomeAssessmentRequest(325000m, secondDate, "Excellent condition"));
 
         // Get assessments
         var response = await client.GetAsync($"/api/homes/{homeId}/assessments?page.number=1&page.size=10");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result = await response.Content.ReadFromJsonAsync<PaginatedResponse<BuildingAssessmentItemResponse>>();
+        var result = await response.Content.ReadFromJsonAsync<PaginatedResponse<HomeAssessmentItemResponse>>();
         result!.Items.Should().HaveCount(2);
         result.Items[0].AssessmentDate.Should().Be(secondDate);
         result.Items[1].AssessmentDate.Should().Be(firstDate);

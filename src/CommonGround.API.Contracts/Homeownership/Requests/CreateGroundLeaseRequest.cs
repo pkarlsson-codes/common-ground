@@ -3,7 +3,7 @@ namespace CommonGround.API.Contracts.Homeownership.Requests;
 /// <summary>Request to create a new ground lease.</summary>
 public sealed record CreateGroundLeaseRequest(
     string LandParcelId,
-    string BuildingId,
+    string HomeId,
     string LeaseStartDate,
     int TermYears,
     string CovenantTerms,

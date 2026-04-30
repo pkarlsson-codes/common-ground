@@ -1,6 +1,6 @@
 using CommonGround.PropertyRegistry.Application.ReadModels;
+using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
-using CommonGround.PropertyRegistry.Domain.LeasableUnits;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
 using Marten;
@@ -15,7 +15,7 @@ namespace CommonGround.PropertyRegistry.Application.Queries;
 public sealed record GetHomes(
     PageSpec Page,
     IReadOnlyList<LandParcelId>? LandParcelIds = null,
-    IReadOnlyList<UnitStatus>? Statuses = null);
+    IReadOnlyList<HomeStatus>? Statuses = null);
 
 /// <summary>Handles <see cref="GetHomes"/>.</summary>
 public static class GetHomesHandler

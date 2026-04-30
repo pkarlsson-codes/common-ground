@@ -1,8 +1,8 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
+using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
-using CommonGround.PropertyRegistry.Domain.LeasableUnits;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using FluentAssertions;
@@ -13,7 +13,7 @@ public class GroundLeaseTests
 {
     private static readonly UserId StaffUser = UserId.Generate();
     private static readonly LandParcelId ParcelId = LandParcelId.Generate();
-    private static readonly LeasableUnitId TestUnitId = LeasableUnitId.Generate();
+    private static readonly HomeId TestUnitId = HomeId.Generate();
 
     private static GroundLease CreateLease()
     {

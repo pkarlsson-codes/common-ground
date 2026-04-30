@@ -1,9 +1,9 @@
 namespace CommonGround.API.Contracts.PropertyRegistry.Requests;
 
 /// <summary>Request to register a new building on a land parcel.</summary>
-public sealed record RegisterBuildingRequest(
+public sealed record RegisterHomeRequest(
     string LandParcelId,
-    string BuildingType,
+    string HomeType,
     int Bedrooms,
     decimal Bathrooms,
     decimal SquareFootage,

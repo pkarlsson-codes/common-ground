@@ -2,7 +2,6 @@ using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Infrastructure.Persistence.Projections;
 using JasperFx.Events.Projections;
 using Marten;
-using Weasel.Postgresql.Tables;
 
 namespace CommonGround.Homeownership.Infrastructure.Persistence;
 

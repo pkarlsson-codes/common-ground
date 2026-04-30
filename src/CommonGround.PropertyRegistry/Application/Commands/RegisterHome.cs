@@ -1,5 +1,5 @@
+using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
-using CommonGround.PropertyRegistry.Domain.LeasableUnits;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Persistence;
 
@@ -28,9 +28,9 @@ public sealed record RegisterHome(
 public static class RegisterHomeHandler
 {
     /// <summary>Creates a new Home and returns its ID.</summary>
-    public static async Task<LeasableUnitId> Handle(
+    public static async Task<HomeId> Handle(
         RegisterHome command,
-        ILeasableUnitRepository repository,
+        IHomeRepository repository,
         IUnitOfWork unitOfWork,
         CancellationToken cancellationToken)
     {

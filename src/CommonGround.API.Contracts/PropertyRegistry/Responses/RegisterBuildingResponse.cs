@@ -1,4 +1,4 @@
 namespace CommonGround.API.Contracts.PropertyRegistry.Responses;
 
-/// <summary>Response returned when a building is successfully registered.</summary>
-public sealed record RegisterBuildingResponse(string BuildingId);
+/// <summary>Response returned when a home is successfully registered.</summary>
+public sealed record RegisterHomeResponse(string HomeId);

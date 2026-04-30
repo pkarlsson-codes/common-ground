@@ -7,8 +7,8 @@ using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
+using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
-using CommonGround.PropertyRegistry.Domain.LeasableUnits;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
 using Microsoft.AspNetCore.Mvc;
@@ -47,7 +47,7 @@ public sealed class GroundLeasesController(IMessageBus bus) : ControllerBase
 
         var command = new CreateGroundLease(
             LandParcelId.Create(request.LandParcelId),
-            LeasableUnitId.Create(request.BuildingId),
+            HomeId.Create(request.HomeId),
             DateOnly.Parse(request.LeaseStartDate, CultureInfo.InvariantCulture),
             request.TermYears,
             request.CovenantTerms,
@@ -75,8 +75,8 @@ public sealed class GroundLeasesController(IMessageBus bus) : ControllerBase
         var landParcelFilter = request.Filter?.LandParcelId is not null
             ? LandParcelId.Create(request.Filter.LandParcelId)
             : null;
-        var unitFilter = request.Filter?.BuildingId is not null
-            ? LeasableUnitId.Create(request.Filter.BuildingId)
+        var unitFilter = request.Filter?.HomeId is not null
+            ? HomeId.Create(request.Filter.HomeId)
             : null;
 
         var query = new GetGroundLeases(request.Page, statusFilter, landParcelFilter, unitFilter, request.Filter?.Search);
@@ -86,7 +86,7 @@ public sealed class GroundLeasesController(IMessageBus bus) : ControllerBase
         var response = result.MapItems(v => new GroundLeaseListItemResponse(
             v.Id,
             v.LandParcelId,
-            v.BuildingId,
+            v.HomeId,
             v.LeaseStartDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             v.TermYears,
             v.Status,

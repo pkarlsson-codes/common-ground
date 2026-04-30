@@ -403,7 +403,7 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
     }
 
     /// <summary>Lists documents attached to a given entity.</summary>
-    /// <param name="entityType">Opaque entity type (e.g. "Building"). Case-sensitive.</param>
+    /// <param name="entityType">Opaque entity type (e.g. "Home"). Case-sensitive.</param>
     /// <param name="entityId">The entity's GUID identifier.</param>
     /// <param name="request">The pagination query spec.</param>
     /// <param name="includeDeleted">When true, includes soft-deleted attachments.</param>

@@ -1,5 +1,5 @@
 using CommonGround.PropertyRegistry.Application.ReadModels;
-using CommonGround.PropertyRegistry.Domain.LeasableUnits.Events;
+using CommonGround.PropertyRegistry.Domain.Homes.Events;
 using JasperFx.Events;
 using Marten.Events.Projections;
 
@@ -7,7 +7,7 @@ namespace CommonGround.PropertyRegistry.Infrastructure.Persistence.Projections;
 
 internal sealed class HomeAssessmentViewProjection : EventProjection
 {
-    public static HomeAssessmentView Create(IEvent<LeasableUnitAssessed> e) =>
+    public static HomeAssessmentView Create(IEvent<HomeAssessed> e) =>
         new()
         {
             Id = e.Id,

@@ -1,5 +1,4 @@
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Events;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
 using CommonGround.Stewardship.Domain.ForeclosurePreventionCases.Events;

@@ -1,7 +1,7 @@
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
+using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
-using CommonGround.PropertyRegistry.Domain.LeasableUnits;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 using CommonGround.SharedKernel.Domain.Exceptions;
@@ -22,7 +22,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     public LandParcelId LandParcelId { get; private set; }
 
     /// <summary>Gets the ID of the leasable unit on this leased parcel.</summary>
-    public LeasableUnitId UnitId { get; private set; }
+    public HomeId UnitId { get; private set; }
 
     /// <summary>Gets the start date of the lease.</summary>
     public DateOnly LeaseStartDate { get; private set; }
@@ -51,7 +51,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <summary>Creates a new ground lease.</summary>
     public static GroundLease Create(
         LandParcelId landParcelId,
-        LeasableUnitId unitId,
+        HomeId unitId,
         DateOnly leaseStartDate,
         int termYears,
         string covenantTerms,
@@ -200,7 +200,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     {
         Id = GroundLeaseId.Create(e.AggregateId);
         LandParcelId = LandParcelId.Create(e.LandParcelId);
-        UnitId = LeasableUnitId.Create(e.BuildingId);
+        UnitId = HomeId.Create(e.BuildingId);
         LeaseStartDate = e.LeaseStartDate;
         TermYears = e.TermYears;
         CovenantTerms = e.CovenantTerms;
