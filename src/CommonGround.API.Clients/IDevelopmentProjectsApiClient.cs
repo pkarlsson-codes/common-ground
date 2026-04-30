@@ -1,18 +1,19 @@
+using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
+using CommonGround.SharedKernel.Infrastructure.Querying;
 
 namespace CommonGround.API.Clients;
 
+/// <summary>HTTP client for development project API endpoints.</summary>
 public interface IDevelopmentProjectsApiClient
 {
     /// <summary>
     /// Gets a paginated list of development projects.
     /// </summary>
-    /// <param name="page">Page number (1-based).</param>
-    /// <param name="pageSize">Number of items per page.</param>
-    /// <param name="search">Optional free-text search across description.</param>
+    /// <param name="query">Pagination and filter parameters.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Paginated list of development projects.</returns>
     Task<PaginatedResponse<DevelopmentProjectListItemResponse>> GetDevelopmentProjectsAsync(
-        int page, int pageSize, string? search, CancellationToken cancellationToken);
+        PaginationQuerySpec<GetDevelopmentProjectsFilter> query, CancellationToken cancellationToken);
 }

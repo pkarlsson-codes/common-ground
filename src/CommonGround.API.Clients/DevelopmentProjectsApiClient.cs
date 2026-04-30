@@ -1,6 +1,7 @@
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
+using CommonGround.SharedKernel.Infrastructure.Querying;
 using Microsoft.Extensions.Logging;
 
 namespace CommonGround.API.Clients;
@@ -15,14 +16,9 @@ public sealed class DevelopmentProjectsApiClient(
 {
     /// <inheritdoc/>
     public async Task<PaginatedResponse<DevelopmentProjectListItemResponse>> GetDevelopmentProjectsAsync(
-        int page, int pageSize, string? search, CancellationToken cancellationToken)
+        PaginationQuerySpec<GetDevelopmentProjectsFilter> query, CancellationToken cancellationToken)
     {
-        var qs = $"?page.number={page}&page.size={pageSize}";
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            qs += $"&filter.search={Uri.EscapeDataString(search)}";
-        }
-        
+        var qs = query?.ToQueryString() ?? string.Empty;
         return await GetAsync<PaginatedResponse<DevelopmentProjectListItemResponse>>($"api/development-projects{qs}", cancellationToken).ConfigureAwait(false);
     }
 }
