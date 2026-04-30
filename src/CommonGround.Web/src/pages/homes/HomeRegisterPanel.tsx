@@ -24,13 +24,13 @@ interface FormState {
 
 const emptyForm = (parcelId = ''): FormState => ({
   landParcelId: parcelId,
-  homeType: 'SingleFamily',
-  bedrooms: 3,
-  bathrooms: 2,
-  squareFootage: 1200,
-  yearBuilt: new Date().getFullYear(),
-  initialAssessedValue: 150000,
-  initialAssessedDate: new Date().toISOString().substring(0, 10),
+  homeType: '',
+  bedrooms: 0,
+  bathrooms: 0,
+  squareFootage: 0,
+  yearBuilt: 0,
+  initialAssessedValue: 0,
+  initialAssessedDate: '',
   appraiserName: '',
 })
 
