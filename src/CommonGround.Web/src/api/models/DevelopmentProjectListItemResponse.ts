@@ -21,29 +21,41 @@ import { mapValues } from '../runtime';
  */
 export interface DevelopmentProjectListItemResponse {
     /**
-     * 
+     * The project ID.
      * @type {string}
      * @memberof DevelopmentProjectListItemResponse
      */
     id?: string;
     /**
-     * 
+     * The associated land parcel ID.
      * @type {string}
      * @memberof DevelopmentProjectListItemResponse
      */
     landParcelId?: string;
     /**
-     * 
+     * The project name.
      * @type {string}
      * @memberof DevelopmentProjectListItemResponse
      */
-    description?: string;
+    name?: string;
     /**
-     * 
+     * The project description.
+     * @type {string}
+     * @memberof DevelopmentProjectListItemResponse
+     */
+    description?: string | null;
+    /**
+     * The current project status.
      * @type {string}
      * @memberof DevelopmentProjectListItemResponse
      */
     status?: string;
+    /**
+     * The project type: NewConstruction or Rehabilitation.
+     * @type {string}
+     * @memberof DevelopmentProjectListItemResponse
+     */
+    projectType?: string;
 }
 
 /**
@@ -65,8 +77,10 @@ export function DevelopmentProjectListItemResponseFromJSONTyped(json: any, ignor
         
         'id': json['id'] == null ? undefined : json['id'],
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
+        'name': json['name'] == null ? undefined : json['name'],
         'description': json['description'] == null ? undefined : json['description'],
         'status': json['status'] == null ? undefined : json['status'],
+        'projectType': json['projectType'] == null ? undefined : json['projectType'],
     };
 }
 
@@ -83,8 +97,10 @@ export function DevelopmentProjectListItemResponseToJSONTyped(value?: Developmen
         
         'id': value['id'],
         'landParcelId': value['landParcelId'],
+        'name': value['name'],
         'description': value['description'],
         'status': value['status'],
+        'projectType': value['projectType'],
     };
 }
 

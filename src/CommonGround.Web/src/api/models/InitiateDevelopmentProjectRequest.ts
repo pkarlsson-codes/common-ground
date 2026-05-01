@@ -21,17 +21,35 @@ import { mapValues } from '../runtime';
  */
 export interface InitiateDevelopmentProjectRequest {
     /**
-     * 
+     * The land parcel to associate the project with.
      * @type {string}
      * @memberof InitiateDevelopmentProjectRequest
      */
     landParcelId?: string;
     /**
-     * 
+     * The name of the development project.
      * @type {string}
      * @memberof InitiateDevelopmentProjectRequest
      */
-    description?: string;
+    name?: string;
+    /**
+     * The project type discriminator: NewConstruction or Rehabilitation.
+     * @type {string}
+     * @memberof InitiateDevelopmentProjectRequest
+     */
+    type?: string;
+    /**
+     * An optional description of the development project.
+     * @type {string}
+     * @memberof InitiateDevelopmentProjectRequest
+     */
+    description?: string | null;
+    /**
+     * Home IDs to include; required for Rehabilitation projects.
+     * @type {Array<string>}
+     * @memberof InitiateDevelopmentProjectRequest
+     */
+    existingHomes?: Array<string> | null;
 }
 
 /**
@@ -52,7 +70,10 @@ export function InitiateDevelopmentProjectRequestFromJSONTyped(json: any, ignore
     return {
         
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
+        'name': json['name'] == null ? undefined : json['name'],
+        'type': json['type'] == null ? undefined : json['type'],
         'description': json['description'] == null ? undefined : json['description'],
+        'existingHomes': json['existingHomes'] == null ? undefined : json['existingHomes'],
     };
 }
 
@@ -68,7 +89,10 @@ export function InitiateDevelopmentProjectRequestToJSONTyped(value?: InitiateDev
     return {
         
         'landParcelId': value['landParcelId'],
+        'name': value['name'],
+        'type': value['type'],
         'description': value['description'],
+        'existingHomes': value['existingHomes'],
     };
 }
 
