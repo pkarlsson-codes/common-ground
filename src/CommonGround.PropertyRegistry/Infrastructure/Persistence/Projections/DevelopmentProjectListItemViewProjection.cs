@@ -15,8 +15,10 @@ public class DevelopmentProjectListItemViewProjection : SingleStreamProjection<D
         {
             Id = @event.AggregateId,
             LandParcelId = @event.LandParcelId,
+            Name = @event.Name,
             Description = @event.Description,
-            Status = "Initiated"
+            Status = "Initiated",
+            ProjectType = @event.ProjectType == 2 ? "Rehabilitation" : "NewConstruction"
         };
     }
 }

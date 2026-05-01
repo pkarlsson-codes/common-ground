@@ -31,8 +31,7 @@ public static class GetDevelopmentProjectsHandler
         {
             var s = request.Search.ToLower(CultureInfo.InvariantCulture);
             query = query.Where(p =>
-                p.Description.Contains(s, StringComparison.OrdinalIgnoreCase) ||
-                p.Status.Contains(s, StringComparison.OrdinalIgnoreCase));
+                p.Description != null && p.Description.Contains(s, StringComparison.OrdinalIgnoreCase));
         }
 
         var page = await query

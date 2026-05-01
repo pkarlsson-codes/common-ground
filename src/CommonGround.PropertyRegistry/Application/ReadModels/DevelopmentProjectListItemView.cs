@@ -9,9 +9,15 @@ public class DevelopmentProjectListItemView
     /// <summary>Gets or sets the land parcel ID.</summary>
     public string LandParcelId { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the project name.</summary>
+    public string Name { get; set; } = string.Empty;
+
     /// <summary>Gets or sets the project description.</summary>
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the current status.</summary>
     public string Status { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the project type.</summary>
+    public string ProjectType { get; set; } = string.Empty;
 }

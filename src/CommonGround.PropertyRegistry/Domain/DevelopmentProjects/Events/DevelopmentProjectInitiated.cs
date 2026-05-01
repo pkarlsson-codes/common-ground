@@ -6,5 +6,8 @@ namespace CommonGround.PropertyRegistry.Domain.DevelopmentProjects.Events;
 public sealed record DevelopmentProjectInitiated(
     string AggregateId,
     string LandParcelId,
-    string Description,
+    IReadOnlyCollection<string> HomeIds,
+    string Name,
+    string? Description,
+    int ProjectType,
     string InitiatedBy) : DomainEvent(AggregateId);

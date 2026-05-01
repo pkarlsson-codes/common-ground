@@ -5,6 +5,7 @@ using CommonGround.PropertyRegistry.Application.Commands;
 using CommonGround.PropertyRegistry.Application.Queries;
 using CommonGround.PropertyRegistry.Application.ReadModels;
 using CommonGround.PropertyRegistry.Domain.DevelopmentProjects;
+using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
@@ -40,7 +41,7 @@ public sealed class DevelopmentProjectsController(IMessageBus bus) : ControllerB
         var result = await bus.InvokeAsync<PaginatedResponse<DevelopmentProjectListItemView>>(query, cancellationToken);
 
         var response = result.MapItems(v => new DevelopmentProjectListItemResponse(
-            v.Id, v.LandParcelId, v.Description, v.Status));
+            v.Id, v.LandParcelId, v.Name, v.Description, v.Status, v.ProjectType));
 
         return Ok(response);
     }
@@ -61,12 +62,27 @@ public sealed class DevelopmentProjectsController(IMessageBus bus) : ControllerB
         ArgumentNullException.ThrowIfNull(request);
 
         var userId = HttpContext.GetUserId();
-        var command = new InitiateDevelopmentProject(
-            new LandParcelId(request.LandParcelId),
-            request.Description,
-            userId);
+        var landParcelId = new LandParcelId(request.LandParcelId);
 
-        var id = await bus.InvokeAsync<DevelopmentProjectId>(command, cancellationToken);
+        if (request.Type != "NewConstruction" && request.Type != "Rehabilitation")
+        {
+            return BadRequest($"Unrecognized project type: '{request.Type}'.");
+        }
+
+        DevelopmentProjectId id = request.Type switch
+        {
+            "NewConstruction" => await bus.InvokeAsync<DevelopmentProjectId>(
+                new InitiateNewConstructionProject(landParcelId, request.Name, request.Description, userId),
+                cancellationToken),
+            _ => await bus.InvokeAsync<DevelopmentProjectId>(
+                new InitiateRehabilitationProject(
+                    landParcelId,
+                    (request.ExistingHomes ?? []).Select(h => new HomeId(h)).ToList(),
+                    request.Name,
+                    request.Description,
+                    userId),
+                cancellationToken)
+        };
 
         return CreatedAtAction(
             nameof(GetDevelopmentProjects),
