@@ -15,6 +15,7 @@ public class DevelopmentProjectListItemViewProjection : SingleStreamProjection<D
         {
             Id = @event.AggregateId,
             LandParcelId = @event.LandParcelId,
+            HomeIds = @event.HomeIds,
             Name = @event.Name,
             Description = @event.Description,
             Status = "Initiated",

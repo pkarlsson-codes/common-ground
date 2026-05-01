@@ -42,7 +42,10 @@ public static class PropertyRegistryMartenConfiguration
         options.Schema.For<HomeAssessmentView>()
             .DatabaseSchemaName(SchemaName)
             .Index(x => x.UnitId);
-        options.Schema.For<DevelopmentProjectListItemView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<DevelopmentProjectListItemView>()
+            .DatabaseSchemaName(SchemaName)
+            .Index(x => x.LandParcelId)
+            .GinIndexJsonData();
     }
 
     private static void ConfigureProjections(StoreOptions options)

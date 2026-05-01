@@ -9,6 +9,9 @@ public class DevelopmentProjectListItemView
     /// <summary>Gets or sets the land parcel ID.</summary>
     public string LandParcelId { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the home IDs associated with this project.</summary>
+    public IReadOnlyCollection<string> HomeIds { get; set; } = [];
+
     /// <summary>Gets or sets the project name.</summary>
     public string Name { get; set; } = string.Empty;
 

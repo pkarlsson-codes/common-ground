@@ -36,7 +36,9 @@ public sealed class DevelopmentProjectsController(IMessageBus bus) : ControllerB
     {
         var query = new GetDevelopmentProjects(
             request.Page,
-            request.Filter?.Search);
+            request.Filter?.Search,
+            request.Filter?.LandParcelId,
+            request.Filter?.HomeIds);
 
         var result = await bus.InvokeAsync<PaginatedResponse<DevelopmentProjectListItemView>>(query, cancellationToken);
 

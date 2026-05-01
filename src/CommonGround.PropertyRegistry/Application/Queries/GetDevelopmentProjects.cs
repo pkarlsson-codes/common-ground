@@ -10,9 +10,13 @@ namespace CommonGround.PropertyRegistry.Application.Queries;
 /// <summary>Returns a paginated list of development projects with optional filters.</summary>
 /// <param name="Page">Pagination spec (page number + size).</param>
 /// <param name="Search">Optional text search across description or status.</param>
+/// <param name="LandParcelId">Optional land parcel ID filter.</param>
+/// <param name="HomeIds">Optional home IDs filter.</param>
 public sealed record GetDevelopmentProjects(
     PageSpec Page,
-    string? Search = null);
+    string? Search = null,
+    string? LandParcelId = null,
+    IReadOnlyCollection<string>? HomeIds = null);
     
 /// <summary>Handles <see cref="GetDevelopmentProjects"/>.</summary>
 public static class GetDevelopmentProjectsHandler
@@ -32,6 +36,17 @@ public static class GetDevelopmentProjectsHandler
             var s = request.Search.ToLower(CultureInfo.InvariantCulture);
             query = query.Where(p =>
                 p.Description != null && p.Description.Contains(s, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.LandParcelId))
+        {
+            query = query.Where(p => p.LandParcelId == request.LandParcelId);
+        }
+
+        if (request.HomeIds is { Count: > 0 })
+        {
+            var ids = request.HomeIds;
+            query = query.Where(p => p.HomeIds.Any(id => ids.Contains(id)));
         }
 
         var page = await query
