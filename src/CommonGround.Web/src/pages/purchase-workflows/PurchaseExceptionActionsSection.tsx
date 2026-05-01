@@ -78,7 +78,7 @@ export default function PurchaseExceptionActionsSection({
           <button
             type="submit"
             className="btn btn-ghost"
-            style={{ color: 'var(--red)', borderColor: 'var(--red-dim)' }}
+            style={{ color: 'var(--red)', borderColor: 'var(--danger-surface)' }}
             disabled={failPending}
           >
             {failPending ? 'Failing…' : 'Mark as Failed'}

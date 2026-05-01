@@ -22,7 +22,7 @@ export default function PurchaseTrackSection({
   return (
     <div
       style={{
-        borderLeft: `3px solid ${complete ? 'var(--green-text)' : 'var(--border-bright)'}`,
+        borderLeft: `3px solid ${complete ? 'var(--success)' : 'var(--border-bright)'}`,
         paddingLeft: 12,
         marginBottom: 16,
       }}
@@ -41,7 +41,7 @@ export default function PurchaseTrackSection({
             style={{
               fontFamily: 'var(--font-mono)',
               fontSize: 11,
-              color: complete ? 'var(--green-text)' : 'var(--text-secondary)',
+              color: complete ? 'var(--success)' : 'var(--text-secondary)',
               textTransform: 'uppercase',
               letterSpacing: '0.06em',
               marginBottom: 4,

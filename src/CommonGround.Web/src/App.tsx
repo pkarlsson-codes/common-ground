@@ -23,7 +23,7 @@ function ProtectedRoute() {
   )
   if (error) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
-      <span style={{ fontFamily: 'var(--font-mono)', color: '#e87070', fontSize: '12px', letterSpacing: '0.1em' }}>
+      <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--error-bright)', fontSize: '12px', letterSpacing: '0.1em' }}>
         Connection error
       </span>
       <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{error}</span>

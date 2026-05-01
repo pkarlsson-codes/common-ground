@@ -327,10 +327,10 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
         <div
           style={{
             padding: '10px 14px',
-            background: 'var(--green-dim, #0d2818)',
+            background: 'var(--success-dim)',
             borderRadius: 6,
             fontSize: 13,
-            color: 'var(--green-text)',
+            color: 'var(--success)',
           }}
         >
           Verified {String(current.decisionDate)} — occupancy confirmed for {year}.
@@ -344,7 +344,7 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
             padding: '10px 14px',
             background: 'var(--surface)',
             borderRadius: 6,
-            borderLeft: '3px solid var(--red, #ef4444)',
+            borderLeft: '3px solid var(--red)',
           }}
         >
           <StatusBadge status={current.status ?? ''} />

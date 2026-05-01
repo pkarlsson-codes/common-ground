@@ -67,7 +67,7 @@ export default function ExpiringDocumentsWidget({ daysAhead = 30 }: Props) {
                 gap: 8,
                 padding: '8px 10px',
                 borderRadius: 6,
-                background: urgent ? 'rgba(255,80,50,.08)' : 'var(--surface-2)',
+                background: urgent ? 'var(--urgent-surface)' : 'var(--surface-2)',
                 border: `1px solid ${urgent ? 'var(--red)' : 'var(--border)'}`,
               }}
             >

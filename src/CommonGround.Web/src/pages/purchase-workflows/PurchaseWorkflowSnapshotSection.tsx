@@ -19,9 +19,9 @@ export default function PurchaseWorkflowSnapshotSection({ detail }: PurchaseWork
             marginBottom: 20,
             padding: '12px 14px',
             borderRadius: 8,
-            border: '1px solid var(--orange-text)',
-            background: 'var(--orange-bg)',
-            color: 'var(--orange-text)',
+            border: '1px solid var(--warning)',
+            background: 'var(--warning-surface)',
+            color: 'var(--warning)',
             fontSize: 13,
             lineHeight: 1.4,
           }}

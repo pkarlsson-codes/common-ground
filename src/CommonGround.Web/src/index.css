@@ -10,6 +10,9 @@
    Aesthetic: Cadastral Archive / Blueprint Dark
    ===================================================== */
 
+/* Token taxonomy: primitive/base -> semantic roles -> status surfaces (notice, warning, danger) -> shadcn bridge tokens. */
+/* Guardrail intent: raw color literals are authored only here, then consumed elsewhere via var(--token). */
+/* stylelint-disable declaration-property-value-disallowed-list -- raw literals are allowed for source token definitions in this block */
 :root {
   /* Backgrounds */
   --bg:             #0b1018;
@@ -33,19 +36,38 @@
   --amber-dim:      rgba(191, 131, 42, 0.13);
 
   /* Status */
-  --green-bg:   rgba(46, 130, 90, 0.16);
-  --green-text: #4ec48a;
-  --indigo-bg:  rgba(90, 70, 200, 0.16);
-  --indigo-text:#9a84e8;
-  --orange-bg:  rgba(180, 108, 36, 0.16);
-  --orange-text:#e09840;
-  --sky-bg:     rgba(52, 110, 190, 0.16);
-  --sky-text:   #6aa8f0;
+  --success-surface: rgba(46, 130, 90, 0.16);
+  --success:         #4ec48a;
+  --info-surface:    rgba(90, 70, 200, 0.16);
+  --info:            #9a84e8;
+  --warning-surface: rgba(180, 108, 36, 0.16);
+  --warning:         #e09840;
+  --notice-surface:  rgba(52, 110, 190, 0.16);
+  --notice:          #6aa8f0;
 
   /* Semantic */
-  --blue:       #4284d4;
-  --red:        #c44040;
-  --red-dim:    rgba(196, 64, 64, 0.12);
+  --blue:           #4284d4;
+  --red:            #c44040;
+  --danger-surface: rgba(196, 64, 64, 0.12);
+  --error-bright:   #e87070;
+  --success-dim:    #0d2818;
+
+  /* Neutral / Utility */
+  --neutral-surface: rgba(120, 140, 160, 0.12);
+  --urgent-surface:  rgba(255, 80, 50, 0.08);
+  --danger-border:   rgba(196, 64, 64, 0.25);
+  --overlay-heavy:   rgba(8, 12, 20, 0.65);
+  --overlay-medium:  rgba(8, 12, 20, 0.55);
+  --hover-notice-surface: rgba(66, 132, 212, 0.05);
+  --focus-ring-amber: 0 0 0 3px rgba(191, 131, 42, 0.12);
+  --shadow-amber-md:  0 4px 14px rgba(191, 131, 42, 0.28);
+  --shadow-overlay-sm: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-overlay-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-overlay-xl: 0 16px 48px rgba(0, 0, 0, 0.55);
+  --surface-option:  #1a2438;
+  --surface-1:       #192336;
+  --surface-2:       #111827;
+  --surface-3:       #0f1b28;
 
   /* Typography */
   --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
@@ -88,6 +110,7 @@
   --sidebar-border:      #1e2d3d;
   --sidebar-ring:        #4284d4;
 }
+/* stylelint-enable declaration-property-value-disallowed-list */
 
 /* ── Reset ────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -280,7 +303,7 @@ body {
   border-color: var(--border-bright);
   outline: none;
 }
-.select option { background: #1a2438; }
+.select option { background: var(--surface-option); }
 
 /* ── Buttons ──────────────────────────────────────── */
 .btn {
@@ -300,12 +323,12 @@ body {
 }
 .btn-primary {
   background: var(--amber);
-  color: #0c0d0e;
+  color: var(--bg);
 }
 .btn-primary:hover {
   background: var(--amber-bright);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(191, 131, 42, 0.28);
+  box-shadow: var(--shadow-amber-md);
 }
 .btn-secondary {
   background: var(--surface-raised);
@@ -371,7 +394,7 @@ body {
   transition: background var(--transition);
   animation: rowIn 240ms ease backwards;
 }
-.registry-table tbody tr:hover { background: rgba(66, 132, 212, 0.05); }
+.registry-table tbody tr:hover { background: var(--hover-notice-surface); }
 .registry-table tbody tr.row--selected { background: var(--amber-dim); }
 
 /* Row stagger */
@@ -419,24 +442,24 @@ body {
   background: currentColor;
   flex-shrink: 0;
 }
-.badge-available          { background: var(--green-bg);  color: var(--green-text);  }
-.badge-occupied           { background: var(--indigo-bg); color: var(--indigo-text); }
-.badge-underdevelopment   { background: var(--orange-bg); color: var(--orange-text); }
-.badge-underrenovation    { background: var(--sky-bg);    color: var(--sky-text);    }
-.badge-default            { background: rgba(120,140,160,.12); color: var(--text-secondary); }
+.badge-available          { background: var(--success-surface);  color: var(--success);  }
+.badge-occupied           { background: var(--info-surface);    color: var(--info);    }
+.badge-underdevelopment   { background: var(--warning-surface); color: var(--warning); }
+.badge-underrenovation    { background: var(--notice-surface);  color: var(--notice);  }
+.badge-default            { background: var(--neutral-surface); color: var(--text-secondary); }
 
 /* Ground lease statuses */
-.badge-active             { background: var(--green-bg);  color: var(--green-text);  }
-.badge-inactive           { background: rgba(120,140,160,.12); color: var(--text-secondary); }
+.badge-active             { background: var(--success-surface);  color: var(--success);  }
+.badge-inactive           { background: var(--neutral-surface); color: var(--text-secondary); }
 
 /* Purchase workflow phases */
-.badge-initiated          { background: var(--sky-bg);    color: var(--sky-text);    }
-.badge-inprogress         { background: var(--indigo-bg); color: var(--indigo-text); }
-.badge-closingscheduled   { background: var(--orange-bg); color: var(--orange-text); }
-.badge-closed             { background: var(--green-bg);  color: var(--green-text);  }
-.badge-failed             { background: var(--red-dim);   color: var(--red);         }
-.badge-withdrawn          { background: rgba(120,140,160,.12); color: var(--text-secondary); }
-.badge-stalled            { background: var(--orange-bg); color: var(--orange-text); }
+.badge-initiated          { background: var(--notice-surface);  color: var(--notice);  }
+.badge-inprogress         { background: var(--info-surface);    color: var(--info);    }
+.badge-closingscheduled   { background: var(--warning-surface); color: var(--warning); }
+.badge-closed             { background: var(--success-surface); color: var(--success); }
+.badge-failed             { background: var(--danger-surface);  color: var(--red);     }
+.badge-withdrawn          { background: var(--neutral-surface); color: var(--text-secondary); }
+.badge-stalled            { background: var(--warning-surface); color: var(--warning); }
 
 /* ── Pagination ───────────────────────────────────── */
 .pagination {
@@ -465,7 +488,7 @@ body {
 .slideover-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(8, 12, 20, 0.55);
+  background: var(--overlay-medium);
   backdrop-filter: blur(3px);
   animation: fadeIn 200ms ease;
 }
@@ -620,7 +643,7 @@ body {
 .form-textarea:focus {
   outline: none;
   border-color: var(--amber);
-  box-shadow: 0 0 0 3px rgba(191, 131, 42, 0.12);
+  box-shadow: var(--focus-ring-amber);
 }
 .form-input::placeholder { color: var(--text-dim); }
 .form-textarea { resize: vertical; min-height: 80px; }
@@ -632,7 +655,7 @@ body {
   padding-right: 32px;
   cursor: pointer;
 }
-.form-select option { background: #1a2438; }
+.form-select option { background: var(--surface-option); }
 
 /* ── EntityCombobox ───────────────────────────────── */
 .entity-combobox {
@@ -651,7 +674,7 @@ body {
   background: var(--surface-raised);
   border: 1px solid var(--border-bright);
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow-overlay-lg);
   list-style: none;
   margin: 0;
   padding: 4px;
@@ -691,10 +714,10 @@ body {
 .form-error {
   margin-top: 12px;
   padding: 10px 12px;
-  background: var(--red-dim);
-  border: 1px solid rgba(196, 64, 64, 0.25);
+  background: var(--danger-surface);
+  border: 1px solid var(--danger-border);
   border-radius: 8px;
-  color: #e87070;
+  color: var(--error-bright);
   font-size: 12.5px;
 }
 
@@ -749,7 +772,7 @@ body {
 .error-state__title {
   font-family: var(--font-display);
   font-size: 24px;
-  color: #e87070;
+  color: var(--error-bright);
   margin-bottom: 6px;
 }
 .error-state__sub { font-size: 13px; color: var(--text-secondary); }

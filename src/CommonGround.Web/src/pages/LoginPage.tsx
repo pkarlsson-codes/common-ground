@@ -52,7 +52,7 @@ export default function LoginPage() {
             width: '100%',
             padding: '10px 20px',
             background: 'var(--amber)',
-            color: '#0b1018',
+            color: 'var(--bg)',
             border: 'none',
             borderRadius: '6px',
             fontFamily: 'var(--font-body)',

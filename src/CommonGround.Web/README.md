@@ -1,5 +1,19 @@
 # React + TypeScript + Vite
 
+## Styling Guardrails (Phase 4)
+
+- Token source-of-truth: define color literals only in [src/index.css](src/index.css) `:root` token declarations.
+- CSS usage rule: in component/app CSS, use `var(--token-name)` for color-bearing properties (`color`, `background`, `border*`, `outline*`, `fill`, `stroke`, `*shadow`).
+- Allowed direct values for color-bearing CSS declarations: `transparent`, `currentColor`, `inherit`, `initial`, `unset`, and `color-mix(...)`.
+- TS/TSX inline styles: do not use raw color literals (`#hex`, `rgb(...)`, `rgba(...)`, `hsl(...)`, `hsla(...)`) in `style={{ ... }}` color-bearing properties.
+- Prefer `className` styling; when inline styles are necessary, reference tokens via `var(--...)`.
+
+### Commands
+
+- `npm run lint` - ESLint (includes inline color-literal guardrail).
+- `npm run lint:styles` - Stylelint for CSS token enforcement.
+- `npm run lint:styles:fix` - Auto-fix stylelint-safe issues.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

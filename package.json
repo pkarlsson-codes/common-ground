@@ -17,6 +17,9 @@
     "frontend:start": "cd src/CommonGround.Web && npm run dev",
     "frontend:build": "cd src/CommonGround.Web && npm run build",
     "frontend:lint": "cd src/CommonGround.Web && npm run lint",
+    "frontend:lint:colors": "cd src/CommonGround.Web && npm run lint:colors",
+    "frontend:lint:styles": "cd src/CommonGround.Web && npm run lint:styles",
+    "frontend:guardrails": "cd src/CommonGround.Web && npm run lint:guardrails",
     "frontend:test": "cd src/CommonGround.Web && npm run test",
     "frontend:generate": "bash ./scripts/generate-api-clients.sh",
     "prepare": "husky"

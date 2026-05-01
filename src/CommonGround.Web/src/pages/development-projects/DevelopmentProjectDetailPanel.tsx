@@ -91,7 +91,7 @@ export default function DevelopmentProjectDetailPanel({ projectId, onClose }: Pr
                       borderRadius: 8,
                       padding: '4px 0',
                       minWidth: 160,
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                      boxShadow: 'var(--shadow-overlay-sm)',
                     }}
                   >
                     <button

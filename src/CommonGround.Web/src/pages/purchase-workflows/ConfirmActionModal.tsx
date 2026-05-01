@@ -46,7 +46,7 @@ export default function ConfirmActionModal({
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'rgba(8, 12, 20, 0.65)',
+          background: 'var(--overlay-heavy)',
           backdropFilter: 'blur(3px)',
         }}
       />
@@ -60,7 +60,7 @@ export default function ConfirmActionModal({
           border: '1px solid var(--border)',
           borderRadius: 12,
           padding: 24,
-          boxShadow: '0 16px 48px rgba(0, 0, 0, 0.55)',
+          boxShadow: 'var(--shadow-overlay-xl)',
         }}
       >
         <div
@@ -93,7 +93,7 @@ export default function ConfirmActionModal({
             className="btn btn-secondary btn-sm"
             style={
               confirmTone === 'danger'
-                ? { color: 'var(--red)', borderColor: 'var(--red-dim)' }
+                ? { color: 'var(--red)', borderColor: 'var(--danger-surface)' }
                 : undefined
             }
             onClick={onConfirm}

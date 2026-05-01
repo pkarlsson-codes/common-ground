@@ -3,15 +3,15 @@ interface Props {
 }
 
 const SENSITIVITY_STYLES: Record<string, { bg: string; color: string; label: string }> = {
-  Public:       { bg: 'var(--green-bg)',  color: 'var(--green-text)',  label: 'Public' },
-  Internal:     { bg: 'var(--sky-bg)',    color: 'var(--sky-text)',    label: 'Internal' },
-  Confidential: { bg: 'var(--orange-bg)', color: 'var(--orange-text)', label: 'Confidential' },
-  Restricted:   { bg: 'var(--red-dim)',   color: 'var(--red)',         label: 'Restricted' },
+  Public:       { bg: 'var(--success-surface)',  color: 'var(--success)',  label: 'Public' },
+  Internal:     { bg: 'var(--notice-surface)',   color: 'var(--notice)',   label: 'Internal' },
+  Confidential: { bg: 'var(--warning-surface)',  color: 'var(--warning)',  label: 'Confidential' },
+  Restricted:   { bg: 'var(--danger-surface)',   color: 'var(--red)',      label: 'Restricted' },
 }
 
 export default function DocumentSensitivityBadge({ sensitivity }: Props) {
   const style = SENSITIVITY_STYLES[sensitivity] ?? {
-    bg: 'rgba(120,140,160,.12)',
+    bg: 'var(--neutral-surface)',
     color: 'var(--text-secondary)',
     label: sensitivity,
   }

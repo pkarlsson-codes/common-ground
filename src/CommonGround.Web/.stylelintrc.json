@@ -1,0 +1,12 @@
+{
+  "ignoreFiles": ["dist/**", "node_modules/**"],
+  "rules": {
+    "declaration-property-value-disallowed-list": {
+      "/^(color|background|background-color|border|border-color|border-top|border-right|border-bottom|border-left|outline|outline-color|fill|stroke|box-shadow|text-shadow|caret-color|column-rule-color|text-decoration-color)$/i": [
+        "/#[0-9a-fA-F]{3,8}\\b/",
+        "/\\b(?:rgb|rgba|hsl|hsla)\\(/i",
+        "/\\b(?:lab|lch|oklab|oklch|color)\\(/i"
+      ]
+    }
+  }
+}
