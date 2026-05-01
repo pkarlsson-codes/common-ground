@@ -7,6 +7,12 @@ import DevelopmentProjectInitiatePanel from './development-projects/DevelopmentP
 
 type Panel = 'detail' | 'initiate' | null
 
+interface DevelopmentProjectsLocationState {
+  openId?: string
+  initiateParcelId?: string
+  initiateHomeIds?: string[]
+}
+
 export default function DevelopmentProjectsPage() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -14,6 +20,8 @@ export default function DevelopmentProjectsPage() {
   const [page,      setPage]      = useState(1)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [panel,     setPanel]     = useState<Panel>(null)
+  const [initiateParcelId, setInitiateParcelId] = useState<string | undefined>(undefined)
+  const [initiateHomeIds, setInitiateHomeIds] = useState<string[] | undefined>(undefined)
 
   const { data, isLoading, isError } = useDevelopmentProjects({
     pageNumber: page,
@@ -21,11 +29,33 @@ export default function DevelopmentProjectsPage() {
 
   const openDetail = (id: string) => {
     setSelectedId(id)
+    setInitiateParcelId(undefined)
+    setInitiateHomeIds(undefined)
     setPanel('detail')
   }
 
+  const openInitiate = (parcelId?: string, homeIds?: string[]) => {
+    setSelectedId(null)
+    setInitiateParcelId(parcelId)
+    setInitiateHomeIds(homeIds)
+    setPanel('initiate')
+  }
+
   useEffect(() => {
-    const openId = (location.state as { openId?: string } | null)?.openId
+    const state = (location.state as DevelopmentProjectsLocationState | null) ?? null
+    const openId = state?.openId
+    const parcelId = state?.initiateParcelId
+    const homeIds = state?.initiateHomeIds
+
+    if (parcelId) {
+      openInitiate(parcelId, homeIds)
+      navigate(
+        { pathname: location.pathname, search: location.search, hash: location.hash },
+        { replace: true, state: null },
+      )
+      return
+    }
+
     if (!openId) return
     openDetail(openId)
     navigate(
@@ -37,6 +67,8 @@ export default function DevelopmentProjectsPage() {
   const closePanel = () => {
     setPanel(null)
     setSelectedId(null)
+    setInitiateParcelId(undefined)
+    setInitiateHomeIds(undefined)
   }
 
   const projects = data?.items ?? []
@@ -53,7 +85,7 @@ export default function DevelopmentProjectsPage() {
             </div>
           )}
         </div>
-        <button className="btn btn-primary" onClick={() => setPanel('initiate')}>
+        <button className="btn btn-primary" onClick={() => openInitiate()}>
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
             <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
           </svg>
@@ -79,7 +111,15 @@ export default function DevelopmentProjectsPage() {
       )}
 
       {panel === 'initiate' && (
-        <DevelopmentProjectInitiatePanel onClose={closePanel} />
+        initiateParcelId ? (
+          <DevelopmentProjectInitiatePanel
+            onClose={closePanel}
+            initialParcelId={initiateParcelId}
+            initialHomeIds={initiateHomeIds}
+          />
+        ) : (
+          <DevelopmentProjectInitiatePanel onClose={closePanel} />
+        )
       )}
     </div>
   )

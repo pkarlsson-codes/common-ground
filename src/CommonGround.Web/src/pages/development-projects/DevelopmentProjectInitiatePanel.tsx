@@ -23,12 +23,15 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 const landParcelsApi = new LandParcelsApi(apiConfig)
 const homesApi = new HomesApi(apiConfig)
 
-const emptyForm = (parcelId = ''): InitiateDevelopmentProjectRequest => ({
+const emptyForm = (
+  parcelId = '',
+  homeIds: string[] = [],
+): InitiateDevelopmentProjectRequest => ({
   landParcelId: parcelId,
   name: '',
-  type: 'NewConstruction',
+  type: homeIds.length > 0 ? 'Rehabilitation' : 'NewConstruction',
   description: '',
-  existingHomes: [],
+  existingHomes: homeIds,
 })
 
 function homeLabel(h: HomeListItemResponse): string {
@@ -78,6 +81,7 @@ function HomesMultiSelect({ homes, selected, onToggle, disabled }: HomesMultiSel
                   variant="secondary"
                   className="gap-1 border border-[var(--border)] bg-[var(--surface)] pr-1 text-[var(--text-primary)]"
                   onClick={e => {
+                    if (disabled) return
                     e.stopPropagation()
                     onToggle(h.id!)
                   }}
@@ -109,7 +113,10 @@ function HomesMultiSelect({ homes, selected, onToggle, disabled }: HomesMultiSel
                     <CommandItem
                       key={h.id}
                       value={h.id!}
-                      onSelect={() => onToggle(h.id!)}
+                      onSelect={() => {
+                        if (disabled) return
+                        onToggle(h.id!)
+                      }}
                       data-checked={isSelected}
                     >
                       <Check
@@ -128,18 +135,31 @@ function HomesMultiSelect({ homes, selected, onToggle, disabled }: HomesMultiSel
   )
 }
 
-interface Props {
+type Props = {
   onClose: () => void
   initialParcelId?: string
+  initialHomeIds?: never
+} | {
+  onClose: () => void
+  initialParcelId: string
+  initialHomeIds?: string[]
 }
 
-export default function DevelopmentProjectInitiatePanel({ onClose, initialParcelId }: Props) {
-  const [form, setForm] = useState<InitiateDevelopmentProjectRequest>(() => emptyForm(initialParcelId))
+export default function DevelopmentProjectInitiatePanel({
+  onClose,
+  initialParcelId,
+  initialHomeIds,
+}: Props) {
+  const [form, setForm] = useState<InitiateDevelopmentProjectRequest>(() =>
+    emptyForm(initialParcelId, initialHomeIds ?? []),
+  )
   const [availableHomes, setAvailableHomes] = useState<HomeListItemResponse[]>([])
   const [homesLoading, setHomesLoading] = useState(false)
   const initiateMutation = useInitiateDevelopmentProject()
   const { success } = useToast()
 
+  const parcelSelectionLocked = !!initialParcelId
+  const homesSelectionLocked = initialHomeIds !== undefined
   const isRehab = form.type === 'Rehabilitation'
 
   useEffect(() => {
@@ -214,7 +234,13 @@ export default function DevelopmentProjectInitiatePanel({ onClose, initialParcel
                   key={t}
                   type="button"
                   className={`btn ${form.type === t ? 'btn-primary' : 'btn-ghost'}`}
-                  onClick={() => setForm(f => ({ ...f, type: t, existingHomes: [] }))}
+                  onClick={() =>
+                    setForm(f => ({
+                      ...f,
+                      type: t,
+                      existingHomes: homesSelectionLocked ? f.existingHomes : [],
+                    }))
+                  }
                 >
                   {t === 'NewConstruction' ? 'New Construction' : 'Rehabilitation'}
                 </button>
@@ -227,6 +253,7 @@ export default function DevelopmentProjectInitiatePanel({ onClose, initialParcel
             <EntityCombobox
               value={form.landParcelId || null}
               onChange={id => setForm(f => ({ ...f, landParcelId: id ?? '', existingHomes: [] }))}
+              disabled={parcelSelectionLocked}
               fetchOptions={async q => {
                 const result = await landParcelsApi.getLandParcels({ search: q, pageSize: 10 })
                 return (result.items ?? []).map(p => ({
@@ -262,6 +289,7 @@ export default function DevelopmentProjectInitiatePanel({ onClose, initialParcel
                   homes={availableHomes}
                   selected={form.existingHomes ?? []}
                   onToggle={toggleHome}
+                  disabled={homesSelectionLocked}
                 />
               )}
             </div>

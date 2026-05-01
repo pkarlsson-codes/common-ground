@@ -6,6 +6,7 @@ import StatusBadge from '../../components/StatusBadge'
 import NavIdLink from '../../components/NavIdLink'
 import DocumentList from '../../components/DocumentList'
 import { useToast } from '../../hooks/useToast'
+import DevelopmentProjectsSection from '../land-parcels/DevelopmentProjectsSection'
 
 type Tab = 'details' | 'documents'
 
@@ -145,6 +146,13 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
                   </div>
                 </div>
               </div>
+
+              {detail.landParcelId && (
+                <DevelopmentProjectsSection
+                  parcelId={detail.landParcelId}
+                  initialHomeIds={[homeId]}
+                />
+              )}
 
               <div
                 className="detail-section"
