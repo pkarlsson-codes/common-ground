@@ -1,18 +1,132 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Check, ChevronsUpDown, X } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { useInitiateDevelopmentProject } from '../../hooks/developmentProjects'
 import type { InitiateDevelopmentProjectRequest } from '../../api'
+import type { HomeListItemResponse } from '../../api'
 import EntityCombobox from '../../components/EntityCombobox'
 import SlideOver from '../../components/SlideOver'
-import { LandParcelsApi } from '../../api'
+import { LandParcelsApi, HomesApi } from '../../api'
 import { apiConfig } from '../../lib/apiConfig'
 import { useToast } from '../../hooks/useToast'
+import { Badge } from '@/components/ui/badge'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
+const homesApi = new HomesApi(apiConfig)
 
 const emptyForm = (parcelId = ''): InitiateDevelopmentProjectRequest => ({
   landParcelId: parcelId,
+  name: '',
+  type: 'NewConstruction',
   description: '',
+  existingHomes: [],
 })
+
+function homeLabel(h: HomeListItemResponse): string {
+  const parts: string[] = []
+  if (h.homeType) parts.push(h.homeType)
+  const details: string[] = []
+  if (h.bedrooms != null) details.push(`${h.bedrooms}bd`)
+  if (h.bathrooms != null) details.push(`${h.bathrooms}ba`)
+  if (details.length > 0) parts.push(details.join(' / '))
+  return parts.join(' — ')
+}
+
+interface HomesMultiSelectProps {
+  homes: HomeListItemResponse[]
+  selected: string[]
+  onToggle: (id: string) => void
+  disabled?: boolean
+}
+
+function HomesMultiSelect({ homes, selected, onToggle, disabled }: HomesMultiSelectProps) {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+
+  const filtered = search
+    ? homes.filter(h => homeLabel(h).toLowerCase().includes(search.toLowerCase()))
+    : homes
+
+  const selectedHomes = homes.filter(h => selected.includes(h.id!))
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          role="combobox"
+          aria-expanded={open}
+          disabled={disabled}
+          className="form-input flex min-h-[38px] flex-wrap items-center justify-between gap-2"
+        >
+          {selectedHomes.length === 0 ? (
+            <span className="text-[var(--text-dim)]">Select homes…</span>
+          ) : (
+            <div className="flex flex-wrap gap-1">
+              {selectedHomes.map(h => (
+                <Badge
+                  key={h.id}
+                  variant="secondary"
+                  className="gap-1 border border-[var(--border)] bg-[var(--surface)] pr-1 text-[var(--text-primary)]"
+                  onClick={e => {
+                    e.stopPropagation()
+                    onToggle(h.id!)
+                  }}
+                >
+                  {homeLabel(h)}
+                  <X className="size-3 cursor-pointer" />
+                </Badge>
+              ))}
+            </div>
+          )}
+          <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Filter homes…"
+            value={search}
+            onValueChange={setSearch}
+          />
+          <CommandList>
+            {filtered.length === 0 ? (
+              <CommandEmpty>No homes found.</CommandEmpty>
+            ) : (
+              <CommandGroup>
+                {filtered.map(h => {
+                  const isSelected = selected.includes(h.id!)
+                  return (
+                    <CommandItem
+                      key={h.id}
+                      value={h.id!}
+                      onSelect={() => onToggle(h.id!)}
+                      data-checked={isSelected}
+                    >
+                      <Check
+                        className={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')}
+                      />
+                      {homeLabel(h)}
+                    </CommandItem>
+                  )
+                })}
+              </CommandGroup>
+            )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
 
 interface Props {
   onClose: () => void
@@ -21,15 +135,50 @@ interface Props {
 
 export default function DevelopmentProjectInitiatePanel({ onClose, initialParcelId }: Props) {
   const [form, setForm] = useState<InitiateDevelopmentProjectRequest>(() => emptyForm(initialParcelId))
+  const [availableHomes, setAvailableHomes] = useState<HomeListItemResponse[]>([])
+  const [homesLoading, setHomesLoading] = useState(false)
   const initiateMutation = useInitiateDevelopmentProject()
   const { success } = useToast()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const isRehab = form.type === 'Rehabilitation'
+
+  useEffect(() => {
+    if (!isRehab || !form.landParcelId) {
+      setAvailableHomes([])
+      return
+    }
+    setHomesLoading(true)
+    homesApi
+      .getHomes({ landParcelId: form.landParcelId, pageSize: 100 })
+      .then(r => setAvailableHomes(r.items ?? []))
+      .finally(() => setHomesLoading(false))
+  }, [isRehab, form.landParcelId])
+
+  const toggleHome = (id: string) => {
+    setForm(f => {
+      const current = f.existingHomes ?? []
+      return {
+        ...f,
+        existingHomes: current.includes(id) ? current.filter(h => h !== id) : [...current, id],
+      }
+    })
+  }
+
+  const canSubmit =
+    !!form.landParcelId &&
+    !!form.name?.trim() &&
+    (!isRehab || (form.existingHomes?.length ?? 0) > 0) &&
+    !initiateMutation.isPending
+
+  const handleSubmit = async (e: { preventDefault(): void }) => {
     e.preventDefault()
     try {
       await initiateMutation.mutateAsync({
         landParcelId: form.landParcelId,
+        name: form.name,
+        type: form.type,
         description: form.description || undefined,
+        existingHomes: isRehab ? form.existingHomes : undefined,
       })
       success('Development project initiated')
       onClose()
@@ -48,7 +197,7 @@ export default function DevelopmentProjectInitiatePanel({ onClose, initialParcel
             className="btn btn-primary"
             type="submit"
             form="initiate-project-form"
-            disabled={initiateMutation.isPending || !form.landParcelId}
+            disabled={!canSubmit}
           >
             {initiateMutation.isPending ? 'Initiating…' : 'Initiate Project'}
           </button>
@@ -58,10 +207,26 @@ export default function DevelopmentProjectInitiatePanel({ onClose, initialParcel
       <form id="initiate-project-form" onSubmit={handleSubmit}>
         <div className="form-grid">
           <div className="form-field full">
+            <label className="form-label">Project Type</label>
+            <div className="flex gap-2">
+              {(['NewConstruction', 'Rehabilitation'] as const).map(t => (
+                <button
+                  key={t}
+                  type="button"
+                  className={`btn ${form.type === t ? 'btn-primary' : 'btn-ghost'}`}
+                  onClick={() => setForm(f => ({ ...f, type: t, existingHomes: [] }))}
+                >
+                  {t === 'NewConstruction' ? 'New Construction' : 'Rehabilitation'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="form-field full">
             <label className="form-label">Land Parcel</label>
             <EntityCombobox
               value={form.landParcelId || null}
-              onChange={id => setForm(f => ({ ...f, landParcelId: id ?? '' }))}
+              onChange={id => setForm(f => ({ ...f, landParcelId: id ?? '', existingHomes: [] }))}
               fetchOptions={async q => {
                 const result = await landParcelsApi.getLandParcels({ search: q, pageSize: 10 })
                 return (result.items ?? []).map(p => ({
@@ -72,6 +237,36 @@ export default function DevelopmentProjectInitiatePanel({ onClose, initialParcel
               placeholder="Search parcels…"
             />
           </div>
+
+          <div className="form-field full">
+            <label className="form-label">Name</label>
+            <input
+              className="form-input"
+              value={form.name ?? ''}
+              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              placeholder="Project name…"
+            />
+          </div>
+
+          {isRehab && (
+            <div className="form-field full">
+              <label className="form-label">Homes</label>
+              {!form.landParcelId ? (
+                <p className="form-hint">Select a parcel to load homes.</p>
+              ) : homesLoading ? (
+                <p className="form-hint">Loading homes…</p>
+              ) : availableHomes.length === 0 ? (
+                <p className="form-hint">No homes found on this parcel.</p>
+              ) : (
+                <HomesMultiSelect
+                  homes={availableHomes}
+                  selected={form.existingHomes ?? []}
+                  onToggle={toggleHome}
+                />
+              )}
+            </div>
+          )}
+
           <div className="form-field full">
             <label className="form-label">Description (optional)</label>
             <textarea
@@ -82,8 +277,9 @@ export default function DevelopmentProjectInitiatePanel({ onClose, initialParcel
             />
           </div>
         </div>
+
         {initiateMutation.isError && (
-          <div className="form-error">Failed to initiate project. Check the parcel and try again.</div>
+          <div className="form-error">Failed to initiate project. Check the details and try again.</div>
         )}
       </form>
     </SlideOver>

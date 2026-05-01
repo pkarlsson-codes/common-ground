@@ -1,4 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
+import { Check, ChevronsUpDown } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 interface Option {
   id: string
@@ -14,12 +25,6 @@ interface EntityComboboxProps {
   id?: string
 }
 
-type DropdownState =
-  | { status: 'idle' }
-  | { status: 'loading' }
-  | { status: 'error' }
-  | { status: 'ready'; options: Option[] }
-
 export default function EntityCombobox({
   value,
   onChange,
@@ -28,25 +33,21 @@ export default function EntityCombobox({
   disabled = false,
   id,
 }: EntityComboboxProps) {
-  const [inputText, setInputText] = useState('')
   const [open, setOpen] = useState(false)
-  const [dropdown, setDropdown] = useState<DropdownState>({ status: 'idle' })
-  const [activeIndex, setActiveIndex] = useState(-1)
+  const [query, setQuery] = useState('')
+  const [options, setOptions] = useState<Option[]>([])
+  const [loading, setLoading] = useState(false)
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null)
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const fetchSequenceRef = useRef(0)
+  const fetchSeqRef = useRef(0)
   const isMountedRef = useRef(true)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const listRef = useRef<HTMLUListElement>(null)
 
   useEffect(() => {
     isMountedRef.current = true
     return () => {
       isMountedRef.current = false
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
-      }
+      if (debounceRef.current) clearTimeout(debounceRef.current)
     }
   }, [])
 
@@ -54,148 +55,105 @@ export default function EntityCombobox({
   useEffect(() => {
     if (value === null) {
       setSelectedLabel(null)
-      setInputText('')
     }
   }, [value])
 
   const runFetch = (q: string) => {
-    const fetchSequence = ++fetchSequenceRef.current
-    setDropdown({ status: 'loading' })
-    setActiveIndex(-1)
+    const seq = ++fetchSeqRef.current
+    setLoading(true)
     fetchOptions(q)
-      .then(options => {
-        if (!isMountedRef.current || fetchSequence !== fetchSequenceRef.current) return
-        setDropdown({ status: 'ready', options })
+      .then(results => {
+        if (!isMountedRef.current || seq !== fetchSeqRef.current) return
+        setOptions(results)
+        setLoading(false)
       })
       .catch(() => {
-        if (!isMountedRef.current || fetchSequence !== fetchSequenceRef.current) return
-        setDropdown({ status: 'error' })
+        if (!isMountedRef.current || seq !== fetchSeqRef.current) return
+        setOptions([])
+        setLoading(false)
       })
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const text = e.target.value
-    setInputText(text)
-    setOpen(true)
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next)
+    if (next) {
+      setQuery('')
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      // Fetch initial options immediately on open
+      debounceRef.current = setTimeout(() => runFetch(''), 0)
+    }
+  }
 
-    // If user cleared the text, propagate null
-    if (text === '') {
+  const handleQueryChange = (q: string) => {
+    setQuery(q)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => runFetch(q), 300)
+  }
+
+  const handleSelect = (opt: Option) => {
+    if (value === opt.id) {
+      // Clicking the selected item deselects it
       onChange(null)
       setSelectedLabel(null)
+    } else {
+      onChange(opt.id)
+      setSelectedLabel(opt.label)
     }
-
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => runFetch(text), 300)
-  }
-
-  const handleFocus = () => {
-    setOpen(true)
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => runFetch(inputText), 300)
-  }
-
-  const selectOption = (option: Option) => {
-    setSelectedLabel(option.label)
-    setInputText(option.label)
-    onChange(option.id)
     setOpen(false)
-    setActiveIndex(-1)
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!open) return
-    const options = dropdown.status === 'ready' ? dropdown.options : []
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setActiveIndex(i => Math.min(i + 1, options.length - 1))
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setActiveIndex(i => Math.max(i - 1, 0))
-    } else if (e.key === 'Enter') {
-      e.preventDefault()
-      if (activeIndex >= 0 && activeIndex < options.length) {
-        selectOption(options[activeIndex])
-      }
-    } else if (e.key === 'Escape') {
-      setOpen(false)
-      // Restore display to last confirmed selection
-      setInputText(selectedLabel ?? '')
-    }
-  }
-
-  // Close on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false)
-        setInputText(selectedLabel ?? '')
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [selectedLabel])
-
-  // Scroll active item into view
-  useEffect(() => {
-    if (activeIndex >= 0 && listRef.current) {
-      const item = listRef.current.children[activeIndex] as HTMLElement | undefined
-      item?.scrollIntoView({ block: 'nearest' })
-    }
-  }, [activeIndex])
-
-  const renderDropdownItems = () => {
-    if (dropdown.status === 'loading') {
-      return <li className="entity-combobox__option entity-combobox__option--disabled">Loading…</li>
-    }
-    if (dropdown.status === 'error') {
-      return <li className="entity-combobox__option entity-combobox__option--disabled">Failed to load</li>
-    }
-    if (dropdown.status === 'ready') {
-      if (dropdown.options.length === 0) {
-        return <li className="entity-combobox__option entity-combobox__option--disabled">No results</li>
-      }
-      return dropdown.options.map((opt, i) => (
-        <li
-          key={opt.id}
-          className={
-            'entity-combobox__option' +
-            (i === activeIndex ? ' entity-combobox__option--active' : '')
-          }
-          onMouseDown={e => {
-            e.preventDefault() // prevent blur before click registers
-            selectOption(opt)
-          }}
-          onMouseEnter={() => setActiveIndex(i)}
-        >
-          {opt.label}
-        </li>
-      ))
-    }
-    return null
-  }
+  const displayLabel = selectedLabel ?? (value ? value : null)
 
   return (
-    <div className="entity-combobox" ref={containerRef}>
-      <input
-        id={id}
-        className="form-input entity-combobox__input"
-        value={inputText}
-        onChange={handleInputChange}
-        onFocus={handleFocus}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        disabled={disabled}
-        autoComplete="off"
-        role="combobox"
-        aria-expanded={open}
-        aria-autocomplete="list"
-      />
-      {open && (
-        <ul className="entity-combobox__dropdown" ref={listRef} role="listbox">
-          {renderDropdownItems()}
-        </ul>
-      )}
-    </div>
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverTrigger asChild>
+        <button
+          id={id}
+          type="button"
+          role="combobox"
+          aria-expanded={open}
+          disabled={disabled}
+          className={cn(
+            'form-input flex items-center justify-between gap-2',
+            displayLabel ? 'text-[var(--text-primary)]' : 'text-[var(--text-dim)]',
+          )}
+        >
+          <span className="truncate">{displayLabel ?? placeholder}</span>
+          <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder={placeholder}
+            value={query}
+            onValueChange={handleQueryChange}
+          />
+          <CommandList>
+            {loading ? (
+              <CommandEmpty>Loading…</CommandEmpty>
+            ) : options.length === 0 ? (
+              <CommandEmpty>No results found.</CommandEmpty>
+            ) : (
+              <CommandGroup>
+                {options.map(opt => (
+                  <CommandItem
+                    key={opt.id}
+                    value={opt.id}
+                    onSelect={() => handleSelect(opt)}
+                    data-checked={value === opt.id}
+                  >
+                    <Check
+                      className={cn('mr-2 size-4', value === opt.id ? 'opacity-100' : 'opacity-0')}
+                    />
+                    {opt.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   )
 }
