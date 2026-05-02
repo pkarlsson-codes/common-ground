@@ -7,5 +7,4 @@ public sealed record BuyerEligibilityVerified(
     string AggregateId,
     DateOnly VerifiedDate,
     string? EligibilityNotes,
-    string RecordedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RecordedBy) : DomainEvent(AggregateId);

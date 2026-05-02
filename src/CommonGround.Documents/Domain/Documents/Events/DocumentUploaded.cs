@@ -14,5 +14,4 @@ public sealed record DocumentUploaded(
     string ContentType,
     long SizeBytes,
     string Sha256,
-    string UploadedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string UploadedBy) : DomainEvent(AggregateId);

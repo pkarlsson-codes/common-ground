@@ -15,5 +15,4 @@ public sealed record GroundLeaseTemplateCreated(
     decimal? BaselineIndexValue,
     decimal? AnnualPercentage,
     decimal? ImprovementsCap,
-    string CreatedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string CreatedBy) : DomainEvent(AggregateId);

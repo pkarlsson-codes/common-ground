@@ -8,11 +8,9 @@ namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases.Events;
 /// <param name="Outcome">Description of the counseling outcome.</param>
 /// <param name="OutcomeDate">The date the outcome was recorded.</param>
 /// <param name="RecordedBy">The staff member who recorded the outcome.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record CounselingOutcomeRecorded(
     string AggregateId,
     Guid ReferralId,
     string Outcome,
     DateOnly OutcomeDate,
-    string RecordedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RecordedBy) : DomainEvent(AggregateId);

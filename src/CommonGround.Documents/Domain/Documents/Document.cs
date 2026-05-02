@@ -82,7 +82,6 @@ public sealed class Document : AggregateRoot<DocumentId>
             throw new BusinessRuleViolationException("Uploaded blob must have non-zero size.");
 
         var doc = new Document();
-        var now = DateTimeOffset.UtcNow;
         var actualVersionId = versionId ?? DocumentVersionId.Generate();
         var actualDocumentId = documentId ?? DocumentId.Generate();
 
@@ -97,8 +96,7 @@ public sealed class Document : AggregateRoot<DocumentId>
             contentType,
             sizeBytes,
             sha256,
-            uploadedBy.Value,
-            now));
+            uploadedBy.Value));
 
         if (initialAttachment is { } a)
         {
@@ -126,7 +124,7 @@ public sealed class Document : AggregateRoot<DocumentId>
         ApplyChange(new DocumentAttached(
             Id.Value, entityType, entityId, role,
             Title, current.FileName, current.ContentType, current.SizeBytes,
-            attachedBy.Value, DateTimeOffset.UtcNow));
+            attachedBy.Value));
     }
 
     /// <summary>Detaches this document from an entity. Idempotent if not attached.</summary>
@@ -141,7 +139,7 @@ public sealed class Document : AggregateRoot<DocumentId>
             return;
 
         ApplyChange(new DocumentDetached(
-            Id.Value, entityType, entityId, role, detachedBy.Value, DateTimeOffset.UtcNow));
+            Id.Value, entityType, entityId, role, detachedBy.Value));
     }
 
     /// <summary>Soft-deletes this document. Idempotent if already deleted.</summary>
@@ -161,14 +159,13 @@ public sealed class Document : AggregateRoot<DocumentId>
         if (IsOnLegalHold)
             throw new BusinessRuleViolationException("Cannot soft-delete a document on legal hold.");
 
-        var now = DateTimeOffset.UtcNow;
-        ApplyChange(new DocumentSoftDeleted(Id.Value, reason, deletedBy.Value, now));
+        ApplyChange(new DocumentSoftDeleted(Id.Value, reason, deletedBy.Value));
 
         // Snapshot before raising fanout events — the apply paths don't mutate _attachments here.
         foreach (var att in _attachments.ToArray())
         {
             ApplyChange(new DocumentSoftDeletedForAttachment(
-                Id.Value, att.EntityType, att.EntityId, att.Role, now));
+                Id.Value, att.EntityType, att.EntityId, att.Role));
         }
     }
 
@@ -208,8 +205,7 @@ public sealed class Document : AggregateRoot<DocumentId>
             sizeBytes,
             sha256,
             note,
-            uploadedBy.Value,
-            DateTimeOffset.UtcNow));
+            uploadedBy.Value));
     }
 
     /// <summary>Updates editable metadata fields. Nulls leave the corresponding field untouched.</summary>
@@ -241,7 +237,7 @@ public sealed class Document : AggregateRoot<DocumentId>
 
         ApplyChange(new DocumentMetadataUpdated(
             Id.Value, newTitle, newSensitivity, newExpiresAt, clearExpiresAt,
-            updatedBy.Value, DateTimeOffset.UtcNow));
+            updatedBy.Value));
     }
 
     /// <summary>Adds a tag (lowercased, trimmed). Idempotent.</summary>
@@ -258,7 +254,7 @@ public sealed class Document : AggregateRoot<DocumentId>
             return;
 
         ApplyChange(new DocumentTagged(
-            Id.Value, normalised, taggedBy.Value, DateTimeOffset.UtcNow));
+            Id.Value, normalised, taggedBy.Value));
     }
 
     /// <summary>Removes a tag. Idempotent.</summary>
@@ -272,7 +268,7 @@ public sealed class Document : AggregateRoot<DocumentId>
             return;
 
         ApplyChange(new DocumentUntagged(
-            Id.Value, normalised, untaggedBy.Value, DateTimeOffset.UtcNow));
+            Id.Value, normalised, untaggedBy.Value));
     }
 
     /// <summary>Normalises a tag string to lowercase, trimmed.</summary>

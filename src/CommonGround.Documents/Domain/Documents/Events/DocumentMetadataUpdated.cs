@@ -9,5 +9,4 @@ public sealed record DocumentMetadataUpdated(
     string Sensitivity,
     DateTimeOffset? ExpiresAt,
     bool ClearExpiresAt,
-    string UpdatedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string UpdatedBy) : DomainEvent(AggregateId);

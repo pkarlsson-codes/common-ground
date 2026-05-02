@@ -8,5 +8,4 @@ public sealed record InspectionCompleted(
     DateOnly InspectionDate,
     string InspectorName,
     string? InspectionNotes,
-    string RecordedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RecordedBy) : DomainEvent(AggregateId);

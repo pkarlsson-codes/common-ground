@@ -7,5 +7,4 @@ public sealed record StewardshipCheckInRecorded(
     string AggregateId,
     DateOnly CheckInDate,
     string Notes,
-    string RecordedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RecordedBy) : DomainEvent(AggregateId);

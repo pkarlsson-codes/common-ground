@@ -7,5 +7,4 @@ public sealed record TitleCleared(
     string AggregateId,
     DateOnly ClearedDate,
     string? TitleCompanyName,
-    string RecordedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RecordedBy) : DomainEvent(AggregateId);

@@ -6,5 +6,4 @@ namespace CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 public sealed record ClosingScheduled(
     string AggregateId,
     DateOnly ScheduledClosingDate,
-    string RecordedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RecordedBy) : DomainEvent(AggregateId);

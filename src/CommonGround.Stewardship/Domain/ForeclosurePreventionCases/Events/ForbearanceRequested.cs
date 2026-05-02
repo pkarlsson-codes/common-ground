@@ -8,11 +8,9 @@ namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases.Events;
 /// <param name="LenderName">The name of the lender.</param>
 /// <param name="RequestedDate">The date the request was submitted.</param>
 /// <param name="RequestedBy">The staff member who submitted the request.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record ForbearanceRequested(
     string AggregateId,
     Guid RequestId,
     string LenderName,
     DateOnly RequestedDate,
-    string RequestedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RequestedBy) : DomainEvent(AggregateId);

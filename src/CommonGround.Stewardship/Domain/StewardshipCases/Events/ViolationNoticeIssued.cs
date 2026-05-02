@@ -8,11 +8,9 @@ namespace CommonGround.Stewardship.Domain.StewardshipCases.Events;
 /// <param name="NoticeDate">The date the notice was issued.</param>
 /// <param name="CureDeadline">The deadline for curing the violation.</param>
 /// <param name="IssuedBy">The staff member who issued the notice.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record ViolationNoticeIssued(
     string AggregateId,
     Guid ViolationId,
     DateOnly NoticeDate,
     DateOnly CureDeadline,
-    string IssuedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string IssuedBy) : DomainEvent(AggregateId);

@@ -9,12 +9,10 @@ namespace CommonGround.Stewardship.Domain.StewardshipCases.Events;
 /// <param name="SubletDisclosed">Whether any sublet arrangement was disclosed.</param>
 /// <param name="MajorChanges">Any major changes reported.</param>
 /// <param name="SubmittedDate">The date of submission.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record OccupancyVerificationSubmitted(
     string AggregateId,
     Guid VerificationId,
     bool IsPrimaryResident,
     bool SubletDisclosed,
     string? MajorChanges,
-    DateOnly SubmittedDate,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    DateOnly SubmittedDate) : DomainEvent(AggregateId);

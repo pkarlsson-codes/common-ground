@@ -85,8 +85,7 @@ public sealed class Home : AggregateRoot<HomeId>
             initialAssessment.AssessedValue,
             initialAssessment.AssessedAt,
             initialAssessment.AppraiserName,
-            registeredBy.Value,
-            DateTimeOffset.UtcNow));
+            registeredBy.Value));
 
         return home;
     }

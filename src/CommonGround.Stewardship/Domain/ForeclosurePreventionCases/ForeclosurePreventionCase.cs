@@ -62,7 +62,7 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         fpc.ApplyChange(new ForeclosurePreventionCaseOpened(
             ForeclosurePreventionCaseId.Generate().Value,
             groundLeaseId, trigger, openedDate,
-            openedBy.Value, DateTimeOffset.UtcNow));
+            openedBy.Value));
         return fpc;
     }
 
@@ -77,7 +77,7 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
 
         ApplyChange(new ServicerDelinquencyRecorded(
             Id.Value, servicerName, delinquentMonths, recordedDate,
-            recordedBy.Value, DateTimeOffset.UtcNow));
+            recordedBy.Value));
     }
 
     /// <summary>Makes a housing counseling referral, advancing the case to Active if still Opened.</summary>
@@ -91,7 +91,7 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
 
         ApplyChange(new CounselingReferralMade(
             Id.Value, Guid.NewGuid(), agencyName, referralDate,
-            referredBy.Value, DateTimeOffset.UtcNow));
+            referredBy.Value));
     }
 
     /// <summary>Records the outcome of a counseling referral.</summary>
@@ -107,7 +107,7 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
 
         ApplyChange(new CounselingOutcomeRecorded(
             Id.Value, referralId, outcome, outcomeDate,
-            recordedBy.Value, DateTimeOffset.UtcNow));
+            recordedBy.Value));
     }
 
     /// <summary>Submits a forbearance request to a lender, advancing the case to Active if still Opened.</summary>
@@ -121,7 +121,7 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
 
         ApplyChange(new ForbearanceRequested(
             Id.Value, Guid.NewGuid(), lenderName, requestedDate,
-            requestedBy.Value, DateTimeOffset.UtcNow));
+            requestedBy.Value));
     }
 
     /// <summary>Records the lender's decision on a forbearance request.</summary>
@@ -136,7 +136,7 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
 
         ApplyChange(new ForbearanceOutcomeRecorded(
             Id.Value, requestId, outcome, outcomeDate, notes,
-            recordedBy.Value, DateTimeOffset.UtcNow));
+            recordedBy.Value));
     }
 
     /// <summary>Activates a CLT cure period under a lender recognition agreement, advancing the case to Active if still Opened.</summary>
@@ -153,7 +153,7 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         var cureDeadline = activationDate.AddDays(curePeriodDays);
         ApplyChange(new CurePeriodActivated(
             Id.Value, Guid.NewGuid(), lraId, activationDate, curePeriodDays, cureDeadline,
-            activatedBy.Value, DateTimeOffset.UtcNow));
+            activatedBy.Value));
     }
 
     /// <summary>Resolves the case with the given outcome.</summary>
@@ -166,7 +166,7 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
 
         ApplyChange(new ForeclosurePreventionCaseResolved(
             Id.Value, outcome, resolvedDate,
-            resolvedBy.Value, DateTimeOffset.UtcNow));
+            resolvedBy.Value));
     }
 
     /// <inheritdoc/>

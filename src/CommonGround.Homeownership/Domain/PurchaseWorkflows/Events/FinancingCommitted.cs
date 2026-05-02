@@ -8,5 +8,4 @@ public sealed record FinancingCommitted(
     string LenderName,
     decimal CommittedAmount,
     DateOnly PreapprovalLetterDate,
-    string RecordedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RecordedBy) : DomainEvent(AggregateId);

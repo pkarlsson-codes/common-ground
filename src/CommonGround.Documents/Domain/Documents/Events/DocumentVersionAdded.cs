@@ -13,5 +13,4 @@ public sealed record DocumentVersionAdded(
     long SizeBytes,
     string Sha256,
     string? Note,
-    string UploadedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string UploadedBy) : DomainEvent(AggregateId);

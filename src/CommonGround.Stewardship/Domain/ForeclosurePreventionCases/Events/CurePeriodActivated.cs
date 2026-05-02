@@ -10,7 +10,6 @@ namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases.Events;
 /// <param name="CurePeriodDays">The number of days in the cure period.</param>
 /// <param name="CureDeadline">The deadline by which the delinquency must be cured.</param>
 /// <param name="ActivatedBy">The staff member who activated the cure period.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record CurePeriodActivated(
     string AggregateId,
     Guid ActivationId,
@@ -18,5 +17,4 @@ public sealed record CurePeriodActivated(
     DateOnly ActivationDate,
     int CurePeriodDays,
     DateOnly CureDeadline,
-    string ActivatedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string ActivatedBy) : DomainEvent(AggregateId);

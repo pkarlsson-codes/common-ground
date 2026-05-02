@@ -6,5 +6,4 @@ namespace CommonGround.Documents.Domain.Documents.Events;
 public sealed record DocumentUntagged(
     string AggregateId,
     string Tag,
-    string UntaggedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string UntaggedBy) : DomainEvent(AggregateId);

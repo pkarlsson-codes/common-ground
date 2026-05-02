@@ -17,7 +17,6 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.Events;
 /// <param name="AnnualPercentage">Annual growth rate (FixedPercentage only).</param>
 /// <param name="ImprovementsCap">Maximum improvements credit, if any.</param>
 /// <param name="RegisteredBy">The user who created this lease.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record GroundLeaseCreated(
     string AggregateId,
     string LandParcelId,
@@ -31,5 +30,4 @@ public sealed record GroundLeaseCreated(
     decimal? BaselineIndexValue,
     decimal? AnnualPercentage,
     decimal? ImprovementsCap,
-    string RegisteredBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RegisteredBy) : DomainEvent(AggregateId);

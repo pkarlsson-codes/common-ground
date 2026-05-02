@@ -8,5 +8,4 @@ public sealed record DocumentDetached(
     string EntityType,
     Guid EntityId,
     string? Role,
-    string DetachedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string DetachedBy) : DomainEvent(AggregateId);

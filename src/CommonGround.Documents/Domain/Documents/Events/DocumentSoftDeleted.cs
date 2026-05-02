@@ -6,5 +6,4 @@ namespace CommonGround.Documents.Domain.Documents.Events;
 public sealed record DocumentSoftDeleted(
     string AggregateId,
     string Reason,
-    string DeletedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string DeletedBy) : DomainEvent(AggregateId);

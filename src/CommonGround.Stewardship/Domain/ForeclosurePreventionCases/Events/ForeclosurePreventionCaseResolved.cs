@@ -7,10 +7,8 @@ namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases.Events;
 /// <param name="Outcome">The outcome of the case.</param>
 /// <param name="ResolvedDate">The date the case was resolved.</param>
 /// <param name="ResolvedBy">The staff member who resolved the case.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record ForeclosurePreventionCaseResolved(
     string AggregateId,
     ForeclosurePreventionOutcome Outcome,
     DateOnly ResolvedDate,
-    string ResolvedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string ResolvedBy) : DomainEvent(AggregateId);

@@ -9,12 +9,10 @@ namespace CommonGround.Stewardship.Domain.StewardshipCases.Events;
 /// <param name="ConditionNotes">Optional notes on property condition.</param>
 /// <param name="CompletedDate">The date the inspection was completed.</param>
 /// <param name="RecordedBy">The staff member who recorded the completion.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record PropertyInspectionCompleted(
     string AggregateId,
     Guid InspectionId,
     bool OccupancyConfirmed,
     string? ConditionNotes,
     DateOnly CompletedDate,
-    string RecordedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RecordedBy) : DomainEvent(AggregateId);

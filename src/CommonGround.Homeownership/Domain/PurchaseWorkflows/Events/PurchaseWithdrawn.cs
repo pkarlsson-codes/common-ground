@@ -7,5 +7,4 @@ public sealed record PurchaseWithdrawn(
     string AggregateId,
     DateOnly WithdrawnDate,
     string? WithdrawalReason,
-    string RecordedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RecordedBy) : DomainEvent(AggregateId);

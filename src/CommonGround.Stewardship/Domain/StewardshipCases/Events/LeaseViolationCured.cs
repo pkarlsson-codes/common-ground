@@ -7,10 +7,8 @@ namespace CommonGround.Stewardship.Domain.StewardshipCases.Events;
 /// <param name="ViolationId">The cured violation identifier.</param>
 /// <param name="CuredDate">The date the cure was verified.</param>
 /// <param name="VerifiedBy">The staff member who verified the cure.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record LeaseViolationCured(
     string AggregateId,
     Guid ViolationId,
     DateOnly CuredDate,
-    string VerifiedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string VerifiedBy) : DomainEvent(AggregateId);

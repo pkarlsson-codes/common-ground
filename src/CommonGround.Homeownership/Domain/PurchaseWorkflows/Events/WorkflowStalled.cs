@@ -8,5 +8,4 @@ public sealed record WorkflowStalled(
     string StalledReason,
     DateOnly StalledDate,
     DateOnly ResolutionTargetDate,
-    string RecordedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RecordedBy) : DomainEvent(AggregateId);

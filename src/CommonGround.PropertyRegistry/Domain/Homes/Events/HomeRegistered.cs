@@ -14,5 +14,4 @@ public sealed record HomeRegistered(
     decimal InitialAssessedValue,
     DateOnly InitiallyAssessedAt,
     string? InitialAppraiserName,
-    string RegisteredBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RegisteredBy) : DomainEvent(AggregateId);

@@ -11,5 +11,4 @@ public sealed record HomeownerChanged(
     string NewFullName,
     string NewEmail,
     string? NewPhone,
-    string ChangedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string ChangedBy) : DomainEvent(AggregateId);

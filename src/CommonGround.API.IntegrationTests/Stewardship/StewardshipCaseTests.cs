@@ -191,8 +191,7 @@ public class StewardshipCaseTests(ApiFactory factory)
             caseId,
             groundLeaseId,
             new DateOnly(2026, 1, 1),
-            "user-system",
-            DateTimeOffset.UtcNow);
+            "user-system");
 
         session.Events.Append(caseId, openedEvent);
         await session.SaveChangesAsync();

@@ -9,12 +9,10 @@ namespace CommonGround.Stewardship.Domain.StewardshipCases.Events;
 /// <param name="Description">Description of the violation.</param>
 /// <param name="IdentifiedDate">The date the violation was identified.</param>
 /// <param name="IdentifiedBy">The staff member who identified the violation.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record LeaseViolationIdentified(
     string AggregateId,
     Guid ViolationId,
     LeaseViolationType ViolationType,
     string Description,
     DateOnly IdentifiedDate,
-    string IdentifiedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string IdentifiedBy) : DomainEvent(AggregateId);

@@ -7,5 +7,4 @@ public sealed record PurchaseFailed(
     string AggregateId,
     string FailureReason,
     DateOnly FailedDate,
-    string RecordedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RecordedBy) : DomainEvent(AggregateId);

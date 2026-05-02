@@ -7,5 +7,4 @@ public sealed record PurchaseClosed(
     string AggregateId,
     DateOnly ActualClosingDate,
     string? ClosingNotes,
-    string RecordedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RecordedBy) : DomainEvent(AggregateId);

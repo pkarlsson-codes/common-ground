@@ -9,12 +9,10 @@ namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases.Events;
 /// <param name="OutcomeDate">The date the outcome was recorded.</param>
 /// <param name="Notes">Optional notes on the outcome.</param>
 /// <param name="RecordedBy">The staff member who recorded the outcome.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record ForbearanceOutcomeRecorded(
     string AggregateId,
     Guid RequestId,
     ForbearanceOutcome Outcome,
     DateOnly OutcomeDate,
     string? Notes,
-    string RecordedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string RecordedBy) : DomainEvent(AggregateId);

@@ -90,8 +90,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             resalePolicyTerms.BaselineIndexValue,
             resalePolicyTerms.AnnualPercentage,
             resalePolicyTerms.ImprovementsCap,
-            createdBy.Value,
-            DateTimeOffset.UtcNow));
+            createdBy.Value));
 
         return lease;
     }
@@ -130,8 +129,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             template.ResalePolicyTerms.BaselineIndexValue,
             template.ResalePolicyTerms.AnnualPercentage,
             template.ResalePolicyTerms.ImprovementsCap,
-            createdBy.Value,
-            DateTimeOffset.UtcNow));
+            createdBy.Value));
 
         return lease;
     }
@@ -155,8 +153,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             homeowner.FullName,
             homeowner.Email,
             homeowner.Phone,
-            onboardedBy.Value,
-            DateTimeOffset.UtcNow));
+            onboardedBy.Value));
     }
 
     /// <summary>Changes the homeowner on this lease.</summary>
@@ -181,8 +178,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             newHomeowner.FullName,
             newHomeowner.Email,
             newHomeowner.Phone,
-            changedBy.Value,
-            DateTimeOffset.UtcNow));
+            changedBy.Value));
     }
 
     /// <summary>Terminates this ground lease.</summary>
@@ -203,8 +199,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             Id.Value,
             reason,
             terminatedDate,
-            terminatedBy.Value,
-            DateTimeOffset.UtcNow));
+            terminatedBy.Value));
     }
 
     /// <summary>Records a stewardship check-in visit.</summary>
@@ -224,8 +219,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             Id.Value,
             checkInDate,
             notes,
-            recordedBy.Value,
-            DateTimeOffset.UtcNow));
+            recordedBy.Value));
     }
 
     /// <inheritdoc/>

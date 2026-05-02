@@ -33,8 +33,7 @@ public sealed class User : AggregateRoot<UserId>
             UserId.Generate().Value,
             keycloakSubject,
             email,
-            displayName,
-            DateTimeOffset.UtcNow));
+            displayName));
         return user;
     }
 

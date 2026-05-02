@@ -7,10 +7,8 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.Events;
 /// <param name="Reason">The reason for termination.</param>
 /// <param name="TerminatedDate">The date the lease was terminated.</param>
 /// <param name="TerminatedBy">The user who terminated the lease.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record GroundLeaseTerminated(
     string AggregateId,
     string Reason,
     DateOnly TerminatedDate,
-    string TerminatedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string TerminatedBy) : DomainEvent(AggregateId);

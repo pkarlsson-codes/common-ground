@@ -16,5 +16,4 @@ public sealed record DocumentAttached(
     string CurrentFileName,
     string CurrentContentType,
     long CurrentSizeBytes,
-    string AttachedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string AttachedBy) : DomainEvent(AggregateId);

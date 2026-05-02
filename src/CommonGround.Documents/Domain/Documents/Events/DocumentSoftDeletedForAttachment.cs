@@ -11,5 +11,4 @@ public sealed record DocumentSoftDeletedForAttachment(
     string AggregateId,
     string EntityType,
     Guid EntityId,
-    string? Role,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string? Role) : DomainEvent(AggregateId);

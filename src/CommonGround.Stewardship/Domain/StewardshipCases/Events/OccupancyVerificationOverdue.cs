@@ -6,9 +6,7 @@ namespace CommonGround.Stewardship.Domain.StewardshipCases.Events;
 /// <param name="AggregateId">The stewardship case identifier.</param>
 /// <param name="VerificationId">The overdue verification.</param>
 /// <param name="Deadline">The deadline that was missed.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record OccupancyVerificationOverdue(
     string AggregateId,
     Guid VerificationId,
-    DateOnly Deadline,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    DateOnly Deadline) : DomainEvent(AggregateId);

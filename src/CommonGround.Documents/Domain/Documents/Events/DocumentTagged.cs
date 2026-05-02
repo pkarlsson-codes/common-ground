@@ -6,5 +6,4 @@ namespace CommonGround.Documents.Domain.Documents.Events;
 public sealed record DocumentTagged(
     string AggregateId,
     string Tag,
-    string TaggedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string TaggedBy) : DomainEvent(AggregateId);

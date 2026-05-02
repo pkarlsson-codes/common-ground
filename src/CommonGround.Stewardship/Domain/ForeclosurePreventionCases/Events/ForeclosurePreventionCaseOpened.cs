@@ -8,11 +8,9 @@ namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases.Events;
 /// <param name="Trigger">The event that triggered opening this case.</param>
 /// <param name="OpenedDate">The date the case was opened.</param>
 /// <param name="OpenedBy">The staff member who opened the case.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record ForeclosurePreventionCaseOpened(
     string AggregateId,
     string GroundLeaseId,
     ForeclosurePreventionTrigger Trigger,
     DateOnly OpenedDate,
-    string OpenedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string OpenedBy) : DomainEvent(AggregateId);

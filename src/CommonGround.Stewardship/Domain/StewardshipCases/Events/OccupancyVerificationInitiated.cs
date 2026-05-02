@@ -8,11 +8,9 @@ namespace CommonGround.Stewardship.Domain.StewardshipCases.Events;
 /// <param name="PeriodYear">The calendar year being verified.</param>
 /// <param name="SurveyDeadline">Optional deadline for homeowner submission.</param>
 /// <param name="InitiatedBy">The user who initiated the verification.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record OccupancyVerificationInitiated(
     string AggregateId,
     Guid VerificationId,
     int PeriodYear,
     DateOnly? SurveyDeadline,
-    string InitiatedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string InitiatedBy) : DomainEvent(AggregateId);

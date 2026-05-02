@@ -56,8 +56,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
             StewardshipCaseId.Generate().Value,
             groundLeaseId,
             openedDate,
-            openedBy.Value,
-            DateTimeOffset.UtcNow));
+            openedBy.Value));
         return sc;
     }
 
@@ -73,8 +72,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
             Guid.NewGuid(),
             periodYear,
             surveyDeadline,
-            initiatedBy.Value,
-            DateTimeOffset.UtcNow));
+            initiatedBy.Value));
     }
 
     /// <summary>Records a homeowner's occupancy survey submission.</summary>
@@ -95,7 +93,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         ApplyChange(new OccupancyVerificationSubmitted(
             Id.Value, verificationId,
             isPrimaryResident, subletDisclosed, majorChanges,
-            submittedDate, DateTimeOffset.UtcNow));
+            submittedDate));
     }
 
     /// <summary>Confirms occupancy for a submitted verification.</summary>
@@ -110,7 +108,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
 
         ApplyChange(new OccupancyVerified(
             Id.Value, verificationId, verifiedDate,
-            verifiedBy.Value, DateTimeOffset.UtcNow));
+            verifiedBy.Value));
     }
 
     /// <summary>Fails a submitted occupancy verification.</summary>
@@ -127,7 +125,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
 
         ApplyChange(new OccupancyVerificationFailed(
             Id.Value, verificationId, reason, failedDate,
-            recordedBy.Value, DateTimeOffset.UtcNow));
+            recordedBy.Value));
     }
 
     /// <summary>Marks a pending occupancy verification as overdue.</summary>
@@ -140,7 +138,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
                 "Only Pending verifications can become Overdue.");
 
         ApplyChange(new OccupancyVerificationOverdue(
-            Id.Value, verificationId, deadline, DateTimeOffset.UtcNow));
+            Id.Value, verificationId, deadline));
     }
 
     /// <summary>Schedules a property inspection.</summary>
@@ -155,7 +153,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         ApplyChange(new PropertyInspectionScheduled(
             Id.Value, Guid.NewGuid(),
             scheduledDate, inspectorName,
-            scheduledBy.Value, DateTimeOffset.UtcNow));
+            scheduledBy.Value));
     }
 
     /// <summary>Records the completion of a scheduled property inspection.</summary>
@@ -173,7 +171,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         ApplyChange(new PropertyInspectionCompleted(
             Id.Value, inspectionId, occupancyConfirmed,
             conditionNotes, completedDate,
-            recordedBy.Value, DateTimeOffset.UtcNow));
+            recordedBy.Value));
     }
 
     /// <summary>Cancels a scheduled property inspection.</summary>
@@ -190,7 +188,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
 
         ApplyChange(new PropertyInspectionCancelled(
             Id.Value, inspectionId, reason,
-            cancelledBy.Value, DateTimeOffset.UtcNow));
+            cancelledBy.Value));
     }
 
     /// <summary>Identifies a new lease violation.</summary>
@@ -205,7 +203,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
 
         ApplyChange(new LeaseViolationIdentified(
             Id.Value, Guid.NewGuid(), type, description,
-            identifiedDate, identifiedBy.Value, DateTimeOffset.UtcNow));
+            identifiedDate, identifiedBy.Value));
     }
 
     /// <summary>Issues a formal violation notice for an identified violation.</summary>
@@ -221,7 +219,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
 
         ApplyChange(new ViolationNoticeIssued(
             Id.Value, violationId, noticeDate, cureDeadline,
-            issuedBy.Value, DateTimeOffset.UtcNow));
+            issuedBy.Value));
     }
 
     /// <summary>Records the cure of a violation that has had a notice issued.</summary>
@@ -236,7 +234,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
 
         ApplyChange(new LeaseViolationCured(
             Id.Value, violationId, curedDate,
-            verifiedBy.Value, DateTimeOffset.UtcNow));
+            verifiedBy.Value));
     }
 
     /// <summary>Escalates a violation that has had a notice issued but was not cured.</summary>
@@ -254,7 +252,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
 
         ApplyChange(new LeaseViolationEscalated(
             Id.Value, violationId, reason, escalatedDate,
-            escalatedBy.Value, DateTimeOffset.UtcNow));
+            escalatedBy.Value));
     }
 
     /// <summary>Closes the stewardship case.</summary>
@@ -267,7 +265,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
 
         ApplyChange(new StewardshipCaseClosed(
             Id.Value, reason, closedDate,
-            closedBy.Value, DateTimeOffset.UtcNow));
+            closedBy.Value));
     }
 
     /// <inheritdoc/>

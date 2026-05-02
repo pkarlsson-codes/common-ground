@@ -8,11 +8,9 @@ namespace CommonGround.Stewardship.Domain.StewardshipCases.Events;
 /// <param name="ScheduledDate">The scheduled date for the inspection.</param>
 /// <param name="InspectorName">The name of the inspector.</param>
 /// <param name="ScheduledBy">The staff member who scheduled the inspection.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record PropertyInspectionScheduled(
     string AggregateId,
     Guid InspectionId,
     DateOnly ScheduledDate,
     string InspectorName,
-    string ScheduledBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string ScheduledBy) : DomainEvent(AggregateId);

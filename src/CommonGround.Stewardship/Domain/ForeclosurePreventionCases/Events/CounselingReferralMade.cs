@@ -8,11 +8,9 @@ namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases.Events;
 /// <param name="AgencyName">The name of the counseling agency.</param>
 /// <param name="ReferralDate">The date the referral was made.</param>
 /// <param name="ReferredBy">The staff member who made the referral.</param>
-/// <param name="OccurredAt">When the event occurred.</param>
 public sealed record CounselingReferralMade(
     string AggregateId,
     Guid ReferralId,
     string AgencyName,
     DateOnly ReferralDate,
-    string ReferredBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string ReferredBy) : DomainEvent(AggregateId);

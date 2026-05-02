@@ -128,8 +128,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
             buyer.Email,
             buyer.Phone,
             purchasePrice,
-            initiatedBy.Value,
-            DateTimeOffset.UtcNow));
+            initiatedBy.Value));
 
         return workflow;
     }
@@ -147,7 +146,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         ApplyChange(new BuyerEligibilityVerified(
             Id.Value, verifiedDate, notes,
-            recordedBy.Value, DateTimeOffset.UtcNow));
+            recordedBy.Value));
     }
 
     /// <summary>Records that financing has been committed by a lender. Idempotent.</summary>
@@ -165,8 +164,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         ApplyChange(new FinancingCommitted(
             Id.Value, lenderName, committedAmount,
-            preapprovalLetterDate, recordedBy.Value,
-            DateTimeOffset.UtcNow));
+            preapprovalLetterDate, recordedBy.Value));
     }
 
     /// <summary>Records that a home inspection has been completed. Idempotent.</summary>
@@ -184,7 +182,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         ApplyChange(new InspectionCompleted(
             Id.Value, inspectionDate, inspectorName, notes,
-            recordedBy.Value, DateTimeOffset.UtcNow));
+            recordedBy.Value));
     }
 
     /// <summary>Records that the title has been cleared. Idempotent.</summary>
@@ -201,7 +199,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         ApplyChange(new TitleCleared(
             Id.Value, clearedDate, titleCompanyName,
-            recordedBy.Value, DateTimeOffset.UtcNow));
+            recordedBy.Value));
     }
 
     /// <summary>Records that both parties have signed the ground lease. Idempotent.</summary>
@@ -215,8 +213,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         if (IsLeaseExecuted) return;
 
         ApplyChange(new LeaseExecuted(
-            Id.Value, signedDate, recordedBy.Value,
-            DateTimeOffset.UtcNow));
+            Id.Value, signedDate, recordedBy.Value));
     }
 
     /// <summary>Schedules the closing date. Requires all mandatory tracks satisfied and InProgress phase.</summary>
@@ -246,7 +243,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         ApplyChange(new ClosingScheduled(
             Id.Value, scheduledClosingDate,
-            recordedBy.Value, DateTimeOffset.UtcNow));
+            recordedBy.Value));
     }
 
     /// <summary>Records that the purchase has been closed. Requires ClosingScheduled phase.</summary>
@@ -267,7 +264,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         ApplyChange(new PurchaseClosed(
             Id.Value, actualClosingDate, notes,
-            recordedBy.Value, DateTimeOffset.UtcNow));
+            recordedBy.Value));
     }
 
     /// <summary>Records that the purchase has failed.</summary>
@@ -289,7 +286,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         ApplyChange(new PurchaseFailed(
             Id.Value, failureReason, failedDate,
-            recordedBy.Value, DateTimeOffset.UtcNow));
+            recordedBy.Value));
     }
 
     /// <summary>Records that the buyer has withdrawn.</summary>
@@ -305,7 +302,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         ApplyChange(new PurchaseWithdrawn(
             Id.Value, withdrawnDate, reason,
-            recordedBy.Value, DateTimeOffset.UtcNow));
+            recordedBy.Value));
     }
 
     /// <summary>Records that the workflow is stalled. Only from InProgress phase.</summary>
@@ -327,8 +324,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         ApplyChange(new WorkflowStalled(
             Id.Value, stalledReason, stalledDate,
-            resolutionTargetDate, recordedBy.Value,
-            DateTimeOffset.UtcNow));
+            resolutionTargetDate, recordedBy.Value));
     }
 
     /// <inheritdoc/>

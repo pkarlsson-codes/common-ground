@@ -8,5 +8,4 @@ public sealed record HomeownerOnboarded(
     string FullName,
     string Email,
     string? Phone,
-    string OnboardedBy,
-    DateTimeOffset OccurredAt) : IDomainEvent;
+    string OnboardedBy) : DomainEvent(AggregateId);

@@ -74,8 +74,7 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
             resalePolicyTerms.BaselineIndexValue,
             resalePolicyTerms.AnnualPercentage,
             resalePolicyTerms.ImprovementsCap,
-            createdBy.Value,
-            DateTimeOffset.UtcNow));
+            createdBy.Value));
 
         return template;
     }
@@ -93,8 +92,7 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
 
         ApplyChange(new GroundLeaseTemplateRestored(
             Id.Value,
-            activatedBy.Value,
-            DateTimeOffset.UtcNow));
+            activatedBy.Value));
     }
 
     /// <summary>Deactivates this template.</summary>
@@ -110,8 +108,7 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
 
         ApplyChange(new GroundLeaseTemplateArchived(
             Id.Value,
-            deactivatedBy.Value,
-            DateTimeOffset.UtcNow));
+            deactivatedBy.Value));
     }
 
     /// <inheritdoc/>
