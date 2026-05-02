@@ -1,5 +1,6 @@
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
+using CommonGround.Homeownership.Domain.GroundLeases.Templates;
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
@@ -48,6 +49,12 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <summary>Gets the user who created this lease.</summary>
     public UserId CreatedBy { get; private set; }
 
+    /// <summary>
+    /// Gets the source template ID when this lease was created from a template.
+    /// Null indicates this lease was created directly without a template.
+    /// </summary>
+    public GroundLeaseTemplateId? TemplateId { get; private set; }
+
     /// <summary>Creates a new ground lease.</summary>
     public static GroundLease Create(
         LandParcelId landParcelId,
@@ -83,6 +90,46 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             resalePolicyTerms.BaselineIndexValue,
             resalePolicyTerms.AnnualPercentage,
             resalePolicyTerms.ImprovementsCap,
+            createdBy.Value,
+            DateTimeOffset.UtcNow));
+
+        return lease;
+    }
+
+    /// <summary>Creates a new ground lease from an active template.</summary>
+    public static GroundLease CreateFromTemplate(
+        GroundLeaseTemplate template,
+        LandParcelId landParcelId,
+        HomeId unitId,
+        DateOnly leaseStartDate,
+        UserId createdBy)
+    {
+        ArgumentNullException.ThrowIfNull(template);
+        ArgumentNullException.ThrowIfNull(landParcelId);
+        ArgumentNullException.ThrowIfNull(unitId);
+        ArgumentNullException.ThrowIfNull(createdBy);
+
+        if (template.Status != GroundLeaseTemplateStatus.Active)
+        {
+            throw new BusinessRuleViolationException(
+                "Ground lease template must be active.");
+        }
+
+        var lease = new GroundLease();
+        lease.ApplyChange(new GroundLeaseCreatedFromTemplate(
+            GroundLeaseId.Generate().Value,
+            template.Id.Value,
+            landParcelId.Value,
+            unitId.Value,
+            leaseStartDate,
+            template.TermYears,
+            template.CovenantTerms,
+            template.ResalePolicyTerms.FormulaKind,
+            template.ResalePolicyTerms.AppreciationShare,
+            template.ResalePolicyTerms.IndexType,
+            template.ResalePolicyTerms.BaselineIndexValue,
+            template.ResalePolicyTerms.AnnualPercentage,
+            template.ResalePolicyTerms.ImprovementsCap,
             createdBy.Value,
             DateTimeOffset.UtcNow));
 
@@ -187,6 +234,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         switch (domainEvent)
         {
             case GroundLeaseCreated e: Apply(e); break;
+            case GroundLeaseCreatedFromTemplate e: Apply(e); break;
             case HomeownerOnboarded e: Apply(e); break;
             case HomeownerChanged e: Apply(e); break;
             case StewardshipCheckInRecorded: break; // No state mutation needed
@@ -199,6 +247,31 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     private void Apply(GroundLeaseCreated e)
     {
         Id = GroundLeaseId.Create(e.AggregateId);
+        LandParcelId = LandParcelId.Create(e.LandParcelId);
+        UnitId = HomeId.Create(e.BuildingId);
+        LeaseStartDate = e.LeaseStartDate;
+        TermYears = e.TermYears;
+        CovenantTerms = e.CovenantTerms;
+        ResalePolicyTerms = e.FormulaKind switch
+        {
+            FormulaKind.AppraisalBased => ResalePolicyTerms.AppraisalBased(
+                e.AppreciationShare!.Value, e.ImprovementsCap),
+            FormulaKind.IndexBased => ResalePolicyTerms.IndexBased(
+                e.IndexType!, e.BaselineIndexValue!.Value, e.ImprovementsCap),
+            FormulaKind.FixedPercentage => ResalePolicyTerms.FixedPercentage(
+                e.AnnualPercentage!.Value, e.ImprovementsCap),
+            _ => throw new InvalidOperationException($"Unknown formula kind: {e.FormulaKind}")
+        };
+        Status = GroundLeaseStatus.Active;
+        CreatedBy = UserId.Create(e.RegisteredBy);
+        CreatedAt = e.OccurredAt;
+        TemplateId = null;
+    }
+
+    private void Apply(GroundLeaseCreatedFromTemplate e)
+    {
+        Id = GroundLeaseId.Create(e.AggregateId);
+        TemplateId = GroundLeaseTemplateId.Create(e.GroundLeaseTemplateId);
         LandParcelId = LandParcelId.Create(e.LandParcelId);
         UnitId = HomeId.Create(e.BuildingId);
         LeaseStartDate = e.LeaseStartDate;

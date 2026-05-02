@@ -1,6 +1,7 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
+using CommonGround.Homeownership.Domain.GroundLeases.Templates;
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
@@ -221,5 +222,154 @@ public class GroundLeaseTests
             new DateOnly(2025, 6, 15), "", StaffUser);
 
         act.Should().Throw<BusinessRuleViolationException>();
+    }
+
+    [Fact]
+    public void CreateFromTemplate_ActiveTemplate_CreatesLease()
+    {
+        var template = GroundLeaseTemplate.Create(
+            "Default 99-Year",
+            99,
+            "Template covenant terms",
+            ResalePolicyTerms.IndexBased("CPI", 100m, 7500m),
+            StaffUser);
+
+        var lease = GroundLease.CreateFromTemplate(
+            template,
+            ParcelId,
+            TestUnitId,
+            new DateOnly(2026, 1, 1),
+            StaffUser);
+
+        lease.TemplateId.Should().Be(template.Id);
+        lease.TermYears.Should().Be(99);
+        lease.CovenantTerms.Should().Be("Template covenant terms");
+        lease.ResalePolicyTerms.FormulaKind.Should().Be(FormulaKind.IndexBased);
+        lease.ResalePolicyTerms.IndexType.Should().Be("CPI");
+    }
+
+    [Fact]
+    public void CreateFromTemplate_InactiveTemplate_Throws()
+    {
+        var template = GroundLeaseTemplate.Create(
+            "Inactive Template",
+            50,
+            "Covenants",
+            ResalePolicyTerms.AppraisalBased(0.25m),
+            StaffUser);
+        template.Deactivate(StaffUser);
+
+        var act = () => GroundLease.CreateFromTemplate(
+            template,
+            ParcelId,
+            TestUnitId,
+            new DateOnly(2026, 1, 1),
+            StaffUser);
+
+        act.Should().Throw<BusinessRuleViolationException>();
+    }
+
+    [Fact]
+    public void CreateFromTemplate_EmitsGroundLeaseCreatedFromTemplateEvent()
+    {
+        var template = GroundLeaseTemplate.Create(
+            "Template A",
+            40,
+            "Template covenants",
+            ResalePolicyTerms.FixedPercentage(0.02m, 12000m),
+            StaffUser);
+
+        var lease = GroundLease.CreateFromTemplate(
+            template,
+            ParcelId,
+            TestUnitId,
+            new DateOnly(2026, 4, 1),
+            StaffUser);
+
+        lease.UncommittedEvents.Should().HaveCount(1);
+        var evt = lease.UncommittedEvents.Single()
+            .Should().BeOfType<GroundLeaseCreatedFromTemplate>().Subject;
+
+        evt.GroundLeaseTemplateId.Should().Be(template.Id.Value);
+        evt.TermYears.Should().Be(40);
+        evt.CovenantTerms.Should().Be("Template covenants");
+        evt.FormulaKind.Should().Be(FormulaKind.FixedPercentage);
+        evt.AnnualPercentage.Should().Be(0.02m);
+        evt.ImprovementsCap.Should().Be(12000m);
+    }
+
+    [Fact]
+    public void Create_DirectPath_LeavesTemplateIdNull()
+    {
+        var lease = CreateLease();
+
+        lease.TemplateId.Should().BeNull();
+    }
+
+    [Fact]
+    public void CreateFromTemplate_AppraisalTerms_RoundTrips()
+    {
+        var template = GroundLeaseTemplate.Create(
+            "Appraisal",
+            99,
+            "Appraisal covenants",
+            ResalePolicyTerms.AppraisalBased(0.33m, 15000m),
+            StaffUser);
+
+        var lease = GroundLease.CreateFromTemplate(
+            template,
+            ParcelId,
+            TestUnitId,
+            new DateOnly(2026, 2, 1),
+            StaffUser);
+
+        lease.ResalePolicyTerms.FormulaKind.Should().Be(FormulaKind.AppraisalBased);
+        lease.ResalePolicyTerms.AppreciationShare.Should().Be(0.33m);
+        lease.ResalePolicyTerms.ImprovementsCap.Should().Be(15000m);
+    }
+
+    [Fact]
+    public void CreateFromTemplate_IndexTerms_RoundTrips()
+    {
+        var template = GroundLeaseTemplate.Create(
+            "Index",
+            60,
+            "Index covenants",
+            ResalePolicyTerms.IndexBased("CPI", 210m, null),
+            StaffUser);
+
+        var lease = GroundLease.CreateFromTemplate(
+            template,
+            ParcelId,
+            TestUnitId,
+            new DateOnly(2026, 2, 1),
+            StaffUser);
+
+        lease.ResalePolicyTerms.FormulaKind.Should().Be(FormulaKind.IndexBased);
+        lease.ResalePolicyTerms.IndexType.Should().Be("CPI");
+        lease.ResalePolicyTerms.BaselineIndexValue.Should().Be(210m);
+        lease.ResalePolicyTerms.ImprovementsCap.Should().BeNull();
+    }
+
+    [Fact]
+    public void CreateFromTemplate_FixedTerms_RoundTrips()
+    {
+        var template = GroundLeaseTemplate.Create(
+            "Fixed",
+            30,
+            "Fixed covenants",
+            ResalePolicyTerms.FixedPercentage(0.015m, 5000m),
+            StaffUser);
+
+        var lease = GroundLease.CreateFromTemplate(
+            template,
+            ParcelId,
+            TestUnitId,
+            new DateOnly(2026, 2, 1),
+            StaffUser);
+
+        lease.ResalePolicyTerms.FormulaKind.Should().Be(FormulaKind.FixedPercentage);
+        lease.ResalePolicyTerms.AnnualPercentage.Should().Be(0.015m);
+        lease.ResalePolicyTerms.ImprovementsCap.Should().Be(5000m);
     }
 }
