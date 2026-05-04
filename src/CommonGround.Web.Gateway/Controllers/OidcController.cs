@@ -174,7 +174,7 @@ public sealed class OidcController : ControllerBase
 
         var newSessionId = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32));
         await _tokenStore.RemoveAsync(sessionId, HttpContext.RequestAborted);
-        await _tokenStore.SaveTokensAsync(newSessionId, tokens.Value.userId, newAccess, newRefresh, existingIdToken, HttpContext.RequestAborted);
+        await _tokenStore.SaveTokensAsync(newSessionId, tokens.Value.userId, tokens.Value.trustId, newAccess, newRefresh, existingIdToken, HttpContext.RequestAborted);
 
         var isProd = _env.IsProduction();
         Response.Cookies.Append(

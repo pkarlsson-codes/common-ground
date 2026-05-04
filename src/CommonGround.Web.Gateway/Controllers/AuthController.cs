@@ -59,7 +59,7 @@ public sealed class AuthController(IHostEnvironment env) : ControllerBase
             return Unauthorized(new { success = false, error = "Invalid or expired session" });
         }
 
-        var (userId, _, _, _) = tokens.Value;
+        var (userId, _, _, _, _) = tokens.Value;
 
         var preferredUsername = User?.FindFirst("preferred_username")?.Value
                                  ?? User?.Identity?.Name

@@ -88,17 +88,17 @@ public sealed class OidcEventsFactory(
 
         var userId = response.UserId;
         AddUserIdClaim(ctx, userId);
-        await PersistTokensAndIssueCookiesAsync(ctx, userId).ConfigureAwait(false);
+        await PersistTokensAndIssueCookiesAsync(ctx, userId, response.TrustId).ConfigureAwait(false);
     }
 
-    private async Task PersistTokensAndIssueCookiesAsync(TokenValidatedContext ctx, string userId)
+    private async Task PersistTokensAndIssueCookiesAsync(TokenValidatedContext ctx, string userId, string trustId)
     {
         var accessToken = ctx.TokenEndpointResponse?.AccessToken;
         var refreshToken = ctx.TokenEndpointResponse?.RefreshToken;
         var idToken = ctx.TokenEndpointResponse?.IdToken;
 
         var sessionId = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
-        await tokenStore.SaveTokensAsync(sessionId, userId, accessToken, refreshToken, idToken, ctx.HttpContext.RequestAborted).ConfigureAwait(false);
+        await tokenStore.SaveTokensAsync(sessionId, userId, trustId, accessToken, refreshToken, idToken, ctx.HttpContext.RequestAborted).ConfigureAwait(false);
 
         var isProd = env.IsProduction();
 

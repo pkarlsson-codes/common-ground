@@ -37,6 +37,7 @@ public sealed partial class InternalGatewayAuthHandler : DelegatingHandler
     {
         var httpContext = _httpContextAccessor.HttpContext;
         string? userId = null;
+        string? trustId = null;
         string? sessionId = null;
 
         if (httpContext != null)
@@ -54,6 +55,7 @@ public sealed partial class InternalGatewayAuthHandler : DelegatingHandler
                 if (stored.HasValue)
                 {
                     userId = stored.Value.userId;
+                    trustId = stored.Value.trustId;
                     Logs.ResolvedFromTokenStore(_logger, userId);
                 }
             }
@@ -68,7 +70,7 @@ public sealed partial class InternalGatewayAuthHandler : DelegatingHandler
             }
         }
 
-        var token = _jwtService.GenerateToken(userId, sessionId);
+        var token = _jwtService.GenerateToken(userId, trustId, sessionId);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);

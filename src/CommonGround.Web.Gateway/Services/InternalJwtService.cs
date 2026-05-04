@@ -14,9 +14,10 @@ public interface IInternalJwtService
     /// Generates a short-lived internal JWT for a given user.
     /// </summary>
     /// <param name="userId">The user identifier.</param>
+    /// <param name="trustId">Optional trust (tenant) identifier.</param>
     /// <param name="sessionId">Optional session identifier.</param>
     /// <returns>Signed JWT string.</returns>
-    string GenerateToken(string? userId, string? sessionId);
+    string GenerateToken(string? userId, string? trustId, string? sessionId);
 
     /// <summary>
     /// Generates a short-lived service token used by the BFF to call downstream services.
@@ -62,7 +63,7 @@ public sealed class InternalJwtService : IInternalJwtService
     }
 
     /// <inheritdoc/>
-    public string GenerateToken(string? userId, string? sessionId)
+    public string GenerateToken(string? userId, string? trustId, string? sessionId)
     {
         var now = DateTimeOffset.UtcNow;
         var claims = new List<Claim>
@@ -81,6 +82,11 @@ public sealed class InternalJwtService : IInternalJwtService
         if (!string.IsNullOrWhiteSpace(userId))
         {
             claims.Add(new Claim("user_id", userId));
+        }
+
+        if (!string.IsNullOrWhiteSpace(trustId))
+        {
+            claims.Add(new Claim("tenant_id", trustId));
         }
 
         if (!string.IsNullOrWhiteSpace(sessionId))
