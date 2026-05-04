@@ -2,6 +2,7 @@ using CommonGround.SharedKernel.Persistence;
 using JasperFx.Events;
 using JasperFx.Events.Daemon;
 using Marten;
+using Marten.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Wolverine.Marten;
 
@@ -40,6 +41,8 @@ public static class MartenServiceCollectionExtensions
             opts.Connection(connectionString);
             opts.Events.StreamIdentity = StreamIdentity.AsString;
             opts.Events.DatabaseSchemaName = "commonground_events";
+            opts.Policies.AllDocumentsAreMultiTenanted();
+            opts.Events.TenancyStyle = TenancyStyle.Conjoined;
             configureOptions?.Invoke(opts);
         })
             .UseLightweightSessions()

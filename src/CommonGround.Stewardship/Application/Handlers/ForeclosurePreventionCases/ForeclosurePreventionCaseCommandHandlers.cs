@@ -13,6 +13,25 @@ public sealed class ForeclosurePreventionCaseCommandHandler(
     IUnitOfWork unitOfWork)
 {
     /// <summary>
+    /// Handles the OpenForeclosurePreventionCaseCommand.
+    /// </summary>
+    public async Task<string> Handle(OpenForeclosurePreventionCaseCommand cmd, CancellationToken ct)
+    {
+        var fpc = ForeclosurePreventionCase.Open(
+            cmd.GroundLeaseId,
+            ForeclosurePreventionTrigger.ServicerDelinquency,
+            cmd.RecordedDate,
+            UserId.Create(cmd.RecordedBy));
+
+        fpc.RecordServicerDelinquency(cmd.ServicerName, cmd.DelinquentMonths, cmd.RecordedDate, UserId.Create(cmd.RecordedBy));
+
+        repository.Stage(fpc);
+        await unitOfWork.CommitAsync(ct).ConfigureAwait(false);
+
+        return fpc.Id.Value;
+    }
+
+    /// <summary>
     /// Handles the RecordServicerDelinquencyCommand.
     /// </summary>
     public async Task Handle(RecordServicerDelinquencyCommand cmd, CancellationToken ct)

@@ -40,7 +40,8 @@ public sealed class DevelopmentProjectsController(IMessageBus bus) : ControllerB
             request.Filter?.LandParcelId,
             request.Filter?.HomeIds);
 
-        var result = await bus.InvokeAsync<PaginatedResponse<DevelopmentProjectListItemView>>(query, cancellationToken);
+        var tenantId = HttpContext.GetTenantId();
+        var result = await bus.InvokeForTenantAsync<PaginatedResponse<DevelopmentProjectListItemView>>(tenantId, query, cancellationToken);
 
         var response = result.MapItems(v => new DevelopmentProjectListItemResponse(
             v.Id, v.LandParcelId, v.Name, v.Description, v.Status, v.ProjectType));
@@ -63,6 +64,7 @@ public sealed class DevelopmentProjectsController(IMessageBus bus) : ControllerB
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
         var landParcelId = new LandParcelId(request.LandParcelId);
 
@@ -73,10 +75,12 @@ public sealed class DevelopmentProjectsController(IMessageBus bus) : ControllerB
 
         DevelopmentProjectId id = request.Type switch
         {
-            "NewConstruction" => await bus.InvokeAsync<DevelopmentProjectId>(
+            "NewConstruction" => await bus.InvokeForTenantAsync<DevelopmentProjectId>(
+                tenantId,
                 new InitiateNewConstructionProject(landParcelId, request.Name, request.Description, userId),
                 cancellationToken),
-            _ => await bus.InvokeAsync<DevelopmentProjectId>(
+            _ => await bus.InvokeForTenantAsync<DevelopmentProjectId>(
+                tenantId,
                 new InitiateRehabilitationProject(
                     landParcelId,
                     (request.ExistingHomes ?? []).Select(h => new HomeId(h)).ToList(),

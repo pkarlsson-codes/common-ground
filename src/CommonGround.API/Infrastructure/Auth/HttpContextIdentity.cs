@@ -25,6 +25,19 @@ internal static class HttpContextIdentity
     }
 
     /// <summary>
+    /// Retrieves the tenant ID string from the HTTP context's user claims.
+    /// </summary>
+    /// <param name="httpContext">The HTTP context containing the user claims.</param>
+    /// <returns>The tenant ID string extracted from the claims.</returns>
+    public static string GetTenantId(this HttpContext httpContext)
+    {
+        ArgumentNullException.ThrowIfNull(httpContext);
+
+        return httpContext.User?.FindFirst("tenant_id")?.Value
+            ?? throw new InvalidOperationException("Claim 'tenant_id' not found. Ensure the endpoint is authenticated.");
+    }
+
+    /// <summary>
     /// Attempts to retrieve the tenant ID from the HTTP context's user claims. Returns null if not found or if the claim value is invalid.
     /// </summary>
     /// <param name="httpContext">The HTTP context containing the user claims.</param>

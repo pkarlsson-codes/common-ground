@@ -1,5 +1,4 @@
 using System.Text;
-using CommonGround.API.Infrastructure.Auth;
 using CommonGround.API.Infrastructure.ExceptionHandling;
 using CommonGround.Documents.Infrastructure;
 using CommonGround.Documents.Infrastructure.Persistence;
@@ -65,7 +64,6 @@ internal static class CommonGroundServiceCollectionExtensions
     {
         services.AddMemoryCache();
         services.AddHttpContextAccessor();
-        services.AddScoped<ITenantContext, TenantContext>();
         services.AddValidatorsFromAssemblyContaining<Program>(includeInternalTypes: true);
         services.AddFluentValidationAutoValidation();
         return services;

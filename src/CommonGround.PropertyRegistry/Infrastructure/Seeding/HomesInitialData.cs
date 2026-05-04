@@ -32,7 +32,7 @@ public sealed class HomesInitialData : IInitialData
             return;
         }
 
-        using var session = store.LightweightSession();
+        using var session = store.LightweightSession("org-dev-default");
         var repository = new HomeRepository(session, NullLogger<HomeRepository>.Instance);
 
         foreach (var entry in entries)

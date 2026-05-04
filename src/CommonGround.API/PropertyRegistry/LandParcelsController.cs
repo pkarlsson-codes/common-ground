@@ -33,6 +33,7 @@ public sealed class LandParcelsController(IMessageBus bus) : ControllerBase
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
         var acquisitionMethod = AcquisitionMethod.FromDisplayName(request.AcquisitionMethod);
 
@@ -45,7 +46,7 @@ public sealed class LandParcelsController(IMessageBus bus) : ControllerBase
             request.CovenantTerms,
             userId);
 
-        var id = await bus.InvokeAsync<LandParcelId>(command, cancellationToken);
+        var id = await bus.InvokeForTenantAsync<LandParcelId>(tenantId, command, cancellationToken);
 
         return CreatedAtAction(nameof(GetLandParcel), new { landParcelId = id.Value }, new RegisterLandParcelResponse(id.Value));
     }
@@ -66,7 +67,9 @@ public sealed class LandParcelsController(IMessageBus bus) : ControllerBase
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
 
-        var view = await bus.InvokeAsync<LandParcelView>(
+        var tenantId = HttpContext.GetTenantId();
+        var view = await bus.InvokeForTenantAsync<LandParcelView>(
+            tenantId,
             new GetLandParcel(LandParcelId.Create(landParcelId)),
             cancellationToken);
 
@@ -89,11 +92,12 @@ public sealed class LandParcelsController(IMessageBus bus) : ControllerBase
         [FromQuery] PaginationQuerySpec<GetLandParcelsFilter> request,
         CancellationToken cancellationToken = default)
     {
+        var tenantId = HttpContext.GetTenantId();
         var query = new GetLandParcels(request.Page, request.Filter?.Search);
 
         var result = await bus
-            .InvokeAsync<PaginatedResponse<LandParcelListItemView>>(
-                query, cancellationToken);
+            .InvokeForTenantAsync<PaginatedResponse<LandParcelListItemView>>(
+                tenantId, query, cancellationToken);
 
         var response = result.MapItems(v => new LandParcelListItemResponse(
             v.Id, v.LegalParcelNumber, v.Address, v.AreaAcres, v.IsDecommissioned, v.RegisteredAt));
@@ -118,9 +122,11 @@ public sealed class LandParcelsController(IMessageBus bus) : ControllerBase
         ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new DecommissionParcel(LandParcelId.Create(landParcelId), userId),
             cancellationToken).ConfigureAwait(false);
 
@@ -144,9 +150,11 @@ public sealed class LandParcelsController(IMessageBus bus) : ControllerBase
         ArgumentException.ThrowIfNullOrWhiteSpace(landParcelId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new RecommissionParcel(LandParcelId.Create(landParcelId), userId),
             cancellationToken).ConfigureAwait(false);
 

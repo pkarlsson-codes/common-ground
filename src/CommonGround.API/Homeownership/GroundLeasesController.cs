@@ -35,6 +35,7 @@ public sealed class GroundLeasesController(IMessageBus bus) : ControllerBase
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
         var resalePolicyTerms = request.FormulaKind switch
@@ -54,7 +55,7 @@ public sealed class GroundLeasesController(IMessageBus bus) : ControllerBase
             resalePolicyTerms,
             userId);
 
-        var id = await bus.InvokeAsync<GroundLeaseId>(command, cancellationToken);
+        var id = await bus.InvokeForTenantAsync<GroundLeaseId>(tenantId, command, cancellationToken);
 
         return CreatedAtAction(nameof(GetGroundLease), new { groundLeaseId = id.Value }, new CreateGroundLeaseResponse(id.Value));
     }
@@ -81,7 +82,8 @@ public sealed class GroundLeasesController(IMessageBus bus) : ControllerBase
 
         var query = new GetGroundLeases(request.Page, statusFilter, landParcelFilter, unitFilter, request.Filter?.Search);
 
-        var result = await bus.InvokeAsync<PaginatedResponse<GroundLeaseListItemView>>(query, cancellationToken);
+        var tenantId = HttpContext.GetTenantId();
+        var result = await bus.InvokeForTenantAsync<PaginatedResponse<GroundLeaseListItemView>>(tenantId, query, cancellationToken);
 
         var response = result.MapItems(v => new GroundLeaseListItemResponse(
             v.Id,
@@ -111,7 +113,9 @@ public sealed class GroundLeasesController(IMessageBus bus) : ControllerBase
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
 
-        var view = await bus.InvokeAsync<GroundLeaseView>(
+        var tenantId = HttpContext.GetTenantId();
+        var view = await bus.InvokeForTenantAsync<GroundLeaseView>(
+            tenantId,
             new GetGroundLease(GroundLeaseId.Create(groundLeaseId)),
             cancellationToken);
 
@@ -160,9 +164,11 @@ public sealed class GroundLeasesController(IMessageBus bus) : ControllerBase
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new ChangeHomeowner(
                 GroundLeaseId.Create(groundLeaseId),
                 new Homeowner(request.FullName, request.Email, request.Phone),
@@ -189,9 +195,11 @@ public sealed class GroundLeasesController(IMessageBus bus) : ControllerBase
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new RecordStewardshipCheckIn(
                 GroundLeaseId.Create(groundLeaseId),
                 DateOnly.Parse(request.CheckInDate, CultureInfo.InvariantCulture),
@@ -219,7 +227,9 @@ public sealed class GroundLeasesController(IMessageBus bus) : ControllerBase
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
         ArgumentNullException.ThrowIfNull(request);
 
-        var view = await bus.InvokeAsync<GroundLeaseView>(
+        var tenantId = HttpContext.GetTenantId();
+        var view = await bus.InvokeForTenantAsync<GroundLeaseView>(
+            tenantId,
             new GetGroundLease(GroundLeaseId.Create(groundLeaseId)),
             cancellationToken);
 

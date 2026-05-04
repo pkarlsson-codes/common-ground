@@ -57,6 +57,7 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
         var file = form.Files["file"]
             ?? throw new InvalidOperationException("'file' part missing");
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
         // Compose a deterministic key — see plan: documents/{docId}/{versionId}.{ext}.
@@ -93,7 +94,7 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
                 documentId,
                 versionId);
 
-            var assignedId = await bus.InvokeAsync<DocumentId>(command, cancellationToken).ConfigureAwait(false);
+            var assignedId = await bus.InvokeForTenantAsync<DocumentId>(tenantId, command, cancellationToken).ConfigureAwait(false);
 
             return CreatedAtAction(
                 nameof(GetDocument),
@@ -114,8 +115,9 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
 
-        var view = await bus.InvokeAsync<DocumentView>(
-            new GetDocument(DocumentId.Create(documentId)), cancellationToken).ConfigureAwait(false);
+        var tenantId = HttpContext.GetTenantId();
+        var view = await bus.InvokeForTenantAsync<DocumentView>(
+            tenantId, new GetDocument(DocumentId.Create(documentId)), cancellationToken).ConfigureAwait(false);
 
         DocumentVersionResponse[] versions = [.. view.Versions.Select(v => new DocumentVersionResponse(
             v.VersionId, v.VersionNumber, v.FileName, v.ContentType, v.SizeBytes, v.Sha256, v.UploadedAt))];
@@ -159,9 +161,11 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
         ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new AttachDocument(
                 DocumentId.Create(documentId),
                 request.EntityType,
@@ -190,8 +194,10 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
         ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new SoftDeleteDocument(DocumentId.Create(documentId), request.Reason, userId),
             cancellationToken).ConfigureAwait(false);
 
@@ -210,8 +216,9 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
 
-        var url = await bus.InvokeAsync<Uri>(
-            new GetDocumentDownloadUrl(DocumentId.Create(documentId)), cancellationToken).ConfigureAwait(false);
+        var tenantId = HttpContext.GetTenantId();
+        var url = await bus.InvokeForTenantAsync<Uri>(
+            tenantId, new GetDocumentDownloadUrl(DocumentId.Create(documentId)), cancellationToken).ConfigureAwait(false);
 
         return Redirect(url.ToString());
     }
@@ -246,6 +253,7 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
         var file = form.Files["file"]
             ?? throw new InvalidOperationException("'file' part missing");
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
         var docId = DocumentId.Create(documentId);
         var versionId = DocumentVersionId.Generate();
@@ -266,7 +274,7 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
             userId,
             versionId);
 
-        var assignedVersionId = await bus.InvokeAsync<DocumentVersionId>(command, cancellationToken).ConfigureAwait(false);
+        var assignedVersionId = await bus.InvokeForTenantAsync<DocumentVersionId>(tenantId, command, cancellationToken).ConfigureAwait(false);
 
         return CreatedAtAction(
             nameof(GetDocument),
@@ -291,12 +299,14 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
         ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
         var sensitivity = string.IsNullOrWhiteSpace(request.Sensitivity)
             ? null
             : SensitivityLevel.FromDisplayName(request.Sensitivity);
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new UpdateDocumentMetadata(
                 DocumentId.Create(documentId),
                 request.Title,
@@ -326,8 +336,10 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
         ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new TagDocument(DocumentId.Create(documentId), request.Tag, userId),
             cancellationToken).ConfigureAwait(false);
 
@@ -351,8 +363,10 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
         ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
         ArgumentException.ThrowIfNullOrWhiteSpace(tag);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new UntagDocument(DocumentId.Create(documentId), tag, userId),
             cancellationToken).ConfigureAwait(false);
 
@@ -391,7 +405,9 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
             },
         };
 
-        var result = await bus.InvokeAsync<PaginatedResponse<DocumentLibraryItemView>>(
+        var tenantId = HttpContext.GetTenantId();
+        var result = await bus.InvokeForTenantAsync<PaginatedResponse<DocumentLibraryItemView>>(
+            tenantId,
             new ListDocuments(pageSpec, includeDeleted, contentType, tag, expiringBefore),
             cancellationToken).ConfigureAwait(false);
 
@@ -421,7 +437,9 @@ public sealed class DocumentsController(IMessageBus bus, IDocumentBlobStore blob
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(entityType);
 
-        var result = await bus.InvokeAsync<PaginatedResponse<EntityDocumentAttachmentItem>>(
+        var tenantId = HttpContext.GetTenantId();
+        var result = await bus.InvokeForTenantAsync<PaginatedResponse<EntityDocumentAttachmentItem>>(
+            tenantId,
             new GetEntityDocuments(entityType, entityId, request.Page, includeDeleted),
             cancellationToken).ConfigureAwait(false);
 

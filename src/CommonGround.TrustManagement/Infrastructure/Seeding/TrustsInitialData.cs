@@ -28,7 +28,7 @@ public sealed class TrustsInitialData : IInitialData
             return;
         }
 
-        using var session = store.LightweightSession();
+        using var session = store.LightweightSession("org-dev-default");
         var repository = new TrustRepository(session, NullLogger<MartenRepository<Trust, TrustId>>.Instance);
 
         foreach (var entry in entries)

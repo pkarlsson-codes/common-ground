@@ -33,6 +33,7 @@ public sealed class PurchaseWorkflowsController(IMessageBus bus) : ControllerBas
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
         var command = new InitiatePurchaseWorkflow(
@@ -41,7 +42,7 @@ public sealed class PurchaseWorkflowsController(IMessageBus bus) : ControllerBas
             request.PurchasePrice,
             userId);
 
-        var id = await bus.InvokeAsync<PurchaseWorkflowId>(command, cancellationToken);
+        var id = await bus.InvokeForTenantAsync<PurchaseWorkflowId>(tenantId, command, cancellationToken);
 
         return CreatedAtAction(nameof(GetPurchaseWorkflow), new { workflowId = id.Value }, new InitiatePurchaseWorkflowResponse(id.Value));
     }
@@ -63,7 +64,8 @@ public sealed class PurchaseWorkflowsController(IMessageBus bus) : ControllerBas
 
         var query = new GetPurchaseWorkflows(request.Page, groundLeaseFilter, request.Filter?.Phase, request.Filter?.Search);
 
-        var result = await bus.InvokeAsync<PaginatedResponse<PurchaseWorkflowListItemView>>(query, cancellationToken);
+        var tenantId = HttpContext.GetTenantId();
+        var result = await bus.InvokeForTenantAsync<PaginatedResponse<PurchaseWorkflowListItemView>>(tenantId, query, cancellationToken);
 
         var response = result.MapItems(v => new PurchaseWorkflowListItemResponse(
             v.Id,
@@ -90,7 +92,9 @@ public sealed class PurchaseWorkflowsController(IMessageBus bus) : ControllerBas
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
 
-        var view = await bus.InvokeAsync<PurchaseWorkflowView>(
+        var tenantId = HttpContext.GetTenantId();
+        var view = await bus.InvokeForTenantAsync<PurchaseWorkflowView>(
+            tenantId,
             new GetPurchaseWorkflow(PurchaseWorkflowId.Create(workflowId)),
             cancellationToken);
 
@@ -115,9 +119,11 @@ public sealed class PurchaseWorkflowsController(IMessageBus bus) : ControllerBas
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new RecordEligibilityVerified(
                 PurchaseWorkflowId.Create(workflowId),
                 DateOnly.Parse(request.VerifiedDate, CultureInfo.InvariantCulture),
@@ -144,9 +150,11 @@ public sealed class PurchaseWorkflowsController(IMessageBus bus) : ControllerBas
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new RecordFinancingCommitted(
                 PurchaseWorkflowId.Create(workflowId),
                 request.LenderName,
@@ -174,9 +182,11 @@ public sealed class PurchaseWorkflowsController(IMessageBus bus) : ControllerBas
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new RecordInspectionCompleted(
                 PurchaseWorkflowId.Create(workflowId),
                 DateOnly.Parse(request.InspectionDate, CultureInfo.InvariantCulture),
@@ -204,9 +214,11 @@ public sealed class PurchaseWorkflowsController(IMessageBus bus) : ControllerBas
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new RecordTitleCleared(
                 PurchaseWorkflowId.Create(workflowId),
                 DateOnly.Parse(request.ClearedDate, CultureInfo.InvariantCulture),
@@ -233,9 +245,11 @@ public sealed class PurchaseWorkflowsController(IMessageBus bus) : ControllerBas
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new RecordLeaseExecuted(
                 PurchaseWorkflowId.Create(workflowId),
                 DateOnly.Parse(request.SignedDate, CultureInfo.InvariantCulture),
@@ -261,9 +275,11 @@ public sealed class PurchaseWorkflowsController(IMessageBus bus) : ControllerBas
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new ScheduleClosing(
                 PurchaseWorkflowId.Create(workflowId),
                 DateOnly.Parse(request.ScheduledClosingDate, CultureInfo.InvariantCulture),
@@ -289,9 +305,11 @@ public sealed class PurchaseWorkflowsController(IMessageBus bus) : ControllerBas
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new RecordPurchaseClosed(
                 PurchaseWorkflowId.Create(workflowId),
                 DateOnly.Parse(request.ActualClosingDate, CultureInfo.InvariantCulture),
@@ -318,9 +336,11 @@ public sealed class PurchaseWorkflowsController(IMessageBus bus) : ControllerBas
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new FailPurchase(
                 PurchaseWorkflowId.Create(workflowId),
                 request.FailureReason,
@@ -347,9 +367,11 @@ public sealed class PurchaseWorkflowsController(IMessageBus bus) : ControllerBas
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new WithdrawPurchase(
                 PurchaseWorkflowId.Create(workflowId),
                 DateOnly.Parse(request.WithdrawnDate, CultureInfo.InvariantCulture),
@@ -376,9 +398,11 @@ public sealed class PurchaseWorkflowsController(IMessageBus bus) : ControllerBas
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        await bus.InvokeAsync(
+        await bus.InvokeForTenantAsync(
+            tenantId,
             new StallWorkflow(
                 PurchaseWorkflowId.Create(workflowId),
                 request.StalledReason,

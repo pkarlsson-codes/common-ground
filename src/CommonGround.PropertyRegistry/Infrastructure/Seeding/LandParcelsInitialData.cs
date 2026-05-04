@@ -31,7 +31,7 @@ public sealed class LandParcelsInitialData : IInitialData
             return;
         }
 
-        using var session = store.LightweightSession();
+        using var session = store.LightweightSession("org-dev-default");
         var repository = new LandParcelRepository(session, NullLogger<LandParcelRepository>.Instance);
 
         foreach (var entry in entries)

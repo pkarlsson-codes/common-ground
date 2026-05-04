@@ -1,6 +1,5 @@
 using CommonGround.API.Contracts.Stewardship.Requests;
 using CommonGround.API.Infrastructure.Auth;
-using CommonGround.SharedKernel.Persistence;
 using CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
 using CommonGround.Stewardship.Application.Queries;
 using CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
@@ -13,10 +12,7 @@ namespace CommonGround.API.Stewardship;
 /// <summary>API controller for foreclosure prevention case management.</summary>
 [ApiController]
 [Route("api/stewardship/foreclosure-prevention")]
-public sealed class ForeclosurePreventionCasesController(
-    IMessageBus bus,
-    IForeclosurePreventionCaseRepository repository,
-    IUnitOfWork unitOfWork) : ControllerBase
+public sealed class ForeclosurePreventionCasesController(IMessageBus bus) : ControllerBase
 {
     /// <summary>Gets a foreclosure prevention case by identifier.</summary>
     /// <param name="id">The foreclosure prevention case identifier.</param>
@@ -27,8 +23,9 @@ public sealed class ForeclosurePreventionCasesController(
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetById(string id, CancellationToken ct)
     {
-        var result = await bus.InvokeAsync<ForeclosurePreventionCaseView?>(
-            new GetForeclosurePreventionCaseQuery(id), ct);
+        var tenantId = HttpContext.GetTenantId();
+        var result = await bus.InvokeForTenantAsync<ForeclosurePreventionCaseView?>(
+            tenantId, new GetForeclosurePreventionCaseQuery(id), ct);
         return result is null ? NotFound() : Ok(result);
     }
 
@@ -40,11 +37,12 @@ public sealed class ForeclosurePreventionCasesController(
     [ProducesResponseType(typeof(IReadOnlyList<ForeclosurePreventionCaseView>), 200)]
     public async Task<IActionResult> GetByGroundLease([FromQuery] string? groundLeaseId, CancellationToken ct)
     {
+        var tenantId = HttpContext.GetTenantId();
         IReadOnlyList<ForeclosurePreventionCaseView> result = string.IsNullOrWhiteSpace(groundLeaseId)
-            ? await bus.InvokeAsync<IReadOnlyList<ForeclosurePreventionCaseView>>(
-                new GetAllForeclosurePreventionCasesQuery(), ct)
-            : await bus.InvokeAsync<IReadOnlyList<ForeclosurePreventionCaseView>>(
-                new GetForeclosurePreventionCasesByGroundLeaseQuery(groundLeaseId), ct);
+            ? await bus.InvokeForTenantAsync<IReadOnlyList<ForeclosurePreventionCaseView>>(
+                tenantId, new GetAllForeclosurePreventionCasesQuery(), ct)
+            : await bus.InvokeForTenantAsync<IReadOnlyList<ForeclosurePreventionCaseView>>(
+                tenantId, new GetForeclosurePreventionCasesByGroundLeaseQuery(groundLeaseId), ct);
         return Ok(result);
     }
 
@@ -59,24 +57,20 @@ public sealed class ForeclosurePreventionCasesController(
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
-        var fpc = ForeclosurePreventionCase.Open(
-            request.GroundLeaseId,
-            ForeclosurePreventionTrigger.ServicerDelinquency,
-            request.RecordedDate,
-            userId);
+        var id = await bus.InvokeForTenantAsync<string>(
+            tenantId,
+            new OpenForeclosurePreventionCaseCommand(
+                request.GroundLeaseId,
+                request.ServicerName,
+                request.DelinquentMonths,
+                request.RecordedDate,
+                userId.Value),
+            ct).ConfigureAwait(false);
 
-        fpc.RecordServicerDelinquency(
-            request.ServicerName,
-            request.DelinquentMonths,
-            request.RecordedDate,
-            userId);
-
-        repository.Stage(fpc);
-        await unitOfWork.CommitAsync(ct);
-
-        return Accepted(new { Id = fpc.Id.Value });
+        return Accepted(new { Id = id });
     }
 
     /// <summary>Records a servicer delinquency for an existing case.</summary>
@@ -92,8 +86,9 @@ public sealed class ForeclosurePreventionCasesController(
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(new RecordServicerDelinquencyCommand(
+        await bus.InvokeForTenantAsync(tenantId, new RecordServicerDelinquencyCommand(
             id, request.ServicerName, request.DelinquentMonths, request.RecordedDate, userId.Value), ct);
         return NoContent();
     }
@@ -111,8 +106,9 @@ public sealed class ForeclosurePreventionCasesController(
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(new MakeCounselingReferralCommand(
+        await bus.InvokeForTenantAsync(tenantId, new MakeCounselingReferralCommand(
             id, request.AgencyName, request.ReferralDate, userId.Value), ct);
         return NoContent();
     }
@@ -132,8 +128,9 @@ public sealed class ForeclosurePreventionCasesController(
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(new RecordCounselingOutcomeCommand(
+        await bus.InvokeForTenantAsync(tenantId, new RecordCounselingOutcomeCommand(
             id, referralId, request.Outcome, request.OutcomeDate, userId.Value), ct);
         return NoContent();
     }
@@ -151,8 +148,9 @@ public sealed class ForeclosurePreventionCasesController(
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(new RequestForbearanceCommand(
+        await bus.InvokeForTenantAsync(tenantId, new RequestForbearanceCommand(
             id, request.LenderName, request.RequestedDate, userId.Value), ct);
         return NoContent();
     }
@@ -172,9 +170,10 @@ public sealed class ForeclosurePreventionCasesController(
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
         var outcome = Enum.Parse<ForbearanceOutcome>(request.Outcome);
-        await bus.InvokeAsync(new RecordForbearanceOutcomeCommand(
+        await bus.InvokeForTenantAsync(tenantId, new RecordForbearanceOutcomeCommand(
             id, requestId, outcome, request.OutcomeDate, request.Notes, userId.Value), ct);
         return NoContent();
     }
@@ -192,8 +191,9 @@ public sealed class ForeclosurePreventionCasesController(
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(new ActivateCurePeriodCommand(
+        await bus.InvokeForTenantAsync(tenantId, new ActivateCurePeriodCommand(
             id, request.LraId, request.ActivationDate, request.CurePeriodDays, userId.Value), ct);
         return NoContent();
     }
@@ -211,9 +211,10 @@ public sealed class ForeclosurePreventionCasesController(
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
         var outcome = Enum.Parse<ForeclosurePreventionOutcome>(request.Outcome);
-        await bus.InvokeAsync(new ResolveForeclosurePreventionCaseCommand(
+        await bus.InvokeForTenantAsync(tenantId, new ResolveForeclosurePreventionCaseCommand(
             id, outcome, request.ResolvedDate, userId.Value), ct);
         return NoContent();
     }

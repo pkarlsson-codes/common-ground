@@ -22,7 +22,8 @@ public sealed class UsersController(IMessageBus bus) : ControllerBase
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var result = await bus.InvokeAsync<EnsureUserResult>(
+        var result = await bus.InvokeForTenantAsync<EnsureUserResult>(
+            request.TrustId,
             new EnsureUser(request.KeycloakSubject, request.Email, request.DisplayName, SharedKernel.Domain.TrustId.Create(request.TrustId)),
             cancellationToken).ConfigureAwait(false);
 

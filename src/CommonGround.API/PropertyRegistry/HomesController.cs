@@ -34,6 +34,7 @@ public sealed class HomesController(IMessageBus bus) : ControllerBase
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
         var command = new RegisterHome(
@@ -48,7 +49,7 @@ public sealed class HomesController(IMessageBus bus) : ControllerBase
             request.AppraiserName,
             userId);
 
-        var id = await bus.InvokeAsync<HomeId>(command, cancellationToken);
+        var id = await bus.InvokeForTenantAsync<HomeId>(tenantId, command, cancellationToken);
 
         return CreatedAtAction(nameof(GetHome), new { homeId = id.Value }, new RegisterHomeResponse(id.Value));
     }
@@ -69,7 +70,9 @@ public sealed class HomesController(IMessageBus bus) : ControllerBase
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
 
-        var view = await bus.InvokeAsync<HomeView>(
+        var tenantId = HttpContext.GetTenantId();
+        var view = await bus.InvokeForTenantAsync<HomeView>(
+            tenantId,
             new GetHome(HomeId.Create(homeId)),
             cancellationToken);
 
@@ -98,9 +101,10 @@ public sealed class HomesController(IMessageBus bus) : ControllerBase
             .Select(HomeStatus.FromDisplayName).ToList().AsReadOnly();
         var query = new GetHomes(request.Page, landParcelFilter, statusFilter);
 
+        var tenantId = HttpContext.GetTenantId();
         var result = await bus
-            .InvokeAsync<PaginatedResponse<HomeListItemView>>(
-                query, cancellationToken);
+            .InvokeForTenantAsync<PaginatedResponse<HomeListItemView>>(
+                tenantId, query, cancellationToken);
 
         var response = result.MapItems(v => new HomeListItemResponse(
             v.Id, v.LandParcelId, v.UnitType, v.Bedrooms, v.Bathrooms, v.SquareFootage, v.AssessedValue, v.Status));
@@ -126,6 +130,7 @@ public sealed class HomesController(IMessageBus bus) : ControllerBase
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
         ArgumentNullException.ThrowIfNull(request);
 
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
 
         var command = new RecordHomeAssessment(
@@ -136,7 +141,7 @@ public sealed class HomesController(IMessageBus bus) : ControllerBase
             request.ConditionNotes,
             userId);
 
-        await bus.InvokeAsync(command, cancellationToken);
+        await bus.InvokeForTenantAsync(tenantId, command, cancellationToken);
 
         return Created();
     }
@@ -157,8 +162,9 @@ public sealed class HomesController(IMessageBus bus) : ControllerBase
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
 
+        var tenantId = HttpContext.GetTenantId();
         var query = new GetHomeAssessments(HomeId.Create(homeId), request.Page);
-        var result = await bus.InvokeAsync<PaginatedResponse<HomeAssessmentView>>(query, cancellationToken);
+        var result = await bus.InvokeForTenantAsync<PaginatedResponse<HomeAssessmentView>>(tenantId, query, cancellationToken);
 
         var response = result.MapItems(v => new HomeAssessmentItemResponse(
             v.Id.ToString(), v.UnitId, v.AssessedValue, v.AssessmentDate, v.ConditionNotes, v.AssessedBy, v.RecordedAt));

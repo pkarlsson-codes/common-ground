@@ -23,7 +23,8 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetById(string id, CancellationToken ct)
     {
-        var result = await bus.InvokeAsync<StewardshipCaseView?>(new GetStewardshipCaseQuery(id), ct);
+        var tenantId = HttpContext.GetTenantId();
+        var result = await bus.InvokeForTenantAsync<StewardshipCaseView?>(tenantId, new GetStewardshipCaseQuery(id), ct);
         return result is null ? NotFound() : Ok(result);
     }
 
@@ -35,10 +36,11 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyList<StewardshipCaseView>), 200)]
     public async Task<IActionResult> GetByGroundLease([FromQuery] string? groundLeaseId, CancellationToken ct)
     {
+        var tenantId = HttpContext.GetTenantId();
         IReadOnlyList<StewardshipCaseView> result = string.IsNullOrWhiteSpace(groundLeaseId)
-            ? await bus.InvokeAsync<IReadOnlyList<StewardshipCaseView>>(new GetAllStewardshipCasesQuery(), ct)
-            : await bus.InvokeAsync<IReadOnlyList<StewardshipCaseView>>(
-                new GetStewardshipCasesByGroundLeaseQuery(groundLeaseId), ct);
+            ? await bus.InvokeForTenantAsync<IReadOnlyList<StewardshipCaseView>>(tenantId, new GetAllStewardshipCasesQuery(), ct)
+            : await bus.InvokeForTenantAsync<IReadOnlyList<StewardshipCaseView>>(
+                tenantId, new GetStewardshipCasesByGroundLeaseQuery(groundLeaseId), ct);
         return Ok(result);
     }
 
@@ -55,8 +57,9 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(new InitiateOccupancyVerificationCommand(
+        await bus.InvokeForTenantAsync(tenantId, new InitiateOccupancyVerificationCommand(
             id, request.PeriodYear, request.SurveyDeadline, userId.Value), ct);
         return NoContent();
     }
@@ -76,7 +79,8 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
-        await bus.InvokeAsync(new SubmitOccupancyVerificationCommand(
+        var tenantId = HttpContext.GetTenantId();
+        await bus.InvokeForTenantAsync(tenantId, new SubmitOccupancyVerificationCommand(
             id, verificationId, request.IsPrimaryResident, request.SubletDisclosed,
             request.MajorChanges, request.SubmittedDate), ct);
         return NoContent();
@@ -97,8 +101,9 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(new VerifyOccupancyCommand(
+        await bus.InvokeForTenantAsync(tenantId, new VerifyOccupancyCommand(
             id, verificationId, request.VerifiedDate, userId.Value), ct);
         return NoContent();
     }
@@ -118,8 +123,9 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(new FailOccupancyCommand(
+        await bus.InvokeForTenantAsync(tenantId, new FailOccupancyCommand(
             id, verificationId, request.Reason, request.FailedDate, userId.Value), ct);
         return NoContent();
     }
@@ -139,7 +145,8 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
-        await bus.InvokeAsync(new MarkOccupancyVerificationOverdueCommand(
+        var tenantId = HttpContext.GetTenantId();
+        await bus.InvokeForTenantAsync(tenantId, new MarkOccupancyVerificationOverdueCommand(
             id, verificationId, request.Deadline), ct);
         return NoContent();
     }
@@ -157,8 +164,9 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(new SchedulePropertyInspectionCommand(
+        await bus.InvokeForTenantAsync(tenantId, new SchedulePropertyInspectionCommand(
             id, request.ScheduledDate, request.InspectorName, userId.Value), ct);
         return NoContent();
     }
@@ -178,8 +186,9 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(new CompletePropertyInspectionCommand(
+        await bus.InvokeForTenantAsync(tenantId, new CompletePropertyInspectionCommand(
             id, inspectionId, request.OccupancyConfirmed, request.ConditionNotes,
             request.CompletedDate, userId.Value), ct);
         return NoContent();
@@ -200,8 +209,9 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(new CancelPropertyInspectionCommand(
+        await bus.InvokeForTenantAsync(tenantId, new CancelPropertyInspectionCommand(
             id, inspectionId, request.Reason, userId.Value), ct);
         return NoContent();
     }
@@ -219,9 +229,10 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
         var violationType = Enum.Parse<LeaseViolationType>(request.ViolationType);
-        await bus.InvokeAsync(new IdentifyViolationCommand(
+        await bus.InvokeForTenantAsync(tenantId, new IdentifyViolationCommand(
             id, violationType, request.Description, request.IdentifiedDate, userId.Value), ct);
         return NoContent();
     }
@@ -241,8 +252,9 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(new IssueViolationNoticeCommand(
+        await bus.InvokeForTenantAsync(tenantId, new IssueViolationNoticeCommand(
             id, violationId, request.NoticeDate, request.CureDeadline, userId.Value), ct);
         return NoContent();
     }
@@ -262,8 +274,9 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(new CureViolationCommand(
+        await bus.InvokeForTenantAsync(tenantId, new CureViolationCommand(
             id, violationId, request.CuredDate, userId.Value), ct);
         return NoContent();
     }
@@ -283,8 +296,9 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(new EscalateViolationCommand(
+        await bus.InvokeForTenantAsync(tenantId, new EscalateViolationCommand(
             id, violationId, request.Reason, request.EscalatedDate, userId.Value), ct);
         return NoContent();
     }
@@ -302,8 +316,9 @@ public sealed class StewardshipCasesController(IMessageBus bus) : ControllerBase
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
+        var tenantId = HttpContext.GetTenantId();
         var userId = HttpContext.GetUserId();
-        await bus.InvokeAsync(new CloseStewardshipCaseCommand(
+        await bus.InvokeForTenantAsync(tenantId, new CloseStewardshipCaseCommand(
             id, request.Reason, request.ClosedDate, userId.Value), ct);
         return NoContent();
     }
