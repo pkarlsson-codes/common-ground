@@ -37,6 +37,9 @@ public class ApiFactory : WebApplicationFactory<Program>
     /// <summary>The symmetric key used to sign test JWTs.</summary>
     internal const string JwtSigningKey = "integration-test-signing-key-must-be-32ch";
 
+    /// <summary>The trust identifier used by default in test JWTs.</summary>
+    internal const string TestTrustId = "trust-testdefault00000000000";
+
     private readonly PostgreSqlContainer _pgContainer = BuildPostgresContainer();
     private int _containerStarted;
 

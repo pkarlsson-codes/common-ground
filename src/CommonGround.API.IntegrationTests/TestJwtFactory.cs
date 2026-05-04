@@ -17,8 +17,9 @@ public static class TestJwtFactory
     /// </summary>
     /// <param name="userId">The user identifier to include in the token.</param>
     /// <param name="roles">Optional role claims to include.</param>
+    /// <param name="trustId">Optional trust identifier to include as a <c>tenant_id</c> claim.</param>
     /// <returns>A serialized JWT string.</returns>
-    public static string CreateToken(UserId userId, string[]? roles = null)
+    public static string CreateToken(UserId userId, string[]? roles = null, string? trustId = null)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ApiFactory.JwtSigningKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -33,6 +34,11 @@ public static class TestJwtFactory
         if (roles is not null)
         {
             claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
+        }
+
+        if (!string.IsNullOrEmpty(trustId))
+        {
+            claims.Add(new Claim("tenant_id", trustId));
         }
 
         var token = new JwtSecurityToken(
@@ -51,12 +57,13 @@ public static class TestJwtFactory
     /// </summary>
     /// <param name="client">The HTTP client to decorate.</param>
     /// <param name="userId">Optional explicit user ID value.</param>
+    /// <param name="trustId">Optional trust identifier; defaults to <see cref="ApiFactory.TestTrustId"/>.</param>
     /// <returns>The same client for fluent chaining.</returns>
-    public static HttpClient WithAuthToken(this HttpClient client, string? userId = null)
+    public static HttpClient WithAuthToken(this HttpClient client, string? userId = null, string? trustId = null)
     {
         var actorId = userId is null ? UserId.Generate() : UserId.Create(userId);
         client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", CreateToken(actorId));
+            new AuthenticationHeaderValue("Bearer", CreateToken(actorId, trustId: trustId ?? ApiFactory.TestTrustId));
         return client;
     }
 }
