@@ -23,4 +23,15 @@ internal static class HttpContextIdentity
 
         return UserId.Create(id);
     }
+
+    /// <summary>
+    /// Attempts to retrieve the tenant ID from the HTTP context's user claims. Returns null if not found or if the claim value is invalid.
+    /// </summary>
+    /// <param name="httpContext">The HTTP context containing the user claims.</param>
+    /// <returns>The tenant ID if available; otherwise, null.</returns>
+    public static TrustId? TryGetTenantId(this HttpContext httpContext)
+    {
+        var id = httpContext.User?.FindFirst("tenant_id")?.Value;
+        return id is not null ? TrustId.Create(id) : null;
+    }
 }
