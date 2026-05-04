@@ -16,11 +16,14 @@ public sealed record EnsureUser(
     string? DisplayName,
     TrustId TrustId);
 
+/// <summary>Result of <see cref="EnsureUser"/>.</summary>
+public sealed record EnsureUserResult(string UserId, string TrustId);
+
 /// <summary>Handles <see cref="EnsureUser"/>.</summary>
 public static class EnsureUserHandler
 {
-    /// <summary>Returns the existing or newly-created UserId for the given Keycloak subject.</summary>
-    public static async Task<UserId> Handle(
+    /// <summary>Returns the existing or newly-created UserId and TrustId for the given Keycloak subject.</summary>
+    public static async Task<EnsureUserResult> Handle(
         EnsureUser command,
         IUserRepository repository,
         IUnitOfWork unitOfWork,
@@ -34,19 +37,23 @@ public static class EnsureUserHandler
 
         if (existing is not null)
         {
-            return UserId.Create(existing.UserId);
+            var user = await repository
+                .GetByIdAsync(UserId.Create(existing.UserId), cancellationToken)
+                .ConfigureAwait(false);
+
+            return new EnsureUserResult(existing.UserId, user!.TrustId.Value);
         }
 
-        var user = User.Register(command.KeycloakSubject, command.Email, command.DisplayName, command.TrustId);
+        var newUser = User.Register(command.KeycloakSubject, command.Email, command.DisplayName, command.TrustId);
 
-        repository.Stage(user);
+        repository.Stage(newUser);
         repository.StoreSubjectIndex(new UserSubjectIndex
         {
             Id = command.KeycloakSubject,
-            UserId = user.Id.Value,
+            UserId = newUser.Id.Value,
         });
         await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
 
-        return user.Id;
+        return new EnsureUserResult(newUser.Id.Value, newUser.TrustId.Value);
     }
 }
