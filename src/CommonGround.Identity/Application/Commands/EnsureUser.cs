@@ -9,10 +9,12 @@ namespace CommonGround.Identity.Application.Commands;
 /// <param name="KeycloakSubject">The Keycloak sub claim.</param>
 /// <param name="Email">Optional email address.</param>
 /// <param name="DisplayName">Optional display name.</param>
+/// <param name="TrustId">The trust the user belongs to.</param>
 public sealed record EnsureUser(
     string KeycloakSubject,
     string? Email,
-    string? DisplayName);
+    string? DisplayName,
+    TrustId TrustId);
 
 /// <summary>Handles <see cref="EnsureUser"/>.</summary>
 public static class EnsureUserHandler
@@ -35,7 +37,7 @@ public static class EnsureUserHandler
             return UserId.Create(existing.UserId);
         }
 
-        var user = User.Register(command.KeycloakSubject, command.Email, command.DisplayName);
+        var user = User.Register(command.KeycloakSubject, command.Email, command.DisplayName, command.TrustId);
 
         repository.Stage(user);
         repository.StoreSubjectIndex(new UserSubjectIndex

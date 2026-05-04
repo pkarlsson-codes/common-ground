@@ -15,7 +15,7 @@ public class UsersTests(ApiFactory factory)
         var client = factory.CreateClient();
 
         var response = await client.PostAsJsonAsync("/api/users/ensure",
-            new EnsureUserRequest("some-keycloak-sub", null, null));
+            new EnsureUserRequest("some-keycloak-sub", null, null, TrustId: "trust-testdefault00000000000"));
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
@@ -27,7 +27,7 @@ public class UsersTests(ApiFactory factory)
         var subject = $"test-subject-{Guid.NewGuid()}";
 
         var response = await client.PostAsJsonAsync("/api/users/ensure",
-            new EnsureUserRequest(subject, "test@example.com", "Test User"));
+            new EnsureUserRequest(subject, "test@example.com", "Test User", TrustId: "trust-testdefault00000000000"));
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content.ReadFromJsonAsync<EnsureUserResponse>();
@@ -42,12 +42,12 @@ public class UsersTests(ApiFactory factory)
         var subject = $"test-subject-idempotent-{Guid.NewGuid()}";
 
         var first = await client.PostAsJsonAsync("/api/users/ensure",
-            new EnsureUserRequest(subject, "idempotent@example.com", "Idempotent User"));
+            new EnsureUserRequest(subject, "idempotent@example.com", "Idempotent User", TrustId: "trust-testdefault00000000000"));
         first.StatusCode.Should().Be(HttpStatusCode.OK);
         var firstResult = await first.Content.ReadFromJsonAsync<EnsureUserResponse>();
 
         var second = await client.PostAsJsonAsync("/api/users/ensure",
-            new EnsureUserRequest(subject, "idempotent@example.com", "Idempotent User"));
+            new EnsureUserRequest(subject, "idempotent@example.com", "Idempotent User", TrustId: "trust-testdefault00000000000"));
         second.StatusCode.Should().Be(HttpStatusCode.OK);
         var secondResult = await second.Content.ReadFromJsonAsync<EnsureUserResponse>();
 

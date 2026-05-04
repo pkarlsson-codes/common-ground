@@ -49,7 +49,15 @@ public sealed class OidcController : ControllerBase
             ? requestedReturnUrl
             : defaultRedirect;
 
+        var trustId = HttpContext.Request.Query["trustId"].ToString();
+        if (string.IsNullOrWhiteSpace(trustId))
+        {
+            return BadRequest(new { error = "trustId is required" });
+        }
+
         var props = new AuthenticationProperties { RedirectUri = redirectTarget };
+        props.Items["trust_id"] = trustId;
+
         return Challenge(props, OpenIdConnectDefaults.AuthenticationScheme);
     }
 
@@ -67,8 +75,16 @@ public sealed class OidcController : ControllerBase
             ? requestedReturnUrl
             : defaultRedirect;
 
+        var trustId = HttpContext.Request.Query["trustId"].ToString();
+        if (string.IsNullOrWhiteSpace(trustId))
+        {
+            return BadRequest(new { error = "trustId is required" });
+        }
+
         var props = new AuthenticationProperties { RedirectUri = redirectTarget };
         props.SetParameter("prompt", "create");
+        props.Items["trust_id"] = trustId;
+
         return Challenge(props, OpenIdConnectDefaults.AuthenticationScheme);
     }
 

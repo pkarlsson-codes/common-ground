@@ -4,4 +4,5 @@ namespace CommonGround.API.Contracts.Identity.Requests;
 public sealed record EnsureUserRequest(
     string KeycloakSubject,
     string? Email,
-    string? DisplayName);
+    string? DisplayName,
+    string TrustId);

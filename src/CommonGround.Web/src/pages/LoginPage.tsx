@@ -1,4 +1,6 @@
 export default function LoginPage() {
+  const trustId = new URLSearchParams(window.location.search).get('trustId')
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -46,24 +48,34 @@ export default function LoginPage() {
         }}>
           Property Register
         </div>
-        <button
-          onClick={() => { window.location.href = '/auth/login' }}
-          style={{
-            width: '100%',
-            padding: '10px 20px',
-            background: 'var(--amber)',
-            color: 'var(--bg)',
-            border: 'none',
-            borderRadius: '6px',
-            fontFamily: 'var(--font-body)',
-            fontSize: '13.5px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            letterSpacing: '0.02em',
-          }}
-        >
-          Log in
-        </button>
+        {trustId ? (
+          <button
+            onClick={() => { window.location.href = `/auth/login?trustId=${encodeURIComponent(trustId)}` }}
+            style={{
+              width: '100%',
+              padding: '10px 20px',
+              background: 'var(--amber)',
+              color: 'var(--bg)',
+              border: 'none',
+              borderRadius: '6px',
+              fontFamily: 'var(--font-body)',
+              fontSize: '13.5px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              letterSpacing: '0.02em',
+            }}
+          >
+            Log in
+          </button>
+        ) : (
+          <div style={{
+            fontSize: '13px',
+            color: 'var(--text-dim)',
+            lineHeight: 1.5,
+          }}>
+            This link is invalid. Please use the invitation link provided by your trust administrator.
+          </div>
+        )}
       </div>
     </div>
   )

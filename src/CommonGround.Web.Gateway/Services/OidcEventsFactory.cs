@@ -76,8 +76,14 @@ public sealed class OidcEventsFactory(
         var displayName = ctx.Principal?.FindFirst("name")?.Value
                        ?? ctx.Principal?.FindFirst("preferred_username")?.Value;
 
+        if (!ctx.Properties!.Items.TryGetValue("trust_id", out var trustId) || string.IsNullOrWhiteSpace(trustId))
+        {
+            ctx.Fail("Missing trust_id — initiate login via /auth/login?trustId=<id>");
+            return;
+        }
+
         var response = await usersApiClient.EnsureUserAsync(
-            new EnsureUserRequest(subject, email, displayName),
+            new EnsureUserRequest(subject, email, displayName, trustId),
             ctx.HttpContext.RequestAborted).ConfigureAwait(false);
 
         var userId = response.UserId;

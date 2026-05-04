@@ -16,6 +16,7 @@
     <ProjectReference Include="..\CommonGround.Documents\CommonGround.Documents.csproj" />
     <ProjectReference Include="..\CommonGround.Homeownership\CommonGround.Homeownership.csproj" />
     <ProjectReference Include="..\CommonGround.Identity\CommonGround.Identity.csproj" />
+    <ProjectReference Include="..\CommonGround.TrustManagement\CommonGround.TrustManagement.csproj" />
     <ProjectReference Include="..\CommonGround.PropertyRegistry\CommonGround.PropertyRegistry.csproj" />
     <ProjectReference Include="..\CommonGround.Stewardship\CommonGround.Stewardship.csproj" />
   </ItemGroup>

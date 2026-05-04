@@ -12,6 +12,9 @@ using CommonGround.PropertyRegistry.Infrastructure.Seeding;
 using CommonGround.SharedKernel.Extensions;
 using CommonGround.Stewardship.Infrastructure;
 using CommonGround.Stewardship.Infrastructure.Persistence;
+using CommonGround.TrustManagement.Infrastructure;
+using CommonGround.TrustManagement.Infrastructure.Persistence;
+using CommonGround.TrustManagement.Infrastructure.Seeding;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -42,6 +45,7 @@ internal static class CommonGroundServiceCollectionExtensions
         services.AddPropertyRegistry();
         services.AddHomeownership();
         services.AddIdentity();
+        services.AddTrustManagement();
         services.AddStewardship();
         services.AddDocuments(configuration);
         return services;
@@ -74,10 +78,12 @@ internal static class CommonGroundServiceCollectionExtensions
             PropertyRegistryMartenConfiguration.Configure(opts);
             HomeownershipMartenConfiguration.Configure(opts);
             IdentityMartenConfiguration.Configure(opts);
+            TrustManagementMartenConfiguration.Configure(opts);
             StewardshipMartenConfiguration.Configure(opts);
             DocumentsMartenConfiguration.Configure(opts);
         }, configureBuilder: marten =>
         {
+            marten.InitializeWith<TrustsInitialData>();
             marten.InitializeWith<LandParcelsInitialData>();
             marten.InitializeWith<HomesInitialData>();
         });

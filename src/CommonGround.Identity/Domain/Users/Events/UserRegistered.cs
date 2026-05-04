@@ -7,4 +7,5 @@ public sealed record UserRegistered(
     string AggregateId,
     string KeycloakSubject,
     string? Email,
-    string? DisplayName) : DomainEvent(AggregateId);
+    string? DisplayName,
+    string TrustId) : DomainEvent(AggregateId);
