@@ -7,6 +7,7 @@ using CommonGround.Homeownership.Infrastructure;
 using CommonGround.Identity.Infrastructure;
 using CommonGround.PropertyRegistry.Infrastructure;
 using CommonGround.Stewardship;
+using CommonGround.TrustManagement.Infrastructure;
 using Serilog;
 using Wolverine;
 using Wolverine.RabbitMQ;
@@ -52,6 +53,7 @@ try
         opts.Discovery.IncludeAssembly(typeof(IdentityAssemblyReference).Assembly);
         opts.Discovery.IncludeAssembly(typeof(StewardshipAssemblyReference).Assembly);
         opts.Discovery.IncludeAssembly(typeof(DocumentsAssemblyReference).Assembly);
+        opts.Discovery.IncludeAssembly(typeof(TrustManagementAssemblyReference).Assembly);
     });
 
     var app = builder.Build();

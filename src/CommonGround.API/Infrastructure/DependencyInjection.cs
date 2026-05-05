@@ -142,6 +142,9 @@ internal static class CommonGroundServiceCollectionExtensions
         services.AddAuthorization(options =>
         {
             options.FallbackPolicy = options.DefaultPolicy;
+
+            options.AddPolicy("ServiceToken", policy =>
+                policy.RequireClaim("actor", "gateway"));
         });
         return services;
     }

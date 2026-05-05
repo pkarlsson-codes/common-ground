@@ -56,6 +56,10 @@ internal static class CorePlatformClientExtensions
             client.BaseAddress = new Uri(corePlatformBaseAddress))
             .AddHttpMessageHandler<InternalServiceTokenHandler>();
 
+        services.AddHttpClient<ITrustsApiClient, TrustsApiClient>(client =>
+            client.BaseAddress = new Uri(corePlatformBaseAddress))
+            .AddHttpMessageHandler<InternalServiceTokenHandler>();
+
         services.AddHttpClient<IStewardshipApiClient, StewardshipApiClient>(client =>
             client.BaseAddress = new Uri(corePlatformBaseAddress))
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
