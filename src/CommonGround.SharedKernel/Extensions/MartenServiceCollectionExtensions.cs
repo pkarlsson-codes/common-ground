@@ -1,4 +1,3 @@
-using CommonGround.SharedKernel.Persistence;
 using JasperFx.Events;
 using JasperFx.Events.Daemon;
 using Marten;
@@ -53,20 +52,6 @@ public static class MartenServiceCollectionExtensions
         marten.ApplyAllDatabaseChangesOnStartup();
 
         configureBuilder?.Invoke(marten);
-
-        return services;
-    }
-
-    /// <summary>
-    /// Adds the Marten unit of work to the service collection.
-    /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddMartenUnitOfWork(this IServiceCollection services)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-
-        services.AddScoped<IUnitOfWork, MartenUnitOfWork>();
 
         return services;
     }

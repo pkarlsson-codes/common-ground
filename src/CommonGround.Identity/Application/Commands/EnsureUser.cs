@@ -1,7 +1,7 @@
 using CommonGround.Identity.Domain.Users;
 using CommonGround.Identity.Infrastructure.Persistence;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Persistence;
+using Marten;
 
 namespace CommonGround.Identity.Application.Commands;
 
@@ -25,34 +25,33 @@ public static class EnsureUserHandler
     /// <summary>Returns the existing or newly-created UserId and TrustId for the given Keycloak subject.</summary>
     public static async Task<EnsureUserResult> Handle(
         EnsureUser command,
-        IUserRepository repository,
-        IUnitOfWork unitOfWork,
+        IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var existing = await repository
-            .LoadSubjectIndexAsync(command.KeycloakSubject, cancellationToken)
+        var existing = await session
+            .LoadAsync<UserSubjectIndex>(command.KeycloakSubject, cancellationToken)
             .ConfigureAwait(false);
 
         if (existing is not null)
         {
-            var user = await repository
-                .GetByIdAsync(UserId.Create(existing.UserId), cancellationToken)
+            var userStream = await session.Events
+                .FetchForWriting<User>(existing.UserId, cancellationToken)
                 .ConfigureAwait(false);
 
-            return new EnsureUserResult(existing.UserId, user!.TrustId.Value);
+            return new EnsureUserResult(existing.UserId, userStream.Aggregate!.TrustId.Value);
         }
 
         var newUser = User.Register(command.KeycloakSubject, command.Email, command.DisplayName, command.TrustId);
 
-        repository.Stage(newUser);
-        repository.StoreSubjectIndex(new UserSubjectIndex
+        session.Events.StartStream<User>(newUser.Id.Value, newUser.UncommittedEvents.ToArray());
+        newUser.UncommittedEvents.MarkAsCommitted();
+        session.Store(new UserSubjectIndex
         {
             Id = command.KeycloakSubject,
             UserId = newUser.Id.Value,
         });
-        await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
 
         return new EnsureUserResult(newUser.Id.Value, newUser.TrustId.Value);
     }

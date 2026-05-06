@@ -1,10 +1,8 @@
 using System.Text.Json;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
-using CommonGround.PropertyRegistry.Infrastructure.Persistence;
 using CommonGround.SharedKernel.Domain;
 using Marten;
 using Marten.Schema;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CommonGround.PropertyRegistry.Infrastructure.Seeding;
 
@@ -32,7 +30,6 @@ public sealed class LandParcelsInitialData : IInitialData
         }
 
         using var session = store.LightweightSession("org-dev-default");
-        var repository = new LandParcelRepository(session, NullLogger<LandParcelRepository>.Instance);
 
         foreach (var entry in entries)
         {
@@ -56,7 +53,8 @@ public sealed class LandParcelsInitialData : IInitialData
                 entry.CovenantTerms,
                 SeederUserId);
 
-            repository.Stage(parcel);
+            session.Events.StartStream<LandParcel>(parcel.Id.Value, parcel.UncommittedEvents.ToArray());
+            parcel.UncommittedEvents.MarkAsCommitted();
 
             session.Store(new LandParcelSeedLookup
             {

@@ -1,7 +1,7 @@
 using CommonGround.Documents.Domain.Documents;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
-using CommonGround.SharedKernel.Persistence;
+using Marten;
 
 namespace CommonGround.Documents.Application.Commands;
 
@@ -32,14 +32,15 @@ public static class AddDocumentVersionHandler
     /// <summary>Loads the document, appends a version, and persists.</summary>
     public static async Task<DocumentVersionId> Handle(
         AddDocumentVersion command,
-        IDocumentRepository repository,
-        IUnitOfWork unitOfWork,
+        IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var doc = await repository.GetByIdAsync(command.DocumentId, cancellationToken).ConfigureAwait(false)
-            ?? throw new AggregateNotFoundException(command.DocumentId.Value);
+        var stream = await session.Events
+            .FetchForWriting<Document>(command.DocumentId.Value, cancellationToken)
+            .ConfigureAwait(false);
+        var doc = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(Document), command.DocumentId.Value);
 
         doc.AddVersion(
             command.BlobKey,
@@ -50,9 +51,9 @@ public static class AddDocumentVersionHandler
             command.Note,
             command.UploadedBy,
             command.VersionId);
-
-        repository.Stage(doc);
-        await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
+        doc.ValidateInvariants();
+        stream.AppendMany(doc.UncommittedEvents.ToArray());
+        doc.UncommittedEvents.MarkAsCommitted();
 
         return doc.CurrentVersionId;
     }

@@ -1,11 +1,7 @@
 using System.Text.Json;
-using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Persistence;
 using CommonGround.TrustManagement.Domain.Trusts;
-using CommonGround.TrustManagement.Infrastructure.Persistence;
 using Marten;
 using Marten.Schema;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CommonGround.TrustManagement.Infrastructure.Seeding;
 
@@ -29,7 +25,6 @@ public sealed class TrustsInitialData : IInitialData
         }
 
         using var session = store.LightweightSession("org-dev-default");
-        var repository = new TrustRepository(session, NullLogger<MartenRepository<Trust, TrustId>>.Instance);
 
         foreach (var entry in entries)
         {
@@ -45,8 +40,8 @@ public sealed class TrustsInitialData : IInitialData
             }
 
             var trust = Trust.Create(entry.Name);
-
-            repository.Stage(trust);
+            session.Events.StartStream<Trust>(trust.Id.Value, trust.UncommittedEvents.ToArray());
+            trust.UncommittedEvents.MarkAsCommitted();
 
             session.Store(new TrustSeedLookup
             {

@@ -1,6 +1,7 @@
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Persistence;
+using CommonGround.SharedKernel.Domain.Exceptions;
+using Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
 
@@ -18,17 +19,18 @@ public static class RecordFinancingCommittedHandler
     /// <summary>Loads the workflow, records financing commitment, and persists.</summary>
     public static async Task Handle(
         RecordFinancingCommitted command,
-        IPurchaseWorkflowRepository repository,
-        IUnitOfWork unitOfWork,
+        IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var workflow = await repository.GetByIdAsync(command.WorkflowId, cancellationToken).ConfigureAwait(false)
-            ?? throw new CommonGround.SharedKernel.Domain.Exceptions.AggregateNotFoundException(command.WorkflowId.Value);
+        var stream = await session.Events.FetchForWriting<PurchaseWorkflow>(command.WorkflowId.Value, cancellationToken).ConfigureAwait(false);
+        var workflow = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(PurchaseWorkflow), command.WorkflowId.Value);
+
         workflow.RecordFinancingCommitted(command.LenderName, command.CommittedAmount, command.PreapprovalLetterDate, command.RecordedBy);
 
-        repository.Stage(workflow);
-        await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
+        workflow.ValidateInvariants();
+        stream.AppendMany(workflow.UncommittedEvents.ToArray());
+        workflow.UncommittedEvents.MarkAsCommitted();
     }
 }

@@ -1,5 +1,6 @@
 using CommonGround.Web.Gateway.Configuration;
 using Serilog;
+using Wolverine;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ try
     builder.Services.AddGatewayServices(builder.Configuration);
     builder.Services.AddGatewayAuthentication(builder.Configuration);
     builder.Services.AddGatewayInfrastructure(builder.Configuration, builder.Environment);
+    builder.Host.UseWolverine();
 
     if (builder.Environment.IsDevelopment())
     {

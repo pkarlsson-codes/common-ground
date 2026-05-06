@@ -29,17 +29,17 @@ public sealed class HomesApiClient(
 
     /// <inheritdoc/>
     public async Task<PaginatedResponse<HomeListItemResponse>> GetHomesAsync(
-        int page, int pageSize, string? landParcelId, string? status, CancellationToken cancellationToken)
+        int pageNumber, int pageSize, string? landParcelId, string? status, CancellationToken cancellationToken)
     {
-        var qs = $"?page.number={page}&page.size={pageSize}";
+        var qs = $"?pageNumber={pageNumber}&pageSize={pageSize}";
         if (!string.IsNullOrWhiteSpace(landParcelId))
         {
-            qs += $"&filter.landParcelIds={Uri.EscapeDataString(landParcelId)}";
+            qs += $"&landParcelIds={Uri.EscapeDataString(landParcelId)}";
         }
 
         if (!string.IsNullOrWhiteSpace(status))
         {
-            qs += $"&filter.statuses={Uri.EscapeDataString(status)}";
+            qs += $"&statuses={Uri.EscapeDataString(status)}";
         }
 
         return await GetAsync<PaginatedResponse<HomeListItemResponse>>($"api/homes{qs}", cancellationToken).ConfigureAwait(false);
@@ -55,10 +55,10 @@ public sealed class HomesApiClient(
 
     /// <inheritdoc/>
     public async Task<PaginatedResponse<HomeAssessmentItemResponse>> GetHomeAssessmentsAsync(
-        string homeId, int page, int pageSize, CancellationToken cancellationToken)
+        string homeId, int pageNumber, int pageSize, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
-        var qs = $"?page.number={page}&page.size={pageSize}";
+        var qs = $"?pageNumber={pageNumber}&pageSize={pageSize}";
         return await GetAsync<PaginatedResponse<HomeAssessmentItemResponse>>(
             $"api/homes/{homeId}/assessments{qs}", cancellationToken).ConfigureAwait(false);
     }

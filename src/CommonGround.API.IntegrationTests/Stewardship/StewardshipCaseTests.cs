@@ -185,7 +185,8 @@ public class StewardshipCaseTests(ApiFactory factory)
         var caseId = StewardshipCaseId.Generate().Value;
 
         using var scope = factory.Services.CreateScope();
-        var session = scope.ServiceProvider.GetRequiredService<IDocumentSession>();
+        var store = scope.ServiceProvider.GetRequiredService<IDocumentStore>();
+        await using var session = store.LightweightSession(ApiFactory.TestTrustId);
 
         var openedEvent = new StewardshipCaseOpened(
             caseId,
@@ -193,7 +194,7 @@ public class StewardshipCaseTests(ApiFactory factory)
             new DateOnly(2026, 1, 1),
             "user-system");
 
-        session.Events.Append(caseId, openedEvent);
+        session.Events.StartStream<StewardshipCase>(caseId, openedEvent);
         await session.SaveChangesAsync();
 
         return (client, caseId);

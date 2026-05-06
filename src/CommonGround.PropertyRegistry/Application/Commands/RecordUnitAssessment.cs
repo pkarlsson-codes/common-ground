@@ -1,7 +1,7 @@
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
-using CommonGround.SharedKernel.Persistence;
+using Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
 
@@ -26,18 +26,18 @@ public static class RecordHomeAssessmentHandler
     /// <summary>Loads the unit, records the assessment, and persists.</summary>
     public static async Task Handle(
         RecordHomeAssessment command,
-        IHomeRepository repository,
-        IUnitOfWork unitOfWork,
+        IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var home = await repository.GetByIdAsync(command.HomeId, cancellationToken).ConfigureAwait(false)
-            ?? throw new AggregateNotFoundException(command.HomeId.Value);
+        var stream = await session.Events.FetchForWriting<Home>(command.HomeId.Value, cancellationToken).ConfigureAwait(false);
+        var home = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(Home), command.HomeId.Value);
 
         home.RecordAssessment(command.AssessedValue, command.AssessmentDate, command.AppraiserName, command.ConditionNotes, command.RecordedById);
 
-        repository.Stage(home);
-        await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
+        home.ValidateInvariants();
+        stream.AppendMany(home.UncommittedEvents.ToArray());
+        home.UncommittedEvents.MarkAsCommitted();
     }
 }

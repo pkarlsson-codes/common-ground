@@ -10,6 +10,11 @@ public static class DocumentsMartenConfiguration
 {
     private const string SchemaName = "documents";
 
+    private static ProjectionLifecycle ProjectionLifecycleForEnvironment =>
+        string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Testing", StringComparison.OrdinalIgnoreCase)
+            ? ProjectionLifecycle.Inline
+            : ProjectionLifecycle.Async;
+
     /// <summary>Configures Marten for Documents.</summary>
     public static void Configure(StoreOptions options)
     {
@@ -25,8 +30,8 @@ public static class DocumentsMartenConfiguration
             .Index(x => x.IsDeleted)
             .Index(x => x.UploadedAt);
 
-        options.Projections.Add<DocumentViewProjection>(ProjectionLifecycle.Async);
-        options.Projections.Add<EntityDocumentsViewProjection>(ProjectionLifecycle.Async);
-        options.Projections.Add<DocumentLibraryItemViewProjection>(ProjectionLifecycle.Async);
+        options.Projections.Add<DocumentViewProjection>(ProjectionLifecycleForEnvironment);
+        options.Projections.Add<EntityDocumentsViewProjection>(ProjectionLifecycleForEnvironment);
+        options.Projections.Add<DocumentLibraryItemViewProjection>(ProjectionLifecycleForEnvironment);
     }
 }

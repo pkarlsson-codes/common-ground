@@ -9,6 +9,11 @@ public static class StewardshipMartenConfiguration
 {
     private const string SchemaName = "stewardship";
 
+    private static ProjectionLifecycle ProjectionLifecycleForEnvironment =>
+        string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Testing", StringComparison.OrdinalIgnoreCase)
+            ? ProjectionLifecycle.Inline
+            : ProjectionLifecycle.Async;
+
     /// <summary>Configures Marten store options for the Stewardship bounded context.</summary>
     public static void Configure(StoreOptions options)
     {
@@ -17,7 +22,7 @@ public static class StewardshipMartenConfiguration
         options.Schema.For<StewardshipCaseView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<ForeclosurePreventionCaseView>().DatabaseSchemaName(SchemaName);
 
-        options.Projections.Add<StewardshipCaseProjection>(ProjectionLifecycle.Async);
-        options.Projections.Add<ForeclosurePreventionCaseProjection>(ProjectionLifecycle.Async);
+        options.Projections.Add<StewardshipCaseProjection>(ProjectionLifecycleForEnvironment);
+        options.Projections.Add<ForeclosurePreventionCaseProjection>(ProjectionLifecycleForEnvironment);
     }
 }

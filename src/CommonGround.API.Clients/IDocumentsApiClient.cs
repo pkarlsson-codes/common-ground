@@ -79,7 +79,7 @@ public interface IDocumentsApiClient
     Task UntagDocumentAsync(string documentId, string tag, CancellationToken cancellationToken);
 
     /// <summary>Lists documents in the library, paginated with optional filters.</summary>
-    /// <param name="page">The 1-based page number.</param>
+    /// <param name="pageNumber">The 1-based page number.</param>
     /// <param name="pageSize">The page size.</param>
     /// <param name="includeDeleted">When true, includes soft-deleted documents.</param>
     /// <param name="contentType">Optional MIME content-type filter.</param>
@@ -88,7 +88,7 @@ public interface IDocumentsApiClient
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A paginated response of library items.</returns>
     Task<PaginatedResponse<DocumentLibraryItemResponse>> ListDocumentsAsync(
-        int page,
+        int pageNumber,
         int pageSize,
         bool includeDeleted,
         string? contentType,
@@ -99,12 +99,12 @@ public interface IDocumentsApiClient
     /// <summary>Lists documents attached to an entity.</summary>
     /// <param name="entityType">The type of entity.</param>
     /// <param name="entityId">The ID of the entity.</param>
-    /// <param name="page">The page number (1-based).</param>
+    /// <param name="pageNumber">The page number (1-based).</param>
     /// <param name="pageSize">The number of items per page.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A paginated response of entity documents.</returns>
     Task<PaginatedResponse<EntityDocumentItemResponse>> GetEntityDocumentsAsync(
-        string entityType, Guid entityId, int page, int pageSize, CancellationToken cancellationToken);
+        string entityType, Guid entityId, int pageNumber, int pageSize, CancellationToken cancellationToken);
 
     /// <summary>Gets the absolute URL the client should redirect to for downloading.</summary>
     /// <remarks>Implementation should call the API and surface the 302 location header without following.</remarks>

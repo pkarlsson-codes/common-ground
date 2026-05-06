@@ -1,7 +1,6 @@
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
-using CommonGround.SharedKernel.Infrastructure.Querying;
 using Microsoft.Extensions.Logging;
 
 namespace CommonGround.API.Clients;
@@ -16,10 +15,31 @@ public sealed class DevelopmentProjectsApiClient(
 {
     /// <inheritdoc/>
     public async Task<PaginatedResponse<DevelopmentProjectListItemResponse>> GetDevelopmentProjectsAsync(
-        PaginationQuerySpec<GetDevelopmentProjectsFilter> query, CancellationToken cancellationToken)
+        int pageNumber, int pageSize, string? search, string? landParcelId,
+        IReadOnlyCollection<string>? homeIds, CancellationToken cancellationToken)
     {
-        var qs = query?.ToQueryString() ?? string.Empty;
-        return await GetAsync<PaginatedResponse<DevelopmentProjectListItemResponse>>($"api/development-projects{qs}", cancellationToken).ConfigureAwait(false);
+        var query = new List<string>(capacity: 5)
+        {
+            $"pageNumber={pageNumber}",
+            $"pageSize={pageSize}",
+        };
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query.Add($"search={Uri.EscapeDataString(search)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(landParcelId))
+        {
+            query.Add($"landParcelId={Uri.EscapeDataString(landParcelId)}");
+        }
+
+        if (homeIds is { Count: > 0 })
+        {
+            query.AddRange(homeIds.Select(id => $"homeIds={Uri.EscapeDataString(id)}"));
+        }
+
+        return await GetAsync<PaginatedResponse<DevelopmentProjectListItemResponse>>(
+            $"api/development-projects?{string.Join('&', query)}", cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

@@ -1,3 +1,5 @@
+using Wolverine.Http;
+
 namespace CommonGround.Web.Gateway.Configuration;
 
 /// <summary>
@@ -14,6 +16,7 @@ internal static class GatewayServicesExtensions
     public static IServiceCollection AddGatewayServices(this IServiceCollection services, ConfigurationManager configuration)
     {
         services.AddMvcWithQuerying();
+        services.AddWolverineHttp();
         services.AddCorePlatformClients(configuration);
         services.AddGatewayOptions(configuration);
 

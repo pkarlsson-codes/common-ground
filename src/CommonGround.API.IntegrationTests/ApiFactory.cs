@@ -77,6 +77,9 @@ public class ApiFactory : WebApplicationFactory<Program>
     {
         EnsureContainerStarted();
 
+        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+        Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", "Testing");
+
         builder.UseEnvironment("Testing");
 
         builder.ConfigureAppConfiguration((_, configurationBuilder) =>
@@ -100,6 +103,16 @@ public class ApiFactory : WebApplicationFactory<Program>
                 foreach (var source in options.Projections.All.OfType<ProjectionBase>())
                 {
                     source.Lifecycle = ProjectionLifecycle.Inline;
+                }
+
+                // Some projection source types are not ProjectionBase; force inline when possible.
+                foreach (var source in options.Projections.All)
+                {
+                    var lifecycleProperty = source.GetType().GetProperty("Lifecycle");
+                    if (lifecycleProperty?.CanWrite == true && lifecycleProperty.PropertyType == typeof(ProjectionLifecycle))
+                    {
+                        lifecycleProperty.SetValue(source, ProjectionLifecycle.Inline);
+                    }
                 }
             });
 

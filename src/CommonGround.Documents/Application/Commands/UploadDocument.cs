@@ -1,6 +1,6 @@
 using CommonGround.Documents.Domain.Documents;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Persistence;
+using Marten;
 
 namespace CommonGround.Documents.Application.Commands;
 
@@ -38,10 +38,9 @@ public sealed record UploadDocumentAttachment(string EntityType, Guid EntityId, 
 public static class UploadDocumentHandler
 {
     /// <summary>Creates the aggregate and persists.</summary>
-    public static async Task<DocumentId> Handle(
+    public static Task<DocumentId> Handle(
         UploadDocument command,
-        IDocumentRepository repository,
-        IUnitOfWork unitOfWork,
+        IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
@@ -62,9 +61,9 @@ public static class UploadDocumentHandler
             command.DocumentId,
             command.VersionId);
 
-        repository.Stage(doc);
-        await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
+        session.Events.StartStream<Document>(doc.Id.Value, doc.UncommittedEvents.ToArray());
+        doc.UncommittedEvents.MarkAsCommitted();
 
-        return doc.Id;
+        return Task.FromResult(doc.Id);
     }
 }

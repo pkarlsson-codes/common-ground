@@ -1,27 +1,22 @@
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Persistence;
 using CommonGround.Stewardship.Domain.StewardshipCases;
+using Marten;
 
 namespace CommonGround.API.Stewardship.Consumers;
 
-/// <summary>Handles homeowner onboarding events by creating a stewardship case.</summary>
-public sealed class HomeownerOnboardedConsumer(
-    IStewardshipCaseRepository repository,
-    IUnitOfWork unitOfWork)
+#pragma warning disable SA1600
+public sealed class HomeownerOnboardedConsumer(IDocumentSession session)
 {
-    /// <summary>Creates a stewardship case for a newly onboarded homeowner.</summary>
-    /// <param name="event">The homeowner onboarding event.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task Handle(HomeownerOnboarded @event, CancellationToken ct)
+    public void Handle(HomeownerOnboarded @event, CancellationToken ct)
     {
         var sc = StewardshipCase.Open(
             @event.AggregateId,
             DateOnly.FromDateTime(@event.OccurredAt.UtcDateTime),
             UserId.Create(@event.OnboardedBy));
 
-        repository.Stage(sc);
-        await unitOfWork.CommitAsync(ct).ConfigureAwait(false);
+        sc.ValidateInvariants();
+        session.Events.StartStream<StewardshipCase>(sc.Id.Value, sc.UncommittedEvents.ToArray());
+        sc.UncommittedEvents.MarkAsCommitted();
     }
 }

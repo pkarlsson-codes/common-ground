@@ -31,10 +31,10 @@ public sealed class LandParcelsApiClient(
     public async Task<PaginatedResponse<LandParcelListItemResponse>> GetLandParcelsAsync(
         int page, int pageSize, string? search, CancellationToken cancellationToken)
     {
-        var qs = $"?page.number={page}&page.size={pageSize}";
+        var qs = $"?pageNumber={page}&pageSize={pageSize}";
         if (!string.IsNullOrWhiteSpace(search))
         {
-            qs += $"&filter.search={Uri.EscapeDataString(search)}";
+            qs += $"&search={Uri.EscapeDataString(search)}";
         }
 
         return await GetAsync<PaginatedResponse<LandParcelListItemResponse>>($"api/land-parcels{qs}", cancellationToken).ConfigureAwait(false);

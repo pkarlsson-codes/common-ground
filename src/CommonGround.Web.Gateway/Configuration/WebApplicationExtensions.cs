@@ -1,4 +1,5 @@
 using CommonGround.Web.Gateway.Middleware;
+using Wolverine.Http;
 
 namespace CommonGround.Web.Gateway.Configuration;
 
@@ -52,6 +53,7 @@ internal static partial class WebApplicationExtensions
     {
         app.MapHealthChecks("/health").AllowAnonymous();
         app.MapControllers();
+        app.MapWolverineEndpoints();
 
         return app;
     }

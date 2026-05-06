@@ -1,5 +1,7 @@
 using CommonGround.SharedKernel.Infrastructure.API;
 using Scalar.AspNetCore;
+using Serilog;
+using Wolverine.Http;
 
 namespace CommonGround.API.Infrastructure.Configuration;
 
@@ -35,6 +37,11 @@ internal static class WebApplicationExtensions
     public static WebApplication ConfigureStandardPipeline(this WebApplication app)
     {
         app.UseExceptionHandler();
+        app.UseSerilogRequestLogging(options =>
+        {
+            options.MessageTemplate =
+                "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
+        });
         app.UseCorrelationId();
         app.UseCors();
         app.UseAuthentication();
@@ -53,7 +60,12 @@ internal static class WebApplicationExtensions
         app.MapHealthChecks("/health").AllowAnonymous();
         app.MapGet("/api/test-auth", () => Results.Ok(new { success = true }))
             .RequireAuthorization();
-        app.MapControllers();
+
+        app.MapWolverineEndpoints(opts =>
+        {
+            opts.TenantId.IsClaimTypeNamed("tenant_id");
+            opts.TenantId.AssertExists();
+        });
 
         return app;
     }

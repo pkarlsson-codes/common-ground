@@ -1,11 +1,9 @@
 using System.Text.Json;
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
-using CommonGround.PropertyRegistry.Infrastructure.Persistence;
 using CommonGround.SharedKernel.Domain;
 using Marten;
 using Marten.Schema;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CommonGround.PropertyRegistry.Infrastructure.Seeding;
 
@@ -33,7 +31,6 @@ public sealed class HomesInitialData : IInitialData
         }
 
         using var session = store.LightweightSession("org-dev-default");
-        var repository = new HomeRepository(session, NullLogger<HomeRepository>.Instance);
 
         foreach (var entry in entries)
         {
@@ -86,7 +83,8 @@ public sealed class HomesInitialData : IInitialData
                 initialAssessment,
                 SeederUserId);
 
-            repository.Stage(unit);
+            session.Events.StartStream<Home>(unit.Id.Value, unit.UncommittedEvents.ToArray());
+            unit.UncommittedEvents.MarkAsCommitted();
 
             session.Store(new HomeSeedLookup
             {

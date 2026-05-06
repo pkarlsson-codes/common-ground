@@ -10,6 +10,7 @@ using CommonGround.Stewardship;
 using CommonGround.TrustManagement.Infrastructure;
 using Serilog;
 using Wolverine;
+using Wolverine.Http;
 using Wolverine.RabbitMQ;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,12 +29,15 @@ try
     builder.Services.AddConfiguredSwagger();
     builder.Services.AddConfiguredCors(builder.Configuration);
     builder.Services.AddCommonGroundServices(builder.Configuration, builder.Environment);
+    builder.Services.AddWolverineHttp();
 
     var rabbitMqOptions = builder.Configuration.GetSection("RabbitMq").Get<RabbitMqOptions>() ?? new RabbitMqOptions();
     var useRabbitMq = !builder.Environment.IsEnvironment("Testing");
 
     builder.Host.UseWolverine(opts =>
     {
+        opts.Policies.AutoApplyTransactions();
+
         if (useRabbitMq)
         {
             opts.UseRabbitMq(rabbit =>

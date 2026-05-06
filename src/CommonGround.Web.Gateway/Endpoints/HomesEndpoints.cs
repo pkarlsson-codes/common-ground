@@ -1,0 +1,95 @@
+using CommonGround.API.Clients;
+using CommonGround.API.Contracts.PropertyRegistry.Requests;
+using CommonGround.API.Contracts.PropertyRegistry.Responses;
+using CommonGround.SharedKernel.Infrastructure.API;
+using Wolverine.Http;
+
+#pragma warning disable CA2007
+#pragma warning disable SA1600
+
+namespace CommonGround.Web.Gateway.Endpoints;
+
+public static class HomesEndpoints
+{
+    [WolverinePost("/api/v1/homes")]
+    public static async Task<IResult> RegisterHome(
+        RegisterHomeRequest request,
+        IHomesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        var result = await client.RegisterHomeAsync(request, cancellationToken).ConfigureAwait(false);
+        return Results.Created($"/api/v1/homes/{result.HomeId}", result);
+    }
+
+    [WolverineGet("/api/v1/homes/{homeId}")]
+    public static async Task<IResult> GetHome(
+        string homeId,
+        IHomesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+        var result = await client.GetHomeAsync(homeId, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+
+    [WolverineGet("/api/v1/homes")]
+    public static async Task<IResult> GetHomes(
+        int pageNumber,
+        int pageSize,
+        string? landParcelId,
+        string? status,
+        IHomesApiClient client,
+        CancellationToken cancellationToken = default)
+    {
+        if (pageNumber <= 0)
+        {
+            pageNumber = 1;
+        }
+
+        if (pageSize <= 0)
+        {
+            pageSize = 20;
+        }
+
+        var result = await client.GetHomesAsync(pageNumber, pageSize, landParcelId, status, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+
+    [WolverinePost("/api/v1/homes/{homeId}/assessments")]
+
+    public static async Task<IResult> RecordHomeAssessment(
+        string homeId,
+        RecordHomeAssessmentRequest request,
+        IHomesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.RecordHomeAssessmentAsync(homeId, request, cancellationToken).ConfigureAwait(false);
+        return Results.Created();
+    }
+
+    [WolverineGet("/api/v1/homes/{homeId}/assessments")]
+    public static async Task<IResult> GetHomeAssessments(
+        string homeId,
+        int pageNumber,
+        int pageSize,
+        IHomesApiClient client,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+        if (pageNumber <= 0)
+        {
+            pageNumber = 1;
+        }
+
+        if (pageSize <= 0)
+        {
+            pageSize = 20;
+        }
+
+        var result = await client.GetHomeAssessmentsAsync(homeId, pageNumber, pageSize, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+}

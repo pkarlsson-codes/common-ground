@@ -1,7 +1,7 @@
 using CommonGround.Documents.Domain.Documents;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
-using CommonGround.SharedKernel.Persistence;
+using Marten;
 
 namespace CommonGround.Documents.Application.Commands;
 
@@ -19,18 +19,19 @@ public static class AttachDocumentHandler
     /// <summary>Loads the document, attaches it, and persists.</summary>
     public static async Task Handle(
         AttachDocument command,
-        IDocumentRepository repository,
-        IUnitOfWork unitOfWork,
+        IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var doc = await repository.GetByIdAsync(command.DocumentId, cancellationToken).ConfigureAwait(false)
-            ?? throw new AggregateNotFoundException(command.DocumentId.Value);
+        var stream = await session.Events
+            .FetchForWriting<Document>(command.DocumentId.Value, cancellationToken)
+            .ConfigureAwait(false);
+        var doc = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(Document), command.DocumentId.Value);
 
         doc.Attach(command.EntityType, command.EntityId, command.Role, command.AttachedBy);
-
-        repository.Stage(doc);
-        await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
+        doc.ValidateInvariants();
+        stream.AppendMany(doc.UncommittedEvents.ToArray());
+        doc.UncommittedEvents.MarkAsCommitted();
     }
 }

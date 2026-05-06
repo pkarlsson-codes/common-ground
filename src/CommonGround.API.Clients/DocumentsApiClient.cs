@@ -94,13 +94,13 @@ public sealed class DocumentsApiClient(
 
     /// <inheritdoc/>
     public Task<PaginatedResponse<DocumentLibraryItemResponse>> ListDocumentsAsync(
-        int page, int pageSize, bool includeDeleted, string? contentType, string? tag,
+        int pageNumber, int pageSize, bool includeDeleted, string? contentType, string? tag,
         DateTimeOffset? expiringBefore, CancellationToken cancellationToken)
     {
         var query = new List<string>(capacity: 6)
         {
-            $"page.number={page}",
-            $"page.size={pageSize}",
+            $"pageNumber={pageNumber}",
+            $"pageSize={pageSize}",
         };
         if (includeDeleted)
         {
@@ -128,9 +128,9 @@ public sealed class DocumentsApiClient(
 
     /// <inheritdoc/>
     public Task<PaginatedResponse<EntityDocumentItemResponse>> GetEntityDocumentsAsync(
-        string entityType, Guid entityId, int page, int pageSize, CancellationToken cancellationToken)
+        string entityType, Guid entityId, int pageNumber, int pageSize, CancellationToken cancellationToken)
         => GetAsync<PaginatedResponse<EntityDocumentItemResponse>>(
-            $"api/entities/{entityType}/{entityId:N}/documents?page.number={page}&page.size={pageSize}",
+            $"api/entities/{entityType}/{entityId:N}/documents?pageNumber={pageNumber}&pageSize={pageSize}",
             cancellationToken);
 
     /// <inheritdoc/>

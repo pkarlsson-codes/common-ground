@@ -49,14 +49,14 @@ public sealed partial class InternalGatewayAuthHandler : DelegatingHandler
 
             sessionId = httpContext.Request.Cookies[GatewayDefaults.Cookies.SessionCookie];
 
-            if (string.IsNullOrWhiteSpace(userId) && !string.IsNullOrWhiteSpace(sessionId))
+            if (!string.IsNullOrWhiteSpace(sessionId))
             {
                 var stored = await _tokenStore.TryGetTokensAsync(sessionId, cancellationToken).ConfigureAwait(false);
                 if (stored.HasValue)
                 {
-                    userId = stored.Value.userId;
+                    userId ??= stored.Value.userId;
                     trustId = stored.Value.trustId;
-                    Logs.ResolvedFromTokenStore(_logger, userId);
+                    Logs.ResolvedFromTokenStore(_logger, stored.Value.userId);
                 }
             }
 

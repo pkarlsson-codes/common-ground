@@ -1,6 +1,3 @@
-using CommonGround.Homeownership.Domain.GroundLeases;
-using CommonGround.Homeownership.Domain.PurchaseWorkflows;
-using CommonGround.Homeownership.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CommonGround.Homeownership.Infrastructure;
@@ -13,8 +10,6 @@ public static class HomeownershipServiceCollectionExtensions
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddHomeownership(this IServiceCollection services)
     {
-        services.AddScoped<IGroundLeaseRepository, GroundLeaseRepository>();
-        services.AddScoped<IPurchaseWorkflowRepository, PurchaseWorkflowRepository>();
         return services;
     }
 }

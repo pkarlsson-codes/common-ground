@@ -10,6 +10,11 @@ public static class HomeownershipMartenConfiguration
 {
     private const string SchemaName = "homeownership";
 
+    private static ProjectionLifecycle ProjectionLifecycleForEnvironment =>
+        string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Testing", StringComparison.OrdinalIgnoreCase)
+            ? ProjectionLifecycle.Inline
+            : ProjectionLifecycle.Async;
+
     /// <summary>Configures Marten for Homeownership.</summary>
     public static void Configure(StoreOptions options)
     {
@@ -34,9 +39,9 @@ public static class HomeownershipMartenConfiguration
 
     private static void ConfigureProjections(StoreOptions options)
     {
-        options.Projections.Add<GroundLeaseViewProjection>(ProjectionLifecycle.Async);
-        options.Projections.Add<GroundLeaseListItemViewProjection>(ProjectionLifecycle.Async);
-        options.Projections.Add<PurchaseWorkflowViewProjection>(ProjectionLifecycle.Async);
-        options.Projections.Add<PurchaseWorkflowListItemViewProjection>(ProjectionLifecycle.Async);
+        options.Projections.Add<GroundLeaseViewProjection>(ProjectionLifecycleForEnvironment);
+        options.Projections.Add<GroundLeaseListItemViewProjection>(ProjectionLifecycleForEnvironment);
+        options.Projections.Add<PurchaseWorkflowViewProjection>(ProjectionLifecycleForEnvironment);
+        options.Projections.Add<PurchaseWorkflowListItemViewProjection>(ProjectionLifecycleForEnvironment);
     }
 }

@@ -1,7 +1,7 @@
 using CommonGround.PropertyRegistry.Domain.DevelopmentProjects;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Persistence;
+using Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
 
@@ -20,10 +20,9 @@ public sealed record InitiateNewConstructionProject(
 public static class InitiateNewConstructionProjectHandler
 {
     /// <summary>Creates a new DevelopmentProject, persists it, and returns its ID.</summary>
-    public static async Task<DevelopmentProjectId> Handle(
+    public static Task<DevelopmentProjectId> Handle(
         InitiateNewConstructionProject command,
-        IDevelopmentProjectRepository repository,
-        IUnitOfWork unitOfWork,
+        IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
@@ -34,9 +33,10 @@ public static class InitiateNewConstructionProjectHandler
             command.Description,
             command.InitiatedBy);
 
-        repository.Stage(project);
-        await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
+        project.ValidateInvariants();
+        session.Events.StartStream<DevelopmentProject>(project.Id.Value, project.UncommittedEvents.ToArray());
+        project.UncommittedEvents.MarkAsCommitted();
 
-        return project.Id;
+        return Task.FromResult(project.Id);
     }
 }

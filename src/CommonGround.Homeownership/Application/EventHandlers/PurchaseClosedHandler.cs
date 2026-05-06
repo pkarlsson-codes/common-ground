@@ -2,7 +2,8 @@ using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Persistence;
+using CommonGround.SharedKernel.Domain.Exceptions;
+using Marten;
 
 namespace CommonGround.Homeownership.Application.EventHandlers;
 
@@ -10,10 +11,7 @@ namespace CommonGround.Homeownership.Application.EventHandlers;
 /// Applies purchase-closing outcomes to the linked ground lease.
 /// On close, the workflow buyer becomes the lease homeowner.
 /// </summary>
-public sealed class PurchaseClosedHandler(
-    IPurchaseWorkflowRepository workflowRepository,
-    IGroundLeaseRepository leaseRepository,
-    IUnitOfWork unitOfWork)
+public sealed class PurchaseClosedHandler(IDocumentSession session)
 {
     /// <summary>
     /// Handles purchase closure by onboarding or changing the ground lease homeowner.
@@ -25,15 +23,11 @@ public sealed class PurchaseClosedHandler(
     {
         ArgumentNullException.ThrowIfNull(@event);
 
-        var workflow = await workflowRepository
-            .GetByIdAsync(PurchaseWorkflowId.Create(@event.AggregateId), ct)
-            .ConfigureAwait(false)
-            ?? throw new SharedKernel.Domain.Exceptions.AggregateNotFoundException(@event.AggregateId);
+        var workflowStream = await session.Events.FetchForWriting<PurchaseWorkflow>(@event.AggregateId, ct).ConfigureAwait(false);
+        var workflow = workflowStream.Aggregate ?? throw new AggregateNotFoundException(@event.AggregateId);
 
-        var lease = await leaseRepository
-            .GetByIdAsync(workflow.GroundLeaseId, ct)
-            .ConfigureAwait(false)
-            ?? throw new SharedKernel.Domain.Exceptions.AggregateNotFoundException(workflow.GroundLeaseId.Value);
+        var leaseStream = await session.Events.FetchForWriting<GroundLease>(workflow.GroundLeaseId.Value, ct).ConfigureAwait(false);
+        var lease = leaseStream.Aggregate ?? throw new AggregateNotFoundException(workflow.GroundLeaseId.Value);
 
         var recordedBy = UserId.Create(@event.RecordedBy);
         var buyer = workflow.Buyer;
@@ -51,8 +45,9 @@ public sealed class PurchaseClosedHandler(
             return;
         }
 
-        leaseRepository.Stage(lease);
-        await unitOfWork.CommitAsync(ct).ConfigureAwait(false);
+        lease.ValidateInvariants();
+        leaseStream.AppendMany(lease.UncommittedEvents.ToArray());
+        lease.UncommittedEvents.MarkAsCommitted();
     }
 
     private static bool IsSameHomeowner(Homeowner current, Homeowner buyer)

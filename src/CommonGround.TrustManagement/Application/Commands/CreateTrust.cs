@@ -1,5 +1,5 @@
-using CommonGround.SharedKernel.Persistence;
 using CommonGround.TrustManagement.Domain.Trusts;
+using Marten;
 
 namespace CommonGround.TrustManagement.Application.Commands;
 
@@ -14,19 +14,18 @@ public sealed record CreateTrustResult(string TrustId);
 public static class CreateTrustHandler
 {
     /// <summary>Creates a new trust and returns its stable ID.</summary>
-    public static async Task<CreateTrustResult> Handle(
+    public static Task<CreateTrustResult> Handle(
         CreateTrust command,
-        ITrustRepository repository,
-        IUnitOfWork unitOfWork,
+        IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
         var trust = Trust.Create(command.Name);
+        trust.ValidateInvariants();
+        session.Events.StartStream<Trust>(trust.Id.Value, trust.UncommittedEvents.ToArray());
+        trust.UncommittedEvents.MarkAsCommitted();
 
-        repository.Stage(trust);
-        await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
-
-        return new CreateTrustResult(trust.Id.Value);
+        return Task.FromResult(new CreateTrustResult(trust.Id.Value));
     }
 }

@@ -1,7 +1,7 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Persistence;
+using Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
 
@@ -16,10 +16,9 @@ public sealed record InitiatePurchaseWorkflow(
 public static class InitiatePurchaseWorkflowHandler
 {
     /// <summary>Initiates a new purchase workflow and returns its ID.</summary>
-    public static async Task<PurchaseWorkflowId> Handle(
+    public static Task<PurchaseWorkflowId> Handle(
         InitiatePurchaseWorkflow command,
-        IPurchaseWorkflowRepository repository,
-        IUnitOfWork unitOfWork,
+        IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
@@ -30,9 +29,10 @@ public static class InitiatePurchaseWorkflowHandler
             command.PurchasePrice,
             command.InitiatedBy);
 
-        repository.Stage(workflow);
-        await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
+        workflow.ValidateInvariants();
+        session.Events.StartStream<PurchaseWorkflow>(workflow.Id.Value, workflow.UncommittedEvents.ToArray());
+        workflow.UncommittedEvents.MarkAsCommitted();
 
-        return workflow.Id;
+        return Task.FromResult(workflow.Id);
     }
 }

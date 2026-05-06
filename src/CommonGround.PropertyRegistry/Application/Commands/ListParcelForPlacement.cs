@@ -1,7 +1,7 @@
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
-using CommonGround.SharedKernel.Persistence;
+using Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
 
@@ -14,18 +14,18 @@ public static class ListParcelForPlacementHandler
     /// <summary>Loads the parcel, lists it for placement, and persists.</summary>
     public static async Task Handle(
         ListParcelForPlacement command,
-        ILandParcelRepository repository,
-        IUnitOfWork unitOfWork,
+        IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var parcel = await repository.GetByIdAsync(command.LandParcelId, cancellationToken).ConfigureAwait(false)
-            ?? throw new AggregateNotFoundException(command.LandParcelId.Value);
+        var stream = await session.Events.FetchForWriting<LandParcel>(command.LandParcelId.Value, cancellationToken).ConfigureAwait(false);
+        var parcel = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(LandParcel), command.LandParcelId.Value);
 
         parcel.ListForPlacement(command.ChangedBy);
 
-        repository.Stage(parcel);
-        await unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
+        parcel.ValidateInvariants();
+        stream.AppendMany(parcel.UncommittedEvents.ToArray());
+        parcel.UncommittedEvents.MarkAsCommitted();
     }
 }

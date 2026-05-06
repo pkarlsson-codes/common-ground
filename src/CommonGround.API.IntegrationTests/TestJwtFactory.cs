@@ -18,8 +18,13 @@ public static class TestJwtFactory
     /// <param name="userId">The user identifier to include in the token.</param>
     /// <param name="roles">Optional role claims to include.</param>
     /// <param name="trustId">Optional trust identifier to include as a <c>tenant_id</c> claim.</param>
+    /// <param name="additionalClaims">Optional additional claims to include.</param>
     /// <returns>A serialized JWT string.</returns>
-    public static string CreateToken(UserId userId, string[]? roles = null, string? trustId = null)
+    public static string CreateToken(
+        UserId userId,
+        string[]? roles = null,
+        string? trustId = null,
+        IEnumerable<Claim>? additionalClaims = null)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ApiFactory.JwtSigningKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -39,6 +44,11 @@ public static class TestJwtFactory
         if (!string.IsNullOrEmpty(trustId))
         {
             claims.Add(new Claim("tenant_id", trustId));
+        }
+
+        if (additionalClaims is not null)
+        {
+            claims.AddRange(additionalClaims);
         }
 
         var token = new JwtSecurityToken(
@@ -64,6 +74,26 @@ public static class TestJwtFactory
         var actorId = userId is null ? UserId.Generate() : UserId.Create(userId);
         client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", CreateToken(actorId, trustId: trustId ?? ApiFactory.TestTrustId));
+        return client;
+    }
+
+    /// <summary>
+    /// Adds a service token that satisfies the ServiceToken authorization policy.
+    /// </summary>
+    /// <param name="client">The HTTP client to decorate.</param>
+    /// <param name="userId">Optional explicit user ID value.</param>
+    /// <returns>The same client for fluent chaining.</returns>
+    public static HttpClient WithServiceToken(this HttpClient client, string? userId = null)
+    {
+        var actorId = userId is null ? UserId.Generate() : UserId.Create(userId);
+        var claims = new[]
+        {
+            new Claim("actor", "gateway"),
+        };
+
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", CreateToken(actorId, trustId: null, additionalClaims: claims));
+
         return client;
     }
 }
