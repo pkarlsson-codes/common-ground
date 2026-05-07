@@ -4483,10 +4483,19 @@
           "200": {
             "description": "The current user if authenticated; otherwise unauthorized.",
             "content": {
-              "application/octet-stream": {
+              "application/json": {
                 "schema": {
-                  "type": "string",
-                  "format": "binary"
+                  "$ref": "#/components/schemas/CurrentUserDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -6997,6 +7006,25 @@
           "resolvedDate": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "CurrentUserDto": {
+        "type": "object",
+        "description": "DTO representing the authenticated user details.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the user."
+          },
+          "username": {
+            "type": "string",
+            "description": "Display username for the user."
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the user."
           }
         }
       }

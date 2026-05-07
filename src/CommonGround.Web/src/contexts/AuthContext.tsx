@@ -1,4 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { AuthApi } from '../api'
+import { apiConfig } from '../lib/apiConfig'
 
 interface User {
   id: string
@@ -22,17 +24,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/api/v1/Auth/me', { credentials: 'include' })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.user) {
-          setUser(data.user)
+    const loadUser = async () => {
+      try {
+        const api = new AuthApi(apiConfig)
+        const data = await api.getCurrentUser()
+        if (data && data.id) {
+          setUser({ id: data.id, username: data.username ?? data.id, email: data.email ?? '' })
         }
-      })
-      .catch(() => {
+      } catch {
         setError('Could not reach the server. Check your connection and reload.')
-      })
-      .finally(() => setIsLoading(false))
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void loadUser()
   }, [])
 
   function logout() {

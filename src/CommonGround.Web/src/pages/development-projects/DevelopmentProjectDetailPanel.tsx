@@ -1,10 +1,5 @@
 import { useState } from 'react'
-import {
-  useDevelopmentProject,
-  useActivateDevelopmentProject,
-  useCompleteDevelopmentProject,
-  useAbandonDevelopmentProject,
-} from '../../hooks/developmentProjects'
+import { useDevelopmentProject } from '../../hooks/developmentProjects'
 import SlideOver from '../../components/SlideOver'
 import StatusBadge from '../../components/StatusBadge'
 import NavIdLink from '../../components/NavIdLink'
@@ -25,40 +20,8 @@ interface Props {
 
 export default function DevelopmentProjectDetailPanel({ projectId, onClose }: Props) {
   const { data: detail, isLoading } = useDevelopmentProject(projectId)
-  const activate = useActivateDevelopmentProject()
-  const complete = useCompleteDevelopmentProject()
-  const abandon = useAbandonDevelopmentProject()
-  const [completionDate, setCompletionDate] = useState(new Date().toISOString().slice(0, 10))
-  const [showCompleteForm, setShowCompleteForm] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [confirmAbandon, setConfirmAbandon] = useState(false)
-  const { success } = useToast()
-
-  const isPending = activate.isPending || complete.isPending || abandon.isPending
-
-  const handleActivate = async () => {
-    try {
-      await activate.mutateAsync(projectId)
-      success('Project activated')
-    } catch { /* error via mutation state */ }
-  }
-
-  const handleComplete = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      await complete.mutateAsync({ id: projectId, actualCompletionDate: completionDate })
-      success('Project marked complete')
-      setShowCompleteForm(false)
-    } catch { /* error via mutation state */ }
-  }
-
-  const handleAbandon = async () => {
-    try {
-      await abandon.mutateAsync(projectId)
-      success('Project abandoned')
-      setConfirmAbandon(false)
-    } catch { /* error via mutation state */ }
-  }
+  const [menuOpen] = useState(false)
+  const [confirmAbandon] = useState(false)
 
   return (
     <SlideOver
@@ -68,143 +31,13 @@ export default function DevelopmentProjectDetailPanel({ projectId, onClose }: Pr
     >
       {isLoading || !detail ? <SkeletonRows /> : (
         <>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8, position: 'relative' }}>
-            {detail.status !== 'Completed' && detail.status !== 'Abandoned' && (
-              <>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  onClick={() => setMenuOpen(o => !o)}
-                  aria-label="Actions"
-                >
-                  ···
-                </button>
-                {menuOpen && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '100%',
-                      right: 0,
-                      zIndex: 10,
-                      background: 'var(--surface-1)',
-                      border: '1px solid var(--border)',
-                      borderRadius: 8,
-                      padding: '4px 0',
-                      minWidth: 160,
-                      boxShadow: 'var(--shadow-overlay-sm)',
-                    }}
-                  >
-                    <button
-                      type="button"
-                      className="btn btn-ghost"
-                      style={{ width: '100%', textAlign: 'left', borderRadius: 0, padding: '8px 16px' }}
-                      onClick={() => { setMenuOpen(false); setConfirmAbandon(true) }}
-                    >
-                      Abandon Project
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8, position: 'relative' }} />
 
-          {confirmAbandon && (
-            <div
-              style={{
-                border: '1px solid var(--border)',
-                borderRadius: 8,
-                padding: 12,
-                marginBottom: 16,
-                background: 'var(--surface-1)',
-              }}
-            >
-              <div style={{ fontSize: 13, marginBottom: 10 }}>
-                Abandon this project? This cannot be undone.
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={handleAbandon}
-                  disabled={isPending}
-                >
-                  {abandon.isPending ? 'Saving…' : 'Confirm'}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={() => setConfirmAbandon(false)}
-                  disabled={isPending}
-                >
-                  Cancel
-                </button>
-              </div>
-              {abandon.isError && (
-                <div className="form-error" style={{ marginTop: 8 }}>Action failed. Please try again.</div>
-              )}
-            </div>
-          )}
+          {/* Action buttons removed — not supported by gateway */}
 
-          {detail.status === 'Initiated' && (
-            <div className="detail-section">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={handleActivate}
-                disabled={isPending}
-              >
-                {activate.isPending ? 'Activating…' : 'Activate Project'}
-              </button>
-              {activate.isError && <div className="form-error">Action failed.</div>}
-            </div>
-          )}
+          {/* Activate action removed — not supported by gateway */}
 
-          {detail.status === 'Active' && !showCompleteForm && (
-            <div className="detail-section">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setShowCompleteForm(true)}
-                disabled={isPending}
-              >
-                Mark Complete
-              </button>
-            </div>
-          )}
-
-          {detail.status === 'Active' && showCompleteForm && (
-            <div className="detail-section" style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, marginBottom: 16 }}>
-              <form onSubmit={handleComplete}>
-                <div className="form-field" style={{ marginBottom: 10 }}>
-                  <label className="form-label">Actual Completion Date</label>
-                  <input
-                    className="form-input"
-                    type="date"
-                    value={completionDate}
-                    onChange={e => setCompletionDate(e.target.value)}
-                    required
-                  />
-                </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    type="submit"
-                    className="btn btn-secondary"
-                    disabled={isPending}
-                  >
-                    {complete.isPending ? 'Saving…' : 'Confirm Completion'}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-ghost"
-                    onClick={() => setShowCompleteForm(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
-                {complete.isError && <div className="form-error">Action failed.</div>}
-              </form>
-            </div>
-          )}
+          {/* Completion action removed — not supported by gateway */}
 
           <div className="detail-grid">
             <div className="detail-field">

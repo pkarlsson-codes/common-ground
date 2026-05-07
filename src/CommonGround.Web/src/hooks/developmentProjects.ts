@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { DevelopmentProjectsApi } from '../api'
 import type { InitiateDevelopmentProjectRequest } from '../api'
 import { apiConfig } from '../lib/apiConfig'
-import { getCsrfToken } from '../lib/csrf'
 
 const api = new DevelopmentProjectsApi(apiConfig)
 
@@ -16,22 +15,6 @@ interface DevelopmentProjectDetail {
   actualCompletionDate?: string
   budget?: number
   homeIds?: string[]
-}
-
-async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const method = ((init?.method ?? 'GET') as string).toUpperCase()
-  const csrfHeaders: HeadersInit =
-    !['GET', 'HEAD', 'OPTIONS'].includes(method)
-      ? { 'X-CSRF-Token': getCsrfToken() ?? '' }
-      : {}
-  const res = await fetch(url, {
-    ...init,
-    credentials: 'include',
-    headers: { ...init?.headers, ...csrfHeaders },
-  })
-  if (!res.ok) throw new Error(`${res.status}`)
-  if (res.status === 204) return undefined as unknown as T
-  return res.json()
 }
 
 export function useDevelopmentProjects(params: { pageNumber: number; pageSize?: number; search?: string; landParcelId?: string }) {
@@ -49,7 +32,13 @@ export function useDevelopmentProjects(params: { pageNumber: number; pageSize?: 
 export function useDevelopmentProject(id: string | null) {
   return useQuery<DevelopmentProjectDetail>({
     queryKey: ['development-project', id],
-    queryFn: () => fetchJson(`/api/development-projects/${id}`),
+    queryFn: async () => {
+      if (!id) return undefined as unknown as DevelopmentProjectDetail
+      // Gateway doesn't expose a single-item GET; fall back to listing and pick the item
+      const res = await api.getDevelopmentProjects({ pageNumber: 1, pageSize: 50 })
+      const item = (res.items ?? []).find((p: any) => p.id === id)
+      return (item ?? (undefined as unknown)) as DevelopmentProjectDetail
+    },
     enabled: !!id,
   })
 }
@@ -63,42 +52,3 @@ export function useInitiateDevelopmentProject() {
   })
 }
 
-export function useActivateDevelopmentProject() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (id: string) =>
-      fetchJson<void>(`/api/development-projects/${id}/activate`, { method: 'POST' }),
-    onSuccess: (_d, id) => {
-      qc.invalidateQueries({ queryKey: ['development-project', id] })
-      qc.invalidateQueries({ queryKey: ['development-projects'] })
-    },
-  })
-}
-
-export function useCompleteDevelopmentProject() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, actualCompletionDate }: { id: string; actualCompletionDate: string }) =>
-      fetchJson<void>(`/api/development-projects/${id}/complete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ actualCompletionDate }),
-      }),
-    onSuccess: (_d, v) => {
-      qc.invalidateQueries({ queryKey: ['development-project', v.id] })
-      qc.invalidateQueries({ queryKey: ['development-projects'] })
-    },
-  })
-}
-
-export function useAbandonDevelopmentProject() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (id: string) =>
-      fetchJson<void>(`/api/development-projects/${id}/abandon`, { method: 'POST' }),
-    onSuccess: (_d, id) => {
-      qc.invalidateQueries({ queryKey: ['development-project', id] })
-      qc.invalidateQueries({ queryKey: ['development-projects'] })
-    },
-  })
-}

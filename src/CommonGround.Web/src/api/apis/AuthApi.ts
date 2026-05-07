@@ -16,9 +16,12 @@
 
 import * as runtime from '../runtime';
 import type {
+  CurrentUserDto,
   ProblemDetails,
 } from '../models/index';
 import {
+    CurrentUserDtoFromJSON,
+    CurrentUserDtoToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
 } from '../models/index';
@@ -37,12 +40,12 @@ export interface AuthApiInterface {
      * @throws {RequiredError}
      * @memberof AuthApiInterface
      */
-    getCurrentUserRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>>;
+    getCurrentUserRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CurrentUserDto>>;
 
     /**
      * Get current authenticated user.
      */
-    getCurrentUser(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob>;
+    getCurrentUser(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CurrentUserDto>;
 
     /**
      * 
@@ -68,7 +71,7 @@ export class AuthApi extends runtime.BaseAPI implements AuthApiInterface {
     /**
      * Get current authenticated user.
      */
-    async getCurrentUserRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
+    async getCurrentUserRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CurrentUserDto>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -83,13 +86,13 @@ export class AuthApi extends runtime.BaseAPI implements AuthApiInterface {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.BlobApiResponse(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => CurrentUserDtoFromJSON(jsonValue));
     }
 
     /**
      * Get current authenticated user.
      */
-    async getCurrentUser(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
+    async getCurrentUser(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CurrentUserDto> {
         const response = await this.getCurrentUserRaw(initOverrides);
         return await response.value();
     }

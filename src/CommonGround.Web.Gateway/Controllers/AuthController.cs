@@ -44,19 +44,21 @@ public sealed class AuthController(IHostEnvironment env) : ControllerBase
     /// <returns>The current user if authenticated; otherwise unauthorized.</returns>
     [HttpGet("me")]
     [EndpointName("getCurrentUser")]
+    [ProducesResponseType(typeof(CommonGround.Web.Gateway.Models.CurrentUserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetCurrentUser([FromServices] ITokenStore tokenStore)
     {
         var sessionId = Request.Cookies[GatewayDefaults.Cookies.SessionCookie];
 
         if (string.IsNullOrEmpty(sessionId))
         {
-            return Unauthorized(new { success = false, error = "No session found" });
+            return Unauthorized();
         }
 
         var tokens = await tokenStore.TryGetTokensAsync(sessionId, HttpContext.RequestAborted);
         if (tokens is null)
         {
-            return Unauthorized(new { success = false, error = "Invalid or expired session" });
+            return Unauthorized();
         }
 
         var (userId, _, _, _, _) = tokens.Value;
@@ -66,15 +68,11 @@ public sealed class AuthController(IHostEnvironment env) : ControllerBase
                                  ?? string.Empty;
         var email = User?.FindFirst("email")?.Value ?? string.Empty;
 
-        return Ok(new
+        return Ok(new CommonGround.Web.Gateway.Models.CurrentUserDto
         {
-            success = true,
-            user = new
-            {
-                id = userId,
-                username = string.IsNullOrWhiteSpace(preferredUsername) ? userId : preferredUsername,
-                email,
-            },
+            Id = userId,
+            Username = string.IsNullOrWhiteSpace(preferredUsername) ? userId : preferredUsername,
+            Email = email,
         });
     }
 }

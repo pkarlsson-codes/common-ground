@@ -14,6 +14,7 @@ export * from './CreateGroundLeaseRequest';
 export * from './CreateGroundLeaseResponse';
 export * from './CurePeriodActivationResponse';
 export * from './CureViolationRequest';
+export * from './CurrentUserDto';
 export * from './DevelopmentProjectListItemResponse';
 export * from './DocumentAttachmentResponse';
 export * from './DocumentLibraryItemResponse';
