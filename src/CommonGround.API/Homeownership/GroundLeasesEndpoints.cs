@@ -33,13 +33,13 @@ public static class GroundLeasesEndpoints
 
         var userId = httpContext.GetUserId();
 
-        var resalePolicyTerms = request.FormulaKind switch
-        {
-            "AppraisalBased" => ResalePolicyTerms.AppraisalBased(request.AppreciationShare!.Value, request.ImprovementsCap),
-            "IndexBased" => ResalePolicyTerms.IndexBased(request.IndexType!, request.BaselineIndexValue!.Value, request.ImprovementsCap),
-            "FixedPercentage" => ResalePolicyTerms.FixedPercentage(request.AnnualPercentage!.Value, request.ImprovementsCap),
-            _ => throw new ArgumentException($"Unknown formula kind: {request.FormulaKind}")
-        };
+        var resalePolicyTerms = ResalePolicyTerms.FromString(
+            request.FormulaKind,
+            request.AppreciationShare,
+            request.IndexType,
+            request.BaselineIndexValue,
+            request.AnnualPercentage,
+            request.ImprovementsCap);
 
         var command = new CreateGroundLease(
             LandParcelId.Create(request.LandParcelId),

@@ -52,25 +52,23 @@ public static class DevelopmentProjectsEndpoints
         var userId = httpContext.GetUserId();
         var landParcelId = new LandParcelId(request.LandParcelId);
 
-        if (request.Type != "NewConstruction" && request.Type != "Rehabilitation")
+        if (!ProjectType.TryFromDisplayName(request.Type, out var projectType))
         {
             return Results.BadRequest($"Unrecognized project type: '{request.Type}'.");
         }
 
-        DevelopmentProjectId id = request.Type switch
-        {
-            "NewConstruction" => await bus.InvokeForTenantAsync<DevelopmentProjectId>(bus.TenantId!,
+        DevelopmentProjectId id = projectType == ProjectType.NewConstruction
+            ? await bus.InvokeForTenantAsync<DevelopmentProjectId>(bus.TenantId!,
                 new InitiateNewConstructionProject(landParcelId, request.Name, request.Description, userId),
-                cancellationToken),
-            _ => await bus.InvokeForTenantAsync<DevelopmentProjectId>(bus.TenantId!,
+                cancellationToken)
+            : await bus.InvokeForTenantAsync<DevelopmentProjectId>(bus.TenantId!,
                 new InitiateRehabilitationProject(
                     landParcelId,
                     (request.ExistingHomes ?? []).Select(h => new HomeId(h)).ToList(),
                     request.Name,
                     request.Description,
                     userId),
-                cancellationToken)
-        };
+                cancellationToken);
 
         return Results.Created("/api/development-projects", new InitiateDevelopmentProjectResponse(id.Value));
     }

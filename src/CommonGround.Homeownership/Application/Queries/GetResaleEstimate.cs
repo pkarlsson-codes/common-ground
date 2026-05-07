@@ -32,13 +32,13 @@ public static class GetResaleEstimateHandler
         var view = await session.LoadAsync<ReadModels.GroundLeaseView>(request.GroundLeaseId.Value, cancellationToken).ConfigureAwait(false)
             ?? throw new AggregateNotFoundException(request.GroundLeaseId.Value);
 
-        var terms = view.FormulaKind switch
-        {
-            "AppraisalBased" => ResalePolicyTerms.AppraisalBased(view.AppreciationShare!.Value, view.ImprovementsCap),
-            "IndexBased" => ResalePolicyTerms.IndexBased(view.IndexType!, view.BaselineIndexValue!.Value, view.ImprovementsCap),
-            "FixedPercentage" => ResalePolicyTerms.FixedPercentage(view.AnnualPercentage!.Value, view.ImprovementsCap),
-            _ => throw new InvalidOperationException($"Unknown formula kind: {view.FormulaKind}")
-        };
+        var terms = ResalePolicyTerms.FromString(
+            view.FormulaKind,
+            view.AppreciationShare,
+            view.IndexType,
+            view.BaselineIndexValue,
+            view.AnnualPercentage,
+            view.ImprovementsCap);
 
         var input = new ResaleCalculationInput(
             request.OriginalPurchasePrice,

@@ -128,6 +128,34 @@ public sealed class ResalePolicyTerms : ValueObject
             improvementsCap: improvementsCap);
     }
 
+    /// <summary>
+    /// Factory method that reconstructs <see cref="ResalePolicyTerms"/> from a stored formula kind string and its
+    /// associated parameters. Use this when restoring from a read model or mapping user-supplied input that has
+    /// already been validated upstream.
+    /// </summary>
+    /// <param name="formulaKind">The formula kind string, e.g. "AppraisalBased", "IndexBased", or "FixedPercentage".</param>
+    /// <param name="appreciationShare">Required for AppraisalBased formulas.</param>
+    /// <param name="indexType">Required for IndexBased formulas.</param>
+    /// <param name="baselineIndexValue">Required for IndexBased formulas.</param>
+    /// <param name="annualPercentage">Required for FixedPercentage formulas.</param>
+    /// <param name="improvementsCap">Optional cap on improvements appreciation for any formula kind.</param>
+    /// <returns>A <see cref="ResalePolicyTerms"/> instance for the specified formula kind.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when <paramref name="formulaKind"/> is not a recognised value.</exception>
+    public static ResalePolicyTerms FromString(
+        string formulaKind,
+        decimal? appreciationShare,
+        string? indexType,
+        decimal? baselineIndexValue,
+        decimal? annualPercentage,
+        decimal? improvementsCap)
+        => formulaKind switch
+        {
+            "AppraisalBased" => AppraisalBased(appreciationShare!.Value, improvementsCap),
+            "IndexBased" => IndexBased(indexType!, baselineIndexValue!.Value, improvementsCap),
+            "FixedPercentage" => FixedPercentage(annualPercentage!.Value, improvementsCap),
+            _ => throw new InvalidOperationException($"Unknown formula kind: {formulaKind}")
+        };
+
     private static void ValidateImprovementsCap(decimal? cap)
     {
         if (cap is <= 0)
