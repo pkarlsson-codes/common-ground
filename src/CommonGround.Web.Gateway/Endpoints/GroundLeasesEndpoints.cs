@@ -2,6 +2,7 @@ using CommonGround.API.Clients;
 using CommonGround.API.Contracts.Homeownership.Requests;
 using CommonGround.API.Contracts.Homeownership.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
+using Microsoft.AspNetCore.Mvc;
 using Wolverine.Http;
 
 #pragma warning disable CA2007
@@ -12,6 +13,7 @@ namespace CommonGround.Web.Gateway.Endpoints;
 public static class GroundLeasesEndpoints
 {
     [WolverinePost("/api/v1/ground-leases")]
+    [ProducesResponseType<CreateGroundLeaseResponse>(StatusCodes.Status201Created)]
     public static async Task<IResult> CreateGroundLease(
         CreateGroundLeaseRequest request,
         IGroundLeasesApiClient client,
@@ -23,6 +25,7 @@ public static class GroundLeasesEndpoints
     }
 
     [WolverineGet("/api/v1/ground-leases/{groundLeaseId}")]
+    [ProducesResponseType<GroundLeaseResponse>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetGroundLease(
         string groundLeaseId,
         IGroundLeasesApiClient client,
@@ -34,6 +37,7 @@ public static class GroundLeasesEndpoints
     }
 
     [WolverineGet("/api/v1/ground-leases")]
+    [ProducesResponseType<PaginatedResponse<GroundLeaseListItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetGroundLeases(
         int pageNumber,
         int pageSize,
@@ -59,6 +63,7 @@ public static class GroundLeasesEndpoints
     }
 
     [WolverinePatch("/api/v1/ground-leases/{groundLeaseId}/homeowner")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> ChangeHomeowner(
         string groundLeaseId,
         ChangeHomeownerRequest request,
@@ -72,6 +77,7 @@ public static class GroundLeasesEndpoints
     }
 
     [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/stewardship-check-ins")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> RecordStewardshipCheckIn(
         string groundLeaseId,
         RecordStewardshipCheckInRequest request,
@@ -85,6 +91,7 @@ public static class GroundLeasesEndpoints
     }
 
     [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/resale-estimate")]
+    [ProducesResponseType<ResaleEstimateResponse>(StatusCodes.Status200OK)]
     public static async Task<IResult> CalculateResaleEstimate(
         string groundLeaseId,
         CalculateResaleEstimateRequest request,

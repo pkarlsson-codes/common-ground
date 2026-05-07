@@ -2,6 +2,7 @@ using CommonGround.API.Clients;
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
+using Microsoft.AspNetCore.Mvc;
 using Wolverine.Http;
 
 #pragma warning disable CA2007
@@ -12,6 +13,7 @@ namespace CommonGround.Web.Gateway.Endpoints;
 public static class HomesEndpoints
 {
     [WolverinePost("/api/v1/homes")]
+    [ProducesResponseType<RegisterHomeResponse>(StatusCodes.Status201Created)]
     public static async Task<IResult> RegisterHome(
         RegisterHomeRequest request,
         IHomesApiClient client,
@@ -23,6 +25,7 @@ public static class HomesEndpoints
     }
 
     [WolverineGet("/api/v1/homes/{homeId}")]
+    [ProducesResponseType<HomeResponse>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetHome(
         string homeId,
         IHomesApiClient client,
@@ -34,6 +37,7 @@ public static class HomesEndpoints
     }
 
     [WolverineGet("/api/v1/homes")]
+    [ProducesResponseType<PaginatedResponse<HomeListItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetHomes(
         int pageNumber,
         int pageSize,
@@ -57,7 +61,7 @@ public static class HomesEndpoints
     }
 
     [WolverinePost("/api/v1/homes/{homeId}/assessments")]
-
+    [ProducesResponseType(StatusCodes.Status201Created)]
     public static async Task<IResult> RecordHomeAssessment(
         string homeId,
         RecordHomeAssessmentRequest request,
@@ -71,6 +75,7 @@ public static class HomesEndpoints
     }
 
     [WolverineGet("/api/v1/homes/{homeId}/assessments")]
+    [ProducesResponseType<PaginatedResponse<HomeAssessmentItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetHomeAssessments(
         string homeId,
         int pageNumber,

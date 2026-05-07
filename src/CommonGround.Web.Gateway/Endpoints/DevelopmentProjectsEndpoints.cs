@@ -2,6 +2,7 @@ using CommonGround.API.Clients;
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
+using Microsoft.AspNetCore.Mvc;
 using Wolverine.Http;
 
 #pragma warning disable CA2007
@@ -12,6 +13,7 @@ namespace CommonGround.Web.Gateway.Endpoints;
 public static class DevelopmentProjectsEndpoints
 {
     [WolverineGet("/api/v1/development-projects")]
+    [ProducesResponseType<PaginatedResponse<DevelopmentProjectListItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetDevelopmentProjects(
         int pageNumber,
         int pageSize,
@@ -35,6 +37,7 @@ public static class DevelopmentProjectsEndpoints
     }
 
     [WolverinePost("/api/v1/development-projects")]
+    [ProducesResponseType<InitiateDevelopmentProjectResponse>(StatusCodes.Status201Created)]
     public static async Task<IResult> InitiateDevelopmentProject(
         InitiateDevelopmentProjectRequest request,
         IDevelopmentProjectsApiClient client,

@@ -2,6 +2,7 @@ using CommonGround.API.Clients;
 using CommonGround.API.Contracts.Homeownership.Requests;
 using CommonGround.API.Contracts.Homeownership.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
+using Microsoft.AspNetCore.Mvc;
 using Wolverine.Http;
 
 #pragma warning disable CA2007
@@ -12,6 +13,7 @@ namespace CommonGround.Web.Gateway.Endpoints;
 public static class PurchaseWorkflowsEndpoints
 {
     [WolverinePost("/api/v1/purchase-workflows")]
+    [ProducesResponseType<InitiatePurchaseWorkflowResponse>(StatusCodes.Status201Created)]
     public static async Task<IResult> InitiatePurchaseWorkflow(
         InitiatePurchaseWorkflowRequest request,
         IPurchaseWorkflowsApiClient client,
@@ -23,6 +25,7 @@ public static class PurchaseWorkflowsEndpoints
     }
 
     [WolverineGet("/api/v1/purchase-workflows/{workflowId}")]
+    [ProducesResponseType<PurchaseWorkflowResponse>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetPurchaseWorkflow(
         string workflowId,
         IPurchaseWorkflowsApiClient client,
@@ -34,6 +37,7 @@ public static class PurchaseWorkflowsEndpoints
     }
 
     [WolverineGet("/api/v1/purchase-workflows")]
+    [ProducesResponseType<PaginatedResponse<PurchaseWorkflowListItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetPurchaseWorkflows(
         int pageNumber,
         int pageSize,
@@ -58,6 +62,7 @@ public static class PurchaseWorkflowsEndpoints
     }
 
     [WolverinePost("/api/v1/purchase-workflows/{workflowId}/eligibility")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> RecordEligibilityVerified(
         string workflowId,
         RecordEligibilityVerifiedRequest request,
@@ -71,6 +76,7 @@ public static class PurchaseWorkflowsEndpoints
     }
 
     [WolverinePost("/api/v1/purchase-workflows/{workflowId}/financing")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> RecordFinancingCommitted(
         string workflowId,
         RecordFinancingCommittedRequest request,
@@ -84,6 +90,7 @@ public static class PurchaseWorkflowsEndpoints
     }
 
     [WolverinePost("/api/v1/purchase-workflows/{workflowId}/inspection")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> RecordInspectionCompleted(
         string workflowId,
         RecordInspectionCompletedRequest request,
@@ -97,6 +104,7 @@ public static class PurchaseWorkflowsEndpoints
     }
 
     [WolverinePost("/api/v1/purchase-workflows/{workflowId}/title")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> RecordTitleCleared(
         string workflowId,
         RecordTitleClearedRequest request,
@@ -110,6 +118,7 @@ public static class PurchaseWorkflowsEndpoints
     }
 
     [WolverinePost("/api/v1/purchase-workflows/{workflowId}/lease-execution")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> RecordLeaseExecuted(
         string workflowId,
         RecordLeaseExecutedRequest request,
@@ -123,6 +132,7 @@ public static class PurchaseWorkflowsEndpoints
     }
 
     [WolverinePost("/api/v1/purchase-workflows/{workflowId}/closing/schedule")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> ScheduleClosing(
         string workflowId,
         ScheduleClosingRequest request,
@@ -136,6 +146,7 @@ public static class PurchaseWorkflowsEndpoints
     }
 
     [WolverinePost("/api/v1/purchase-workflows/{workflowId}/closing/record")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> RecordPurchaseClosed(
         string workflowId,
         RecordPurchaseClosedRequest request,
@@ -149,6 +160,7 @@ public static class PurchaseWorkflowsEndpoints
     }
 
     [WolverinePost("/api/v1/purchase-workflows/{workflowId}/fail")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> FailPurchase(
         string workflowId,
         FailPurchaseRequest request,
@@ -162,6 +174,7 @@ public static class PurchaseWorkflowsEndpoints
     }
 
     [WolverinePost("/api/v1/purchase-workflows/{workflowId}/withdraw")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> WithdrawPurchase(
         string workflowId,
         WithdrawPurchaseRequest request,
@@ -175,6 +188,7 @@ public static class PurchaseWorkflowsEndpoints
     }
 
     [WolverinePost("/api/v1/purchase-workflows/{workflowId}/stall")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> StallWorkflow(
         string workflowId,
         StallWorkflowRequest request,

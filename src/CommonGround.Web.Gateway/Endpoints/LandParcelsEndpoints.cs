@@ -2,6 +2,7 @@ using CommonGround.API.Clients;
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
+using Microsoft.AspNetCore.Mvc;
 using Wolverine.Http;
 
 #pragma warning disable CA2007
@@ -12,6 +13,7 @@ namespace CommonGround.Web.Gateway.Endpoints;
 public static class LandParcelsEndpoints
 {
     [WolverinePost("/api/v1/land-parcels")]
+    [ProducesResponseType<RegisterLandParcelResponse>(StatusCodes.Status201Created)]
     public static async Task<IResult> RegisterLandParcel(
         RegisterLandParcelRequest request,
         ILandParcelsApiClient client,
@@ -23,6 +25,7 @@ public static class LandParcelsEndpoints
     }
 
     [WolverineGet("/api/v1/land-parcels/{landParcelId}")]
+    [ProducesResponseType<LandParcelResponse>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetLandParcel(
         string landParcelId,
         ILandParcelsApiClient client,
@@ -34,6 +37,7 @@ public static class LandParcelsEndpoints
     }
 
     [WolverineGet("/api/v1/land-parcels")]
+    [ProducesResponseType<PaginatedResponse<LandParcelListItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetLandParcels(
         int pageNumber,
         int pageSize,
@@ -56,6 +60,8 @@ public static class LandParcelsEndpoints
     }
 
     [WolverinePost("/api/v1/land-parcels/{landParcelId}/decommission")]
+    [EndpointName("DecommissionLandParcel")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> DecommissionParcel(
         string landParcelId,
         DecommissionParcelRequest request,
@@ -69,6 +75,8 @@ public static class LandParcelsEndpoints
     }
 
     [WolverinePost("/api/v1/land-parcels/{landParcelId}/recommission")]
+    [EndpointName("RecommissionLandParcel")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> RecommissionParcel(
         string landParcelId,
         RecommissionParcelRequest request,

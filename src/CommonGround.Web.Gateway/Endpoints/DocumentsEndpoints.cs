@@ -1,9 +1,9 @@
 using System.Text.Json;
 using CommonGround.API.Clients;
-
 using CommonGround.API.Contracts.Documents.Requests;
 using CommonGround.API.Contracts.Documents.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
+using Microsoft.AspNetCore.Mvc;
 using Wolverine.Http;
 
 #pragma warning disable CA2007
@@ -14,6 +14,7 @@ namespace CommonGround.Web.Gateway.Endpoints;
 public static class DocumentsEndpoints
 {
     [WolverinePost("/api/v1/documents")]
+    [ProducesResponseType<UploadDocumentResponse>(StatusCodes.Status201Created)]
     public static async Task<IResult> UploadDocument(
         HttpContext httpContext,
         IDocumentsApiClient client,
@@ -37,6 +38,7 @@ public static class DocumentsEndpoints
     }
 
     [WolverineGet("/api/v1/documents/{documentId}")]
+    [ProducesResponseType<DocumentResponse>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetDocument(
         string documentId,
         IDocumentsApiClient client,
@@ -44,6 +46,7 @@ public static class DocumentsEndpoints
         => Results.Ok(await client.GetDocumentAsync(documentId, cancellationToken).ConfigureAwait(false));
 
     [WolverinePost("/api/v1/documents/{documentId}/attachments")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> AttachDocument(
         string documentId,
         AttachDocumentRequest request,
@@ -55,6 +58,7 @@ public static class DocumentsEndpoints
     }
 
     [WolverineDelete("/api/v1/documents/{documentId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> SoftDeleteDocument(
         string documentId,
         HttpContext httpContext,
@@ -80,6 +84,7 @@ public static class DocumentsEndpoints
     }
 
     [WolverinePost("/api/v1/documents/{documentId}/versions")]
+    [ProducesResponseType<AddDocumentVersionResponse>(StatusCodes.Status201Created)]
     public static async Task<IResult> AddDocumentVersion(
         string documentId,
         HttpContext httpContext,
@@ -105,6 +110,7 @@ public static class DocumentsEndpoints
     }
 
     [WolverinePatch("/api/v1/documents/{documentId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> UpdateDocumentMetadata(
         string documentId,
         UpdateDocumentMetadataRequest request,
@@ -116,6 +122,7 @@ public static class DocumentsEndpoints
     }
 
     [WolverinePost("/api/v1/documents/{documentId}/tags")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> TagDocument(
         string documentId,
         TagDocumentRequest request,
@@ -127,6 +134,7 @@ public static class DocumentsEndpoints
     }
 
     [WolverineDelete("/api/v1/documents/{documentId}/tags/{tag}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> UntagDocument(
         string documentId,
         string tag,
@@ -138,6 +146,7 @@ public static class DocumentsEndpoints
     }
 
     [WolverineGet("/api/v1/documents")]
+    [ProducesResponseType<PaginatedResponse<DocumentLibraryItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> ListDocuments(
         int pageNumber,
         int pageSize,
@@ -163,6 +172,7 @@ public static class DocumentsEndpoints
     }
 
     [WolverineGet("/api/v1/entities/{entityType}/{entityId}/documents")]
+    [ProducesResponseType<PaginatedResponse<EntityDocumentItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetEntityDocuments(
         string entityType,
         Guid entityId,

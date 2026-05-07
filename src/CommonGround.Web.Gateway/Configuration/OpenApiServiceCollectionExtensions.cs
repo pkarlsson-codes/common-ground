@@ -1,3 +1,7 @@
+using Microsoft.AspNetCore.Mvc;
+using Namotion.Reflection;
+using NJsonSchema;
+using NSwag;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 
@@ -24,6 +28,7 @@ public static class OpenApiServiceCollectionExtensions
             options.Version = "1.0";
             options.Description = "CommonGround Web Gateway API";
             options.OperationProcessors.Add(new EndpointNameOperationProcessor());
+            options.OperationProcessors.Add(new ProblemDetailsResponseProcessor());
             options.PostProcess = document =>
             {
                 var httpUrl = configuration["Gateway:BaseUrl"]
@@ -36,8 +41,26 @@ public static class OpenApiServiceCollectionExtensions
     }
 
     /// <summary>
-    /// NSwag operation processor that uses <see cref="EndpointNameAttribute"/> as the operation ID.
+    /// NSwag operation processor that uses <see cref="EndpointNameAttribute"/> as the operation ID
+    /// and derives OpenAPI tags from the declaring class name so the TypeScript generator
+    /// can group operations into named API classes.
     /// </summary>
+    private sealed class ProblemDetailsResponseProcessor : IOperationProcessor
+    {
+        public bool Process(OperationProcessorContext context)
+        {
+            var schema = context.SchemaGenerator.GenerateWithReferenceAndNullability<JsonSchema>(
+                typeof(ProblemDetails).ToContextualType(), context.SchemaResolver);
+            var response = new OpenApiResponse
+            {
+                Description = "Error",
+                Content = { ["application/problem+json"] = new OpenApiMediaType { Schema = schema } },
+            };
+            context.OperationDescription.Operation.Responses["400"] = response;
+            return true;
+        }
+    }
+
     private sealed class EndpointNameOperationProcessor : IOperationProcessor
     {
         /// <inheritdoc/>
@@ -51,6 +74,24 @@ public static class OpenApiServiceCollectionExtensions
             if (endpointName is not null)
             {
                 context.OperationDescription.Operation.OperationId = endpointName.EndpointName;
+            }
+            else
+            {
+                context.OperationDescription.Operation.OperationId = context.MethodInfo.Name;
+            }
+
+            if (context.OperationDescription.Operation.Tags.Count == 0 ||
+                context.OperationDescription.Operation.Tags.All(t => t is null))
+            {
+                var declaringType = context.MethodInfo.DeclaringType;
+                if (declaringType is not null)
+                {
+                    var tag = declaringType.Name.EndsWith("Endpoints", StringComparison.Ordinal)
+                        ? declaringType.Name[..^"Endpoints".Length]
+                        : declaringType.Name;
+                    context.OperationDescription.Operation.Tags.Clear();
+                    context.OperationDescription.Operation.Tags.Add(tag);
+                }
             }
 
             return true;

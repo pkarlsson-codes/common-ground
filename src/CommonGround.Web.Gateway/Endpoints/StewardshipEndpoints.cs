@@ -1,6 +1,7 @@
 using CommonGround.API.Clients;
 using CommonGround.API.Contracts.Stewardship.Requests;
 using CommonGround.API.Contracts.Stewardship.Responses;
+using Microsoft.AspNetCore.Mvc;
 using Wolverine.Http;
 
 #pragma warning disable CA2007
@@ -12,6 +13,7 @@ public static class StewardshipEndpoints
 {
     // Stewardship Cases
     [WolverineGet("/api/v1/stewardship/cases")]
+    [ProducesResponseType<IReadOnlyList<StewardshipCaseResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetAllStewardshipCases(
         IStewardshipApiClient client,
         CancellationToken cancellationToken)
@@ -21,6 +23,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverineGet("/api/v1/stewardship/cases/by-ground-lease/{groundLeaseId}")]
+    [ProducesResponseType<IReadOnlyList<StewardshipCaseResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetStewardshipCasesByGroundLease(
         string groundLeaseId,
         IStewardshipApiClient client,
@@ -32,6 +35,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverineGet("/api/v1/stewardship/cases/{caseId}")]
+    [ProducesResponseType<StewardshipCaseResponse>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetStewardshipCase(
         string caseId,
         IStewardshipApiClient client,
@@ -43,6 +47,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/cases/{caseId}/occupancy-verifications")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> InitiateOccupancyVerification(
         string caseId,
         InitiateOccupancyVerificationRequest request,
@@ -56,6 +61,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/cases/{caseId}/occupancy-verifications/{verificationId}/submit")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> SubmitOccupancyVerification(
         string caseId,
         Guid verificationId,
@@ -70,6 +76,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/cases/{caseId}/occupancy-verifications/{verificationId}/verify")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> VerifyOccupancy(
         string caseId,
         Guid verificationId,
@@ -84,6 +91,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/cases/{caseId}/occupancy-verifications/{verificationId}/fail")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> FailOccupancy(
         string caseId,
         Guid verificationId,
@@ -98,6 +106,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/cases/{caseId}/occupancy-verifications/{verificationId}/overdue")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> MarkOccupancyVerificationOverdue(
         string caseId,
         Guid verificationId,
@@ -112,6 +121,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/cases/{caseId}/inspections")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> SchedulePropertyInspection(
         string caseId,
         SchedulePropertyInspectionRequest request,
@@ -125,6 +135,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/cases/{caseId}/inspections/{inspectionId}/complete")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> CompletePropertyInspection(
         string caseId,
         Guid inspectionId,
@@ -139,6 +150,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/cases/{caseId}/inspections/{inspectionId}/cancel")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> CancelPropertyInspection(
         string caseId,
         Guid inspectionId,
@@ -153,6 +165,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/cases/{caseId}/violations")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> IdentifyViolation(
         string caseId,
         IdentifyViolationRequest request,
@@ -166,6 +179,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/cases/{caseId}/violations/{violationId}/notice")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> IssueViolationNotice(
         string caseId,
         Guid violationId,
@@ -180,6 +194,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/cases/{caseId}/violations/{violationId}/cure")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> CureViolation(
         string caseId,
         Guid violationId,
@@ -194,6 +209,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/cases/{caseId}/violations/{violationId}/escalate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> EscalateViolation(
         string caseId,
         Guid violationId,
@@ -208,6 +224,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/cases/{caseId}/close")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> CloseStewardshipCase(
         string caseId,
         CloseStewardshipCaseRequest request,
@@ -222,6 +239,7 @@ public static class StewardshipEndpoints
 
     // Foreclosure Prevention Cases
     [WolverineGet("/api/v1/stewardship/foreclosure-prevention")]
+    [ProducesResponseType<IReadOnlyList<ForeclosurePreventionCaseResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetAllForeclosurePreventionCases(
         IStewardshipApiClient client,
         CancellationToken cancellationToken)
@@ -231,6 +249,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverineGet("/api/v1/stewardship/foreclosure-prevention/by-ground-lease/{groundLeaseId}")]
+    [ProducesResponseType<IReadOnlyList<ForeclosurePreventionCaseResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetForeclosurePreventionCasesByGroundLease(
         string groundLeaseId,
         IStewardshipApiClient client,
@@ -242,6 +261,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/foreclosure-prevention")]
+    [ProducesResponseType<OpenForeclosurePreventionCaseResponse>(StatusCodes.Status202Accepted)]
     public static async Task<IResult> OpenForeclosurePreventionCase(
         OpenForeclosurePreventionCaseRequest request,
         IStewardshipApiClient client,
@@ -253,6 +273,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverineGet("/api/v1/stewardship/foreclosure-prevention/{caseId}")]
+    [ProducesResponseType<ForeclosurePreventionCaseResponse>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetForeclosurePreventionCase(
         string caseId,
         IStewardshipApiClient client,
@@ -264,6 +285,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/foreclosure-prevention/{caseId}/servicer-delinquency")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> RecordServicerDelinquency(
         string caseId,
         RecordServicerDelinquencyRequest request,
@@ -277,6 +299,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/foreclosure-prevention/{caseId}/counseling-referrals")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> MakeCounselingReferral(
         string caseId,
         MakeCounselingReferralRequest request,
@@ -290,6 +313,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/foreclosure-prevention/{caseId}/counseling-referrals/{referralId}/outcome")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> RecordCounselingOutcome(
         string caseId,
         Guid referralId,
@@ -304,6 +328,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/foreclosure-prevention/{caseId}/forbearance-requests")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> RequestForbearance(
         string caseId,
         RequestForbearanceRequest request,
@@ -317,6 +342,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/foreclosure-prevention/{caseId}/forbearance-requests/{requestId}/outcome")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> RecordForbearanceOutcome(
         string caseId,
         Guid requestId,
@@ -331,6 +357,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/foreclosure-prevention/{caseId}/cure-period")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> ActivateCurePeriod(
         string caseId,
         ActivateCurePeriodRequest request,
@@ -344,6 +371,7 @@ public static class StewardshipEndpoints
     }
 
     [WolverinePost("/api/v1/stewardship/foreclosure-prevention/{caseId}/resolve")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> ResolveForeclosurePreventionCase(
         string caseId,
         ResolveForeclosurePreventionCaseRequest request,
