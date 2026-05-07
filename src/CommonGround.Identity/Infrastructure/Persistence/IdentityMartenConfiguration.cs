@@ -10,6 +10,8 @@ public static class IdentityMartenConfiguration
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        options.Schema.For<UserSubjectIndex>().DatabaseSchemaName("identity");
+        options.Schema.For<UserSubjectIndex>()
+            .DatabaseSchemaName("identity")
+            .SingleTenanted();
     }
 }

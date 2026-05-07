@@ -36,11 +36,7 @@ public static class EnsureUserHandler
 
         if (existing is not null)
         {
-            var userStream = await session.Events
-                .FetchForWriting<User>(existing.UserId, cancellationToken)
-                .ConfigureAwait(false);
-
-            return new EnsureUserResult(existing.UserId, userStream.Aggregate!.TrustId.Value);
+            return new EnsureUserResult(existing.UserId, existing.TrustId);
         }
 
         var newUser = User.Register(command.KeycloakSubject, command.Email, command.DisplayName, command.TrustId);
@@ -51,6 +47,7 @@ public static class EnsureUserHandler
         {
             Id = command.KeycloakSubject,
             UserId = newUser.Id.Value,
+            TrustId = newUser.TrustId.Value,
         });
 
         return new EnsureUserResult(newUser.Id.Value, newUser.TrustId.Value);
