@@ -7,7 +7,7 @@ namespace CommonGround.SharedKernel.Domain.Events;
 /// Integration events represent something that happened in one bounded context
 /// that other bounded contexts might be interested in, without creating direct dependencies.
 /// </summary>
-public abstract record IntegrationEvent : IIntegrationEvent
+public abstract record IntegrationEvent
 {
     /// <summary>
     /// Gets the unique identifier for this integration event.

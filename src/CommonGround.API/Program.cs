@@ -46,7 +46,7 @@ try
                 rabbit.Port = rabbitMqOptions.Port;
                 rabbit.UserName = rabbitMqOptions.Username;
                 rabbit.Password = rabbitMqOptions.Password;
-            }).AutoProvision();
+            }).AutoProvision().UseConventionalRouting();
 
             opts.Policies.ConventionalLocalRoutingIsAdditive();
         }

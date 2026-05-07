@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommonGround.SharedKernel\CommonGround.SharedKernel.csproj" />
+    <ProjectReference Include="..\CommonGround.Homeownership.Contracts\CommonGround.Homeownership.Contracts.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Marten" Version="8.23.0" />

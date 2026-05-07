@@ -1,17 +1,18 @@
-using CommonGround.Homeownership.Domain.GroundLeases.Events;
+using CommonGround.Homeownership.Contracts.Events;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.Stewardship.Domain.StewardshipCases;
 using Marten;
 
-namespace CommonGround.API.Stewardship.Consumers;
+namespace CommonGround.Stewardship.Application.EventHandlers;
 
-#pragma warning disable SA1600
-public sealed class HomeownerOnboardedConsumer(IDocumentSession session)
+/// <summary>Opens a StewardshipCase when a homeowner is onboarded in the Homeownership BC.</summary>
+public sealed class HomeownerOnboardedHandler(IDocumentSession session)
 {
+    /// <summary>Handles the integration event.</summary>
     public void Handle(HomeownerOnboarded @event, CancellationToken ct)
     {
         var sc = StewardshipCase.Open(
-            @event.AggregateId,
+            @event.GroundLeaseId,
             DateOnly.FromDateTime(@event.OccurredAt.UtcDateTime),
             UserId.Create(@event.OnboardedBy));
 
