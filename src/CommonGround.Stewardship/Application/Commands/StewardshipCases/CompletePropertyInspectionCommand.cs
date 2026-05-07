@@ -1,3 +1,5 @@
+using CommonGround.SharedKernel.Domain;
+
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
 /// <summary>
@@ -15,4 +17,4 @@ public sealed record CompletePropertyInspectionCommand(
     bool OccupancyConfirmed,
     string? ConditionNotes,
     DateOnly CompletedDate,
-    string RecordedBy);
+    UserId RecordedBy);

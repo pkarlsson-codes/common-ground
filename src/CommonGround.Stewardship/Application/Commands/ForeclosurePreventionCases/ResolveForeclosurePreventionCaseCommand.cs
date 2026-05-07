@@ -1,3 +1,4 @@
+using CommonGround.SharedKernel.Domain;
 using CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
 
 namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
@@ -13,4 +14,4 @@ public sealed record ResolveForeclosurePreventionCaseCommand(
     string ForeclosurePreventionCaseId,
     ForeclosurePreventionOutcome Outcome,
     DateOnly ResolvedDate,
-    string ResolvedBy);
+    UserId ResolvedBy);

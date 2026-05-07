@@ -1,3 +1,5 @@
+using CommonGround.SharedKernel.Domain;
+
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
 /// <summary>
@@ -11,4 +13,4 @@ public sealed record InitiateOccupancyVerificationCommand(
     string StewardshipCaseId,
     int PeriodYear,
     DateOnly? SurveyDeadline,
-    string InitiatedBy);
+    UserId InitiatedBy);

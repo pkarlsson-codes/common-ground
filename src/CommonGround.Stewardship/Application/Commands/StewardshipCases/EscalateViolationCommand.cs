@@ -1,3 +1,5 @@
+using CommonGround.SharedKernel.Domain;
+
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
 /// <summary>
@@ -13,4 +15,4 @@ public sealed record EscalateViolationCommand(
     Guid ViolationId,
     string Reason,
     DateOnly EscalatedDate,
-    string EscalatedBy);
+    UserId EscalatedBy);

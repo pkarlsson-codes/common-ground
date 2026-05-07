@@ -1,3 +1,5 @@
+using CommonGround.SharedKernel.Domain;
+
 namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
 
 /// <summary>
@@ -11,4 +13,4 @@ public sealed record MakeCounselingReferralCommand(
     string ForeclosurePreventionCaseId,
     string AgencyName,
     DateOnly ReferralDate,
-    string ReferredBy);
+    UserId ReferredBy);

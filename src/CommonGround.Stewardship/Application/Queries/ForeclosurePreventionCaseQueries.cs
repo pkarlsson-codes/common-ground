@@ -20,31 +20,30 @@ public sealed record GetForeclosurePreventionCasesByGroundLeaseQuery(string Grou
 /// </summary>
 public sealed record GetAllForeclosurePreventionCasesQuery;
 
-/// <summary>
-/// Handles queries for foreclosure prevention cases.
-/// </summary>
-public sealed class ForeclosurePreventionCaseQueryHandler(IQuerySession session)
+/// <summary>Handles <see cref="GetForeclosurePreventionCaseQuery"/>.</summary>
+public static class GetForeclosurePreventionCaseHandler
 {
-    /// <summary>
-    /// Handles the GetForeclosurePreventionCaseQuery.
-    /// </summary>
-    public async Task<ForeclosurePreventionCaseView?> Handle(GetForeclosurePreventionCaseQuery query, CancellationToken ct)
+    /// <summary>Returns the <see cref="ForeclosurePreventionCaseView"/> for the given ID, or null if not found.</summary>
+    public static async Task<ForeclosurePreventionCaseView?> Handle(GetForeclosurePreventionCaseQuery query, IQuerySession session, CancellationToken ct)
         => await session.LoadAsync<ForeclosurePreventionCaseView>(query.ForeclosurePreventionCaseId, ct).ConfigureAwait(false);
+}
 
-    /// <summary>
-    /// Handles the GetForeclosurePreventionCasesByGroundLeaseQuery.
-    /// </summary>
-    public async Task<IReadOnlyList<ForeclosurePreventionCaseView>> Handle(GetForeclosurePreventionCasesByGroundLeaseQuery query, CancellationToken ct)
+/// <summary>Handles <see cref="GetForeclosurePreventionCasesByGroundLeaseQuery"/>.</summary>
+public static class GetForeclosurePreventionCasesByGroundLeaseHandler
+{
+    /// <summary>Returns all foreclosure prevention cases for the given ground lease.</summary>
+    public static async Task<IReadOnlyList<ForeclosurePreventionCaseView>> Handle(GetForeclosurePreventionCasesByGroundLeaseQuery query, IQuerySession session, CancellationToken ct)
         => await session.Query<ForeclosurePreventionCaseView>()
             .Where(x => x.GroundLeaseId == query.GroundLeaseId)
             .ToListAsync(ct)
             .ConfigureAwait(false);
+}
 
-    /// <summary>
-    /// Handles the GetAllForeclosurePreventionCasesQuery.
-    /// Returns all cases that are not in the Resolved terminal state (Opened + Active).
-    /// </summary>
-    public async Task<IReadOnlyList<ForeclosurePreventionCaseView>> Handle(GetAllForeclosurePreventionCasesQuery query, CancellationToken ct)
+/// <summary>Handles <see cref="GetAllForeclosurePreventionCasesQuery"/>.</summary>
+public static class GetAllForeclosurePreventionCasesHandler
+{
+    /// <summary>Returns all foreclosure prevention cases not in the Resolved terminal state (Opened + Active).</summary>
+    public static async Task<IReadOnlyList<ForeclosurePreventionCaseView>> Handle(GetAllForeclosurePreventionCasesQuery query, IQuerySession session, CancellationToken ct)
         => await session.Query<ForeclosurePreventionCaseView>()
             .Where(x => x.Status != "Resolved")
             .ToListAsync(ct)

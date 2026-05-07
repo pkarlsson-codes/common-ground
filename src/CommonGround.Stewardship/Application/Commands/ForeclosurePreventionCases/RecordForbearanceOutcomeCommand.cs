@@ -1,3 +1,4 @@
+using CommonGround.SharedKernel.Domain;
 using CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
 
 namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
@@ -17,4 +18,4 @@ public sealed record RecordForbearanceOutcomeCommand(
     ForbearanceOutcome Outcome,
     DateOnly OutcomeDate,
     string? Notes,
-    string RecordedBy);
+    UserId RecordedBy);

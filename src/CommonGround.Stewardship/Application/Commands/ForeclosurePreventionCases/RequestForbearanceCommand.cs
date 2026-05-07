@@ -1,3 +1,5 @@
+using CommonGround.SharedKernel.Domain;
+
 namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
 
 /// <summary>
@@ -11,4 +13,4 @@ public sealed record RequestForbearanceCommand(
     string ForeclosurePreventionCaseId,
     string LenderName,
     DateOnly RequestedDate,
-    string RequestedBy);
+    UserId RequestedBy);

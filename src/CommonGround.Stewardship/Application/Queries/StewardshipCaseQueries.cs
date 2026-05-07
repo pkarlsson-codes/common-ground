@@ -20,31 +20,30 @@ public sealed record GetStewardshipCasesByGroundLeaseQuery(string GroundLeaseId)
 /// </summary>
 public sealed record GetAllStewardshipCasesQuery;
 
-/// <summary>
-/// Handles queries for stewardship cases.
-/// </summary>
-public sealed class StewardshipCaseQueryHandler(IQuerySession session)
+/// <summary>Handles <see cref="GetStewardshipCaseQuery"/>.</summary>
+public static class GetStewardshipCaseHandler
 {
-    /// <summary>
-    /// Handles the GetStewardshipCaseQuery.
-    /// </summary>
-    public async Task<StewardshipCaseView?> Handle(GetStewardshipCaseQuery query, CancellationToken ct)
+    /// <summary>Returns the <see cref="StewardshipCaseView"/> for the given ID, or null if not found.</summary>
+    public static async Task<StewardshipCaseView?> Handle(GetStewardshipCaseQuery query, IQuerySession session, CancellationToken ct)
         => await session.LoadAsync<StewardshipCaseView>(query.StewardshipCaseId, ct).ConfigureAwait(false);
+}
 
-    /// <summary>
-    /// Handles the GetStewardshipCasesByGroundLeaseQuery.
-    /// </summary>
-    public async Task<IReadOnlyList<StewardshipCaseView>> Handle(GetStewardshipCasesByGroundLeaseQuery query, CancellationToken ct)
+/// <summary>Handles <see cref="GetStewardshipCasesByGroundLeaseQuery"/>.</summary>
+public static class GetStewardshipCasesByGroundLeaseHandler
+{
+    /// <summary>Returns all stewardship cases for the given ground lease.</summary>
+    public static async Task<IReadOnlyList<StewardshipCaseView>> Handle(GetStewardshipCasesByGroundLeaseQuery query, IQuerySession session, CancellationToken ct)
         => await session.Query<StewardshipCaseView>()
             .Where(x => x.GroundLeaseId == query.GroundLeaseId)
             .ToListAsync(ct)
             .ConfigureAwait(false);
+}
 
-    /// <summary>
-    /// Handles the GetAllStewardshipCasesQuery.
-    /// Returns all cases whose status is Active (i.e. not yet closed).
-    /// </summary>
-    public async Task<IReadOnlyList<StewardshipCaseView>> Handle(GetAllStewardshipCasesQuery query, CancellationToken ct)
+/// <summary>Handles <see cref="GetAllStewardshipCasesQuery"/>.</summary>
+public static class GetAllStewardshipCasesHandler
+{
+    /// <summary>Returns all stewardship cases whose status is Active (i.e. not yet closed).</summary>
+    public static async Task<IReadOnlyList<StewardshipCaseView>> Handle(GetAllStewardshipCasesQuery query, IQuerySession session, CancellationToken ct)
         => await session.Query<StewardshipCaseView>()
             .Where(x => x.Status == "Active")
             .ToListAsync(ct)

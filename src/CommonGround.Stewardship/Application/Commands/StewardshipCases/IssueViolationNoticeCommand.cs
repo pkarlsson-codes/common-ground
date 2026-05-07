@@ -1,3 +1,5 @@
+using CommonGround.SharedKernel.Domain;
+
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
 /// <summary>
@@ -13,4 +15,4 @@ public sealed record IssueViolationNoticeCommand(
     Guid ViolationId,
     DateOnly NoticeDate,
     DateOnly CureDeadline,
-    string IssuedBy);
+    UserId IssuedBy);

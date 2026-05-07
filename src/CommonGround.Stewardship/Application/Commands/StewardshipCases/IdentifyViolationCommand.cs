@@ -1,3 +1,4 @@
+using CommonGround.SharedKernel.Domain;
 using CommonGround.Stewardship.Domain.StewardshipCases;
 
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
@@ -15,4 +16,4 @@ public sealed record IdentifyViolationCommand(
     LeaseViolationType Type,
     string Description,
     DateOnly IdentifiedDate,
-    string IdentifiedBy);
+    UserId IdentifiedBy);

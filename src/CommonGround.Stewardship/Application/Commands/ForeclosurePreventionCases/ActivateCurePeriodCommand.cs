@@ -1,3 +1,5 @@
+using CommonGround.SharedKernel.Domain;
+
 namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
 
 /// <summary>
@@ -13,4 +15,4 @@ public sealed record ActivateCurePeriodCommand(
     string LraId,
     DateOnly ActivationDate,
     int CurePeriodDays,
-    string ActivatedBy);
+    UserId ActivatedBy);

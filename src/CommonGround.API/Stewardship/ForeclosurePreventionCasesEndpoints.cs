@@ -46,7 +46,7 @@ public static class ForeclosurePreventionCasesEndpoints
                 request.ServicerName,
                 request.DelinquentMonths,
                 request.RecordedDate,
-                userId.Value),
+                userId),
             ct).ConfigureAwait(false);
 
         return Results.Accepted(value: new { Id = id });
@@ -58,7 +58,7 @@ public static class ForeclosurePreventionCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new RecordServicerDelinquencyCommand(
-            id, request.ServicerName, request.DelinquentMonths, request.RecordedDate, userId.Value), ct);
+            id, request.ServicerName, request.DelinquentMonths, request.RecordedDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -68,7 +68,7 @@ public static class ForeclosurePreventionCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new MakeCounselingReferralCommand(
-            id, request.AgencyName, request.ReferralDate, userId.Value), ct);
+            id, request.AgencyName, request.ReferralDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -78,7 +78,7 @@ public static class ForeclosurePreventionCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new RecordCounselingOutcomeCommand(
-            id, referralId, request.Outcome, request.OutcomeDate, userId.Value), ct);
+            id, referralId, request.Outcome, request.OutcomeDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -88,7 +88,7 @@ public static class ForeclosurePreventionCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new RequestForbearanceCommand(
-            id, request.LenderName, request.RequestedDate, userId.Value), ct);
+            id, request.LenderName, request.RequestedDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -97,9 +97,9 @@ public static class ForeclosurePreventionCasesEndpoints
     {
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
-        var outcome = Enum.Parse<ForbearanceOutcome>(request.Outcome);
+        var outcome = ForbearanceOutcome.FromDisplayName(request.Outcome);
         await bus.InvokeForTenantAsync(bus.TenantId!, new RecordForbearanceOutcomeCommand(
-            id, requestId, outcome, request.OutcomeDate, request.Notes, userId.Value), ct);
+            id, requestId, outcome, request.OutcomeDate, request.Notes, userId), ct);
         return Results.NoContent();
     }
 
@@ -109,7 +109,7 @@ public static class ForeclosurePreventionCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new ActivateCurePeriodCommand(
-            id, request.LraId, request.ActivationDate, request.CurePeriodDays, userId.Value), ct);
+            id, request.LraId, request.ActivationDate, request.CurePeriodDays, userId), ct);
         return Results.NoContent();
     }
 
@@ -120,7 +120,7 @@ public static class ForeclosurePreventionCasesEndpoints
         var userId = httpContext.GetUserId();
         var outcome = Enum.Parse<ForeclosurePreventionOutcome>(request.Outcome);
         await bus.InvokeForTenantAsync(bus.TenantId!, new ResolveForeclosurePreventionCaseCommand(
-            id, outcome, request.ResolvedDate, userId.Value), ct);
+            id, outcome, request.ResolvedDate, userId), ct);
         return Results.NoContent();
     }
 }

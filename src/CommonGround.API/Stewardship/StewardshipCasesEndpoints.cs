@@ -38,7 +38,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new InitiateOccupancyVerificationCommand(
-            id, request.PeriodYear, request.SurveyDeadline, userId.Value), ct);
+            id, request.PeriodYear, request.SurveyDeadline, userId), ct);
         return Results.NoContent();
     }
 
@@ -58,7 +58,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new VerifyOccupancyCommand(
-            id, verificationId, request.VerifiedDate, userId.Value), ct);
+            id, verificationId, request.VerifiedDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -68,7 +68,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new FailOccupancyCommand(
-            id, verificationId, request.Reason, request.FailedDate, userId.Value), ct);
+            id, verificationId, request.Reason, request.FailedDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -87,7 +87,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new SchedulePropertyInspectionCommand(
-            id, request.ScheduledDate, request.InspectorName, userId.Value), ct);
+            id, request.ScheduledDate, request.InspectorName, userId), ct);
         return Results.NoContent();
     }
 
@@ -98,7 +98,7 @@ public static class StewardshipCasesEndpoints
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new CompletePropertyInspectionCommand(
             id, inspectionId, request.OccupancyConfirmed, request.ConditionNotes,
-            request.CompletedDate, userId.Value), ct);
+            request.CompletedDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -108,7 +108,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new CancelPropertyInspectionCommand(
-            id, inspectionId, request.Reason, userId.Value), ct);
+            id, inspectionId, request.Reason, userId), ct);
         return Results.NoContent();
     }
 
@@ -117,9 +117,9 @@ public static class StewardshipCasesEndpoints
     {
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
-        var violationType = Enum.Parse<LeaseViolationType>(request.ViolationType);
+        var violationType = LeaseViolationType.FromDisplayName(request.ViolationType);
         await bus.InvokeForTenantAsync(bus.TenantId!, new IdentifyViolationCommand(
-            id, violationType, request.Description, request.IdentifiedDate, userId.Value), ct);
+            id, violationType, request.Description, request.IdentifiedDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -129,7 +129,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new IssueViolationNoticeCommand(
-            id, violationId, request.NoticeDate, request.CureDeadline, userId.Value), ct);
+            id, violationId, request.NoticeDate, request.CureDeadline, userId), ct);
         return Results.NoContent();
     }
 
@@ -139,7 +139,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new CureViolationCommand(
-            id, violationId, request.CuredDate, userId.Value), ct);
+            id, violationId, request.CuredDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -149,7 +149,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new EscalateViolationCommand(
-            id, violationId, request.Reason, request.EscalatedDate, userId.Value), ct);
+            id, violationId, request.Reason, request.EscalatedDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -159,7 +159,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new CloseStewardshipCaseCommand(
-            id, request.Reason, request.ClosedDate, userId.Value), ct);
+            id, request.Reason, request.ClosedDate, userId), ct);
         return Results.NoContent();
     }
 }

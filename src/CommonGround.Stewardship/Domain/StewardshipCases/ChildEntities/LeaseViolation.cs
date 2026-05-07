@@ -7,7 +7,7 @@ public sealed class LeaseViolation
     public Guid Id { get; internal set; }
 
     /// <summary>The category of the violation.</summary>
-    public LeaseViolationType Type { get; internal set; }
+    public LeaseViolationType Type { get; internal set; } = null!;
 
     /// <summary>Description of the violation.</summary>
     public string Description { get; internal set; } = string.Empty;

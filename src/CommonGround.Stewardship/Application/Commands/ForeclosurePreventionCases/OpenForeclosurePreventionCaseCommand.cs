@@ -1,3 +1,5 @@
+using CommonGround.SharedKernel.Domain;
+
 namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
 
 /// <summary>Opens a foreclosure prevention case for a servicer delinquency trigger.</summary>
@@ -11,4 +13,4 @@ public sealed record OpenForeclosurePreventionCaseCommand(
     string ServicerName,
     int DelinquentMonths,
     DateOnly RecordedDate,
-    string RecordedBy);
+    UserId RecordedBy);

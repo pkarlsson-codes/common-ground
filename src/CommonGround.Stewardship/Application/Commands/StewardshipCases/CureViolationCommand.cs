@@ -1,3 +1,5 @@
+using CommonGround.SharedKernel.Domain;
+
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
 /// <summary>
@@ -11,4 +13,4 @@ public sealed record CureViolationCommand(
     string StewardshipCaseId,
     Guid ViolationId,
     DateOnly CuredDate,
-    string VerifiedBy);
+    UserId VerifiedBy);

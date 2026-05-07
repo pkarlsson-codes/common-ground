@@ -1,3 +1,5 @@
+using CommonGround.SharedKernel.Domain;
+
 namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
 
 /// <summary>
@@ -13,4 +15,4 @@ public sealed record RecordCounselingOutcomeCommand(
     Guid ReferralId,
     string Outcome,
     DateOnly OutcomeDate,
-    string RecordedBy);
+    UserId RecordedBy);
