@@ -8,7 +8,7 @@ public sealed record GroundLeaseCreatedFromTemplate(
     string AggregateId,
     string GroundLeaseTemplateId,
     string LandParcelId,
-    string BuildingId,
+    string HomeId,
     DateOnly LeaseStartDate,
     int TermYears,
     string CovenantTerms,

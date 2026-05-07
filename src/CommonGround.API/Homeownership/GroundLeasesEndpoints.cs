@@ -105,7 +105,7 @@ public static class GroundLeasesEndpoints
         var response = new GroundLeaseResponse(
             view.Id,
             view.LandParcelId,
-            view.BuildingId,
+            view.HomeId,
             view.LeaseStartDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             view.TermYears,
             view.CovenantTerms,

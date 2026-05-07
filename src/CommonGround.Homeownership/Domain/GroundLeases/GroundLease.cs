@@ -242,7 +242,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     {
         Id = GroundLeaseId.Create(e.AggregateId);
         LandParcelId = LandParcelId.Create(e.LandParcelId);
-        UnitId = HomeId.Create(e.BuildingId);
+        UnitId = HomeId.Create(e.HomeId);
         LeaseStartDate = e.LeaseStartDate;
         TermYears = e.TermYears;
         CovenantTerms = e.CovenantTerms;
@@ -267,7 +267,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         Id = GroundLeaseId.Create(e.AggregateId);
         TemplateId = GroundLeaseTemplateId.Create(e.GroundLeaseTemplateId);
         LandParcelId = LandParcelId.Create(e.LandParcelId);
-        UnitId = HomeId.Create(e.BuildingId);
+        UnitId = HomeId.Create(e.HomeId);
         LeaseStartDate = e.LeaseStartDate;
         TermYears = e.TermYears;
         CovenantTerms = e.CovenantTerms;

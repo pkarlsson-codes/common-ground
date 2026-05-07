@@ -20,7 +20,7 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.Events;
 public sealed record GroundLeaseCreated(
     string AggregateId,
     string LandParcelId,
-    string BuildingId,
+    string HomeId,
     DateOnly LeaseStartDate,
     int TermYears,
     string CovenantTerms,
