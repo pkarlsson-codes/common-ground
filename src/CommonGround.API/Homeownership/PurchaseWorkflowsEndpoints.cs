@@ -45,7 +45,6 @@ public static class PurchaseWorkflowsEndpoints
     [WolverineGet("/api/purchase-workflows")]
     public static async Task<IResult> GetPurchaseWorkflows(
         [FromQuery] GetPurchaseWorkflowsQuerySpec request,
-        HttpContext httpContext,
         IMessageBus bus,
         CancellationToken cancellationToken = default)
     {
@@ -71,7 +70,6 @@ public static class PurchaseWorkflowsEndpoints
     [WolverineGet("/api/purchase-workflows/{workflowId}")]
     public static async Task<IResult> GetPurchaseWorkflow(
         string workflowId,
-        HttpContext httpContext,
         IMessageBus bus,
         CancellationToken cancellationToken)
     {

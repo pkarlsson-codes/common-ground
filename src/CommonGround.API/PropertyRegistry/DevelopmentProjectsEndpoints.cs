@@ -23,7 +23,6 @@ public static class DevelopmentProjectsEndpoints
     [WolverineGet("/api/development-projects")]
     public static async Task<IResult> GetDevelopmentProjects(
         [FromQuery] GetDevelopmentProjectsQuerySpec request,
-        HttpContext httpContext,
         IMessageBus bus,
         CancellationToken cancellationToken)
     {
