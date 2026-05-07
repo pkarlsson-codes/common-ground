@@ -61,9 +61,7 @@ export function useDecommissionParcel() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) =>
-      fetch(`/api/land-parcels/${id}/decommission`, { method: 'POST' }).then(r => {
-        if (!r.ok) throw new Error(`${r.status}`)
-      }),
+      api.decommissionLandParcel({ landParcelId: id, body: {} }),
     onSuccess: (_d, id) => {
       qc.invalidateQueries({ queryKey: ['land-parcel', id] })
       qc.invalidateQueries({ queryKey: ['land-parcels'] })
@@ -75,9 +73,7 @@ export function useRecommissionParcel() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) =>
-      fetch(`/api/land-parcels/${id}/recommission`, { method: 'POST' }).then(r => {
-        if (!r.ok) throw new Error(`${r.status}`)
-      }),
+      api.recommissionLandParcel({ landParcelId: id, body: {} }),
     onSuccess: (_d, id) => {
       qc.invalidateQueries({ queryKey: ['land-parcel', id] })
       qc.invalidateQueries({ queryKey: ['land-parcels'] })

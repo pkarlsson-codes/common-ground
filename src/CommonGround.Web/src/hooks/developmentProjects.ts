@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { DevelopmentProjectsApi } from '../api'
 import type { InitiateDevelopmentProjectRequest } from '../api'
 import { apiConfig } from '../lib/apiConfig'
+import { getCsrfToken } from '../lib/csrf'
 
 const api = new DevelopmentProjectsApi(apiConfig)
 
@@ -18,7 +19,16 @@ interface DevelopmentProjectDetail {
 }
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, init)
+  const method = ((init?.method ?? 'GET') as string).toUpperCase()
+  const csrfHeaders: HeadersInit =
+    !['GET', 'HEAD', 'OPTIONS'].includes(method)
+      ? { 'X-CSRF-Token': getCsrfToken() ?? '' }
+      : {}
+  const res = await fetch(url, {
+    ...init,
+    credentials: 'include',
+    headers: { ...init?.headers, ...csrfHeaders },
+  })
   if (!res.ok) throw new Error(`${res.status}`)
   if (res.status === 204) return undefined as unknown as T
   return res.json()

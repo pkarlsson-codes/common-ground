@@ -114,7 +114,7 @@ public static class HomesEndpoints
 
         await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);
 
-        return Results.Created();
+        return Results.NoContent();
     }
 
     [WolverineGet("/api/homes/{homeId}/assessments")]

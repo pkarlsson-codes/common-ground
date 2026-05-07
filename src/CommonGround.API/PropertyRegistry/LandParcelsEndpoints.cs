@@ -68,11 +68,9 @@ public static class LandParcelsEndpoints
     [WolverineGet("/api/land-parcels")]
     public static async Task<IResult> GetLandParcels(
         [FromQuery] GetLandParcelsQuerySpec request,
-        HttpContext httpContext,
         IMessageBus bus,
         CancellationToken cancellationToken = default)
     {
-        _ = httpContext;
         var query = new GetLandParcels(request.Page, request.Search);
 
         var result = await bus

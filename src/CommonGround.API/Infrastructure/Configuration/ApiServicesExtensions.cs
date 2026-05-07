@@ -76,24 +76,21 @@ internal static class ApiServicesExtensions
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddConfiguredCors(this IServiceCollection services, IConfiguration configuration)
     {
+        var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+
+        if (allowedOrigins is not { Length: > 0 })
+        {
+            throw new InvalidOperationException(
+                "CORS is not configured. Add 'Cors:AllowedOrigins' to configuration.");
+        }
+
         services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
             {
-                var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
-
-                if (allowedOrigins is { Length: > 0 })
-                {
-                    policy.WithOrigins(allowedOrigins)
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
-                }
-                else
-                {
-                    policy.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
-                }
+                policy.WithOrigins(allowedOrigins)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
             });
         });
 

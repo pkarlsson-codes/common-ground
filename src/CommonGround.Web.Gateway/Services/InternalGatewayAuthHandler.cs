@@ -44,8 +44,7 @@ public sealed partial class InternalGatewayAuthHandler : DelegatingHandler
         {
             var requestPath = httpContext.Request.Path.Value ?? string.Empty;
 
-            userId = httpContext.User.FindFirst("userId")?.Value
-                     ?? httpContext.User.FindFirst("user_id")?.Value;
+            userId = httpContext.User.FindFirst("user_id")?.Value;
 
             sessionId = httpContext.Request.Cookies[GatewayDefaults.Cookies.SessionCookie];
 

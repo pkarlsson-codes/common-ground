@@ -1,9 +1,5 @@
 import { Configuration, type Middleware } from '../api'
-
-function getCsrfToken(): string | null {
-  const m = document.cookie.match(/(?:^|;\s*)cg_csrf=([^;]+)/)
-  return m ? decodeURIComponent(m[1]) : null
-}
+import { getCsrfToken } from './csrf'
 
 const csrfMiddleware: Middleware = {
   pre: async (ctx) => {

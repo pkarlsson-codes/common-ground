@@ -311,7 +311,7 @@ public abstract class Enumeration : IComparable<Enumeration>, IEquatable<Enumera
             result = FromValue<T>(value);
             return true;
         }
-        catch
+        catch (InvalidOperationException)
         {
             result = default;
             return false;
@@ -333,7 +333,7 @@ public abstract class Enumeration : IComparable<Enumeration>, IEquatable<Enumera
             result = FromDisplayName<T>(displayName);
             return true;
         }
-        catch
+        catch (InvalidOperationException)
         {
             result = default;
             return false;

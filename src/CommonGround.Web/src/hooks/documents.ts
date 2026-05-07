@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { DocumentsApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
+import { getCsrfToken } from '../lib/csrf'
 import type {
   AttachDocumentRequest,
   SoftDeleteDocumentRequest,
@@ -83,9 +84,7 @@ export function useUploadDocument() {
       form.append('metadata', JSON.stringify(metadata))
       form.append('file', file, file.name)
 
-      // Get CSRF token from cookie
-      const m = document.cookie.match(/(?:^|;\s*)cg_csrf=([^;]+)/)
-      const csrf = m ? decodeURIComponent(m[1]) : ''
+      const csrf = getCsrfToken() ?? ''
 
       const res = await fetch('/api/v1/documents', {
         method: 'POST',
@@ -119,8 +118,7 @@ export function useAddDocumentVersion() {
       form.append('metadata', JSON.stringify({ note: note ?? null }))
       form.append('file', file, file.name)
 
-      const m = document.cookie.match(/(?:^|;\s*)cg_csrf=([^;]+)/)
-      const csrf = m ? decodeURIComponent(m[1]) : ''
+      const csrf = getCsrfToken() ?? ''
 
       const res = await fetch(`/api/v1/documents/${documentId}/versions`, {
         method: 'POST',
