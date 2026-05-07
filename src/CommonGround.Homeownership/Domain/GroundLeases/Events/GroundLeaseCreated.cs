@@ -6,7 +6,7 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.Events;
 /// <summary>Raised when a new ground lease is created.</summary>
 /// <param name="AggregateId">The ID of the new ground lease.</param>
 /// <param name="LandParcelId">The land parcel being leased.</param>
-/// <param name="BuildingId">The building on the parcel.</param>
+/// <param name="HomeId">The home on the parcel.</param>
 /// <param name="LeaseStartDate">When the lease starts.</param>
 /// <param name="TermYears">Lease duration in years.</param>
 /// <param name="CovenantTerms">Free-text covenant terms.</param>

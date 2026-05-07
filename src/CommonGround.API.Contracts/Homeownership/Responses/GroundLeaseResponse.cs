@@ -4,7 +4,7 @@ namespace CommonGround.API.Contracts.Homeownership.Responses;
 public sealed record GroundLeaseResponse(
     string Id,
     string LandParcelId,
-    string BuildingId,
+    string HomeId,
     string LeaseStartDate,
     int TermYears,
     string CovenantTerms,
