@@ -24,7 +24,7 @@ public sealed class TrustsInitialData : IInitialData
             return;
         }
 
-        using var session = store.LightweightSession("org-dev-default");
+        using var session = store.LightweightSession();
 
         foreach (var entry in entries)
         {

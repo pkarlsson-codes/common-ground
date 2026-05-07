@@ -1,6 +1,7 @@
 [
   {
     "seedKey": "home-downtown-civic-001",
+    "trustSeedKey": "dev-default",
     "landParcelSeedKey": "lp-downtown-civic-001",
     "type": "Townhouse",
     "bedrooms": 3,
@@ -11,6 +12,7 @@
   },
   {
     "seedKey": "home-riverbend-002",
+    "trustSeedKey": "dev-default",
     "landParcelSeedKey": "lp-riverbend-002",
     "type": "Duplex",
     "bedrooms": 4,
@@ -21,6 +23,7 @@
   },
   {
     "seedKey": "home-east-grove-003",
+    "trustSeedKey": "dev-default",
     "landParcelSeedKey": "lp-east-grove-003",
     "type": "SingleFamily",
     "bedrooms": 2,
@@ -31,6 +34,7 @@
   },
   {
     "seedKey": "home-harbor-view-004",
+    "trustSeedKey": "dev-default",
     "landParcelSeedKey": "lp-harbor-view-004",
     "type": "CondoUnit",
     "bedrooms": 2,

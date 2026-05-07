@@ -1,5 +1,6 @@
 using System.Text;
 using CommonGround.API.Infrastructure.ExceptionHandling;
+using CommonGround.API.Infrastructure.Seeding;
 using CommonGround.Documents.Infrastructure;
 using CommonGround.Documents.Infrastructure.Persistence;
 using CommonGround.Homeownership.Infrastructure;
@@ -87,6 +88,7 @@ internal static class CommonGroundServiceCollectionExtensions
             marten.InitializeWith<TrustsInitialData>();
             marten.InitializeWith<LandParcelsInitialData>();
             marten.InitializeWith<HomesInitialData>();
+            marten.InitializeWith<UsersInitialData>();
         });
 
         return services;

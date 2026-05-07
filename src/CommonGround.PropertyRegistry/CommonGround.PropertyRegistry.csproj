@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CommonGround.SharedKernel\CommonGround.SharedKernel.csproj" />
+    <ProjectReference Include="..\CommonGround.TrustManagement\CommonGround.TrustManagement.csproj" />
   </ItemGroup>
 
   <ItemGroup>

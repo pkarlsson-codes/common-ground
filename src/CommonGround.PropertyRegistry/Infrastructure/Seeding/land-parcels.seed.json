@@ -1,6 +1,7 @@
 [
   {
     "seedKey": "lp-downtown-civic-001",
+    "trustSeedKey": "dev-default",
     "legalParcelNumber": "APN-217-44-019",
     "address": "1458 Cedar Avenue, Riverton, OR 97211",
     "areaAcres": 0.83,
@@ -10,6 +11,7 @@
   },
   {
     "seedKey": "lp-riverbend-002",
+    "trustSeedKey": "dev-default",
     "legalParcelNumber": "APN-332-08-114",
     "address": "902 Riverbend Lane, Riverton, OR 97212",
     "areaAcres": 1.27,
@@ -19,6 +21,7 @@
   },
   {
     "seedKey": "lp-east-grove-003",
+    "trustSeedKey": "dev-default",
     "legalParcelNumber": "APN-118-73-221",
     "address": "3770 East Grove Street, Riverton, OR 97210",
     "areaAcres": 0.64,
@@ -28,6 +31,7 @@
   },
   {
     "seedKey": "lp-harbor-view-004",
+    "trustSeedKey": "dev-default",
     "legalParcelNumber": "APN-501-12-008",
     "address": "64 Harbor View Court, Riverton, OR 97209",
     "areaAcres": 1.91,

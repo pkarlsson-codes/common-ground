@@ -2,6 +2,7 @@ using System.Text.Json;
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.TrustManagement.Infrastructure.Seeding;
 using Marten;
 using Marten.Schema;
 
@@ -30,35 +31,43 @@ public sealed class HomesInitialData : IInitialData
             return;
         }
 
-        using var session = store.LightweightSession("org-dev-default");
+        using var defaultSession = store.LightweightSession();
 
         foreach (var entry in entries)
         {
-            var landParcelLookup = await session
+            var trustLookup = await defaultSession
+                .LoadAsync<TrustSeedLookup>(TrustSeedLookup.BuildId(entry.TrustSeedKey), cancellation)
+                .ConfigureAwait(false)
+                ?? throw new InvalidOperationException(
+                    $"Trust seed '{entry.TrustSeedKey}' not found for home seed '{entry.SeedKey}'. Ensure TrustsInitialData runs first.");
+
+            using var trustSession = store.LightweightSession(trustLookup.TrustId);
+
+            var landParcelLookup = await trustSession
                 .LoadAsync<LandParcelSeedLookup>(LandParcelSeedLookup.BuildId(entry.LandParcelSeedKey), cancellation)
                 .ConfigureAwait(false);
 
             if (landParcelLookup is null)
             {
                 throw new InvalidOperationException(
-                    $"Missing land parcel seed mapping for unit seed key '{entry.SeedKey}' (landParcelSeedKey='{entry.LandParcelSeedKey}').");
+                    $"Missing land parcel seed mapping for home seed key '{entry.SeedKey}' (landParcelSeedKey='{entry.LandParcelSeedKey}').");
             }
 
-            var landParcelStreamState = await session.Events
+            var landParcelStreamState = await trustSession.Events
                 .FetchStreamStateAsync(landParcelLookup.LandParcelId, cancellation)
                 .ConfigureAwait(false);
 
             if (landParcelStreamState is null)
             {
                 throw new InvalidOperationException(
-                    $"Land parcel stream '{landParcelLookup.LandParcelId}' does not exist for unit seed key '{entry.SeedKey}'.");
+                    $"Land parcel stream '{landParcelLookup.LandParcelId}' does not exist for home seed key '{entry.SeedKey}'.");
             }
 
             var lookupId = HomeSeedLookup.BuildId(entry.SeedKey);
-            var lookup = await session.LoadAsync<HomeSeedLookup>(lookupId, cancellation).ConfigureAwait(false);
+            var lookup = await trustSession.LoadAsync<HomeSeedLookup>(lookupId, cancellation).ConfigureAwait(false);
             if (lookup is not null)
             {
-                var streamState = await session.Events.FetchStreamStateAsync(lookup.UnitId, cancellation).ConfigureAwait(false);
+                var streamState = await trustSession.Events.FetchStreamStateAsync(lookup.UnitId, cancellation).ConfigureAwait(false);
                 if (streamState is not null)
                 {
                     continue;
@@ -83,10 +92,10 @@ public sealed class HomesInitialData : IInitialData
                 initialAssessment,
                 SeederUserId);
 
-            session.Events.StartStream<Home>(unit.Id.Value, unit.UncommittedEvents.ToArray());
+            trustSession.Events.StartStream<Home>(unit.Id.Value, unit.UncommittedEvents.ToArray());
             unit.UncommittedEvents.MarkAsCommitted();
 
-            session.Store(new HomeSeedLookup
+            trustSession.Store(new HomeSeedLookup
             {
                 Id = lookupId,
                 SeedKey = entry.SeedKey,
@@ -94,7 +103,7 @@ public sealed class HomesInitialData : IInitialData
                 SeededAt = DateTimeOffset.UtcNow,
             });
 
-            await session.SaveChangesAsync(cancellation).ConfigureAwait(false);
+            await trustSession.SaveChangesAsync(cancellation).ConfigureAwait(false);
         }
     }
 
@@ -132,13 +141,24 @@ public sealed class HomesInitialData : IInitialData
         }
     }
 
-    private sealed record HomeSeedEntry(
-        string SeedKey,
-        string LandParcelSeedKey,
-        string Type,
-        int Bedrooms,
-        decimal Bathrooms,
-        decimal SquareFootage,
-        int YearBuilt,
-        decimal InitialAssessedValue);
+    private sealed class HomeSeedEntry
+    {
+        public string SeedKey { get; set; } = string.Empty;
+
+        public string TrustSeedKey { get; set; } = string.Empty;
+
+        public string LandParcelSeedKey { get; set; } = string.Empty;
+
+        public string Type { get; set; } = string.Empty;
+
+        public int Bedrooms { get; set; }
+
+        public decimal Bathrooms { get; set; }
+
+        public decimal SquareFootage { get; set; }
+
+        public int YearBuilt { get; set; }
+
+        public decimal InitialAssessedValue { get; set; }
+    }
 }

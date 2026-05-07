@@ -1,6 +1,7 @@
 using System.Text.Json;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.TrustManagement.Infrastructure.Seeding;
 using Marten;
 using Marten.Schema;
 
@@ -29,15 +30,23 @@ public sealed class LandParcelsInitialData : IInitialData
             return;
         }
 
-        using var session = store.LightweightSession("org-dev-default");
+        using var defaultSession = store.LightweightSession();
 
         foreach (var entry in entries)
         {
+            var trustLookup = await defaultSession
+                .LoadAsync<TrustSeedLookup>(TrustSeedLookup.BuildId(entry.TrustSeedKey), cancellation)
+                .ConfigureAwait(false)
+                ?? throw new InvalidOperationException(
+                    $"Trust seed '{entry.TrustSeedKey}' not found for land parcel seed '{entry.SeedKey}'. Ensure TrustsInitialData runs first.");
+
+            using var trustSession = store.LightweightSession(trustLookup.TrustId);
+
             var lookupId = LandParcelSeedLookup.BuildId(entry.SeedKey);
-            var lookup = await session.LoadAsync<LandParcelSeedLookup>(lookupId, cancellation).ConfigureAwait(false);
+            var lookup = await trustSession.LoadAsync<LandParcelSeedLookup>(lookupId, cancellation).ConfigureAwait(false);
             if (lookup is not null)
             {
-                var streamState = await session.Events.FetchStreamStateAsync(lookup.LandParcelId, cancellation).ConfigureAwait(false);
+                var streamState = await trustSession.Events.FetchStreamStateAsync(lookup.LandParcelId, cancellation).ConfigureAwait(false);
                 if (streamState is not null)
                 {
                     continue;
@@ -53,10 +62,10 @@ public sealed class LandParcelsInitialData : IInitialData
                 entry.CovenantTerms,
                 SeederUserId);
 
-            session.Events.StartStream<LandParcel>(parcel.Id.Value, parcel.UncommittedEvents.ToArray());
+            trustSession.Events.StartStream<LandParcel>(parcel.Id.Value, parcel.UncommittedEvents.ToArray());
             parcel.UncommittedEvents.MarkAsCommitted();
 
-            session.Store(new LandParcelSeedLookup
+            trustSession.Store(new LandParcelSeedLookup
             {
                 Id = lookupId,
                 SeedKey = entry.SeedKey,
@@ -64,7 +73,7 @@ public sealed class LandParcelsInitialData : IInitialData
                 SeededAt = DateTimeOffset.UtcNow,
             });
 
-            await session.SaveChangesAsync(cancellation).ConfigureAwait(false);
+            await trustSession.SaveChangesAsync(cancellation).ConfigureAwait(false);
         }
     }
 
@@ -102,12 +111,22 @@ public sealed class LandParcelsInitialData : IInitialData
         }
     }
 
-    private sealed record LandParcelSeedEntry(
-        string SeedKey,
-        string LegalParcelNumber,
-        string Address,
-        decimal AreaAcres,
-        DateOnly AcquisitionDate,
-        string AcquisitionMethod,
-        string? CovenantTerms);
+    private sealed class LandParcelSeedEntry
+    {
+        public string SeedKey { get; set; } = string.Empty;
+
+        public string TrustSeedKey { get; set; } = string.Empty;
+
+        public string LegalParcelNumber { get; set; } = string.Empty;
+
+        public string Address { get; set; } = string.Empty;
+
+        public decimal AreaAcres { get; set; }
+
+        public DateOnly AcquisitionDate { get; set; }
+
+        public string AcquisitionMethod { get; set; } = string.Empty;
+
+        public string? CovenantTerms { get; set; }
+    }
 }
