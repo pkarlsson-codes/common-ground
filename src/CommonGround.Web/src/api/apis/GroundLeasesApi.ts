@@ -66,11 +66,11 @@ export interface GetGroundLeaseRequest {
 }
 
 export interface GetGroundLeasesRequest {
-    page?: number;
+    pageNumber?: number;
     pageSize?: number;
     status?: string | null;
     landParcelId?: string | null;
-    buildingId?: string | null;
+    homeId?: string | null;
     search?: string | null;
 }
 
@@ -88,9 +88,8 @@ export interface RecordStewardshipCheckInOperationRequest {
 export interface GroundLeasesApiInterface {
     /**
      * 
-     * @summary Calculates a resale price estimate for a ground lease.
-     * @param {string} groundLeaseId The ID of the ground lease.
-     * @param {CalculateResaleEstimateRequest} calculateResaleEstimateRequest The calculation inputs.
+     * @param {string} groundLeaseId 
+     * @param {CalculateResaleEstimateRequest} calculateResaleEstimateRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof GroundLeasesApiInterface
@@ -98,45 +97,39 @@ export interface GroundLeasesApiInterface {
     calculateResaleEstimateRaw(requestParameters: CalculateResaleEstimateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResaleEstimateResponse>>;
 
     /**
-     * Calculates a resale price estimate for a ground lease.
      */
     calculateResaleEstimate(requestParameters: CalculateResaleEstimateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResaleEstimateResponse>;
 
     /**
      * 
-     * @summary Changes the homeowner on a ground lease.
-     * @param {string} groundLeaseId The ID of the ground lease.
-     * @param {ChangeHomeownerRequest} changeHomeownerRequest The new homeowner details.
+     * @param {string} groundLeaseId 
+     * @param {ChangeHomeownerRequest} changeHomeownerRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof GroundLeasesApiInterface
      */
-    changeHomeownerRaw(requestParameters: ChangeHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    changeHomeownerRaw(requestParameters: ChangeHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Changes the homeowner on a ground lease.
      */
-    changeHomeowner(requestParameters: ChangeHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    changeHomeowner(requestParameters: ChangeHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Creates a new ground lease.
-     * @param {CreateGroundLeaseRequest} createGroundLeaseRequest The ground lease creation details.
+     * @param {CreateGroundLeaseRequest} createGroundLeaseRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof GroundLeasesApiInterface
      */
-    createGroundLeaseRaw(requestParameters: CreateGroundLeaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateGroundLeaseResponse>>;
+    createGroundLeaseRaw(requestParameters: CreateGroundLeaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Creates a new ground lease.
      */
-    createGroundLease(requestParameters: CreateGroundLeaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateGroundLeaseResponse>;
+    createGroundLease(requestParameters: CreateGroundLeaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
     /**
      * 
-     * @summary Gets a ground lease by ID.
-     * @param {string} groundLeaseId The ID of the ground lease to retrieve.
+     * @param {string} groundLeaseId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof GroundLeasesApiInterface
@@ -144,19 +137,17 @@ export interface GroundLeasesApiInterface {
     getGroundLeaseRaw(requestParameters: GetGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GroundLeaseResponse>>;
 
     /**
-     * Gets a ground lease by ID.
      */
     getGroundLease(requestParameters: GetGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GroundLeaseResponse>;
 
     /**
      * 
-     * @summary Gets a paginated list of ground leases.
-     * @param {number} [page] The page number (1-based).
-     * @param {number} [pageSize] The number of items per page.
-     * @param {string} [status] Optional status filter.
-     * @param {string} [landParcelId] Optional land parcel ID filter.
-     * @param {string} [buildingId] Optional building ID filter.
-     * @param {string} [search] Optional free-text search across homeowner name and email.
+     * @param {number} [pageNumber] 
+     * @param {number} [pageSize] 
+     * @param {string} [status] 
+     * @param {string} [landParcelId] 
+     * @param {string} [homeId] 
+     * @param {string} [search] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof GroundLeasesApiInterface
@@ -164,25 +155,22 @@ export interface GroundLeasesApiInterface {
     getGroundLeasesRaw(requestParameters: GetGroundLeasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfGroundLeaseListItemResponse>>;
 
     /**
-     * Gets a paginated list of ground leases.
      */
     getGroundLeases(requestParameters: GetGroundLeasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfGroundLeaseListItemResponse>;
 
     /**
      * 
-     * @summary Records a stewardship check-in for a ground lease.
-     * @param {string} groundLeaseId The ID of the ground lease.
-     * @param {RecordStewardshipCheckInRequest} recordStewardshipCheckInRequest The check-in details.
+     * @param {string} groundLeaseId 
+     * @param {RecordStewardshipCheckInRequest} recordStewardshipCheckInRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof GroundLeasesApiInterface
      */
-    recordStewardshipCheckInRaw(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    recordStewardshipCheckInRaw(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Records a stewardship check-in for a ground lease.
      */
-    recordStewardshipCheckIn(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    recordStewardshipCheckIn(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
 }
 
@@ -192,7 +180,6 @@ export interface GroundLeasesApiInterface {
 export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiInterface {
 
     /**
-     * Calculates a resale price estimate for a ground lease.
      */
     async calculateResaleEstimateRaw(requestParameters: CalculateResaleEstimateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResaleEstimateResponse>> {
         if (requestParameters['groundLeaseId'] == null) {
@@ -231,7 +218,6 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
     }
 
     /**
-     * Calculates a resale price estimate for a ground lease.
      */
     async calculateResaleEstimate(requestParameters: CalculateResaleEstimateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResaleEstimateResponse> {
         const response = await this.calculateResaleEstimateRaw(requestParameters, initOverrides);
@@ -239,9 +225,8 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
     }
 
     /**
-     * Changes the homeowner on a ground lease.
      */
-    async changeHomeownerRaw(requestParameters: ChangeHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async changeHomeownerRaw(requestParameters: ChangeHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['groundLeaseId'] == null) {
             throw new runtime.RequiredError(
                 'groundLeaseId',
@@ -274,20 +259,26 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
             body: ChangeHomeownerRequestToJSON(requestParameters['changeHomeownerRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Changes the homeowner on a ground lease.
      */
-    async changeHomeowner(requestParameters: ChangeHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.changeHomeownerRaw(requestParameters, initOverrides);
+    async changeHomeowner(requestParameters: ChangeHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.changeHomeownerRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Creates a new ground lease.
      */
-    async createGroundLeaseRaw(requestParameters: CreateGroundLeaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateGroundLeaseResponse>> {
+    async createGroundLeaseRaw(requestParameters: CreateGroundLeaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['createGroundLeaseRequest'] == null) {
             throw new runtime.RequiredError(
                 'createGroundLeaseRequest',
@@ -312,19 +303,17 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
             body: CreateGroundLeaseRequestToJSON(requestParameters['createGroundLeaseRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => CreateGroundLeaseResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Creates a new ground lease.
      */
-    async createGroundLease(requestParameters: CreateGroundLeaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateGroundLeaseResponse> {
+    async createGroundLease(requestParameters: CreateGroundLeaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.createGroundLeaseRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
-     * Gets a ground lease by ID.
      */
     async getGroundLeaseRaw(requestParameters: GetGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GroundLeaseResponse>> {
         if (requestParameters['groundLeaseId'] == null) {
@@ -353,7 +342,6 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
     }
 
     /**
-     * Gets a ground lease by ID.
      */
     async getGroundLease(requestParameters: GetGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GroundLeaseResponse> {
         const response = await this.getGroundLeaseRaw(requestParameters, initOverrides);
@@ -361,13 +349,12 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
     }
 
     /**
-     * Gets a paginated list of ground leases.
      */
     async getGroundLeasesRaw(requestParameters: GetGroundLeasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfGroundLeaseListItemResponse>> {
         const queryParameters: any = {};
 
-        if (requestParameters['page'] != null) {
-            queryParameters['page'] = requestParameters['page'];
+        if (requestParameters['pageNumber'] != null) {
+            queryParameters['pageNumber'] = requestParameters['pageNumber'];
         }
 
         if (requestParameters['pageSize'] != null) {
@@ -382,8 +369,8 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
             queryParameters['landParcelId'] = requestParameters['landParcelId'];
         }
 
-        if (requestParameters['buildingId'] != null) {
-            queryParameters['buildingId'] = requestParameters['buildingId'];
+        if (requestParameters['homeId'] != null) {
+            queryParameters['homeId'] = requestParameters['homeId'];
         }
 
         if (requestParameters['search'] != null) {
@@ -406,7 +393,6 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
     }
 
     /**
-     * Gets a paginated list of ground leases.
      */
     async getGroundLeases(requestParameters: GetGroundLeasesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfGroundLeaseListItemResponse> {
         const response = await this.getGroundLeasesRaw(requestParameters, initOverrides);
@@ -414,9 +400,8 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
     }
 
     /**
-     * Records a stewardship check-in for a ground lease.
      */
-    async recordStewardshipCheckInRaw(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async recordStewardshipCheckInRaw(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['groundLeaseId'] == null) {
             throw new runtime.RequiredError(
                 'groundLeaseId',
@@ -449,14 +434,21 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
             body: RecordStewardshipCheckInRequestToJSON(requestParameters['recordStewardshipCheckInRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Records a stewardship check-in for a ground lease.
      */
-    async recordStewardshipCheckIn(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.recordStewardshipCheckInRaw(requestParameters, initOverrides);
+    async recordStewardshipCheckIn(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordStewardshipCheckInRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
 }

@@ -235,124 +235,109 @@ export interface VerifyOccupancyOperationRequest {
 export interface StewardshipApiInterface {
     /**
      * 
-     * @summary Activates an LRA cure period.
-     * @param {string} caseId The foreclosure prevention case identifier.
-     * @param {ActivateCurePeriodRequest} activateCurePeriodRequest The cure period activation details.
+     * @param {string} caseId 
+     * @param {ActivateCurePeriodRequest} activateCurePeriodRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    activateCurePeriodRaw(requestParameters: ActivateCurePeriodOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    activateCurePeriodRaw(requestParameters: ActivateCurePeriodOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Activates an LRA cure period.
      */
-    activateCurePeriod(requestParameters: ActivateCurePeriodOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    activateCurePeriod(requestParameters: ActivateCurePeriodOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Cancels a scheduled property inspection.
-     * @param {string} caseId The stewardship case identifier.
-     * @param {string} inspectionId The property inspection identifier.
-     * @param {CancelPropertyInspectionRequest} cancelPropertyInspectionRequest The cancellation details.
+     * @param {string} caseId 
+     * @param {string} inspectionId 
+     * @param {CancelPropertyInspectionRequest} cancelPropertyInspectionRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    cancelPropertyInspectionRaw(requestParameters: CancelPropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    cancelPropertyInspectionRaw(requestParameters: CancelPropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Cancels a scheduled property inspection.
      */
-    cancelPropertyInspection(requestParameters: CancelPropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    cancelPropertyInspection(requestParameters: CancelPropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Closes a stewardship case.
-     * @param {string} caseId The stewardship case identifier.
-     * @param {CloseStewardshipCaseRequest} closeStewardshipCaseRequest The closure details.
+     * @param {string} caseId 
+     * @param {CloseStewardshipCaseRequest} closeStewardshipCaseRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    closeStewardshipCaseRaw(requestParameters: CloseStewardshipCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    closeStewardshipCaseRaw(requestParameters: CloseStewardshipCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Closes a stewardship case.
      */
-    closeStewardshipCase(requestParameters: CloseStewardshipCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    closeStewardshipCase(requestParameters: CloseStewardshipCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Records the completion of a property inspection.
-     * @param {string} caseId The stewardship case identifier.
-     * @param {string} inspectionId The property inspection identifier.
-     * @param {CompletePropertyInspectionRequest} completePropertyInspectionRequest The inspection completion details.
+     * @param {string} caseId 
+     * @param {string} inspectionId 
+     * @param {CompletePropertyInspectionRequest} completePropertyInspectionRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    completePropertyInspectionRaw(requestParameters: CompletePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    completePropertyInspectionRaw(requestParameters: CompletePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Records the completion of a property inspection.
      */
-    completePropertyInspection(requestParameters: CompletePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    completePropertyInspection(requestParameters: CompletePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Records that a lease violation has been cured.
-     * @param {string} caseId The stewardship case identifier.
-     * @param {string} violationId The lease violation identifier.
-     * @param {CureViolationRequest} cureViolationRequest The cure details.
+     * @param {string} caseId 
+     * @param {string} violationId 
+     * @param {CureViolationRequest} cureViolationRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    cureViolationRaw(requestParameters: CureViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    cureViolationRaw(requestParameters: CureViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Records that a lease violation has been cured.
      */
-    cureViolation(requestParameters: CureViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    cureViolation(requestParameters: CureViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Escalates an unresolved lease violation.
-     * @param {string} caseId The stewardship case identifier.
-     * @param {string} violationId The lease violation identifier.
-     * @param {EscalateViolationRequest} escalateViolationRequest The escalation details.
+     * @param {string} caseId 
+     * @param {string} violationId 
+     * @param {EscalateViolationRequest} escalateViolationRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    escalateViolationRaw(requestParameters: EscalateViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    escalateViolationRaw(requestParameters: EscalateViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Escalates an unresolved lease violation.
      */
-    escalateViolation(requestParameters: EscalateViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    escalateViolation(requestParameters: EscalateViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Records a failed occupancy verification.
-     * @param {string} caseId The stewardship case identifier.
-     * @param {string} verificationId The occupancy verification identifier.
-     * @param {FailOccupancyRequest} failOccupancyRequest The failure details.
+     * @param {string} caseId 
+     * @param {string} verificationId 
+     * @param {FailOccupancyRequest} failOccupancyRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    failOccupancyRaw(requestParameters: FailOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    failOccupancyRaw(requestParameters: FailOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Records a failed occupancy verification.
      */
-    failOccupancy(requestParameters: FailOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    failOccupancy(requestParameters: FailOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Lists all non-resolved foreclosure prevention cases.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
@@ -360,13 +345,11 @@ export interface StewardshipApiInterface {
     getAllForeclosurePreventionCasesRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ForeclosurePreventionCaseResponse>>>;
 
     /**
-     * Lists all non-resolved foreclosure prevention cases.
      */
     getAllForeclosurePreventionCases(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ForeclosurePreventionCaseResponse>>;
 
     /**
      * 
-     * @summary Lists all active stewardship cases.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
@@ -374,14 +357,12 @@ export interface StewardshipApiInterface {
     getAllStewardshipCasesRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<StewardshipCaseResponse>>>;
 
     /**
-     * Lists all active stewardship cases.
      */
     getAllStewardshipCases(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<StewardshipCaseResponse>>;
 
     /**
      * 
-     * @summary Gets a foreclosure prevention case by ID.
-     * @param {string} caseId The foreclosure prevention case identifier.
+     * @param {string} caseId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
@@ -389,14 +370,12 @@ export interface StewardshipApiInterface {
     getForeclosurePreventionCaseRaw(requestParameters: GetForeclosurePreventionCaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ForeclosurePreventionCaseResponse>>;
 
     /**
-     * Gets a foreclosure prevention case by ID.
      */
     getForeclosurePreventionCase(requestParameters: GetForeclosurePreventionCaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ForeclosurePreventionCaseResponse>;
 
     /**
      * 
-     * @summary Gets foreclosure prevention cases for a specific ground lease.
-     * @param {string} groundLeaseId The ground lease identifier.
+     * @param {string} groundLeaseId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
@@ -404,14 +383,12 @@ export interface StewardshipApiInterface {
     getForeclosurePreventionCasesByGroundLeaseRaw(requestParameters: GetForeclosurePreventionCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ForeclosurePreventionCaseResponse>>>;
 
     /**
-     * Gets foreclosure prevention cases for a specific ground lease.
      */
     getForeclosurePreventionCasesByGroundLease(requestParameters: GetForeclosurePreventionCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ForeclosurePreventionCaseResponse>>;
 
     /**
      * 
-     * @summary Gets a stewardship case by ID.
-     * @param {string} caseId The stewardship case identifier.
+     * @param {string} caseId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
@@ -419,14 +396,12 @@ export interface StewardshipApiInterface {
     getStewardshipCaseRaw(requestParameters: GetStewardshipCaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StewardshipCaseResponse>>;
 
     /**
-     * Gets a stewardship case by ID.
      */
     getStewardshipCase(requestParameters: GetStewardshipCaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StewardshipCaseResponse>;
 
     /**
      * 
-     * @summary Gets stewardship cases for a specific ground lease.
-     * @param {string} groundLeaseId The ground lease identifier.
+     * @param {string} groundLeaseId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
@@ -434,238 +409,209 @@ export interface StewardshipApiInterface {
     getStewardshipCasesByGroundLeaseRaw(requestParameters: GetStewardshipCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<StewardshipCaseResponse>>>;
 
     /**
-     * Gets stewardship cases for a specific ground lease.
      */
     getStewardshipCasesByGroundLease(requestParameters: GetStewardshipCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<StewardshipCaseResponse>>;
 
     /**
      * 
-     * @summary Identifies a new lease violation.
-     * @param {string} caseId The stewardship case identifier.
-     * @param {IdentifyViolationRequest} identifyViolationRequest The violation identification details.
+     * @param {string} caseId 
+     * @param {IdentifyViolationRequest} identifyViolationRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    identifyViolationRaw(requestParameters: IdentifyViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    identifyViolationRaw(requestParameters: IdentifyViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Identifies a new lease violation.
      */
-    identifyViolation(requestParameters: IdentifyViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    identifyViolation(requestParameters: IdentifyViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Initiates an annual occupancy verification.
-     * @param {string} caseId The stewardship case identifier.
-     * @param {InitiateOccupancyVerificationRequest} initiateOccupancyVerificationRequest The verification initiation details.
+     * @param {string} caseId 
+     * @param {InitiateOccupancyVerificationRequest} initiateOccupancyVerificationRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    initiateOccupancyVerificationRaw(requestParameters: InitiateOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    initiateOccupancyVerificationRaw(requestParameters: InitiateOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Initiates an annual occupancy verification.
      */
-    initiateOccupancyVerification(requestParameters: InitiateOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    initiateOccupancyVerification(requestParameters: InitiateOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Issues a formal notice for a lease violation.
-     * @param {string} caseId The stewardship case identifier.
-     * @param {string} violationId The lease violation identifier.
-     * @param {IssueViolationNoticeRequest} issueViolationNoticeRequest The notice details.
+     * @param {string} caseId 
+     * @param {string} violationId 
+     * @param {IssueViolationNoticeRequest} issueViolationNoticeRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    issueViolationNoticeRaw(requestParameters: IssueViolationNoticeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    issueViolationNoticeRaw(requestParameters: IssueViolationNoticeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Issues a formal notice for a lease violation.
      */
-    issueViolationNotice(requestParameters: IssueViolationNoticeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    issueViolationNotice(requestParameters: IssueViolationNoticeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Makes a housing counseling referral.
-     * @param {string} caseId The foreclosure prevention case identifier.
-     * @param {MakeCounselingReferralRequest} makeCounselingReferralRequest The referral details.
+     * @param {string} caseId 
+     * @param {MakeCounselingReferralRequest} makeCounselingReferralRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    makeCounselingReferralRaw(requestParameters: MakeCounselingReferralOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    makeCounselingReferralRaw(requestParameters: MakeCounselingReferralOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Makes a housing counseling referral.
      */
-    makeCounselingReferral(requestParameters: MakeCounselingReferralOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    makeCounselingReferral(requestParameters: MakeCounselingReferralOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Marks an occupancy verification as overdue.
-     * @param {string} caseId The stewardship case identifier.
-     * @param {string} verificationId The occupancy verification identifier.
-     * @param {MarkOccupancyVerificationOverdueRequest} markOccupancyVerificationOverdueRequest The overdue details.
+     * @param {string} caseId 
+     * @param {string} verificationId 
+     * @param {MarkOccupancyVerificationOverdueRequest} markOccupancyVerificationOverdueRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    markOccupancyVerificationOverdueRaw(requestParameters: MarkOccupancyVerificationOverdueOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    markOccupancyVerificationOverdueRaw(requestParameters: MarkOccupancyVerificationOverdueOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Marks an occupancy verification as overdue.
      */
-    markOccupancyVerificationOverdue(requestParameters: MarkOccupancyVerificationOverdueOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    markOccupancyVerificationOverdue(requestParameters: MarkOccupancyVerificationOverdueOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Opens a new foreclosure prevention case.
-     * @param {OpenForeclosurePreventionCaseRequest} openForeclosurePreventionCaseRequest The case opening details.
+     * @param {OpenForeclosurePreventionCaseRequest} openForeclosurePreventionCaseRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    openForeclosurePreventionCaseRaw(requestParameters: OpenForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<OpenForeclosurePreventionCaseResponse>>;
+    openForeclosurePreventionCaseRaw(requestParameters: OpenForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Opens a new foreclosure prevention case.
      */
-    openForeclosurePreventionCase(requestParameters: OpenForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<OpenForeclosurePreventionCaseResponse>;
+    openForeclosurePreventionCase(requestParameters: OpenForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
     /**
      * 
-     * @summary Records the outcome of a counseling referral.
-     * @param {string} caseId The foreclosure prevention case identifier.
-     * @param {string} referralId The counseling referral identifier.
-     * @param {RecordCounselingOutcomeRequest} recordCounselingOutcomeRequest The outcome details.
+     * @param {string} caseId 
+     * @param {string} referralId 
+     * @param {RecordCounselingOutcomeRequest} recordCounselingOutcomeRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    recordCounselingOutcomeRaw(requestParameters: RecordCounselingOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    recordCounselingOutcomeRaw(requestParameters: RecordCounselingOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Records the outcome of a counseling referral.
      */
-    recordCounselingOutcome(requestParameters: RecordCounselingOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    recordCounselingOutcome(requestParameters: RecordCounselingOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Records the outcome of a forbearance request.
-     * @param {string} caseId The foreclosure prevention case identifier.
-     * @param {string} requestId The forbearance request identifier.
-     * @param {RecordForbearanceOutcomeRequest} recordForbearanceOutcomeRequest The outcome details.
+     * @param {string} caseId 
+     * @param {string} requestId 
+     * @param {RecordForbearanceOutcomeRequest} recordForbearanceOutcomeRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    recordForbearanceOutcomeRaw(requestParameters: RecordForbearanceOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    recordForbearanceOutcomeRaw(requestParameters: RecordForbearanceOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Records the outcome of a forbearance request.
      */
-    recordForbearanceOutcome(requestParameters: RecordForbearanceOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    recordForbearanceOutcome(requestParameters: RecordForbearanceOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Records a servicer delinquency.
-     * @param {string} caseId The foreclosure prevention case identifier.
-     * @param {RecordServicerDelinquencyRequest} recordServicerDelinquencyRequest The delinquency details.
+     * @param {string} caseId 
+     * @param {RecordServicerDelinquencyRequest} recordServicerDelinquencyRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    recordServicerDelinquencyRaw(requestParameters: RecordServicerDelinquencyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    recordServicerDelinquencyRaw(requestParameters: RecordServicerDelinquencyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Records a servicer delinquency.
      */
-    recordServicerDelinquency(requestParameters: RecordServicerDelinquencyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    recordServicerDelinquency(requestParameters: RecordServicerDelinquencyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Submits a mortgage forbearance request.
-     * @param {string} caseId The foreclosure prevention case identifier.
-     * @param {RequestForbearanceRequest} requestForbearanceRequest The forbearance request details.
+     * @param {string} caseId 
+     * @param {RequestForbearanceRequest} requestForbearanceRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    requestForbearanceRaw(requestParameters: RequestForbearanceOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    requestForbearanceRaw(requestParameters: RequestForbearanceOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Submits a mortgage forbearance request.
      */
-    requestForbearance(requestParameters: RequestForbearanceOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    requestForbearance(requestParameters: RequestForbearanceOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Resolves a foreclosure prevention case.
-     * @param {string} caseId The foreclosure prevention case identifier.
-     * @param {ResolveForeclosurePreventionCaseRequest} resolveForeclosurePreventionCaseRequest The resolution details.
+     * @param {string} caseId 
+     * @param {ResolveForeclosurePreventionCaseRequest} resolveForeclosurePreventionCaseRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    resolveForeclosurePreventionCaseRaw(requestParameters: ResolveForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    resolveForeclosurePreventionCaseRaw(requestParameters: ResolveForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Resolves a foreclosure prevention case.
      */
-    resolveForeclosurePreventionCase(requestParameters: ResolveForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    resolveForeclosurePreventionCase(requestParameters: ResolveForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Schedules a property inspection.
-     * @param {string} caseId The stewardship case identifier.
-     * @param {SchedulePropertyInspectionRequest} schedulePropertyInspectionRequest The inspection scheduling details.
+     * @param {string} caseId 
+     * @param {SchedulePropertyInspectionRequest} schedulePropertyInspectionRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    schedulePropertyInspectionRaw(requestParameters: SchedulePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    schedulePropertyInspectionRaw(requestParameters: SchedulePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Schedules a property inspection.
      */
-    schedulePropertyInspection(requestParameters: SchedulePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    schedulePropertyInspection(requestParameters: SchedulePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Submits homeowner responses to an occupancy verification.
-     * @param {string} caseId The stewardship case identifier.
-     * @param {string} verificationId The occupancy verification identifier.
-     * @param {SubmitOccupancyVerificationRequest} submitOccupancyVerificationRequest The submission details.
+     * @param {string} caseId 
+     * @param {string} verificationId 
+     * @param {SubmitOccupancyVerificationRequest} submitOccupancyVerificationRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    submitOccupancyVerificationRaw(requestParameters: SubmitOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    submitOccupancyVerificationRaw(requestParameters: SubmitOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Submits homeowner responses to an occupancy verification.
      */
-    submitOccupancyVerification(requestParameters: SubmitOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    submitOccupancyVerification(requestParameters: SubmitOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Records staff approval of an occupancy verification.
-     * @param {string} caseId The stewardship case identifier.
-     * @param {string} verificationId The occupancy verification identifier.
-     * @param {VerifyOccupancyRequest} verifyOccupancyRequest The verification approval details.
+     * @param {string} caseId 
+     * @param {string} verificationId 
+     * @param {VerifyOccupancyRequest} verifyOccupancyRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    verifyOccupancyRaw(requestParameters: VerifyOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    verifyOccupancyRaw(requestParameters: VerifyOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Records staff approval of an occupancy verification.
      */
-    verifyOccupancy(requestParameters: VerifyOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    verifyOccupancy(requestParameters: VerifyOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
 }
 
@@ -675,9 +621,8 @@ export interface StewardshipApiInterface {
 export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInterface {
 
     /**
-     * Activates an LRA cure period.
      */
-    async activateCurePeriodRaw(requestParameters: ActivateCurePeriodOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async activateCurePeriodRaw(requestParameters: ActivateCurePeriodOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -710,20 +655,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: ActivateCurePeriodRequestToJSON(requestParameters['activateCurePeriodRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Activates an LRA cure period.
      */
-    async activateCurePeriod(requestParameters: ActivateCurePeriodOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.activateCurePeriodRaw(requestParameters, initOverrides);
+    async activateCurePeriod(requestParameters: ActivateCurePeriodOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.activateCurePeriodRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Cancels a scheduled property inspection.
      */
-    async cancelPropertyInspectionRaw(requestParameters: CancelPropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async cancelPropertyInspectionRaw(requestParameters: CancelPropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -764,20 +715,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: CancelPropertyInspectionRequestToJSON(requestParameters['cancelPropertyInspectionRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Cancels a scheduled property inspection.
      */
-    async cancelPropertyInspection(requestParameters: CancelPropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.cancelPropertyInspectionRaw(requestParameters, initOverrides);
+    async cancelPropertyInspection(requestParameters: CancelPropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.cancelPropertyInspectionRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Closes a stewardship case.
      */
-    async closeStewardshipCaseRaw(requestParameters: CloseStewardshipCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async closeStewardshipCaseRaw(requestParameters: CloseStewardshipCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -810,20 +767,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: CloseStewardshipCaseRequestToJSON(requestParameters['closeStewardshipCaseRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Closes a stewardship case.
      */
-    async closeStewardshipCase(requestParameters: CloseStewardshipCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.closeStewardshipCaseRaw(requestParameters, initOverrides);
+    async closeStewardshipCase(requestParameters: CloseStewardshipCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.closeStewardshipCaseRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Records the completion of a property inspection.
      */
-    async completePropertyInspectionRaw(requestParameters: CompletePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async completePropertyInspectionRaw(requestParameters: CompletePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -864,20 +827,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: CompletePropertyInspectionRequestToJSON(requestParameters['completePropertyInspectionRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Records the completion of a property inspection.
      */
-    async completePropertyInspection(requestParameters: CompletePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.completePropertyInspectionRaw(requestParameters, initOverrides);
+    async completePropertyInspection(requestParameters: CompletePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.completePropertyInspectionRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Records that a lease violation has been cured.
      */
-    async cureViolationRaw(requestParameters: CureViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async cureViolationRaw(requestParameters: CureViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -918,20 +887,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: CureViolationRequestToJSON(requestParameters['cureViolationRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Records that a lease violation has been cured.
      */
-    async cureViolation(requestParameters: CureViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.cureViolationRaw(requestParameters, initOverrides);
+    async cureViolation(requestParameters: CureViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.cureViolationRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Escalates an unresolved lease violation.
      */
-    async escalateViolationRaw(requestParameters: EscalateViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async escalateViolationRaw(requestParameters: EscalateViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -972,20 +947,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: EscalateViolationRequestToJSON(requestParameters['escalateViolationRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Escalates an unresolved lease violation.
      */
-    async escalateViolation(requestParameters: EscalateViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.escalateViolationRaw(requestParameters, initOverrides);
+    async escalateViolation(requestParameters: EscalateViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.escalateViolationRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Records a failed occupancy verification.
      */
-    async failOccupancyRaw(requestParameters: FailOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async failOccupancyRaw(requestParameters: FailOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -1026,18 +1007,24 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: FailOccupancyRequestToJSON(requestParameters['failOccupancyRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Records a failed occupancy verification.
      */
-    async failOccupancy(requestParameters: FailOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.failOccupancyRaw(requestParameters, initOverrides);
+    async failOccupancy(requestParameters: FailOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.failOccupancyRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Lists all non-resolved foreclosure prevention cases.
      */
     async getAllForeclosurePreventionCasesRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ForeclosurePreventionCaseResponse>>> {
         const queryParameters: any = {};
@@ -1058,7 +1045,6 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
     }
 
     /**
-     * Lists all non-resolved foreclosure prevention cases.
      */
     async getAllForeclosurePreventionCases(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ForeclosurePreventionCaseResponse>> {
         const response = await this.getAllForeclosurePreventionCasesRaw(initOverrides);
@@ -1066,7 +1052,6 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
     }
 
     /**
-     * Lists all active stewardship cases.
      */
     async getAllStewardshipCasesRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<StewardshipCaseResponse>>> {
         const queryParameters: any = {};
@@ -1087,7 +1072,6 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
     }
 
     /**
-     * Lists all active stewardship cases.
      */
     async getAllStewardshipCases(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<StewardshipCaseResponse>> {
         const response = await this.getAllStewardshipCasesRaw(initOverrides);
@@ -1095,7 +1079,6 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
     }
 
     /**
-     * Gets a foreclosure prevention case by ID.
      */
     async getForeclosurePreventionCaseRaw(requestParameters: GetForeclosurePreventionCaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ForeclosurePreventionCaseResponse>> {
         if (requestParameters['caseId'] == null) {
@@ -1124,7 +1107,6 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
     }
 
     /**
-     * Gets a foreclosure prevention case by ID.
      */
     async getForeclosurePreventionCase(requestParameters: GetForeclosurePreventionCaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ForeclosurePreventionCaseResponse> {
         const response = await this.getForeclosurePreventionCaseRaw(requestParameters, initOverrides);
@@ -1132,7 +1114,6 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
     }
 
     /**
-     * Gets foreclosure prevention cases for a specific ground lease.
      */
     async getForeclosurePreventionCasesByGroundLeaseRaw(requestParameters: GetForeclosurePreventionCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ForeclosurePreventionCaseResponse>>> {
         if (requestParameters['groundLeaseId'] == null) {
@@ -1161,7 +1142,6 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
     }
 
     /**
-     * Gets foreclosure prevention cases for a specific ground lease.
      */
     async getForeclosurePreventionCasesByGroundLease(requestParameters: GetForeclosurePreventionCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ForeclosurePreventionCaseResponse>> {
         const response = await this.getForeclosurePreventionCasesByGroundLeaseRaw(requestParameters, initOverrides);
@@ -1169,7 +1149,6 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
     }
 
     /**
-     * Gets a stewardship case by ID.
      */
     async getStewardshipCaseRaw(requestParameters: GetStewardshipCaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StewardshipCaseResponse>> {
         if (requestParameters['caseId'] == null) {
@@ -1198,7 +1177,6 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
     }
 
     /**
-     * Gets a stewardship case by ID.
      */
     async getStewardshipCase(requestParameters: GetStewardshipCaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StewardshipCaseResponse> {
         const response = await this.getStewardshipCaseRaw(requestParameters, initOverrides);
@@ -1206,7 +1184,6 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
     }
 
     /**
-     * Gets stewardship cases for a specific ground lease.
      */
     async getStewardshipCasesByGroundLeaseRaw(requestParameters: GetStewardshipCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<StewardshipCaseResponse>>> {
         if (requestParameters['groundLeaseId'] == null) {
@@ -1235,7 +1212,6 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
     }
 
     /**
-     * Gets stewardship cases for a specific ground lease.
      */
     async getStewardshipCasesByGroundLease(requestParameters: GetStewardshipCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<StewardshipCaseResponse>> {
         const response = await this.getStewardshipCasesByGroundLeaseRaw(requestParameters, initOverrides);
@@ -1243,9 +1219,8 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
     }
 
     /**
-     * Identifies a new lease violation.
      */
-    async identifyViolationRaw(requestParameters: IdentifyViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async identifyViolationRaw(requestParameters: IdentifyViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -1278,20 +1253,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: IdentifyViolationRequestToJSON(requestParameters['identifyViolationRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Identifies a new lease violation.
      */
-    async identifyViolation(requestParameters: IdentifyViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.identifyViolationRaw(requestParameters, initOverrides);
+    async identifyViolation(requestParameters: IdentifyViolationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.identifyViolationRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Initiates an annual occupancy verification.
      */
-    async initiateOccupancyVerificationRaw(requestParameters: InitiateOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async initiateOccupancyVerificationRaw(requestParameters: InitiateOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -1324,20 +1305,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: InitiateOccupancyVerificationRequestToJSON(requestParameters['initiateOccupancyVerificationRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Initiates an annual occupancy verification.
      */
-    async initiateOccupancyVerification(requestParameters: InitiateOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.initiateOccupancyVerificationRaw(requestParameters, initOverrides);
+    async initiateOccupancyVerification(requestParameters: InitiateOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.initiateOccupancyVerificationRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Issues a formal notice for a lease violation.
      */
-    async issueViolationNoticeRaw(requestParameters: IssueViolationNoticeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async issueViolationNoticeRaw(requestParameters: IssueViolationNoticeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -1378,20 +1365,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: IssueViolationNoticeRequestToJSON(requestParameters['issueViolationNoticeRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Issues a formal notice for a lease violation.
      */
-    async issueViolationNotice(requestParameters: IssueViolationNoticeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.issueViolationNoticeRaw(requestParameters, initOverrides);
+    async issueViolationNotice(requestParameters: IssueViolationNoticeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.issueViolationNoticeRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Makes a housing counseling referral.
      */
-    async makeCounselingReferralRaw(requestParameters: MakeCounselingReferralOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async makeCounselingReferralRaw(requestParameters: MakeCounselingReferralOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -1424,20 +1417,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: MakeCounselingReferralRequestToJSON(requestParameters['makeCounselingReferralRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Makes a housing counseling referral.
      */
-    async makeCounselingReferral(requestParameters: MakeCounselingReferralOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.makeCounselingReferralRaw(requestParameters, initOverrides);
+    async makeCounselingReferral(requestParameters: MakeCounselingReferralOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.makeCounselingReferralRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Marks an occupancy verification as overdue.
      */
-    async markOccupancyVerificationOverdueRaw(requestParameters: MarkOccupancyVerificationOverdueOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async markOccupancyVerificationOverdueRaw(requestParameters: MarkOccupancyVerificationOverdueOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -1478,20 +1477,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: MarkOccupancyVerificationOverdueRequestToJSON(requestParameters['markOccupancyVerificationOverdueRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Marks an occupancy verification as overdue.
      */
-    async markOccupancyVerificationOverdue(requestParameters: MarkOccupancyVerificationOverdueOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.markOccupancyVerificationOverdueRaw(requestParameters, initOverrides);
+    async markOccupancyVerificationOverdue(requestParameters: MarkOccupancyVerificationOverdueOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.markOccupancyVerificationOverdueRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Opens a new foreclosure prevention case.
      */
-    async openForeclosurePreventionCaseRaw(requestParameters: OpenForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<OpenForeclosurePreventionCaseResponse>> {
+    async openForeclosurePreventionCaseRaw(requestParameters: OpenForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['openForeclosurePreventionCaseRequest'] == null) {
             throw new runtime.RequiredError(
                 'openForeclosurePreventionCaseRequest',
@@ -1516,21 +1521,19 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: OpenForeclosurePreventionCaseRequestToJSON(requestParameters['openForeclosurePreventionCaseRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => OpenForeclosurePreventionCaseResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Opens a new foreclosure prevention case.
      */
-    async openForeclosurePreventionCase(requestParameters: OpenForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<OpenForeclosurePreventionCaseResponse> {
+    async openForeclosurePreventionCase(requestParameters: OpenForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.openForeclosurePreventionCaseRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
-     * Records the outcome of a counseling referral.
      */
-    async recordCounselingOutcomeRaw(requestParameters: RecordCounselingOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async recordCounselingOutcomeRaw(requestParameters: RecordCounselingOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -1571,20 +1574,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: RecordCounselingOutcomeRequestToJSON(requestParameters['recordCounselingOutcomeRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Records the outcome of a counseling referral.
      */
-    async recordCounselingOutcome(requestParameters: RecordCounselingOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.recordCounselingOutcomeRaw(requestParameters, initOverrides);
+    async recordCounselingOutcome(requestParameters: RecordCounselingOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordCounselingOutcomeRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Records the outcome of a forbearance request.
      */
-    async recordForbearanceOutcomeRaw(requestParameters: RecordForbearanceOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async recordForbearanceOutcomeRaw(requestParameters: RecordForbearanceOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -1625,20 +1634,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: RecordForbearanceOutcomeRequestToJSON(requestParameters['recordForbearanceOutcomeRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Records the outcome of a forbearance request.
      */
-    async recordForbearanceOutcome(requestParameters: RecordForbearanceOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.recordForbearanceOutcomeRaw(requestParameters, initOverrides);
+    async recordForbearanceOutcome(requestParameters: RecordForbearanceOutcomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordForbearanceOutcomeRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Records a servicer delinquency.
      */
-    async recordServicerDelinquencyRaw(requestParameters: RecordServicerDelinquencyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async recordServicerDelinquencyRaw(requestParameters: RecordServicerDelinquencyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -1671,20 +1686,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: RecordServicerDelinquencyRequestToJSON(requestParameters['recordServicerDelinquencyRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Records a servicer delinquency.
      */
-    async recordServicerDelinquency(requestParameters: RecordServicerDelinquencyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.recordServicerDelinquencyRaw(requestParameters, initOverrides);
+    async recordServicerDelinquency(requestParameters: RecordServicerDelinquencyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordServicerDelinquencyRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Submits a mortgage forbearance request.
      */
-    async requestForbearanceRaw(requestParameters: RequestForbearanceOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async requestForbearanceRaw(requestParameters: RequestForbearanceOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -1717,20 +1738,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: RequestForbearanceRequestToJSON(requestParameters['requestForbearanceRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Submits a mortgage forbearance request.
      */
-    async requestForbearance(requestParameters: RequestForbearanceOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.requestForbearanceRaw(requestParameters, initOverrides);
+    async requestForbearance(requestParameters: RequestForbearanceOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.requestForbearanceRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Resolves a foreclosure prevention case.
      */
-    async resolveForeclosurePreventionCaseRaw(requestParameters: ResolveForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async resolveForeclosurePreventionCaseRaw(requestParameters: ResolveForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -1763,20 +1790,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: ResolveForeclosurePreventionCaseRequestToJSON(requestParameters['resolveForeclosurePreventionCaseRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Resolves a foreclosure prevention case.
      */
-    async resolveForeclosurePreventionCase(requestParameters: ResolveForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.resolveForeclosurePreventionCaseRaw(requestParameters, initOverrides);
+    async resolveForeclosurePreventionCase(requestParameters: ResolveForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.resolveForeclosurePreventionCaseRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Schedules a property inspection.
      */
-    async schedulePropertyInspectionRaw(requestParameters: SchedulePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async schedulePropertyInspectionRaw(requestParameters: SchedulePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -1809,20 +1842,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: SchedulePropertyInspectionRequestToJSON(requestParameters['schedulePropertyInspectionRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Schedules a property inspection.
      */
-    async schedulePropertyInspection(requestParameters: SchedulePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.schedulePropertyInspectionRaw(requestParameters, initOverrides);
+    async schedulePropertyInspection(requestParameters: SchedulePropertyInspectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.schedulePropertyInspectionRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Submits homeowner responses to an occupancy verification.
      */
-    async submitOccupancyVerificationRaw(requestParameters: SubmitOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async submitOccupancyVerificationRaw(requestParameters: SubmitOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -1863,20 +1902,26 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: SubmitOccupancyVerificationRequestToJSON(requestParameters['submitOccupancyVerificationRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Submits homeowner responses to an occupancy verification.
      */
-    async submitOccupancyVerification(requestParameters: SubmitOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.submitOccupancyVerificationRaw(requestParameters, initOverrides);
+    async submitOccupancyVerification(requestParameters: SubmitOccupancyVerificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.submitOccupancyVerificationRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Records staff approval of an occupancy verification.
      */
-    async verifyOccupancyRaw(requestParameters: VerifyOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async verifyOccupancyRaw(requestParameters: VerifyOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
                 'caseId',
@@ -1917,14 +1962,21 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             body: VerifyOccupancyRequestToJSON(requestParameters['verifyOccupancyRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Records staff approval of an occupancy verification.
      */
-    async verifyOccupancy(requestParameters: VerifyOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.verifyOccupancyRaw(requestParameters, initOverrides);
+    async verifyOccupancy(requestParameters: VerifyOccupancyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.verifyOccupancyRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
 }

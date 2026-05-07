@@ -126,7 +126,7 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
             )}
             <div className="detail-field full-span">
               <div className="detail-field__value">
-                <NavIdLink id={detail.buildingId} to="/homes" label="Open Home" />
+                <NavIdLink id={detail.homeId} to="/homes" label="Open Home" />
               </div>
             </div>
             <div className="detail-field full-span">

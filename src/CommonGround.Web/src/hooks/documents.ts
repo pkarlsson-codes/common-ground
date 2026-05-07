@@ -35,7 +35,7 @@ export function useEntityDocuments(
 ) {
   return useQuery({
     queryKey: [...KEYS.entityDocs(entityType ?? '', entityId ?? ''), page, pageSize],
-    queryFn: () => api.getEntityDocuments({ entityType: entityType!, entityId: entityId!, page, pageSize }),
+    queryFn: () => api.getEntityDocuments({ entityType: entityType!, entityId: entityId!, pageNumber: page, pageSize }),
     enabled: !!entityType && !!entityId,
   })
 }

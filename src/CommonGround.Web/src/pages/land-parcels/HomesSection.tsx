@@ -12,7 +12,7 @@ interface Props {
 export default function HomesSection({ parcelId }: Props) {
   const [expanded, setExpanded] = useState(true)
   const [showRegister, setShowRegister] = useState(false)
-  const { data, isLoading } = useHomes({ page: 1, pageSize: 50, landParcelId: parcelId })
+  const { data, isLoading } = useHomes({ pageNumber: 1, pageSize: 50, landParcelId: parcelId })
   const homes = data?.items ?? []
 
   return (

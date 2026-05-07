@@ -21,7 +21,7 @@ import type {
   DocumentResponse,
   PaginatedResponseOfDocumentLibraryItemResponse,
   PaginatedResponseOfEntityDocumentItemResponse,
-  SoftDeleteDocumentRequest,
+  ProblemDetails,
   TagDocumentRequest,
   UpdateDocumentMetadataRequest,
   UploadDocumentResponse,
@@ -37,8 +37,8 @@ import {
     PaginatedResponseOfDocumentLibraryItemResponseToJSON,
     PaginatedResponseOfEntityDocumentItemResponseFromJSON,
     PaginatedResponseOfEntityDocumentItemResponseToJSON,
-    SoftDeleteDocumentRequestFromJSON,
-    SoftDeleteDocumentRequestToJSON,
+    ProblemDetailsFromJSON,
+    ProblemDetailsToJSON,
     TagDocumentRequestFromJSON,
     TagDocumentRequestToJSON,
     UpdateDocumentMetadataRequestFromJSON,
@@ -67,7 +67,7 @@ export interface GetDocumentRequest {
 export interface GetEntityDocumentsRequest {
     entityType: string;
     entityId: string;
-    page?: number;
+    pageNumber?: number;
     pageSize?: number;
 }
 
@@ -80,9 +80,8 @@ export interface ListDocumentsRequest {
     expiringBefore?: Date | null;
 }
 
-export interface SoftDeleteDocumentOperationRequest {
+export interface SoftDeleteDocumentRequest {
     documentId: string;
-    softDeleteDocumentRequest: SoftDeleteDocumentRequest;
 }
 
 export interface TagDocumentOperationRequest {
@@ -109,54 +108,47 @@ export interface UpdateDocumentMetadataOperationRequest {
 export interface DocumentsApiInterface {
     /**
      * 
-     * @summary Adds a new version to an existing document. Multipart/form-data identical to upload.
-     * @param {string} documentId The document ID.
+     * @param {string} documentId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
      */
-    addDocumentVersionRaw(requestParameters: AddDocumentVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AddDocumentVersionResponse>>;
+    addDocumentVersionRaw(requestParameters: AddDocumentVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Adds a new version to an existing document. Multipart/form-data identical to upload.
      */
-    addDocumentVersion(requestParameters: AddDocumentVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AddDocumentVersionResponse>;
+    addDocumentVersion(requestParameters: AddDocumentVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
     /**
      * 
-     * @summary Attaches a document to an entity.
-     * @param {string} documentId The ID of the document to attach.
-     * @param {AttachDocumentRequest} attachDocumentRequest The attachment request details.
+     * @param {string} documentId 
+     * @param {AttachDocumentRequest} attachDocumentRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
      */
-    attachDocumentRaw(requestParameters: AttachDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    attachDocumentRaw(requestParameters: AttachDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Attaches a document to an entity.
      */
-    attachDocument(requestParameters: AttachDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    attachDocument(requestParameters: AttachDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Redirects to the download URL for a document.
-     * @param {string} documentId The ID of the document to download.
+     * @param {string} documentId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
      */
-    downloadDocumentRaw(requestParameters: DownloadDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    downloadDocumentRaw(requestParameters: DownloadDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Redirects to the download URL for a document.
      */
-    downloadDocument(requestParameters: DownloadDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    downloadDocument(requestParameters: DownloadDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
     /**
      * 
-     * @summary Gets a document by ID.
-     * @param {string} documentId The ID of the document to retrieve.
+     * @param {string} documentId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
@@ -164,17 +156,15 @@ export interface DocumentsApiInterface {
     getDocumentRaw(requestParameters: GetDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DocumentResponse>>;
 
     /**
-     * Gets a document by ID.
      */
     getDocument(requestParameters: GetDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DocumentResponse>;
 
     /**
      * 
-     * @summary Lists documents attached to an entity.
-     * @param {string} entityType The type of entity.
-     * @param {string} entityId The ID of the entity.
-     * @param {number} [page] The page number (1-based).
-     * @param {number} [pageSize] The number of items per page.
+     * @param {string} entityType 
+     * @param {string} entityId 
+     * @param {number} [pageNumber] 
+     * @param {number} [pageSize] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
@@ -182,19 +172,17 @@ export interface DocumentsApiInterface {
     getEntityDocumentsRaw(requestParameters: GetEntityDocumentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfEntityDocumentItemResponse>>;
 
     /**
-     * Lists documents attached to an entity.
      */
     getEntityDocuments(requestParameters: GetEntityDocumentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfEntityDocumentItemResponse>;
 
     /**
      * 
-     * @summary Lists documents in the library, paginated with optional filters.
-     * @param {number} [pageNumber] The 1-based page number.
-     * @param {number} [pageSize] The page size.
-     * @param {boolean} [includeDeleted] When true, includes soft-deleted documents.
-     * @param {string} [contentType] Optional MIME content-type filter.
-     * @param {string} [tag] Optional tag filter.
-     * @param {Date} [expiringBefore] When provided, restricts results to documents expiring before this date.
+     * @param {number} [pageNumber] 
+     * @param {number} [pageSize] 
+     * @param {boolean} [includeDeleted] 
+     * @param {string} [contentType] 
+     * @param {string} [tag] 
+     * @param {Date} [expiringBefore] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
@@ -202,87 +190,75 @@ export interface DocumentsApiInterface {
     listDocumentsRaw(requestParameters: ListDocumentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfDocumentLibraryItemResponse>>;
 
     /**
-     * Lists documents in the library, paginated with optional filters.
      */
     listDocuments(requestParameters: ListDocumentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfDocumentLibraryItemResponse>;
 
     /**
      * 
-     * @summary Soft-deletes a document.
-     * @param {string} documentId The ID of the document to delete.
-     * @param {SoftDeleteDocumentRequest} softDeleteDocumentRequest The soft delete request details.
+     * @param {string} documentId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
      */
-    softDeleteDocumentRaw(requestParameters: SoftDeleteDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    softDeleteDocumentRaw(requestParameters: SoftDeleteDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Soft-deletes a document.
      */
-    softDeleteDocument(requestParameters: SoftDeleteDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    softDeleteDocument(requestParameters: SoftDeleteDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Adds a tag to a document.
-     * @param {string} documentId The document ID.
-     * @param {TagDocumentRequest} tagDocumentRequest The tag request.
+     * @param {string} documentId 
+     * @param {TagDocumentRequest} tagDocumentRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
      */
-    tagDocumentRaw(requestParameters: TagDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    tagDocumentRaw(requestParameters: TagDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Adds a tag to a document.
      */
-    tagDocument(requestParameters: TagDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    tagDocument(requestParameters: TagDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Removes a tag from a document.
-     * @param {string} documentId The document ID.
-     * @param {string} tag The tag to remove.
+     * @param {string} documentId 
+     * @param {string} tag 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
      */
-    untagDocumentRaw(requestParameters: UntagDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    untagDocumentRaw(requestParameters: UntagDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Removes a tag from a document.
      */
-    untagDocument(requestParameters: UntagDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    untagDocument(requestParameters: UntagDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Updates editable metadata fields on a document.
-     * @param {string} documentId The document ID.
-     * @param {UpdateDocumentMetadataRequest} updateDocumentMetadataRequest The metadata update request.
+     * @param {string} documentId 
+     * @param {UpdateDocumentMetadataRequest} updateDocumentMetadataRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
      */
-    updateDocumentMetadataRaw(requestParameters: UpdateDocumentMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    updateDocumentMetadataRaw(requestParameters: UpdateDocumentMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Updates editable metadata fields on a document.
      */
-    updateDocumentMetadata(requestParameters: UpdateDocumentMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    updateDocumentMetadata(requestParameters: UpdateDocumentMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Uploads a new document. Forwards multipart body to the API without buffering.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
      */
-    uploadDocumentRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UploadDocumentResponse>>;
+    uploadDocumentRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Uploads a new document. Forwards multipart body to the API without buffering.
      */
-    uploadDocument(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UploadDocumentResponse>;
+    uploadDocument(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
 }
 
@@ -292,9 +268,8 @@ export interface DocumentsApiInterface {
 export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterface {
 
     /**
-     * Adds a new version to an existing document. Multipart/form-data identical to upload.
      */
-    async addDocumentVersionRaw(requestParameters: AddDocumentVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AddDocumentVersionResponse>> {
+    async addDocumentVersionRaw(requestParameters: AddDocumentVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['documentId'] == null) {
             throw new runtime.RequiredError(
                 'documentId',
@@ -317,21 +292,19 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => AddDocumentVersionResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Adds a new version to an existing document. Multipart/form-data identical to upload.
      */
-    async addDocumentVersion(requestParameters: AddDocumentVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AddDocumentVersionResponse> {
+    async addDocumentVersion(requestParameters: AddDocumentVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.addDocumentVersionRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
-     * Attaches a document to an entity.
      */
-    async attachDocumentRaw(requestParameters: AttachDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async attachDocumentRaw(requestParameters: AttachDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['documentId'] == null) {
             throw new runtime.RequiredError(
                 'documentId',
@@ -364,20 +337,26 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
             body: AttachDocumentRequestToJSON(requestParameters['attachDocumentRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Attaches a document to an entity.
      */
-    async attachDocument(requestParameters: AttachDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.attachDocumentRaw(requestParameters, initOverrides);
+    async attachDocument(requestParameters: AttachDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.attachDocumentRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Redirects to the download URL for a document.
      */
-    async downloadDocumentRaw(requestParameters: DownloadDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async downloadDocumentRaw(requestParameters: DownloadDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['documentId'] == null) {
             throw new runtime.RequiredError(
                 'documentId',
@@ -400,18 +379,17 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Redirects to the download URL for a document.
      */
-    async downloadDocument(requestParameters: DownloadDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.downloadDocumentRaw(requestParameters, initOverrides);
+    async downloadDocument(requestParameters: DownloadDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.downloadDocumentRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**
-     * Gets a document by ID.
      */
     async getDocumentRaw(requestParameters: GetDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DocumentResponse>> {
         if (requestParameters['documentId'] == null) {
@@ -440,7 +418,6 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
     }
 
     /**
-     * Gets a document by ID.
      */
     async getDocument(requestParameters: GetDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DocumentResponse> {
         const response = await this.getDocumentRaw(requestParameters, initOverrides);
@@ -448,7 +425,6 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
     }
 
     /**
-     * Lists documents attached to an entity.
      */
     async getEntityDocumentsRaw(requestParameters: GetEntityDocumentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfEntityDocumentItemResponse>> {
         if (requestParameters['entityType'] == null) {
@@ -467,8 +443,8 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
 
         const queryParameters: any = {};
 
-        if (requestParameters['page'] != null) {
-            queryParameters['page'] = requestParameters['page'];
+        if (requestParameters['pageNumber'] != null) {
+            queryParameters['pageNumber'] = requestParameters['pageNumber'];
         }
 
         if (requestParameters['pageSize'] != null) {
@@ -493,7 +469,6 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
     }
 
     /**
-     * Lists documents attached to an entity.
      */
     async getEntityDocuments(requestParameters: GetEntityDocumentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfEntityDocumentItemResponse> {
         const response = await this.getEntityDocumentsRaw(requestParameters, initOverrides);
@@ -501,17 +476,16 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
     }
 
     /**
-     * Lists documents in the library, paginated with optional filters.
      */
     async listDocumentsRaw(requestParameters: ListDocumentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfDocumentLibraryItemResponse>> {
         const queryParameters: any = {};
 
         if (requestParameters['pageNumber'] != null) {
-            queryParameters['page.number'] = requestParameters['pageNumber'];
+            queryParameters['pageNumber'] = requestParameters['pageNumber'];
         }
 
         if (requestParameters['pageSize'] != null) {
-            queryParameters['page.size'] = requestParameters['pageSize'];
+            queryParameters['pageSize'] = requestParameters['pageSize'];
         }
 
         if (requestParameters['includeDeleted'] != null) {
@@ -546,7 +520,6 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
     }
 
     /**
-     * Lists documents in the library, paginated with optional filters.
      */
     async listDocuments(requestParameters: ListDocumentsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfDocumentLibraryItemResponse> {
         const response = await this.listDocumentsRaw(requestParameters, initOverrides);
@@ -554,9 +527,8 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
     }
 
     /**
-     * Soft-deletes a document.
      */
-    async softDeleteDocumentRaw(requestParameters: SoftDeleteDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async softDeleteDocumentRaw(requestParameters: SoftDeleteDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['documentId'] == null) {
             throw new runtime.RequiredError(
                 'documentId',
@@ -564,18 +536,9 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
             );
         }
 
-        if (requestParameters['softDeleteDocumentRequest'] == null) {
-            throw new runtime.RequiredError(
-                'softDeleteDocumentRequest',
-                'Required parameter "softDeleteDocumentRequest" was null or undefined when calling softDeleteDocument().'
-            );
-        }
-
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
 
 
         let urlPath = `/api/v1/documents/{documentId}`;
@@ -586,23 +549,28 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
             method: 'DELETE',
             headers: headerParameters,
             query: queryParameters,
-            body: SoftDeleteDocumentRequestToJSON(requestParameters['softDeleteDocumentRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Soft-deletes a document.
      */
-    async softDeleteDocument(requestParameters: SoftDeleteDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.softDeleteDocumentRaw(requestParameters, initOverrides);
+    async softDeleteDocument(requestParameters: SoftDeleteDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.softDeleteDocumentRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Adds a tag to a document.
      */
-    async tagDocumentRaw(requestParameters: TagDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async tagDocumentRaw(requestParameters: TagDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['documentId'] == null) {
             throw new runtime.RequiredError(
                 'documentId',
@@ -635,20 +603,26 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
             body: TagDocumentRequestToJSON(requestParameters['tagDocumentRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Adds a tag to a document.
      */
-    async tagDocument(requestParameters: TagDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.tagDocumentRaw(requestParameters, initOverrides);
+    async tagDocument(requestParameters: TagDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.tagDocumentRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Removes a tag from a document.
      */
-    async untagDocumentRaw(requestParameters: UntagDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async untagDocumentRaw(requestParameters: UntagDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['documentId'] == null) {
             throw new runtime.RequiredError(
                 'documentId',
@@ -679,20 +653,26 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Removes a tag from a document.
      */
-    async untagDocument(requestParameters: UntagDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.untagDocumentRaw(requestParameters, initOverrides);
+    async untagDocument(requestParameters: UntagDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.untagDocumentRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Updates editable metadata fields on a document.
      */
-    async updateDocumentMetadataRaw(requestParameters: UpdateDocumentMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async updateDocumentMetadataRaw(requestParameters: UpdateDocumentMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['documentId'] == null) {
             throw new runtime.RequiredError(
                 'documentId',
@@ -725,20 +705,26 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
             body: UpdateDocumentMetadataRequestToJSON(requestParameters['updateDocumentMetadataRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Updates editable metadata fields on a document.
      */
-    async updateDocumentMetadata(requestParameters: UpdateDocumentMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.updateDocumentMetadataRaw(requestParameters, initOverrides);
+    async updateDocumentMetadata(requestParameters: UpdateDocumentMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.updateDocumentMetadataRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Uploads a new document. Forwards multipart body to the API without buffering.
      */
-    async uploadDocumentRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UploadDocumentResponse>> {
+    async uploadDocumentRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -753,13 +739,12 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => UploadDocumentResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Uploads a new document. Forwards multipart body to the API without buffering.
      */
-    async uploadDocument(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UploadDocumentResponse> {
+    async uploadDocument(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.uploadDocumentRaw(initOverrides);
         return await response.value();
     }

@@ -90,9 +90,6 @@ models/ResaleEstimateResponse.ts
 models/ResolveForeclosurePreventionCaseRequest.ts
 models/ScheduleClosingRequest.ts
 models/SchedulePropertyInspectionRequest.ts
-models/SoftDeleteDocumentRequest.ts
-models/SortDescriptor.ts
-models/SortDirection.ts
 models/StallWorkflowRequest.ts
 models/StewardshipCaseResponse.ts
 models/StewardshipCheckInDto.ts

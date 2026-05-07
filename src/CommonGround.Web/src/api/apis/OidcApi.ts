@@ -15,6 +15,13 @@
 
 
 import * as runtime from '../runtime';
+import type {
+  ProblemDetails,
+} from '../models/index';
+import {
+    ProblemDetailsFromJSON,
+    ProblemDetailsToJSON,
+} from '../models/index';
 
 /**
  * OidcApi - interface
@@ -30,12 +37,12 @@ export interface OidcApiInterface {
      * @throws {RequiredError}
      * @memberof OidcApiInterface
      */
-    oidcLoginRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>>;
+    loginRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>>;
 
     /**
      * Initiates the OIDC authorization request with PKCE and state.
      */
-    oidcLogin(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob>;
+    login(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob>;
 
     /**
      * 
@@ -44,12 +51,12 @@ export interface OidcApiInterface {
      * @throws {RequiredError}
      * @memberof OidcApiInterface
      */
-    oidcLogoutRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>>;
+    logoutRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>>;
 
     /**
      * Signs the user out of both cookie and OIDC schemes, clears server-side tokens, and redirects to the app.
      */
-    oidcLogout(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob>;
+    logout(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob>;
 
     /**
      * 
@@ -58,12 +65,12 @@ export interface OidcApiInterface {
      * @throws {RequiredError}
      * @memberof OidcApiInterface
      */
-    oidcRefreshRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>>;
+    refreshRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>>;
 
     /**
      * Exchanges a refresh token for a new access token using the server-side token store.
      */
-    oidcRefresh(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob>;
+    refresh(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob>;
 
     /**
      * 
@@ -72,12 +79,12 @@ export interface OidcApiInterface {
      * @throws {RequiredError}
      * @memberof OidcApiInterface
      */
-    oidcRegisterRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>>;
+    registerRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>>;
 
     /**
      * Initiates the OIDC authorization request with prompt=create to open the registration UI directly.
      */
-    oidcRegister(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob>;
+    register(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob>;
 
 }
 
@@ -89,7 +96,7 @@ export class OidcApi extends runtime.BaseAPI implements OidcApiInterface {
     /**
      * Initiates the OIDC authorization request with PKCE and state.
      */
-    async oidcLoginRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
+    async loginRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -110,15 +117,15 @@ export class OidcApi extends runtime.BaseAPI implements OidcApiInterface {
     /**
      * Initiates the OIDC authorization request with PKCE and state.
      */
-    async oidcLogin(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
-        const response = await this.oidcLoginRaw(initOverrides);
+    async login(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
+        const response = await this.loginRaw(initOverrides);
         return await response.value();
     }
 
     /**
      * Signs the user out of both cookie and OIDC schemes, clears server-side tokens, and redirects to the app.
      */
-    async oidcLogoutRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
+    async logoutRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -139,15 +146,15 @@ export class OidcApi extends runtime.BaseAPI implements OidcApiInterface {
     /**
      * Signs the user out of both cookie and OIDC schemes, clears server-side tokens, and redirects to the app.
      */
-    async oidcLogout(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
-        const response = await this.oidcLogoutRaw(initOverrides);
+    async logout(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
+        const response = await this.logoutRaw(initOverrides);
         return await response.value();
     }
 
     /**
      * Exchanges a refresh token for a new access token using the server-side token store.
      */
-    async oidcRefreshRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
+    async refreshRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -168,15 +175,15 @@ export class OidcApi extends runtime.BaseAPI implements OidcApiInterface {
     /**
      * Exchanges a refresh token for a new access token using the server-side token store.
      */
-    async oidcRefresh(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
-        const response = await this.oidcRefreshRaw(initOverrides);
+    async refresh(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
+        const response = await this.refreshRaw(initOverrides);
         return await response.value();
     }
 
     /**
      * Initiates the OIDC authorization request with prompt=create to open the registration UI directly.
      */
-    async oidcRegisterRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
+    async registerRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -197,8 +204,8 @@ export class OidcApi extends runtime.BaseAPI implements OidcApiInterface {
     /**
      * Initiates the OIDC authorization request with prompt=create to open the registration UI directly.
      */
-    async oidcRegister(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
-        const response = await this.oidcRegisterRaw(initOverrides);
+    async register(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
+        const response = await this.registerRaw(initOverrides);
         return await response.value();
     }
 

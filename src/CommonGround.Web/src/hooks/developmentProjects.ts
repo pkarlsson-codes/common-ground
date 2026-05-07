@@ -34,13 +34,14 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   return res.json()
 }
 
-export function useDevelopmentProjects(params: { pageNumber: number; pageSize?: number; filterSearch?: string }) {
+export function useDevelopmentProjects(params: { pageNumber: number; pageSize?: number; search?: string; landParcelId?: string }) {
   return useQuery({
-    queryKey: ['development-projects', params.pageNumber, params.filterSearch],
+    queryKey: ['development-projects', params.pageNumber, params.search, params.landParcelId],
     queryFn: () => api.getDevelopmentProjects({
       pageNumber: params.pageNumber,
       pageSize: params.pageSize ?? 20,
-      filterSearch: params.filterSearch,
+      search: params.search,
+      landParcelId: params.landParcelId,
     }),
   })
 }

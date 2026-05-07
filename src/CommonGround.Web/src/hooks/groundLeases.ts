@@ -9,10 +9,10 @@ import type {
 
 const api = new GroundLeasesApi(apiConfig)
 
-export function useGroundLeases(page: number, status?: string, landParcelId?: string, buildingId?: string, search?: string) {
+export function useGroundLeases(pageNumber: number, status?: string, landParcelId?: string, homeId?: string, search?: string) {
   return useQuery({
-    queryKey: ['ground-leases', page, status, landParcelId, buildingId, search],
-    queryFn: () => api.getGroundLeases({ page, pageSize: 20, status, landParcelId, buildingId, search }),
+    queryKey: ['ground-leases', pageNumber, status, landParcelId, homeId, search],
+    queryFn: () => api.getGroundLeases({ pageNumber, pageSize: 20, status, landParcelId, homeId, search }),
   })
 }
 

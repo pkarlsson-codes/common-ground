@@ -9,11 +9,11 @@ const api = new HomesApi(apiConfig)
 const dateStr = (d: Date | null | undefined) =>
   d instanceof Date ? d.toISOString().substring(0, 10) : undefined
 
-export function useHomes(params: { page: number; pageSize?: number; landParcelId?: string; status?: string }) {
+export function useHomes(params: { pageNumber: number; pageSize?: number; landParcelId?: string; status?: string }) {
   return useQuery({
-    queryKey: ['homes', params.page, params.landParcelId, params.status],
+    queryKey: ['homes', params.pageNumber, params.landParcelId, params.status],
     queryFn: () => api.getHomes({
-      page: params.page,
+      pageNumber: params.pageNumber,
       pageSize: params.pageSize ?? 20,
       landParcelId: params.landParcelId,
       status: params.status,
@@ -38,12 +38,12 @@ export function useHome(id: string | null) {
 
 export function useHomeAssessments(
   homeId: string | null,
-  page: number = 1,
+  pageNumber: number = 1,
   pageSize: number = 20,
 ) {
   return useQuery<PaginatedResponseOfBuildingAssessmentItemResponse>({
-    queryKey: ['home-assessments', homeId, page, pageSize],
-    queryFn: () => api.getHomeAssessments({ homeId: homeId!, page, pageSize }),
+    queryKey: ['home-assessments', homeId, pageNumber, pageSize],
+    queryFn: () => api.getHomeAssessments({ homeId: homeId!, pageNumber, pageSize }),
     enabled: !!homeId,
   })
 }

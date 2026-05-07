@@ -19,10 +19,10 @@ import type { PurchaseWorkflowListItemResponse } from '../api/models/PurchaseWor
 
 const api = new PurchaseWorkflowsApi(apiConfig)
 
-export function usePurchaseWorkflows(page: number, groundLeaseId?: string, phase?: string, search?: string) {
+export function usePurchaseWorkflows(pageNumber: number, groundLeaseId?: string, phase?: string, search?: string) {
   return useQuery({
-    queryKey: ['purchase-workflows', page, groundLeaseId, phase, search],
-    queryFn: () => api.getPurchaseWorkflows({ page, pageSize: 20, groundLeaseId, phase, search }),
+    queryKey: ['purchase-workflows', pageNumber, groundLeaseId, phase, search],
+    queryFn: () => api.getPurchaseWorkflows({ pageNumber, pageSize: 20, groundLeaseId, phase, search }),
   })
 }
 

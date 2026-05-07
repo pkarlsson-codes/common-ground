@@ -47,12 +47,12 @@ export interface GetHomeRequest {
 
 export interface GetHomeAssessmentsRequest {
     homeId: string;
-    page?: number;
+    pageNumber?: number;
     pageSize?: number;
 }
 
 export interface GetHomesRequest {
-    page?: number;
+    pageNumber?: number;
     pageSize?: number;
     landParcelId?: string | null;
     status?: string | null;
@@ -76,8 +76,7 @@ export interface RegisterHomeOperationRequest {
 export interface HomesApiInterface {
     /**
      * 
-     * @summary Gets a home by ID.
-     * @param {string} homeId The ID of the home to retrieve.
+     * @param {string} homeId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HomesApiInterface
@@ -85,16 +84,14 @@ export interface HomesApiInterface {
     getHomeRaw(requestParameters: GetHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HomeResponse>>;
 
     /**
-     * Gets a home by ID.
      */
     getHome(requestParameters: GetHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HomeResponse>;
 
     /**
      * 
-     * @summary Gets a paginated list of assessments for a home.
-     * @param {string} homeId The ID of the home.
-     * @param {number} [page] The page number (1-based).
-     * @param {number} [pageSize] The number of items per page.
+     * @param {string} homeId 
+     * @param {number} [pageNumber] 
+     * @param {number} [pageSize] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HomesApiInterface
@@ -102,17 +99,15 @@ export interface HomesApiInterface {
     getHomeAssessmentsRaw(requestParameters: GetHomeAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfHomeAssessmentItemResponse>>;
 
     /**
-     * Gets a paginated list of assessments for a home.
      */
     getHomeAssessments(requestParameters: GetHomeAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeAssessmentItemResponse>;
 
     /**
      * 
-     * @summary Gets a paginated list of homes.
-     * @param {number} [page] The page number (1-based).
-     * @param {number} [pageSize] The number of items per page.
-     * @param {string} [landParcelId] Optional land parcel ID filter.
-     * @param {string} [status] Optional status filter.
+     * @param {number} [pageNumber] 
+     * @param {number} [pageSize] 
+     * @param {string} [landParcelId] 
+     * @param {string} [status] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HomesApiInterface
@@ -120,40 +115,35 @@ export interface HomesApiInterface {
     getHomesRaw(requestParameters: GetHomesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfHomeListItemResponse>>;
 
     /**
-     * Gets a paginated list of homes.
      */
     getHomes(requestParameters: GetHomesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeListItemResponse>;
 
     /**
      * 
-     * @summary Records an assessment for a home.
-     * @param {string} homeId The ID of the home to assess.
-     * @param {RecordHomeAssessmentRequest} recordHomeAssessmentRequest The assessment details.
+     * @param {string} homeId 
+     * @param {RecordHomeAssessmentRequest} recordHomeAssessmentRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HomesApiInterface
      */
-    recordHomeAssessmentRaw(requestParameters: RecordHomeAssessmentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    recordHomeAssessmentRaw(requestParameters: RecordHomeAssessmentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Records an assessment for a home.
      */
-    recordHomeAssessment(requestParameters: RecordHomeAssessmentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    recordHomeAssessment(requestParameters: RecordHomeAssessmentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Registers a new home.
-     * @param {RegisterHomeRequest} registerHomeRequest The home registration details.
+     * @param {RegisterHomeRequest} registerHomeRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HomesApiInterface
      */
-    registerHomeRaw(requestParameters: RegisterHomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RegisterHomeResponse>>;
+    registerHomeRaw(requestParameters: RegisterHomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Registers a new home.
      */
-    registerHome(requestParameters: RegisterHomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RegisterHomeResponse>;
+    registerHome(requestParameters: RegisterHomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
 }
 
@@ -163,7 +153,6 @@ export interface HomesApiInterface {
 export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
 
     /**
-     * Gets a home by ID.
      */
     async getHomeRaw(requestParameters: GetHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HomeResponse>> {
         if (requestParameters['homeId'] == null) {
@@ -192,7 +181,6 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
     }
 
     /**
-     * Gets a home by ID.
      */
     async getHome(requestParameters: GetHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HomeResponse> {
         const response = await this.getHomeRaw(requestParameters, initOverrides);
@@ -200,7 +188,6 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
     }
 
     /**
-     * Gets a paginated list of assessments for a home.
      */
     async getHomeAssessmentsRaw(requestParameters: GetHomeAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfHomeAssessmentItemResponse>> {
         if (requestParameters['homeId'] == null) {
@@ -212,8 +199,8 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
 
         const queryParameters: any = {};
 
-        if (requestParameters['page'] != null) {
-            queryParameters['page'] = requestParameters['page'];
+        if (requestParameters['pageNumber'] != null) {
+            queryParameters['pageNumber'] = requestParameters['pageNumber'];
         }
 
         if (requestParameters['pageSize'] != null) {
@@ -237,7 +224,6 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
     }
 
     /**
-     * Gets a paginated list of assessments for a home.
      */
     async getHomeAssessments(requestParameters: GetHomeAssessmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeAssessmentItemResponse> {
         const response = await this.getHomeAssessmentsRaw(requestParameters, initOverrides);
@@ -245,13 +231,12 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
     }
 
     /**
-     * Gets a paginated list of homes.
      */
     async getHomesRaw(requestParameters: GetHomesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfHomeListItemResponse>> {
         const queryParameters: any = {};
 
-        if (requestParameters['page'] != null) {
-            queryParameters['page'] = requestParameters['page'];
+        if (requestParameters['pageNumber'] != null) {
+            queryParameters['pageNumber'] = requestParameters['pageNumber'];
         }
 
         if (requestParameters['pageSize'] != null) {
@@ -282,7 +267,6 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
     }
 
     /**
-     * Gets a paginated list of homes.
      */
     async getHomes(requestParameters: GetHomesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeListItemResponse> {
         const response = await this.getHomesRaw(requestParameters, initOverrides);
@@ -290,9 +274,8 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
     }
 
     /**
-     * Records an assessment for a home.
      */
-    async recordHomeAssessmentRaw(requestParameters: RecordHomeAssessmentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async recordHomeAssessmentRaw(requestParameters: RecordHomeAssessmentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['homeId'] == null) {
             throw new runtime.RequiredError(
                 'homeId',
@@ -325,20 +308,26 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
             body: RecordHomeAssessmentRequestToJSON(requestParameters['recordHomeAssessmentRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Records an assessment for a home.
      */
-    async recordHomeAssessment(requestParameters: RecordHomeAssessmentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.recordHomeAssessmentRaw(requestParameters, initOverrides);
+    async recordHomeAssessment(requestParameters: RecordHomeAssessmentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordHomeAssessmentRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 201:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Registers a new home.
      */
-    async registerHomeRaw(requestParameters: RegisterHomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RegisterHomeResponse>> {
+    async registerHomeRaw(requestParameters: RegisterHomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['registerHomeRequest'] == null) {
             throw new runtime.RequiredError(
                 'registerHomeRequest',
@@ -363,13 +352,12 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
             body: RegisterHomeRequestToJSON(requestParameters['registerHomeRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => RegisterHomeResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Registers a new home.
      */
-    async registerHome(requestParameters: RegisterHomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RegisterHomeResponse> {
+    async registerHome(requestParameters: RegisterHomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.registerHomeRaw(requestParameters, initOverrides);
         return await response.value();
     }

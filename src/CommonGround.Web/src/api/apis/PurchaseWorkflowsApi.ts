@@ -75,7 +75,7 @@ export interface GetPurchaseWorkflowRequest {
 }
 
 export interface GetPurchaseWorkflowsRequest {
-    page?: number;
+    pageNumber?: number;
     pageSize?: number;
     groundLeaseId?: string | null;
     phase?: string | null;
@@ -140,24 +140,21 @@ export interface WithdrawPurchaseOperationRequest {
 export interface PurchaseWorkflowsApiInterface {
     /**
      * 
-     * @summary Fails the purchase.
-     * @param {string} workflowId The ID of the purchase workflow.
-     * @param {FailPurchaseRequest} failPurchaseRequest The failure details.
+     * @param {string} workflowId 
+     * @param {FailPurchaseRequest} failPurchaseRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PurchaseWorkflowsApiInterface
      */
-    failPurchaseRaw(requestParameters: FailPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    failPurchaseRaw(requestParameters: FailPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Fails the purchase.
      */
-    failPurchase(requestParameters: FailPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    failPurchase(requestParameters: FailPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Gets a purchase workflow by ID.
-     * @param {string} workflowId The ID of the purchase workflow to retrieve.
+     * @param {string} workflowId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PurchaseWorkflowsApiInterface
@@ -165,18 +162,16 @@ export interface PurchaseWorkflowsApiInterface {
     getPurchaseWorkflowRaw(requestParameters: GetPurchaseWorkflowRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PurchaseWorkflowResponse>>;
 
     /**
-     * Gets a purchase workflow by ID.
      */
     getPurchaseWorkflow(requestParameters: GetPurchaseWorkflowRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PurchaseWorkflowResponse>;
 
     /**
      * 
-     * @summary Gets a paginated list of purchase workflows.
-     * @param {number} [page] The page number (1-based).
-     * @param {number} [pageSize] The number of items per page.
-     * @param {string} [groundLeaseId] Optional ground lease ID filter.
-     * @param {string} [phase] Optional phase filter.
-     * @param {string} [search] Optional free-text search across buyer name.
+     * @param {number} [pageNumber] 
+     * @param {number} [pageSize] 
+     * @param {string} [groundLeaseId] 
+     * @param {string} [phase] 
+     * @param {string} [search] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PurchaseWorkflowsApiInterface
@@ -184,168 +179,147 @@ export interface PurchaseWorkflowsApiInterface {
     getPurchaseWorkflowsRaw(requestParameters: GetPurchaseWorkflowsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfPurchaseWorkflowListItemResponse>>;
 
     /**
-     * Gets a paginated list of purchase workflows.
      */
     getPurchaseWorkflows(requestParameters: GetPurchaseWorkflowsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfPurchaseWorkflowListItemResponse>;
 
     /**
      * 
-     * @summary Initiates a new purchase workflow.
-     * @param {InitiatePurchaseWorkflowRequest} initiatePurchaseWorkflowRequest The purchase workflow initiation details.
+     * @param {InitiatePurchaseWorkflowRequest} initiatePurchaseWorkflowRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PurchaseWorkflowsApiInterface
      */
-    initiatePurchaseWorkflowRaw(requestParameters: InitiatePurchaseWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<InitiatePurchaseWorkflowResponse>>;
+    initiatePurchaseWorkflowRaw(requestParameters: InitiatePurchaseWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Initiates a new purchase workflow.
      */
-    initiatePurchaseWorkflow(requestParameters: InitiatePurchaseWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<InitiatePurchaseWorkflowResponse>;
+    initiatePurchaseWorkflow(requestParameters: InitiatePurchaseWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
     /**
      * 
-     * @summary Records buyer eligibility verified.
-     * @param {string} workflowId The ID of the purchase workflow.
-     * @param {RecordEligibilityVerifiedRequest} recordEligibilityVerifiedRequest The eligibility verification details.
+     * @param {string} workflowId 
+     * @param {RecordEligibilityVerifiedRequest} recordEligibilityVerifiedRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PurchaseWorkflowsApiInterface
      */
-    recordEligibilityVerifiedRaw(requestParameters: RecordEligibilityVerifiedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    recordEligibilityVerifiedRaw(requestParameters: RecordEligibilityVerifiedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Records buyer eligibility verified.
      */
-    recordEligibilityVerified(requestParameters: RecordEligibilityVerifiedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    recordEligibilityVerified(requestParameters: RecordEligibilityVerifiedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Records financing committed.
-     * @param {string} workflowId The ID of the purchase workflow.
-     * @param {RecordFinancingCommittedRequest} recordFinancingCommittedRequest The financing commitment details.
+     * @param {string} workflowId 
+     * @param {RecordFinancingCommittedRequest} recordFinancingCommittedRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PurchaseWorkflowsApiInterface
      */
-    recordFinancingCommittedRaw(requestParameters: RecordFinancingCommittedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    recordFinancingCommittedRaw(requestParameters: RecordFinancingCommittedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Records financing committed.
      */
-    recordFinancingCommitted(requestParameters: RecordFinancingCommittedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    recordFinancingCommitted(requestParameters: RecordFinancingCommittedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Records inspection completed.
-     * @param {string} workflowId The ID of the purchase workflow.
-     * @param {RecordInspectionCompletedRequest} recordInspectionCompletedRequest The inspection completion details.
+     * @param {string} workflowId 
+     * @param {RecordInspectionCompletedRequest} recordInspectionCompletedRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PurchaseWorkflowsApiInterface
      */
-    recordInspectionCompletedRaw(requestParameters: RecordInspectionCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    recordInspectionCompletedRaw(requestParameters: RecordInspectionCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Records inspection completed.
      */
-    recordInspectionCompleted(requestParameters: RecordInspectionCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    recordInspectionCompleted(requestParameters: RecordInspectionCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Records lease executed.
-     * @param {string} workflowId The ID of the purchase workflow.
-     * @param {RecordLeaseExecutedRequest} recordLeaseExecutedRequest The lease execution details.
+     * @param {string} workflowId 
+     * @param {RecordLeaseExecutedRequest} recordLeaseExecutedRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PurchaseWorkflowsApiInterface
      */
-    recordLeaseExecutedRaw(requestParameters: RecordLeaseExecutedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    recordLeaseExecutedRaw(requestParameters: RecordLeaseExecutedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Records lease executed.
      */
-    recordLeaseExecuted(requestParameters: RecordLeaseExecutedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    recordLeaseExecuted(requestParameters: RecordLeaseExecutedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Records the purchase closed.
-     * @param {string} workflowId The ID of the purchase workflow.
-     * @param {RecordPurchaseClosedRequest} recordPurchaseClosedRequest The closing details.
+     * @param {string} workflowId 
+     * @param {RecordPurchaseClosedRequest} recordPurchaseClosedRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PurchaseWorkflowsApiInterface
      */
-    recordPurchaseClosedRaw(requestParameters: RecordPurchaseClosedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    recordPurchaseClosedRaw(requestParameters: RecordPurchaseClosedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Records the purchase closed.
      */
-    recordPurchaseClosed(requestParameters: RecordPurchaseClosedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    recordPurchaseClosed(requestParameters: RecordPurchaseClosedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Records title cleared.
-     * @param {string} workflowId The ID of the purchase workflow.
-     * @param {RecordTitleClearedRequest} recordTitleClearedRequest The title clearance details.
+     * @param {string} workflowId 
+     * @param {RecordTitleClearedRequest} recordTitleClearedRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PurchaseWorkflowsApiInterface
      */
-    recordTitleClearedRaw(requestParameters: RecordTitleClearedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    recordTitleClearedRaw(requestParameters: RecordTitleClearedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Records title cleared.
      */
-    recordTitleCleared(requestParameters: RecordTitleClearedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    recordTitleCleared(requestParameters: RecordTitleClearedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Schedules the closing date.
-     * @param {string} workflowId The ID of the purchase workflow.
-     * @param {ScheduleClosingRequest} scheduleClosingRequest The scheduled closing date.
+     * @param {string} workflowId 
+     * @param {ScheduleClosingRequest} scheduleClosingRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PurchaseWorkflowsApiInterface
      */
-    scheduleClosingRaw(requestParameters: ScheduleClosingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    scheduleClosingRaw(requestParameters: ScheduleClosingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Schedules the closing date.
      */
-    scheduleClosing(requestParameters: ScheduleClosingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    scheduleClosing(requestParameters: ScheduleClosingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Stalls the workflow.
-     * @param {string} workflowId The ID of the purchase workflow.
-     * @param {StallWorkflowRequest} stallWorkflowRequest The stall details.
+     * @param {string} workflowId 
+     * @param {StallWorkflowRequest} stallWorkflowRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PurchaseWorkflowsApiInterface
      */
-    stallWorkflowRaw(requestParameters: StallWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    stallWorkflowRaw(requestParameters: StallWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Stalls the workflow.
      */
-    stallWorkflow(requestParameters: StallWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    stallWorkflow(requestParameters: StallWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Withdraws the purchase.
-     * @param {string} workflowId The ID of the purchase workflow.
-     * @param {WithdrawPurchaseRequest} withdrawPurchaseRequest The withdrawal details.
+     * @param {string} workflowId 
+     * @param {WithdrawPurchaseRequest} withdrawPurchaseRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PurchaseWorkflowsApiInterface
      */
-    withdrawPurchaseRaw(requestParameters: WithdrawPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    withdrawPurchaseRaw(requestParameters: WithdrawPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Withdraws the purchase.
      */
-    withdrawPurchase(requestParameters: WithdrawPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    withdrawPurchase(requestParameters: WithdrawPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
 }
 
@@ -355,9 +329,8 @@ export interface PurchaseWorkflowsApiInterface {
 export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWorkflowsApiInterface {
 
     /**
-     * Fails the purchase.
      */
-    async failPurchaseRaw(requestParameters: FailPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async failPurchaseRaw(requestParameters: FailPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['workflowId'] == null) {
             throw new runtime.RequiredError(
                 'workflowId',
@@ -390,18 +363,24 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
             body: FailPurchaseRequestToJSON(requestParameters['failPurchaseRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Fails the purchase.
      */
-    async failPurchase(requestParameters: FailPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.failPurchaseRaw(requestParameters, initOverrides);
+    async failPurchase(requestParameters: FailPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.failPurchaseRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Gets a purchase workflow by ID.
      */
     async getPurchaseWorkflowRaw(requestParameters: GetPurchaseWorkflowRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PurchaseWorkflowResponse>> {
         if (requestParameters['workflowId'] == null) {
@@ -430,7 +409,6 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
     }
 
     /**
-     * Gets a purchase workflow by ID.
      */
     async getPurchaseWorkflow(requestParameters: GetPurchaseWorkflowRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PurchaseWorkflowResponse> {
         const response = await this.getPurchaseWorkflowRaw(requestParameters, initOverrides);
@@ -438,13 +416,12 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
     }
 
     /**
-     * Gets a paginated list of purchase workflows.
      */
     async getPurchaseWorkflowsRaw(requestParameters: GetPurchaseWorkflowsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfPurchaseWorkflowListItemResponse>> {
         const queryParameters: any = {};
 
-        if (requestParameters['page'] != null) {
-            queryParameters['page'] = requestParameters['page'];
+        if (requestParameters['pageNumber'] != null) {
+            queryParameters['pageNumber'] = requestParameters['pageNumber'];
         }
 
         if (requestParameters['pageSize'] != null) {
@@ -479,7 +456,6 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
     }
 
     /**
-     * Gets a paginated list of purchase workflows.
      */
     async getPurchaseWorkflows(requestParameters: GetPurchaseWorkflowsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfPurchaseWorkflowListItemResponse> {
         const response = await this.getPurchaseWorkflowsRaw(requestParameters, initOverrides);
@@ -487,9 +463,8 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
     }
 
     /**
-     * Initiates a new purchase workflow.
      */
-    async initiatePurchaseWorkflowRaw(requestParameters: InitiatePurchaseWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<InitiatePurchaseWorkflowResponse>> {
+    async initiatePurchaseWorkflowRaw(requestParameters: InitiatePurchaseWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['initiatePurchaseWorkflowRequest'] == null) {
             throw new runtime.RequiredError(
                 'initiatePurchaseWorkflowRequest',
@@ -514,21 +489,19 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
             body: InitiatePurchaseWorkflowRequestToJSON(requestParameters['initiatePurchaseWorkflowRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => InitiatePurchaseWorkflowResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Initiates a new purchase workflow.
      */
-    async initiatePurchaseWorkflow(requestParameters: InitiatePurchaseWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<InitiatePurchaseWorkflowResponse> {
+    async initiatePurchaseWorkflow(requestParameters: InitiatePurchaseWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.initiatePurchaseWorkflowRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
-     * Records buyer eligibility verified.
      */
-    async recordEligibilityVerifiedRaw(requestParameters: RecordEligibilityVerifiedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async recordEligibilityVerifiedRaw(requestParameters: RecordEligibilityVerifiedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['workflowId'] == null) {
             throw new runtime.RequiredError(
                 'workflowId',
@@ -561,20 +534,26 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
             body: RecordEligibilityVerifiedRequestToJSON(requestParameters['recordEligibilityVerifiedRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Records buyer eligibility verified.
      */
-    async recordEligibilityVerified(requestParameters: RecordEligibilityVerifiedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.recordEligibilityVerifiedRaw(requestParameters, initOverrides);
+    async recordEligibilityVerified(requestParameters: RecordEligibilityVerifiedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordEligibilityVerifiedRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Records financing committed.
      */
-    async recordFinancingCommittedRaw(requestParameters: RecordFinancingCommittedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async recordFinancingCommittedRaw(requestParameters: RecordFinancingCommittedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['workflowId'] == null) {
             throw new runtime.RequiredError(
                 'workflowId',
@@ -607,20 +586,26 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
             body: RecordFinancingCommittedRequestToJSON(requestParameters['recordFinancingCommittedRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Records financing committed.
      */
-    async recordFinancingCommitted(requestParameters: RecordFinancingCommittedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.recordFinancingCommittedRaw(requestParameters, initOverrides);
+    async recordFinancingCommitted(requestParameters: RecordFinancingCommittedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordFinancingCommittedRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Records inspection completed.
      */
-    async recordInspectionCompletedRaw(requestParameters: RecordInspectionCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async recordInspectionCompletedRaw(requestParameters: RecordInspectionCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['workflowId'] == null) {
             throw new runtime.RequiredError(
                 'workflowId',
@@ -653,20 +638,26 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
             body: RecordInspectionCompletedRequestToJSON(requestParameters['recordInspectionCompletedRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Records inspection completed.
      */
-    async recordInspectionCompleted(requestParameters: RecordInspectionCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.recordInspectionCompletedRaw(requestParameters, initOverrides);
+    async recordInspectionCompleted(requestParameters: RecordInspectionCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordInspectionCompletedRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Records lease executed.
      */
-    async recordLeaseExecutedRaw(requestParameters: RecordLeaseExecutedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async recordLeaseExecutedRaw(requestParameters: RecordLeaseExecutedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['workflowId'] == null) {
             throw new runtime.RequiredError(
                 'workflowId',
@@ -699,20 +690,26 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
             body: RecordLeaseExecutedRequestToJSON(requestParameters['recordLeaseExecutedRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Records lease executed.
      */
-    async recordLeaseExecuted(requestParameters: RecordLeaseExecutedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.recordLeaseExecutedRaw(requestParameters, initOverrides);
+    async recordLeaseExecuted(requestParameters: RecordLeaseExecutedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordLeaseExecutedRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Records the purchase closed.
      */
-    async recordPurchaseClosedRaw(requestParameters: RecordPurchaseClosedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async recordPurchaseClosedRaw(requestParameters: RecordPurchaseClosedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['workflowId'] == null) {
             throw new runtime.RequiredError(
                 'workflowId',
@@ -745,20 +742,26 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
             body: RecordPurchaseClosedRequestToJSON(requestParameters['recordPurchaseClosedRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Records the purchase closed.
      */
-    async recordPurchaseClosed(requestParameters: RecordPurchaseClosedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.recordPurchaseClosedRaw(requestParameters, initOverrides);
+    async recordPurchaseClosed(requestParameters: RecordPurchaseClosedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordPurchaseClosedRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Records title cleared.
      */
-    async recordTitleClearedRaw(requestParameters: RecordTitleClearedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async recordTitleClearedRaw(requestParameters: RecordTitleClearedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['workflowId'] == null) {
             throw new runtime.RequiredError(
                 'workflowId',
@@ -791,20 +794,26 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
             body: RecordTitleClearedRequestToJSON(requestParameters['recordTitleClearedRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Records title cleared.
      */
-    async recordTitleCleared(requestParameters: RecordTitleClearedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.recordTitleClearedRaw(requestParameters, initOverrides);
+    async recordTitleCleared(requestParameters: RecordTitleClearedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordTitleClearedRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Schedules the closing date.
      */
-    async scheduleClosingRaw(requestParameters: ScheduleClosingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async scheduleClosingRaw(requestParameters: ScheduleClosingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['workflowId'] == null) {
             throw new runtime.RequiredError(
                 'workflowId',
@@ -837,20 +846,26 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
             body: ScheduleClosingRequestToJSON(requestParameters['scheduleClosingRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Schedules the closing date.
      */
-    async scheduleClosing(requestParameters: ScheduleClosingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.scheduleClosingRaw(requestParameters, initOverrides);
+    async scheduleClosing(requestParameters: ScheduleClosingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.scheduleClosingRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Stalls the workflow.
      */
-    async stallWorkflowRaw(requestParameters: StallWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async stallWorkflowRaw(requestParameters: StallWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['workflowId'] == null) {
             throw new runtime.RequiredError(
                 'workflowId',
@@ -883,20 +898,26 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
             body: StallWorkflowRequestToJSON(requestParameters['stallWorkflowRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Stalls the workflow.
      */
-    async stallWorkflow(requestParameters: StallWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.stallWorkflowRaw(requestParameters, initOverrides);
+    async stallWorkflow(requestParameters: StallWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.stallWorkflowRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Withdraws the purchase.
      */
-    async withdrawPurchaseRaw(requestParameters: WithdrawPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async withdrawPurchaseRaw(requestParameters: WithdrawPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['workflowId'] == null) {
             throw new runtime.RequiredError(
                 'workflowId',
@@ -929,14 +950,21 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
             body: WithdrawPurchaseRequestToJSON(requestParameters['withdrawPurchaseRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Withdraws the purchase.
      */
-    async withdrawPurchase(requestParameters: WithdrawPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.withdrawPurchaseRaw(requestParameters, initOverrides);
+    async withdrawPurchase(requestParameters: WithdrawPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.withdrawPurchaseRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
 }

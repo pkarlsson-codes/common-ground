@@ -24,7 +24,7 @@ export default function HomesPage() {
   const [panel,        setPanel]        = useState<Panel>(null)
 
   const { data, isLoading, isError } = useHomes({
-    page,
+    pageNumber: page,
     landParcelId: parcelFilter || undefined,
     status: statusFilter || undefined,
   })

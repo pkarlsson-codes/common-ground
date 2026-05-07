@@ -11,7 +11,7 @@ interface Props {
 export default function DevelopmentProjectsSection({ parcelId, initialHomeIds }: Props) {
   const [expanded, setExpanded] = useState(true)
   const [showInitiate, setShowInitiate] = useState(false)
-  const { data, isLoading } = useDevelopmentProjects({ page: 1, pageSize: 50, landParcelId: parcelId })
+  const { data, isLoading } = useDevelopmentProjects({ pageNumber: 1, pageSize: 50, landParcelId: parcelId })
   const projects = data?.items ?? []
 
   return (

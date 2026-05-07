@@ -19,7 +19,7 @@ import type {
   InitiateDevelopmentProjectRequest,
   InitiateDevelopmentProjectResponse,
   PaginatedResponseOfDevelopmentProjectListItemResponse,
-  SortDescriptor,
+  ProblemDetails,
 } from '../models/index';
 import {
     InitiateDevelopmentProjectRequestFromJSON,
@@ -28,15 +28,15 @@ import {
     InitiateDevelopmentProjectResponseToJSON,
     PaginatedResponseOfDevelopmentProjectListItemResponseFromJSON,
     PaginatedResponseOfDevelopmentProjectListItemResponseToJSON,
-    SortDescriptorFromJSON,
-    SortDescriptorToJSON,
+    ProblemDetailsFromJSON,
+    ProblemDetailsToJSON,
 } from '../models/index';
 
 export interface GetDevelopmentProjectsRequest {
-    filterSearch?: string | null;
     pageNumber?: number;
     pageSize?: number;
-    sort?: Array<SortDescriptor>;
+    search?: string | null;
+    landParcelId?: string | null;
 }
 
 export interface InitiateDevelopmentProjectOperationRequest {
@@ -52,11 +52,10 @@ export interface InitiateDevelopmentProjectOperationRequest {
 export interface DevelopmentProjectsApiInterface {
     /**
      * 
-     * @summary Gets a paginated list of development projects.
-     * @param {string} [filterSearch] Optional free-text search across description.
-     * @param {number} [pageNumber] The current page number (1-based).
-     * @param {number} [pageSize] The requested page size.
-     * @param {Array<SortDescriptor>} [sort] Parsed sort descriptors bound from the querystring parameter named \&#39;sort\&#39;.
+     * @param {number} [pageNumber] 
+     * @param {number} [pageSize] 
+     * @param {string} [search] 
+     * @param {string} [landParcelId] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DevelopmentProjectsApiInterface
@@ -64,24 +63,21 @@ export interface DevelopmentProjectsApiInterface {
     getDevelopmentProjectsRaw(requestParameters: GetDevelopmentProjectsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfDevelopmentProjectListItemResponse>>;
 
     /**
-     * Gets a paginated list of development projects.
      */
     getDevelopmentProjects(requestParameters: GetDevelopmentProjectsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfDevelopmentProjectListItemResponse>;
 
     /**
      * 
-     * @summary Initiates a new development project for a land parcel.
-     * @param {InitiateDevelopmentProjectRequest} initiateDevelopmentProjectRequest The initiation request.
+     * @param {InitiateDevelopmentProjectRequest} initiateDevelopmentProjectRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DevelopmentProjectsApiInterface
      */
-    initiateDevelopmentProjectRaw(requestParameters: InitiateDevelopmentProjectOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<InitiateDevelopmentProjectResponse>>;
+    initiateDevelopmentProjectRaw(requestParameters: InitiateDevelopmentProjectOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Initiates a new development project for a land parcel.
      */
-    initiateDevelopmentProject(requestParameters: InitiateDevelopmentProjectOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<InitiateDevelopmentProjectResponse>;
+    initiateDevelopmentProject(requestParameters: InitiateDevelopmentProjectOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
 }
 
@@ -91,25 +87,24 @@ export interface DevelopmentProjectsApiInterface {
 export class DevelopmentProjectsApi extends runtime.BaseAPI implements DevelopmentProjectsApiInterface {
 
     /**
-     * Gets a paginated list of development projects.
      */
     async getDevelopmentProjectsRaw(requestParameters: GetDevelopmentProjectsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfDevelopmentProjectListItemResponse>> {
         const queryParameters: any = {};
 
-        if (requestParameters['filterSearch'] != null) {
-            queryParameters['Filter.Search'] = requestParameters['filterSearch'];
-        }
-
         if (requestParameters['pageNumber'] != null) {
-            queryParameters['Page.Number'] = requestParameters['pageNumber'];
+            queryParameters['pageNumber'] = requestParameters['pageNumber'];
         }
 
         if (requestParameters['pageSize'] != null) {
-            queryParameters['Page.Size'] = requestParameters['pageSize'];
+            queryParameters['pageSize'] = requestParameters['pageSize'];
         }
 
-        if (requestParameters['sort'] != null) {
-            queryParameters['sort'] = requestParameters['sort'];
+        if (requestParameters['search'] != null) {
+            queryParameters['search'] = requestParameters['search'];
+        }
+
+        if (requestParameters['landParcelId'] != null) {
+            queryParameters['landParcelId'] = requestParameters['landParcelId'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -128,7 +123,6 @@ export class DevelopmentProjectsApi extends runtime.BaseAPI implements Developme
     }
 
     /**
-     * Gets a paginated list of development projects.
      */
     async getDevelopmentProjects(requestParameters: GetDevelopmentProjectsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfDevelopmentProjectListItemResponse> {
         const response = await this.getDevelopmentProjectsRaw(requestParameters, initOverrides);
@@ -136,9 +130,8 @@ export class DevelopmentProjectsApi extends runtime.BaseAPI implements Developme
     }
 
     /**
-     * Initiates a new development project for a land parcel.
      */
-    async initiateDevelopmentProjectRaw(requestParameters: InitiateDevelopmentProjectOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<InitiateDevelopmentProjectResponse>> {
+    async initiateDevelopmentProjectRaw(requestParameters: InitiateDevelopmentProjectOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['initiateDevelopmentProjectRequest'] == null) {
             throw new runtime.RequiredError(
                 'initiateDevelopmentProjectRequest',
@@ -163,13 +156,12 @@ export class DevelopmentProjectsApi extends runtime.BaseAPI implements Developme
             body: InitiateDevelopmentProjectRequestToJSON(requestParameters['initiateDevelopmentProjectRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => InitiateDevelopmentProjectResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Initiates a new development project for a land parcel.
      */
-    async initiateDevelopmentProject(requestParameters: InitiateDevelopmentProjectOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<InitiateDevelopmentProjectResponse> {
+    async initiateDevelopmentProject(requestParameters: InitiateDevelopmentProjectOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.initiateDevelopmentProjectRaw(requestParameters, initOverrides);
         return await response.value();
     }

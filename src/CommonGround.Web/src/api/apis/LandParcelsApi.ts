@@ -45,7 +45,7 @@ export interface GetLandParcelRequest {
 }
 
 export interface GetLandParcelsRequest {
-    page?: number;
+    pageNumber?: number;
     pageSize?: number;
     search?: string | null;
 }
@@ -68,24 +68,21 @@ export interface RegisterLandParcelOperationRequest {
 export interface LandParcelsApiInterface {
     /**
      * 
-     * @summary Decommissions a land parcel.
-     * @param {string} landParcelId The ID of the land parcel to transition.
-     * @param {object} body The transition request.
+     * @param {string} landParcelId 
+     * @param {object} body 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof LandParcelsApiInterface
      */
-    decommissionLandParcelRaw(requestParameters: DecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    decommissionLandParcelRaw(requestParameters: DecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Decommissions a land parcel.
      */
-    decommissionLandParcel(requestParameters: DecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    decommissionLandParcel(requestParameters: DecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Gets a land parcel by ID.
-     * @param {string} landParcelId The ID of the land parcel to retrieve.
+     * @param {string} landParcelId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof LandParcelsApiInterface
@@ -93,16 +90,14 @@ export interface LandParcelsApiInterface {
     getLandParcelRaw(requestParameters: GetLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<LandParcelResponse>>;
 
     /**
-     * Gets a land parcel by ID.
      */
     getLandParcel(requestParameters: GetLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<LandParcelResponse>;
 
     /**
      * 
-     * @summary Gets a paginated list of land parcels.
-     * @param {number} [page] The page number (1-based).
-     * @param {number} [pageSize] The number of items per page.
-     * @param {string} [search] Optional free-text search across address and legal parcel number.
+     * @param {number} [pageNumber] 
+     * @param {number} [pageSize] 
+     * @param {string} [search] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof LandParcelsApiInterface
@@ -110,40 +105,35 @@ export interface LandParcelsApiInterface {
     getLandParcelsRaw(requestParameters: GetLandParcelsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfLandParcelListItemResponse>>;
 
     /**
-     * Gets a paginated list of land parcels.
      */
     getLandParcels(requestParameters: GetLandParcelsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfLandParcelListItemResponse>;
 
     /**
      * 
-     * @summary Recommissions a land parcel.
-     * @param {string} landParcelId The ID of the land parcel to transition.
-     * @param {object} body The transition request.
+     * @param {string} landParcelId 
+     * @param {object} body 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof LandParcelsApiInterface
      */
-    recommissionLandParcelRaw(requestParameters: RecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    recommissionLandParcelRaw(requestParameters: RecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Recommissions a land parcel.
      */
-    recommissionLandParcel(requestParameters: RecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    recommissionLandParcel(requestParameters: RecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @summary Registers a new land parcel.
-     * @param {RegisterLandParcelRequest} registerLandParcelRequest The land parcel registration details.
+     * @param {RegisterLandParcelRequest} registerLandParcelRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof LandParcelsApiInterface
      */
-    registerLandParcelRaw(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RegisterLandParcelResponse>>;
+    registerLandParcelRaw(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
-     * Registers a new land parcel.
      */
-    registerLandParcel(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RegisterLandParcelResponse>;
+    registerLandParcel(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
 }
 
@@ -153,9 +143,8 @@ export interface LandParcelsApiInterface {
 export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInterface {
 
     /**
-     * Decommissions a land parcel.
      */
-    async decommissionLandParcelRaw(requestParameters: DecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async decommissionLandParcelRaw(requestParameters: DecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['landParcelId'] == null) {
             throw new runtime.RequiredError(
                 'landParcelId',
@@ -188,18 +177,24 @@ export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInt
             body: requestParameters['body'] as any,
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Decommissions a land parcel.
      */
-    async decommissionLandParcel(requestParameters: DecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.decommissionLandParcelRaw(requestParameters, initOverrides);
+    async decommissionLandParcel(requestParameters: DecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.decommissionLandParcelRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Gets a land parcel by ID.
      */
     async getLandParcelRaw(requestParameters: GetLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<LandParcelResponse>> {
         if (requestParameters['landParcelId'] == null) {
@@ -228,7 +223,6 @@ export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInt
     }
 
     /**
-     * Gets a land parcel by ID.
      */
     async getLandParcel(requestParameters: GetLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<LandParcelResponse> {
         const response = await this.getLandParcelRaw(requestParameters, initOverrides);
@@ -236,13 +230,12 @@ export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInt
     }
 
     /**
-     * Gets a paginated list of land parcels.
      */
     async getLandParcelsRaw(requestParameters: GetLandParcelsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfLandParcelListItemResponse>> {
         const queryParameters: any = {};
 
-        if (requestParameters['page'] != null) {
-            queryParameters['page'] = requestParameters['page'];
+        if (requestParameters['pageNumber'] != null) {
+            queryParameters['pageNumber'] = requestParameters['pageNumber'];
         }
 
         if (requestParameters['pageSize'] != null) {
@@ -269,7 +262,6 @@ export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInt
     }
 
     /**
-     * Gets a paginated list of land parcels.
      */
     async getLandParcels(requestParameters: GetLandParcelsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfLandParcelListItemResponse> {
         const response = await this.getLandParcelsRaw(requestParameters, initOverrides);
@@ -277,9 +269,8 @@ export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInt
     }
 
     /**
-     * Recommissions a land parcel.
      */
-    async recommissionLandParcelRaw(requestParameters: RecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async recommissionLandParcelRaw(requestParameters: RecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['landParcelId'] == null) {
             throw new runtime.RequiredError(
                 'landParcelId',
@@ -312,20 +303,26 @@ export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInt
             body: requestParameters['body'] as any,
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Recommissions a land parcel.
      */
-    async recommissionLandParcel(requestParameters: RecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.recommissionLandParcelRaw(requestParameters, initOverrides);
+    async recommissionLandParcel(requestParameters: RecommissionLandParcelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recommissionLandParcelRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
-     * Registers a new land parcel.
      */
-    async registerLandParcelRaw(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RegisterLandParcelResponse>> {
+    async registerLandParcelRaw(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['registerLandParcelRequest'] == null) {
             throw new runtime.RequiredError(
                 'registerLandParcelRequest',
@@ -350,13 +347,12 @@ export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInt
             body: RegisterLandParcelRequestToJSON(requestParameters['registerLandParcelRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => RegisterLandParcelResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Registers a new land parcel.
      */
-    async registerLandParcel(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RegisterLandParcelResponse> {
+    async registerLandParcel(requestParameters: RegisterLandParcelOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.registerLandParcelRaw(requestParameters, initOverrides);
         return await response.value();
     }
