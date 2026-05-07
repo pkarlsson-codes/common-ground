@@ -58,12 +58,11 @@ public static class GroundLeasesEndpoints
     [WolverineGet("/api/ground-leases")]
     public static async Task<IResult> GetGroundLeases(
         [FromQuery] GetGroundLeasesQuerySpec request,
-        HttpContext httpContext,
         IMessageBus bus,
         CancellationToken cancellationToken = default)
     {
         var statusFilter = request.Statuses?
-            .Select(s => Enum.Parse<GroundLeaseStatus>(s)).ToList().AsReadOnly();
+            .Select(s => GroundLeaseStatus.FromDisplayName(s)).ToList().AsReadOnly();
         var landParcelFilter = request.LandParcelId is not null
             ? LandParcelId.Create(request.LandParcelId)
             : null;
@@ -92,7 +91,6 @@ public static class GroundLeasesEndpoints
     [WolverineGet("/api/ground-leases/{groundLeaseId}")]
     public static async Task<IResult> GetGroundLease(
         string groundLeaseId,
-        HttpContext httpContext,
         IMessageBus bus,
         CancellationToken cancellationToken)
     {
