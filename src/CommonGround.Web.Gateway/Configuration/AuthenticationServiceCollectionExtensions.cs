@@ -44,7 +44,6 @@ public static class AuthenticationServiceCollectionExtensions
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
                 options.Scope.Add("email");
-                options.Scope.Add("offline_access");
                 options.TokenValidationParameters.NameClaimType = "preferred_username";
                 options.TokenValidationParameters.RoleClaimType = "roles";
                 options.RequireHttpsMetadata = false;

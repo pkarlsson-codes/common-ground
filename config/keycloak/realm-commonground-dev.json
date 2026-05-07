@@ -237,6 +237,24 @@
       }
     }
   ],
+  "users": [
+    {
+      "id": "00000000-0000-0000-0000-000000000001",
+      "username": "test",
+      "email": "test@example.com",
+      "firstName": "Test",
+      "lastName": "User",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test",
+          "temporary": false
+        }
+      ]
+    }
+  ],
   "browserFlow": "browser",
   "registrationFlow": "registration",
   "resetCredentialsFlow": "reset credentials",

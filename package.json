@@ -6,6 +6,7 @@
   "scripts": {
     "infra:start": "docker compose up -d",
     "infra:init": "bash ./scripts/infra-init-schemas.sh",
+    "infra:reset": "bash ./scripts/infra-init-schemas.sh --reset",
     "db:reset": "bash ./scripts/db-reset-marten.sh",
     "infra:down": "docker compose down",
     "dotnet:restore": "dotnet restore src/CommonGround.slnx",

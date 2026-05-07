@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 # Creates required database schemas if they don't already exist.
 # Safe to run repeatedly — all statements are idempotent.
+# Pass --reset to drop and recreate all schemas.
 set -euo pipefail
+
+RESET=false
+if [[ "${1:-}" == "--reset" ]]; then
+    RESET=true
+fi
 
 POSTGRES_CONTAINER="${POSTGRES_CONTAINER:-commonground_postgres}"
 POSTGRES_DB="${POSTGRES_DB:-commonground}"
@@ -26,6 +32,11 @@ for i in $(seq 1 30); do
     fi
     sleep 1
 done
+
+if [ "$RESET" = true ]; then
+    echo "[init-schemas] Dropping schemas..."
+    psql_exec "DROP SCHEMA IF EXISTS keycloak CASCADE;"
+fi
 
 echo "[init-schemas] Creating schemas..."
 psql_exec "CREATE SCHEMA IF NOT EXISTS keycloak;"
