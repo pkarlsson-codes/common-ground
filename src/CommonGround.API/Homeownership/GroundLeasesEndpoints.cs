@@ -188,19 +188,8 @@ public static class GroundLeasesEndpoints
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
         ArgumentNullException.ThrowIfNull(request);
 
-        var view = await bus.InvokeForTenantAsync<GroundLeaseView>(bus.TenantId!,
-            new GetGroundLease(GroundLeaseId.Create(groundLeaseId)),
-            cancellationToken);
-
-        var terms = view.FormulaKind switch
-        {
-            "AppraisalBased" => ResalePolicyTerms.AppraisalBased(view.AppreciationShare!.Value, view.ImprovementsCap),
-            "IndexBased" => ResalePolicyTerms.IndexBased(view.IndexType!, view.BaselineIndexValue!.Value, view.ImprovementsCap),
-            "FixedPercentage" => ResalePolicyTerms.FixedPercentage(view.AnnualPercentage!.Value, view.ImprovementsCap),
-            _ => throw new InvalidOperationException($"Unknown formula kind: {view.FormulaKind}")
-        };
-
-        var input = new ResaleCalculationInput(
+        var query = new GetResaleEstimate(
+            GroundLeaseId.Create(groundLeaseId),
             request.OriginalPurchasePrice,
             request.CurrentAppraisalValue,
             request.OriginalAppraisalValue,
@@ -208,7 +197,7 @@ public static class GroundLeasesEndpoints
             request.ApprovedImprovements,
             request.CurrentIndexValue);
 
-        var maxResalePrice = ResalePriceCalculator.Calculate(terms, input);
+        var maxResalePrice = await bus.InvokeForTenantAsync<decimal>(bus.TenantId!, query, cancellationToken);
 
         return Results.Ok(new ResaleEstimateResponse(maxResalePrice));
     }

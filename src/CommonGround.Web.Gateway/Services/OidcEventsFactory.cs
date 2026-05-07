@@ -58,12 +58,6 @@ public sealed class OidcEventsFactory(
         return false;
     }
 
-    private static void AddUserIdClaim(TokenValidatedContext ctx, string userId)
-    {
-        var identity = (ClaimsIdentity)ctx.Principal!.Identity!;
-        identity.AddClaim(new Claim("userId", userId));
-    }
-
     private async Task HandleTokenValidatedAsync(TokenValidatedContext ctx)
     {
         if (!TryGetSubject(ctx.Principal, out var subject))
@@ -87,7 +81,6 @@ public sealed class OidcEventsFactory(
             ctx.HttpContext.RequestAborted).ConfigureAwait(false);
 
         var userId = response.UserId;
-        AddUserIdClaim(ctx, userId);
         await PersistTokensAndIssueCookiesAsync(ctx, userId, response.TrustId).ConfigureAwait(false);
     }
 
@@ -108,7 +101,7 @@ public sealed class OidcEventsFactory(
             new CookieOptions
             {
                 HttpOnly = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.Lax,
                 Secure = isProd,
                 Path = "/",
                 MaxAge = TimeSpan.FromDays(7),
@@ -121,7 +114,7 @@ public sealed class OidcEventsFactory(
             new CookieOptions
             {
                 HttpOnly = false,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.Lax,
                 Secure = isProd,
                 Path = "/",
                 MaxAge = TimeSpan.FromDays(7),
