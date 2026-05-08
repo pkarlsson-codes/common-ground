@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { AuthApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
 
@@ -6,6 +6,8 @@ interface User {
   id: string
   username: string
   email: string
+  trustId?: string | null
+  hasTrust: boolean
 }
 
 interface AuthContextValue {
@@ -14,6 +16,7 @@ interface AuthContextValue {
   isAuthenticated: boolean
   error: string | null
   logout: () => void
+  refresh: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -23,30 +26,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const api = new AuthApi(apiConfig)
-        const data = await api.getCurrentUser()
-        if (data && data.id) {
-          setUser({ id: data.id, username: data.username ?? data.id, email: data.email ?? '' })
-        }
-      } catch {
-        setError('Could not reach the server. Check your connection and reload.')
-      } finally {
-        setIsLoading(false)
+  const loadUser = useCallback(async () => {
+    try {
+      const api = new AuthApi(apiConfig)
+      const data = await api.getCurrentUser()
+      if (data && data.id) {
+        const hasTrust = data.hasTrust ?? !!data.trustId
+        setUser({
+          id: data.id,
+          username: data.username ?? data.id,
+          email: data.email ?? '',
+          trustId: data.trustId,
+          hasTrust,
+        })
+        setError(null)
+      } else {
+        setUser(null)
       }
+    } catch {
+      setUser(null)
+      setError('Could not reach the server. Check your connection and reload.')
+    } finally {
+      setIsLoading(false)
     }
-
-    void loadUser()
   }, [])
+
+  useEffect(() => {
+    void loadUser()
+  }, [loadUser])
 
   function logout() {
     window.location.href = '/auth/logout'
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, error, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, error, logout, refresh: loadUser }}>
       {children}
     </AuthContext.Provider>
   )

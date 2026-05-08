@@ -1,4 +1,5 @@
-import { FormEvent, useState } from 'react'
+import { useState } from 'react'
+import type { FormEvent } from 'react'
 
 type SignupResult = {
   trustId: string
@@ -144,18 +145,6 @@ export default function SignupPage() {
         >
           {isSubmitting ? 'Creating trust…' : 'Create trust and continue'}
         </button>
-
-        <a
-          href='/login'
-          style={{
-            textAlign: 'center',
-            fontSize: '13px',
-            color: 'var(--text-dim)',
-            textDecoration: 'none',
-          }}
-        >
-          Back to login options
-        </a>
       </form>
     </div>
   )

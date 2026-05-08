@@ -1,12 +1,12 @@
 import './App.css'
-import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import Layout from './components/Layout'
 import DevelopmentProjectsPage from './pages/DevelopmentProjectsPage'
 import DocumentsPage from './pages/documents/DocumentsPage'
 import GroundLeasesPage from './pages/GroundLeasesPage'
 import HomesPage from './pages/HomesPage'
 import LandParcelsPage from './pages/LandParcelsPage'
-import LoginPage from './pages/LoginPage'
+import OnboardingPage from './pages/OnboardingPage'
 import PurchaseWorkflowsPage from './pages/PurchaseWorkflowsPage'
 import ResaleWorkflowsPage from './pages/ResaleWorkflowsPage'
 import SignupPage from './pages/SignupPage'
@@ -14,7 +14,8 @@ import StewardshipPage from './pages/stewardship/StewardshipPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 
 function ProtectedRoute() {
-  const { isLoading, isAuthenticated, error } = useAuth()
+  const { isLoading, isAuthenticated, user, error } = useAuth()
+  const location = useLocation()
   if (isLoading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', fontSize: '12px', letterSpacing: '0.1em' }}>
@@ -30,7 +31,16 @@ function ProtectedRoute() {
       <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{error}</span>
     </div>
   )
-  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (!isAuthenticated) {
+    const returnUrl = `${location.pathname}${location.search}${location.hash}`
+    window.location.href = `/auth/login?returnUrl=${encodeURIComponent(returnUrl)}`
+    return null
+  }
+
+  if (!user?.hasTrust && location.pathname !== '/onboarding') {
+    return <Navigate to="/onboarding" replace />
+  }
+
   return <Outlet />
 }
 
@@ -39,9 +49,9 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route element={<ProtectedRoute />}>
+            <Route path="/onboarding" element={<OnboardingPage />} />
             <Route element={<Layout />}>
               <Route index element={<Navigate to="/land-parcels" replace />} />
               <Route path="/land-parcels"        element={<LandParcelsPage />} />

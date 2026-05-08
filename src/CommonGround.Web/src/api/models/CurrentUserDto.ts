@@ -38,6 +38,18 @@ export interface CurrentUserDto {
      * @memberof CurrentUserDto
      */
     email?: string;
+    /**
+     * Trust identifier for the user when membership exists.
+     * @type {string}
+     * @memberof CurrentUserDto
+     */
+    trustId?: string | null;
+    /**
+     * Indicates whether the user currently belongs to a trust.
+     * @type {boolean}
+     * @memberof CurrentUserDto
+     */
+    hasTrust?: boolean;
 }
 
 /**
@@ -60,6 +72,8 @@ export function CurrentUserDtoFromJSONTyped(json: any, ignoreDiscriminator: bool
         'id': json['id'] == null ? undefined : json['id'],
         'username': json['username'] == null ? undefined : json['username'],
         'email': json['email'] == null ? undefined : json['email'],
+        'trustId': json['trustId'] == null ? undefined : json['trustId'],
+        'hasTrust': json['hasTrust'] == null ? undefined : json['hasTrust'],
     };
 }
 
@@ -77,6 +91,8 @@ export function CurrentUserDtoToJSONTyped(value?: CurrentUserDto | null, ignoreD
         'id': value['id'],
         'username': value['username'],
         'email': value['email'],
+        'trustId': value['trustId'],
+        'hasTrust': value['hasTrust'],
     };
 }
 

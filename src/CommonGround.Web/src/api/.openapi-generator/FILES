@@ -91,6 +91,7 @@ models/ResaleEstimateResponse.ts
 models/ResolveForeclosurePreventionCaseRequest.ts
 models/ScheduleClosingRequest.ts
 models/SchedulePropertyInspectionRequest.ts
+models/SignupRequest.ts
 models/StallWorkflowRequest.ts
 models/StewardshipCaseResponse.ts
 models/StewardshipCheckInDto.ts

@@ -4592,6 +4592,56 @@
         }
       }
     },
+    "/auth/signup": {
+      "post": {
+        "tags": [
+          "Oidc"
+        ],
+        "summary": "Creates a trust for self-service onboarding and returns the next OIDC registration URL.",
+        "operationId": "Signup",
+        "requestBody": {
+          "x-name": "request",
+          "description": "Payload containing the trust name.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "Created trust ID and URL for continuing registration.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/logout": {
       "get": {
         "tags": [
@@ -7025,6 +7075,26 @@
           "email": {
             "type": "string",
             "description": "Email address of the user."
+          },
+          "trustId": {
+            "type": "string",
+            "description": "Trust identifier for the user when membership exists.",
+            "nullable": true
+          },
+          "hasTrust": {
+            "type": "boolean",
+            "description": "Indicates whether the user currently belongs to a trust."
+          }
+        }
+      },
+      "SignupRequest": {
+        "type": "object",
+        "description": "Request payload for self-service trust signup.",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Gets or sets the trust name."
           }
         }
       }

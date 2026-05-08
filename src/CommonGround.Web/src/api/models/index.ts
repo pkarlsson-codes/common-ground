@@ -82,6 +82,7 @@ export * from './ResaleEstimateResponse';
 export * from './ResolveForeclosurePreventionCaseRequest';
 export * from './ScheduleClosingRequest';
 export * from './SchedulePropertyInspectionRequest';
+export * from './SignupRequest';
 export * from './StallWorkflowRequest';
 export * from './StewardshipCaseResponse';
 export * from './StewardshipCheckInDto';
