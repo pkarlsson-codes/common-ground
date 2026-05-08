@@ -27,7 +27,7 @@ public sealed class User : AggregateRoot<UserId>
     public TrustId? TrustId { get; private set; }
 
     /// <summary>Creates a new owned user record for the given Keycloak subject.</summary>
-    public static User Register(string keycloakSubject, string? email, string? displayName, TrustId? trustId)
+    public static User Register(string keycloakSubject, string? email, string? displayName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(keycloakSubject);
 
@@ -36,9 +36,21 @@ public sealed class User : AggregateRoot<UserId>
             UserId.Generate().Value,
             keycloakSubject,
             email,
-            displayName,
-            trustId?.Value));
+            displayName));
         return user;
+    }
+
+    /// <summary>Assigns the user to a trust when no trust is currently assigned.</summary>
+    public void AssignTrust(TrustId trustId)
+    {
+        ArgumentNullException.ThrowIfNull(trustId);
+
+        if (TrustId is not null)
+        {
+            throw new InvalidOperationException("User already belongs to a trust.");
+        }
+
+        ApplyChange(new UserTrustAssigned(Id.Value, trustId.Value));
     }
 
     /// <inheritdoc/>
@@ -47,6 +59,7 @@ public sealed class User : AggregateRoot<UserId>
         switch (domainEvent)
         {
             case UserRegistered e: Apply(e); break;
+            case UserTrustAssigned e: Apply(e); break;
             default: throw new InvalidOperationException($"Unknown event: {domainEvent?.GetType().Name}");
         }
     }
@@ -58,6 +71,10 @@ public sealed class User : AggregateRoot<UserId>
         Email = e.Email;
         DisplayName = e.DisplayName;
         CreatedAt = e.OccurredAt;
-        TrustId = string.IsNullOrWhiteSpace(e.TrustId) ? null : TrustId.Create(e.TrustId);
+    }
+
+    private void Apply(UserTrustAssigned e)
+    {
+        TrustId = TrustId.Create(e.TrustId);
     }
 }

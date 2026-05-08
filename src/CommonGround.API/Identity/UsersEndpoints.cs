@@ -28,21 +28,9 @@ public static class UsersEndpoints
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        EnsureUserResult result;
-
-        if (string.IsNullOrWhiteSpace(request.TrustId))
-        {
-            result = await bus.InvokeAsync<EnsureUserResult>(
-                new EnsureUser(request.KeycloakSubject, request.Email, request.DisplayName, null),
-                cancellationToken).ConfigureAwait(false);
-        }
-        else
-        {
-            result = await bus.InvokeForTenantAsync<EnsureUserResult>(
-                request.TrustId,
-                new EnsureUser(request.KeycloakSubject, request.Email, request.DisplayName, TrustId.Create(request.TrustId)),
-                cancellationToken).ConfigureAwait(false);
-        }
+        var result = await bus.InvokeAsync<EnsureUserResult>(
+            new EnsureUser(request.KeycloakSubject, request.Email, request.DisplayName),
+            cancellationToken).ConfigureAwait(false);
 
         return Results.Ok(new EnsureUserResponse(result.UserId, result.TrustId));
     }

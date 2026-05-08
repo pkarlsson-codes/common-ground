@@ -51,8 +51,7 @@ public sealed class UsersInitialData : IInitialData
             var user = User.Register(
                 entry.KeycloakSubject,
                 entry.Email,
-                entry.DisplayName,
-                TrustId.Create(trustLookup.TrustId));
+                entry.DisplayName);
 
             trustSession.Events.StartStream<User>(user.Id.Value, user.UncommittedEvents.ToArray());
             user.UncommittedEvents.MarkAsCommitted();

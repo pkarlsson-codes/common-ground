@@ -1,5 +1,5 @@
+using CommonGround.Identity.Application.ReadModels;
 using CommonGround.Identity.Domain.Users;
-using CommonGround.Identity.Infrastructure.Persistence;
 using CommonGround.SharedKernel.Domain;
 using Marten;
 
@@ -9,14 +9,14 @@ namespace CommonGround.Identity.Application.Commands;
 /// <param name="KeycloakSubject">The Keycloak sub claim.</param>
 /// <param name="Email">Optional email address.</param>
 /// <param name="DisplayName">Optional display name.</param>
-/// <param name="TrustId">The trust the user belongs to, if known.</param>
 public sealed record EnsureUser(
     string KeycloakSubject,
     string? Email,
-    string? DisplayName,
-    TrustId? TrustId);
+    string? DisplayName);
 
 /// <summary>Result of <see cref="EnsureUser"/>.</summary>
+/// <param name="UserId">The CommonGround UserId.</param>
+/// <param name="TrustId">The trust this user belongs to, if assigned.</param>
 public sealed record EnsureUserResult(string UserId, string? TrustId);
 
 /// <summary>Handles <see cref="EnsureUser"/>.</summary>
@@ -30,8 +30,9 @@ public static class EnsureUserHandler
     {
         ArgumentNullException.ThrowIfNull(command);
 
+        // Check if user already exists by querying the UserView read model
         var existing = await session
-            .LoadAsync<UserSubjectIndex>(command.KeycloakSubject, cancellationToken)
+            .LoadAsync<UserView>(command.KeycloakSubject, cancellationToken)
             .ConfigureAwait(false);
 
         if (existing is not null)
@@ -39,17 +40,13 @@ public static class EnsureUserHandler
             return new EnsureUserResult(existing.UserId, existing.TrustId);
         }
 
-        var newUser = User.Register(command.KeycloakSubject, command.Email, command.DisplayName, command.TrustId);
+        // Create a new user without an initial trust assignment
+        var newUser = User.Register(command.KeycloakSubject, command.Email, command.DisplayName);
 
         session.Events.StartStream<User>(newUser.Id.Value, newUser.UncommittedEvents.ToArray());
         newUser.UncommittedEvents.MarkAsCommitted();
-        session.Store(new UserSubjectIndex
-        {
-            Id = command.KeycloakSubject,
-            UserId = newUser.Id.Value,
-            TrustId = newUser.TrustId?.Value,
-        });
 
-        return new EnsureUserResult(newUser.Id.Value, newUser.TrustId?.Value);
+        return new EnsureUserResult(newUser.Id.Value, null);
     }
 }
+

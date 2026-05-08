@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Domain.Exceptions;
 using CommonGround.SharedKernel.Domain.Events;
 using CommonGround.TrustManagement.Domain.Trusts.Events;
 
@@ -17,10 +18,28 @@ public sealed class Trust : AggregateRoot<TrustId>
     /// <summary>Creates a new trust.</summary>
     public static Trust Create(string name)
     {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new InvariantViolationException("Trust name must be provided.");
+        }
+
         var trust = new Trust();
 
         trust.ApplyChange(new TrustCreated(TrustId.Generate().Value, name));
         return trust;
+    }
+
+    /// <summary>Raises an onboarding event that links this trust to an authenticated creator user.</summary>
+    public void RequestOnboarding(UserId creatorUserId, string correlationId)
+    {
+        ArgumentNullException.ThrowIfNull(creatorUserId);
+
+        if (string.IsNullOrWhiteSpace(correlationId))
+        {
+            throw new InvariantViolationException("Correlation id must be provided for onboarding choreography.");
+        }
+
+        ApplyChange(new TrustOnboardingRequested(Id.Value, Name, creatorUserId.Value, correlationId));
     }
 
     /// <inheritdoc/>
@@ -29,6 +48,7 @@ public sealed class Trust : AggregateRoot<TrustId>
         switch (domainEvent)
         {
             case TrustCreated e: Apply(e); break;
+            case TrustOnboardingRequested e: Apply(e); break;
             default:
                 throw new InvalidOperationException($"Unhandled event type: {domainEvent.GetType().Name}");
         }
@@ -38,5 +58,10 @@ public sealed class Trust : AggregateRoot<TrustId>
     {
         Id = TrustId.Create(e.AggregateId);
         Name = e.Name;
+    }
+
+    private static void Apply(TrustOnboardingRequested _)
+    {
+        // No additional state transition on Trust; this event exists for integration choreography.
     }
 }
