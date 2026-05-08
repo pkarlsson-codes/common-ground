@@ -55,7 +55,7 @@ public sealed class OidcController : ControllerBase
         var requestedReturnUrl = HttpContext.Request.Query["returnUrl"].ToString();
         var defaultRedirect = _configuration["Authentication:OIDC:PostLoginRedirect"] ?? "/";
 
-        var redirectTarget = Uri.TryCreate(requestedReturnUrl, UriKind.Absolute, out _)
+        var redirectTarget = IsSafeRelativeReturnUrl(requestedReturnUrl)
             ? requestedReturnUrl
             : defaultRedirect;
 
@@ -80,7 +80,7 @@ public sealed class OidcController : ControllerBase
         var requestedReturnUrl = HttpContext.Request.Query["returnUrl"].ToString();
         var defaultRedirect = _configuration["Authentication:OIDC:PostLoginRedirect"] ?? "/";
 
-        var redirectTarget = Uri.TryCreate(requestedReturnUrl, UriKind.Absolute, out _)
+        var redirectTarget = IsSafeRelativeReturnUrl(requestedReturnUrl)
             ? requestedReturnUrl
             : defaultRedirect;
 
@@ -233,6 +233,21 @@ public sealed class OidcController : ControllerBase
             });
 
         return Ok(new { success = true });
+    }
+
+    private static bool IsSafeRelativeReturnUrl(string? returnUrl)
+    {
+        if (string.IsNullOrWhiteSpace(returnUrl))
+        {
+            return false;
+        }
+
+        if (!returnUrl.StartsWith('/') || returnUrl.StartsWith("//", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        return Uri.TryCreate(returnUrl, UriKind.Relative, out _);
     }
 }
 
