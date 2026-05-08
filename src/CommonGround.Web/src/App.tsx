@@ -9,6 +9,7 @@ import LandParcelsPage from './pages/LandParcelsPage'
 import LoginPage from './pages/LoginPage'
 import PurchaseWorkflowsPage from './pages/PurchaseWorkflowsPage'
 import ResaleWorkflowsPage from './pages/ResaleWorkflowsPage'
+import SignupPage from './pages/SignupPage'
 import StewardshipPage from './pages/stewardship/StewardshipPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 
@@ -39,6 +40,7 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route index element={<Navigate to="/land-parcels" replace />} />

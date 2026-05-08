@@ -5,4 +5,4 @@ public sealed record EnsureUserRequest(
     string KeycloakSubject,
     string? Email,
     string? DisplayName,
-    string TrustId);
+    string? TrustId);

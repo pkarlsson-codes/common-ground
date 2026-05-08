@@ -14,7 +14,7 @@ public sealed record EnsureUser(
     string KeycloakSubject,
     string? Email,
     string? DisplayName,
-    TrustId TrustId);
+    TrustId? TrustId);
 
 /// <summary>Result of <see cref="EnsureUser"/>.</summary>
 public sealed record EnsureUserResult(string UserId, string TrustId);
@@ -37,6 +37,11 @@ public static class EnsureUserHandler
         if (existing is not null)
         {
             return new EnsureUserResult(existing.UserId, existing.TrustId);
+        }
+
+        if (command.TrustId is null)
+        {
+            throw new InvalidOperationException("TrustId is required when provisioning a new user.");
         }
 
         var newUser = User.Register(command.KeycloakSubject, command.Email, command.DisplayName, command.TrustId);

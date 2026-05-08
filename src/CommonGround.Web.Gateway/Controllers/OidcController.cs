@@ -1,4 +1,6 @@
 using System.Text.Json;
+using CommonGround.API.Clients;
+using CommonGround.API.Contracts.TrustManagement.Requests;
 using CommonGround.Web.Gateway.Configuration;
 using CommonGround.Web.Gateway.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -19,6 +21,7 @@ public sealed class OidcController : ControllerBase
     private readonly ITokenStore _tokenStore;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IHostEnvironment _env;
+    private readonly ITrustsApiClient _trustsApiClient;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OidcController"/> class.
@@ -27,12 +30,19 @@ public sealed class OidcController : ControllerBase
     /// <param name="tokenStore">Token store for managing server-side tokens.</param>
     /// <param name="httpClientFactory">Factory for creating HTTP clients.</param>
     /// <param name="env">Host environment used to determine cookie security flags.</param>
-    public OidcController(IConfiguration configuration, ITokenStore tokenStore, IHttpClientFactory httpClientFactory, IHostEnvironment env)
+    /// <param name="trustsApiClient">Client used for trust self-service onboarding operations.</param>
+    public OidcController(
+        IConfiguration configuration,
+        ITokenStore tokenStore,
+        IHttpClientFactory httpClientFactory,
+        IHostEnvironment env,
+        ITrustsApiClient trustsApiClient)
     {
         _configuration = configuration;
         _tokenStore = tokenStore;
         _httpClientFactory = httpClientFactory;
         _env = env;
+        _trustsApiClient = trustsApiClient;
     }
 
     /// <summary>
@@ -49,14 +59,13 @@ public sealed class OidcController : ControllerBase
             ? requestedReturnUrl
             : defaultRedirect;
 
-        var trustId = HttpContext.Request.Query["trustId"].ToString();
-        if (string.IsNullOrWhiteSpace(trustId))
-        {
-            return BadRequest(new { error = "trustId is required" });
-        }
-
         var props = new AuthenticationProperties { RedirectUri = redirectTarget };
-        props.Items["trust_id"] = trustId;
+
+        var trustId = HttpContext.Request.Query["trustId"].ToString();
+        if (!string.IsNullOrWhiteSpace(trustId))
+        {
+            props.Items["trust_id"] = trustId;
+        }
 
         return Challenge(props, OpenIdConnectDefaults.AuthenticationScheme);
     }
@@ -86,6 +95,27 @@ public sealed class OidcController : ControllerBase
         props.Items["trust_id"] = trustId;
 
         return Challenge(props, OpenIdConnectDefaults.AuthenticationScheme);
+    }
+
+    /// <summary>
+    /// Creates a trust for self-service onboarding and returns the next OIDC registration URL.
+    /// </summary>
+    /// <param name="request">Payload containing the trust name.</param>
+    /// <returns>Created trust ID and URL for continuing registration.</returns>
+    [HttpPost("signup")]
+    public async Task<IActionResult> Signup([FromBody] SignupRequest request)
+    {
+        if (request is null || string.IsNullOrWhiteSpace(request.Name))
+        {
+            return BadRequest(new { error = "Trust name is required" });
+        }
+
+        var created = await _trustsApiClient
+            .CreateTrustAsync(new CreateTrustRequest(request.Name.Trim()), HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        var nextUrl = $"/auth/register?trustId={Uri.EscapeDataString(created.TrustId)}";
+        return Ok(new SignupResponse { TrustId = created.TrustId, NextUrl = nextUrl });
     }
 
     /// <summary>
@@ -204,4 +234,31 @@ public sealed class OidcController : ControllerBase
 
         return Ok(new { success = true });
     }
+}
+
+/// <summary>
+/// Request payload for self-service trust signup.
+/// </summary>
+public sealed record SignupRequest
+{
+    /// <summary>
+    /// Gets or sets the trust name.
+    /// </summary>
+    public string Name { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// Response payload for self-service trust signup.
+/// </summary>
+public sealed record SignupResponse
+{
+    /// <summary>
+    /// Gets or sets the created trust identifier.
+    /// </summary>
+    public string TrustId { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the next URL for continuing registration.
+    /// </summary>
+    public string NextUrl { get; init; } = string.Empty;
 }

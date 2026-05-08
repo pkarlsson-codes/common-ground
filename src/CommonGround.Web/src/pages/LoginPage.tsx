@@ -1,6 +1,4 @@
 export default function LoginPage() {
-  const trustId = new URLSearchParams(window.location.search).get('trustId')
-
   return (
     <div style={{
       minHeight: '100vh',
@@ -48,9 +46,13 @@ export default function LoginPage() {
         }}>
           Property Register
         </div>
-        {trustId ? (
-          <button
-            onClick={() => { window.location.href = `/auth/login?trustId=${encodeURIComponent(trustId)}` }}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+        }}>
+          <a
+            href='/signup'
             style={{
               width: '100%',
               padding: '10px 20px',
@@ -61,21 +63,34 @@ export default function LoginPage() {
               fontFamily: 'var(--font-body)',
               fontSize: '13.5px',
               fontWeight: 600,
-              cursor: 'pointer',
               letterSpacing: '0.02em',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              justifyContent: 'center',
+            }}
+          >
+            Sign up and create a CLT
+          </a>
+          <a
+            href='/auth/login'
+            style={{
+              width: '100%',
+              padding: '10px 20px',
+              border: '1px solid var(--border)',
+              borderRadius: '6px',
+              fontFamily: 'var(--font-body)',
+              fontSize: '13.5px',
+              fontWeight: 600,
+              letterSpacing: '0.02em',
+              textDecoration: 'none',
+              color: 'var(--text-bright)',
+              display: 'inline-flex',
+              justifyContent: 'center',
             }}
           >
             Log in
-          </button>
-        ) : (
-          <div style={{
-            fontSize: '13px',
-            color: 'var(--text-dim)',
-            lineHeight: 1.5,
-          }}>
-            This link is invalid. Please use the invitation link provided by your trust administrator.
-          </div>
-        )}
+          </a>
+        </div>
       </div>
     </div>
   )
