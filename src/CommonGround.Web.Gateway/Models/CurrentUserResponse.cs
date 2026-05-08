@@ -19,6 +19,16 @@ public sealed class CurrentUserDto
     /// Email address of the user.
     /// </summary>
     public string Email { get; set; } = null!;
+
+    /// <summary>
+    /// Trust identifier for the user when membership exists.
+    /// </summary>
+    public string? TrustId { get; set; }
+
+    /// <summary>
+    /// Indicates whether the user currently belongs to a trust.
+    /// </summary>
+    public bool HasTrust { get; set; }
 }
 
 // NOTE: We intentionally return the user DTO directly on 200 and rely on HTTP 401 for unauthorized.

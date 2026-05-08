@@ -8,4 +8,4 @@ public sealed record UserRegistered(
     string KeycloakSubject,
     string? Email,
     string? DisplayName,
-    string TrustId) : DomainEvent(AggregateId);
+    string? TrustId) : DomainEvent(AggregateId);

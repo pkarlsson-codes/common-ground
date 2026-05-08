@@ -4,7 +4,7 @@ namespace CommonGround.Web.Gateway.Configuration;
 /// Default configuration values for the Gateway application.
 /// Centralizes magic numbers and fallback values.
 /// </summary>
-internal static class GatewayDefaults
+public static class GatewayDefaults
 {
     /// <summary>
     /// Default CORS allowed origins for development.

@@ -61,7 +61,7 @@ public sealed class AuthController(IHostEnvironment env) : ControllerBase
             return Unauthorized();
         }
 
-        var (userId, _, _, _, _) = tokens.Value;
+        var (userId, trustId, _, _, _) = tokens.Value;
 
         var preferredUsername = User?.FindFirst("preferred_username")?.Value
                                  ?? User?.Identity?.Name
@@ -73,6 +73,8 @@ public sealed class AuthController(IHostEnvironment env) : ControllerBase
             Id = userId,
             Username = string.IsNullOrWhiteSpace(preferredUsername) ? userId : preferredUsername,
             Email = email,
+            TrustId = trustId,
+            HasTrust = !string.IsNullOrWhiteSpace(trustId),
         });
     }
 }

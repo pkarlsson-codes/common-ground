@@ -9,7 +9,7 @@ namespace CommonGround.Identity.Application.Commands;
 /// <param name="KeycloakSubject">The Keycloak sub claim.</param>
 /// <param name="Email">Optional email address.</param>
 /// <param name="DisplayName">Optional display name.</param>
-/// <param name="TrustId">The trust the user belongs to.</param>
+/// <param name="TrustId">The trust the user belongs to, if known.</param>
 public sealed record EnsureUser(
     string KeycloakSubject,
     string? Email,
@@ -17,7 +17,7 @@ public sealed record EnsureUser(
     TrustId? TrustId);
 
 /// <summary>Result of <see cref="EnsureUser"/>.</summary>
-public sealed record EnsureUserResult(string UserId, string TrustId);
+public sealed record EnsureUserResult(string UserId, string? TrustId);
 
 /// <summary>Handles <see cref="EnsureUser"/>.</summary>
 public static class EnsureUserHandler
@@ -39,11 +39,6 @@ public static class EnsureUserHandler
             return new EnsureUserResult(existing.UserId, existing.TrustId);
         }
 
-        if (command.TrustId is null)
-        {
-            throw new InvalidOperationException("TrustId is required when provisioning a new user.");
-        }
-
         var newUser = User.Register(command.KeycloakSubject, command.Email, command.DisplayName, command.TrustId);
 
         session.Events.StartStream<User>(newUser.Id.Value, newUser.UncommittedEvents.ToArray());
@@ -52,9 +47,9 @@ public static class EnsureUserHandler
         {
             Id = command.KeycloakSubject,
             UserId = newUser.Id.Value,
-            TrustId = newUser.TrustId.Value,
+            TrustId = newUser.TrustId?.Value,
         });
 
-        return new EnsureUserResult(newUser.Id.Value, newUser.TrustId.Value);
+        return new EnsureUserResult(newUser.Id.Value, newUser.TrustId?.Value);
     }
 }

@@ -9,6 +9,6 @@ public sealed class UserSubjectIndex
     /// <summary>Gets or sets the owned UserId value.</summary>
     public string UserId { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the trust the user belongs to.</summary>
-    public string TrustId { get; set; } = string.Empty;
+    /// <summary>Gets or sets the trust the user belongs to, if assigned.</summary>
+    public string? TrustId { get; set; }
 }

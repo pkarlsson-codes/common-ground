@@ -81,7 +81,7 @@ public sealed class OidcEventsFactory(
         await PersistTokensAndIssueCookiesAsync(ctx, userId, response.TrustId).ConfigureAwait(false);
     }
 
-    private async Task PersistTokensAndIssueCookiesAsync(TokenValidatedContext ctx, string userId, string trustId)
+    private async Task PersistTokensAndIssueCookiesAsync(TokenValidatedContext ctx, string userId, string? trustId)
     {
         var accessToken = ctx.TokenEndpointResponse?.AccessToken;
         var refreshToken = ctx.TokenEndpointResponse?.RefreshToken;

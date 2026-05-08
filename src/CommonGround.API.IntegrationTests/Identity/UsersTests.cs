@@ -53,4 +53,40 @@ public class UsersTests(ApiFactory factory)
 
         secondResult!.UserId.Should().Be(firstResult!.UserId);
     }
+
+    [Fact]
+    public async Task EnsureUser_FirstCall_WithNullTrustId_CreatesTrustlessUser()
+    {
+        var client = factory.CreateClient().WithAuthToken(trustId: string.Empty);
+        var subject = $"test-subject-no-trust-{Guid.NewGuid()}";
+
+        var response = await client.PostAsJsonAsync("/api/users/ensure",
+            new EnsureUserRequest(subject, "notrust@example.com", "No Trust User", TrustId: null));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<EnsureUserResponse>();
+        result!.UserId.Should().NotBeNullOrWhiteSpace();
+        result.UserId.Should().StartWith("user-");
+        result.TrustId.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task EnsureUser_ExistingTrustlessUser_WithNullTrustId_RoundTripsNullTrust()
+    {
+        var client = factory.CreateClient().WithAuthToken(trustId: string.Empty);
+        var subject = $"test-subject-existing-no-trust-{Guid.NewGuid()}";
+
+        var first = await client.PostAsJsonAsync("/api/users/ensure",
+            new EnsureUserRequest(subject, "existing-notrust@example.com", "Existing No Trust User", TrustId: null));
+        first.StatusCode.Should().Be(HttpStatusCode.OK);
+        var firstResult = await first.Content.ReadFromJsonAsync<EnsureUserResponse>();
+
+        var second = await client.PostAsJsonAsync("/api/users/ensure",
+            new EnsureUserRequest(subject, "existing-notrust@example.com", "Existing No Trust User", TrustId: null));
+        second.StatusCode.Should().Be(HttpStatusCode.OK);
+        var secondResult = await second.Content.ReadFromJsonAsync<EnsureUserResponse>();
+
+        secondResult!.UserId.Should().Be(firstResult!.UserId);
+        secondResult.TrustId.Should().BeNull();
+    }
 }

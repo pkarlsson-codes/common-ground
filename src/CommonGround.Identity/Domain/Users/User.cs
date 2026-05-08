@@ -23,11 +23,11 @@ public sealed class User : AggregateRoot<UserId>
     /// <summary>Gets when this user record was created.</summary>
     public DateTimeOffset CreatedAt { get; private set; }
 
-    /// <summary>Gets the trust this user belongs to.</summary>
-    public TrustId TrustId { get; private set; }
+    /// <summary>Gets the trust this user belongs to, if assigned.</summary>
+    public TrustId? TrustId { get; private set; }
 
     /// <summary>Creates a new owned user record for the given Keycloak subject.</summary>
-    public static User Register(string keycloakSubject, string? email, string? displayName, TrustId trustId)
+    public static User Register(string keycloakSubject, string? email, string? displayName, TrustId? trustId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(keycloakSubject);
 
@@ -37,7 +37,7 @@ public sealed class User : AggregateRoot<UserId>
             keycloakSubject,
             email,
             displayName,
-            trustId.Value));
+            trustId?.Value));
         return user;
     }
 
@@ -58,6 +58,6 @@ public sealed class User : AggregateRoot<UserId>
         Email = e.Email;
         DisplayName = e.DisplayName;
         CreatedAt = e.OccurredAt;
-        TrustId = TrustId.Create(e.TrustId);
+        TrustId = string.IsNullOrWhiteSpace(e.TrustId) ? null : TrustId.Create(e.TrustId);
     }
 }

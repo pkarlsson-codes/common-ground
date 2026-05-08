@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CommonGround.API\CommonGround.API.csproj" />
+    <ProjectReference Include="..\CommonGround.Web.Gateway\CommonGround.Web.Gateway.csproj" />
   </ItemGroup>
 
 </Project>
