@@ -8,6 +8,7 @@ apis/LandParcelsApi.ts
 apis/OidcApi.ts
 apis/PurchaseWorkflowsApi.ts
 apis/StewardshipApi.ts
+apis/TrustsApi.ts
 apis/index.ts
 index.ts
 models/ActivateCurePeriodRequest.ts
@@ -21,6 +22,8 @@ models/CompletePropertyInspectionRequest.ts
 models/CounselingReferralResponse.ts
 models/CreateGroundLeaseRequest.ts
 models/CreateGroundLeaseResponse.ts
+models/CreateTrustRequest.ts
+models/CreateTrustResponse.ts
 models/CurePeriodActivationResponse.ts
 models/CureViolationRequest.ts
 models/CurrentUserDto.ts
@@ -91,7 +94,6 @@ models/ResaleEstimateResponse.ts
 models/ResolveForeclosurePreventionCaseRequest.ts
 models/ScheduleClosingRequest.ts
 models/SchedulePropertyInspectionRequest.ts
-models/SignupRequest.ts
 models/StallWorkflowRequest.ts
 models/StewardshipCaseResponse.ts
 models/StewardshipCheckInDto.ts

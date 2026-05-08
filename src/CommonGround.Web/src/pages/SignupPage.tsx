@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { TrustsApi } from '../api'
 import { useAuth } from '../contexts/AuthContext'
+import { ResponseError } from '../api/runtime'
+import { apiConfig } from '../lib/apiConfig'
+import { getErrorMessage } from '../lib/getErrorMessage'
+
+const trustsApi = new TrustsApi(apiConfig)
 
 export default function SignupPage() {
   const [name, setName] = useState('')
@@ -23,26 +29,17 @@ export default function SignupPage() {
     setError(null)
 
     try {
-      const response = await fetch('/api/v1/trusts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: trimmed }),
-      })
+      await trustsApi.createTrust({ createTrustRequest: { name: trimmed } })
 
-      if (response.status === 409) {
+      await refresh()
+      navigate('/', { replace: true })
+    } catch (error) {
+      if (error instanceof ResponseError && error.response.status === 409) {
         setError('You already belong to a trust.')
         return
       }
 
-      if (!response.ok) {
-        setError('Could not create trust. Please try again.')
-        return
-      }
-
-      await refresh()
-      navigate('/', { replace: true })
-    } catch {
-      setError('Could not reach the server. Please try again.')
+      setError(await getErrorMessage(error, 'Could not create trust. Please try again.'))
     } finally {
       setIsSubmitting(false)
     }
@@ -98,7 +95,7 @@ export default function SignupPage() {
             color: 'var(--text-dim)',
             lineHeight: 1.5,
           }}>
-            Start with your organization name. You will continue to account registration next.
+            Start with your organization name. You will be brought into the app once your trust is created.
           </p>
         </div>
 

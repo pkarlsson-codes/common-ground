@@ -10,3 +10,4 @@ export * from './LandParcelsApi';
 export * from './OidcApi';
 export * from './PurchaseWorkflowsApi';
 export * from './StewardshipApi';
+export * from './TrustsApi';

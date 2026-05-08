@@ -17,18 +17,11 @@
 import * as runtime from '../runtime';
 import type {
   ProblemDetails,
-  SignupRequest,
 } from '../models/index';
 import {
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
-    SignupRequestFromJSON,
-    SignupRequestToJSON,
 } from '../models/index';
-
-export interface SignupOperationRequest {
-    signupRequest: SignupRequest;
-}
 
 /**
  * OidcApi - interface
@@ -78,35 +71,6 @@ export interface OidcApiInterface {
      * Exchanges a refresh token for a new access token using the server-side token store.
      */
     refresh(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob>;
-
-    /**
-     * 
-     * @summary Initiates the OIDC authorization request with prompt=create to open the registration UI directly.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof OidcApiInterface
-     */
-    registerRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>>;
-
-    /**
-     * Initiates the OIDC authorization request with prompt=create to open the registration UI directly.
-     */
-    register(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob>;
-
-    /**
-     * 
-     * @summary Creates a trust for self-service onboarding and returns the next OIDC registration URL.
-     * @param {SignupRequest} signupRequest Payload containing the trust name.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof OidcApiInterface
-     */
-    signupRaw(requestParameters: SignupOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>>;
-
-    /**
-     * Creates a trust for self-service onboarding and returns the next OIDC registration URL.
-     */
-    signup(requestParameters: SignupOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob>;
 
 }
 
@@ -199,74 +163,6 @@ export class OidcApi extends runtime.BaseAPI implements OidcApiInterface {
      */
     async refresh(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
         const response = await this.refreshRaw(initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Initiates the OIDC authorization request with prompt=create to open the registration UI directly.
-     */
-    async registerRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-
-        let urlPath = `/auth/register`;
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.BlobApiResponse(response);
-    }
-
-    /**
-     * Initiates the OIDC authorization request with prompt=create to open the registration UI directly.
-     */
-    async register(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
-        const response = await this.registerRaw(initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Creates a trust for self-service onboarding and returns the next OIDC registration URL.
-     */
-    async signupRaw(requestParameters: SignupOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
-        if (requestParameters['signupRequest'] == null) {
-            throw new runtime.RequiredError(
-                'signupRequest',
-                'Required parameter "signupRequest" was null or undefined when calling signup().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-
-        let urlPath = `/auth/signup`;
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: SignupRequestToJSON(requestParameters['signupRequest']),
-        }, initOverrides);
-
-        return new runtime.BlobApiResponse(response);
-    }
-
-    /**
-     * Creates a trust for self-service onboarding and returns the next OIDC registration URL.
-     */
-    async signup(requestParameters: SignupOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
-        const response = await this.signupRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -4435,6 +4435,60 @@
         }
       }
     },
+    "/api/v1/trusts": {
+      "post": {
+        "tags": [
+          "Trusts"
+        ],
+        "operationId": "CreateTrust",
+        "requestBody": {
+          "x-name": "CreateTrustRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTrustRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTrustResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": ""
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/Auth/csrf": {
       "get": {
         "tags": [
@@ -4528,93 +4582,6 @@
         "responses": {
           "200": {
             "description": "Redirect to the identity provider's authorize endpoint.",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/auth/register": {
-      "get": {
-        "tags": [
-          "Oidc"
-        ],
-        "summary": "Initiates the OIDC authorization request with prompt=create to open the registration UI directly.",
-        "operationId": "Register",
-        "responses": {
-          "200": {
-            "description": "Redirect to the identity provider's registration screen.",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/auth/signup": {
-      "post": {
-        "tags": [
-          "Oidc"
-        ],
-        "summary": "Creates a trust for self-service onboarding and returns the next OIDC registration URL.",
-        "operationId": "Signup",
-        "requestBody": {
-          "x-name": "request",
-          "description": "Payload containing the trust name.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SignupRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 1
-        },
-        "responses": {
-          "200": {
-            "description": "Created trust ID and URL for continuing registration.",
             "content": {
               "application/octet-stream": {
                 "schema": {
@@ -7059,6 +7026,26 @@
           }
         }
       },
+      "CreateTrustResponse": {
+        "type": "object",
+        "description": "Response from creating a new trust.",
+        "additionalProperties": false,
+        "properties": {
+          "trustId": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateTrustRequest": {
+        "type": "object",
+        "description": "Request to create a new trust.",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "CurrentUserDto": {
         "type": "object",
         "description": "DTO representing the authenticated user details.",
@@ -7084,17 +7071,6 @@
           "hasTrust": {
             "type": "boolean",
             "description": "Indicates whether the user currently belongs to a trust."
-          }
-        }
-      },
-      "SignupRequest": {
-        "type": "object",
-        "description": "Request payload for self-service trust signup.",
-        "additionalProperties": false,
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Gets or sets the trust name."
           }
         }
       }
