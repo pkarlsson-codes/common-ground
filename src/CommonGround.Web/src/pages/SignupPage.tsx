@@ -1,15 +1,14 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-
-type SignupResult = {
-  trustId: string
-  nextUrl: string
-}
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function SignupPage() {
   const [name, setName] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { refresh } = useAuth()
+  const navigate = useNavigate()
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -24,19 +23,24 @@ export default function SignupPage() {
     setError(null)
 
     try {
-      const response = await fetch('/auth/signup', {
+      const response = await fetch('/api/v1/trusts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: trimmed }),
       })
+
+      if (response.status === 409) {
+        setError('You already belong to a trust.')
+        return
+      }
 
       if (!response.ok) {
         setError('Could not create trust. Please try again.')
         return
       }
 
-      const payload = (await response.json()) as SignupResult
-      window.location.href = payload.nextUrl
+      await refresh()
+      navigate('/', { replace: true })
     } catch {
       setError('Could not reach the server. Please try again.')
     } finally {

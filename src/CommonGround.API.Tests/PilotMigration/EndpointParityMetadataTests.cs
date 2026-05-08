@@ -31,7 +31,7 @@ public sealed class EndpointParityMetadataTests
     }
 
     [Fact]
-    public void TrustsCreate_WolverineRoute_MatchesControllerRoute()
+    public void TrustsCreate_WolverineRoute_MatchesExpectedRoute()
     {
         var method = typeof(TrustsEndpoints).GetMethod(nameof(TrustsEndpoints.CreateTrust), BindingFlags.Public | BindingFlags.Static);
 
@@ -42,7 +42,7 @@ public sealed class EndpointParityMetadataTests
     }
 
     [Fact]
-    public void TrustsCreate_WolverineEndpoint_UsesServiceTokenPolicy()
+    public void TrustsCreate_WolverineEndpoint_RequiresAuthenticationWithoutPolicy()
     {
         var method = typeof(TrustsEndpoints).GetMethod(nameof(TrustsEndpoints.CreateTrust), BindingFlags.Public | BindingFlags.Static);
 
@@ -50,7 +50,7 @@ public sealed class EndpointParityMetadataTests
         var authorize = method!.GetCustomAttribute<AuthorizeAttribute>();
 
         Assert.NotNull(authorize);
-        Assert.Equal("ServiceToken", authorize!.Policy);
+        Assert.Null(authorize!.Policy);
     }
 
     private static string GetWolverinePostTemplate(MemberInfo method)

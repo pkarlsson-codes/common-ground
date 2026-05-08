@@ -7,7 +7,6 @@ namespace CommonGround.API.Clients;
 
 /// <summary>
 /// HTTP client for trust management API endpoints.
-/// Requests are decorated with a service token by <c>InternalServiceTokenHandler</c>.
 /// </summary>
 public sealed class TrustsApiClient(
     HttpClient httpClient,

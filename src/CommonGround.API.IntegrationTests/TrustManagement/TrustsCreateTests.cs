@@ -9,22 +9,22 @@ using FluentAssertions;
 namespace CommonGround.API.IntegrationTests.TrustManagement;
 
 [Collection(IntegrationCollection.Name)]
-public class TrustsSelfCreateTests(ApiFactory factory)
+public class TrustsCreateTests(ApiFactory factory)
 {
     [Fact]
-    public async Task SelfCreateTrust_Unauthenticated_Returns401()
+    public async Task CreateTrust_Unauthenticated_Returns401()
     {
         var client = factory.CreateClient();
 
         var response = await client.PostAsJsonAsync(
-            "/api/trusts/self-create",
+            "/api/trusts",
             new CreateTrustRequest($"My Trust {Guid.NewGuid():N}"));
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
-    public async Task SelfCreateTrust_TrustlessAuthenticatedUser_Returns200WithTrustId()
+    public async Task CreateTrust_TrustlessAuthenticatedUser_Returns200WithTrustId()
     {
         var subject = $"self-create-no-trust-{Guid.NewGuid():N}";
 
@@ -41,7 +41,7 @@ public class TrustsSelfCreateTests(ApiFactory factory)
         var client = factory.CreateClient().WithAuthToken(userId: ensurePayload!.UserId, trustId: string.Empty);
 
         var response = await client.PostAsJsonAsync(
-            "/api/trusts/self-create",
+            "/api/trusts",
             new CreateTrustRequest($"Self Create Trust {Guid.NewGuid():N}"));
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -52,7 +52,7 @@ public class TrustsSelfCreateTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task SelfCreateTrust_UserAlreadyHasTrust_Returns409()
+    public async Task CreateTrust_UserAlreadyHasTrust_Returns409()
     {
         var subject = $"self-create-existing-trust-{Guid.NewGuid():N}";
         var existingTrustId = "trust-testdefault00000000000";
@@ -70,14 +70,14 @@ public class TrustsSelfCreateTests(ApiFactory factory)
         var client = factory.CreateClient().WithAuthToken(userId: ensurePayload!.UserId, trustId: existingTrustId);
 
         var response = await client.PostAsJsonAsync(
-            "/api/trusts/self-create",
+            "/api/trusts",
             new CreateTrustRequest($"Blocked Trust {Guid.NewGuid():N}"));
 
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
 
     [Fact]
-    public async Task SelfCreateTrust_DuplicateSubmitAfterSuccess_Returns409()
+    public async Task CreateTrust_DuplicateSubmitAfterSuccess_Returns409()
     {
         var subject = $"self-create-duplicate-{Guid.NewGuid():N}";
         var bootstrapClient = factory.CreateClient().WithAuthToken(trustId: string.Empty);
@@ -93,7 +93,7 @@ public class TrustsSelfCreateTests(ApiFactory factory)
         var client = factory.CreateClient().WithAuthToken(userId: ensurePayload!.UserId, trustId: string.Empty);
 
         var first = await client.PostAsJsonAsync(
-            "/api/trusts/self-create",
+            "/api/trusts",
             new CreateTrustRequest($"Duplicate Trust {Guid.NewGuid():N}"));
 
         first.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -102,7 +102,7 @@ public class TrustsSelfCreateTests(ApiFactory factory)
         firstPayload!.TrustId.Should().StartWith("trust-");
 
         var second = await client.PostAsJsonAsync(
-            "/api/trusts/self-create",
+            "/api/trusts",
             new CreateTrustRequest($"Duplicate Trust {Guid.NewGuid():N}"));
 
         second.StatusCode.Should().Be(HttpStatusCode.Conflict);

@@ -37,7 +37,7 @@ function ProtectedRoute() {
     return null
   }
 
-  if (!user?.hasTrust && location.pathname !== '/onboarding') {
+  if (!user?.hasTrust && location.pathname !== '/onboarding' && location.pathname !== '/signup') {
     return <Navigate to="/onboarding" replace />
   }
 
@@ -49,8 +49,8 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/signup" element={<SignupPage />} />
           <Route element={<ProtectedRoute />}>
+            <Route path="/signup" element={<SignupPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route element={<Layout />}>
               <Route index element={<Navigate to="/land-parcels" replace />} />

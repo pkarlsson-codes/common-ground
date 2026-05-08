@@ -1,6 +1,3 @@
-using CommonGround.API.Clients;
-using CommonGround.API.Contracts.TrustManagement.Requests;
-using CommonGround.API.Contracts.TrustManagement.Responses;
 using CommonGround.Web.Gateway.Controllers;
 using CommonGround.Web.Gateway.Services;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -50,47 +47,7 @@ public sealed class OidcControllerReturnUrlTests
         Assert.Equal("/default", challenge.Properties?.RedirectUri);
     }
 
-    [Fact]
-    public void Register_WithValidRelativeReturnUrl_UsesReturnUrlAsRedirectUri()
-    {
-        var controller = BuildController("/invite/abc?x=1", "trust-123");
-
-        var result = controller.Register();
-
-        var challenge = Assert.IsType<ChallengeResult>(result);
-        Assert.Equal(OpenIdConnectDefaults.AuthenticationScheme, Assert.Single(challenge.AuthenticationSchemes));
-        Assert.Equal("/invite/abc?x=1", challenge.Properties?.RedirectUri);
-        Assert.Equal("create", challenge.Properties?.Parameters["prompt"]);
-    }
-
-    [Theory]
-    [InlineData("http://evil.example/path")]
-    [InlineData("https://evil.example/path")]
-    [InlineData("//evil.example/path")]
-    public void Register_WithInvalidReturnUrl_UsesDefaultRedirect(string returnUrl)
-    {
-        var controller = BuildController(returnUrl, "trust-123");
-
-        var result = controller.Register();
-
-        var challenge = Assert.IsType<ChallengeResult>(result);
-        Assert.Equal("/default", challenge.Properties?.RedirectUri);
-        Assert.Equal("create", challenge.Properties?.Parameters["prompt"]);
-    }
-
-    [Fact]
-    public void Register_WithoutReturnUrl_UsesDefaultRedirect()
-    {
-        var controller = BuildController(null, "trust-123");
-
-        var result = controller.Register();
-
-        var challenge = Assert.IsType<ChallengeResult>(result);
-        Assert.Equal("/default", challenge.Properties?.RedirectUri);
-        Assert.Equal("create", challenge.Properties?.Parameters["prompt"]);
-    }
-
-    private static OidcController BuildController(string? returnUrl = null, string? trustId = null)
+    private static OidcController BuildController(string? returnUrl = null)
     {
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -103,24 +60,14 @@ public sealed class OidcControllerReturnUrlTests
             config,
             new StubTokenStore(),
             new StubHttpClientFactory(),
-            new StubHostEnvironment(),
-            new StubTrustsApiClient());
+            new StubHostEnvironment());
 
-        var queryValues = new List<string>();
-        if (!string.IsNullOrWhiteSpace(returnUrl))
-        {
-            queryValues.Add($"returnUrl={Uri.EscapeDataString(returnUrl)}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(trustId))
-        {
-            queryValues.Add($"trustId={Uri.EscapeDataString(trustId)}");
-        }
+        var queryString = !string.IsNullOrWhiteSpace(returnUrl)
+            ? new QueryString($"?returnUrl={Uri.EscapeDataString(returnUrl)}")
+            : QueryString.Empty;
 
         var httpContext = new DefaultHttpContext();
-        httpContext.Request.QueryString = queryValues.Count > 0
-            ? new QueryString($"?{string.Join("&", queryValues)}")
-            : QueryString.Empty;
+        httpContext.Request.QueryString = queryString;
 
         controller.ControllerContext = new ControllerContext
         {
@@ -128,12 +75,6 @@ public sealed class OidcControllerReturnUrlTests
         };
 
         return controller;
-    }
-
-    private sealed class StubTrustsApiClient : ITrustsApiClient
-    {
-        public Task<CreateTrustResponse> CreateTrustAsync(CreateTrustRequest request, CancellationToken ct = default)
-            => throw new NotSupportedException();
     }
 
     private sealed class StubTokenStore : ITokenStore
