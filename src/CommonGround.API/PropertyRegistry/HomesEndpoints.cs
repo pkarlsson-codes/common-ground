@@ -30,9 +30,19 @@ public static class HomesEndpoints
 
         var userId = httpContext.GetUserId();
 
+        if (string.IsNullOrWhiteSpace(request.HomeType))
+        {
+            return Results.BadRequest("homeType is required.");
+        }
+
+        if (!HomeType.TryFromDisplayName(request.HomeType, out var homeType))
+        {
+            return Results.BadRequest($"Unrecognized home type: '{request.HomeType}'.");
+        }
+
         var command = new RegisterHome(
             LandParcelId.Create(request.LandParcelId),
-            HomeType.FromDisplayName(request.HomeType),
+            homeType,
             request.Bedrooms,
             request.Bathrooms,
             request.SquareFootage,

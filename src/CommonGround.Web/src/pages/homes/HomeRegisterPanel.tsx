@@ -24,7 +24,7 @@ interface FormState {
 
 const emptyForm = (parcelId = ''): FormState => ({
   landParcelId: parcelId,
-  homeType: '',
+  homeType: 'SingleFamily',
   bedrooms: 0,
   bathrooms: 0,
   squareFootage: 0,
@@ -89,7 +89,7 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
             className="btn btn-primary"
             type="submit"
             form="register-home-form"
-            disabled={registerMutation.isPending || !form.landParcelId}
+            disabled={registerMutation.isPending || !form.landParcelId || !form.homeType}
           >
             {registerMutation.isPending ? 'Registering…' : 'Register Home'}
           </button>
@@ -125,6 +125,7 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
               className="form-select"
               value={form.homeType}
               onChange={e => setForm(f => ({ ...f, homeType: e.target.value }))}
+              required
             >
               {BUILDING_TYPES.map(t => (
                 <option key={t} value={t}>{HOME_TYPE_LABELS[t]}</option>

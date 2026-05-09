@@ -92,6 +92,27 @@ public class HomesTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task RegisterHome_InvalidHomeType_ReturnsBadRequest()
+    {
+        var parcelId = await CreateLandParcelAsync();
+        var client = factory.CreateClient().WithAuthToken();
+
+        var response = await client.PostAsJsonAsync("/api/homes",
+            new RegisterHomeRequest(
+                parcelId,
+                string.Empty,
+                3,
+                2m,
+                1200m,
+                1990,
+                "Test Appraiser",
+                new DateOnly(2024, 1, 1),
+                280000m));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task GetHome_AfterRegistration_ReturnsHome()
     {
         var parcelId = await CreateLandParcelAsync();
