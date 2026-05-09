@@ -12,7 +12,7 @@ internal sealed class PurchaseWorkflowListItemViewProjection : SingleStreamProje
         new()
         {
             Id = e.Data.AggregateId,
-            GroundLeaseId = e.Data.GroundLeaseId,
+            GroundLeaseTemplateId = e.Data.GroundLeaseTemplateId,
             BuyerFullName = e.Data.BuyerFullName,
             PurchasePrice = e.Data.PurchasePrice,
             Phase = "Initiated",

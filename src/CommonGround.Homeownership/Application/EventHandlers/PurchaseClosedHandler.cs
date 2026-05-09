@@ -1,8 +1,10 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.SharedKernel.Extensions;
 using Marten;
 
 namespace CommonGround.Homeownership.Application.EventHandlers;
@@ -23,37 +25,25 @@ public sealed class PurchaseClosedHandler(IDocumentSession session)
     {
         ArgumentNullException.ThrowIfNull(@event);
 
-        var workflowStream = await session.Events.FetchForWriting<PurchaseWorkflow>(@event.AggregateId, ct).ConfigureAwait(false);
-        var workflow = workflowStream.Aggregate ?? throw new AggregateNotFoundException(@event.AggregateId);
+        var workflowId = PurchaseWorkflowId.Create(@event.AggregateId);
 
-        var leaseStream = await session.Events.FetchForWriting<GroundLease>(workflow.GroundLeaseId.Value, ct).ConfigureAwait(false);
-        var lease = leaseStream.Aggregate ?? throw new AggregateNotFoundException(workflow.GroundLeaseId.Value);
+        var workflow = await session
+            .LoadAggregateAsync<PurchaseWorkflow>(workflowId, ct)
+            .ConfigureAwait(false);
+
+        var groundLeaseTemplate = await session
+            .LoadAggregateAsync<GroundLeaseTemplate>(workflow.GroundLeaseTemplateId, ct)
+            .ConfigureAwait(false);
 
         var recordedBy = UserId.Create(@event.RecordedBy);
-        var buyer = workflow.Buyer;
 
-        if (lease.CurrentHomeowner is null)
-        {
-            lease.OnboardHomeowner(buyer, recordedBy);
-        }
-        else if (!IsSameHomeowner(lease.CurrentHomeowner, buyer))
-        {
-            lease.ChangeHomeowner(buyer, recordedBy);
-        }
-        else
-        {
-            return;
-        }
+        var lease = GroundLease.CreateFromPurchase(
+            groundLeaseTemplate,
+            workflow,
+            @event.ActualClosingDate,
+            recordedBy
+        );
 
-        lease.ValidateInvariants();
-        leaseStream.AppendMany(lease.UncommittedEvents.ToArray());
-        lease.UncommittedEvents.MarkAsCommitted();
-    }
-
-    private static bool IsSameHomeowner(Homeowner current, Homeowner buyer)
-    {
-        return string.Equals(current.FullName, buyer.FullName, StringComparison.Ordinal)
-            && string.Equals(current.Email, buyer.Email, StringComparison.OrdinalIgnoreCase)
-            && string.Equals(current.Phone, buyer.Phone, StringComparison.Ordinal);
+        session.UpdateAggregate(lease);
     }
 }

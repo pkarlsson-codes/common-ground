@@ -2,10 +2,9 @@ using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Application.Errors;
-using CommonGround.PropertyRegistry.Domain.Homes;
-using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
+using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 
 namespace CommonGround.Homeownership.Domain.GroundLeases;
 
@@ -20,10 +19,10 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
 #pragma warning restore CS8618
 
     /// <summary>Gets the ID of the land parcel this lease is for.</summary>
-    public LandParcelId LandParcelId { get; private set; }
+    public string LandParcelId { get; private set; }
 
     /// <summary>Gets the ID of the leasable unit on this leased parcel.</summary>
-    public HomeId UnitId { get; private set; }
+    public string UnitId { get; private set; }
 
     /// <summary>Gets the start date of the lease.</summary>
     public DateOnly LeaseStartDate { get; private set; }
@@ -55,10 +54,13 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// </summary>
     public GroundLeaseTemplateId? TemplateId { get; private set; }
 
+    /// <summary>Gets the source purchase workflow ID when this lease was created from a purchase workflow.</summary>
+    public PurchaseWorkflowId? PurchaseWorkflowId { get; private set; } 
+
     /// <summary>Creates a new ground lease.</summary>
     public static GroundLease Create(
-        LandParcelId landParcelId,
-        HomeId unitId,
+        string landParcelId,
+        string unitId,
         DateOnly leaseStartDate,
         int termYears,
         string covenantTerms,
@@ -79,8 +81,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         var lease = new GroundLease();
         lease.ApplyChange(new GroundLeaseCreated(
             GroundLeaseId.Generate().Value,
-            landParcelId.Value,
-            unitId.Value,
+            landParcelId,
+            unitId,
             leaseStartDate,
             termYears,
             covenantTerms,
@@ -96,16 +98,14 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     }
 
     /// <summary>Creates a new ground lease from an active template.</summary>
-    public static GroundLease CreateFromTemplate(
+    public static GroundLease CreateFromPurchase(
         GroundLeaseTemplate template,
-        LandParcelId landParcelId,
-        HomeId unitId,
+        PurchaseWorkflow purchaseWorkflow,
         DateOnly leaseStartDate,
         UserId createdBy)
     {
         ArgumentNullException.ThrowIfNull(template);
-        ArgumentNullException.ThrowIfNull(landParcelId);
-        ArgumentNullException.ThrowIfNull(unitId);
+        ArgumentNullException.ThrowIfNull(purchaseWorkflow);
         ArgumentNullException.ThrowIfNull(createdBy);
 
         if (template.Status != GroundLeaseTemplateStatus.Active)
@@ -114,11 +114,12 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         }
 
         var lease = new GroundLease();
-        lease.ApplyChange(new GroundLeaseCreatedFromTemplate(
+        lease.ApplyChange(new GroundLeaseCreatedFromPurchase(
             GroundLeaseId.Generate().Value,
+            purchaseWorkflow.Id.Value,
             template.Id.Value,
-            landParcelId.Value,
-            unitId.Value,
+            purchaseWorkflow.LandParcelId,
+            purchaseWorkflow.HomeId,
             leaseStartDate,
             template.TermYears,
             template.CovenantTerms,
@@ -128,54 +129,12 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             template.ResalePolicyTerms.BaselineIndexValue,
             template.ResalePolicyTerms.AnnualPercentage,
             template.ResalePolicyTerms.ImprovementsCap,
-            createdBy.Value));
+            createdBy.Value,
+            purchaseWorkflow.Buyer.FullName,
+            purchaseWorkflow.Buyer.Email,
+            purchaseWorkflow.Buyer.Phone));
 
         return lease;
-    }
-
-    /// <summary>Onboards the first homeowner to this lease.</summary>
-    /// <param name="homeowner">The homeowner to onboard.</param>
-    /// <param name="onboardedBy">The user recording this action.</param>
-    public void OnboardHomeowner(Homeowner homeowner, UserId onboardedBy)
-    {
-        ArgumentNullException.ThrowIfNull(homeowner);
-        ArgumentNullException.ThrowIfNull(onboardedBy);
-
-        if (CurrentHomeowner is not null)
-        {
-            throw BusinessRuleViolation.GroundLease.OnboardHomeowner.AlreadyOnboarded();
-        }
-
-        ApplyChange(new HomeownerOnboarded(
-            Id.Value,
-            homeowner.FullName,
-            homeowner.Email,
-            homeowner.Phone,
-            onboardedBy.Value));
-    }
-
-    /// <summary>Changes the homeowner on this lease.</summary>
-    /// <param name="newHomeowner">The new homeowner.</param>
-    /// <param name="changedBy">The user recording this action.</param>
-    public void ChangeHomeowner(Homeowner newHomeowner, UserId changedBy)
-    {
-        ArgumentNullException.ThrowIfNull(newHomeowner);
-        ArgumentNullException.ThrowIfNull(changedBy);
-
-        if (CurrentHomeowner is null)
-        {
-            throw BusinessRuleViolation.GroundLease.ChangeHomeowner.CurrentHomeownerMissing();
-        }
-
-        ApplyChange(new HomeownerChanged(
-            Id.Value,
-            CurrentHomeowner.FullName,
-            CurrentHomeowner.Email,
-            CurrentHomeowner.Phone,
-            newHomeowner.FullName,
-            newHomeowner.Email,
-            newHomeowner.Phone,
-            changedBy.Value));
     }
 
     /// <summary>Terminates this ground lease.</summary>
@@ -225,9 +184,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         switch (domainEvent)
         {
             case GroundLeaseCreated e: Apply(e); break;
-            case GroundLeaseCreatedFromTemplate e: Apply(e); break;
-            case HomeownerOnboarded e: Apply(e); break;
-            case HomeownerChanged e: Apply(e); break;
+            case GroundLeaseCreatedFromPurchase e: Apply(e); break;
             case StewardshipCheckInRecorded: break; // No state mutation needed
             case GroundLeaseTerminated e: Apply(e); break;
             default: throw new InvalidOperationException(
@@ -238,8 +195,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     private void Apply(GroundLeaseCreated e)
     {
         Id = GroundLeaseId.Create(e.AggregateId);
-        LandParcelId = LandParcelId.Create(e.LandParcelId);
-        UnitId = HomeId.Create(e.HomeId);
+        LandParcelId = e.LandParcelId;
+        UnitId = e.HomeId;
         LeaseStartDate = e.LeaseStartDate;
         TermYears = e.TermYears;
         CovenantTerms = e.CovenantTerms;
@@ -259,12 +216,13 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         TemplateId = null;
     }
 
-    private void Apply(GroundLeaseCreatedFromTemplate e)
+    private void Apply(GroundLeaseCreatedFromPurchase e)
     {
         Id = GroundLeaseId.Create(e.AggregateId);
+        PurchaseWorkflowId = PurchaseWorkflowId.Create(e.PurchaseWorkflowId);
         TemplateId = GroundLeaseTemplateId.Create(e.GroundLeaseTemplateId);
-        LandParcelId = LandParcelId.Create(e.LandParcelId);
-        UnitId = HomeId.Create(e.HomeId);
+        LandParcelId = e.LandParcelId;
+        UnitId = e.HomeId;
         LeaseStartDate = e.LeaseStartDate;
         TermYears = e.TermYears;
         CovenantTerms = e.CovenantTerms;
@@ -281,6 +239,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         Status = GroundLeaseStatus.Active;
         CreatedBy = UserId.Create(e.RegisteredBy);
         CreatedAt = e.OccurredAt;
+        CurrentHomeowner = new Homeowner(e.BuyerFullName, e.BuyerEmail, e.BuyerPhone);
     }
 
     private void Apply(HomeownerOnboarded e)

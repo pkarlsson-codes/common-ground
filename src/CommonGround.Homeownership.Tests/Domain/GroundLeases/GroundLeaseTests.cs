@@ -2,8 +2,7 @@ using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
-using CommonGround.PropertyRegistry.Domain.Homes;
-using CommonGround.PropertyRegistry.Domain.LandParcels;
+using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using FluentAssertions;
@@ -12,15 +11,27 @@ namespace CommonGround.Homeownership.Tests.Domain.GroundLeases;
 
 public class GroundLeaseTests
 {
+    private const string ParcelId = "land-parcel-1234";
+    private const string HomeId = "home-5678";
     private static readonly UserId StaffUser = UserId.Generate();
-    private static readonly LandParcelId ParcelId = LandParcelId.Generate();
-    private static readonly HomeId TestUnitId = HomeId.Generate();
+    private static readonly PurchaseWorkflowId PurchaseWorkflowId = PurchaseWorkflowId.Generate();
+
+    private static PurchaseWorkflow CreatePurchaseWorkflow()
+    {
+        return PurchaseWorkflow.Initiate(
+            GroundLeaseTemplateId.Generate(),
+            ParcelId,
+            HomeId,
+            new Homeowner("Buyer Name", "buyer@example.com"),
+            250000m,
+            StaffUser);
+    }
 
     private static GroundLease CreateLease()
     {
         return GroundLease.Create(
             ParcelId,
-            TestUnitId,
+            HomeId,
             new DateOnly(2025, 1, 1),
             99,
             "Standard affordability covenant",
@@ -32,7 +43,7 @@ public class GroundLeaseTests
     {
         return GroundLease.Create(
             ParcelId,
-            TestUnitId,
+            HomeId,
             new DateOnly(2025, 1, 1),
             99,
             "Standard affordability covenant",
@@ -46,7 +57,7 @@ public class GroundLeaseTests
         var lease = CreateLease();
 
         lease.LandParcelId.Should().Be(ParcelId);
-        lease.UnitId.Should().Be(TestUnitId);
+        lease.UnitId.Should().Be(HomeId);
         lease.LeaseStartDate.Should().Be(new DateOnly(2025, 1, 1));
         lease.TermYears.Should().Be(99);
         lease.CovenantTerms.Should().Be("Standard affordability covenant");
@@ -59,7 +70,7 @@ public class GroundLeaseTests
     public void Create_ZeroTermYears_Throws()
     {
         var act = () => GroundLease.Create(
-            ParcelId, TestUnitId, new DateOnly(2025, 1, 1),
+            ParcelId, HomeId, new DateOnly(2025, 1, 1),
             0, "Terms", ResalePolicyTerms.AppraisalBased(0.25m), StaffUser);
 
         act.Should().Throw<BusinessRuleViolationException>();
@@ -69,7 +80,7 @@ public class GroundLeaseTests
     public void Create_EmptyCovenantTerms_Throws()
     {
         var act = () => GroundLease.Create(
-            ParcelId, TestUnitId, new DateOnly(2025, 1, 1),
+            ParcelId, HomeId, new DateOnly(2025, 1, 1),
             99, "", ResalePolicyTerms.AppraisalBased(0.25m), StaffUser);
 
         act.Should().Throw<BusinessRuleViolationException>();
@@ -134,73 +145,6 @@ public class GroundLeaseTests
     }
 
     [Fact]
-    public void OnboardHomeowner_NoExistingHomeowner_SetsHomeowner()
-    {
-        var lease = CreateLease();
-        var homeowner = new Homeowner("Jane Doe", "jane@example.com", "+12025551234");
-
-        lease.OnboardHomeowner(homeowner, StaffUser);
-
-        lease.CurrentHomeowner.Should().NotBeNull();
-        lease.CurrentHomeowner!.FullName.Should().Be("Jane Doe");
-        lease.CurrentHomeowner.Email.Should().Be("jane@example.com");
-        lease.CurrentHomeowner.Phone.Should().Be("+12025551234");
-    }
-
-    [Fact]
-    public void OnboardHomeowner_AlreadyOnboarded_Throws()
-    {
-        var lease = CreateLease();
-        lease.OnboardHomeowner(new Homeowner("Jane Doe", "jane@example.com"), StaffUser);
-
-        var act = () => lease.OnboardHomeowner(
-            new Homeowner("Other Person", "other@example.com"), StaffUser);
-
-        act.Should().Throw<BusinessRuleViolationException>();
-    }
-
-    [Fact]
-    public void ChangeHomeowner_WithExisting_UpdatesHomeowner()
-    {
-        var lease = CreateLease();
-        lease.OnboardHomeowner(new Homeowner("Jane Doe", "jane@example.com"), StaffUser);
-
-        var newOwner = new Homeowner("John Smith", "john@example.com", "+12025559999");
-        lease.ChangeHomeowner(newOwner, StaffUser);
-
-        lease.CurrentHomeowner!.FullName.Should().Be("John Smith");
-        lease.CurrentHomeowner.Email.Should().Be("john@example.com");
-    }
-
-    [Fact]
-    public void ChangeHomeowner_NoExisting_Throws()
-    {
-        var lease = CreateLease();
-
-        var act = () => lease.ChangeHomeowner(
-            new Homeowner("John Smith", "john@example.com"), StaffUser);
-
-        act.Should().Throw<BusinessRuleViolationException>();
-    }
-
-    [Fact]
-    public void ChangeHomeowner_EmitsEventWithPreviousData()
-    {
-        var lease = CreateLease();
-        lease.OnboardHomeowner(new Homeowner("Jane Doe", "jane@example.com", "+12025551234"), StaffUser);
-
-        lease.ChangeHomeowner(new Homeowner("John Smith", "john@example.com"), StaffUser);
-
-        var changeEvent = lease.UncommittedEvents.OfType<HomeownerChanged>().Single();
-        changeEvent.PreviousFullName.Should().Be("Jane Doe");
-        changeEvent.PreviousEmail.Should().Be("jane@example.com");
-        changeEvent.PreviousPhone.Should().Be("+12025551234");
-        changeEvent.NewFullName.Should().Be("John Smith");
-        changeEvent.NewEmail.Should().Be("john@example.com");
-        changeEvent.NewPhone.Should().BeNull();
-    }
-
-    [Fact]
     public void RecordStewardshipCheckIn_ValidNotes_EmitsEvent()
     {
         var lease = CreateLease();
@@ -234,10 +178,9 @@ public class GroundLeaseTests
             ResalePolicyTerms.IndexBased("CPI", 100m, 7500m),
             StaffUser);
 
-        var lease = GroundLease.CreateFromTemplate(
+        var lease = GroundLease.CreateFromPurchase(
             template,
-            ParcelId,
-            TestUnitId,
+            CreatePurchaseWorkflow(),
             new DateOnly(2026, 1, 1),
             StaffUser);
 
@@ -246,6 +189,9 @@ public class GroundLeaseTests
         lease.CovenantTerms.Should().Be("Template covenant terms");
         lease.ResalePolicyTerms.FormulaKind.Should().Be(FormulaKind.IndexBased);
         lease.ResalePolicyTerms.IndexType.Should().Be("CPI");
+        lease.CurrentHomeowner.Should().NotBeNull();
+        lease.CurrentHomeowner.FullName.Should().Be("Buyer Name");
+        lease.CurrentHomeowner.Email.Should().Be("buyer@example.com");
     }
 
     [Fact]
@@ -259,10 +205,9 @@ public class GroundLeaseTests
             StaffUser);
         template.Deactivate(StaffUser);
 
-        var act = () => GroundLease.CreateFromTemplate(
+        var act = () => GroundLease.CreateFromPurchase(
             template,
-            ParcelId,
-            TestUnitId,
+            CreatePurchaseWorkflow(),
             new DateOnly(2026, 1, 1),
             StaffUser);
 
@@ -279,16 +224,15 @@ public class GroundLeaseTests
             ResalePolicyTerms.FixedPercentage(0.02m, 12000m),
             StaffUser);
 
-        var lease = GroundLease.CreateFromTemplate(
+        var lease = GroundLease.CreateFromPurchase(
             template,
-            ParcelId,
-            TestUnitId,
+            CreatePurchaseWorkflow(),
             new DateOnly(2026, 4, 1),
             StaffUser);
 
         lease.UncommittedEvents.Should().HaveCount(1);
         var evt = lease.UncommittedEvents.Single()
-            .Should().BeOfType<GroundLeaseCreatedFromTemplate>().Subject;
+            .Should().BeOfType<GroundLeaseCreatedFromPurchase>().Subject;
 
         evt.GroundLeaseTemplateId.Should().Be(template.Id.Value);
         evt.TermYears.Should().Be(40);
@@ -316,10 +260,9 @@ public class GroundLeaseTests
             ResalePolicyTerms.AppraisalBased(0.33m, 15000m),
             StaffUser);
 
-        var lease = GroundLease.CreateFromTemplate(
+        var lease = GroundLease.CreateFromPurchase(
             template,
-            ParcelId,
-            TestUnitId,
+            CreatePurchaseWorkflow(),
             new DateOnly(2026, 2, 1),
             StaffUser);
 
@@ -338,10 +281,9 @@ public class GroundLeaseTests
             ResalePolicyTerms.IndexBased("CPI", 210m, null),
             StaffUser);
 
-        var lease = GroundLease.CreateFromTemplate(
+        var lease = GroundLease.CreateFromPurchase(
             template,
-            ParcelId,
-            TestUnitId,
+            CreatePurchaseWorkflow(),
             new DateOnly(2026, 2, 1),
             StaffUser);
 
@@ -361,10 +303,9 @@ public class GroundLeaseTests
             ResalePolicyTerms.FixedPercentage(0.015m, 5000m),
             StaffUser);
 
-        var lease = GroundLease.CreateFromTemplate(
+        var lease = GroundLease.CreateFromPurchase(
             template,
-            ParcelId,
-            TestUnitId,
+            CreatePurchaseWorkflow(),
             new DateOnly(2026, 2, 1),
             StaffUser);
 

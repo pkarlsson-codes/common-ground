@@ -42,8 +42,8 @@ public static class GroundLeasesEndpoints
             request.ImprovementsCap);
 
         var command = new CreateGroundLease(
-            LandParcelId.Create(request.LandParcelId),
-            HomeId.Create(request.HomeId),
+            request.LandParcelId,
+            request.HomeId,
             DateOnly.Parse(request.LeaseStartDate, CultureInfo.InvariantCulture),
             request.TermYears,
             request.CovenantTerms,
@@ -63,14 +63,8 @@ public static class GroundLeasesEndpoints
     {
         var statusFilter = request.Statuses?
             .Select(s => GroundLeaseStatus.FromDisplayName(s)).ToList().AsReadOnly();
-        var landParcelFilter = request.LandParcelId is not null
-            ? LandParcelId.Create(request.LandParcelId)
-            : null;
-        var unitFilter = request.HomeId is not null
-            ? HomeId.Create(request.HomeId)
-            : null;
 
-        var query = new GetGroundLeases(request.Page, statusFilter, landParcelFilter, unitFilter, request.Search);
+        var query = new GetGroundLeases(request.Page, statusFilter, request.LandParcelId, request.HomeId, request.Search);
 
         var result = await bus.InvokeForTenantAsync<PaginatedResponse<GroundLeaseListItemView>>(bus.TenantId!, query, cancellationToken);
 
@@ -126,29 +120,6 @@ public static class GroundLeasesEndpoints
             view.CreatedBy);
 
         return Results.Ok(response);
-    }
-
-    [WolverinePatch("/api/ground-leases/{groundLeaseId}/homeowner")]
-    public static async Task<IResult> ChangeHomeowner(
-        string groundLeaseId,
-        ChangeHomeownerRequest request,
-        HttpContext httpContext,
-        IMessageBus bus,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
-        ArgumentNullException.ThrowIfNull(request);
-
-        var userId = httpContext.GetUserId();
-
-        await bus.InvokeForTenantAsync(bus.TenantId!,
-            new ChangeHomeowner(
-                GroundLeaseId.Create(groundLeaseId),
-                new Homeowner(request.FullName, request.Email, request.Phone),
-                userId),
-            cancellationToken);
-
-        return Results.NoContent();
     }
 
     [WolverinePost("/api/ground-leases/{groundLeaseId}/stewardship-check-ins")]

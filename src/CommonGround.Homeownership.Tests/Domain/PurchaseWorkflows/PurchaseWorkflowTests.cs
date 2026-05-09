@@ -1,4 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 using CommonGround.SharedKernel.Domain;
@@ -9,13 +10,15 @@ namespace CommonGround.Homeownership.Tests.Domain.PurchaseWorkflows;
 
 public class PurchaseWorkflowTests
 {
+    private const string ParcelId = "land-parcel-1234";
+    private const string HomeId = "home-5678";
     private static readonly UserId StaffUser = UserId.Generate();
-    private static readonly GroundLeaseId LeaseId = GroundLeaseId.Generate();
+    private static readonly GroundLeaseTemplateId LeaseTemplateId = GroundLeaseTemplateId.Generate();
     private static readonly Homeowner Buyer = new("Alice Johnson", "alice@example.com", "+12025551234");
 
     private static PurchaseWorkflow CreateWorkflow(decimal price = 250_000m)
     {
-        return PurchaseWorkflow.Initiate(LeaseId, Buyer, price, StaffUser);
+        return PurchaseWorkflow.Initiate(LeaseTemplateId, ParcelId, HomeId, Buyer, price, StaffUser);
     }
 
     private static void SatisfyAllTracks(PurchaseWorkflow workflow)
@@ -34,7 +37,7 @@ public class PurchaseWorkflowTests
     {
         var workflow = CreateWorkflow();
 
-        workflow.GroundLeaseId.Should().Be(LeaseId);
+        workflow.GroundLeaseTemplateId.Should().Be(LeaseTemplateId);
         workflow.Buyer.FullName.Should().Be("Alice Johnson");
         workflow.PurchasePrice.Should().Be(250_000m);
         workflow.Phase.Should().Be(WorkflowPhase.Initiated);
@@ -46,14 +49,14 @@ public class PurchaseWorkflowTests
     [Fact]
     public void Initiate_ZeroPrice_Throws()
     {
-        var act = () => PurchaseWorkflow.Initiate(LeaseId, Buyer, 0m, StaffUser);
+        var act = () => PurchaseWorkflow.Initiate(LeaseTemplateId, ParcelId, HomeId, Buyer, 0m, StaffUser);
         act.Should().Throw<BusinessRuleViolationException>();
     }
 
     [Fact]
     public void Initiate_NegativePrice_Throws()
     {
-        var act = () => PurchaseWorkflow.Initiate(LeaseId, Buyer, -1m, StaffUser);
+        var act = () => PurchaseWorkflow.Initiate(LeaseTemplateId, ParcelId, HomeId, Buyer, -1m, StaffUser);
         act.Should().Throw<BusinessRuleViolationException>();
     }
 
@@ -353,7 +356,7 @@ public class PurchaseWorkflowTests
         var workflow = CreateWorkflow();
 
         var initiated = workflow.UncommittedEvents.OfType<PurchaseWorkflowInitiated>().Single();
-        initiated.GroundLeaseId.Should().Be(LeaseId.Value);
+        initiated.GroundLeaseTemplateId.Should().Be(LeaseTemplateId.Value);
         initiated.BuyerFullName.Should().Be("Alice Johnson");
         initiated.BuyerEmail.Should().Be("alice@example.com");
         initiated.BuyerPhone.Should().Be("+12025551234");

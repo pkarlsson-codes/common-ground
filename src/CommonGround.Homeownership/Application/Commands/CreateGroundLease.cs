@@ -1,7 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
-using CommonGround.PropertyRegistry.Domain.Homes;
-using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Extensions;
 using Marten;
@@ -10,8 +8,8 @@ namespace CommonGround.Homeownership.Application.Commands;
 
 /// <summary>Creates a new ground lease.</summary>
 public sealed record CreateGroundLease(
-    LandParcelId LandParcelId,
-    HomeId UnitId,
+    string LandParcelId,
+    string UnitId,
     DateOnly LeaseStartDate,
     int TermYears,
     string CovenantTerms,

@@ -1,4 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Extensions;
@@ -8,7 +9,9 @@ namespace CommonGround.Homeownership.Application.Commands;
 
 /// <summary>Initiates a new purchase workflow for a ground lease.</summary>
 public sealed record InitiatePurchaseWorkflow(
-    GroundLeaseId GroundLeaseId,
+    GroundLeaseTemplateId GroundLeaseTemplateId,
+    string LandParcelId,
+    string HomeId,
     Homeowner Buyer,
     decimal PurchasePrice,
     UserId InitiatedBy);
@@ -24,7 +27,9 @@ public static class InitiatePurchaseWorkflowHandler
         ArgumentNullException.ThrowIfNull(command);
 
         var workflow = PurchaseWorkflow.Initiate(
-            command.GroundLeaseId,
+            command.GroundLeaseTemplateId,
+            command.LandParcelId,
+            command.HomeId,
             command.Buyer,
             command.PurchasePrice,
             command.InitiatedBy);

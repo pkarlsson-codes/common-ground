@@ -7,7 +7,7 @@ public class PurchaseWorkflowListItemView
     public string Id { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the associated ground lease ID.</summary>
-    public string GroundLeaseId { get; set; } = string.Empty;
+    public string GroundLeaseTemplateId { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the buyer's full name.</summary>
     public string BuyerFullName { get; set; } = string.Empty;

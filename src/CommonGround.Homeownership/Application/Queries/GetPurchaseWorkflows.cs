@@ -1,5 +1,5 @@
 using CommonGround.Homeownership.Application.ReadModels;
-using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
 using Marten;
@@ -10,7 +10,7 @@ namespace CommonGround.Homeownership.Application.Queries;
 /// <summary>Returns a paginated list of purchase workflows with optional filters.</summary>
 public sealed record GetPurchaseWorkflows(
     PageSpec Page,
-    GroundLeaseId? GroundLeaseId = null,
+    GroundLeaseTemplateId? GroundLeaseTemplateId = null,
     string? Phase = null,
     string? Search = null);
 
@@ -27,9 +27,9 @@ public static class GetPurchaseWorkflowsHandler
 
         IQueryable<PurchaseWorkflowListItemView> query = session.Query<PurchaseWorkflowListItemView>();
 
-        if (request.GroundLeaseId is not null)
+        if (request.GroundLeaseTemplateId is not null)
         {
-            query = query.Where(v => v.GroundLeaseId == request.GroundLeaseId.Value);
+            query = query.Where(v => v.GroundLeaseTemplateId == request.GroundLeaseTemplateId.Value);
         }
 
         if (!string.IsNullOrWhiteSpace(request.Phase))

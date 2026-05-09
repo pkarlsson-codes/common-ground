@@ -6,9 +6,9 @@ using CommonGround.Homeownership.Application.Commands;
 using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Infrastructure.API;
-using CommonGround.SharedKernel.Infrastructure.Querying;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
@@ -32,7 +32,9 @@ public static class PurchaseWorkflowsEndpoints
         var userId = httpContext.GetUserId();
 
         var command = new InitiatePurchaseWorkflow(
-            GroundLeaseId.Create(request.GroundLeaseId),
+            GroundLeaseTemplateId.Create(request.GroundLeaseTemplateId),
+            request.LandParcelId,
+            request.HomeId,
             new Homeowner(request.BuyerFullName, request.BuyerEmail, request.BuyerPhone),
             request.PurchasePrice,
             userId);
@@ -48,17 +50,17 @@ public static class PurchaseWorkflowsEndpoints
         IMessageBus bus,
         CancellationToken cancellationToken = default)
     {
-        var groundLeaseFilter = request.GroundLeaseId is not null
-            ? GroundLeaseId.Create(request.GroundLeaseId)
+        var groundLeaseTemplateFilter = request.GroundLeaseTemplateId is not null
+            ? GroundLeaseTemplateId.Create(request.GroundLeaseTemplateId)
             : null;
 
-        var query = new GetPurchaseWorkflows(request.Page, groundLeaseFilter, request.Phase, request.Search);
+        var query = new GetPurchaseWorkflows(request.Page, groundLeaseTemplateFilter, request.Phase, request.Search);
 
         var result = await bus.InvokeForTenantAsync<PaginatedResponse<PurchaseWorkflowListItemView>>(bus.TenantId!, query, cancellationToken);
 
         var response = result.MapItems(v => new PurchaseWorkflowListItemResponse(
             v.Id,
-            v.GroundLeaseId,
+            v.GroundLeaseTemplateId,
             v.BuyerFullName,
             v.PurchasePrice,
             v.Phase,
@@ -338,7 +340,7 @@ public static class PurchaseWorkflowsEndpoints
 
         return new PurchaseWorkflowResponse(
             view.Id,
-            view.GroundLeaseId,
+            view.GroundLeaseTemplateId,
             view.Phase,
             view.InitiatedBy,
             view.BuyerFullName,

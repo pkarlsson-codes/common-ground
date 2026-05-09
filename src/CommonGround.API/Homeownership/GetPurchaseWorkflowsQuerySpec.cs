@@ -24,7 +24,7 @@ public sealed class GetPurchaseWorkflowsQuerySpec : PaginationQuerySpecV2
         string? search = null)
         : base(pageNumber, pageSize)
     {
-        GroundLeaseId = groundLeaseId;
+        GroundLeaseTemplateId = groundLeaseId;
         Phase = phase;
         Search = search;
     }
@@ -32,7 +32,7 @@ public sealed class GetPurchaseWorkflowsQuerySpec : PaginationQuerySpecV2
     /// <summary>
     /// Gets an optional ground lease ID from the <c>groundLeaseId</c> query key.
     /// </summary>
-    public string? GroundLeaseId { get; }
+    public string? GroundLeaseTemplateId { get; }
 
     /// <summary>
     /// Gets an optional workflow phase from the <c>phase</c> query key.

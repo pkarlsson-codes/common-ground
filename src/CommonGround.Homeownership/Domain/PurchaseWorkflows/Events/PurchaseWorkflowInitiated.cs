@@ -5,7 +5,9 @@ namespace CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 /// <summary>Raised when a new purchase workflow is initiated.</summary>
 public sealed record PurchaseWorkflowInitiated(
     string AggregateId,
-    string GroundLeaseId,
+    string GroundLeaseTemplateId,
+    string LandParcelId,
+    string HomeId,
     string BuyerFullName,
     string BuyerEmail,
     string? BuyerPhone,

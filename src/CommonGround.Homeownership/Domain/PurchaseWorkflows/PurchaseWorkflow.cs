@@ -4,6 +4,7 @@ using CommonGround.Homeownership.Domain.PurchaseWorkflows.TrackDetails;
 using CommonGround.Homeownership.Application.Errors;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
+using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 
 namespace CommonGround.Homeownership.Domain.PurchaseWorkflows;
 
@@ -19,7 +20,13 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 #pragma warning restore CS8618
 
     /// <summary>Gets the ground lease this purchase is for.</summary>
-    public GroundLeaseId GroundLeaseId { get; private set; }
+    public GroundLeaseTemplateId GroundLeaseTemplateId { get; private set; }
+
+    /// <summary>Gets the land parcel ID of the property being purchased.</summary>
+    public string LandParcelId { get; private set; }
+
+    /// <summary>Gets the home ID of the property being purchased.</summary>
+    public string HomeId { get; private set; }
 
     /// <summary>Gets the prospective buyer.</summary>
     public Homeowner Buyer { get; private set; }
@@ -96,18 +103,24 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     public bool IsTerminal => Phase.IsTerminal;
 
     /// <summary>Initiates a new purchase workflow.</summary>
-    /// <param name="groundLeaseId">The ground lease to purchase.</param>
+    /// <param name="groundLeaseTemplateId">The ground lease template to use.</param>
+    /// <param name="landParcelId">The land parcel ID of the property being purchased.</param>
+    /// <param name="homeId">The home ID of the property being purchased.</param>
     /// <param name="buyer">The prospective buyer.</param>
     /// <param name="purchasePrice">The offer price. Must be positive.</param>
     /// <param name="initiatedBy">The user initiating the workflow.</param>
     /// <returns>A new purchase workflow instance.</returns>
     public static PurchaseWorkflow Initiate(
-        GroundLeaseId groundLeaseId,
+        GroundLeaseTemplateId groundLeaseTemplateId,
+        string landParcelId,
+        string homeId,
         Homeowner buyer,
         decimal purchasePrice,
         UserId initiatedBy)
     {
-        ArgumentNullException.ThrowIfNull(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(groundLeaseTemplateId);
+        ArgumentNullException.ThrowIfNull(landParcelId);
+        ArgumentNullException.ThrowIfNull(homeId);
         ArgumentNullException.ThrowIfNull(buyer);
         ArgumentNullException.ThrowIfNull(initiatedBy);
 
@@ -119,7 +132,9 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         var workflow = new PurchaseWorkflow();
         workflow.ApplyChange(new PurchaseWorkflowInitiated(
             PurchaseWorkflowId.Generate().Value,
-            groundLeaseId.Value,
+            groundLeaseTemplateId.Value,
+            landParcelId,
+            homeId,
             buyer.FullName,
             buyer.Email,
             buyer.Phone,
@@ -342,7 +357,9 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     private void Apply(PurchaseWorkflowInitiated e)
     {
         Id = PurchaseWorkflowId.Create(e.AggregateId);
-        GroundLeaseId = GroundLeaseId.Create(e.GroundLeaseId);
+        GroundLeaseTemplateId = GroundLeaseTemplateId.Create(e.GroundLeaseTemplateId);
+        LandParcelId = e.LandParcelId;
+        HomeId = e.HomeId;
         Buyer = new Homeowner(e.BuyerFullName, e.BuyerEmail, e.BuyerPhone);
         PurchasePrice = e.PurchasePrice;
         Phase = WorkflowPhase.Initiated;
