@@ -1,4 +1,6 @@
+using CommonGround.Identity.Application.ReadModels;
 using CommonGround.Identity.Infrastructure.Persistence.Projections;
+using CommonGround.Identity.Infrastructure.Seeding;
 using JasperFx.Events.Projections;
 using Marten;
 
@@ -18,9 +20,11 @@ public static class IdentityMartenConfiguration
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        options.Schema.For<UserSubjectIndex>()
-            .DatabaseSchemaName("identity")
-            .SingleTenanted();
+        options.Schema.For<UserView>()
+            .DatabaseSchemaName("identity");
+
+        options.Schema.For<UserSeedLookup>()
+            .DatabaseSchemaName("identity");
 
         options.Projections.Add<UserViewProjection>(ProjectionLifecycleForEnvironment);
     }

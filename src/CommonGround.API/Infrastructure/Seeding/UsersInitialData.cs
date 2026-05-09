@@ -1,6 +1,6 @@
 using System.Text.Json;
 using CommonGround.Identity.Domain.Users;
-using CommonGround.Identity.Infrastructure.Persistence;
+using CommonGround.Identity.Infrastructure.Seeding;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.TrustManagement.Infrastructure.Seeding;
 using Marten;
@@ -27,43 +27,43 @@ public sealed class UsersInitialData : IInitialData
             return;
         }
 
-        using var defaultSession = store.LightweightSession();
+        // Users are pre-trust global entities — always use the default (non-tenanted) session.
+        using var session = store.LightweightSession();
 
         foreach (var entry in entries)
         {
-            var trustLookup = await defaultSession
+            var trustLookup = await session
                 .LoadAsync<TrustSeedLookup>(TrustSeedLookup.BuildId(entry.TrustSeedKey), cancellation)
                 .ConfigureAwait(false)
                 ?? throw new InvalidOperationException(
                     $"Trust seed '{entry.TrustSeedKey}' not found for user seed '{entry.SeedKey}'. Ensure TrustsInitialData runs first.");
 
-            using var trustSession = store.LightweightSession(trustLookup.TrustId);
-
-            var existing = await trustSession
-                .LoadAsync<UserSubjectIndex>(entry.KeycloakSubject, cancellation)
-                .ConfigureAwait(false);
-
-            if (existing is not null)
+            var lookupId = UserSeedLookup.BuildId(entry.SeedKey);
+            var lookup = await session.LoadAsync<UserSeedLookup>(lookupId, cancellation).ConfigureAwait(false);
+            if (lookup is not null)
             {
-                continue;
+                var streamState = await session.Events.FetchStreamStateAsync(lookup.UserId, cancellation).ConfigureAwait(false);
+                if (streamState is not null)
+                {
+                    continue;
+                }
             }
 
-            var user = User.Register(
-                entry.KeycloakSubject,
-                entry.Email,
-                entry.DisplayName);
+            var user = User.Register(entry.KeycloakSubject, entry.Email, entry.DisplayName);
+            user.AssignTrust(TrustId.Create(trustLookup.TrustId));
 
-            trustSession.Events.StartStream<User>(user.Id.Value, user.UncommittedEvents.ToArray());
+            session.Events.StartStream<User>(user.Id.Value, user.UncommittedEvents.ToArray());
             user.UncommittedEvents.MarkAsCommitted();
 
-            trustSession.Store(new UserSubjectIndex
+            session.Store(new UserSeedLookup
             {
-                Id = entry.KeycloakSubject,
+                Id = lookupId,
+                SeedKey = entry.SeedKey,
                 UserId = user.Id.Value,
-                TrustId = trustLookup.TrustId,
+                SeededAt = DateTimeOffset.UtcNow,
             });
 
-            await trustSession.SaveChangesAsync(cancellation).ConfigureAwait(false);
+            await session.SaveChangesAsync(cancellation).ConfigureAwait(false);
         }
     }
 
