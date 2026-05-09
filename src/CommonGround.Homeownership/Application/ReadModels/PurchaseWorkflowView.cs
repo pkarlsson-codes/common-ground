@@ -9,6 +9,12 @@ public class PurchaseWorkflowView
     /// <summary>Gets or sets the associated ground lease ID.</summary>
     public string GroundLeaseTemplateId { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the land parcel ID.</summary>
+    public string LandParcelId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the home ID.</summary>
+    public string HomeId { get; set; } = string.Empty;
+
     /// <summary>Gets or sets the current workflow phase.</summary>
     public string Phase { get; set; } = string.Empty;
 

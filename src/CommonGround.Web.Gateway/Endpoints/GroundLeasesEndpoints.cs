@@ -62,20 +62,6 @@ public static class GroundLeasesEndpoints
         return Results.Ok(result);
     }
 
-    [WolverinePatch("/api/v1/ground-leases/{groundLeaseId}/homeowner")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public static async Task<IResult> ChangeHomeowner(
-        string groundLeaseId,
-        ChangeHomeownerRequest request,
-        IGroundLeasesApiClient client,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
-        ArgumentNullException.ThrowIfNull(request);
-        await client.ChangeHomeownerAsync(groundLeaseId, request, cancellationToken).ConfigureAwait(false);
-        return Results.NoContent();
-    }
-
     [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/stewardship-check-ins")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> RecordStewardshipCheckIn(

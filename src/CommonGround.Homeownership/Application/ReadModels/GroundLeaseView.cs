@@ -6,6 +6,12 @@ public class GroundLeaseView
     /// <summary>Gets or sets the unique identifier.</summary>
     public string Id { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the ground lease template ID used when creating this lease.</summary>
+    public string? GroundLeaseTemplateId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the purchase workflow ID if this lease was created from a home purchase; otherwise null/empty.</summary>
+    public string? PurchaseWorkflowId { get; set; } = string.Empty;
+
     /// <summary>Gets or sets the land parcel ID.</summary>
     public string LandParcelId { get; set; } = string.Empty;
 

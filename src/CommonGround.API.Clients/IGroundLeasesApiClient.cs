@@ -30,13 +30,6 @@ public interface IGroundLeasesApiClient
     /// <returns>A paginated list of ground lease summaries.</returns>
     Task<PaginatedResponse<GroundLeaseListItemResponse>> GetGroundLeasesAsync(int pageNumber, int pageSize, string? status, string? landParcelId, string? homeId, string? search, CancellationToken cancellationToken);
 
-    /// <summary>Changes the homeowner on a ground lease.</summary>
-    /// <param name="groundLeaseId">The ID of the ground lease.</param>
-    /// <param name="request">The new homeowner details.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    Task ChangeHomeownerAsync(string groundLeaseId, ChangeHomeownerRequest request, CancellationToken cancellationToken);
-
     /// <summary>Records a stewardship check-in for a ground lease.</summary>
     /// <param name="groundLeaseId">The ID of the ground lease.</param>
     /// <param name="request">The check-in details.</param>

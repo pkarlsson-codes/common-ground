@@ -1,6 +1,6 @@
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using Wolverine;
-using HomeownerOnboardedIntegration = CommonGround.Homeownership.Contracts.Events.HomeownerOnboarded;
+using GroundLeaseCreatedIntegration = CommonGround.Homeownership.Contracts.Events.GroundLeaseCreated;
 
 namespace CommonGround.Homeownership.Application.EventHandlers;
 
@@ -8,13 +8,14 @@ namespace CommonGround.Homeownership.Application.EventHandlers;
 public sealed class HomeownerOnboardedHandler(IMessageBus bus)
 {
     /// <summary>Handles the domain event and publishes the integration event to the bus.</summary>
-    public async Task Handle(HomeownerOnboarded @event, CancellationToken ct)
+    public async Task Handle(GroundLeaseCreatedFromPurchase @event, CancellationToken ct)
     {
-        await bus.PublishAsync(new HomeownerOnboardedIntegration(
+        await bus.PublishAsync(new GroundLeaseCreatedIntegration(
             @event.AggregateId,
-            @event.FullName,
-            @event.Email,
-            @event.Phone,
-            @event.OnboardedBy)).ConfigureAwait(false);
+            @event.BuyerFullName,
+            @event.BuyerEmail,
+            @event.BuyerPhone,
+            @event.RegisteredBy))
+            .ConfigureAwait(false);
     }
 }

@@ -242,16 +242,6 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         CurrentHomeowner = new Homeowner(e.BuyerFullName, e.BuyerEmail, e.BuyerPhone);
     }
 
-    private void Apply(HomeownerOnboarded e)
-    {
-        CurrentHomeowner = new Homeowner(e.FullName, e.Email, e.Phone);
-    }
-
-    private void Apply(HomeownerChanged e)
-    {
-        CurrentHomeowner = new Homeowner(e.NewFullName, e.NewEmail, e.NewPhone);
-    }
-
     private void Apply(GroundLeaseTerminated _)
     {
         Status = GroundLeaseStatus.Inactive;

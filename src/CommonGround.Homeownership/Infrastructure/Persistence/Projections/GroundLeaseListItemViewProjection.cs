@@ -20,15 +20,15 @@ internal sealed class GroundLeaseListItemViewProjection : SingleStreamProjection
             CreatedAt = e.Data.OccurredAt,
         };
 
-    public static void Apply(GroundLeaseListItemView view, HomeownerOnboarded e)
-    {
-        view.HomeownerFullName = e.FullName;
-        view.HomeownerEmail = e.Email;
-    }
-
-    public static void Apply(GroundLeaseListItemView view, HomeownerChanged e)
-    {
-        view.HomeownerFullName = e.NewFullName;
-        view.HomeownerEmail = e.NewEmail;
-    }
+    public static GroundLeaseListItemView Create(IEvent<GroundLeaseCreatedFromPurchase> e) =>
+        new()
+        {
+            Id = e.Data.AggregateId,
+            LandParcelId = e.Data.LandParcelId,
+            HomeId = e.Data.HomeId,
+            LeaseStartDate = e.Data.LeaseStartDate,
+            TermYears = e.Data.TermYears,
+            Status = "Active",
+            CreatedAt = e.Data.OccurredAt,
+        };
 }

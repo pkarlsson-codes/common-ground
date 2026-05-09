@@ -26,12 +26,12 @@ public sealed class PurchaseWorkflowsApiClient(
 
     /// <inheritdoc/>
     public async Task<PaginatedResponse<PurchaseWorkflowListItemResponse>> GetPurchaseWorkflowsAsync(
-        int pageNumber, int pageSize, string? groundLeaseId, string? phase, string? search, CancellationToken cancellationToken)
+        int pageNumber, int pageSize, string? groundLeaseTemplateId, string? phase, string? search, CancellationToken cancellationToken)
     {
         var qs = $"?pageNumber={pageNumber}&pageSize={pageSize}";
-        if (!string.IsNullOrWhiteSpace(groundLeaseId))
+        if (!string.IsNullOrWhiteSpace(groundLeaseTemplateId))
         {
-            qs += $"&groundLeaseId={Uri.EscapeDataString(groundLeaseId)}";
+            qs += $"&groundLeaseId={Uri.EscapeDataString(groundLeaseTemplateId)}";
         }
 
         if (!string.IsNullOrWhiteSpace(phase))

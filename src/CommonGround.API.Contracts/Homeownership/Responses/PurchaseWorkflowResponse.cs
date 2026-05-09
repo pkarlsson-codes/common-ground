@@ -3,7 +3,9 @@ namespace CommonGround.API.Contracts.Homeownership.Responses;
 /// <summary>Detail response for a purchase workflow.</summary>
 public sealed record PurchaseWorkflowResponse(
     string Id,
-    string GroundLeaseId,
+    string GroundLeaseTemplateId,
+    string LandParcelId,
+    string HomeId,
     string Phase,
     string InitiatedBy,
     string BuyerFullName,

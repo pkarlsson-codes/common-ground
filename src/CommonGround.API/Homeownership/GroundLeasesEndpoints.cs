@@ -7,10 +7,7 @@ using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
-using CommonGround.PropertyRegistry.Domain.Homes;
-using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Infrastructure.API;
-using CommonGround.SharedKernel.Infrastructure.Querying;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
@@ -96,6 +93,8 @@ public static class GroundLeasesEndpoints
 
         var response = new GroundLeaseResponse(
             view.Id,
+            view.GroundLeaseTemplateId,
+            view.PurchaseWorkflowId,
             view.LandParcelId,
             view.HomeId,
             view.LeaseStartDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),

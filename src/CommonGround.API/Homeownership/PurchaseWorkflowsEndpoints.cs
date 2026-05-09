@@ -341,6 +341,8 @@ public static class PurchaseWorkflowsEndpoints
         return new PurchaseWorkflowResponse(
             view.Id,
             view.GroundLeaseTemplateId,
+            view.LandParcelId,
+            view.HomeId,
             view.Phase,
             view.InitiatedBy,
             view.BuyerFullName,

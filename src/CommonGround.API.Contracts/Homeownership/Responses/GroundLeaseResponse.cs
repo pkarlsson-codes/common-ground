@@ -3,6 +3,8 @@ namespace CommonGround.API.Contracts.Homeownership.Responses;
 /// <summary>Detail response for a ground lease.</summary>
 public sealed record GroundLeaseResponse(
     string Id,
+    string? GroundLeaseTemplateId,
+    string? PurchaseWorkflowId,
     string LandParcelId,
     string HomeId,
     string LeaseStartDate,

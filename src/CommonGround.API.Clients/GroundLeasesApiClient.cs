@@ -53,14 +53,6 @@ public sealed class GroundLeasesApiClient(
     }
 
     /// <inheritdoc/>
-    public async Task ChangeHomeownerAsync(string groundLeaseId, ChangeHomeownerRequest request, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
-        ArgumentNullException.ThrowIfNull(request);
-        await PatchAsync($"api/ground-leases/{groundLeaseId}/homeowner", request, cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
     public async Task RecordStewardshipCheckInAsync(string groundLeaseId, RecordStewardshipCheckInRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
