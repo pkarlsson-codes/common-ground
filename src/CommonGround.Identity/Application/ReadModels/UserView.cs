@@ -6,6 +6,9 @@ public sealed class UserView
     /// <summary>Gets the Keycloak subject (primary key for this read model).</summary>
     public string Id { get; set; } = string.Empty;
 
+    /// <summary>Gets the Keycloak subject used for idempotent user lookup.</summary>
+    public string KeycloakSubject { get; set; } = string.Empty;
+
     /// <summary>Gets the CommonGround UserId.</summary>
     public string UserId { get; set; } = string.Empty;
 

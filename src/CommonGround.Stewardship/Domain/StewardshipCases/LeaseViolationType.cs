@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using CommonGround.SharedKernel.Domain;
 
 namespace CommonGround.Stewardship.Domain.StewardshipCases;
@@ -17,5 +18,6 @@ public sealed class LeaseViolationType : Enumeration<LeaseViolationType>
     /// <summary>Other lease term violation.</summary>
     public static readonly LeaseViolationType LeaseTermViolation = new(3, "LeaseTermViolation");
 
+    [JsonConstructor]
     private LeaseViolationType(int value, string displayName) : base(value, displayName) { }
 }

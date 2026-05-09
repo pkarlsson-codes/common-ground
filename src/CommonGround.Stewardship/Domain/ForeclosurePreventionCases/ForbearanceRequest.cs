@@ -1,4 +1,4 @@
-namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases.ChildEntities;
+namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
 
 /// <summary>A forbearance request submitted to a lender on behalf of the homeowner.</summary>
 public sealed class ForbearanceRequest

@@ -30,7 +30,18 @@ public static class EnsureUserHandler
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        // Check if user already exists by querying the UserView read model
+        // Query by explicit KeycloakSubject field rather than relying on projection document id.
+        var existingBySubject = await session.Query<UserView>()
+            .Where(x => x.KeycloakSubject == command.KeycloakSubject)
+            .SingleOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (existingBySubject is not null)
+        {
+            return new EnsureUserResult(existingBySubject.UserId, existingBySubject.TrustId);
+        }
+
+        // Backward compatibility fallback for existing rows keyed directly by subject.
         var existing = await session
             .LoadAsync<UserView>(command.KeycloakSubject, cancellationToken)
             .ConfigureAwait(false);

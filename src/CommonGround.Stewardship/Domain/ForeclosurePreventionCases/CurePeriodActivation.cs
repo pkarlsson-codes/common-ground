@@ -1,4 +1,4 @@
-namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases.ChildEntities;
+namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
 
 /// <summary>An activation of the CLT cure period under a lender recognition agreement.</summary>
 public sealed class CurePeriodActivation

@@ -77,7 +77,7 @@ public class TrustsCreateTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task CreateTrust_DuplicateSubmitAfterSuccess_Returns409()
+    public async Task CreateTrust_DuplicateSubmitAfterSuccess_RemainsSuccessful()
     {
         var subject = $"self-create-duplicate-{Guid.NewGuid():N}";
         var bootstrapClient = factory.CreateClient().WithAuthToken(trustId: string.Empty);
@@ -105,6 +105,9 @@ public class TrustsCreateTests(ApiFactory factory)
             "/api/trusts",
             new CreateTrustRequest($"Duplicate Trust {Guid.NewGuid():N}"));
 
-        second.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        second.StatusCode.Should().Be(HttpStatusCode.OK);
+        var secondPayload = await second.Content.ReadFromJsonAsync<CreateTrustResponse>();
+        secondPayload.Should().NotBeNull();
+        secondPayload!.TrustId.Should().StartWith("trust-");
     }
 }

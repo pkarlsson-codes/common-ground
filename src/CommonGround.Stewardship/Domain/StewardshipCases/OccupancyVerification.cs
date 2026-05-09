@@ -1,4 +1,4 @@
-namespace CommonGround.Stewardship.Domain.StewardshipCases.ChildEntities;
+namespace CommonGround.Stewardship.Domain.StewardshipCases;
 
 /// <summary>Annual occupancy verification for a stewardship case.</summary>
 public sealed class OccupancyVerification

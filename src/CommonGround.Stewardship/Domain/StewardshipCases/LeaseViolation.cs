@@ -1,4 +1,4 @@
-namespace CommonGround.Stewardship.Domain.StewardshipCases.ChildEntities;
+namespace CommonGround.Stewardship.Domain.StewardshipCases;
 
 /// <summary>A lease violation identified against a stewardship case.</summary>
 public sealed class LeaseViolation

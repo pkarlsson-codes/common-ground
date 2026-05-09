@@ -1,4 +1,4 @@
-namespace CommonGround.Stewardship.Domain.StewardshipCases.ChildEntities;
+namespace CommonGround.Stewardship.Domain.StewardshipCases;
 
 /// <summary>A scheduled property inspection for a stewardship case.</summary>
 public sealed class PropertyInspection

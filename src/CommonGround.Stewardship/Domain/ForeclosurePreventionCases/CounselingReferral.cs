@@ -1,4 +1,4 @@
-namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases.ChildEntities;
+namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
 
 /// <summary>A referral to a housing counseling agency.</summary>
 public sealed class CounselingReferral

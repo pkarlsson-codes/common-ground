@@ -13,6 +13,7 @@ internal sealed class UserViewProjection : SingleStreamProjection<UserView, stri
         new()
         {
             Id = e.Data.KeycloakSubject,
+            KeycloakSubject = e.Data.KeycloakSubject,
             UserId = e.Data.AggregateId,
             TrustId = null, // User starts without a trust
         };

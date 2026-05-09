@@ -1,7 +1,6 @@
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 using CommonGround.SharedKernel.Domain.Exceptions;
-using CommonGround.Stewardship.Domain.ForeclosurePreventionCases.ChildEntities;
 using CommonGround.Stewardship.Domain.ForeclosurePreventionCases.Events;
 
 namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases;

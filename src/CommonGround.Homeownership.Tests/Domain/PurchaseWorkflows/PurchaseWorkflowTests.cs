@@ -182,7 +182,7 @@ public class PurchaseWorkflowTests
         var act = () => workflow.ScheduleClosing(new DateOnly(2025, 4, 1), StaffUser);
 
         act.Should().Throw<BusinessRuleViolationException>()
-            .WithMessage("*mandatory tracks*");
+            .WithMessage("homeownership.purchase_workflow.schedule_closing.mandatory_tracks_incomplete");
     }
 
     [Fact]
@@ -208,7 +208,7 @@ public class PurchaseWorkflowTests
         var act = () => workflow.ScheduleClosing(new DateOnly(2025, 4, 2), StaffUser);
 
         act.Should().Throw<BusinessRuleViolationException>()
-            .WithMessage("*in progress*");
+            .WithMessage("homeownership.purchase_workflow.schedule_closing.invalid_phase");
     }
 
     [Fact]
@@ -235,7 +235,7 @@ public class PurchaseWorkflowTests
         var act = () => workflow.RecordPurchaseClosed(new DateOnly(2025, 4, 1), null, StaffUser);
 
         act.Should().Throw<BusinessRuleViolationException>()
-            .WithMessage("*closing is scheduled*");
+            .WithMessage("homeownership.purchase_workflow.record_purchase_closed.phase_not_closing_scheduled");
     }
 
     // --- Failure ---
@@ -314,7 +314,7 @@ public class PurchaseWorkflowTests
             "Reason", new DateOnly(2025, 3, 15), new DateOnly(2025, 4, 15), StaffUser);
 
         act.Should().Throw<BusinessRuleViolationException>()
-            .WithMessage("*in-progress*");
+            .WithMessage("homeownership.purchase_workflow.stall_workflow.phase_not_in_progress");
     }
 
     [Fact]
