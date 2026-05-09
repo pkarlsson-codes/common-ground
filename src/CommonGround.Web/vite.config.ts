@@ -14,6 +14,11 @@ export default defineConfig({
       '@/types': '/src/types',
     },
   },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test-setup.ts'],
+  },
   server: {
     port: 3000,
     strictPort: true,

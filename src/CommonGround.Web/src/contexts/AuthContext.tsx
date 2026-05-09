@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { AuthApi } from '../api'
+import { ResponseError } from '../api/runtime'
 import { apiConfig } from '../lib/apiConfig'
 
 interface User {
@@ -42,10 +43,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setError(null)
       } else {
         setUser(null)
+        setError(null)
       }
-    } catch {
+    } catch (error) {
       setUser(null)
-      setError('Could not reach the server. Check your connection and reload.')
+      if (error instanceof ResponseError && error.response.status === 401) {
+        setError(null)
+      } else {
+        setError('Could not reach the server. Check your connection and reload.')
+      }
     } finally {
       setIsLoading(false)
     }

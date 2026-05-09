@@ -11,7 +11,7 @@
     "lint:styles": "stylelint \"src/**/*.css\"",
     "lint:styles:fix": "stylelint \"src/**/*.css\" --fix",
     "lint:guardrails": "npm run lint && npm run lint:styles && npm run lint:colors",
-    "test": "echo \"No frontend tests configured yet\"",
+    "test": "vitest run",
     "preview": "vite preview",
     "clean:api": "node -e \"require('fs').rmSync('./src/api',{recursive:true,force:true})\"",
     "generate-api-from-spec": "npm run clean:api && npx @openapitools/openapi-generator-cli generate -i ./api-spec.json -g typescript-fetch -o ./src/api --additional-properties=supportsES6=true,withInterfaces=true,basePath=,nullSafeTypes=true,stringEnums=true"
@@ -36,18 +36,24 @@
     "@eslint/js": "^9.39.4",
     "@openapitools/openapi-generator-cli": "^2.25.0",
     "@tailwindcss/vite": "^4.1.14",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^4.1.5",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "jsdom": "^29.1.1",
     "stylelint": "^16.25.0",
     "tailwindcss": "^4.2.2",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.0",
-    "vite": "^8.0.4"
+    "vite": "^8.0.4",
+    "vitest": "^4.1.5"
   }
 }
