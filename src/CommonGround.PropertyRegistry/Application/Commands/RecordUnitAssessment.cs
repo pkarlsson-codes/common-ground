@@ -1,6 +1,6 @@
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.SharedKernel.Extensions;
 using Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
@@ -31,13 +31,17 @@ public static class RecordHomeAssessmentHandler
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var stream = await session.Events.FetchForWriting<Home>(command.HomeId.Value, cancellationToken).ConfigureAwait(false);
-        var home = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(Home), command.HomeId.Value);
+        var home = await session
+            .LoadAggregateAsync<Home>(command.HomeId, cancellationToken)
+            .ConfigureAwait(false);
 
-        home.RecordAssessment(command.AssessedValue, command.AssessmentDate, command.AppraiserName, command.ConditionNotes, command.RecordedById);
+        home.RecordAssessment(
+            command.AssessedValue,
+            command.AssessmentDate,
+            command.AppraiserName,
+            command.ConditionNotes,
+            command.RecordedById);
 
-        home.ValidateInvariants();
-        stream.AppendMany(home.UncommittedEvents.ToArray());
-        home.UncommittedEvents.MarkAsCommitted();
+        session.UpdateAggregate(home);
     }
 }

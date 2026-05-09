@@ -1,5 +1,6 @@
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Extensions;
 using Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
@@ -25,10 +26,9 @@ public sealed record RegisterLandParcel(
 public static class RegisterLandParcelHandler
 {
     /// <summary>Creates a new LandParcel and returns its ID.</summary>
-    public static Task<LandParcelId> Handle(
+    public static LandParcelId Handle(
         RegisterLandParcel command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+        IDocumentSession session)
     {
         ArgumentNullException.ThrowIfNull(command);
 
@@ -41,10 +41,8 @@ public static class RegisterLandParcelHandler
             command.CovenantTerms,
             command.RegisteredBy);
 
-        parcel.ValidateInvariants();
-        session.Events.StartStream<LandParcel>(parcel.Id.Value, parcel.UncommittedEvents.ToArray());
-        parcel.UncommittedEvents.MarkAsCommitted();
+        session.CreateAggregate<LandParcel, LandParcelId>(parcel);
 
-        return Task.FromResult(parcel.Id);
+        return parcel.Id;
     }
 }

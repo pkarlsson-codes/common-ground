@@ -2,6 +2,7 @@ using CommonGround.PropertyRegistry.Domain.DevelopmentProjects;
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Extensions;
 using Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
@@ -25,10 +26,9 @@ public sealed record InitiateRehabilitationProject(
 public static class InitiateRehabilitationProjectHandler
 {
     /// <summary>Creates a new DevelopmentProject of type Rehabilitation, persists it, and returns its ID.</summary>
-    public static Task<DevelopmentProjectId> Handle(
+    public static DevelopmentProjectId Handle(
         InitiateRehabilitationProject command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+        IDocumentSession session)
     {
         ArgumentNullException.ThrowIfNull(command);
 
@@ -39,10 +39,8 @@ public static class InitiateRehabilitationProjectHandler
             command.HomeIds,
             command.InitiatedBy);
 
-        project.ValidateInvariants();
-        session.Events.StartStream<DevelopmentProject>(project.Id.Value, project.UncommittedEvents.ToArray());
-        project.UncommittedEvents.MarkAsCommitted();
+        session.CreateAggregate<DevelopmentProject, DevelopmentProjectId>(project);
 
-        return Task.FromResult(project.Id);
+        return project.Id;
     }
 }

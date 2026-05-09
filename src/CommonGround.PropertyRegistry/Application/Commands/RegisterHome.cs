@@ -1,6 +1,7 @@
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Extensions;
 using Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
@@ -32,10 +33,9 @@ public sealed record RegisterHome(
 public static class RegisterHomeHandler
 {
     /// <summary>Creates a new Home and returns its ID.</summary>
-    public static Task<HomeId> Handle(
+    public static HomeId Handle(
         RegisterHome command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+        IDocumentSession session)
     {
         ArgumentNullException.ThrowIfNull(command);
 
@@ -47,7 +47,7 @@ public static class RegisterHomeHandler
             command.RegisteredBy,
             DateTimeOffset.UtcNow);
 
-        var unit = Home.Register(
+        var home = Home.Register(
             command.LandParcelId,
             command.UnitType,
             command.Bedrooms,
@@ -57,10 +57,8 @@ public static class RegisterHomeHandler
             initialAssessment,
             command.RegisteredBy);
 
-        unit.ValidateInvariants();
-        session.Events.StartStream<Home>(unit.Id.Value, unit.UncommittedEvents.ToArray());
-        unit.UncommittedEvents.MarkAsCommitted();
+        session.CreateAggregate<Home, HomeId>(home);
 
-        return Task.FromResult(unit.Id);
+        return home.Id;
     }
 }

@@ -1,6 +1,6 @@
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.SharedKernel.Extensions;
 using Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
@@ -24,13 +24,14 @@ public static class StallWorkflowHandler
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var stream = await session.Events.FetchForWriting<PurchaseWorkflow>(command.WorkflowId.Value, cancellationToken).ConfigureAwait(false);
-        var workflow = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(PurchaseWorkflow), command.WorkflowId.Value);
+        var workflow = await session
+            .LoadAggregateAsync<PurchaseWorkflow>(
+                command.WorkflowId,
+                cancellationToken)
+            .ConfigureAwait(false);
 
         workflow.StallWorkflow(command.StalledReason, command.StalledDate, command.ResolutionTargetDate, command.RecordedBy);
 
-        workflow.ValidateInvariants();
-        stream.AppendMany(workflow.UncommittedEvents.ToArray());
-        workflow.UncommittedEvents.MarkAsCommitted();
+        session.UpdateAggregate(workflow);
     }
 }

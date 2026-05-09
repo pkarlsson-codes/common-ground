@@ -1,6 +1,6 @@
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.SharedKernel.Extensions;
 using Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
@@ -19,13 +19,12 @@ public static class DecommissionParcelHandler
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var stream = await session.Events.FetchForWriting<LandParcel>(command.LandParcelId.Value, cancellationToken).ConfigureAwait(false);
-        var parcel = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(LandParcel), command.LandParcelId.Value);
+        var parcel = await session
+            .LoadAggregateAsync<LandParcel>(command.LandParcelId, cancellationToken)
+            .ConfigureAwait(false);
 
         parcel.Decommission(command.ChangedBy);
 
-        parcel.ValidateInvariants();
-        stream.AppendMany(parcel.UncommittedEvents.ToArray());
-        parcel.UncommittedEvents.MarkAsCommitted();
+        session.UpdateAggregate(parcel);
     }
 }

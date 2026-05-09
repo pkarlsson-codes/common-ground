@@ -1,6 +1,7 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.SharedKernel.Extensions;
 using Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
@@ -23,13 +24,12 @@ public static class RecordStewardshipCheckInHandler
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var stream = await session.Events.FetchForWriting<GroundLease>(command.GroundLeaseId.Value, cancellationToken).ConfigureAwait(false);
-        var lease = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(GroundLease), command.GroundLeaseId.Value);
+        var lease = await session
+            .LoadAggregateAsync<GroundLease>(command.GroundLeaseId, cancellationToken)
+            .ConfigureAwait(false);
 
         lease.RecordStewardshipCheckIn(command.CheckInDate, command.Notes, command.RecordedBy);
 
-        lease.ValidateInvariants();
-        stream.AppendMany(lease.UncommittedEvents.ToArray());
-        lease.UncommittedEvents.MarkAsCommitted();
+        session.UpdateAggregate(lease);
     }
 }

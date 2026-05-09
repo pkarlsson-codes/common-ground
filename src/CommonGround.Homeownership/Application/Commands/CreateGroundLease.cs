@@ -3,6 +3,7 @@ using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Extensions;
 using Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
@@ -21,10 +22,9 @@ public sealed record CreateGroundLease(
 public static class CreateGroundLeaseHandler
 {
     /// <summary>Creates a new ground lease and returns its ID.</summary>
-    public static Task<GroundLeaseId> Handle(
+    public static GroundLeaseId Handle(
         CreateGroundLease command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+        IDocumentSession session)
     {
         ArgumentNullException.ThrowIfNull(command);
 
@@ -37,10 +37,8 @@ public static class CreateGroundLeaseHandler
             command.ResalePolicyTerms,
             command.CreatedBy);
 
-        lease.ValidateInvariants();
-        session.Events.StartStream<GroundLease>(lease.Id.Value, lease.UncommittedEvents.ToArray());
-        lease.UncommittedEvents.MarkAsCommitted();
+        session.CreateAggregate<GroundLease, GroundLeaseId>(lease);
 
-        return Task.FromResult(lease.Id);
+        return lease.Id;
     }
 }
