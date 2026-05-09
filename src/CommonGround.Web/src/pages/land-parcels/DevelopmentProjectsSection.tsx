@@ -59,8 +59,8 @@ export default function DevelopmentProjectsSection({ parcelId, initialHomeIds }:
                   background: 'var(--surface-2)',
                 }}
               >
-                <span style={{ fontSize: 13 }}>{p.name}</span>
-                <StatusBadge status={p.status} />
+                <span style={{ fontSize: 13 }}>{p.name ?? 'Untitled Project'}</span>
+                <StatusBadge status={p.status ?? ''} />
               </div>
             ))}
           </div>

@@ -71,7 +71,16 @@ export default function DevelopmentProjectsPage() {
     setInitiateHomeIds(undefined)
   }
 
-  const projects = data?.items ?? []
+  const projects = (data?.items ?? [])
+    .filter((p): p is { id: string; landParcelId: string; name?: string; status?: string } =>
+      typeof p.id === 'string' && typeof p.landParcelId === 'string',
+    )
+    .map(p => ({
+      id: p.id,
+      landParcelId: p.landParcelId,
+      name: p.name ?? 'Untitled Project',
+      status: p.status ?? '',
+    }))
 
   return (
     <div className="page">

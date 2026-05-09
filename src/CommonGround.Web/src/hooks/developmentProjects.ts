@@ -8,6 +8,7 @@ const api = new DevelopmentProjectsApi(apiConfig)
 interface DevelopmentProjectDetail {
   id: string
   landParcelId: string
+  name?: string
   description?: string
   status: string
   projectedStartDate?: string
