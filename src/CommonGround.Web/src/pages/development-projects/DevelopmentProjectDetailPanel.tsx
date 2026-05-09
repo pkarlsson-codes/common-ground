@@ -1,9 +1,7 @@
-import { useState } from 'react'
 import { useDevelopmentProject } from '../../hooks/developmentProjects'
 import SlideOver from '../../components/SlideOver'
 import StatusBadge from '../../components/StatusBadge'
 import NavIdLink from '../../components/NavIdLink'
-import { useToast } from '../../hooks/useToast'
 
 function SkeletonRows() {
   return (
@@ -20,8 +18,6 @@ interface Props {
 
 export default function DevelopmentProjectDetailPanel({ projectId, onClose }: Props) {
   const { data: detail, isLoading } = useDevelopmentProject(projectId)
-  const [menuOpen] = useState(false)
-  const [confirmAbandon] = useState(false)
 
   return (
     <SlideOver
