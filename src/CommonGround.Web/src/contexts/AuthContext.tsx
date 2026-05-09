@@ -1,7 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
-import { AuthApi } from '../api'
-import { ResponseError } from '../api/runtime'
-import { apiConfig } from '../lib/apiConfig'
+import { createContext, useContext, type ReactNode } from 'react'
+import { useCurrentUser, useRefreshCurrentUser } from '../hooks/auth'
 
 interface User {
   id: string
@@ -23,50 +21,22 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const loadUser = useCallback(async () => {
-    try {
-      const api = new AuthApi(apiConfig)
-      const data = await api.getCurrentUser()
-      if (data && data.id) {
-        const hasTrust = data.hasTrust ?? !!data.trustId
-        setUser({
-          id: data.id,
-          username: data.username ?? data.id,
-          email: data.email ?? '',
-          trustId: data.trustId,
-          hasTrust,
-        })
-        setError(null)
-      } else {
-        setUser(null)
-        setError(null)
-      }
-    } catch (error) {
-      setUser(null)
-      if (error instanceof ResponseError && error.response.status === 401) {
-        setError(null)
-      } else {
-        setError('Could not reach the server. Check your connection and reload.')
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    void loadUser()
-  }, [loadUser])
+  const { data: user = null, isLoading, isError } = useCurrentUser()
+  const refreshCurrentUser = useRefreshCurrentUser()
 
   function logout() {
     window.location.href = '/auth/logout'
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, error, logout, refresh: loadUser }}>
+    <AuthContext.Provider value={{
+      user,
+      isLoading,
+      isAuthenticated: !!user,
+      error: isError ? 'Could not reach the server. Check your connection and reload.' : null,
+      logout,
+      refresh: refreshCurrentUser,
+    }}>
       {children}
     </AuthContext.Provider>
   )
