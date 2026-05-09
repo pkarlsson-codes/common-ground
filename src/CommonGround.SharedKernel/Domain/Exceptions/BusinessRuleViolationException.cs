@@ -6,28 +6,33 @@ namespace CommonGround.SharedKernel.Domain.Exceptions;
 public sealed class BusinessRuleViolationException : DomainException
 {
     /// <summary>
-    /// Initializes a new instance of the BusinessRuleViolationException class.
+    /// Initializes a new instance of the BusinessRuleViolationException class with a stable error code and message.
     /// </summary>
-    public BusinessRuleViolationException()
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the BusinessRuleViolationException class with a specified error message.
-    /// </summary>
+    /// <param name="code">The stable machine-readable business rule code.</param>
     /// <param name="message">The message that describes the error.</param>
-    public BusinessRuleViolationException(string message)
-        : base(message)
+    /// <param name="args">Named metadata arguments for message template rendering.</param>
+    public BusinessRuleViolationException(
+        string code,
+        string message,
+        IReadOnlyDictionary<string, object?>? args = null)
+        : base(code, message, args)
     {
     }
 
     /// <summary>
-    /// Initializes a new instance of the BusinessRuleViolationException class with a specified error message and a reference to the inner exception that is the cause of this exception.
+    /// Initializes a new instance of the BusinessRuleViolationException class with a stable error code,
+    /// message template context arguments, and a reference to the inner exception that is the cause of this exception.
     /// </summary>
-    /// <param name="message">The error message that explains the reason for the exception.</param>
+    /// <param name="code">The stable machine-readable business rule code.</param>
+    /// <param name="message">The message that describes the error.</param>
+    /// <param name="args">Named metadata arguments for message template rendering.</param>
     /// <param name="innerException">The exception that is the cause of the current exception.</param>
-    public BusinessRuleViolationException(string message, Exception innerException)
-        : base(message, innerException)
+    public BusinessRuleViolationException(
+        string code,
+        string message,
+        IReadOnlyDictionary<string, object?>? args,
+        Exception innerException)
+        : base(code, message, args, innerException)
     {
     }
 }
