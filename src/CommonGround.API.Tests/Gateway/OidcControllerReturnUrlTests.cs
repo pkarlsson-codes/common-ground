@@ -11,14 +11,25 @@ namespace CommonGround.API.Tests.Gateway;
 public sealed class OidcControllerReturnUrlTests
 {
     [Fact]
-    public void Login_WithValidRelativeReturnUrl_UsesReturnUrlAsRedirectUri()
+    public void Login_WithValidRelativeReturnUrl_UsesFrontendBaseUrlAsRedirectOrigin()
     {
-        var controller = BuildController("/invite/abc?x=1");
+        var controller = BuildController("/invite/abc?x=1", "http://localhost:3000/home");
 
         var result = controller.Login();
 
         var challenge = Assert.IsType<ChallengeResult>(result);
         Assert.Equal(OpenIdConnectDefaults.AuthenticationScheme, Assert.Single(challenge.AuthenticationSchemes));
+        Assert.Equal("http://localhost:3000/invite/abc?x=1", challenge.Properties?.RedirectUri);
+    }
+
+    [Fact]
+    public void Login_WithValidRelativeReturnUrl_AndRelativeDefault_UsesRelativeRedirect()
+    {
+        var controller = BuildController("/invite/abc?x=1", "/default");
+
+        var result = controller.Login();
+
+        var challenge = Assert.IsType<ChallengeResult>(result);
         Assert.Equal("/invite/abc?x=1", challenge.Properties?.RedirectUri);
     }
 
@@ -28,31 +39,31 @@ public sealed class OidcControllerReturnUrlTests
     [InlineData("//evil.example/path")]
     public void Login_WithInvalidReturnUrl_UsesDefaultRedirect(string returnUrl)
     {
-        var controller = BuildController(returnUrl);
+        var controller = BuildController(returnUrl, "http://localhost:3000/default");
 
         var result = controller.Login();
 
         var challenge = Assert.IsType<ChallengeResult>(result);
-        Assert.Equal("/default", challenge.Properties?.RedirectUri);
+        Assert.Equal("http://localhost:3000/default", challenge.Properties?.RedirectUri);
     }
 
     [Fact]
     public void Login_WithoutReturnUrl_UsesDefaultRedirect()
     {
-        var controller = BuildController();
+        var controller = BuildController(defaultRedirect: "http://localhost:3000/default");
 
         var result = controller.Login();
 
         var challenge = Assert.IsType<ChallengeResult>(result);
-        Assert.Equal("/default", challenge.Properties?.RedirectUri);
+        Assert.Equal("http://localhost:3000/default", challenge.Properties?.RedirectUri);
     }
 
-    private static OidcController BuildController(string? returnUrl = null)
+    private static OidcController BuildController(string? returnUrl = null, string defaultRedirect = "http://localhost:3000/default")
     {
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["Authentication:OIDC:PostLoginRedirect"] = "/default",
+                ["Authentication:OIDC:PostLoginRedirect"] = defaultRedirect,
             })
             .Build();
 

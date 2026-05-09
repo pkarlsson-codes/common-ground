@@ -49,9 +49,7 @@ public sealed class OidcController : ControllerBase
         var requestedReturnUrl = HttpContext.Request.Query["returnUrl"].ToString();
         var defaultRedirect = _configuration["Authentication:OIDC:PostLoginRedirect"] ?? "/";
 
-        var redirectTarget = IsSafeRelativeReturnUrl(requestedReturnUrl)
-            ? requestedReturnUrl
-            : defaultRedirect;
+        var redirectTarget = ResolveLoginRedirectTarget(requestedReturnUrl, defaultRedirect);
 
         var props = new AuthenticationProperties { RedirectUri = redirectTarget };
 
@@ -194,5 +192,21 @@ public sealed class OidcController : ControllerBase
         }
 
         return Uri.TryCreate(returnUrl, UriKind.Relative, out _);
+    }
+
+    private static string ResolveLoginRedirectTarget(string? requestedReturnUrl, string defaultRedirect)
+    {
+        if (!IsSafeRelativeReturnUrl(requestedReturnUrl))
+        {
+            return defaultRedirect;
+        }
+
+        if (!Uri.TryCreate(defaultRedirect, UriKind.Absolute, out var frontendBaseUri)
+            || (frontendBaseUri.Scheme != Uri.UriSchemeHttp && frontendBaseUri.Scheme != Uri.UriSchemeHttps))
+        {
+            return requestedReturnUrl!;
+        }
+
+        return new Uri(frontendBaseUri, requestedReturnUrl).ToString();
     }
 }
