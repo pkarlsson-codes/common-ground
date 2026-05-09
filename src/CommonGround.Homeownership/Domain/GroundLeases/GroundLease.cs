@@ -1,6 +1,6 @@
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
-using CommonGround.Homeownership.Domain.GroundLeases.Templates;
+using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Application.Errors;
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;

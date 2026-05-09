@@ -1,10 +1,10 @@
 using CommonGround.Homeownership.Application.Errors;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
-using CommonGround.Homeownership.Domain.GroundLeases.Templates.Events;
+using CommonGround.Homeownership.Domain.GroundLeaseTemplates.Events;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 
-namespace CommonGround.Homeownership.Domain.GroundLeases.Templates;
+namespace CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 
 /// <summary>
 /// A reusable template for creating ground leases.

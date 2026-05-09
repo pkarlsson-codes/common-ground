@@ -1,6 +1,6 @@
 using CommonGround.SharedKernel.Domain;
 
-namespace CommonGround.Homeownership.Domain.GroundLeases.Templates;
+namespace CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 
 /// <summary>
 /// Unique identifier for a ground lease template.

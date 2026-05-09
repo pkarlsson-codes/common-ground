@@ -1,6 +1,6 @@
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
-using CommonGround.Homeownership.Domain.GroundLeases.Templates;
-using CommonGround.Homeownership.Domain.GroundLeases.Templates.Events;
+using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
+using CommonGround.Homeownership.Domain.GroundLeaseTemplates.Events;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using FluentAssertions;

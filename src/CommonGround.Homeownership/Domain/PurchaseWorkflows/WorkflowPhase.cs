@@ -1,26 +1,38 @@
+using CommonGround.SharedKernel.Domain;
+
 namespace CommonGround.Homeownership.Domain.PurchaseWorkflows;
 
 /// <summary>High-level lifecycle state of a purchase workflow.</summary>
-public enum WorkflowPhase
+public sealed class WorkflowPhase : Enumeration<WorkflowPhase>
 {
-    /// <summary>Workflow just created, no tracks satisfied yet.</summary>
-    Initiated = 0,
+    /// <summary>Workflow has been initiated, but no substantive progress yet.</summary>
+    public static readonly WorkflowPhase Initiated = new(0, nameof(Initiated));
 
     /// <summary>At least one track has been satisfied.</summary>
-    InProgress = 1,
+    public static readonly WorkflowPhase InProgress = new(1, nameof(InProgress));
 
     /// <summary>All mandatory tracks satisfied, closing date set.</summary>
-    ClosingScheduled = 2,
+    public static readonly WorkflowPhase ClosingScheduled = new(2, nameof(ClosingScheduled));
 
     /// <summary>Deal complete, ownership finalized.</summary>
-    Closed = 3,
+    public static readonly WorkflowPhase Closed = new(3, nameof(Closed));
 
     /// <summary>Deal terminated with specific reason.</summary>
-    Failed = 4,
+    public static readonly WorkflowPhase Failed = new(4, nameof(Failed));
 
     /// <summary>Buyer explicitly withdrew.</summary>
-    Withdrawn = 5,
+    public static readonly WorkflowPhase Withdrawn = new(5, nameof(Withdrawn));
 
     /// <summary>Process paused, recoverable by recording next fact.</summary>
-    Stalled = 6
+    public static readonly WorkflowPhase Stalled = new(6, nameof(Stalled));
+
+    /// <summary>Indicates whether the workflow phase is terminal.</summary>
+    public bool IsTerminal => this == Closed || this == Failed || this == Withdrawn;
+
+    /// <summary>Indicates whether the workflow can advance to In Progress.</summary>
+    public bool CanAdvanceToInProgress => this == Initiated || this == Stalled;
+
+    private WorkflowPhase(int value, string name) : base(value, name)
+    {
+    }
 }

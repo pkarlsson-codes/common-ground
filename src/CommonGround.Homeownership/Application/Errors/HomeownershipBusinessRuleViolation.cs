@@ -1,5 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
-using CommonGround.Homeownership.Domain.GroundLeases.Templates;
+using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Domain.Exceptions;
 
@@ -31,8 +31,8 @@ public static class BusinessRuleViolation
                     "homeownership.purchase_workflow.schedule_closing.invalid_phase",
                     new Dictionary<string, object?>
                     {
-                        ["phase"] = phase.ToString(),
-                        ["requiredPhase"] = WorkflowPhase.InProgress.ToString(),
+                        ["phase"] = phase.DisplayName,
+                        ["requiredPhase"] = WorkflowPhase.InProgress.DisplayName,
                     });
         }
 
@@ -43,8 +43,8 @@ public static class BusinessRuleViolation
                     "homeownership.purchase_workflow.record_purchase_closed.phase_not_closing_scheduled",
                     new Dictionary<string, object?>
                     {
-                        ["phase"] = phase.ToString(),
-                        ["requiredPhase"] = WorkflowPhase.ClosingScheduled.ToString(),
+                        ["phase"] = phase.DisplayName,
+                        ["requiredPhase"] = WorkflowPhase.ClosingScheduled.DisplayName,
                     });
         }
 
@@ -62,8 +62,8 @@ public static class BusinessRuleViolation
                     "homeownership.purchase_workflow.stall_workflow.phase_not_in_progress",
                     new Dictionary<string, object?>
                     {
-                        ["phase"] = phase.ToString(),
-                        ["requiredPhase"] = WorkflowPhase.InProgress.ToString(),
+                        ["phase"] = phase.DisplayName,
+                        ["requiredPhase"] = WorkflowPhase.InProgress.DisplayName,
                     });
         }
 
@@ -74,7 +74,7 @@ public static class BusinessRuleViolation
                     "homeownership.purchase_workflow.modify.terminal_phase",
                     new Dictionary<string, object?>
                     {
-                        ["phase"] = phase.ToString(),
+                        ["phase"] = phase.DisplayName,
                     });
         }
     }
@@ -103,8 +103,8 @@ public static class BusinessRuleViolation
                     "homeownership.ground_lease.create_from_template.template_not_active",
                     new Dictionary<string, object?>
                     {
-                        ["templateStatus"] = status.ToString(),
-                        ["requiredStatus"] = GroundLeaseTemplateStatus.Active.ToString(),
+                        ["templateStatus"] = status.DisplayName,
+                        ["requiredStatus"] = GroundLeaseTemplateStatus.Active.DisplayName,
                     });
         }
 
@@ -133,8 +133,8 @@ public static class BusinessRuleViolation
                     "homeownership.ground_lease.terminate.status_not_active",
                     new Dictionary<string, object?>
                     {
-                        ["status"] = status.ToString(),
-                        ["requiredStatus"] = GroundLeaseStatus.Active.ToString(),
+                        ["status"] = status.DisplayName,
+                        ["requiredStatus"] = GroundLeaseStatus.Active.DisplayName,
                     });
         }
 

@@ -93,10 +93,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         IsInspectionCompleted && IsTitleCleared && IsLeaseExecuted;
 
     /// <summary>Gets whether the workflow is in a terminal phase.</summary>
-    public bool IsTerminal =>
-        Phase is WorkflowPhase.Closed
-            or WorkflowPhase.Failed
-            or WorkflowPhase.Withdrawn;
+    public bool IsTerminal => Phase.IsTerminal;
 
     /// <summary>Initiates a new purchase workflow.</summary>
     /// <param name="groundLeaseId">The ground lease to purchase.</param>
@@ -419,7 +416,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
     private void AdvancePhaseIfNeeded()
     {
-        if (Phase is WorkflowPhase.Initiated or WorkflowPhase.Stalled)
+        if (Phase.CanAdvanceToInProgress)
         {
             Phase = WorkflowPhase.InProgress;
         }
