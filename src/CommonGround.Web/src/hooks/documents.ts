@@ -4,7 +4,6 @@ import { apiConfig } from '../lib/apiConfig'
 import { getCsrfToken } from '../lib/csrf'
 import type {
   AttachDocumentRequest,
-  SoftDeleteDocumentRequest,
   TagDocumentRequest,
   UpdateDocumentMetadataRequest,
 } from '../api'
@@ -151,8 +150,8 @@ export function useAttachDocument() {
 export function useSoftDeleteDocument() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ documentId, req }: { documentId: string; req: SoftDeleteDocumentRequest }) =>
-      api.softDeleteDocument({ documentId, softDeleteDocumentRequest: req }),
+    mutationFn: ({ documentId }: { documentId: string }) =>
+      api.softDeleteDocument({ documentId }),
     onSuccess: (_d, v) => {
       qc.invalidateQueries({ queryKey: KEYS.doc(v.documentId) })
       qc.invalidateQueries({ queryKey: ['documents'] })

@@ -98,7 +98,6 @@ export default function DocumentList({ entityType, entityId }: Props) {
     try {
       await deleteMutation.mutateAsync({
         documentId,
-        req: { reason: 'Removed by user' },
       })
       success('Document removed')
     } catch {
