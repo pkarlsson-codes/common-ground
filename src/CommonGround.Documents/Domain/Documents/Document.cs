@@ -1,7 +1,7 @@
+using CommonGround.Documents.Application.Errors;
 using CommonGround.Documents.Domain.Documents.Events;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
-using CommonGround.SharedKernel.Domain.Exceptions;
 
 namespace CommonGround.Documents.Domain.Documents;
 
@@ -79,7 +79,7 @@ public sealed class Document : AggregateRoot<DocumentId>
         ArgumentNullException.ThrowIfNull(uploadedBy);
 
         if (sizeBytes <= 0)
-            throw new BusinessRuleViolationException("Uploaded blob must have non-zero size.");
+            throw BusinessRuleViolation.Document.Upload.SizeNonPositive(sizeBytes);
 
         var doc = new Document();
         var actualVersionId = versionId ?? DocumentVersionId.Generate();
@@ -113,7 +113,7 @@ public sealed class Document : AggregateRoot<DocumentId>
         ArgumentNullException.ThrowIfNull(attachedBy);
 
         if (IsDeleted)
-            throw new BusinessRuleViolationException("Cannot attach a deleted document.");
+            throw BusinessRuleViolation.Document.Attach.DocumentDeleted();
 
         var existing = _attachments.FirstOrDefault(x =>
             x.EntityType == entityType && x.EntityId == entityId && x.Role == role);
@@ -157,7 +157,7 @@ public sealed class Document : AggregateRoot<DocumentId>
             return;
 
         if (IsOnLegalHold)
-            throw new BusinessRuleViolationException("Cannot soft-delete a document on legal hold.");
+            throw BusinessRuleViolation.Document.SoftDelete.LegalHoldActive();
 
         ApplyChange(new DocumentSoftDeleted(Id.Value, reason, deletedBy.Value));
 
@@ -187,10 +187,10 @@ public sealed class Document : AggregateRoot<DocumentId>
         ArgumentNullException.ThrowIfNull(uploadedBy);
 
         if (sizeBytes <= 0)
-            throw new BusinessRuleViolationException("Uploaded blob must have non-zero size.");
+            throw BusinessRuleViolation.Document.AddVersion.SizeNonPositive(sizeBytes);
 
         if (IsDeleted)
-            throw new BusinessRuleViolationException("Cannot add a version to a deleted document.");
+            throw BusinessRuleViolation.Document.AddVersion.DocumentDeleted();
 
         var actualVersionId = versionId ?? DocumentVersionId.Generate();
         var nextNumber = _versions[^1].VersionNumber + 1;
@@ -219,10 +219,10 @@ public sealed class Document : AggregateRoot<DocumentId>
         ArgumentNullException.ThrowIfNull(updatedBy);
 
         if (IsDeleted)
-            throw new BusinessRuleViolationException("Cannot update metadata of a deleted document.");
+            throw BusinessRuleViolation.Document.UpdateMetadata.DocumentDeleted();
 
         if (title is not null && string.IsNullOrWhiteSpace(title))
-            throw new BusinessRuleViolationException("Title cannot be blank.");
+            throw BusinessRuleViolation.Document.UpdateMetadata.TitleBlank();
 
         var newTitle = title ?? Title;
         var newSensitivity = sensitivity?.DisplayName ?? Sensitivity.DisplayName;
@@ -247,7 +247,7 @@ public sealed class Document : AggregateRoot<DocumentId>
         ArgumentNullException.ThrowIfNull(taggedBy);
 
         if (IsDeleted)
-            throw new BusinessRuleViolationException("Cannot tag a deleted document.");
+            throw BusinessRuleViolation.Document.Tag.DocumentDeleted();
 
         var normalised = NormaliseTag(tag);
         if (_tags.Contains(normalised))
