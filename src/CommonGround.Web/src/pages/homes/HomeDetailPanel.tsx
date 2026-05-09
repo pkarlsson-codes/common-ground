@@ -70,7 +70,7 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
 
   return (
     <SlideOver
-      title={detail ? (HOME_TYPE_LABELS[detail.buildingType ?? ''] ?? detail.buildingType ?? '…') : '…'}
+      title={detail ? (HOME_TYPE_LABELS[detail.homeType ?? ''] ?? detail.homeType ?? '…') : '…'}
       subtitle={detail ? `${detail.bedrooms} bd · ${Number(detail.bathrooms).toFixed(1)} ba · ${fmtNumber(Number(detail.squareFootage))} sq ft` : undefined}
       onClose={onClose}
     >

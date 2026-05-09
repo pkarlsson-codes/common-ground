@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { HomesApi, type RegisterHomeRequest } from '../api'
 import { apiConfig } from '../lib/apiConfig'
 import type { RecordHomeAssessmentRequest } from './types'
-import type { PaginatedResponseOfBuildingAssessmentItemResponse } from '../api'
+import type { PaginatedResponseOfHomeAssessmentItemResponse } from '../api'
 
 const api = new HomesApi(apiConfig)
 
@@ -41,7 +41,7 @@ export function useHomeAssessments(
   pageNumber: number = 1,
   pageSize: number = 20,
 ) {
-  return useQuery<PaginatedResponseOfBuildingAssessmentItemResponse>({
+  return useQuery<PaginatedResponseOfHomeAssessmentItemResponse>({
     queryKey: ['home-assessments', homeId, pageNumber, pageSize],
     queryFn: () => api.getHomeAssessments({ homeId: homeId!, pageNumber, pageSize }),
     enabled: !!homeId,
@@ -63,7 +63,7 @@ export function useRecordHomeAssessment() {
     mutationFn: ({ homeId, req }: { homeId: string; req: RecordHomeAssessmentRequest }) =>
       api.recordHomeAssessment({
         homeId,
-        recordBuildingAssessmentRequest: {
+        recordHomeAssessmentRequest: {
           assessedValue: req.assessedValue,
           assessmentDate: new Date(req.assessmentDate),
           conditionNotes: req.conditionNotes,

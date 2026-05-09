@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useHomes } from '../../hooks/homes'
-import type { BuildingListItemResponse } from '../../api'
+import type { HomeListItemResponse } from '../../api'
 import { HOME_TYPE_LABELS } from '../../hooks/types'
 import StatusBadge from '../../components/StatusBadge'
 import HomeRegisterPanel from '../homes/HomeRegisterPanel'
@@ -46,7 +46,7 @@ export default function HomesSection({ parcelId }: Props) {
             {!isLoading && homes.length === 0 && (
               <div className="detail-field__value">No homes registered on this parcel.</div>
             )}
-            {!isLoading && homes.map((h: BuildingListItemResponse) => (
+            {!isLoading && homes.map((h: HomeListItemResponse) => (
               <div
                 key={h.id}
                 style={{
@@ -61,7 +61,7 @@ export default function HomesSection({ parcelId }: Props) {
                 }}
               >
                 <span style={{ fontSize: 13 }}>
-                  {HOME_TYPE_LABELS[h.buildingType ?? ''] ?? h.buildingType}
+                  {HOME_TYPE_LABELS[h.homeType ?? ''] ?? h.homeType}
                   {' · '}
                   <span className="cell-mono">{h.bedrooms} bd / {Number(h.bathrooms).toFixed(1)} ba</span>
                 </span>
