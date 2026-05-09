@@ -26,6 +26,9 @@ interface Props {
   onSuccess: (workflowId?: string) => void
 }
 
+const hasPurchaseWorkflowId = (value: unknown): value is { purchaseWorkflowId?: string } =>
+  typeof value === 'object' && value !== null && 'purchaseWorkflowId' in value
+
 export function useResaleFlowController({ groundLeaseId, onSuccess }: Props) {
   const [step, setStep] = useState<0 | 1 | 2>(0)
 
@@ -64,7 +67,7 @@ export function useResaleFlowController({ groundLeaseId, onSuccess }: Props) {
         ...initiateForm,
         purchasePrice: Number(initiateForm.purchasePrice),
       })
-      onSuccess(result.purchaseWorkflowId)
+      onSuccess(hasPurchaseWorkflowId(result) ? result.purchaseWorkflowId : undefined)
     } catch (error) {
       setInitiateError(await getErrorMessage(error, 'Failed to initiate workflow.'))
     }
