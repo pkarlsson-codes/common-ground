@@ -1,5 +1,5 @@
+using CommonGround.PropertyRegistry.Application.Errors;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Exceptions;
 
 namespace CommonGround.PropertyRegistry.Domain.Homes;
 
@@ -21,11 +21,13 @@ public sealed class UnitAssessment : ValueObject
     {
         ArgumentNullException.ThrowIfNull(recordedById);
 
-        if (assessedValue < 0)
-            throw new BusinessRuleViolationException("Assessed value cannot be negative.");
+        var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.DateTime);
 
-        if (assessmentDate > DateOnly.FromDateTime(DateTimeOffset.UtcNow.DateTime))
-            throw new BusinessRuleViolationException("Assessment date cannot be in the future.");
+        if (assessedValue < 0)
+            throw BusinessRuleViolation.UnitAssessment.Create.AssessedValueNegative(assessedValue);
+
+        if (assessmentDate > today)
+            throw BusinessRuleViolation.UnitAssessment.Create.AssessmentDateInFuture(assessmentDate, today);
 
         return new UnitAssessment(assessedValue, assessmentDate, appraiserName, conditionNotes, recordedById, occurredAt);
     }

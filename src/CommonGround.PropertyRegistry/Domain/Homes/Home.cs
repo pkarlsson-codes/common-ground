@@ -1,7 +1,7 @@
 using CommonGround.PropertyRegistry.Domain.Homes.Events;
+using CommonGround.PropertyRegistry.Application.Errors;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
-using CommonGround.SharedKernel.Domain.Exceptions;
 
 namespace CommonGround.PropertyRegistry.Domain.Homes;
 
@@ -60,17 +60,20 @@ public sealed class Home : AggregateRoot<HomeId>
         ArgumentNullException.ThrowIfNull(initialAssessment);
         ArgumentNullException.ThrowIfNull(registeredBy);
 
+        var minYear = 1800;
+        var maxYear = DateTimeOffset.UtcNow.Year + 5;
+
         if (bedrooms < 0)
-            throw new BusinessRuleViolationException("Bedrooms cannot be negative.");
+            throw BusinessRuleViolation.Home.Register.BedroomsNegative(bedrooms);
 
         if (bathrooms <= 0)
-            throw new BusinessRuleViolationException("Bathrooms must be greater than zero.");
+            throw BusinessRuleViolation.Home.Register.BathroomsNonPositive(bathrooms);
 
         if (squareFootage <= 0)
-            throw new BusinessRuleViolationException("Square footage must be greater than zero.");
+            throw BusinessRuleViolation.Home.Register.SquareFootageNonPositive(squareFootage);
 
-        if (yearBuilt < 1800 || yearBuilt > DateTimeOffset.UtcNow.Year + 5)
-            throw new BusinessRuleViolationException($"Year built must be between 1800 and {DateTimeOffset.UtcNow.Year + 5}.");
+        if (yearBuilt < minYear || yearBuilt > maxYear)
+            throw BusinessRuleViolation.Home.Register.YearBuiltOutOfRange(yearBuilt, minYear, maxYear);
 
         var home = new Home();
 
@@ -96,7 +99,7 @@ public sealed class Home : AggregateRoot<HomeId>
         ArgumentNullException.ThrowIfNull(recordedById);
 
         if (assessedValue < 0)
-            throw new BusinessRuleViolationException("Assessed value cannot be negative.");
+            throw BusinessRuleViolation.Home.RecordAssessment.AssessedValueNegative(assessedValue);
 
         ApplyChange(new HomeAssessed(Id.Value, assessedValue, assessmentDate, appraiserName, conditionNotes, recordedById.Value));
     }

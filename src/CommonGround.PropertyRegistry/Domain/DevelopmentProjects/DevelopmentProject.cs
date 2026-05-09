@@ -1,9 +1,9 @@
 using CommonGround.PropertyRegistry.Domain.DevelopmentProjects.Events;
+using CommonGround.PropertyRegistry.Application.Errors;
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
-using CommonGround.SharedKernel.Domain.Exceptions;
 
 namespace CommonGround.PropertyRegistry.Domain.DevelopmentProjects;
 
@@ -52,7 +52,7 @@ public sealed class DevelopmentProject : AggregateRoot<DevelopmentProjectId>
         ArgumentNullException.ThrowIfNull(initiatedBy);
 
         if (string.IsNullOrWhiteSpace(description))
-            throw new BusinessRuleViolationException("Development project description must be specified.");
+            throw BusinessRuleViolation.DevelopmentProject.Initiate.DescriptionRequired();
 
         var project = new DevelopmentProject();
 
@@ -85,10 +85,10 @@ public sealed class DevelopmentProject : AggregateRoot<DevelopmentProjectId>
         ArgumentNullException.ThrowIfNull(initiatedBy);
 
         if (string.IsNullOrWhiteSpace(description))
-            throw new BusinessRuleViolationException("Development project description must be specified.");
+            throw BusinessRuleViolation.DevelopmentProject.Initiate.DescriptionRequired();
 
         if (homeIds == null || homeIds.Count == 0)
-            throw new BusinessRuleViolationException("At least one home must be associated with a rehabilitation project.");
+            throw BusinessRuleViolation.DevelopmentProject.InitiateRehabilitation.HomeIdsRequired();
 
         var project = new DevelopmentProject();
 

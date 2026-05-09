@@ -1,3 +1,4 @@
+using CommonGround.Homeownership.Application.Errors;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 
@@ -64,7 +65,7 @@ public sealed class ResalePolicyTerms : ValueObject
     public static ResalePolicyTerms AppraisalBased(decimal appreciationShare, decimal? improvementsCap = null)
     {
         if (appreciationShare < 0.0m || appreciationShare > 1.0m)
-            throw new BusinessRuleViolationException("Appreciation share must be between 0.0 and 1.0.");
+            throw BusinessRuleViolation.ResalePolicyTerms.AppraisalBased.AppreciationShareOutOfRange(appreciationShare);
 
         ValidateImprovementsCap(improvementsCap);
 
@@ -89,10 +90,10 @@ public sealed class ResalePolicyTerms : ValueObject
         string indexType, decimal baselineIndexValue, decimal? improvementsCap = null)
     {
         if (string.IsNullOrWhiteSpace(indexType))
-            throw new BusinessRuleViolationException("Index type must be specified.");
+            throw BusinessRuleViolation.ResalePolicyTerms.IndexBased.IndexTypeRequired();
 
         if (baselineIndexValue <= 0)
-            throw new BusinessRuleViolationException("Baseline index value must be positive.");
+            throw BusinessRuleViolation.ResalePolicyTerms.IndexBased.BaselineIndexNonPositive(baselineIndexValue);
 
         ValidateImprovementsCap(improvementsCap);
 
@@ -115,7 +116,7 @@ public sealed class ResalePolicyTerms : ValueObject
     public static ResalePolicyTerms FixedPercentage(decimal annualPercentage, decimal? improvementsCap = null)
     {
         if (annualPercentage < 0.0m || annualPercentage > 1.0m)
-            throw new BusinessRuleViolationException("Annual percentage must be between 0.0 and 1.0.");
+            throw BusinessRuleViolation.ResalePolicyTerms.FixedPercentage.AnnualPercentageOutOfRange(annualPercentage);
 
         ValidateImprovementsCap(improvementsCap);
 
@@ -159,7 +160,7 @@ public sealed class ResalePolicyTerms : ValueObject
     private static void ValidateImprovementsCap(decimal? cap)
     {
         if (cap is <= 0)
-            throw new BusinessRuleViolationException("Improvements cap must be positive when specified.");
+            throw BusinessRuleViolation.ResalePolicyTerms.Create.ImprovementsCapNonPositive(cap);
     }
 
     /// <inheritdoc />

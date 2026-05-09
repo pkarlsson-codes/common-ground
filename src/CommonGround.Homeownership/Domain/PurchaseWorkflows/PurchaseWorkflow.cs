@@ -1,9 +1,9 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows.TrackDetails;
+using CommonGround.Homeownership.Application.Errors;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
-using CommonGround.SharedKernel.Domain.Exceptions;
 
 namespace CommonGround.Homeownership.Domain.PurchaseWorkflows;
 
@@ -116,8 +116,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         if (purchasePrice <= 0)
         {
-            throw new BusinessRuleViolationException(
-                "Purchase price must be positive.");
+            throw BusinessRuleViolation.PurchaseWorkflow.Initiate.PurchasePriceNonPositive(purchasePrice);
         }
 
         var workflow = new PurchaseWorkflow();
@@ -227,8 +226,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         if (!AllMandatoryTracksSatisfied)
         {
-            throw new BusinessRuleViolationException(
-                "All mandatory tracks must be satisfied before scheduling closing.");
+            throw BusinessRuleViolation.PurchaseWorkflow.ScheduleClosing.MandatoryTracksIncomplete();
         }
 
         var canScheduleFromCurrentPhase =
@@ -237,8 +235,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         if (!canScheduleFromCurrentPhase)
         {
-            throw new BusinessRuleViolationException(
-                "Closing can only be scheduled when workflow is in progress.");
+            throw BusinessRuleViolation.PurchaseWorkflow.ScheduleClosing.InvalidPhase(Phase);
         }
 
         ApplyChange(new ClosingScheduled(
@@ -258,8 +255,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         if (Phase != WorkflowPhase.ClosingScheduled)
         {
-            throw new BusinessRuleViolationException(
-                "Purchase can only be closed when closing is scheduled.");
+            throw BusinessRuleViolation.PurchaseWorkflow.RecordPurchaseClosed.PhaseNotClosingScheduled(Phase);
         }
 
         ApplyChange(new PurchaseClosed(
@@ -280,8 +276,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         if (string.IsNullOrWhiteSpace(failureReason))
         {
-            throw new BusinessRuleViolationException(
-                "Failure reason is required.");
+            throw BusinessRuleViolation.PurchaseWorkflow.FailPurchase.FailureReasonRequired();
         }
 
         ApplyChange(new PurchaseFailed(
@@ -318,8 +313,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         if (Phase != WorkflowPhase.InProgress)
         {
-            throw new BusinessRuleViolationException(
-                "Only an in-progress workflow can be stalled.");
+            throw BusinessRuleViolation.PurchaseWorkflow.StallWorkflow.PhaseNotInProgress(Phase);
         }
 
         ApplyChange(new WorkflowStalled(
@@ -435,8 +429,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     {
         if (IsTerminal)
         {
-            throw new BusinessRuleViolationException(
-                $"Cannot modify a workflow in terminal phase '{Phase}'.");
+            throw BusinessRuleViolation.PurchaseWorkflow.Modify.TerminalPhase(Phase);
         }
     }
 }

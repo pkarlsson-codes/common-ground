@@ -1,8 +1,8 @@
+using CommonGround.Homeownership.Application.Errors;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeases.Templates.Events;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
-using CommonGround.SharedKernel.Domain.Exceptions;
 
 namespace CommonGround.Homeownership.Domain.GroundLeases.Templates;
 
@@ -49,17 +49,17 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
 
         if (string.IsNullOrWhiteSpace(templateName))
         {
-            throw new BusinessRuleViolationException("Template name is required.");
+            throw BusinessRuleViolation.GroundLeaseTemplate.Create.TemplateNameRequired();
         }
 
         if (termYears <= 0)
         {
-            throw new BusinessRuleViolationException("Term years must be positive.");
+            throw BusinessRuleViolation.GroundLeaseTemplate.Create.TermYearsNonPositive(termYears);
         }
 
         if (string.IsNullOrWhiteSpace(covenantTerms))
         {
-            throw new BusinessRuleViolationException("Covenant terms must be specified.");
+            throw BusinessRuleViolation.GroundLeaseTemplate.Create.CovenantTermsRequired();
         }
 
         var template = new GroundLeaseTemplate();
@@ -86,8 +86,7 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
 
         if (Status == GroundLeaseTemplateStatus.Active)
         {
-            throw new BusinessRuleViolationException(
-                "Ground lease template is already active.");
+            throw BusinessRuleViolation.GroundLeaseTemplate.Activate.AlreadyActive();
         }
 
         ApplyChange(new GroundLeaseTemplateRestored(
@@ -102,8 +101,7 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
 
         if (Status == GroundLeaseTemplateStatus.Inactive)
         {
-            throw new BusinessRuleViolationException(
-                "Ground lease template is already inactive.");
+            throw BusinessRuleViolation.GroundLeaseTemplate.Deactivate.AlreadyInactive();
         }
 
         ApplyChange(new GroundLeaseTemplateArchived(

@@ -1,8 +1,8 @@
 using CommonGround.PropertyRegistry.Domain.LandParcels.Events;
+using CommonGround.PropertyRegistry.Application.Errors;
 
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
-using CommonGround.SharedKernel.Domain.Exceptions;
 
 namespace CommonGround.PropertyRegistry.Domain.LandParcels;
 
@@ -54,13 +54,13 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         ArgumentNullException.ThrowIfNull(registeredBy);
 
         if (string.IsNullOrWhiteSpace(legalParcelNumber))
-            throw new BusinessRuleViolationException("Legal parcel number must be specified.");
+            throw BusinessRuleViolation.LandParcel.Register.LegalParcelNumberRequired();
 
         if (string.IsNullOrWhiteSpace(address))
-            throw new BusinessRuleViolationException("Address must be specified.");
+            throw BusinessRuleViolation.LandParcel.Register.AddressRequired();
 
         if (areaAcres <= 0)
-            throw new BusinessRuleViolationException("Area must be greater than zero.");
+            throw BusinessRuleViolation.LandParcel.Register.AreaNonPositive(areaAcres);
 
         var parcel = new LandParcel();
 
@@ -83,7 +83,7 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         ArgumentNullException.ThrowIfNull(changedBy);
 
         if (IsDecommissioned)
-            throw new BusinessRuleViolationException("Cannot list a decommissioned parcel for placement.");
+            throw BusinessRuleViolation.LandParcel.ListForPlacement.ParcelDecommissioned();
 
         ApplyChange(new ParcelListedForPlacement(Id.Value, changedBy.Value));
     }
@@ -94,7 +94,7 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         ArgumentNullException.ThrowIfNull(changedBy);
 
         if (IsDecommissioned)
-            throw new BusinessRuleViolationException("Cannot withdraw a decommissioned parcel.");
+            throw BusinessRuleViolation.LandParcel.WithdrawForRedevelopment.ParcelDecommissioned();
 
         ApplyChange(new ParcelWithdrawnForRedevelopment(Id.Value, changedBy.Value));
     }

@@ -1,11 +1,11 @@
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeases.Templates;
+using CommonGround.Homeownership.Application.Errors;
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
-using CommonGround.SharedKernel.Domain.Exceptions;
 
 namespace CommonGround.Homeownership.Domain.GroundLeases;
 
@@ -71,10 +71,10 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         ArgumentNullException.ThrowIfNull(createdBy);
 
         if (termYears <= 0)
-            throw new BusinessRuleViolationException("Term years must be positive.");
+            throw BusinessRuleViolation.GroundLease.Create.TermYearsNonPositive(termYears);
 
         if (string.IsNullOrWhiteSpace(covenantTerms))
-            throw new BusinessRuleViolationException("Covenant terms must be specified.");
+            throw BusinessRuleViolation.GroundLease.Create.CovenantTermsRequired();
 
         var lease = new GroundLease();
         lease.ApplyChange(new GroundLeaseCreated(
@@ -110,8 +110,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
 
         if (template.Status != GroundLeaseTemplateStatus.Active)
         {
-            throw new BusinessRuleViolationException(
-                "Ground lease template must be active.");
+            throw BusinessRuleViolation.GroundLease.CreateFromTemplate.TemplateNotActive(template.Status);
         }
 
         var lease = new GroundLease();
@@ -144,8 +143,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
 
         if (CurrentHomeowner is not null)
         {
-            throw new BusinessRuleViolationException(
-                "A homeowner is already onboarded. Use ChangeHomeowner instead.");
+            throw BusinessRuleViolation.GroundLease.OnboardHomeowner.AlreadyOnboarded();
         }
 
         ApplyChange(new HomeownerOnboarded(
@@ -166,8 +164,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
 
         if (CurrentHomeowner is null)
         {
-            throw new BusinessRuleViolationException(
-                "No homeowner is currently onboarded. Use OnboardHomeowner first.");
+            throw BusinessRuleViolation.GroundLease.ChangeHomeowner.CurrentHomeownerMissing();
         }
 
         ApplyChange(new HomeownerChanged(
@@ -190,10 +187,10 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         ArgumentNullException.ThrowIfNull(terminatedBy);
 
         if (string.IsNullOrWhiteSpace(reason))
-            throw new BusinessRuleViolationException("Termination reason is required.");
+            throw BusinessRuleViolation.GroundLease.Terminate.ReasonRequired();
 
         if (Status != GroundLeaseStatus.Active)
-            throw new BusinessRuleViolationException("Only Active leases can be terminated.");
+            throw BusinessRuleViolation.GroundLease.Terminate.StatusNotActive(Status);
 
         ApplyChange(new GroundLeaseTerminated(
             Id.Value,
@@ -212,7 +209,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
 
         if (string.IsNullOrWhiteSpace(notes))
         {
-            throw new BusinessRuleViolationException("Check-in notes are required.");
+            throw BusinessRuleViolation.GroundLease.RecordStewardshipCheckIn.NotesRequired();
         }
 
         ApplyChange(new StewardshipCheckInRecorded(

@@ -1,5 +1,5 @@
+using CommonGround.Homeownership.Application.Errors;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Exceptions;
 
 namespace CommonGround.Homeownership.Domain.GroundLeases;
 
@@ -23,22 +23,19 @@ public sealed class Homeowner : ValueObject
     {
         if (string.IsNullOrWhiteSpace(fullName) || fullName.Length > 200)
         {
-            throw new BusinessRuleViolationException(
-                "FullName is required and must be 1-200 characters.");
+            throw BusinessRuleViolation.Homeowner.Create.FullNameInvalid(fullName);
         }
 
         if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
         {
-            throw new BusinessRuleViolationException(
-                "A valid email address is required.");
+            throw BusinessRuleViolation.Homeowner.Create.EmailInvalid(email);
         }
 
         if (phone is not null
             && !System.Text.RegularExpressions.Regex.IsMatch(
                 phone, @"^\+[1-9]\d{1,14}$"))
         {
-            throw new BusinessRuleViolationException(
-                "Phone must be in E.164 format if provided.");
+            throw BusinessRuleViolation.Homeowner.Create.PhoneInvalidFormat(phone);
         }
 
         FullName = fullName;
