@@ -21,7 +21,7 @@ public sealed class GetDevelopmentProjectsQuerySpec : PaginationQuerySpecV2
         int pageSize = DefaultPageSize,
         string? search = null,
         string? landParcelId = null,
-        IReadOnlyCollection<string>? homeIds = null)
+        IReadOnlyList<string>? homeIds = null)
         : base(pageNumber, pageSize)
     {
         Search = search;
