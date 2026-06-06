@@ -20,15 +20,10 @@ public interface IGroundLeasesApiClient
     Task<GroundLeaseResponse> GetGroundLeaseAsync(string groundLeaseId, CancellationToken cancellationToken);
 
     /// <summary>Gets a paginated list of ground leases.</summary>
-    /// <param name="pageNumber">The page number (1-based).</param>
-    /// <param name="pageSize">The number of items per page.</param>
-    /// <param name="status">Optional status filter.</param>
-    /// <param name="landParcelId">Optional land parcel ID filter.</param>
-    /// <param name="homeId">Optional home ID filter.</param>
-    /// <param name="search">Optional free-text search across homeowner name and email.</param>
+    /// <param name="querySpec">The query parameters for pagination and filtering.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A paginated list of ground lease summaries.</returns>
-    Task<PaginatedResponse<GroundLeaseListItemResponse>> GetGroundLeasesAsync(int pageNumber, int pageSize, string? status, string? landParcelId, string? homeId, string? search, CancellationToken cancellationToken);
+    Task<PaginatedResponse<GroundLeaseListItemResponse>> GetGroundLeasesAsync(GetGroundLeasesQuerySpec querySpec, CancellationToken cancellationToken);
 
     /// <summary>Records a stewardship check-in for a ground lease.</summary>
     /// <param name="groundLeaseId">The ID of the ground lease.</param>

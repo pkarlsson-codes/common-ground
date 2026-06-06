@@ -36,6 +36,26 @@ public sealed class QueryStringBuilder
         return this;
     }
 
+    /// <summary>Adds a key-value pair for each non-whitespace element in the collection.</summary>
+    /// <param name="key">The query parameter key.</param>
+    /// <param name="values">The values to add.</param>
+    /// <returns>The current <see cref="QueryStringBuilder"/> instance.</returns>
+    public QueryStringBuilder AddEach(string key, IEnumerable<string>? values)
+    {
+        if (values != null)
+        {
+            foreach (var value in values)
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    Add(key, value);
+                }
+            }
+        }
+
+        return this;
+    }
+
     /// <summary>
     /// Builds the query string.
     /// </summary>

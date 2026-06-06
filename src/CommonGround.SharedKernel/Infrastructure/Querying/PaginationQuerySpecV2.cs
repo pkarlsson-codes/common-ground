@@ -46,6 +46,67 @@ public abstract class PaginationQuerySpecV2
     /// </summary>
     public PageSpec Page { get; }
 
+    /// <summary>
+    /// Builds the query string for this specification.
+    /// </summary>
+    /// <returns>A query string beginning with '?' containing all pagination and filter parameters.</returns>
+    public string ToQueryString()
+    {
+        var parts = new List<string>
+        {
+            $"pageNumber={PageNumber}",
+            $"pageSize={PageSize}",
+        };
+
+        AppendFilterParts(parts);
+
+        return "?" + string.Join("&", parts);
+    }
+
+    /// <summary>
+    /// Appends a key=value pair if the value is not null or whitespace.
+    /// </summary>
+    /// <param name="parts">The list of key=value parts to append to.</param>
+    /// <param name="key">The query parameter key.</param>
+    /// <param name="value">The value to conditionally append.</param>
+    protected static void AddIfNotWhiteSpace(List<string> parts, string key, string? value)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            parts.Add($"{key}={Uri.EscapeDataString(value)}");
+        }
+    }
+
+    /// <summary>
+    /// Appends a key=value pair for each non-whitespace element in the collection.
+    /// </summary>
+    /// <param name="parts">The list of key=value parts to append to.</param>
+    /// <param name="key">The query parameter key.</param>
+    /// <param name="values">The values to conditionally append.</param>
+    protected static void AddEach(List<string> parts, string key, IEnumerable<string>? values)
+    {
+        if (values is null)
+        {
+            return;
+        }
+
+        foreach (var v in values)
+        {
+            if (!string.IsNullOrWhiteSpace(v))
+            {
+                parts.Add($"{key}={Uri.EscapeDataString(v)}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Override to append filter-specific query string parts between the page parameters.
+    /// </summary>
+    /// <param name="parts">The list of key=value parts to append to.</param>
+    protected virtual void AppendFilterParts(List<string> parts)
+    {
+    }
+
     private static int NormalizePageNumber(int pageNumber)
     {
         return pageNumber < 1 ? 1 : pageNumber;

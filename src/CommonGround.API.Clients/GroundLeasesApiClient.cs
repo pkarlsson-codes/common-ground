@@ -26,30 +26,11 @@ public sealed class GroundLeasesApiClient(
 
     /// <inheritdoc/>
     public async Task<PaginatedResponse<GroundLeaseListItemResponse>> GetGroundLeasesAsync(
-        int pageNumber, int pageSize, string? status, string? landParcelId, string? homeId, string? search, CancellationToken cancellationToken)
+        GetGroundLeasesQuerySpec querySpec, CancellationToken cancellationToken)
     {
-        var qs = $"?pageNumber={pageNumber}&pageSize={pageSize}";
-        if (!string.IsNullOrWhiteSpace(status))
-        {
-            qs += $"&statuses={Uri.EscapeDataString(status)}";
-        }
+        ArgumentNullException.ThrowIfNull(querySpec);
 
-        if (!string.IsNullOrWhiteSpace(landParcelId))
-        {
-            qs += $"&landParcelId={Uri.EscapeDataString(landParcelId)}";
-        }
-
-        if (!string.IsNullOrWhiteSpace(homeId))
-        {
-            qs += $"&homeId={Uri.EscapeDataString(homeId)}";
-        }
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            qs += $"&search={Uri.EscapeDataString(search)}";
-        }
-
-        return await GetAsync<PaginatedResponse<GroundLeaseListItemResponse>>($"api/ground-leases{qs}", cancellationToken).ConfigureAwait(false);
+        return await GetAsync<PaginatedResponse<GroundLeaseListItemResponse>>($"api/ground-leases{querySpec.ToQueryString()}", cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

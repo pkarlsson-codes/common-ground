@@ -1,3 +1,4 @@
+using CommonGround.API.Contracts.Homeownership.Requests;
 using CommonGround.API.Contracts.Homeownership.Responses;
 using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Application.ReadModels;

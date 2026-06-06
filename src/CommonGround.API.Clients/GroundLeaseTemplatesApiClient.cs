@@ -1,3 +1,4 @@
+using CommonGround.API.Contracts.Homeownership.Requests;
 using CommonGround.API.Contracts.Homeownership.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.Extensions.Logging;
@@ -14,16 +15,11 @@ public sealed class GroundLeaseTemplatesApiClient(
 {
     /// <inheritdoc/>
     public async Task<PaginatedResponse<GroundLeaseTemplateListItemResponse>> GetGroundLeaseTemplatesAsync(
-        int pageNumber, int pageSize, string? search, string? status, CancellationToken cancellationToken)
+        GetGroundLeaseTemplatesQuerySpec querySpec, CancellationToken cancellationToken)
     {
-        var qs = new QueryStringBuilder()
-            .Add("pageNumber", pageNumber)
-            .Add("pageSize", pageSize)
-            .AddIfNotWhiteSpace("search", search)
-            .AddIfNotWhiteSpace("status", status)
-            .Build();
+        ArgumentNullException.ThrowIfNull(querySpec);
 
         return await GetAsync<PaginatedResponse<GroundLeaseTemplateListItemResponse>>(
-            $"api/ground-lease-templates{qs}", cancellationToken).ConfigureAwait(false);
+            $"api/ground-lease-templates{querySpec.ToQueryString()}", cancellationToken).ConfigureAwait(false);
     }
 }

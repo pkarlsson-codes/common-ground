@@ -39,26 +39,11 @@ public static class GroundLeasesEndpoints
     [WolverineGet("/api/v1/ground-leases")]
     [ProducesResponseType<PaginatedResponse<GroundLeaseListItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetGroundLeases(
-        int pageNumber,
-        int pageSize,
-        string? status,
-        string? landParcelId,
-        string? homeId,
-        string? search,
+        [FromQuery] GetGroundLeasesQuerySpec querySpec,
         IGroundLeasesApiClient client,
         CancellationToken cancellationToken = default)
     {
-        if (pageNumber <= 0)
-        {
-            pageNumber = 1;
-        }
-
-        if (pageSize <= 0)
-        {
-            pageSize = 20;
-        }
-
-        var result = await client.GetGroundLeasesAsync(pageNumber, pageSize, status, landParcelId, homeId, search, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetGroundLeasesAsync(querySpec, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
 

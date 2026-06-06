@@ -1,6 +1,6 @@
 using CommonGround.SharedKernel.Infrastructure.Querying;
 
-namespace CommonGround.API.Homeownership;
+namespace CommonGround.API.Contracts.Homeownership.Requests;
 
 /// <summary>Query string parameters for the get ground lease templates endpoint.</summary>
 public sealed class GetGroundLeaseTemplatesQuerySpec : PaginationQuerySpecV2
@@ -26,4 +26,11 @@ public sealed class GetGroundLeaseTemplatesQuerySpec : PaginationQuerySpecV2
 
     /// <summary>Gets the optional status filter.</summary>
     public string? Status { get; }
+
+    /// <inheritdoc cref="PaginationQuerySpecV2.AppendFilterParts"/>
+    protected override void AppendFilterParts(List<string> parts)
+    {
+        AddIfNotWhiteSpace(parts, "search", Search);
+        AddIfNotWhiteSpace(parts, "status", Status);
+    }
 }
