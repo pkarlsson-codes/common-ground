@@ -65,7 +65,9 @@ function ViolationCell({ count }: { count: number }) {
 export default function StewardshipCasesTab() {
   const currentYear = new Date().getFullYear()
 
-  const { data: cases, isLoading: casesLoading, isError: casesError } = useAllStewardshipCases()
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const { data: casePage, isLoading: casesLoading, isError: casesError } = useAllStewardshipCases(currentPage)
   const { data: leasePage, isLoading: leasesLoading } = useAllActiveGroundLeases()
 
   const isLoading = casesLoading || leasesLoading
@@ -81,8 +83,13 @@ export default function StewardshipCasesTab() {
     return map
   }, [leasePage])
 
+  const cases = casePage?.items ?? []
+  const pagination = casePage
+    ? { pageNumber: casePage.pageNumber, totalPages: casePage.totalPages, totalCount: casePage.totalCount, hasNextPage: casePage.hasNextPage ?? false }
+    : null
+
   const rows = useMemo(
-    () => buildStewardshipQueue(cases ?? [], leaseIndex as Map<string, { homeownerFullName?: string | null; parcelAddress?: string | null }>),
+    () => buildStewardshipQueue(cases, leaseIndex as Map<string, { homeownerFullName?: string | null; parcelAddress?: string | null }>),
     [cases, leaseIndex],
   )
 
@@ -146,6 +153,28 @@ export default function StewardshipCasesTab() {
           </tbody>
         </table>
       </div>
+
+      {pagination && pagination.totalPages > 1 && (
+        <div className="pagination-controls" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, justifyContent: 'flex-end', fontSize: 13 }}>
+          <button
+            className="btn btn-secondary"
+            disabled={pagination.pageNumber <= 1}
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          >
+            Previous
+          </button>
+          <span style={{ color: 'var(--text-secondary)' }}>
+            Page {pagination.pageNumber} of {pagination.totalPages}
+          </span>
+          <button
+            className="btn btn-secondary"
+            disabled={!pagination.hasNextPage}
+            onClick={() => setCurrentPage(p => p + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {selectedRow && (
         <StewardshipCaseDetailPanel

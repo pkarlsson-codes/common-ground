@@ -5,6 +5,7 @@ export * from './ApplicantSelectionApi';
 export * from './AuthApi';
 export * from './DevelopmentProjectsApi';
 export * from './DocumentsApi';
+export * from './GroundLeaseTemplatesApi';
 export * from './GroundLeasesApi';
 export * from './HomesApi';
 export * from './LandParcelsApi';

@@ -28,7 +28,6 @@ import type {
   SelectApplicantRequest,
   SubmitApplicationRequest,
   SubmitApplicationResponse,
-  WithdrawApplicationRequest,
 } from '../models/index';
 import {
     ApproveEligibilityRequestFromJSON,
@@ -55,8 +54,6 @@ import {
     SubmitApplicationRequestToJSON,
     SubmitApplicationResponseFromJSON,
     SubmitApplicationResponseToJSON,
-    WithdrawApplicationRequestFromJSON,
-    WithdrawApplicationRequestToJSON,
 } from '../models/index';
 
 export interface ApproveEligibilityOperationRequest {
@@ -109,11 +106,6 @@ export interface SubmitApplicationOperationRequest {
     submitApplicationRequest: SubmitApplicationRequest;
 }
 
-export interface WithdrawApplicationOperationRequest {
-    applicationId: string;
-    withdrawApplicationRequest: WithdrawApplicationRequest;
-}
-
 /**
  * ApplicantSelectionApi - interface
  * 
@@ -123,7 +115,8 @@ export interface WithdrawApplicationOperationRequest {
 export interface ApplicantSelectionApiInterface {
     /**
      * 
-     * @param {string} applicationId 
+     * @summary Approve eligibility endpoint.
+     * @param {string} applicationId The application ID.
      * @param {ApproveEligibilityRequest} approveEligibilityRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -132,12 +125,14 @@ export interface ApplicantSelectionApiInterface {
     approveEligibilityRaw(requestParameters: ApproveEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
+     * Approve eligibility endpoint.
      */
     approveEligibility(requestParameters: ApproveEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @param {string} applicationId 
+     * @summary Deny application endpoint.
+     * @param {string} applicationId The application ID.
      * @param {DenyApplicationRequest} denyApplicationRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -146,12 +141,14 @@ export interface ApplicantSelectionApiInterface {
     denyApplicationRaw(requestParameters: DenyApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
+     * Deny application endpoint.
      */
     denyApplication(requestParameters: DenyApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @param {string} applicationId 
+     * @summary Deny eligibility endpoint.
+     * @param {string} applicationId The application ID.
      * @param {DenyEligibilityRequest} denyEligibilityRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -160,12 +157,14 @@ export interface ApplicantSelectionApiInterface {
     denyEligibilityRaw(requestParameters: DenyEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
+     * Deny eligibility endpoint.
      */
     denyEligibility(requestParameters: DenyEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @param {string} applicationId 
+     * @summary Get homeowner application endpoint.
+     * @param {string} applicationId The application ID.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ApplicantSelectionApiInterface
@@ -173,15 +172,17 @@ export interface ApplicantSelectionApiInterface {
     getHomeownerApplicationRaw(requestParameters: GetHomeownerApplicationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HomeownerApplicationResponse>>;
 
     /**
+     * Get homeowner application endpoint.
      */
     getHomeownerApplication(requestParameters: GetHomeownerApplicationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HomeownerApplicationResponse>;
 
     /**
      * 
-     * @param {number} [pageNumber] 
-     * @param {number} [pageSize] 
-     * @param {string} [phase] 
-     * @param {string} [search] 
+     * @summary Get homeowner applications endpoint.
+     * @param {number} [pageNumber] The page number.
+     * @param {number} [pageSize] The page size.
+     * @param {string} [phase] The application phase.
+     * @param {string} [search] The search term.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ApplicantSelectionApiInterface
@@ -189,12 +190,14 @@ export interface ApplicantSelectionApiInterface {
     getHomeownerApplicationsRaw(requestParameters: GetHomeownerApplicationsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfHomeownerApplicationListItemResponse>>;
 
     /**
+     * Get homeowner applications endpoint.
      */
     getHomeownerApplications(requestParameters: GetHomeownerApplicationsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeownerApplicationListItemResponse>;
 
     /**
      * 
-     * @param {string} applicationId 
+     * @summary Record CLT orientation endpoint.
+     * @param {string} applicationId The application ID.
      * @param {RecordCltOrientationRequest} recordCltOrientationRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -203,12 +206,14 @@ export interface ApplicantSelectionApiInterface {
     recordCltOrientationRaw(requestParameters: RecordCltOrientationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
+     * Record CLT orientation endpoint.
      */
     recordCltOrientation(requestParameters: RecordCltOrientationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @param {string} applicationId 
+     * @summary Record housing counseling endpoint.
+     * @param {string} applicationId The application ID.
      * @param {RecordHousingCounselingRequest} recordHousingCounselingRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -217,12 +222,14 @@ export interface ApplicantSelectionApiInterface {
     recordHousingCounselingRaw(requestParameters: RecordHousingCounselingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
+     * Record housing counseling endpoint.
      */
     recordHousingCounseling(requestParameters: RecordHousingCounselingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @param {string} applicationId 
+     * @summary Record mortgage prequalification endpoint.
+     * @param {string} applicationId The application ID.
      * @param {RecordMortgagePrequalificationRequest} recordMortgagePrequalificationRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -231,12 +238,14 @@ export interface ApplicantSelectionApiInterface {
     recordMortgagePrequalificationRaw(requestParameters: RecordMortgagePrequalificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
+     * Record mortgage prequalification endpoint.
      */
     recordMortgagePrequalification(requestParameters: RecordMortgagePrequalificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
-     * @param {string} applicationId 
+     * @summary Select applicant endpoint.
+     * @param {string} applicationId The application ID.
      * @param {SelectApplicantRequest} selectApplicantRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -245,11 +254,13 @@ export interface ApplicantSelectionApiInterface {
     selectApplicantRaw(requestParameters: SelectApplicantOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
+     * Select applicant endpoint.
      */
     selectApplicant(requestParameters: SelectApplicantOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
+     * @summary Submit application endpoint.
      * @param {SubmitApplicationRequest} submitApplicationRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -258,22 +269,9 @@ export interface ApplicantSelectionApiInterface {
     submitApplicationRaw(requestParameters: SubmitApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
+     * Submit application endpoint.
      */
     submitApplication(requestParameters: SubmitApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
-
-    /**
-     * 
-     * @param {string} applicationId 
-     * @param {WithdrawApplicationRequest} withdrawApplicationRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ApplicantSelectionApiInterface
-     */
-    withdrawApplicationRaw(requestParameters: WithdrawApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
-
-    /**
-     */
-    withdrawApplication(requestParameters: WithdrawApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
 }
 
@@ -283,6 +281,7 @@ export interface ApplicantSelectionApiInterface {
 export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantSelectionApiInterface {
 
     /**
+     * Approve eligibility endpoint.
      */
     async approveEligibilityRaw(requestParameters: ApproveEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['applicationId'] == null) {
@@ -321,6 +320,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Approve eligibility endpoint.
      */
     async approveEligibility(requestParameters: ApproveEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
         const response = await this.approveEligibilityRaw(requestParameters, initOverrides);
@@ -335,6 +335,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Deny application endpoint.
      */
     async denyApplicationRaw(requestParameters: DenyApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['applicationId'] == null) {
@@ -373,6 +374,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Deny application endpoint.
      */
     async denyApplication(requestParameters: DenyApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
         const response = await this.denyApplicationRaw(requestParameters, initOverrides);
@@ -387,6 +389,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Deny eligibility endpoint.
      */
     async denyEligibilityRaw(requestParameters: DenyEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['applicationId'] == null) {
@@ -425,6 +428,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Deny eligibility endpoint.
      */
     async denyEligibility(requestParameters: DenyEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
         const response = await this.denyEligibilityRaw(requestParameters, initOverrides);
@@ -439,6 +443,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Get homeowner application endpoint.
      */
     async getHomeownerApplicationRaw(requestParameters: GetHomeownerApplicationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HomeownerApplicationResponse>> {
         if (requestParameters['applicationId'] == null) {
@@ -467,6 +472,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Get homeowner application endpoint.
      */
     async getHomeownerApplication(requestParameters: GetHomeownerApplicationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HomeownerApplicationResponse> {
         const response = await this.getHomeownerApplicationRaw(requestParameters, initOverrides);
@@ -474,6 +480,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Get homeowner applications endpoint.
      */
     async getHomeownerApplicationsRaw(requestParameters: GetHomeownerApplicationsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfHomeownerApplicationListItemResponse>> {
         const queryParameters: any = {};
@@ -510,6 +517,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Get homeowner applications endpoint.
      */
     async getHomeownerApplications(requestParameters: GetHomeownerApplicationsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeownerApplicationListItemResponse> {
         const response = await this.getHomeownerApplicationsRaw(requestParameters, initOverrides);
@@ -517,6 +525,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Record CLT orientation endpoint.
      */
     async recordCltOrientationRaw(requestParameters: RecordCltOrientationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['applicationId'] == null) {
@@ -555,6 +564,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Record CLT orientation endpoint.
      */
     async recordCltOrientation(requestParameters: RecordCltOrientationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
         const response = await this.recordCltOrientationRaw(requestParameters, initOverrides);
@@ -569,6 +579,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Record housing counseling endpoint.
      */
     async recordHousingCounselingRaw(requestParameters: RecordHousingCounselingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['applicationId'] == null) {
@@ -607,6 +618,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Record housing counseling endpoint.
      */
     async recordHousingCounseling(requestParameters: RecordHousingCounselingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
         const response = await this.recordHousingCounselingRaw(requestParameters, initOverrides);
@@ -621,6 +633,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Record mortgage prequalification endpoint.
      */
     async recordMortgagePrequalificationRaw(requestParameters: RecordMortgagePrequalificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['applicationId'] == null) {
@@ -659,6 +672,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Record mortgage prequalification endpoint.
      */
     async recordMortgagePrequalification(requestParameters: RecordMortgagePrequalificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
         const response = await this.recordMortgagePrequalificationRaw(requestParameters, initOverrides);
@@ -673,6 +687,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Select applicant endpoint.
      */
     async selectApplicantRaw(requestParameters: SelectApplicantOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['applicationId'] == null) {
@@ -711,6 +726,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Select applicant endpoint.
      */
     async selectApplicant(requestParameters: SelectApplicantOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
         const response = await this.selectApplicantRaw(requestParameters, initOverrides);
@@ -725,6 +741,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Submit application endpoint.
      */
     async submitApplicationRaw(requestParameters: SubmitApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['submitApplicationRequest'] == null) {
@@ -755,62 +772,11 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     }
 
     /**
+     * Submit application endpoint.
      */
     async submitApplication(requestParameters: SubmitApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.submitApplicationRaw(requestParameters, initOverrides);
         return await response.value();
-    }
-
-    /**
-     */
-    async withdrawApplicationRaw(requestParameters: WithdrawApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters['applicationId'] == null) {
-            throw new runtime.RequiredError(
-                'applicationId',
-                'Required parameter "applicationId" was null or undefined when calling withdrawApplication().'
-            );
-        }
-
-        if (requestParameters['withdrawApplicationRequest'] == null) {
-            throw new runtime.RequiredError(
-                'withdrawApplicationRequest',
-                'Required parameter "withdrawApplicationRequest" was null or undefined when calling withdrawApplication().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-
-        let urlPath = `/api/v1/homeowner-applications/{applicationId}/withdraw`;
-        urlPath = urlPath.replace(`{${"applicationId"}}`, encodeURIComponent(String(requestParameters['applicationId'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: WithdrawApplicationRequestToJSON(requestParameters['withdrawApplicationRequest']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse<any>(response);
-    }
-
-    /**
-     */
-    async withdrawApplication(requestParameters: WithdrawApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
-        const response = await this.withdrawApplicationRaw(requestParameters, initOverrides);
-        switch (response.raw.status) {
-            case 204:
-                return null;
-            case 200:
-                return await response.value();
-            default:
-                return await response.value();
-        }
     }
 
 }

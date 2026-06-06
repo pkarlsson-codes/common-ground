@@ -3,6 +3,7 @@ apis/ApplicantSelectionApi.ts
 apis/AuthApi.ts
 apis/DevelopmentProjectsApi.ts
 apis/DocumentsApi.ts
+apis/GroundLeaseTemplatesApi.ts
 apis/GroundLeasesApi.ts
 apis/HomesApi.ts
 apis/LandParcelsApi.ts
@@ -45,6 +46,7 @@ models/ForbearanceRequestResponse.ts
 models/ForeclosurePreventionCaseResponse.ts
 models/GroundLeaseListItemResponse.ts
 models/GroundLeaseResponse.ts
+models/GroundLeaseTemplateListItemResponse.ts
 models/HomeAssessmentItemResponse.ts
 models/HomeListItemResponse.ts
 models/HomeResponse.ts
@@ -71,12 +73,15 @@ models/OpenForeclosurePreventionCaseResponse.ts
 models/PaginatedResponseOfDevelopmentProjectListItemResponse.ts
 models/PaginatedResponseOfDocumentLibraryItemResponse.ts
 models/PaginatedResponseOfEntityDocumentItemResponse.ts
+models/PaginatedResponseOfForeclosurePreventionCaseResponse.ts
 models/PaginatedResponseOfGroundLeaseListItemResponse.ts
+models/PaginatedResponseOfGroundLeaseTemplateListItemResponse.ts
 models/PaginatedResponseOfHomeAssessmentItemResponse.ts
 models/PaginatedResponseOfHomeListItemResponse.ts
 models/PaginatedResponseOfHomeownerApplicationListItemResponse.ts
 models/PaginatedResponseOfLandParcelListItemResponse.ts
 models/PaginatedResponseOfPurchaseWorkflowListItemResponse.ts
+models/PaginatedResponseOfStewardshipCaseResponse.ts
 models/ProblemDetails.ts
 models/PropertyInspectionResponse.ts
 models/PurchaseWorkflowListItemResponse.ts
@@ -116,7 +121,6 @@ models/TitleDetailsDto.ts
 models/UpdateDocumentMetadataRequest.ts
 models/UploadDocumentResponse.ts
 models/VerifyOccupancyRequest.ts
-models/WithdrawApplicationRequest.ts
 models/WithdrawPurchaseRequest.ts
 models/index.ts
 runtime.ts

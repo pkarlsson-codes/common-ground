@@ -1,5 +1,6 @@
 using CommonGround.API.Contracts.Stewardship.Requests;
 using CommonGround.API.Infrastructure.Auth;
+using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.Stewardship.Application.Commands.StewardshipCases;
 using CommonGround.Stewardship.Application.Queries;
 using CommonGround.Stewardship.Domain.StewardshipCases;
@@ -23,12 +24,12 @@ public static class StewardshipCasesEndpoints
     }
 
     [WolverineGet("/api/stewardship/cases")]
-    public static async Task<IResult> GetByGroundLease(string? groundLeaseId, HttpContext httpContext, IMessageBus bus, CancellationToken ct)
+    public static async Task<IResult> GetByGroundLease([FromQuery] GetStewardshipCasesQuerySpec spec, HttpContext httpContext, IMessageBus bus, CancellationToken ct)
     {
-        IReadOnlyList<StewardshipCaseView> result = string.IsNullOrWhiteSpace(groundLeaseId)
-            ? await bus.InvokeForTenantAsync<IReadOnlyList<StewardshipCaseView>>(bus.TenantId!, new GetAllStewardshipCasesQuery(), ct)
-            : await bus.InvokeForTenantAsync<IReadOnlyList<StewardshipCaseView>>(
-                bus.TenantId!, new GetStewardshipCasesByGroundLeaseQuery(groundLeaseId), ct);
+        PaginatedResponse<StewardshipCaseView> result = string.IsNullOrWhiteSpace(spec.GroundLeaseId)
+            ? await bus.InvokeForTenantAsync<PaginatedResponse<StewardshipCaseView>>(bus.TenantId!, new GetAllStewardshipCasesQuery(spec.Page), ct)
+            : await bus.InvokeForTenantAsync<PaginatedResponse<StewardshipCaseView>>(
+                bus.TenantId!, new GetStewardshipCasesByGroundLeaseQuery(spec.GroundLeaseId, spec.Page), ct);
         return Results.Ok(result);
     }
 

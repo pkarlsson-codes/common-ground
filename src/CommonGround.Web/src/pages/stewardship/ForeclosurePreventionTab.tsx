@@ -31,11 +31,11 @@ function SkeletonRows() {
 // ── Main component ───────────────────────────────────────────────────────────
 
 export default function ForeclosurePreventionTab() {
-  const [includeResolved, setIncludeResolved] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
   const [selectedCase, setSelectedCase] = useState<ForeclosurePreventionCaseResponse | null>(null)
   const [openingNewCase, setOpeningNewCase] = useState(false)
 
-  const { data: cases, isLoading: casesLoading, isError } = useAllForeclosurePreventionCases(includeResolved)
+  const { data: casePage, isLoading: casesLoading, isError } = useAllForeclosurePreventionCases(currentPage)
   const { data: leasePage, isLoading: leasesLoading } = useAllActiveGroundLeases()
 
   const isLoading = casesLoading || leasesLoading
@@ -47,6 +47,11 @@ export default function ForeclosurePreventionTab() {
     }
     return map
   }, [leasePage])
+
+  const fpcCases = casePage?.items ?? []
+  const pagination = casePage
+    ? { pageNumber: casePage.pageNumber, totalPages: casePage.totalPages, totalCount: casePage.totalCount, hasNextPage: casePage.hasNextPage ?? false }
+    : null
 
   const selectedLease = selectedCase?.groundLeaseId
     ? leaseIndex.get(selectedCase.groundLeaseId)
@@ -63,41 +68,16 @@ export default function ForeclosurePreventionTab() {
     )
   }
 
-  const fpcCases = (cases ?? []).filter(fpc => {
-    if (includeResolved) return true
-    return fpc.status !== 'Resolved'
-  })
-
   return (
     <>
       <div
         style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center',
           marginBottom: 16,
-          gap: 12,
-          flexWrap: 'wrap',
         }}
       >
-        <label
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            fontSize: 13,
-            color: 'var(--text-secondary)',
-            cursor: 'pointer',
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={includeResolved}
-            onChange={e => setIncludeResolved(e.target.checked)}
-          />
-          Include resolved
-        </label>
-
         <button
           className="btn btn-primary"
           onClick={() => setOpeningNewCase(true)}
@@ -114,9 +94,7 @@ export default function ForeclosurePreventionTab() {
           <div className="empty-state__glyph">⊡</div>
           <div className="empty-state__title">No foreclosure prevention cases</div>
           <div className="empty-state__sub">
-            {includeResolved
-              ? 'No cases exist at all for this portfolio.'
-              : 'No open or active cases. Toggle "Include resolved" to see history.'}
+            No open or active cases.
           </div>
         </div>
       ) : (
@@ -170,6 +148,28 @@ export default function ForeclosurePreventionTab() {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {pagination && pagination.totalPages > 1 && (
+        <div className="pagination-controls" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, justifyContent: 'flex-end', fontSize: 13 }}>
+          <button
+            className="btn btn-secondary"
+            disabled={pagination.pageNumber <= 1}
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          >
+            Previous
+          </button>
+          <span style={{ color: 'var(--text-secondary)' }}>
+            Page {pagination.pageNumber} of {pagination.totalPages}
+          </span>
+          <button
+            className="btn btn-secondary"
+            disabled={!pagination.hasNextPage}
+            onClick={() => setCurrentPage(p => p + 1)}
+          >
+            Next
+          </button>
         </div>
       )}
 

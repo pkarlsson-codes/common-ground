@@ -17,7 +17,7 @@ export function useStewardshipCase(groundLeaseId: string | null) {
     queryKey: CASE_KEY(groundLeaseId ?? ''),
     queryFn: () => api.getStewardshipCasesByGroundLease({ groundLeaseId: groundLeaseId! }),
     enabled: !!groundLeaseId,
-    select: (cases) => cases[0] ?? null,   // one case per lease by domain invariant
+    select: (response) => response.items?.[0] ?? null,   // one case per lease by domain invariant
   })
 }
 
@@ -308,11 +308,11 @@ export function useEscalateViolation(groundLeaseId: string) {
 
 // ── Foreclosure prevention queries and mutations ──────────────────────────────
 
-export function useForeclosurePreventionCases(groundLeaseId: string | null) {
+export function useForeclosurePreventionCases(groundLeaseId: string | null, page = 1) {
   return useQuery({
-    queryKey: FPC_KEY(groundLeaseId ?? ''),
+    queryKey: [...FPC_KEY(groundLeaseId ?? ''), page],
     queryFn: () =>
-      api.getForeclosurePreventionCasesByGroundLease({ groundLeaseId: groundLeaseId! }),
+      api.getForeclosurePreventionCasesByGroundLease({ groundLeaseId: groundLeaseId!, pageNumber: page }),
     enabled: !!groundLeaseId,
   })
 }
@@ -492,17 +492,17 @@ export function useResolveForeclosurePreventionCase(groundLeaseId: string) {
 
 // ── Slice 2: list-all queries for the queue page ──────────────────────────────
 
-export function useAllStewardshipCases() {
+export function useAllStewardshipCases(page = 1) {
   return useQuery({
-    queryKey: ['stewardship', 'cases', 'all'],
-    queryFn: () => api.getAllStewardshipCases(),
+    queryKey: ['stewardship', 'cases', 'all', page],
+    queryFn: () => api.getAllStewardshipCases({ pageNumber: page }),
   })
 }
 
-export function useAllForeclosurePreventionCases(_includeResolved: boolean) {
+export function useAllForeclosurePreventionCases(page = 1) {
   return useQuery({
-    queryKey: ['stewardship', 'fpc', 'all'],
-    queryFn: () => api.getAllForeclosurePreventionCases(),
+    queryKey: ['stewardship', 'fpc', 'all', page],
+    queryFn: () => api.getAllForeclosurePreventionCases({ pageNumber: page }),
   })
 }
 

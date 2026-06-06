@@ -1,5 +1,6 @@
 using CommonGround.API.Contracts.Stewardship.Requests;
 using CommonGround.API.Contracts.Stewardship.Responses;
+using CommonGround.SharedKernel.Infrastructure.API;
 
 namespace CommonGround.API.Clients;
 
@@ -16,14 +17,18 @@ public interface IStewardshipApiClient
 
     /// <summary>Gets all stewardship cases for a ground lease.</summary>
     /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="pageNumber">1-based page number.</param>
+    /// <param name="pageSize">Number of items per page.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>The list of stewardship cases.</returns>
-    Task<IReadOnlyList<StewardshipCaseResponse>> GetStewardshipCasesByGroundLeaseAsync(string groundLeaseId, CancellationToken cancellationToken);
+    /// <returns>A paginated list of stewardship cases.</returns>
+    Task<PaginatedResponse<StewardshipCaseResponse>> GetStewardshipCasesByGroundLeaseAsync(string groundLeaseId, int pageNumber, int pageSize, CancellationToken cancellationToken);
 
     /// <summary>Gets all active stewardship cases.</summary>
+    /// <param name="pageNumber">1-based page number.</param>
+    /// <param name="pageSize">Number of items per page.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>The list of all active stewardship cases.</returns>
-    Task<IReadOnlyList<StewardshipCaseResponse>> GetAllStewardshipCasesAsync(CancellationToken cancellationToken);
+    /// <returns>A paginated list of all active stewardship cases.</returns>
+    Task<PaginatedResponse<StewardshipCaseResponse>> GetAllStewardshipCasesAsync(int pageNumber, int pageSize, CancellationToken cancellationToken);
 
     /// <summary>Initiates an annual occupancy verification.</summary>
     /// <param name="caseId">The ID of the stewardship case.</param>
@@ -141,14 +146,18 @@ public interface IStewardshipApiClient
 
     /// <summary>Gets all foreclosure prevention cases for a ground lease.</summary>
     /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="pageNumber">1-based page number.</param>
+    /// <param name="pageSize">Number of items per page.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>The list of foreclosure prevention cases.</returns>
-    Task<IReadOnlyList<ForeclosurePreventionCaseResponse>> GetForeclosurePreventionCasesByGroundLeaseAsync(string groundLeaseId, CancellationToken cancellationToken);
+    /// <returns>A paginated list of foreclosure prevention cases.</returns>
+    Task<PaginatedResponse<ForeclosurePreventionCaseResponse>> GetForeclosurePreventionCasesByGroundLeaseAsync(string groundLeaseId, int pageNumber, int pageSize, CancellationToken cancellationToken);
 
     /// <summary>Gets all non-resolved foreclosure prevention cases.</summary>
+    /// <param name="pageNumber">1-based page number.</param>
+    /// <param name="pageSize">Number of items per page.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>The list of all open and active foreclosure prevention cases.</returns>
-    Task<IReadOnlyList<ForeclosurePreventionCaseResponse>> GetAllForeclosurePreventionCasesAsync(CancellationToken cancellationToken);
+    /// <returns>A paginated list of all open and active foreclosure prevention cases.</returns>
+    Task<PaginatedResponse<ForeclosurePreventionCaseResponse>> GetAllForeclosurePreventionCasesAsync(int pageNumber, int pageSize, CancellationToken cancellationToken);
 
     /// <summary>Records a servicer delinquency on a foreclosure prevention case.</summary>
     /// <param name="caseId">The ID of the foreclosure prevention case.</param>

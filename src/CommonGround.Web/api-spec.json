@@ -18,6 +18,7 @@
         "tags": [
           "ApplicantSelection"
         ],
+        "summary": "Submit application endpoint.",
         "operationId": "SubmitApplication",
         "requestBody": {
           "x-name": "SubmitApplicationRequest",
@@ -34,7 +35,7 @@
         },
         "responses": {
           "201": {
-            "description": "",
+            "description": "Response.",
             "content": {
               "application/json": {
                 "schema": {
@@ -44,7 +45,7 @@
             }
           },
           "200": {
-            "description": "",
+            "description": "Response.",
             "content": {
               "application/json": {
                 "schema": {
@@ -77,11 +78,13 @@
         "tags": [
           "ApplicantSelection"
         ],
+        "summary": "Get homeowner applications endpoint.",
         "operationId": "GetHomeownerApplications",
         "parameters": [
           {
             "name": "pageNumber",
             "in": "query",
+            "description": "The page number.",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -91,6 +94,7 @@
           {
             "name": "pageSize",
             "in": "query",
+            "description": "The page size.",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -100,6 +104,7 @@
           {
             "name": "phase",
             "in": "query",
+            "description": "The application phase.",
             "schema": {
               "type": "string",
               "nullable": true
@@ -109,6 +114,7 @@
           {
             "name": "search",
             "in": "query",
+            "description": "The search term.",
             "schema": {
               "type": "string",
               "nullable": true
@@ -118,7 +124,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Response.",
             "content": {
               "application/json": {
                 "schema": {
@@ -153,12 +159,14 @@
         "tags": [
           "ApplicantSelection"
         ],
+        "summary": "Get homeowner application endpoint.",
         "operationId": "GetHomeownerApplication",
         "parameters": [
           {
             "name": "applicationId",
             "in": "path",
             "required": true,
+            "description": "The application ID.",
             "schema": {
               "type": "string"
             },
@@ -167,7 +175,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Response.",
             "content": {
               "application/json": {
                 "schema": {
@@ -202,12 +210,14 @@
         "tags": [
           "ApplicantSelection"
         ],
+        "summary": "Approve eligibility endpoint.",
         "operationId": "ApproveEligibility",
         "parameters": [
           {
             "name": "applicationId",
             "in": "path",
             "required": true,
+            "description": "The application ID.",
             "schema": {
               "type": "string"
             },
@@ -229,10 +239,10 @@
         },
         "responses": {
           "204": {
-            "description": ""
+            "description": "Response."
           },
           "200": {
-            "description": "",
+            "description": "Response.",
             "content": {
               "application/json": {
                 "schema": {
@@ -267,12 +277,14 @@
         "tags": [
           "ApplicantSelection"
         ],
+        "summary": "Deny eligibility endpoint.",
         "operationId": "DenyEligibility",
         "parameters": [
           {
             "name": "applicationId",
             "in": "path",
             "required": true,
+            "description": "The application ID.",
             "schema": {
               "type": "string"
             },
@@ -294,10 +306,10 @@
         },
         "responses": {
           "204": {
-            "description": ""
+            "description": "Response."
           },
           "200": {
-            "description": "",
+            "description": "Response.",
             "content": {
               "application/json": {
                 "schema": {
@@ -332,12 +344,14 @@
         "tags": [
           "ApplicantSelection"
         ],
+        "summary": "Record housing counseling endpoint.",
         "operationId": "RecordHousingCounseling",
         "parameters": [
           {
             "name": "applicationId",
             "in": "path",
             "required": true,
+            "description": "The application ID.",
             "schema": {
               "type": "string"
             },
@@ -359,10 +373,10 @@
         },
         "responses": {
           "204": {
-            "description": ""
+            "description": "Response."
           },
           "200": {
-            "description": "",
+            "description": "Response.",
             "content": {
               "application/json": {
                 "schema": {
@@ -397,12 +411,14 @@
         "tags": [
           "ApplicantSelection"
         ],
+        "summary": "Record CLT orientation endpoint.",
         "operationId": "RecordCltOrientation",
         "parameters": [
           {
             "name": "applicationId",
             "in": "path",
             "required": true,
+            "description": "The application ID.",
             "schema": {
               "type": "string"
             },
@@ -424,10 +440,10 @@
         },
         "responses": {
           "204": {
-            "description": ""
+            "description": "Response."
           },
           "200": {
-            "description": "",
+            "description": "Response.",
             "content": {
               "application/json": {
                 "schema": {
@@ -462,12 +478,14 @@
         "tags": [
           "ApplicantSelection"
         ],
+        "summary": "Record mortgage prequalification endpoint.",
         "operationId": "RecordMortgagePrequalification",
         "parameters": [
           {
             "name": "applicationId",
             "in": "path",
             "required": true,
+            "description": "The application ID.",
             "schema": {
               "type": "string"
             },
@@ -489,10 +507,10 @@
         },
         "responses": {
           "204": {
-            "description": ""
+            "description": "Response."
           },
           "200": {
-            "description": "",
+            "description": "Response.",
             "content": {
               "application/json": {
                 "schema": {
@@ -527,12 +545,14 @@
         "tags": [
           "ApplicantSelection"
         ],
+        "summary": "Select applicant endpoint.",
         "operationId": "SelectApplicant",
         "parameters": [
           {
             "name": "applicationId",
             "in": "path",
             "required": true,
+            "description": "The application ID.",
             "schema": {
               "type": "string"
             },
@@ -554,10 +574,10 @@
         },
         "responses": {
           "204": {
-            "description": ""
+            "description": "Response."
           },
           "200": {
-            "description": "",
+            "description": "Response.",
             "content": {
               "application/json": {
                 "schema": {
@@ -592,12 +612,14 @@
         "tags": [
           "ApplicantSelection"
         ],
+        "summary": "Deny application endpoint.",
         "operationId": "DenyApplication",
         "parameters": [
           {
             "name": "applicationId",
             "in": "path",
             "required": true,
+            "description": "The application ID.",
             "schema": {
               "type": "string"
             },
@@ -619,75 +641,10 @@
         },
         "responses": {
           "204": {
-            "description": ""
+            "description": "Response."
           },
           "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": ""
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/homeowner-applications/{applicationId}/withdraw": {
-      "post": {
-        "tags": [
-          "ApplicantSelection"
-        ],
-        "operationId": "WithdrawApplication",
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "WithdrawApplicationRequest",
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WithdrawApplicationRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "200": {
-            "description": "",
+            "description": "Response.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1834,6 +1791,82 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ResaleEstimateResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ground-lease-templates": {
+      "get": {
+        "tags": [
+          "GroundLeaseTemplates"
+        ],
+        "operationId": "GetGroundLeaseTemplates",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 3
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 4
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfGroundLeaseTemplateListItemResponse"
                 }
               }
             }
@@ -3327,16 +3360,33 @@
           "Stewardship"
         ],
         "operationId": "GetAllStewardshipCases",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/StewardshipCaseResponse"
-                  }
+                  "$ref": "#/components/schemas/PaginatedResponseOfStewardshipCaseResponse"
                 }
               }
             }
@@ -3377,6 +3427,24 @@
               "type": "string"
             },
             "x-position": 1
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 3
           }
         ],
         "responses": {
@@ -3385,10 +3453,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/StewardshipCaseResponse"
-                  }
+                  "$ref": "#/components/schemas/PaginatedResponseOfStewardshipCaseResponse"
                 }
               }
             }
@@ -4404,16 +4469,33 @@
           "Stewardship"
         ],
         "operationId": "GetAllForeclosurePreventionCases",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ForeclosurePreventionCaseResponse"
-                  }
+                  "$ref": "#/components/schemas/PaginatedResponseOfForeclosurePreventionCaseResponse"
                 }
               }
             }
@@ -4513,6 +4595,24 @@
               "type": "string"
             },
             "x-position": 1
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 3
           }
         ],
         "responses": {
@@ -4521,10 +4621,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ForeclosurePreventionCaseResponse"
-                  }
+                  "$ref": "#/components/schemas/PaginatedResponseOfForeclosurePreventionCaseResponse"
                 }
               }
             }
@@ -5682,20 +5779,6 @@
           }
         }
       },
-      "WithdrawApplicationRequest": {
-        "type": "object",
-        "description": "Request to withdraw an application.",
-        "additionalProperties": false,
-        "properties": {
-          "withdrawnDate": {
-            "type": "string"
-          },
-          "reason": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
       "PaginatedResponseOfDevelopmentProjectListItemResponse": {
         "type": "object",
         "description": "Generic paginated response wrapper for API endpoints.",
@@ -6489,6 +6572,69 @@
             "type": "number",
             "format": "decimal",
             "nullable": true
+          }
+        }
+      },
+      "PaginatedResponseOfGroundLeaseTemplateListItemResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/GroundLeaseTemplateListItemResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "GroundLeaseTemplateListItemResponse": {
+        "type": "object",
+        "description": "Summary response for a ground lease template list item.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier."
+          },
+          "templateName": {
+            "type": "string",
+            "description": "Display name of the template."
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status (e.g. Active, Inactive)."
           }
         }
       },
@@ -7377,6 +7523,50 @@
           }
         }
       },
+      "PaginatedResponseOfStewardshipCaseResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/StewardshipCaseResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
       "StewardshipCaseResponse": {
         "type": "object",
         "description": "Detail response for a stewardship case.",
@@ -7730,6 +7920,50 @@
           "closedDate": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "PaginatedResponseOfForeclosurePreventionCaseResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/ForeclosurePreventionCaseResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
           }
         }
       },

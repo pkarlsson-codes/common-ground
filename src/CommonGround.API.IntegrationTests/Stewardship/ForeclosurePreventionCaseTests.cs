@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using CommonGround.API.Contracts.Stewardship.Requests;
+using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.Stewardship.Infrastructure.Persistence;
 using FluentAssertions;
 
@@ -43,6 +44,41 @@ public class ForeclosurePreventionCaseTests(ApiFactory factory)
 
         var view = await response.Content.ReadFromJsonAsync<ForeclosurePreventionCaseView>();
         view!.Id.Should().Be(caseId);
+    }
+
+    [Fact]
+    public async Task GetAllCases_AfterOpening_ReturnsPaginatedResponse()
+    {
+        var (client, caseId) = await OpenCaseAsync();
+
+        var response = await client.GetAsync("/api/stewardship/foreclosure-prevention?pageNumber=1&pageSize=20");
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var page = await response.Content.ReadFromJsonAsync<PaginatedResponse<ForeclosurePreventionCaseView>>();
+        page!.PageNumber.Should().Be(1);
+        page.PageSize.Should().Be(20);
+        page.TotalCount.Should().BeGreaterThanOrEqualTo(1);
+        page.TotalPages.Should().BeGreaterThanOrEqualTo(1);
+        page.Items.Should().Contain(x => x.Id == caseId);
+    }
+
+    [Fact]
+    public async Task GetAllCases_Page2WithSmallPageSize_ReturnsDifferentItems()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+
+        var firstId = await OpenCaseAndGetIdAsync(client);
+        var secondId = await OpenCaseAndGetIdAsync(client);
+
+        var page1 = await (await client.GetAsync("/api/stewardship/foreclosure-prevention?pageNumber=1&pageSize=1"))
+            .Content.ReadFromJsonAsync<PaginatedResponse<ForeclosurePreventionCaseView>>();
+        var page2 = await (await client.GetAsync("/api/stewardship/foreclosure-prevention?pageNumber=2&pageSize=1"))
+            .Content.ReadFromJsonAsync<PaginatedResponse<ForeclosurePreventionCaseView>>();
+
+        page1!.Items.Should().HaveCount(1);
+        page2!.Items.Should().HaveCount(1);
+        page1.Items[0].Id.Should().NotBe(page2.Items[0].Id);
+        page2.PageNumber.Should().Be(2);
     }
 
     [Fact]
@@ -160,16 +196,20 @@ public class ForeclosurePreventionCaseTests(ApiFactory factory)
     private async Task<(HttpClient client, string caseId)> OpenCaseAsync()
     {
         var client = factory.CreateClient().WithAuthToken();
-        var groundLeaseId = $"groundle-{Guid.NewGuid():N}";
+        var id = await OpenCaseAndGetIdAsync(client);
+        return (client, id);
+    }
 
+    private async Task<string> OpenCaseAndGetIdAsync(HttpClient client)
+    {
+        var groundLeaseId = $"groundle-{Guid.NewGuid():N}";
         var openResponse = await client.PostAsJsonAsync(
             "/api/stewardship/foreclosure-prevention",
             new OpenForeclosurePreventionCaseRequest(
                 groundLeaseId, "Test Servicer", 3, new DateOnly(2026, 3, 1)));
-
         openResponse.EnsureSuccessStatusCode();
         var body = await openResponse.Content.ReadFromJsonAsync<OpenCaseResponse>();
-        return (client, body!.Id);
+        return body!.Id;
     }
 
     private sealed record OpenCaseResponse(string Id);

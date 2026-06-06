@@ -1,5 +1,6 @@
 using CommonGround.API.Contracts.Stewardship.Requests;
 using CommonGround.API.Infrastructure.Auth;
+using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
 using CommonGround.Stewardship.Application.Queries;
 using CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
@@ -24,13 +25,13 @@ public static class ForeclosurePreventionCasesEndpoints
     }
 
     [WolverineGet("/api/stewardship/foreclosure-prevention")]
-    public static async Task<IResult> GetByGroundLease(string? groundLeaseId, HttpContext httpContext, IMessageBus bus, CancellationToken ct)
+    public static async Task<IResult> GetByGroundLease([FromQuery] GetForeclosurePreventionCasesQuerySpec spec, HttpContext httpContext, IMessageBus bus, CancellationToken ct)
     {
-        IReadOnlyList<ForeclosurePreventionCaseView> result = string.IsNullOrWhiteSpace(groundLeaseId)
-            ? await bus.InvokeForTenantAsync<IReadOnlyList<ForeclosurePreventionCaseView>>(
-                bus.TenantId!, new GetAllForeclosurePreventionCasesQuery(), ct)
-            : await bus.InvokeForTenantAsync<IReadOnlyList<ForeclosurePreventionCaseView>>(
-                bus.TenantId!, new GetForeclosurePreventionCasesByGroundLeaseQuery(groundLeaseId), ct);
+        PaginatedResponse<ForeclosurePreventionCaseView> result = string.IsNullOrWhiteSpace(spec.GroundLeaseId)
+            ? await bus.InvokeForTenantAsync<PaginatedResponse<ForeclosurePreventionCaseView>>(
+                bus.TenantId!, new GetAllForeclosurePreventionCasesQuery(spec.Page), ct)
+            : await bus.InvokeForTenantAsync<PaginatedResponse<ForeclosurePreventionCaseView>>(
+                bus.TenantId!, new GetForeclosurePreventionCasesByGroundLeaseQuery(spec.GroundLeaseId, spec.Page), ct);
         return Results.Ok(result);
     }
 

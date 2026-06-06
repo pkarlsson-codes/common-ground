@@ -1,5 +1,8 @@
+using CommonGround.SharedKernel.Infrastructure.API;
+using CommonGround.SharedKernel.Infrastructure.Querying;
 using CommonGround.Stewardship.Infrastructure.Persistence;
 using Marten;
+using Marten.Pagination;
 
 namespace CommonGround.Stewardship.Application.Queries;
 
@@ -13,12 +16,14 @@ public sealed record GetForeclosurePreventionCaseQuery(string ForeclosurePrevent
 /// Query to get all foreclosure prevention cases for a specific ground lease.
 /// </summary>
 /// <param name="GroundLeaseId">The ID of the ground lease.</param>
-public sealed record GetForeclosurePreventionCasesByGroundLeaseQuery(string GroundLeaseId);
+/// <param name="Page">Pagination spec.</param>
+public sealed record GetForeclosurePreventionCasesByGroundLeaseQuery(string GroundLeaseId, PageSpec Page);
 
 /// <summary>
 /// Query to get all non-resolved foreclosure prevention cases across all ground leases.
 /// </summary>
-public sealed record GetAllForeclosurePreventionCasesQuery;
+/// <param name="Page">Pagination spec.</param>
+public sealed record GetAllForeclosurePreventionCasesQuery(PageSpec Page);
 
 /// <summary>Handles <see cref="GetForeclosurePreventionCaseQuery"/>.</summary>
 public static class GetForeclosurePreventionCaseHandler
@@ -31,21 +36,43 @@ public static class GetForeclosurePreventionCaseHandler
 /// <summary>Handles <see cref="GetForeclosurePreventionCasesByGroundLeaseQuery"/>.</summary>
 public static class GetForeclosurePreventionCasesByGroundLeaseHandler
 {
-    /// <summary>Returns all foreclosure prevention cases for the given ground lease.</summary>
-    public static async Task<IReadOnlyList<ForeclosurePreventionCaseView>> Handle(GetForeclosurePreventionCasesByGroundLeaseQuery query, IQuerySession session, CancellationToken ct)
-        => await session.Query<ForeclosurePreventionCaseView>()
+    /// <summary>Returns paginated foreclosure prevention cases for the given ground lease.</summary>
+    public static async Task<PaginatedResponse<ForeclosurePreventionCaseView>> Handle(GetForeclosurePreventionCasesByGroundLeaseQuery query, IQuerySession session, CancellationToken ct)
+    {
+        var page = await session.Query<ForeclosurePreventionCaseView>()
             .Where(x => x.GroundLeaseId == query.GroundLeaseId)
-            .ToListAsync(ct)
+            .ToPagedListAsync(query.Page.Number, query.Page.Size, ct)
             .ConfigureAwait(false);
+
+        return new PaginatedResponse<ForeclosurePreventionCaseView>
+        {
+            Items = [.. page],
+            TotalCount = (int)page.TotalItemCount,
+            PageSize = (int)page.PageSize,
+            PageNumber = (int)page.PageNumber,
+            TotalPages = (int)page.PageCount,
+        };
+    }
 }
 
 /// <summary>Handles <see cref="GetAllForeclosurePreventionCasesQuery"/>.</summary>
 public static class GetAllForeclosurePreventionCasesHandler
 {
-    /// <summary>Returns all foreclosure prevention cases not in the Resolved terminal state (Opened + Active).</summary>
-    public static async Task<IReadOnlyList<ForeclosurePreventionCaseView>> Handle(GetAllForeclosurePreventionCasesQuery query, IQuerySession session, CancellationToken ct)
-        => await session.Query<ForeclosurePreventionCaseView>()
+    /// <summary>Returns paginated foreclosure prevention cases not in the Resolved terminal state (Opened + Active).</summary>
+    public static async Task<PaginatedResponse<ForeclosurePreventionCaseView>> Handle(GetAllForeclosurePreventionCasesQuery query, IQuerySession session, CancellationToken ct)
+    {
+        var page = await session.Query<ForeclosurePreventionCaseView>()
             .Where(x => x.Status != "Resolved")
-            .ToListAsync(ct)
+            .ToPagedListAsync(query.Page.Number, query.Page.Size, ct)
             .ConfigureAwait(false);
+
+        return new PaginatedResponse<ForeclosurePreventionCaseView>
+        {
+            Items = [.. page],
+            TotalCount = (int)page.TotalItemCount,
+            PageSize = (int)page.PageSize,
+            PageNumber = (int)page.PageNumber,
+            TotalPages = (int)page.PageCount,
+        };
+    }
 }

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using CommonGround.API.Contracts.Stewardship.Requests;
+using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.Stewardship.Domain.StewardshipCases;
 using CommonGround.Stewardship.Domain.StewardshipCases.Events;
 using CommonGround.Stewardship.Infrastructure.Persistence;
@@ -32,6 +33,53 @@ public class StewardshipCaseTests(ApiFactory factory)
         var view = await response.Content.ReadFromJsonAsync<StewardshipCaseView>();
         view!.Id.Should().Be(caseId);
         view.Status.Should().Be(nameof(StewardshipCaseStatus.Active));
+    }
+
+    [Fact]
+    public async Task GetAllCases_AfterSeeding_ReturnsPaginatedResponse()
+    {
+        var (client, caseId) = await SeedStewardshipCaseAsync();
+
+        var response = await client.GetAsync("/api/stewardship/cases?pageNumber=1&pageSize=20");
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var page = await response.Content.ReadFromJsonAsync<PaginatedResponse<StewardshipCaseView>>();
+        page!.PageNumber.Should().Be(1);
+        page.PageSize.Should().Be(20);
+        page.TotalCount.Should().BeGreaterThanOrEqualTo(1);
+        page.TotalPages.Should().BeGreaterThanOrEqualTo(1);
+        page.Items.Should().Contain(x => x.Id == caseId);
+    }
+
+    [Fact]
+    public async Task GetAllCases_Page2WithSmallPageSize_ReturnsDifferentItems()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var groundLeaseBase = Guid.NewGuid();
+
+        using var scope = factory.Services.CreateScope();
+        var store = scope.ServiceProvider.GetRequiredService<IDocumentStore>();
+        await using var session = store.LightweightSession(ApiFactory.TestTrustId);
+
+        var seededIds = new List<string>();
+        for (var i = 0; i < 3; i++)
+        {
+            var id = StewardshipCaseId.Generate().Value;
+            seededIds.Add(id);
+            session.Events.StartStream<StewardshipCase>(id, new StewardshipCaseOpened(
+                id, $"groundle-{groundLeaseBase:N}{i}", new DateOnly(2026, 1, 1), "user-system"));
+        }
+        await session.SaveChangesAsync();
+
+        var page1 = await (await client.GetAsync("/api/stewardship/cases?pageNumber=1&pageSize=1"))
+            .Content.ReadFromJsonAsync<PaginatedResponse<StewardshipCaseView>>();
+        var page2 = await (await client.GetAsync("/api/stewardship/cases?pageNumber=2&pageSize=1"))
+            .Content.ReadFromJsonAsync<PaginatedResponse<StewardshipCaseView>>();
+
+        page1!.Items.Should().HaveCount(1);
+        page2!.Items.Should().HaveCount(1);
+        page1.Items[0].Id.Should().NotBe(page2.Items[0].Id);
+        page2.PageNumber.Should().Be(2);
     }
 
     [Fact]
