@@ -31,7 +31,7 @@ export interface PurchaseWorkflowListItemResponse {
      * @type {string}
      * @memberof PurchaseWorkflowListItemResponse
      */
-    groundLeaseId?: string;
+    groundLeaseTemplateId?: string;
     /**
      * 
      * @type {string}
@@ -76,7 +76,7 @@ export function PurchaseWorkflowListItemResponseFromJSONTyped(json: any, ignoreD
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
-        'groundLeaseId': json['groundLeaseId'] == null ? undefined : json['groundLeaseId'],
+        'groundLeaseTemplateId': json['groundLeaseTemplateId'] == null ? undefined : json['groundLeaseTemplateId'],
         'buyerFullName': json['buyerFullName'] == null ? undefined : json['buyerFullName'],
         'purchasePrice': json['purchasePrice'] == null ? undefined : json['purchasePrice'],
         'phase': json['phase'] == null ? undefined : json['phase'],
@@ -96,7 +96,7 @@ export function PurchaseWorkflowListItemResponseToJSONTyped(value?: PurchaseWork
     return {
         
         'id': value['id'],
-        'groundLeaseId': value['groundLeaseId'],
+        'groundLeaseTemplateId': value['groundLeaseTemplateId'],
         'buyerFullName': value['buyerFullName'],
         'purchasePrice': value['purchasePrice'],
         'phase': value['phase'],

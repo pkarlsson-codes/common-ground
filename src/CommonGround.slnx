@@ -4,6 +4,8 @@
   <Project Path="CommonGround.API/CommonGround.API.csproj" />
   <Project Path="CommonGround.API.Clients/CommonGround.API.Clients.csproj" />
   <Project Path="CommonGround.API.Contracts/CommonGround.API.Contracts.csproj" />
+  <Project Path="CommonGround.ApplicantSelection.Contracts/CommonGround.ApplicantSelection.Contracts.csproj" />
+  <Project Path="CommonGround.ApplicantSelection/CommonGround.ApplicantSelection.csproj" />
   <Project Path="CommonGround.Documents.Tests/CommonGround.Documents.Tests.csproj" />
   <Project Path="CommonGround.Documents/CommonGround.Documents.csproj" />
   <Project Path="CommonGround.Homeownership.Contracts/CommonGround.Homeownership.Contracts.csproj" />

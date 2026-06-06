@@ -17,7 +17,6 @@
 import * as runtime from '../runtime';
 import type {
   CalculateResaleEstimateRequest,
-  ChangeHomeownerRequest,
   CreateGroundLeaseRequest,
   CreateGroundLeaseResponse,
   GroundLeaseResponse,
@@ -29,8 +28,6 @@ import type {
 import {
     CalculateResaleEstimateRequestFromJSON,
     CalculateResaleEstimateRequestToJSON,
-    ChangeHomeownerRequestFromJSON,
-    ChangeHomeownerRequestToJSON,
     CreateGroundLeaseRequestFromJSON,
     CreateGroundLeaseRequestToJSON,
     CreateGroundLeaseResponseFromJSON,
@@ -50,11 +47,6 @@ import {
 export interface CalculateResaleEstimateOperationRequest {
     groundLeaseId: string;
     calculateResaleEstimateRequest: CalculateResaleEstimateRequest;
-}
-
-export interface ChangeHomeownerOperationRequest {
-    groundLeaseId: string;
-    changeHomeownerRequest: ChangeHomeownerRequest;
 }
 
 export interface CreateGroundLeaseOperationRequest {
@@ -99,20 +91,6 @@ export interface GroundLeasesApiInterface {
     /**
      */
     calculateResaleEstimate(requestParameters: CalculateResaleEstimateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResaleEstimateResponse>;
-
-    /**
-     * 
-     * @param {string} groundLeaseId 
-     * @param {ChangeHomeownerRequest} changeHomeownerRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof GroundLeasesApiInterface
-     */
-    changeHomeownerRaw(requestParameters: ChangeHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
-
-    /**
-     */
-    changeHomeowner(requestParameters: ChangeHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -222,58 +200,6 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
     async calculateResaleEstimate(requestParameters: CalculateResaleEstimateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResaleEstimateResponse> {
         const response = await this.calculateResaleEstimateRaw(requestParameters, initOverrides);
         return await response.value();
-    }
-
-    /**
-     */
-    async changeHomeownerRaw(requestParameters: ChangeHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters['groundLeaseId'] == null) {
-            throw new runtime.RequiredError(
-                'groundLeaseId',
-                'Required parameter "groundLeaseId" was null or undefined when calling changeHomeowner().'
-            );
-        }
-
-        if (requestParameters['changeHomeownerRequest'] == null) {
-            throw new runtime.RequiredError(
-                'changeHomeownerRequest',
-                'Required parameter "changeHomeownerRequest" was null or undefined when calling changeHomeowner().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-
-        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/homeowner`;
-        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'PATCH',
-            headers: headerParameters,
-            query: queryParameters,
-            body: ChangeHomeownerRequestToJSON(requestParameters['changeHomeownerRequest']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse<any>(response);
-    }
-
-    /**
-     */
-    async changeHomeowner(requestParameters: ChangeHomeownerOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
-        const response = await this.changeHomeownerRaw(requestParameters, initOverrides);
-        switch (response.raw.status) {
-            case 204:
-                return null;
-            case 200:
-                return await response.value();
-            default:
-                return await response.value();
-        }
     }
 
     /**

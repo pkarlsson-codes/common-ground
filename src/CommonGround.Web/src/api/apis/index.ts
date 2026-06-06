@@ -1,6 +1,7 @@
 // @ts-nocheck
 /* tslint:disable */
 /* eslint-disable */
+export * from './ApplicantSelectionApi';
 export * from './AuthApi';
 export * from './DevelopmentProjectsApi';
 export * from './DocumentsApi';

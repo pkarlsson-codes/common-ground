@@ -13,6 +13,710 @@
     }
   ],
   "paths": {
+    "/api/v1/homeowner-applications": {
+      "post": {
+        "tags": [
+          "ApplicantSelection"
+        ],
+        "operationId": "SubmitApplication",
+        "requestBody": {
+          "x-name": "SubmitApplicationRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitApplicationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmitApplicationResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "ApplicantSelection"
+        ],
+        "operationId": "GetHomeownerApplications",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "phase",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 3
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 4
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfHomeownerApplicationListItemResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homeowner-applications/{applicationId}": {
+      "get": {
+        "tags": [
+          "ApplicantSelection"
+        ],
+        "operationId": "GetHomeownerApplication",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HomeownerApplicationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homeowner-applications/{applicationId}/eligibility/approve": {
+      "post": {
+        "tags": [
+          "ApplicantSelection"
+        ],
+        "operationId": "ApproveEligibility",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "ApproveEligibilityRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveEligibilityRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homeowner-applications/{applicationId}/eligibility/deny": {
+      "post": {
+        "tags": [
+          "ApplicantSelection"
+        ],
+        "operationId": "DenyEligibility",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "DenyEligibilityRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DenyEligibilityRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homeowner-applications/{applicationId}/housing-counseling": {
+      "post": {
+        "tags": [
+          "ApplicantSelection"
+        ],
+        "operationId": "RecordHousingCounseling",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordHousingCounselingRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordHousingCounselingRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homeowner-applications/{applicationId}/clt-orientation": {
+      "post": {
+        "tags": [
+          "ApplicantSelection"
+        ],
+        "operationId": "RecordCltOrientation",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordCltOrientationRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordCltOrientationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homeowner-applications/{applicationId}/mortgage-prequalification": {
+      "post": {
+        "tags": [
+          "ApplicantSelection"
+        ],
+        "operationId": "RecordMortgagePrequalification",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordMortgagePrequalificationRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordMortgagePrequalificationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homeowner-applications/{applicationId}/select": {
+      "post": {
+        "tags": [
+          "ApplicantSelection"
+        ],
+        "operationId": "SelectApplicant",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "SelectApplicantRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectApplicantRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homeowner-applications/{applicationId}/deny": {
+      "post": {
+        "tags": [
+          "ApplicantSelection"
+        ],
+        "operationId": "DenyApplication",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "DenyApplicationRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DenyApplicationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homeowner-applications/{applicationId}/withdraw": {
+      "post": {
+        "tags": [
+          "ApplicantSelection"
+        ],
+        "operationId": "WithdrawApplication",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "WithdrawApplicationRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawApplicationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/development-projects": {
       "get": {
         "tags": [
@@ -1003,71 +1707,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GroundLeaseResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": ""
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/ground-leases/{groundLeaseId}/homeowner": {
-      "patch": {
-        "tags": [
-          "GroundLeases"
-        ],
-        "operationId": "ChangeHomeowner",
-        "parameters": [
-          {
-            "name": "groundLeaseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "ChangeHomeownerRequest",
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ChangeHomeownerRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IResult"
                 }
               }
             }
@@ -4686,6 +5325,377 @@
   },
   "components": {
     "schemas": {
+      "SubmitApplicationResponse": {
+        "type": "object",
+        "description": "Response returned after submitting an application.",
+        "additionalProperties": false,
+        "properties": {
+          "applicationId": {
+            "type": "string"
+          }
+        }
+      },
+      "IResult": {
+        "type": "object",
+        "x-abstract": true,
+        "additionalProperties": false
+      },
+      "SubmitApplicationRequest": {
+        "type": "object",
+        "description": "Request to submit a new homeowner application.",
+        "additionalProperties": false,
+        "properties": {
+          "applicantFullName": {
+            "type": "string"
+          },
+          "applicantEmail": {
+            "type": "string"
+          },
+          "applicantPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "householdSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "annualIncome": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "accessibilityRequired": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PaginatedResponseOfHomeownerApplicationListItemResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/HomeownerApplicationListItemResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "HomeownerApplicationListItemResponse": {
+        "type": "object",
+        "description": "Summary item for homeowner application list responses.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "applicantFullName": {
+            "type": "string"
+          },
+          "applicantEmail": {
+            "type": "string"
+          },
+          "householdSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "accessibilityRequired": {
+            "type": "boolean"
+          },
+          "phase": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "HomeownerApplicationResponse": {
+        "type": "object",
+        "description": "Detail response for a homeowner application.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "applicantFullName": {
+            "type": "string"
+          },
+          "applicantEmail": {
+            "type": "string"
+          },
+          "applicantPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "householdSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "annualIncome": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "accessibilityRequired": {
+            "type": "boolean"
+          },
+          "phase": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string"
+          },
+          "submittedBy": {
+            "type": "string"
+          },
+          "eligibilityApprovedDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "isHousingCounselingCompleted": {
+            "type": "boolean"
+          },
+          "isCltOrientationCompleted": {
+            "type": "boolean"
+          },
+          "mortgagePrequalification": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MortgagePrequalificationDto"
+              }
+            ]
+          },
+          "denialReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "withdrawalReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "addedToWaitingListDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "selectedDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "selectedHomeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "selectedLandParcelId": {
+            "type": "string",
+            "nullable": true
+          },
+          "selectedBy": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MortgagePrequalificationDto": {
+        "type": "object",
+        "description": "Mortgage prequalification details.",
+        "additionalProperties": false,
+        "properties": {
+          "lenderName": {
+            "type": "string",
+            "description": "Name of the lender."
+          },
+          "approvedAmount": {
+            "type": "number",
+            "description": "Approved amount.",
+            "format": "decimal"
+          },
+          "expiryDate": {
+            "type": "string",
+            "description": "Prequalification expiry date."
+          }
+        }
+      },
+      "ApproveEligibilityRequest": {
+        "type": "object",
+        "description": "Request to approve eligibility.",
+        "additionalProperties": false,
+        "properties": {
+          "approvedDate": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DenyEligibilityRequest": {
+        "type": "object",
+        "description": "Request to deny eligibility.",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "deniedDate": {
+            "type": "string"
+          }
+        }
+      },
+      "RecordHousingCounselingRequest": {
+        "type": "object",
+        "description": "Request to record housing counseling completion.",
+        "additionalProperties": false,
+        "properties": {
+          "certificationNumber": {
+            "type": "string"
+          },
+          "completedDate": {
+            "type": "string"
+          },
+          "counselorOrganization": {
+            "type": "string"
+          }
+        }
+      },
+      "RecordCltOrientationRequest": {
+        "type": "object",
+        "description": "Request to record CLT orientation completion.",
+        "additionalProperties": false,
+        "properties": {
+          "completedDate": {
+            "type": "string"
+          }
+        }
+      },
+      "RecordMortgagePrequalificationRequest": {
+        "type": "object",
+        "description": "Request to record mortgage prequalification.",
+        "additionalProperties": false,
+        "properties": {
+          "lenderName": {
+            "type": "string"
+          },
+          "approvedAmount": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "expiryDate": {
+            "type": "string"
+          }
+        }
+      },
+      "SelectApplicantRequest": {
+        "type": "object",
+        "description": "Request to select an applicant for a home.",
+        "additionalProperties": false,
+        "properties": {
+          "homeId": {
+            "type": "string"
+          },
+          "landParcelId": {
+            "type": "string"
+          },
+          "groundLeaseTemplateId": {
+            "type": "string"
+          },
+          "purchasePrice": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "selectedDate": {
+            "type": "string"
+          }
+        }
+      },
+      "DenyApplicationRequest": {
+        "type": "object",
+        "description": "Request to deny an application.",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "deniedDate": {
+            "type": "string"
+          }
+        }
+      },
+      "WithdrawApplicationRequest": {
+        "type": "object",
+        "description": "Request to withdraw an application.",
+        "additionalProperties": false,
+        "properties": {
+          "withdrawnDate": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "PaginatedResponseOfDevelopmentProjectListItemResponse": {
         "type": "object",
         "description": "Generic paginated response wrapper for API endpoints.",
@@ -4762,35 +5772,6 @@
           }
         }
       },
-      "ProblemDetails": {
-        "type": "object",
-        "additionalProperties": {
-          "nullable": true
-        },
-        "properties": {
-          "type": {
-            "type": "string",
-            "nullable": true
-          },
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "detail": {
-            "type": "string",
-            "nullable": true
-          },
-          "instance": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
       "InitiateDevelopmentProjectResponse": {
         "type": "object",
         "description": "Response returned when a development project is successfully initiated.",
@@ -4800,11 +5781,6 @@
             "type": "string"
           }
         }
-      },
-      "IResult": {
-        "type": "object",
-        "x-abstract": true,
-        "additionalProperties": false
       },
       "InitiateDevelopmentProjectRequest": {
         "type": "object",
@@ -5279,6 +6255,14 @@
           "id": {
             "type": "string"
           },
+          "groundLeaseTemplateId": {
+            "type": "string",
+            "nullable": true
+          },
+          "purchaseWorkflowId": {
+            "type": "string",
+            "nullable": true
+          },
           "landParcelId": {
             "type": "string"
           },
@@ -5448,23 +6432,6 @@
           },
           "createdAt": {
             "type": "string"
-          }
-        }
-      },
-      "ChangeHomeownerRequest": {
-        "type": "object",
-        "description": "Request to change the homeowner on a ground lease.",
-        "additionalProperties": false,
-        "properties": {
-          "fullName": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "phone": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -5979,7 +6946,13 @@
         "description": "Request to initiate a new purchase workflow.",
         "additionalProperties": false,
         "properties": {
-          "groundLeaseId": {
+          "groundLeaseTemplateId": {
+            "type": "string"
+          },
+          "landParcelId": {
+            "type": "string"
+          },
+          "homeId": {
             "type": "string"
           },
           "buyerFullName": {
@@ -6006,7 +6979,13 @@
           "id": {
             "type": "string"
           },
-          "groundLeaseId": {
+          "groundLeaseTemplateId": {
+            "type": "string"
+          },
+          "landParcelId": {
+            "type": "string"
+          },
+          "homeId": {
             "type": "string"
           },
           "phase": {
@@ -6241,7 +7220,7 @@
           "id": {
             "type": "string"
           },
-          "groundLeaseId": {
+          "groundLeaseTemplateId": {
             "type": "string"
           },
           "buyerFullName": {

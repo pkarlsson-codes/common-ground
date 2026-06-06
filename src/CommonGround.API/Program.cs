@@ -2,6 +2,7 @@ using CommonGround.API;
 using CommonGround.API.Infrastructure;
 using CommonGround.API.Infrastructure.Configuration;
 using CommonGround.API.Infrastructure.Seeding;
+using CommonGround.ApplicantSelection.Infrastructure;
 using CommonGround.Documents.Infrastructure;
 using CommonGround.Homeownership.Infrastructure;
 using CommonGround.Identity.Infrastructure;
@@ -52,6 +53,7 @@ try
         }
 
         opts.Discovery.IncludeAssembly(typeof(CommonGroundApiAssemblyReference).Assembly);
+        opts.Discovery.IncludeAssembly(typeof(ApplicantSelectionAssemblyReference).Assembly);
         opts.Discovery.IncludeAssembly(typeof(PropertyRegistryAssemblyReference).Assembly);
         opts.Discovery.IncludeAssembly(typeof(HomeownershipAssemblyReference).Assembly);
         opts.Discovery.IncludeAssembly(typeof(IdentityAssemblyReference).Assembly);

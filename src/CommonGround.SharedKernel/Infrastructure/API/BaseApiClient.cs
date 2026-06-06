@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
@@ -297,7 +298,20 @@ public abstract partial class BaseApiClient
                 var response = await Pipeline
                     .ExecuteAsync(async ctx => await httpFactory(ctx).ConfigureAwait(false), context)
                     .ConfigureAwait(false);
-                response.EnsureSuccessStatusCode();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var responseBody = response.Content is null
+                        ? string.Empty
+                        : await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+                    throw new UpstreamApiException(
+                        endpoint,
+                        response.StatusCode,
+                        responseBody,
+                        response.Content?.Headers.ContentType?.ToString());
+                }
+
                 return response;
             }
             finally

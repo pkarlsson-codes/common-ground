@@ -67,7 +67,19 @@ export interface PurchaseWorkflowResponse {
      * @type {string}
      * @memberof PurchaseWorkflowResponse
      */
-    groundLeaseId?: string;
+    groundLeaseTemplateId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseWorkflowResponse
+     */
+    landParcelId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseWorkflowResponse
+     */
+    homeId?: string;
     /**
      * 
      * @type {string}
@@ -208,7 +220,9 @@ export function PurchaseWorkflowResponseFromJSONTyped(json: any, ignoreDiscrimin
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
-        'groundLeaseId': json['groundLeaseId'] == null ? undefined : json['groundLeaseId'],
+        'groundLeaseTemplateId': json['groundLeaseTemplateId'] == null ? undefined : json['groundLeaseTemplateId'],
+        'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
+        'homeId': json['homeId'] == null ? undefined : json['homeId'],
         'phase': json['phase'] == null ? undefined : json['phase'],
         'initiatedBy': json['initiatedBy'] == null ? undefined : json['initiatedBy'],
         'buyerFullName': json['buyerFullName'] == null ? undefined : json['buyerFullName'],
@@ -244,7 +258,9 @@ export function PurchaseWorkflowResponseToJSONTyped(value?: PurchaseWorkflowResp
     return {
         
         'id': value['id'],
-        'groundLeaseId': value['groundLeaseId'],
+        'groundLeaseTemplateId': value['groundLeaseTemplateId'],
+        'landParcelId': value['landParcelId'],
+        'homeId': value['homeId'],
         'phase': value['phase'],
         'initiatedBy': value['initiatedBy'],
         'buyerFullName': value['buyerFullName'],

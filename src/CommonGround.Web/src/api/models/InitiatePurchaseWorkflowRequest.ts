@@ -25,7 +25,19 @@ export interface InitiatePurchaseWorkflowRequest {
      * @type {string}
      * @memberof InitiatePurchaseWorkflowRequest
      */
-    groundLeaseId?: string;
+    groundLeaseTemplateId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InitiatePurchaseWorkflowRequest
+     */
+    landParcelId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InitiatePurchaseWorkflowRequest
+     */
+    homeId?: string;
     /**
      * 
      * @type {string}
@@ -69,7 +81,9 @@ export function InitiatePurchaseWorkflowRequestFromJSONTyped(json: any, ignoreDi
     }
     return {
         
-        'groundLeaseId': json['groundLeaseId'] == null ? undefined : json['groundLeaseId'],
+        'groundLeaseTemplateId': json['groundLeaseTemplateId'] == null ? undefined : json['groundLeaseTemplateId'],
+        'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
+        'homeId': json['homeId'] == null ? undefined : json['homeId'],
         'buyerFullName': json['buyerFullName'] == null ? undefined : json['buyerFullName'],
         'buyerEmail': json['buyerEmail'] == null ? undefined : json['buyerEmail'],
         'buyerPhone': json['buyerPhone'] == null ? undefined : json['buyerPhone'],
@@ -88,7 +102,9 @@ export function InitiatePurchaseWorkflowRequestToJSONTyped(value?: InitiatePurch
 
     return {
         
-        'groundLeaseId': value['groundLeaseId'],
+        'groundLeaseTemplateId': value['groundLeaseTemplateId'],
+        'landParcelId': value['landParcelId'],
+        'homeId': value['homeId'],
         'buyerFullName': value['buyerFullName'],
         'buyerEmail': value['buyerEmail'],
         'buyerPhone': value['buyerPhone'],

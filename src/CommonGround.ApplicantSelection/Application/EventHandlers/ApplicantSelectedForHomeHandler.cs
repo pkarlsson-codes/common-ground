@@ -1,0 +1,25 @@
+using CommonGround.ApplicantSelection.Contracts.Events;
+using CommonGround.ApplicantSelection.Domain.HomeownerApplications.Events;
+using Wolverine;
+
+namespace CommonGround.ApplicantSelection.Application.EventHandlers;
+
+/// <summary>Publishes the ApplicantSelected integration event when an applicant is selected for a home.</summary>
+public sealed class ApplicantSelectedForHomeHandler(IMessageBus bus)
+{
+    /// <summary>Maps domain event to integration event and publishes it.</summary>
+    public async Task Handle(ApplicantSelectedForHome @event, CancellationToken cancellationToken)
+    {
+        await bus.PublishAsync(new ApplicantSelected(
+            @event.AggregateId,
+            @event.ApplicantFullName,
+            @event.ApplicantEmail,
+            @event.ApplicantPhone,
+            @event.HomeId,
+            @event.LandParcelId,
+            @event.GroundLeaseTemplateId,
+            @event.PurchasePrice,
+            @event.SelectedDate,
+            @event.SelectedBy)).ConfigureAwait(false);
+    }
+}

@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CommonGround.SharedKernel\CommonGround.SharedKernel.csproj" />
     <ProjectReference Include="..\CommonGround.Homeownership.Contracts\CommonGround.Homeownership.Contracts.csproj" />
+    <ProjectReference Include="..\CommonGround.ApplicantSelection.Contracts\CommonGround.ApplicantSelection.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

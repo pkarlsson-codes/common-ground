@@ -39,6 +39,18 @@ export interface GroundLeaseResponse {
      * @type {string}
      * @memberof GroundLeaseResponse
      */
+    groundLeaseTemplateId?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof GroundLeaseResponse
+     */
+    purchaseWorkflowId?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof GroundLeaseResponse
+     */
     landParcelId?: string;
     /**
      * 
@@ -162,6 +174,8 @@ export function GroundLeaseResponseFromJSONTyped(json: any, ignoreDiscriminator:
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
+        'groundLeaseTemplateId': json['groundLeaseTemplateId'] == null ? undefined : json['groundLeaseTemplateId'],
+        'purchaseWorkflowId': json['purchaseWorkflowId'] == null ? undefined : json['purchaseWorkflowId'],
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
         'homeId': json['homeId'] == null ? undefined : json['homeId'],
         'leaseStartDate': json['leaseStartDate'] == null ? undefined : json['leaseStartDate'],
@@ -195,6 +209,8 @@ export function GroundLeaseResponseToJSONTyped(value?: GroundLeaseResponse | nul
     return {
         
         'id': value['id'],
+        'groundLeaseTemplateId': value['groundLeaseTemplateId'],
+        'purchaseWorkflowId': value['purchaseWorkflowId'],
         'landParcelId': value['landParcelId'],
         'homeId': value['homeId'],
         'leaseStartDate': value['leaseStartDate'],

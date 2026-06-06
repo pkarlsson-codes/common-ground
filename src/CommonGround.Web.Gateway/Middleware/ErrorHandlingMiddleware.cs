@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using CommonGround.SharedKernel.Infrastructure.API;
 
 namespace CommonGround.Web.Gateway.Middleware;
 
@@ -49,6 +50,22 @@ internal sealed partial class ErrorHandlingMiddleware
 #pragma warning restore CA1031 // Do not catch general exception types
     }
 
+    private static async Task<bool> TryForwardUpstreamResponse(HttpResponse response, Exception exception)
+    {
+        if (exception is not UpstreamApiException { ResponseBody.Length: > 0 } upstream)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(upstream.ContentType))
+        {
+            response.ContentType = upstream.ContentType;
+        }
+
+        await response.WriteAsync(upstream.ResponseBody).ConfigureAwait(false);
+        return true;
+    }
+
     private static string GetMessageForStatus(HttpStatusCode statusCode) => statusCode switch
     {
         HttpStatusCode.NotFound => "The requested resource was not found",
@@ -72,6 +89,7 @@ internal sealed partial class ErrorHandlingMiddleware
 
         var (statusCode, errorMessage) = exception switch
         {
+            UpstreamApiException upstreamFailure when upstreamFailure.StatusCode.HasValue => (upstreamFailure.StatusCode.Value, GetMessageForStatus(upstreamFailure.StatusCode.Value)),
             HttpRequestException httpEx when httpEx.StatusCode.HasValue => (httpEx.StatusCode.Value, GetMessageForStatus(httpEx.StatusCode.Value)),
             HttpRequestException => (HttpStatusCode.BadGateway, "An upstream service error occurred"),
             ArgumentNullException => (HttpStatusCode.BadRequest, "Required parameter is missing"),
@@ -82,6 +100,11 @@ internal sealed partial class ErrorHandlingMiddleware
         };
 
         response.StatusCode = (int)statusCode;
+
+        if (await TryForwardUpstreamResponse(response, exception).ConfigureAwait(false))
+        {
+            return;
+        }
 
         var errorResponse = new
         {

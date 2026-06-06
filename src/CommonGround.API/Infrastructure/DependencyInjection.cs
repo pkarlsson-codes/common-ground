@@ -1,6 +1,8 @@
 using System.Text;
 using CommonGround.API.Infrastructure.ExceptionHandling;
 using CommonGround.API.Infrastructure.Seeding;
+using CommonGround.ApplicantSelection.Infrastructure;
+using CommonGround.ApplicantSelection.Infrastructure.Persistence;
 using CommonGround.Documents.Infrastructure;
 using CommonGround.Documents.Infrastructure.Persistence;
 using CommonGround.Homeownership.Infrastructure;
@@ -43,6 +45,7 @@ internal static class CommonGroundServiceCollectionExtensions
         services.AddCommonGroundHealthChecks();
         services.AddCommonGroundAuthentication(configuration, environment);
         services.AddCommonGroundAuthorization();
+        services.AddApplicantSelection();
         services.AddPropertyRegistry();
         services.AddHomeownership();
         services.AddIdentity();
@@ -77,6 +80,7 @@ internal static class CommonGroundServiceCollectionExtensions
 
         services.AddMartenServices(connectionString, opts =>
         {
+            ApplicantSelectionMartenConfiguration.Configure(opts);
             PropertyRegistryMartenConfiguration.Configure(opts);
             HomeownershipMartenConfiguration.Configure(opts);
             IdentityMartenConfiguration.Configure(opts);
