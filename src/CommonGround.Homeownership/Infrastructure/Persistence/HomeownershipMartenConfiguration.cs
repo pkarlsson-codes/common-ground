@@ -35,6 +35,9 @@ public static class HomeownershipMartenConfiguration
         options.Schema.For<PurchaseWorkflowListItemView>()
             .DatabaseSchemaName(SchemaName)
             .Index(x => x.BuyerFullName);
+        options.Schema.For<GroundLeaseTemplateListItemView>()
+            .DatabaseSchemaName(SchemaName)
+            .Index(x => x.TemplateName);
     }
 
     private static void ConfigureProjections(StoreOptions options)
@@ -43,5 +46,6 @@ public static class HomeownershipMartenConfiguration
         options.Projections.Add<GroundLeaseListItemViewProjection>(ProjectionLifecycleForEnvironment);
         options.Projections.Add<PurchaseWorkflowViewProjection>(ProjectionLifecycleForEnvironment);
         options.Projections.Add<PurchaseWorkflowListItemViewProjection>(ProjectionLifecycleForEnvironment);
+        options.Projections.Add<GroundLeaseTemplateListItemViewProjection>(ProjectionLifecycleForEnvironment);
     }
 }
