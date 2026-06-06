@@ -10,7 +10,7 @@ namespace CommonGround.Documents.Domain.Documents;
 public sealed class DocumentAttachment : ValueObject
 {
     /// <summary>Initializes a new attachment.</summary>
-    public DocumentAttachment(string entityType, Guid entityId, string? role, UserId attachedBy, DateTimeOffset attachedAt)
+    public DocumentAttachment(string entityType, string entityId, string? role, UserId attachedBy, DateTimeOffset attachedAt)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(entityType);
         ArgumentNullException.ThrowIfNull(attachedBy);
@@ -25,8 +25,8 @@ public sealed class DocumentAttachment : ValueObject
     /// <summary>Gets the opaque entity type (e.g. "Building").</summary>
     public string EntityType { get; }
 
-    /// <summary>Gets the entity's GUID identifier.</summary>
-    public Guid EntityId { get; }
+    /// <summary>Gets the entity's string identifier.</summary>
+    public string EntityId { get; }
 
     /// <summary>Gets the optional role (e.g. "primary", "amendment-of").</summary>
     public string? Role { get; }

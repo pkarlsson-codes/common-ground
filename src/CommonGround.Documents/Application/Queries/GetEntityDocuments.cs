@@ -12,10 +12,10 @@ namespace CommonGround.Documents.Application.Queries;
 /// results unless <paramref name="IncludeDeleted"/> is true.
 /// </remarks>
 /// <param name="EntityType">Opaque entity type (e.g. "Building"). Case-sensitive.</param>
-/// <param name="EntityId">The entity's GUID identifier.</param>
+/// <param name="EntityId">The entity's string identifier.</param>
 /// <param name="Page">Pagination spec.</param>
 /// <param name="IncludeDeleted">When true, includes soft-deleted attachments in the result.</param>
-public sealed record GetEntityDocuments(string EntityType, Guid EntityId, PageSpec Page, bool IncludeDeleted = false);
+public sealed record GetEntityDocuments(string EntityType, string EntityId, PageSpec Page, bool IncludeDeleted = false);
 
 /// <summary>Handles <see cref="GetEntityDocuments"/>.</summary>
 public static class GetEntityDocumentsHandler

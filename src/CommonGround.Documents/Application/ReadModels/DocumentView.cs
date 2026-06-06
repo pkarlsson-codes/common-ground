@@ -84,7 +84,7 @@ public class DocumentAttachmentSnapshot
     public string EntityType { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the entity ID.</summary>
-    public Guid EntityId { get; set; }
+    public string EntityId { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the optional role.</summary>
     public string? Role { get; set; }

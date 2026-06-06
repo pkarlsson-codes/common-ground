@@ -9,7 +9,7 @@ namespace CommonGround.Documents.Application.Commands;
 public sealed record AttachDocument(
     DocumentId DocumentId,
     string EntityType,
-    Guid EntityId,
+    string EntityId,
     string? Role,
     UserId AttachedBy);
 

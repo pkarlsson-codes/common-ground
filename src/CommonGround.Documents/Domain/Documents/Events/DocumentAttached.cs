@@ -10,7 +10,7 @@ namespace CommonGround.Documents.Domain.Documents.Events;
 public sealed record DocumentAttached(
     string AggregateId,
     string EntityType,
-    Guid EntityId,
+    string EntityId,
     string? Role,
     string Title,
     string CurrentFileName,

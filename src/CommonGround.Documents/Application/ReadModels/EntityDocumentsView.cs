@@ -13,7 +13,7 @@ public class EntityDocumentsView
     public string EntityType { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the entity id segment of the key.</summary>
-    public Guid EntityId { get; set; }
+    public string EntityId { get; set; } = string.Empty;
 
     /// <summary>Gets the current attachments to this entity.</summary>
     public List<EntityDocumentAttachmentItem> Items { get; set; } = [];
@@ -50,10 +50,11 @@ public class EntityDocumentAttachmentItem
 /// <summary>Encodes / decodes the composite identity for <see cref="EntityDocumentsView"/>.</summary>
 public static class EntityDocumentKey
 {
-    /// <summary>Encodes a composite key as <c>"{EntityType}:{EntityId:N}"</c>.</summary>
-    public static string Encode(string entityType, Guid entityId)
+    /// <summary>Encodes a composite key as <c>"{EntityType}:{EntityId}"</c>.</summary>
+    public static string Encode(string entityType, string entityId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(entityType);
-        return $"{entityType}:{entityId:N}";
+        ArgumentException.ThrowIfNullOrWhiteSpace(entityId);
+        return $"{entityType}:{entityId}";
     }
 }

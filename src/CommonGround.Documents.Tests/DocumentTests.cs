@@ -14,7 +14,7 @@ public sealed class DocumentTests
 
     private static Document NewDoc(
         string title = "Title",
-        (string EntityType, Guid EntityId, string? Role)? attach = null) =>
+        (string EntityType, string EntityId, string? Role)? attach = null) =>
         Document.Upload(
             title,
             SensitivityLevel.Internal,
@@ -53,7 +53,7 @@ public sealed class DocumentTests
     [Fact]
     public void Upload_with_initial_attachment_attaches_it()
     {
-        var entityId = Guid.NewGuid();
+        var entityId = Guid.NewGuid().ToString();
         var doc = NewDoc(attach: ("Building", entityId, "primary"));
 
         doc.Attachments.Should().ContainSingle(a =>
@@ -64,7 +64,7 @@ public sealed class DocumentTests
     public void Attach_is_idempotent()
     {
         var doc = NewDoc();
-        var entityId = Guid.NewGuid();
+        var entityId = Guid.NewGuid().ToString();
 
         doc.Attach("Building", entityId, "primary", User);
         doc.Attach("Building", entityId, "primary", User);
@@ -78,7 +78,7 @@ public sealed class DocumentTests
         var doc = NewDoc();
         doc.SoftDelete("test", User);
 
-        var act = () => doc.Attach("Building", Guid.NewGuid(), null, User);
+        var act = () => doc.Attach("Building", Guid.NewGuid().ToString(), null, User);
 
         act.Should().Throw<BusinessRuleViolationException>();
     }
@@ -87,8 +87,8 @@ public sealed class DocumentTests
     public void Detach_removes_matching_attachment_only()
     {
         var doc = NewDoc();
-        var idA = Guid.NewGuid();
-        var idB = Guid.NewGuid();
+        var idA = Guid.NewGuid().ToString();
+        var idB = Guid.NewGuid().ToString();
         doc.Attach("Building", idA, null, User);
         doc.Attach("Building", idB, null, User);
 
@@ -101,7 +101,7 @@ public sealed class DocumentTests
     public void Detach_when_not_attached_is_noop()
     {
         var doc = NewDoc();
-        doc.Detach("Building", Guid.NewGuid(), null, User);
+        doc.Detach("Building", Guid.NewGuid().ToString(), null, User);
 
         doc.Attachments.Should().BeEmpty();
     }
@@ -149,8 +149,8 @@ public sealed class DocumentTests
     public void SoftDelete_fans_out_one_event_per_active_attachment()
     {
         var doc = NewDoc();
-        doc.Attach("Building", Guid.NewGuid(), "primary", User);
-        doc.Attach("Lease", Guid.NewGuid(), null, User);
+        doc.Attach("Building", Guid.NewGuid().ToString(), "primary", User);
+        doc.Attach("Lease", Guid.NewGuid().ToString(), null, User);
         doc.UncommittedEvents.MarkAsCommitted();
 
         doc.SoftDelete("reason", User);

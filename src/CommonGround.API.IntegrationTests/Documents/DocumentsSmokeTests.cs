@@ -20,7 +20,7 @@ public class DocumentsSmokeTests(ApiFactory factory)
             AllowAutoRedirect = false,
         }).WithAuthToken();
 
-        var entityId = Guid.NewGuid();
+        var entityId = Guid.NewGuid().ToString();
 
         // 1. Multipart upload
         using var form = new MultipartFormDataContent();
@@ -43,7 +43,7 @@ public class DocumentsSmokeTests(ApiFactory factory)
         attachResp.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         // 3. List per-entity
-        var listResp = await client.GetAsync($"/api/entities/Building/{entityId:N}/documents?page.number=1&page.size=10");
+        var listResp = await client.GetAsync($"/api/entities/Building/{entityId}/documents?page.number=1&page.size=10");
         listResp.StatusCode.Should().Be(HttpStatusCode.OK);
         var list = await listResp.Content.ReadFromJsonAsync<PaginatedResponse<EntityDocumentItemResponse>>();
         list!.Items.Should().ContainSingle(i => i.DocumentId == upload.DocumentId)

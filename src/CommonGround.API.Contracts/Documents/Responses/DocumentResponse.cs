@@ -31,6 +31,6 @@ public sealed record DocumentVersionResponse(
 /// <summary>Single attachment in a document response.</summary>
 public sealed record DocumentAttachmentResponse(
     string EntityType,
-    Guid EntityId,
+    string EntityId,
     string? Role,
     DateTimeOffset AttachedAt);

@@ -13,6 +13,8 @@ namespace CommonGround.Web.Gateway.Endpoints;
 
 public static class DocumentsEndpoints
 {
+    private static readonly JsonSerializerOptions _webJson = new(JsonSerializerDefaults.Web);
+
     [WolverinePost("/api/v1/documents")]
     [ProducesResponseType<UploadDocumentResponse>(StatusCodes.Status201Created)]
     public static async Task<IResult> UploadDocument(
@@ -27,7 +29,7 @@ public static class DocumentsEndpoints
 
         var form = await httpContext.Request.ReadFormAsync(cancellationToken).ConfigureAwait(false);
         var metaJson = form["metadata"].ToString();
-        var meta = JsonSerializer.Deserialize<UploadDocumentMetadata>(metaJson)
+        var meta = JsonSerializer.Deserialize<UploadDocumentMetadata>(metaJson, _webJson)
             ?? throw new InvalidOperationException("metadata part missing");
         var file = form.Files["file"]
             ?? throw new InvalidOperationException("file part missing");
@@ -175,7 +177,7 @@ public static class DocumentsEndpoints
     [ProducesResponseType<PaginatedResponse<EntityDocumentItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetEntityDocuments(
         string entityType,
-        Guid entityId,
+        string entityId,
         int pageNumber,
         int pageSize,
         IDocumentsApiClient client,

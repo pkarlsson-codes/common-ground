@@ -11,4 +11,4 @@ public sealed record UploadDocumentMetadata(
     InitialAttachment? InitialAttachment = null);
 
 /// <summary>Optional initial attachment carried in the upload metadata part.</summary>
-public sealed record InitialAttachment(string EntityType, Guid EntityId, string? Role);
+public sealed record InitialAttachment(string EntityType, string EntityId, string? Role);

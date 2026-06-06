@@ -256,33 +256,14 @@ public static class DocumentsEndpoints
 
     [WolverineGet("/api/documents")]
     public static async Task<IResult> ListDocuments(
-        [FromQuery(Name = "includeDeleted")] bool includeDeleted,
-        [FromQuery(Name = "contentType")] string? contentType,
-        [FromQuery(Name = "tag")] string? tag,
-        [FromQuery(Name = "expiringBefore")] DateTimeOffset? expiringBefore,
-        [FromQuery(Name = "page.number")] int page,
-        [FromQuery(Name = "page.size")] int pageSize,
+        [AsParameters] GetDocumentsQuerySpec spec,
         HttpContext httpContext,
         IMessageBus bus,
         CancellationToken cancellationToken = default)
     {
-        page = page == 0 ? 1 : page;
-        pageSize = pageSize == 0 ? PaginationQuerySpec.DefaultPageSize : pageSize;
-
-        var pageSpec = new PageSpec
-        {
-            Number = page < 1 ? 1 : page,
-            Size = pageSize switch
-            {
-                < 1 => PaginationQuerySpec.DefaultPageSize,
-                > PaginationQuerySpec.MaxPageSize => PaginationQuerySpec.MaxPageSize,
-                _ => pageSize,
-            },
-        };
-
         var result = await bus.InvokeForTenantAsync<PaginatedResponse<DocumentLibraryItemView>>(
             bus.TenantId!,
-            new ListDocuments(pageSpec, includeDeleted, contentType, tag, expiringBefore),
+            new ListDocuments(spec.Page, spec.IncludeDeleted, spec.ContentType, spec.Tag, spec.ExpiringBefore),
             cancellationToken).ConfigureAwait(false);
 
         return Results.Ok(result.MapItems(d => new DocumentLibraryItemResponse(
@@ -295,7 +276,7 @@ public static class DocumentsEndpoints
     [WolverineGet("/api/entities/{entityType}/{entityId}/documents")]
     public static async Task<IResult> GetEntityDocuments(
         string entityType,
-        Guid entityId,
+        string entityId,
         [FromQuery] GetEntityDocumentsQuerySpec request,
         HttpContext httpContext,
         IMessageBus bus,

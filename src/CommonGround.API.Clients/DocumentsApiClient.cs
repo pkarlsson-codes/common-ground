@@ -128,9 +128,9 @@ public sealed class DocumentsApiClient(
 
     /// <inheritdoc/>
     public Task<PaginatedResponse<EntityDocumentItemResponse>> GetEntityDocumentsAsync(
-        string entityType, Guid entityId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+        string entityType, string entityId, int pageNumber, int pageSize, CancellationToken cancellationToken)
         => GetAsync<PaginatedResponse<EntityDocumentItemResponse>>(
-            $"api/entities/{entityType}/{entityId:N}/documents?pageNumber={pageNumber}&pageSize={pageSize}",
+            $"api/entities/{entityType}/{Uri.EscapeDataString(entityId)}/documents?pageNumber={pageNumber}&pageSize={pageSize}",
             cancellationToken);
 
     /// <inheritdoc/>

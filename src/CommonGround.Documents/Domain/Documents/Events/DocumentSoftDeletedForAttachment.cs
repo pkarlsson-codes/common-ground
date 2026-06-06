@@ -10,5 +10,5 @@ namespace CommonGround.Documents.Domain.Documents.Events;
 public sealed record DocumentSoftDeletedForAttachment(
     string AggregateId,
     string EntityType,
-    Guid EntityId,
+    string EntityId,
     string? Role) : DomainEvent(AggregateId);

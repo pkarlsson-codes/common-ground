@@ -32,7 +32,7 @@ public sealed record UploadDocument(
     DocumentVersionId? VersionId = null);
 
 /// <summary>Initial attachment to apply when uploading a new document.</summary>
-public sealed record UploadDocumentAttachment(string EntityType, Guid EntityId, string? Role);
+public sealed record UploadDocumentAttachment(string EntityType, string EntityId, string? Role);
 
 /// <summary>Handles <see cref="UploadDocument"/>.</summary>
 public static class UploadDocumentHandler

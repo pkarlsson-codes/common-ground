@@ -104,7 +104,7 @@ public interface IDocumentsApiClient
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A paginated response of entity documents.</returns>
     Task<PaginatedResponse<EntityDocumentItemResponse>> GetEntityDocumentsAsync(
-        string entityType, Guid entityId, int pageNumber, int pageSize, CancellationToken cancellationToken);
+        string entityType, string entityId, int pageNumber, int pageSize, CancellationToken cancellationToken);
 
     /// <summary>Gets the absolute URL the client should redirect to for downloading.</summary>
     /// <remarks>Implementation should call the API and surface the 302 location header without following.</remarks>

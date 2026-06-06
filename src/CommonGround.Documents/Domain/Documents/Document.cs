@@ -65,7 +65,7 @@ public sealed class Document : AggregateRoot<DocumentId>
         long sizeBytes,
         string sha256,
         UserId uploadedBy,
-        (string EntityType, Guid EntityId, string? Role)? initialAttachment = null,
+        (string EntityType, string EntityId, string? Role)? initialAttachment = null,
         DocumentId? documentId = null,
         DocumentVersionId? versionId = null)
     {
@@ -107,7 +107,7 @@ public sealed class Document : AggregateRoot<DocumentId>
     }
 
     /// <summary>Attaches this document to an entity. Idempotent on (EntityType, EntityId, Role).</summary>
-    public void Attach(string entityType, Guid entityId, string? role, UserId attachedBy)
+    public void Attach(string entityType, string entityId, string? role, UserId attachedBy)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(entityType);
         ArgumentNullException.ThrowIfNull(attachedBy);
@@ -128,7 +128,7 @@ public sealed class Document : AggregateRoot<DocumentId>
     }
 
     /// <summary>Detaches this document from an entity. Idempotent if not attached.</summary>
-    public void Detach(string entityType, Guid entityId, string? role, UserId detachedBy)
+    public void Detach(string entityType, string entityId, string? role, UserId detachedBy)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(entityType);
         ArgumentNullException.ThrowIfNull(detachedBy);
