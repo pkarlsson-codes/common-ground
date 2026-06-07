@@ -7,6 +7,7 @@ import SlideOver from '../../components/SlideOver'
 import { LandParcelsApi } from '../../api'
 import { apiConfig } from '../../lib/apiConfig'
 import { useToast } from '../../hooks/useToast'
+import { getErrorMessage } from '../../lib/getErrorMessage'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
 
@@ -45,6 +46,7 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
   const { success } = useToast()
   const parcelLocked = Boolean(initialParcelId)
   const [parcelLabel, setParcelLabel] = useState<string>('')
+  const [formError, setFormError] = useState<string | null>(null)
 
   useEffect(() => {
     if (parcelLocked && initialParcelId) {
@@ -61,6 +63,7 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
+    setFormError(null)
     try {
       await registerMutation.mutateAsync({
         ...form,
@@ -74,7 +77,9 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
       })
       success('Home registered successfully')
       onClose()
-    } catch { /* error shown in form */ }
+    } catch (err) {
+      setFormError(await getErrorMessage(err, 'Registration failed. Please try again or contact support.'))
+    }
   }
 
   return (
@@ -211,8 +216,8 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
             />
           </div>
         </div>
-        {registerMutation.isError && (
-          <div className="form-error">Registration failed. Check the parcel ID and try again.</div>
+        {formError && (
+          <div className="form-error">{formError}</div>
         )}
       </form>
     </SlideOver>
