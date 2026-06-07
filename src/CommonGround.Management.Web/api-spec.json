@@ -2,7 +2,7 @@
   "x-generator": "NSwag v14.7.0.0 (NJsonSchema v11.6.0.0 (Newtonsoft.Json v13.0.0.0))",
   "openapi": "3.0.0",
   "info": {
-    "title": "CommonGround.Web.Gateway",
+    "title": "CommonGround.Management.Gateway",
     "description": "CommonGround Web Gateway API",
     "version": "1.0"
   },
@@ -1839,6 +1839,65 @@
       }
     },
     "/api/v1/ground-lease-templates": {
+      "post": {
+        "tags": [
+          "GroundLeaseTemplates"
+        ],
+        "operationId": "CreateGroundLeaseTemplate",
+        "requestBody": {
+          "x-name": "CreateGroundLeaseTemplateRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroundLeaseTemplateRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateGroundLeaseTemplateResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
       "get": {
         "tags": [
           "GroundLeaseTemplates"
@@ -6483,6 +6542,60 @@
             "nullable": true
           },
           "currentIndexValue": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          }
+        }
+      },
+      "CreateGroundLeaseTemplateResponse": {
+        "type": "object",
+        "description": "Response after creating a ground lease template.",
+        "additionalProperties": false,
+        "properties": {
+          "groundLeaseTemplateId": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateGroundLeaseTemplateRequest": {
+        "type": "object",
+        "description": "Request to create a new ground lease template.",
+        "additionalProperties": false,
+        "properties": {
+          "templateName": {
+            "type": "string"
+          },
+          "termYears": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "covenantTerms": {
+            "type": "string"
+          },
+          "formulaKind": {
+            "type": "string"
+          },
+          "appreciationShare": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "indexType": {
+            "type": "string",
+            "nullable": true
+          },
+          "baselineIndexValue": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "annualPercentage": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "improvementsCap": {
             "type": "number",
             "format": "decimal",
             "nullable": true

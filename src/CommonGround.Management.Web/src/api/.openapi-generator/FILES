@@ -24,6 +24,8 @@ models/CompletePropertyInspectionRequest.ts
 models/CounselingReferralResponse.ts
 models/CreateGroundLeaseRequest.ts
 models/CreateGroundLeaseResponse.ts
+models/CreateGroundLeaseTemplateRequest.ts
+models/CreateGroundLeaseTemplateResponse.ts
 models/CreateTrustRequest.ts
 models/CreateTrustResponse.ts
 models/CurePeriodActivationResponse.ts

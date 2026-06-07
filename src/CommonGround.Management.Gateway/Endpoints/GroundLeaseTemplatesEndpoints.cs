@@ -12,6 +12,18 @@ namespace CommonGround.Management.Gateway.Endpoints;
 
 public static class GroundLeaseTemplatesEndpoints
 {
+    [WolverinePost("/api/v1/ground-lease-templates")]
+    [ProducesResponseType<CreateGroundLeaseTemplateResponse>(StatusCodes.Status201Created)]
+    public static async Task<IResult> CreateGroundLeaseTemplate(
+        CreateGroundLeaseTemplateRequest request,
+        IGroundLeaseTemplatesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        var result = await client.CreateGroundLeaseTemplateAsync(request, cancellationToken).ConfigureAwait(false);
+        return Results.Created($"/api/v1/ground-lease-templates/{result.GroundLeaseTemplateId}", result);
+    }
+
     [WolverineGet("/api/v1/ground-lease-templates")]
     [ProducesResponseType<PaginatedResponse<GroundLeaseTemplateListItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetGroundLeaseTemplates(

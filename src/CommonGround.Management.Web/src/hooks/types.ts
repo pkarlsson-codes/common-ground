@@ -137,3 +137,16 @@ export interface StallWorkflowForm {
   reason: string
   resolutionTargetDate: string
 }
+
+export interface CreateGroundLeaseTemplateForm {
+  templateName: string
+  termYears: number
+  covenantTerms: string
+  formulaKind: string
+  appreciationShare: number | null
+  indexType: string | null
+  baselineIndexValue: number | null
+  annualPercentage: number | null
+  improvementsCap: number | null
+  hasImprovementsCap: boolean
+}

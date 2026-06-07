@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * CommonGround.Web.Gateway
+ * CommonGround.Management.Gateway
  * CommonGround Web Gateway API
  *
  * The version of the OpenAPI document: 1.0

@@ -12,6 +12,8 @@ export * from './CompletePropertyInspectionRequest';
 export * from './CounselingReferralResponse';
 export * from './CreateGroundLeaseRequest';
 export * from './CreateGroundLeaseResponse';
+export * from './CreateGroundLeaseTemplateRequest';
+export * from './CreateGroundLeaseTemplateResponse';
 export * from './CreateTrustRequest';
 export * from './CreateTrustResponse';
 export * from './CurePeriodActivationResponse';

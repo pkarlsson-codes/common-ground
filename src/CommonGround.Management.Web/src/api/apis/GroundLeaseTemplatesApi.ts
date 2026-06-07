@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * CommonGround.Web.Gateway
+ * CommonGround.Management.Gateway
  * CommonGround Web Gateway API
  *
  * The version of the OpenAPI document: 1.0
@@ -16,15 +16,25 @@
 
 import * as runtime from '../runtime';
 import type {
+  CreateGroundLeaseTemplateRequest,
+  CreateGroundLeaseTemplateResponse,
   PaginatedResponseOfGroundLeaseTemplateListItemResponse,
   ProblemDetails,
 } from '../models/index';
 import {
+    CreateGroundLeaseTemplateRequestFromJSON,
+    CreateGroundLeaseTemplateRequestToJSON,
+    CreateGroundLeaseTemplateResponseFromJSON,
+    CreateGroundLeaseTemplateResponseToJSON,
     PaginatedResponseOfGroundLeaseTemplateListItemResponseFromJSON,
     PaginatedResponseOfGroundLeaseTemplateListItemResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
 } from '../models/index';
+
+export interface CreateGroundLeaseTemplateOperationRequest {
+    createGroundLeaseTemplateRequest: CreateGroundLeaseTemplateRequest;
+}
 
 export interface GetGroundLeaseTemplatesRequest {
     pageNumber?: number;
@@ -40,6 +50,19 @@ export interface GetGroundLeaseTemplatesRequest {
  * @interface GroundLeaseTemplatesApiInterface
  */
 export interface GroundLeaseTemplatesApiInterface {
+    /**
+     * 
+     * @param {CreateGroundLeaseTemplateRequest} createGroundLeaseTemplateRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeaseTemplatesApiInterface
+     */
+    createGroundLeaseTemplateRaw(requestParameters: CreateGroundLeaseTemplateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    createGroundLeaseTemplate(requestParameters: CreateGroundLeaseTemplateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
     /**
      * 
      * @param {number} [pageNumber] 
@@ -62,6 +85,43 @@ export interface GroundLeaseTemplatesApiInterface {
  * 
  */
 export class GroundLeaseTemplatesApi extends runtime.BaseAPI implements GroundLeaseTemplatesApiInterface {
+
+    /**
+     */
+    async createGroundLeaseTemplateRaw(requestParameters: CreateGroundLeaseTemplateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['createGroundLeaseTemplateRequest'] == null) {
+            throw new runtime.RequiredError(
+                'createGroundLeaseTemplateRequest',
+                'Required parameter "createGroundLeaseTemplateRequest" was null or undefined when calling createGroundLeaseTemplate().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-lease-templates`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CreateGroundLeaseTemplateRequestToJSON(requestParameters['createGroundLeaseTemplateRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async createGroundLeaseTemplate(requestParameters: CreateGroundLeaseTemplateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.createGroundLeaseTemplateRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      */

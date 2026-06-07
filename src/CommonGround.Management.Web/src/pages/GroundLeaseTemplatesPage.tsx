@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useGroundLeaseTemplates } from '../hooks/groundLeaseTemplates'
 import { statusLabel } from '../hooks/types'
 import GroundLeaseTemplatesTable from './ground-lease-templates/GroundLeaseTemplatesTable'
+import CreateGroundLeaseTemplatePanel from './ground-lease-templates/CreateGroundLeaseTemplatePanel'
 
 const TEMPLATE_STATUSES = ['Active', 'Inactive'] as const
 
 export default function GroundLeaseTemplatesPage() {
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState('')
+  const [panel, setPanel] = useState<'create' | null>(null)
 
   const { data, isLoading, isError } = useGroundLeaseTemplates(page, undefined, statusFilter || undefined)
 
@@ -25,6 +27,12 @@ export default function GroundLeaseTemplatesPage() {
             </div>
           )}
         </div>
+        <button className="btn btn-primary" onClick={() => setPanel('create')}>
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+          </svg>
+          New Template
+        </button>
       </div>
 
       <div className="filter-bar">
@@ -48,6 +56,11 @@ export default function GroundLeaseTemplatesPage() {
         totalPages={Number(data?.totalPages ?? 0)}
         totalCount={Number(data?.totalCount ?? 0)}
         onPage={setPage}
+      />
+
+      <CreateGroundLeaseTemplatePanel
+        open={panel === 'create'}
+        onClose={() => setPanel(null)}
       />
     </div>
   )
