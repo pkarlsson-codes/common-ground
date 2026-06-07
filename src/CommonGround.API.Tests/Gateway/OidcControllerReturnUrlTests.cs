@@ -1,5 +1,5 @@
-using CommonGround.Web.Gateway.Controllers;
-using CommonGround.Web.Gateway.Services;
+using CommonGround.Management.Gateway.Controllers;
+using CommonGround.Management.Gateway.Services;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -110,7 +110,7 @@ public sealed class OidcControllerReturnUrlTests
     {
         public string EnvironmentName { get; set; } = "Development";
 
-        public string ApplicationName { get; set; } = "CommonGround.Web.Gateway.Tests";
+        public string ApplicationName { get; set; } = "CommonGround.Management.Gateway.Tests";
 
         public string ContentRootPath { get; set; } = "/";
 

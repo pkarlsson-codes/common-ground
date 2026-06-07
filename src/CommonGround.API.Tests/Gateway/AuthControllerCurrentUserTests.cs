@@ -1,8 +1,8 @@
 using System.Security.Claims;
-using CommonGround.Web.Gateway.Configuration;
-using CommonGround.Web.Gateway.Controllers;
-using CommonGround.Web.Gateway.Models;
-using CommonGround.Web.Gateway.Services;
+using CommonGround.Management.Gateway.Configuration;
+using CommonGround.Management.Gateway.Controllers;
+using CommonGround.Management.Gateway.Models;
+using CommonGround.Management.Gateway.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
@@ -99,7 +99,7 @@ public sealed class AuthControllerCurrentUserTests
     {
         public string EnvironmentName { get; set; } = "Development";
 
-        public string ApplicationName { get; set; } = "CommonGround.Web.Gateway.Tests";
+        public string ApplicationName { get; set; } = "CommonGround.Management.Gateway.Tests";
 
         public string ContentRootPath { get; set; } = "/";
 

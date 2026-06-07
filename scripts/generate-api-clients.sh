@@ -2,7 +2,7 @@
 set -euo pipefail
 
 CONFIGURATION="${1:-Debug}"
-OUTPUT_PATH="${2:-src/CommonGround.Web/api-spec.json}"
+OUTPUT_PATH="${2:-src/CommonGround.Management.Web/api-spec.json}"
 
 echo "Generating OpenAPI specification and API clients..."
 
@@ -11,7 +11,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 echo "Project root: $PROJECT_ROOT"
 
-CSPROJ_PATH="$PROJECT_ROOT/src/CommonGround.Web.Gateway/CommonGround.Web.Gateway.csproj"
+CSPROJ_PATH="$PROJECT_ROOT/src/CommonGround.Management.Gateway/CommonGround.Management.Gateway.csproj"
 
 echo "Building Web Gateway API project..."
 dotnet build "$CSPROJ_PATH" --configuration "$CONFIGURATION"
@@ -39,7 +39,7 @@ MSYS_NO_PATHCONV=1 nswag aspnetcore2openapi \
     /configuration:"$CONFIGURATION" \
     /aspNetCoreEnvironment:Development
 
-FRONTEND_PATH="$PROJECT_ROOT/src/CommonGround.Web"
+FRONTEND_PATH="$PROJECT_ROOT/src/CommonGround.Management.Web"
 if [ ! -d "$FRONTEND_PATH/node_modules" ]; then
     echo "Installing frontend dependencies..."
     npm --prefix "$FRONTEND_PATH" install
