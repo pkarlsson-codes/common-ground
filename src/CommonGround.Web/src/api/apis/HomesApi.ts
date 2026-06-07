@@ -54,8 +54,8 @@ export interface GetHomeAssessmentsRequest {
 export interface GetHomesRequest {
     pageNumber?: number;
     pageSize?: number;
-    landParcelId?: string | null;
-    status?: string | null;
+    landParcelIds?: Array<string> | null;
+    statuses?: Array<string> | null;
 }
 
 export interface RecordHomeAssessmentOperationRequest {
@@ -106,8 +106,8 @@ export interface HomesApiInterface {
      * 
      * @param {number} [pageNumber] 
      * @param {number} [pageSize] 
-     * @param {string} [landParcelId] 
-     * @param {string} [status] 
+     * @param {Array<string>} [landParcelIds] 
+     * @param {Array<string>} [statuses] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HomesApiInterface
@@ -243,12 +243,12 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
             queryParameters['pageSize'] = requestParameters['pageSize'];
         }
 
-        if (requestParameters['landParcelId'] != null) {
-            queryParameters['landParcelId'] = requestParameters['landParcelId'];
+        if (requestParameters['landParcelIds'] != null) {
+            queryParameters['landParcelIds'] = requestParameters['landParcelIds'];
         }
 
-        if (requestParameters['status'] != null) {
-            queryParameters['status'] = requestParameters['status'];
+        if (requestParameters['statuses'] != null) {
+            queryParameters['statuses'] = requestParameters['statuses'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

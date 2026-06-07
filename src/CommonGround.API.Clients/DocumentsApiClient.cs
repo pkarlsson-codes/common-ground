@@ -94,44 +94,22 @@ public sealed class DocumentsApiClient(
 
     /// <inheritdoc/>
     public Task<PaginatedResponse<DocumentLibraryItemResponse>> ListDocumentsAsync(
-        int pageNumber, int pageSize, bool includeDeleted, string? contentType, string? tag,
-        DateTimeOffset? expiringBefore, CancellationToken cancellationToken)
+        GetDocumentsQuerySpec querySpec, CancellationToken cancellationToken)
     {
-        var query = new List<string>(capacity: 6)
-        {
-            $"pageNumber={pageNumber}",
-            $"pageSize={pageSize}",
-        };
-        if (includeDeleted)
-        {
-            query.Add("includeDeleted=true");
-        }
-
-        if (!string.IsNullOrWhiteSpace(contentType))
-        {
-            query.Add($"contentType={Uri.EscapeDataString(contentType)}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(tag))
-        {
-            query.Add($"tag={Uri.EscapeDataString(tag)}");
-        }
-
-        if (expiringBefore.HasValue)
-        {
-            query.Add($"expiringBefore={Uri.EscapeDataString(expiringBefore.Value.ToString("O"))}");
-        }
-
+        ArgumentNullException.ThrowIfNull(querySpec);
         return GetAsync<PaginatedResponse<DocumentLibraryItemResponse>>(
-            $"api/documents?{string.Join('&', query)}", cancellationToken);
+            $"api/documents{querySpec.ToQueryString()}", cancellationToken);
     }
 
     /// <inheritdoc/>
     public Task<PaginatedResponse<EntityDocumentItemResponse>> GetEntityDocumentsAsync(
-        string entityType, string entityId, int pageNumber, int pageSize, CancellationToken cancellationToken)
-        => GetAsync<PaginatedResponse<EntityDocumentItemResponse>>(
-            $"api/entities/{entityType}/{Uri.EscapeDataString(entityId)}/documents?pageNumber={pageNumber}&pageSize={pageSize}",
+        string entityType, string entityId, GetEntityDocumentsQuerySpec querySpec, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(querySpec);
+        return GetAsync<PaginatedResponse<EntityDocumentItemResponse>>(
+            $"api/entities/{entityType}/{Uri.EscapeDataString(entityId)}/documents{querySpec.ToQueryString()}",
             cancellationToken);
+    }
 
     /// <inheritdoc/>
     public async Task<Uri> GetDownloadUrlAsync(string documentId, CancellationToken cancellationToken)

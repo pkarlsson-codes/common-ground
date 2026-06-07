@@ -20,12 +20,10 @@ public interface ILandParcelsApiClient
     Task<LandParcelResponse> GetLandParcelAsync(string landParcelId, CancellationToken cancellationToken);
 
     /// <summary>Gets a paginated list of land parcels.</summary>
-    /// <param name="page">The page number (1-based).</param>
-    /// <param name="pageSize">The number of items per page.</param>
-    /// <param name="search">Optional free-text search across address and legal parcel number.</param>
+    /// <param name="querySpec">The query specification containing pagination and filter parameters.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A paginated list of land parcel summaries.</returns>
-    Task<PaginatedResponse<LandParcelListItemResponse>> GetLandParcelsAsync(int page, int pageSize, string? search, CancellationToken cancellationToken);
+    Task<PaginatedResponse<LandParcelListItemResponse>> GetLandParcelsAsync(GetLandParcelsQuerySpec querySpec, CancellationToken cancellationToken);
 
     /// <summary>Decommissions a land parcel.</summary>
     /// <param name="landParcelId">The ID of the land parcel to transition.</param>

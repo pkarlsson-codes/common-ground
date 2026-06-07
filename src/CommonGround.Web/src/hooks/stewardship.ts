@@ -15,7 +15,7 @@ const FPC_KEY = (groundLeaseId: string) => ['foreclosure-prevention-cases', grou
 export function useStewardshipCase(groundLeaseId: string | null) {
   return useQuery({
     queryKey: CASE_KEY(groundLeaseId ?? ''),
-    queryFn: () => api.getStewardshipCasesByGroundLease({ groundLeaseId: groundLeaseId! }),
+    queryFn: () => api.getStewardshipCases({ groundLeaseId: groundLeaseId! }),
     enabled: !!groundLeaseId,
     select: (response) => response.items?.[0] ?? null,   // one case per lease by domain invariant
   })
@@ -312,7 +312,7 @@ export function useForeclosurePreventionCases(groundLeaseId: string | null, page
   return useQuery({
     queryKey: [...FPC_KEY(groundLeaseId ?? ''), page],
     queryFn: () =>
-      api.getForeclosurePreventionCasesByGroundLease({ groundLeaseId: groundLeaseId!, pageNumber: page }),
+      api.getForeclosurePreventionCases({ groundLeaseId: groundLeaseId!, pageNumber: page }),
     enabled: !!groundLeaseId,
   })
 }
@@ -495,14 +495,14 @@ export function useResolveForeclosurePreventionCase(groundLeaseId: string) {
 export function useAllStewardshipCases(page = 1) {
   return useQuery({
     queryKey: ['stewardship', 'cases', 'all', page],
-    queryFn: () => api.getAllStewardshipCases({ pageNumber: page }),
+    queryFn: () => api.getStewardshipCases({ pageNumber: page }),
   })
 }
 
 export function useAllForeclosurePreventionCases(page = 1) {
   return useQuery({
     queryKey: ['stewardship', 'fpc', 'all', page],
-    queryFn: () => api.getAllForeclosurePreventionCases({ pageNumber: page }),
+    queryFn: () => api.getForeclosurePreventionCases({ pageNumber: page }),
   })
 }
 

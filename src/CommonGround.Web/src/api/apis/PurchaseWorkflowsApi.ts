@@ -77,7 +77,7 @@ export interface GetPurchaseWorkflowRequest {
 export interface GetPurchaseWorkflowsRequest {
     pageNumber?: number;
     pageSize?: number;
-    groundLeaseId?: string | null;
+    groundLeaseTemplateId?: string | null;
     phase?: string | null;
     search?: string | null;
 }
@@ -169,7 +169,7 @@ export interface PurchaseWorkflowsApiInterface {
      * 
      * @param {number} [pageNumber] 
      * @param {number} [pageSize] 
-     * @param {string} [groundLeaseId] 
+     * @param {string} [groundLeaseTemplateId] 
      * @param {string} [phase] 
      * @param {string} [search] 
      * @param {*} [options] Override http request option.
@@ -428,8 +428,8 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
             queryParameters['pageSize'] = requestParameters['pageSize'];
         }
 
-        if (requestParameters['groundLeaseId'] != null) {
-            queryParameters['groundLeaseId'] = requestParameters['groundLeaseId'];
+        if (requestParameters['groundLeaseTemplateId'] != null) {
+            queryParameters['groundLeaseTemplateId'] = requestParameters['groundLeaseTemplateId'];
         }
 
         if (requestParameters['phase'] != null) {

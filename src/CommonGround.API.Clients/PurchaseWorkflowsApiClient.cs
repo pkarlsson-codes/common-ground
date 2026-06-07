@@ -26,25 +26,11 @@ public sealed class PurchaseWorkflowsApiClient(
 
     /// <inheritdoc/>
     public async Task<PaginatedResponse<PurchaseWorkflowListItemResponse>> GetPurchaseWorkflowsAsync(
-        int pageNumber, int pageSize, string? groundLeaseTemplateId, string? phase, string? search, CancellationToken cancellationToken)
+        GetPurchaseWorkflowsQuerySpec querySpec, CancellationToken cancellationToken)
     {
-        var qs = $"?pageNumber={pageNumber}&pageSize={pageSize}";
-        if (!string.IsNullOrWhiteSpace(groundLeaseTemplateId))
-        {
-            qs += $"&groundLeaseId={Uri.EscapeDataString(groundLeaseTemplateId)}";
-        }
+        ArgumentNullException.ThrowIfNull(querySpec);
 
-        if (!string.IsNullOrWhiteSpace(phase))
-        {
-            qs += $"&phase={Uri.EscapeDataString(phase)}";
-        }
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            qs += $"&search={Uri.EscapeDataString(search)}";
-        }
-
-        return await GetAsync<PaginatedResponse<PurchaseWorkflowListItemResponse>>($"api/purchase-workflows{qs}", cancellationToken).ConfigureAwait(false);
+        return await GetAsync<PaginatedResponse<PurchaseWorkflowListItemResponse>>($"api/purchase-workflows{querySpec.ToQueryString()}", cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

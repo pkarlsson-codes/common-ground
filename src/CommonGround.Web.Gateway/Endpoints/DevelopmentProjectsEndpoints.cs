@@ -15,24 +15,11 @@ public static class DevelopmentProjectsEndpoints
     [WolverineGet("/api/v1/development-projects")]
     [ProducesResponseType<PaginatedResponse<DevelopmentProjectListItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetDevelopmentProjects(
-        int pageNumber,
-        int pageSize,
-        string? search,
-        string? landParcelId,
+        [FromQuery] GetDevelopmentProjectsQuerySpec querySpec,
         IDevelopmentProjectsApiClient client,
         CancellationToken cancellationToken = default)
     {
-        if (pageNumber <= 0)
-        {
-            pageNumber = 1;
-        }
-
-        if (pageSize <= 0)
-        {
-            pageSize = 20;
-        }
-
-        var result = await client.GetDevelopmentProjectsAsync(pageNumber, pageSize, search, landParcelId, null, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetDevelopmentProjectsAsync(querySpec, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
 

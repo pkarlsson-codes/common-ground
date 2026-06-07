@@ -169,7 +169,7 @@ export default function DevelopmentProjectInitiatePanel({
     }
     setHomesLoading(true)
     homesApi
-      .getHomes({ landParcelId: form.landParcelId, pageSize: 100 })
+      .getHomes({ landParcelIds: [form.landParcelId], pageSize: 100 })
       .then(r => setAvailableHomes(r.items ?? []))
       .finally(() => setHomesLoading(false))
   }, [isRehab, form.landParcelId])

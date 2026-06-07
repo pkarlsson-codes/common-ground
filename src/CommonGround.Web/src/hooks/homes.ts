@@ -15,8 +15,8 @@ export function useHomes(params: { pageNumber: number; pageSize?: number; landPa
     queryFn: () => api.getHomes({
       pageNumber: params.pageNumber,
       pageSize: params.pageSize ?? 20,
-      landParcelId: params.landParcelId,
-      status: params.status,
+      landParcelIds: params.landParcelId ? [params.landParcelId] : undefined,
+      statuses: params.status ? [params.status] : undefined,
     }),
   })
 }

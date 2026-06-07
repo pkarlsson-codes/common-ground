@@ -39,24 +39,11 @@ public static class HomesEndpoints
     [WolverineGet("/api/v1/homes")]
     [ProducesResponseType<PaginatedResponse<HomeListItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetHomes(
-        int pageNumber,
-        int pageSize,
-        string? landParcelId,
-        string? status,
+        [FromQuery] GetHomesQuerySpec querySpec,
         IHomesApiClient client,
         CancellationToken cancellationToken = default)
     {
-        if (pageNumber <= 0)
-        {
-            pageNumber = 1;
-        }
-
-        if (pageSize <= 0)
-        {
-            pageSize = 20;
-        }
-
-        var result = await client.GetHomesAsync(pageNumber, pageSize, landParcelId, status, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetHomesAsync(querySpec, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
 
@@ -78,23 +65,12 @@ public static class HomesEndpoints
     [ProducesResponseType<PaginatedResponse<HomeAssessmentItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetHomeAssessments(
         string homeId,
-        int pageNumber,
-        int pageSize,
+        [FromQuery] GetHomeAssessmentsQuerySpec querySpec,
         IHomesApiClient client,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
-        if (pageNumber <= 0)
-        {
-            pageNumber = 1;
-        }
-
-        if (pageSize <= 0)
-        {
-            pageSize = 20;
-        }
-
-        var result = await client.GetHomeAssessmentsAsync(homeId, pageNumber, pageSize, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetHomeAssessmentsAsync(homeId, querySpec, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
 }

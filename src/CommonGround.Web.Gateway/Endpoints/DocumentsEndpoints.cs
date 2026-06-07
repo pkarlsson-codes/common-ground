@@ -150,26 +150,11 @@ public static class DocumentsEndpoints
     [WolverineGet("/api/v1/documents")]
     [ProducesResponseType<PaginatedResponse<DocumentLibraryItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> ListDocuments(
-        int pageNumber,
-        int pageSize,
-        bool includeDeleted,
-        string? contentType,
-        string? tag,
-        DateTimeOffset? expiringBefore,
+        [FromQuery] GetDocumentsQuerySpec querySpec,
         IDocumentsApiClient client,
         CancellationToken cancellationToken = default)
     {
-        if (pageNumber <= 0)
-        {
-            pageNumber = 1;
-        }
-
-        if (pageSize <= 0)
-        {
-            pageSize = 20;
-        }
-
-        var result = await client.ListDocumentsAsync(pageNumber, pageSize, includeDeleted, contentType, tag, expiringBefore, cancellationToken).ConfigureAwait(false);
+        var result = await client.ListDocumentsAsync(querySpec, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
 
@@ -178,22 +163,11 @@ public static class DocumentsEndpoints
     public static async Task<IResult> GetEntityDocuments(
         string entityType,
         string entityId,
-        int pageNumber,
-        int pageSize,
+        [FromQuery] GetEntityDocumentsQuerySpec querySpec,
         IDocumentsApiClient client,
         CancellationToken cancellationToken = default)
     {
-        if (pageNumber <= 0)
-        {
-            pageNumber = 1;
-        }
-
-        if (pageSize <= 0)
-        {
-            pageSize = 20;
-        }
-
-        var result = await client.GetEntityDocumentsAsync(entityType, entityId, pageNumber, pageSize, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetEntityDocumentsAsync(entityType, entityId, querySpec, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
 }

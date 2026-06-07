@@ -1,11 +1,11 @@
 using CommonGround.SharedKernel.Infrastructure.Querying;
 
-namespace CommonGround.API.Documents;
+namespace CommonGround.API.Contracts.Documents.Requests;
 
 /// <summary>Query parameters for listing documents with optional filters and pagination.</summary>
 public sealed class GetDocumentsQuerySpec : PaginationQuerySpecV2
 {
-    /// <summary>Initializes a new instance of <see cref="GetDocumentsQuerySpec"/>.</summary>
+    /// <summary>Initializes a new instance with optional filters.</summary>
     /// <param name="pageNumber">1-based page number.</param>
     /// <param name="pageSize">Number of items per page.</param>
     /// <param name="includeDeleted">Whether to include soft-deleted documents.</param>
@@ -38,4 +38,21 @@ public sealed class GetDocumentsQuerySpec : PaginationQuerySpecV2
 
     /// <summary>Gets the upper bound on expiry date, or null for no filter.</summary>
     public DateTimeOffset? ExpiringBefore { get; }
+
+    /// <inheritdoc cref="PaginationQuerySpecV2.AppendFilterParts"/>
+    protected override void AppendFilterParts(List<string> parts)
+    {
+        if (IncludeDeleted)
+        {
+            parts.Add("includeDeleted=true");
+        }
+
+        AddIfNotWhiteSpace(parts, "contentType", ContentType);
+        AddIfNotWhiteSpace(parts, "tag", Tag);
+
+        if (ExpiringBefore.HasValue)
+        {
+            parts.Add($"expiringBefore={Uri.EscapeDataString(ExpiringBefore.Value.ToString("O"))}");
+        }
+    }
 }

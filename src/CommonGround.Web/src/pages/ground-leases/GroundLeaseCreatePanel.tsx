@@ -95,7 +95,7 @@ export default function GroundLeaseCreatePanel({ onClose }: Props) {
               value={createForm.homeId || null}
               onChange={id => setCreateForm(f => ({ ...f, homeId: id ?? '' }))}
               fetchOptions={async q => {
-                const result = await homesApi.getHomes({ landParcelId: createForm.landParcelId, pageSize: 10 })
+                const result = await homesApi.getHomes({ landParcelIds: [createForm.landParcelId], pageSize: 10 })
                 const lower = q.toLowerCase()
                 const items = result.items ?? []
                 const filtered = lower ? items.filter(b =>

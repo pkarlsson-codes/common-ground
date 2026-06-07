@@ -179,10 +179,10 @@ export interface ApplicantSelectionApiInterface {
     /**
      * 
      * @summary Get homeowner applications endpoint.
-     * @param {number} [pageNumber] The page number.
-     * @param {number} [pageSize] The page size.
-     * @param {string} [phase] The application phase.
-     * @param {string} [search] The search term.
+     * @param {number} [pageNumber] 
+     * @param {number} [pageSize] 
+     * @param {string} [phase] 
+     * @param {string} [search] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ApplicantSelectionApiInterface

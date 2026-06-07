@@ -20,16 +20,11 @@ public sealed class StewardshipApiClient(
     }
 
     /// <inheritdoc/>
-    public async Task<PaginatedResponse<StewardshipCaseResponse>> GetStewardshipCasesByGroundLeaseAsync(string groundLeaseId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+    public Task<PaginatedResponse<StewardshipCaseResponse>> GetStewardshipCasesAsync(GetStewardshipCasesQuerySpec querySpec, CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
-        return await GetAsync<PaginatedResponse<StewardshipCaseResponse>>(
-            $"api/stewardship/cases?groundLeaseId={Uri.EscapeDataString(groundLeaseId)}&pageNumber={pageNumber}&pageSize={pageSize}", cancellationToken).ConfigureAwait(false);
+        ArgumentNullException.ThrowIfNull(querySpec);
+        return GetAsync<PaginatedResponse<StewardshipCaseResponse>>($"api/stewardship/cases{querySpec.ToQueryString()}", cancellationToken);
     }
-
-    /// <inheritdoc/>
-    public async Task<PaginatedResponse<StewardshipCaseResponse>> GetAllStewardshipCasesAsync(int pageNumber, int pageSize, CancellationToken cancellationToken)
-        => await GetAsync<PaginatedResponse<StewardshipCaseResponse>>($"api/stewardship/cases?pageNumber={pageNumber}&pageSize={pageSize}", cancellationToken).ConfigureAwait(false);
 
     /// <inheritdoc/>
     public async Task InitiateOccupancyVerificationAsync(string caseId, InitiateOccupancyVerificationRequest request, CancellationToken cancellationToken)
@@ -153,16 +148,11 @@ public sealed class StewardshipApiClient(
     }
 
     /// <inheritdoc/>
-    public async Task<PaginatedResponse<ForeclosurePreventionCaseResponse>> GetForeclosurePreventionCasesByGroundLeaseAsync(string groundLeaseId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+    public Task<PaginatedResponse<ForeclosurePreventionCaseResponse>> GetForeclosurePreventionCasesAsync(GetForeclosurePreventionCasesQuerySpec querySpec, CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
-        return await GetAsync<PaginatedResponse<ForeclosurePreventionCaseResponse>>(
-            $"api/stewardship/foreclosure-prevention?groundLeaseId={Uri.EscapeDataString(groundLeaseId)}&pageNumber={pageNumber}&pageSize={pageSize}", cancellationToken).ConfigureAwait(false);
+        ArgumentNullException.ThrowIfNull(querySpec);
+        return GetAsync<PaginatedResponse<ForeclosurePreventionCaseResponse>>($"api/stewardship/foreclosure-prevention{querySpec.ToQueryString()}", cancellationToken);
     }
-
-    /// <inheritdoc/>
-    public async Task<PaginatedResponse<ForeclosurePreventionCaseResponse>> GetAllForeclosurePreventionCasesAsync(int pageNumber, int pageSize, CancellationToken cancellationToken)
-        => await GetAsync<PaginatedResponse<ForeclosurePreventionCaseResponse>>($"api/stewardship/foreclosure-prevention?pageNumber={pageNumber}&pageSize={pageSize}", cancellationToken).ConfigureAwait(false);
 
     /// <inheritdoc/>
     public async Task RecordServicerDelinquencyAsync(string caseId, RecordServicerDelinquencyRequest request, CancellationToken cancellationToken)

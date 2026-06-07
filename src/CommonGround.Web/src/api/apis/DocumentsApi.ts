@@ -69,6 +69,7 @@ export interface GetEntityDocumentsRequest {
     entityId: string;
     pageNumber?: number;
     pageSize?: number;
+    includeDeleted?: boolean;
 }
 
 export interface ListDocumentsRequest {
@@ -165,6 +166,7 @@ export interface DocumentsApiInterface {
      * @param {string} entityId 
      * @param {number} [pageNumber] 
      * @param {number} [pageSize] 
+     * @param {boolean} [includeDeleted] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
@@ -449,6 +451,10 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
 
         if (requestParameters['pageSize'] != null) {
             queryParameters['pageSize'] = requestParameters['pageSize'];
+        }
+
+        if (requestParameters['includeDeleted'] != null) {
+            queryParameters['includeDeleted'] = requestParameters['includeDeleted'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

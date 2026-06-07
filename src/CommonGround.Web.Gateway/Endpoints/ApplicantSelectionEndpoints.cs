@@ -32,34 +32,18 @@ public static class ApplicantSelectionEndpoints
     /// <summary>
     /// Get homeowner applications endpoint.
     /// </summary>
-    /// <param name="pageNumber">The page number.</param>
-    /// <param name="pageSize">The page size.</param>
-    /// <param name="phase">The application phase.</param>
-    /// <param name="search">The search term.</param>
+    /// <param name="querySpec">The query specification.</param>
     /// <param name="client">Api client.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>Response.</returns>
     [WolverineGet("/api/v1/homeowner-applications")]
     [ProducesResponseType<PaginatedResponse<HomeownerApplicationListItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetHomeownerApplications(
-        int pageNumber,
-        int pageSize,
-        string? phase,
-        string? search,
+        [FromQuery] GetHomeownerApplicationsQuerySpec querySpec,
         IApplicantSelectionApiClient client,
         CancellationToken cancellationToken = default)
     {
-        if (pageNumber <= 0)
-        {
-            pageNumber = 1;
-        }
-
-        if (pageSize <= 0)
-        {
-            pageSize = 20;
-        }
-
-        var result = await client.GetHomeownerApplicationsAsync(pageNumber, pageSize, phase, search, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetHomeownerApplicationsAsync(querySpec, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
 

@@ -15,31 +15,12 @@ public sealed class DevelopmentProjectsApiClient(
 {
     /// <inheritdoc/>
     public async Task<PaginatedResponse<DevelopmentProjectListItemResponse>> GetDevelopmentProjectsAsync(
-        int pageNumber, int pageSize, string? search, string? landParcelId,
-        IReadOnlyCollection<string>? homeIds, CancellationToken cancellationToken)
+        GetDevelopmentProjectsQuerySpec querySpec, CancellationToken cancellationToken)
     {
-        var query = new List<string>(capacity: 5)
-        {
-            $"pageNumber={pageNumber}",
-            $"pageSize={pageSize}",
-        };
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            query.Add($"search={Uri.EscapeDataString(search)}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(landParcelId))
-        {
-            query.Add($"landParcelId={Uri.EscapeDataString(landParcelId)}");
-        }
-
-        if (homeIds is { Count: > 0 })
-        {
-            query.AddRange(homeIds.Select(id => $"homeIds={Uri.EscapeDataString(id)}"));
-        }
+        ArgumentNullException.ThrowIfNull(querySpec);
 
         return await GetAsync<PaginatedResponse<DevelopmentProjectListItemResponse>>(
-            $"api/development-projects?{string.Join('&', query)}", cancellationToken).ConfigureAwait(false);
+            $"api/development-projects{querySpec.ToQueryString()}", cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

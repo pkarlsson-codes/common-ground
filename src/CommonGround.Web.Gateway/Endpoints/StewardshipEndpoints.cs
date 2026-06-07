@@ -15,47 +15,12 @@ public static class StewardshipEndpoints
     // Stewardship Cases
     [WolverineGet("/api/v1/stewardship/cases")]
     [ProducesResponseType<PaginatedResponse<StewardshipCaseResponse>>(StatusCodes.Status200OK)]
-    public static async Task<IResult> GetAllStewardshipCases(
-        int pageNumber,
-        int pageSize,
+    public static async Task<IResult> GetStewardshipCases(
+        [FromQuery] GetStewardshipCasesQuerySpec querySpec,
         IStewardshipApiClient client,
         CancellationToken cancellationToken = default)
     {
-        if (pageNumber <= 0)
-        {
-            pageNumber = 1;
-        }
-
-        if (pageSize <= 0)
-        {
-            pageSize = 20;
-        }
-
-        var result = await client.GetAllStewardshipCasesAsync(pageNumber, pageSize, cancellationToken).ConfigureAwait(false);
-        return Results.Ok(result);
-    }
-
-    [WolverineGet("/api/v1/stewardship/cases/by-ground-lease/{groundLeaseId}")]
-    [ProducesResponseType<PaginatedResponse<StewardshipCaseResponse>>(StatusCodes.Status200OK)]
-    public static async Task<IResult> GetStewardshipCasesByGroundLease(
-        string groundLeaseId,
-        int pageNumber,
-        int pageSize,
-        IStewardshipApiClient client,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
-        if (pageNumber <= 0)
-        {
-            pageNumber = 1;
-        }
-
-        if (pageSize <= 0)
-        {
-            pageSize = 20;
-        }
-
-        var result = await client.GetStewardshipCasesByGroundLeaseAsync(groundLeaseId, pageNumber, pageSize, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetStewardshipCasesAsync(querySpec, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
 
@@ -265,47 +230,12 @@ public static class StewardshipEndpoints
     // Foreclosure Prevention Cases
     [WolverineGet("/api/v1/stewardship/foreclosure-prevention")]
     [ProducesResponseType<PaginatedResponse<ForeclosurePreventionCaseResponse>>(StatusCodes.Status200OK)]
-    public static async Task<IResult> GetAllForeclosurePreventionCases(
-        int pageNumber,
-        int pageSize,
+    public static async Task<IResult> GetForeclosurePreventionCases(
+        [FromQuery] GetForeclosurePreventionCasesQuerySpec querySpec,
         IStewardshipApiClient client,
         CancellationToken cancellationToken = default)
     {
-        if (pageNumber <= 0)
-        {
-            pageNumber = 1;
-        }
-
-        if (pageSize <= 0)
-        {
-            pageSize = 20;
-        }
-
-        var result = await client.GetAllForeclosurePreventionCasesAsync(pageNumber, pageSize, cancellationToken).ConfigureAwait(false);
-        return Results.Ok(result);
-    }
-
-    [WolverineGet("/api/v1/stewardship/foreclosure-prevention/by-ground-lease/{groundLeaseId}")]
-    [ProducesResponseType<PaginatedResponse<ForeclosurePreventionCaseResponse>>(StatusCodes.Status200OK)]
-    public static async Task<IResult> GetForeclosurePreventionCasesByGroundLease(
-        string groundLeaseId,
-        int pageNumber,
-        int pageSize,
-        IStewardshipApiClient client,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
-        if (pageNumber <= 0)
-        {
-            pageNumber = 1;
-        }
-
-        if (pageSize <= 0)
-        {
-            pageSize = 20;
-        }
-
-        var result = await client.GetForeclosurePreventionCasesByGroundLeaseAsync(groundLeaseId, pageNumber, pageSize, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetForeclosurePreventionCasesAsync(querySpec, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
 

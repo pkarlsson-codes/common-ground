@@ -20,13 +20,10 @@ public interface IHomesApiClient
     Task<HomeResponse> GetHomeAsync(string homeId, CancellationToken cancellationToken);
 
     /// <summary>Gets a paginated list of homes.</summary>
-    /// <param name="pageNumber">The page number (1-based).</param>
-    /// <param name="pageSize">The number of items per page.</param>
-    /// <param name="landParcelId">Optional land parcel ID filter.</param>
-    /// <param name="status">Optional status filter.</param>
+    /// <param name="querySpec">The query specification containing pagination and filter parameters.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A paginated list of home summaries.</returns>
-    Task<PaginatedResponse<HomeListItemResponse>> GetHomesAsync(int pageNumber, int pageSize, string? landParcelId, string? status, CancellationToken cancellationToken);
+    Task<PaginatedResponse<HomeListItemResponse>> GetHomesAsync(GetHomesQuerySpec querySpec, CancellationToken cancellationToken);
 
     /// <summary>Records an assessment for a home.</summary>
     /// <param name="homeId">The ID of the home to assess.</param>
@@ -37,9 +34,8 @@ public interface IHomesApiClient
 
     /// <summary>Gets a paginated list of assessments for a home, newest first.</summary>
     /// <param name="homeId">The ID of the home.</param>
-    /// <param name="pageNumber">The page number (1-based).</param>
-    /// <param name="pageSize">The number of items per page.</param>
+    /// <param name="querySpec">The query specification containing pagination parameters.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A paginated list of assessment items.</returns>
-    Task<PaginatedResponse<HomeAssessmentItemResponse>> GetHomeAssessmentsAsync(string homeId, int pageNumber, int pageSize, CancellationToken cancellationToken);
+    Task<PaginatedResponse<HomeAssessmentItemResponse>> GetHomeAssessmentsAsync(string homeId, GetHomeAssessmentsQuerySpec querySpec, CancellationToken cancellationToken);
 }

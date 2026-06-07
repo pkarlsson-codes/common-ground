@@ -141,34 +141,24 @@ export interface FailOccupancyOperationRequest {
     failOccupancyRequest: FailOccupancyRequest;
 }
 
-export interface GetAllForeclosurePreventionCasesRequest {
-    pageNumber?: number;
-    pageSize?: number;
-}
-
-export interface GetAllStewardshipCasesRequest {
-    pageNumber?: number;
-    pageSize?: number;
-}
-
 export interface GetForeclosurePreventionCaseRequest {
     caseId: string;
 }
 
-export interface GetForeclosurePreventionCasesByGroundLeaseRequest {
-    groundLeaseId: string;
+export interface GetForeclosurePreventionCasesRequest {
     pageNumber?: number;
     pageSize?: number;
+    groundLeaseId?: string | null;
 }
 
 export interface GetStewardshipCaseRequest {
     caseId: string;
 }
 
-export interface GetStewardshipCasesByGroundLeaseRequest {
-    groundLeaseId: string;
+export interface GetStewardshipCasesRequest {
     pageNumber?: number;
     pageSize?: number;
+    groundLeaseId?: string | null;
 }
 
 export interface IdentifyViolationOperationRequest {
@@ -358,34 +348,6 @@ export interface StewardshipApiInterface {
 
     /**
      * 
-     * @param {number} [pageNumber] 
-     * @param {number} [pageSize] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof StewardshipApiInterface
-     */
-    getAllForeclosurePreventionCasesRaw(requestParameters: GetAllForeclosurePreventionCasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfForeclosurePreventionCaseResponse>>;
-
-    /**
-     */
-    getAllForeclosurePreventionCases(requestParameters: GetAllForeclosurePreventionCasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfForeclosurePreventionCaseResponse>;
-
-    /**
-     * 
-     * @param {number} [pageNumber] 
-     * @param {number} [pageSize] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof StewardshipApiInterface
-     */
-    getAllStewardshipCasesRaw(requestParameters: GetAllStewardshipCasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfStewardshipCaseResponse>>;
-
-    /**
-     */
-    getAllStewardshipCases(requestParameters: GetAllStewardshipCasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfStewardshipCaseResponse>;
-
-    /**
-     * 
      * @param {string} caseId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -399,18 +361,18 @@ export interface StewardshipApiInterface {
 
     /**
      * 
-     * @param {string} groundLeaseId 
      * @param {number} [pageNumber] 
      * @param {number} [pageSize] 
+     * @param {string} [groundLeaseId] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    getForeclosurePreventionCasesByGroundLeaseRaw(requestParameters: GetForeclosurePreventionCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfForeclosurePreventionCaseResponse>>;
+    getForeclosurePreventionCasesRaw(requestParameters: GetForeclosurePreventionCasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfForeclosurePreventionCaseResponse>>;
 
     /**
      */
-    getForeclosurePreventionCasesByGroundLease(requestParameters: GetForeclosurePreventionCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfForeclosurePreventionCaseResponse>;
+    getForeclosurePreventionCases(requestParameters: GetForeclosurePreventionCasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfForeclosurePreventionCaseResponse>;
 
     /**
      * 
@@ -427,18 +389,18 @@ export interface StewardshipApiInterface {
 
     /**
      * 
-     * @param {string} groundLeaseId 
      * @param {number} [pageNumber] 
      * @param {number} [pageSize] 
+     * @param {string} [groundLeaseId] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StewardshipApiInterface
      */
-    getStewardshipCasesByGroundLeaseRaw(requestParameters: GetStewardshipCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfStewardshipCaseResponse>>;
+    getStewardshipCasesRaw(requestParameters: GetStewardshipCasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfStewardshipCaseResponse>>;
 
     /**
      */
-    getStewardshipCasesByGroundLease(requestParameters: GetStewardshipCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfStewardshipCaseResponse>;
+    getStewardshipCases(requestParameters: GetStewardshipCasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfStewardshipCaseResponse>;
 
     /**
      * 
@@ -1054,76 +1016,6 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
 
     /**
      */
-    async getAllForeclosurePreventionCasesRaw(requestParameters: GetAllForeclosurePreventionCasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfForeclosurePreventionCaseResponse>> {
-        const queryParameters: any = {};
-
-        if (requestParameters['pageNumber'] != null) {
-            queryParameters['pageNumber'] = requestParameters['pageNumber'];
-        }
-
-        if (requestParameters['pageSize'] != null) {
-            queryParameters['pageSize'] = requestParameters['pageSize'];
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-
-        let urlPath = `/api/v1/stewardship/foreclosure-prevention`;
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedResponseOfForeclosurePreventionCaseResponseFromJSON(jsonValue));
-    }
-
-    /**
-     */
-    async getAllForeclosurePreventionCases(requestParameters: GetAllForeclosurePreventionCasesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfForeclosurePreventionCaseResponse> {
-        const response = await this.getAllForeclosurePreventionCasesRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     */
-    async getAllStewardshipCasesRaw(requestParameters: GetAllStewardshipCasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfStewardshipCaseResponse>> {
-        const queryParameters: any = {};
-
-        if (requestParameters['pageNumber'] != null) {
-            queryParameters['pageNumber'] = requestParameters['pageNumber'];
-        }
-
-        if (requestParameters['pageSize'] != null) {
-            queryParameters['pageSize'] = requestParameters['pageSize'];
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-
-        let urlPath = `/api/v1/stewardship/cases`;
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedResponseOfStewardshipCaseResponseFromJSON(jsonValue));
-    }
-
-    /**
-     */
-    async getAllStewardshipCases(requestParameters: GetAllStewardshipCasesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfStewardshipCaseResponse> {
-        const response = await this.getAllStewardshipCasesRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     */
     async getForeclosurePreventionCaseRaw(requestParameters: GetForeclosurePreventionCaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ForeclosurePreventionCaseResponse>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
@@ -1159,14 +1051,7 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
 
     /**
      */
-    async getForeclosurePreventionCasesByGroundLeaseRaw(requestParameters: GetForeclosurePreventionCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfForeclosurePreventionCaseResponse>> {
-        if (requestParameters['groundLeaseId'] == null) {
-            throw new runtime.RequiredError(
-                'groundLeaseId',
-                'Required parameter "groundLeaseId" was null or undefined when calling getForeclosurePreventionCasesByGroundLease().'
-            );
-        }
-
+    async getForeclosurePreventionCasesRaw(requestParameters: GetForeclosurePreventionCasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfForeclosurePreventionCaseResponse>> {
         const queryParameters: any = {};
 
         if (requestParameters['pageNumber'] != null) {
@@ -1177,11 +1062,14 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             queryParameters['pageSize'] = requestParameters['pageSize'];
         }
 
+        if (requestParameters['groundLeaseId'] != null) {
+            queryParameters['groundLeaseId'] = requestParameters['groundLeaseId'];
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
 
-        let urlPath = `/api/v1/stewardship/foreclosure-prevention/by-ground-lease/{groundLeaseId}`;
-        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+        let urlPath = `/api/v1/stewardship/foreclosure-prevention`;
 
         const response = await this.request({
             path: urlPath,
@@ -1195,8 +1083,8 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
 
     /**
      */
-    async getForeclosurePreventionCasesByGroundLease(requestParameters: GetForeclosurePreventionCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfForeclosurePreventionCaseResponse> {
-        const response = await this.getForeclosurePreventionCasesByGroundLeaseRaw(requestParameters, initOverrides);
+    async getForeclosurePreventionCases(requestParameters: GetForeclosurePreventionCasesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfForeclosurePreventionCaseResponse> {
+        const response = await this.getForeclosurePreventionCasesRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -1237,14 +1125,7 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
 
     /**
      */
-    async getStewardshipCasesByGroundLeaseRaw(requestParameters: GetStewardshipCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfStewardshipCaseResponse>> {
-        if (requestParameters['groundLeaseId'] == null) {
-            throw new runtime.RequiredError(
-                'groundLeaseId',
-                'Required parameter "groundLeaseId" was null or undefined when calling getStewardshipCasesByGroundLease().'
-            );
-        }
-
+    async getStewardshipCasesRaw(requestParameters: GetStewardshipCasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfStewardshipCaseResponse>> {
         const queryParameters: any = {};
 
         if (requestParameters['pageNumber'] != null) {
@@ -1255,11 +1136,14 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
             queryParameters['pageSize'] = requestParameters['pageSize'];
         }
 
+        if (requestParameters['groundLeaseId'] != null) {
+            queryParameters['groundLeaseId'] = requestParameters['groundLeaseId'];
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
 
-        let urlPath = `/api/v1/stewardship/cases/by-ground-lease/{groundLeaseId}`;
-        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+        let urlPath = `/api/v1/stewardship/cases`;
 
         const response = await this.request({
             path: urlPath,
@@ -1273,8 +1157,8 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
 
     /**
      */
-    async getStewardshipCasesByGroundLease(requestParameters: GetStewardshipCasesByGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfStewardshipCaseResponse> {
-        const response = await this.getStewardshipCasesByGroundLeaseRaw(requestParameters, initOverrides);
+    async getStewardshipCases(requestParameters: GetStewardshipCasesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfStewardshipCaseResponse> {
+        const response = await this.getStewardshipCasesRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -79,32 +79,21 @@ public interface IDocumentsApiClient
     Task UntagDocumentAsync(string documentId, string tag, CancellationToken cancellationToken);
 
     /// <summary>Lists documents in the library, paginated with optional filters.</summary>
-    /// <param name="pageNumber">The 1-based page number.</param>
-    /// <param name="pageSize">The page size.</param>
-    /// <param name="includeDeleted">When true, includes soft-deleted documents.</param>
-    /// <param name="contentType">Optional MIME content-type filter.</param>
-    /// <param name="tag">Optional tag filter (normalised lowercase).</param>
-    /// <param name="expiringBefore">When provided, restricts results to documents expiring before this date.</param>
+    /// <param name="querySpec">The pagination and filter parameters.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A paginated response of library items.</returns>
     Task<PaginatedResponse<DocumentLibraryItemResponse>> ListDocumentsAsync(
-        int pageNumber,
-        int pageSize,
-        bool includeDeleted,
-        string? contentType,
-        string? tag,
-        DateTimeOffset? expiringBefore,
+        GetDocumentsQuerySpec querySpec,
         CancellationToken cancellationToken);
 
     /// <summary>Lists documents attached to an entity.</summary>
     /// <param name="entityType">The type of entity.</param>
     /// <param name="entityId">The ID of the entity.</param>
-    /// <param name="pageNumber">The page number (1-based).</param>
-    /// <param name="pageSize">The number of items per page.</param>
+    /// <param name="querySpec">The pagination and filter parameters.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A paginated response of entity documents.</returns>
     Task<PaginatedResponse<EntityDocumentItemResponse>> GetEntityDocumentsAsync(
-        string entityType, string entityId, int pageNumber, int pageSize, CancellationToken cancellationToken);
+        string entityType, string entityId, GetEntityDocumentsQuerySpec querySpec, CancellationToken cancellationToken);
 
     /// <summary>Gets the absolute URL the client should redirect to for downloading.</summary>
     /// <remarks>Implementation should call the API and surface the 302 location header without following.</remarks>

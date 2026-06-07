@@ -60,7 +60,7 @@ export interface GetGroundLeaseRequest {
 export interface GetGroundLeasesRequest {
     pageNumber?: number;
     pageSize?: number;
-    status?: string | null;
+    statuses?: Array<string> | null;
     landParcelId?: string | null;
     homeId?: string | null;
     search?: string | null;
@@ -122,7 +122,7 @@ export interface GroundLeasesApiInterface {
      * 
      * @param {number} [pageNumber] 
      * @param {number} [pageSize] 
-     * @param {string} [status] 
+     * @param {Array<string>} [statuses] 
      * @param {string} [landParcelId] 
      * @param {string} [homeId] 
      * @param {string} [search] 
@@ -287,8 +287,8 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
             queryParameters['pageSize'] = requestParameters['pageSize'];
         }
 
-        if (requestParameters['status'] != null) {
-            queryParameters['status'] = requestParameters['status'];
+        if (requestParameters['statuses'] != null) {
+            queryParameters['statuses'] = requestParameters['statuses'];
         }
 
         if (requestParameters['landParcelId'] != null) {

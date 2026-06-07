@@ -12,14 +12,14 @@ const api = new GroundLeasesApi(apiConfig)
 export function useGroundLeases(pageNumber: number, status?: string, landParcelId?: string, homeId?: string, search?: string) {
   return useQuery({
     queryKey: ['ground-leases', pageNumber, status, landParcelId, homeId, search],
-    queryFn: () => api.getGroundLeases({ pageNumber, pageSize: 20, status, landParcelId, homeId, search }),
+    queryFn: () => api.getGroundLeases({ pageNumber, pageSize: 20, statuses: status ? [status] : undefined, landParcelId, homeId, search }),
   })
 }
 
 export function useAllActiveGroundLeases() {
   return useQuery({
     queryKey: ['ground-leases', 'all-active'],
-    queryFn: () => api.getGroundLeases({ pageSize: 1000, status: 'Active' }),
+    queryFn: () => api.getGroundLeases({ pageSize: 1000, statuses: ['Active'] }),
   })
 }
 

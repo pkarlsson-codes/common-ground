@@ -37,6 +37,7 @@ export interface GetDevelopmentProjectsRequest {
     pageSize?: number;
     search?: string | null;
     landParcelId?: string | null;
+    homeIds?: Array<string> | null;
 }
 
 export interface InitiateDevelopmentProjectOperationRequest {
@@ -56,6 +57,7 @@ export interface DevelopmentProjectsApiInterface {
      * @param {number} [pageSize] 
      * @param {string} [search] 
      * @param {string} [landParcelId] 
+     * @param {Array<string>} [homeIds] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DevelopmentProjectsApiInterface
@@ -105,6 +107,10 @@ export class DevelopmentProjectsApi extends runtime.BaseAPI implements Developme
 
         if (requestParameters['landParcelId'] != null) {
             queryParameters['landParcelId'] = requestParameters['landParcelId'];
+        }
+
+        if (requestParameters['homeIds'] != null) {
+            queryParameters['homeIds'] = requestParameters['homeIds'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

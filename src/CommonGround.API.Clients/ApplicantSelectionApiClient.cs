@@ -19,25 +19,12 @@ public sealed class ApplicantSelectionApiClient(
 
     /// <inheritdoc/>
     public async Task<PaginatedResponse<HomeownerApplicationListItemResponse>> GetHomeownerApplicationsAsync(
-        int pageNumber,
-        int pageSize,
-        string? phase,
-        string? search,
+        GetHomeownerApplicationsQuerySpec querySpec,
         CancellationToken cancellationToken)
     {
-        var queryString = $"?pageNumber={pageNumber}&pageSize={pageSize}";
-
-        if (!string.IsNullOrWhiteSpace(phase))
-        {
-            queryString += $"&phase={Uri.EscapeDataString(phase)}";
-        }
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            queryString += $"&search={Uri.EscapeDataString(search)}";
-        }
-
-        return await GetAsync<PaginatedResponse<HomeownerApplicationListItemResponse>>($"api/homeowner-applications{queryString}", cancellationToken).ConfigureAwait(false);
+        ArgumentNullException.ThrowIfNull(querySpec);
+        return await GetAsync<PaginatedResponse<HomeownerApplicationListItemResponse>>(
+            $"api/homeowner-applications{querySpec.ToQueryString()}", cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

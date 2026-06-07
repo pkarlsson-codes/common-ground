@@ -15,10 +15,7 @@ public interface IApplicantSelectionApiClient
 
     /// <summary>Gets a paginated list of homeowner applications.</summary>
     Task<PaginatedResponse<HomeownerApplicationListItemResponse>> GetHomeownerApplicationsAsync(
-        int pageNumber,
-        int pageSize,
-        string? phase,
-        string? search,
+        GetHomeownerApplicationsQuerySpec querySpec,
         CancellationToken cancellationToken);
 
     /// <summary>Gets a homeowner application by ID.</summary>

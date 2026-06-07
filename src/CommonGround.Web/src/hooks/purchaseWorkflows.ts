@@ -22,7 +22,7 @@ const api = new PurchaseWorkflowsApi(apiConfig)
 export function usePurchaseWorkflows(pageNumber: number, groundLeaseId?: string, phase?: string, search?: string) {
   return useQuery({
     queryKey: ['purchase-workflows', pageNumber, groundLeaseId, phase, search],
-    queryFn: () => api.getPurchaseWorkflows({ pageNumber, pageSize: 20, groundLeaseId, phase, search }),
+    queryFn: () => api.getPurchaseWorkflows({ pageNumber, pageSize: 20, groundLeaseTemplateId: groundLeaseId, phase, search }),
   })
 }
 

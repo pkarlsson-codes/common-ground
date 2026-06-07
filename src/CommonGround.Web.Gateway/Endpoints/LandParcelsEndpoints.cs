@@ -39,23 +39,11 @@ public static class LandParcelsEndpoints
     [WolverineGet("/api/v1/land-parcels")]
     [ProducesResponseType<PaginatedResponse<LandParcelListItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetLandParcels(
-        int pageNumber,
-        int pageSize,
-        string? search,
+        [FromQuery] GetLandParcelsQuerySpec querySpec,
         ILandParcelsApiClient client,
         CancellationToken cancellationToken = default)
     {
-        if (pageNumber <= 0)
-        {
-            pageNumber = 1;
-        }
-
-        if (pageSize <= 0)
-        {
-            pageSize = 20;
-        }
-
-        var result = await client.GetLandParcelsAsync(pageNumber, pageSize, search, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetLandParcelsAsync(querySpec, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
 

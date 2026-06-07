@@ -39,25 +39,11 @@ public static class PurchaseWorkflowsEndpoints
     [WolverineGet("/api/v1/purchase-workflows")]
     [ProducesResponseType<PaginatedResponse<PurchaseWorkflowListItemResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetPurchaseWorkflows(
-        int pageNumber,
-        int pageSize,
-        string? groundLeaseId,
-        string? phase,
-        string? search,
+        [FromQuery] GetPurchaseWorkflowsQuerySpec querySpec,
         IPurchaseWorkflowsApiClient client,
         CancellationToken cancellationToken = default)
     {
-        if (pageNumber <= 0)
-        {
-            pageNumber = 1;
-        }
-
-        if (pageSize <= 0)
-        {
-            pageSize = 20;
-        }
-
-        var result = await client.GetPurchaseWorkflowsAsync(pageNumber, pageSize, groundLeaseId, phase, search, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetPurchaseWorkflowsAsync(querySpec, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
 

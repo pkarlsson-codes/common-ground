@@ -84,7 +84,6 @@
           {
             "name": "pageNumber",
             "in": "query",
-            "description": "The page number.",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -94,7 +93,6 @@
           {
             "name": "pageSize",
             "in": "query",
-            "description": "The page size.",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -104,7 +102,6 @@
           {
             "name": "phase",
             "in": "query",
-            "description": "The application phase.",
             "schema": {
               "type": "string",
               "nullable": true
@@ -114,7 +111,6 @@
           {
             "name": "search",
             "in": "query",
-            "description": "The search term.",
             "schema": {
               "type": "string",
               "nullable": true
@@ -716,6 +712,20 @@
               "nullable": true
             },
             "x-position": 4
+          },
+          {
+            "name": "homeIds",
+            "in": "query",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "x-position": 5
           }
         ],
         "responses": {
@@ -1431,8 +1441,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "guid"
+              "type": "string"
             },
             "x-position": 2
           },
@@ -1453,6 +1462,14 @@
               "format": "int32"
             },
             "x-position": 4
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "x-position": 5
           }
         ],
         "responses": {
@@ -1572,11 +1589,16 @@
             "x-position": 2
           },
           {
-            "name": "status",
+            "name": "statuses",
             "in": "query",
+            "style": "form",
+            "explode": true,
             "schema": {
-              "type": "string",
-              "nullable": true
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "type": "string"
+              }
             },
             "x-position": 3
           },
@@ -1977,20 +1999,30 @@
             "x-position": 2
           },
           {
-            "name": "landParcelId",
+            "name": "landParcelIds",
             "in": "query",
+            "style": "form",
+            "explode": true,
             "schema": {
-              "type": "string",
-              "nullable": true
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "type": "string"
+              }
             },
             "x-position": 3
           },
           {
-            "name": "status",
+            "name": "statuses",
             "in": "query",
+            "style": "form",
+            "explode": true,
             "schema": {
-              "type": "string",
-              "nullable": true
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "type": "string"
+              }
             },
             "x-position": 4
           }
@@ -2596,7 +2628,7 @@
             "x-position": 2
           },
           {
-            "name": "groundLeaseId",
+            "name": "groundLeaseTemplateId",
             "in": "query",
             "schema": {
               "type": "string",
@@ -3359,7 +3391,7 @@
         "tags": [
           "Stewardship"
         ],
-        "operationId": "GetAllStewardshipCases",
+        "operationId": "GetStewardshipCases",
         "parameters": [
           {
             "name": "pageNumber",
@@ -3378,71 +3410,13 @@
               "format": "int32"
             },
             "x-position": 2
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponseOfStewardshipCaseResponse"
-                }
-              }
-            }
           },
-          "404": {
-            "description": ""
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/stewardship/cases/by-ground-lease/{groundLeaseId}": {
-      "get": {
-        "tags": [
-          "Stewardship"
-        ],
-        "operationId": "GetStewardshipCasesByGroundLease",
-        "parameters": [
           {
             "name": "groundLeaseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          },
-          {
-            "name": "pageNumber",
             "in": "query",
             "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "x-position": 2
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string",
+              "nullable": true
             },
             "x-position": 3
           }
@@ -4468,7 +4442,7 @@
         "tags": [
           "Stewardship"
         ],
-        "operationId": "GetAllForeclosurePreventionCases",
+        "operationId": "GetForeclosurePreventionCases",
         "parameters": [
           {
             "name": "pageNumber",
@@ -4487,6 +4461,15 @@
               "format": "int32"
             },
             "x-position": 2
+          },
+          {
+            "name": "groundLeaseId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 3
           }
         ],
         "responses": {
@@ -4555,73 +4538,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/IResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": ""
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/stewardship/foreclosure-prevention/by-ground-lease/{groundLeaseId}": {
-      "get": {
-        "tags": [
-          "Stewardship"
-        ],
-        "operationId": "GetForeclosurePreventionCasesByGroundLease",
-        "parameters": [
-          {
-            "name": "groundLeaseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          },
-          {
-            "name": "pageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "x-position": 2
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "x-position": 3
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponseOfForeclosurePreventionCaseResponse"
                 }
               }
             }
@@ -6012,8 +5928,7 @@
             "type": "string"
           },
           "entityId": {
-            "type": "string",
-            "format": "guid"
+            "type": "string"
           },
           "role": {
             "type": "string",
@@ -6034,8 +5949,7 @@
             "type": "string"
           },
           "entityId": {
-            "type": "string",
-            "format": "guid"
+            "type": "string"
           },
           "role": {
             "type": "string",

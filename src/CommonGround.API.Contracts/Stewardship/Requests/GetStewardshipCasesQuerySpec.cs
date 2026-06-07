@@ -1,6 +1,6 @@
 using CommonGround.SharedKernel.Infrastructure.Querying;
 
-namespace CommonGround.API.Stewardship;
+namespace CommonGround.API.Contracts.Stewardship.Requests;
 
 /// <summary>Query parameters for listing stewardship cases with optional ground lease filter and pagination.</summary>
 public sealed class GetStewardshipCasesQuerySpec : PaginationQuerySpecV2
@@ -20,4 +20,10 @@ public sealed class GetStewardshipCasesQuerySpec : PaginationQuerySpecV2
 
     /// <summary>Gets the ground lease ID to filter by, or null to return all active cases.</summary>
     public string? GroundLeaseId { get; }
+
+    /// <inheritdoc cref="PaginationQuerySpecV2.AppendFilterParts"/>
+    protected override void AppendFilterParts(List<string> parts)
+    {
+        AddIfNotWhiteSpace(parts, "groundLeaseId", GroundLeaseId);
+    }
 }
