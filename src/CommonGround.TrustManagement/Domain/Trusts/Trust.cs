@@ -1,6 +1,6 @@
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Exceptions;
 using CommonGround.SharedKernel.Domain.Events;
+using CommonGround.TrustManagement.Application.Errors;
 using CommonGround.TrustManagement.Domain.Trusts.Events;
 
 namespace CommonGround.TrustManagement.Domain.Trusts;
@@ -20,7 +20,7 @@ public sealed class Trust : AggregateRoot<TrustId>
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new InvariantViolationException("Trust name must be provided.");
+            throw BusinessRuleViolation.Trust.Create.NameRequired();
         }
 
         var trust = new Trust();
@@ -36,7 +36,7 @@ public sealed class Trust : AggregateRoot<TrustId>
 
         if (string.IsNullOrWhiteSpace(correlationId))
         {
-            throw new InvariantViolationException("Correlation id must be provided for onboarding choreography.");
+            throw BusinessRuleViolation.Trust.RequestOnboarding.CorrelationIdRequired();
         }
 
         ApplyChange(new TrustOnboardingRequested(Id.Value, Name, creatorUserId.Value, correlationId));

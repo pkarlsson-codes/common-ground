@@ -92,5 +92,8 @@ internal static class BusinessRuleErrorMessageMap
             ["stewardship.stewardship_case.schedule_property_inspection.inspector_name_required"] = "Inspector name is required.",
             ["stewardship.stewardship_case.submit_occupancy_verification.invalid_status"] = "Occupancy verification cannot be submitted in the current status.",
             ["stewardship.stewardship_case.verify_occupancy.invalid_status"] = "Occupancy verification cannot be approved in the current status.",
+
+            ["trust_management.trust.create.name_required"] = "Trust name is required.",
+            ["trust_management.trust.request_onboarding.correlation_id_required"] = "A correlation identifier is required to initiate trust onboarding.",
         };
 }
