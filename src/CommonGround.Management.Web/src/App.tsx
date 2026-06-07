@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import DevelopmentProjectsPage from './pages/DevelopmentProjectsPage'
 import DocumentsPage from './pages/documents/DocumentsPage'
 import GroundLeasesPage from './pages/GroundLeasesPage'
+import GroundLeaseTemplatesPage from './pages/GroundLeaseTemplatesPage'
 import HomesPage from './pages/HomesPage'
 import ApplicantSelectionPage from './pages/ApplicantSelectionPage'
 import LandParcelsPage from './pages/LandParcelsPage'
@@ -58,7 +59,8 @@ export default function App() {
               <Route path="/land-parcels"        element={<LandParcelsPage />} />
               <Route path="/homes"               element={<HomesPage />} />
               <Route path="/development"         element={<DevelopmentProjectsPage />} />
-              <Route path="/ground-leases"       element={<GroundLeasesPage />} />
+              <Route path="/ground-leases"          element={<GroundLeasesPage />} />
+              <Route path="/ground-lease-templates" element={<GroundLeaseTemplatesPage />} />
               <Route path="/applicant-selection" element={<ApplicantSelectionPage />} />
               <Route path="/resale-workflows"    element={<ResaleWorkflowsPage />} />
               <Route path="/purchase-workflows"  element={<PurchaseWorkflowsPage />} />

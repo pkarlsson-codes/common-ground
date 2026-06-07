@@ -104,6 +104,13 @@ export default function Layout() {
             Ground Leases
           </NavLink>
           <NavLink
+            to="/ground-lease-templates"
+            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          >
+            <IconLease />
+            Lease Templates
+          </NavLink>
+          <NavLink
             to="/resale-workflows"
             className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
           >
