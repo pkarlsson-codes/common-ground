@@ -126,6 +126,7 @@ dotnet_diagnostic.CA2007.severity = warning
 
 [**/{*Controller,*Endpoints}.cs]
 dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.SA1600.severity = none
 
 [**/Migrations/*.cs]
 dotnet_diagnostic.CA1707.severity = none

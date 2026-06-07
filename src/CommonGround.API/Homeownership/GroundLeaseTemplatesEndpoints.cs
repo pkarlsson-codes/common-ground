@@ -11,12 +11,9 @@ using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
 
-#pragma warning disable CA2007
-#pragma warning disable SA1600
 
 namespace CommonGround.API.Homeownership;
 
-/// <summary>Endpoints for managing ground lease templates.</summary>
 public static class GroundLeaseTemplatesEndpoints
 {
     [WolverinePost("/api/ground-lease-templates")]
@@ -50,13 +47,6 @@ public static class GroundLeaseTemplatesEndpoints
         return Results.Created($"/api/ground-lease-templates/{id.Value}", new CreateGroundLeaseTemplateResponse(id.Value));
     }
 
-    /// <summary>
-    /// Handles GET requests to retrieve a paginated list of ground lease templates, with optional filtering by name and status. The endpoint accepts query parameters for pagination, search, and status, and returns a paginated response containing summary information about each ground lease template.
-    /// </summary>
-    /// <param name="request">The query parameters for pagination, search, and status filtering.</param>
-    /// <param name="bus">The message bus used to send the query.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>A paginated response containing summary information about each ground lease template.</returns>
     [WolverineGet("/api/ground-lease-templates")]
     public static async Task<IResult> GetGroundLeaseTemplates(
         [FromQuery] GetGroundLeaseTemplatesQuerySpec request,
@@ -77,5 +67,3 @@ public static class GroundLeaseTemplatesEndpoints
     }
 }
 
-#pragma warning restore CA2007
-#pragma warning restore SA1600

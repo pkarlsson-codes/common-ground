@@ -14,8 +14,6 @@ using Wolverine.Http;
 
 namespace CommonGround.API.Documents;
 
-#pragma warning disable SA1600
-#pragma warning disable CA2007
 
 public static class DocumentsEndpoints
 {
@@ -300,5 +298,3 @@ public static class DocumentsEndpoints
     }
 }
 
-#pragma warning restore CA2007
-#pragma warning restore SA1600

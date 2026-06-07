@@ -11,8 +11,6 @@ using Wolverine.Http;
 
 namespace CommonGround.API.Stewardship;
 
-#pragma warning disable SA1600
-#pragma warning disable CA2007
 
 public static class StewardshipCasesEndpoints
 {
@@ -165,5 +163,3 @@ public static class StewardshipCasesEndpoints
     }
 }
 
-#pragma warning restore CA2007
-#pragma warning restore SA1600

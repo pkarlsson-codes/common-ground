@@ -11,8 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
 
-#pragma warning disable SA1600
-#pragma warning disable CA2007
 
 namespace CommonGround.API.PropertyRegistry;
 
@@ -124,5 +122,3 @@ public static class LandParcelsEndpoints
     }
 }
 
-#pragma warning restore CA2007
-#pragma warning restore SA1600

@@ -5,8 +5,6 @@ using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine.Http;
 
-#pragma warning disable CA2007
-#pragma warning disable SA1600
 
 namespace CommonGround.Management.Gateway.Endpoints;
 
