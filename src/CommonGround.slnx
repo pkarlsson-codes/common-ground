@@ -20,4 +20,5 @@
   <Project Path="CommonGround.TrustManagement.Contracts/CommonGround.TrustManagement.Contracts.csproj" />
   <Project Path="CommonGround.TrustManagement/CommonGround.TrustManagement.csproj" />
   <Project Path="CommonGround.Management.Gateway/CommonGround.Management.Gateway.csproj" />
+  <Project Path="CommonGround.Homeowner.Gateway/CommonGround.Homeowner.Gateway.csproj" />
 </Solution>

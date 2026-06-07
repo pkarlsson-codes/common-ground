@@ -15,6 +15,7 @@
     "dotnet:format": "dotnet format src/CommonGround.slnx",
     "api:start": "cd src/CommonGround.API && dotnet run",
     "management:gateway:start": "cd src/CommonGround.Management.Gateway && dotnet run",
+    "homeowner:gateway:start": "cd src/CommonGround.Homeowner.Gateway && dotnet run",
     "management:web:start": "cd src/CommonGround.Management.Web && npm run dev",
     "management:web:build": "cd src/CommonGround.Management.Web && npm run build",
     "management:web:lint": "cd src/CommonGround.Management.Web && npm run lint",
