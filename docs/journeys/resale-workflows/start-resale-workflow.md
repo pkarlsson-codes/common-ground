@@ -15,4 +15,6 @@
 13. Toast: "Purchase workflow initiated"
 14. Panel closes, user is navigated to Purchase Workflows with the new workflow's detail panel open
 
+The new workflow reuses the lease template, land parcel, and home of the ground lease being resold. If the lease was created directly (without a lease template), initiating fails with an error explaining that a purchase workflow cannot be started from it.
+
 Continues in: [View Purchase Workflow Detail](../purchase-workflows/view-purchase-workflow-detail.md)

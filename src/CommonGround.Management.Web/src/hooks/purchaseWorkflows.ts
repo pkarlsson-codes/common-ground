@@ -19,10 +19,10 @@ import type { PurchaseWorkflowListItemResponse } from '../api/models/PurchaseWor
 
 const api = new PurchaseWorkflowsApi(apiConfig)
 
-export function usePurchaseWorkflows(pageNumber: number, groundLeaseId?: string, phase?: string, search?: string) {
+export function usePurchaseWorkflows(pageNumber: number, groundLeaseTemplateId?: string, phase?: string, search?: string) {
   return useQuery({
-    queryKey: ['purchase-workflows', pageNumber, groundLeaseId, phase, search],
-    queryFn: () => api.getPurchaseWorkflows({ pageNumber, pageSize: 20, groundLeaseTemplateId: groundLeaseId, phase, search }),
+    queryKey: ['purchase-workflows', pageNumber, groundLeaseTemplateId, phase, search],
+    queryFn: () => api.getPurchaseWorkflows({ pageNumber, pageSize: 20, groundLeaseTemplateId, phase, search }),
   })
 }
 
@@ -40,7 +40,9 @@ export function useInitiatePurchaseWorkflow() {
     mutationFn: (form: InitiateWorkflowForm) =>
       api.initiatePurchaseWorkflow({
         initiatePurchaseWorkflowRequest: {
-          groundLeaseId: form.groundLeaseId,
+          groundLeaseTemplateId: form.groundLeaseTemplateId,
+          landParcelId: form.landParcelId,
+          homeId: form.homeId,
           buyerFullName: form.buyerFullName,
           buyerEmail: form.buyerEmail,
           buyerPhone: form.buyerPhone || undefined,

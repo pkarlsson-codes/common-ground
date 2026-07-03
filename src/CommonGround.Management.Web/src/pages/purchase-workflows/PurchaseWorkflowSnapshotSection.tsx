@@ -57,8 +57,10 @@ export default function PurchaseWorkflowSnapshotSection({ detail }: PurchaseWork
           </div>
         )}
         <div className="detail-field full-span">
-          <div className="detail-field__value">
-            <NavIdLink id={detail.groundLeaseId} to="/ground-leases" label="Open Ground Lease" />
+          <div className="detail-field__value" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <NavIdLink id={detail.groundLeaseTemplateId} to="/ground-lease-templates" label="Open Lease Template" />
+            <NavIdLink id={detail.landParcelId} to="/land-parcels" label="Open Land Parcel" />
+            <NavIdLink id={detail.homeId} to="/homes" label="Open Home" />
           </div>
         </div>
         {detail.failureReason && (

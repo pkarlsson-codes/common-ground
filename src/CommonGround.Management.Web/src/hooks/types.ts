@@ -83,7 +83,9 @@ export interface ResaleEstimateForm {
 }
 
 export interface InitiateWorkflowForm {
-  groundLeaseId: string
+  groundLeaseTemplateId: string
+  landParcelId: string
+  homeId: string
   buyerFullName: string
   buyerEmail: string
   buyerPhone: string

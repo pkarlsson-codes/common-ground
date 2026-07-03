@@ -48,6 +48,9 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             BaselineIndexValue = e.Data.BaselineIndexValue,
             AnnualPercentage = e.Data.AnnualPercentage,
             ImprovementsCap = e.Data.ImprovementsCap,
+            HomeownerFullName = e.Data.BuyerFullName,
+            HomeownerEmail = e.Data.BuyerEmail,
+            HomeownerPhone = e.Data.BuyerPhone,
         };
 
     public static void Apply(GroundLeaseView view, StewardshipCheckInRecorded e)

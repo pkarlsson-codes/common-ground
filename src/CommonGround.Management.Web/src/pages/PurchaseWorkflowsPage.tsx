@@ -13,13 +13,15 @@ import EntityCombobox from '../components/EntityCombobox'
 import Pagination from '../components/Pagination'
 import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
-import { GroundLeasesApi } from '../api'
+import { GroundLeaseTemplatesApi, HomesApi, LandParcelsApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
 import { getErrorMessage } from '../lib/getErrorMessage'
 import PurchaseWorkflowDetailPanel from './purchase-workflows/PurchaseWorkflowDetailPanel'
 import { useToast } from '../hooks/useToast'
 
-const groundLeasesApi = new GroundLeasesApi(apiConfig)
+const groundLeaseTemplatesApi = new GroundLeaseTemplatesApi(apiConfig)
+const landParcelsApi = new LandParcelsApi(apiConfig)
+const homesApi = new HomesApi(apiConfig)
 const E164_PHONE_PATTERN = /^\+[1-9]\d{1,14}$/
 
 type Panel = 'detail' | 'initiate' | null
@@ -39,7 +41,9 @@ function SkeletonRows() {
 }
 
 const emptyInitiate = (): InitiateWorkflowForm => ({
-  groundLeaseId: '',
+  groundLeaseTemplateId: '',
+  landParcelId: '',
+  homeId: '',
   buyerFullName: '',
   buyerEmail: '',
   buyerPhone: '',
@@ -52,7 +56,7 @@ export default function PurchaseWorkflowsPage() {
 
   const [page, setPage] = useState(1)
   const [phaseFilter, setPhaseFilter] = useState('')
-  const [groundLeaseFilter, setGroundLeaseFilter] = useState('')
+  const [templateFilter, setTemplateFilter] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [panel, setPanel] = useState<Panel>(null)
 
@@ -61,7 +65,7 @@ export default function PurchaseWorkflowsPage() {
   const [initiateError, setInitiateError] = useState<string | null>(null)
   const { success, error } = useToast()
 
-  const { data, isLoading, isError } = usePurchaseWorkflows(page, groundLeaseFilter || undefined, phaseFilter || undefined)
+  const { data, isLoading, isError } = usePurchaseWorkflows(page, templateFilter || undefined, phaseFilter || undefined)
 
   const initiateMutation = useInitiatePurchaseWorkflow()
 
@@ -127,8 +131,8 @@ export default function PurchaseWorkflowsPage() {
     }
   }
 
-  const clearGLFilter = () => {
-    setGroundLeaseFilter('')
+  const clearTemplateFilter = () => {
+    setTemplateFilter('')
     setPage(1)
   }
 
@@ -168,20 +172,19 @@ export default function PurchaseWorkflowsPage() {
 
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
           <EntityCombobox
-            value={groundLeaseFilter || null}
-            onChange={id => { setGroundLeaseFilter(id ?? ''); setPage(1) }}
+            value={templateFilter || null}
+            onChange={id => { setTemplateFilter(id ?? ''); setPage(1) }}
             fetchOptions={async q => {
-              const result = await groundLeasesApi.getGroundLeases({ search: q, pageSize: 10 })
-              return (result.items ?? []).map(l => ({
-                id: l.id!,
-                label: [l.homeownerFullName, (l as { parcelAddress?: string }).parcelAddress]
-                  .filter(Boolean).join(' — '),
+              const result = await groundLeaseTemplatesApi.getGroundLeaseTemplates({ search: q, pageSize: 10 })
+              return (result.items ?? []).map(t => ({
+                id: t.id!,
+                label: t.templateName ?? t.id!,
               }))
             }}
-            placeholder="Filter by ground lease…"
+            placeholder="Filter by lease template…"
           />
-          {groundLeaseFilter && (
-            <button type="button" className="btn btn-ghost btn-sm" onClick={clearGLFilter}>
+          {templateFilter && (
+            <button type="button" className="btn btn-ghost btn-sm" onClick={clearTemplateFilter}>
               Clear
             </button>
           )}
@@ -202,7 +205,7 @@ export default function PurchaseWorkflowsPage() {
           <div className="empty-state">
             <div className="empty-state__glyph">⊡</div>
             <div className="empty-state__title">No workflows found</div>
-            <div className="empty-state__sub">Initiate a purchase workflow on an active ground lease.</div>
+            <div className="empty-state__sub">Initiate a purchase workflow from an active lease template.</div>
           </div>
         )}
 
@@ -214,7 +217,7 @@ export default function PurchaseWorkflowsPage() {
                   <th>Buyer</th>
                   <th>Purchase Price</th>
                   <th>Phase</th>
-                  <th>Ground Lease</th>
+                  <th>Lease Template</th>
                   <th>Created</th>
                 </tr>
               </thead>
@@ -229,8 +232,8 @@ export default function PurchaseWorkflowsPage() {
                     <td><span className="cell-mono">{fmtCurrency(Number(w.purchasePrice))}</span></td>
                     <td><StatusBadge status={w.phase ?? ''} /></td>
                     <td>
-                      <span className="cell-id" title={w.groundLeaseId}>
-                        {w.groundLeaseId?.slice(0, 8)}…
+                      <span className="cell-id" title={w.groundLeaseTemplateId}>
+                        {w.groundLeaseTemplateId?.slice(0, 8)}…
                       </span>
                     </td>
                     <td><span className="cell-mono">{new Date(w.createdAt!).toLocaleDateString()}</span></td>
@@ -264,7 +267,7 @@ export default function PurchaseWorkflowsPage() {
       {panel === 'initiate' && (
         <SlideOver
           title="Initiate Purchase Workflow"
-          subtitle="Start a new purchase process on an active ground lease"
+          subtitle="Start a new purchase process from an active lease template"
           onClose={closePanel}
           footer={
             <>
@@ -273,7 +276,12 @@ export default function PurchaseWorkflowsPage() {
                 className="btn btn-primary"
                 type="submit"
                 form="initiate-workflow-form"
-                disabled={initiateMutation.isPending || !initiateForm.groundLeaseId}
+                disabled={
+                  initiateMutation.isPending ||
+                  !initiateForm.groundLeaseTemplateId ||
+                  !initiateForm.landParcelId ||
+                  !initiateForm.homeId
+                }
               >
                 {initiateMutation.isPending ? 'Initiating…' : 'Initiate Workflow'}
               </button>
@@ -283,19 +291,54 @@ export default function PurchaseWorkflowsPage() {
           <form id="initiate-workflow-form" onSubmit={handleInitiate}>
             <div className="form-grid">
               <div className="form-field full">
-                <label className="form-label">Ground Lease</label>
+                <label className="form-label">Lease Template</label>
                 <EntityCombobox
-                  value={initiateForm.groundLeaseId || null}
-                  onChange={id => setInitiateForm(f => ({ ...f, groundLeaseId: id ?? '' }))}
+                  value={initiateForm.groundLeaseTemplateId || null}
+                  onChange={id => setInitiateForm(f => ({ ...f, groundLeaseTemplateId: id ?? '' }))}
                   fetchOptions={async q => {
-                    const result = await groundLeasesApi.getGroundLeases({ search: q, pageSize: 10 })
-                    return (result.items ?? []).map(l => ({
-                      id: l.id!,
-                      label: [l.homeownerFullName, (l as { parcelAddress?: string }).parcelAddress]
-                        .filter(Boolean).join(' — '),
+                    const result = await groundLeaseTemplatesApi.getGroundLeaseTemplates({ search: q, status: 'Active', pageSize: 10 })
+                    return (result.items ?? []).map(t => ({
+                      id: t.id!,
+                      label: t.templateName ?? t.id!,
                     }))
                   }}
-                  placeholder="Search ground leases…"
+                  placeholder="Search active templates…"
+                />
+              </div>
+              <div className="form-field full">
+                <label className="form-label">Land Parcel</label>
+                <EntityCombobox
+                  value={initiateForm.landParcelId || null}
+                  onChange={id => setInitiateForm(f => ({ ...f, landParcelId: id ?? '', homeId: '' }))}
+                  fetchOptions={async q => {
+                    const result = await landParcelsApi.getLandParcels({ search: q, pageSize: 10 })
+                    return (result.items ?? []).map(p => ({
+                      id: p.id!,
+                      label: [p.legalParcelNumber, p.address].filter(Boolean).join(' — '),
+                    }))
+                  }}
+                  placeholder="Search parcels…"
+                />
+              </div>
+              <div className="form-field full">
+                <label className="form-label">Home</label>
+                <EntityCombobox
+                  value={initiateForm.homeId || null}
+                  onChange={id => setInitiateForm(f => ({ ...f, homeId: id ?? '' }))}
+                  fetchOptions={async q => {
+                    const result = await homesApi.getHomes({ landParcelIds: [initiateForm.landParcelId], pageSize: 10 })
+                    const lower = q.toLowerCase()
+                    const items = result.items ?? []
+                    const filtered = lower ? items.filter(b =>
+                      `${b.homeType} ${b.bedrooms} ${b.bathrooms} ${b.squareFootage}`.toLowerCase().includes(lower)
+                    ) : items
+                    return filtered.map(b => ({
+                      id: b.id!,
+                      label: `${b.homeType}, ${b.bedrooms}bd/${b.bathrooms}ba, ${b.squareFootage} sqft`,
+                    }))
+                  }}
+                  placeholder={initiateForm.landParcelId ? 'Search homes on this parcel…' : 'Select a parcel first'}
+                  disabled={!initiateForm.landParcelId}
                 />
               </div>
               <div className="form-field full">

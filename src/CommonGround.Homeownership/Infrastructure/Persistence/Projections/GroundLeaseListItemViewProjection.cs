@@ -30,5 +30,7 @@ internal sealed class GroundLeaseListItemViewProjection : SingleStreamProjection
             TermYears = e.Data.TermYears,
             Status = "Active",
             CreatedAt = e.Data.OccurredAt,
+            HomeownerFullName = e.Data.BuyerFullName,
+            HomeownerEmail = e.Data.BuyerEmail,
         };
 }

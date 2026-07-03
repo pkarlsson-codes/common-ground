@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useCalculateResaleEstimate } from '../../hooks/groundLeases'
+import { useCalculateResaleEstimate, useGroundLease } from '../../hooks/groundLeases'
 import { useInitiatePurchaseWorkflow } from '../../hooks/purchaseWorkflows'
 import type { InitiateWorkflowForm, ResaleEstimateForm } from '../../hooks/types'
 import { getErrorMessage } from '../../lib/getErrorMessage'
@@ -13,8 +13,10 @@ const emptyEstimate = (): ResaleEstimateForm => ({
   currentIndexValue: 0,
 })
 
-const emptyInitiate = (groundLeaseId: string): InitiateWorkflowForm => ({
-  groundLeaseId,
+const emptyInitiate = (): InitiateWorkflowForm => ({
+  groundLeaseTemplateId: '',
+  landParcelId: '',
+  homeId: '',
   buyerFullName: '',
   buyerEmail: '',
   buyerPhone: '',
@@ -36,9 +38,10 @@ export function useResaleFlowController({ groundLeaseId, onSuccess }: Props) {
   const [estimateResult, setEstimateResult] = useState<number | null>(null)
   const [estimateError, setEstimateError] = useState<string | null>(null)
 
-  const [initiateForm, setInitiateForm] = useState<InitiateWorkflowForm>(() => emptyInitiate(groundLeaseId))
+  const [initiateForm, setInitiateForm] = useState<InitiateWorkflowForm>(emptyInitiate)
   const [initiateError, setInitiateError] = useState<string | null>(null)
 
+  const { data: lease } = useGroundLease(groundLeaseId)
   const estimateMutation = useCalculateResaleEstimate()
   const initiateMutation = useInitiatePurchaseWorkflow()
 
@@ -62,9 +65,18 @@ export function useResaleFlowController({ groundLeaseId, onSuccess }: Props) {
   const handleInitiate = async (e: React.FormEvent) => {
     e.preventDefault()
     setInitiateError(null)
+
+    if (!lease?.groundLeaseTemplateId) {
+      setInitiateError('This ground lease has no lease template, so a purchase workflow cannot be initiated from it.')
+      return
+    }
+
     try {
       const result = await initiateMutation.mutateAsync({
         ...initiateForm,
+        groundLeaseTemplateId: lease.groundLeaseTemplateId,
+        landParcelId: lease.landParcelId ?? '',
+        homeId: lease.homeId ?? '',
         purchasePrice: Number(initiateForm.purchasePrice),
       })
       onSuccess(hasPurchaseWorkflowId(result) ? result.purchaseWorkflowId : undefined)
