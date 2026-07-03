@@ -1,9 +1,16 @@
 import { useState } from 'react'
+import { GroundLeaseTemplatesApi, HomesApi, LandParcelsApi } from '../../api'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
+import EntityCombobox from '../../components/EntityCombobox'
 import SlideOver from '../../components/SlideOver'
 import { useSelectApplicant } from '../../hooks/applicantSelection'
 import { useToast } from '../../hooks/useToast'
+import { apiConfig } from '../../lib/apiConfig'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
+
+const landParcelsApi = new LandParcelsApi(apiConfig)
+const homesApi = new HomesApi(apiConfig)
+const groundLeaseTemplatesApi = new GroundLeaseTemplatesApi(apiConfig)
 
 type FormState = {
   homeId: string
@@ -83,33 +90,58 @@ export default function SelectApplicantPanel({ applicationId, onClose }: Props) 
       <form id="select-applicant-form" onSubmit={handleSubmit}>
         <div className="form-grid">
           <div className="form-field full">
-            <label className="form-label">Home ID</label>
-            <input
-              className="form-input"
-              type="text"
-              value={form.homeId}
-              onChange={e => setForm(f => ({ ...f, homeId: e.target.value }))}
-              required
+            <label className="form-label">Land Parcel</label>
+            <EntityCombobox
+              value={form.landParcelId || null}
+              onChange={id => setForm(f => ({ ...f, landParcelId: id ?? '', homeId: '' }))}
+              fetchOptions={async q => {
+                const result = await landParcelsApi.getLandParcels({ search: q, pageSize: 10 })
+                return (result.items ?? []).map(p => ({
+                  id: p.id!,
+                  label: [p.legalParcelNumber, p.address].filter(Boolean).join(' — '),
+                }))
+              }}
+              placeholder="Search parcels…"
             />
           </div>
           <div className="form-field full">
-            <label className="form-label">Land Parcel ID</label>
-            <input
-              className="form-input"
-              type="text"
-              value={form.landParcelId}
-              onChange={e => setForm(f => ({ ...f, landParcelId: e.target.value }))}
-              required
+            <label className="form-label">Home</label>
+            <EntityCombobox
+              value={form.homeId || null}
+              onChange={id => setForm(f => ({ ...f, homeId: id ?? '' }))}
+              fetchOptions={async q => {
+                const result = await homesApi.getHomes({ landParcelIds: [form.landParcelId], pageSize: 10 })
+                const lower = q.toLowerCase()
+                const items = result.items ?? []
+                const filtered = lower ? items.filter(b =>
+                  `${b.homeType} ${b.bedrooms} ${b.bathrooms} ${b.squareFootage}`.toLowerCase().includes(lower)
+                ) : items
+                return filtered.map(b => ({
+                  id: b.id!,
+                  label: `${b.homeType}, ${b.bedrooms}bd/${b.bathrooms}ba, ${b.squareFootage} sqft`,
+                }))
+              }}
+              placeholder={form.landParcelId ? 'Search homes on this parcel…' : 'Select a parcel first'}
+              disabled={!form.landParcelId}
             />
           </div>
           <div className="form-field full">
-            <label className="form-label">Ground Lease Template ID</label>
-            <input
-              className="form-input"
-              type="text"
-              value={form.groundLeaseTemplateId}
-              onChange={e => setForm(f => ({ ...f, groundLeaseTemplateId: e.target.value }))}
-              required
+            <label className="form-label">Ground Lease Template</label>
+            <EntityCombobox
+              value={form.groundLeaseTemplateId || null}
+              onChange={id => setForm(f => ({ ...f, groundLeaseTemplateId: id ?? '' }))}
+              fetchOptions={async q => {
+                const result = await groundLeaseTemplatesApi.getGroundLeaseTemplates({
+                  search: q,
+                  status: 'Active',
+                  pageSize: 10,
+                })
+                return (result.items ?? []).map(t => ({
+                  id: t.id!,
+                  label: t.templateName ?? t.id!,
+                }))
+              }}
+              placeholder="Search templates…"
             />
           </div>
           <div className="form-field">
