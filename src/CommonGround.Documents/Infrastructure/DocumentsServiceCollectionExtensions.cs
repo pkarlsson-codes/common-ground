@@ -2,6 +2,7 @@ using CommonGround.Documents.Domain.Documents;
 using CommonGround.Documents.Infrastructure.BlobStorage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Minio;
 
 namespace CommonGround.Documents.Infrastructure;
@@ -10,10 +11,11 @@ namespace CommonGround.Documents.Infrastructure;
 public static class DocumentsServiceCollectionExtensions
 {
     /// <summary>Adds the Documents BC services (blob store, MinIO client, options).</summary>
-    public static IServiceCollection AddDocuments(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddDocuments(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentNullException.ThrowIfNull(environment);
 
         services.Configure<MinIOOptions>(configuration.GetSection(MinIOOptions.SectionName));
 
@@ -29,7 +31,10 @@ public static class DocumentsServiceCollectionExtensions
 
         services.AddScoped<IDocumentBlobStore, MinIODocumentBlobStore>();
 
-        services.AddHostedService<MinIOBucketBootstrapper>();
+        if (!environment.IsEnvironment("Testing"))
+        {
+            services.AddHostedService<MinIOBucketBootstrapper>();
+        }
 
         return services;
     }

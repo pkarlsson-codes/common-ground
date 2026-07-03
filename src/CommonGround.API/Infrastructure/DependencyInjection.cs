@@ -51,7 +51,7 @@ internal static class CommonGroundServiceCollectionExtensions
         services.AddIdentity();
         services.AddTrustManagement();
         services.AddStewardship();
-        services.AddDocuments(configuration);
+        services.AddDocuments(configuration, environment);
         return services;
     }
 
