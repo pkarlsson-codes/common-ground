@@ -13,11 +13,6 @@ public static class PropertyRegistryMartenConfiguration
     private const string SchemaName = "property_registry";
     private const string SeedSchemaName = "property_registry_seed";
 
-    private static ProjectionLifecycle ProjectionLifecycleForEnvironment =>
-        string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Testing", StringComparison.OrdinalIgnoreCase)
-            ? ProjectionLifecycle.Inline
-            : ProjectionLifecycle.Async;
-
     /// <summary>Configures Marten for PropertyRegistry.</summary>
     public static void Configure(StoreOptions options)
     {
@@ -55,11 +50,11 @@ public static class PropertyRegistryMartenConfiguration
 
     private static void ConfigureProjections(StoreOptions options)
     {
-        options.Projections.Add<LandParcelViewProjection>(ProjectionLifecycleForEnvironment);
-        options.Projections.Add<LandParcelListItemViewProjection>(ProjectionLifecycleForEnvironment);
-        options.Projections.Add<HomeViewProjection>(ProjectionLifecycleForEnvironment);
-        options.Projections.Add<HomeListItemViewProjection>(ProjectionLifecycleForEnvironment);
-        options.Projections.Add<HomeAssessmentViewProjection>(ProjectionLifecycleForEnvironment);
-        options.Projections.Add<DevelopmentProjectListItemViewProjection>(ProjectionLifecycleForEnvironment);
+        options.Projections.Add<LandParcelViewProjection>(ProjectionLifecycle.Inline);
+        options.Projections.Add<LandParcelListItemViewProjection>(ProjectionLifecycle.Inline);
+        options.Projections.Add<HomeViewProjection>(ProjectionLifecycle.Inline);
+        options.Projections.Add<HomeListItemViewProjection>(ProjectionLifecycle.Inline);
+        options.Projections.Add<HomeAssessmentViewProjection>(ProjectionLifecycle.Inline);
+        options.Projections.Add<DevelopmentProjectListItemViewProjection>(ProjectionLifecycle.Inline);
     }
 }

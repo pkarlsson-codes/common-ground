@@ -10,11 +10,6 @@ public static class ApplicantSelectionMartenConfiguration
 {
     private const string SchemaName = "applicant_selection";
 
-    private static ProjectionLifecycle ProjectionLifecycleForEnvironment =>
-        string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Testing", StringComparison.OrdinalIgnoreCase)
-            ? ProjectionLifecycle.Inline
-            : ProjectionLifecycle.Async;
-
     /// <summary>Configures Marten for ApplicantSelection.</summary>
     public static void Configure(StoreOptions options)
     {
@@ -36,7 +31,7 @@ public static class ApplicantSelectionMartenConfiguration
 
     private static void ConfigureProjections(StoreOptions options)
     {
-        options.Projections.Add<HomeownerApplicationViewProjection>(ProjectionLifecycleForEnvironment);
-        options.Projections.Add<HomeownerApplicationListItemViewProjection>(ProjectionLifecycleForEnvironment);
+        options.Projections.Add<HomeownerApplicationViewProjection>(ProjectionLifecycle.Inline);
+        options.Projections.Add<HomeownerApplicationListItemViewProjection>(ProjectionLifecycle.Inline);
     }
 }
