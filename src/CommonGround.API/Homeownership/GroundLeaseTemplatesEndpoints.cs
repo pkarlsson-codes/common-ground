@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
 
-
 namespace CommonGround.API.Homeownership;
 
 public static class GroundLeaseTemplatesEndpoints
@@ -44,7 +43,8 @@ public static class GroundLeaseTemplatesEndpoints
 
         var id = await bus.InvokeForTenantAsync<GroundLeaseTemplateId>(bus.TenantId!, command, cancellationToken);
 
-        return Results.Created($"/api/ground-lease-templates/{id.Value}", new CreateGroundLeaseTemplateResponse(id.Value));
+        return Results.Created($"/api/ground-lease-templates/{id.Value}",
+            new CreateGroundLeaseTemplateResponse(id.Value));
     }
 
     [WolverineGet("/api/ground-lease-templates")]
@@ -66,4 +66,3 @@ public static class GroundLeaseTemplatesEndpoints
         return Results.Ok(response);
     }
 }
-

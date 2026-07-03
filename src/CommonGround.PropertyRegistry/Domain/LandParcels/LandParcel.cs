@@ -1,6 +1,5 @@
-using CommonGround.PropertyRegistry.Domain.LandParcels.Events;
 using CommonGround.PropertyRegistry.Application.Errors;
-
+using CommonGround.PropertyRegistry.Domain.LandParcels.Events;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 

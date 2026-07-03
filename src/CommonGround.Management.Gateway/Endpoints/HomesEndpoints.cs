@@ -5,7 +5,6 @@ using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine.Http;
 
-
 namespace CommonGround.Management.Gateway.Endpoints;
 
 public static class HomesEndpoints

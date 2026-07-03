@@ -6,7 +6,6 @@ using CommonGround.Management.Gateway.Services;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine.Http;
 
-
 namespace CommonGround.Management.Gateway.Endpoints;
 
 public static class TrustsEndpoints

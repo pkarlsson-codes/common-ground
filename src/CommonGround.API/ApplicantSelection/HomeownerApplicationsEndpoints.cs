@@ -11,9 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
 
-
 namespace CommonGround.API.ApplicantSelection;
-
 public static class HomeownerApplicationsEndpoints
 {
     [WolverinePost("/api/homeowner-applications")]
@@ -302,4 +300,3 @@ public static class HomeownerApplicationsEndpoints
             view.SelectedBy);
     }
 }
-

@@ -8,11 +8,9 @@ using CommonGround.PropertyRegistry.Domain.DevelopmentProjects;
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Infrastructure.API;
-using CommonGround.SharedKernel.Infrastructure.Querying;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
-
 
 namespace CommonGround.API.PropertyRegistry;
 
@@ -71,4 +69,3 @@ public static class DevelopmentProjectsEndpoints
         return Results.Created("/api/development-projects", new InitiateDevelopmentProjectResponse(id.Value));
     }
 }
-

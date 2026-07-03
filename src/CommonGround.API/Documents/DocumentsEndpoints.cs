@@ -7,14 +7,11 @@ using CommonGround.Documents.Application.Queries;
 using CommonGround.Documents.Application.ReadModels;
 using CommonGround.Documents.Domain.Documents;
 using CommonGround.SharedKernel.Infrastructure.API;
-using CommonGround.SharedKernel.Infrastructure.Querying;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
 
 namespace CommonGround.API.Documents;
-
-
 public static class DocumentsEndpoints
 {
     private static readonly JsonSerializerOptions MetadataJson = new(JsonSerializerDefaults.Web);
@@ -297,4 +294,3 @@ public static class DocumentsEndpoints
             i.AttachedAt)));
     }
 }
-

@@ -11,7 +11,6 @@ using Wolverine.Http;
 
 namespace CommonGround.API.Stewardship;
 
-
 public static class StewardshipCasesEndpoints
 {
     [WolverineGet("/api/stewardship/cases/{id}")]
@@ -162,4 +161,3 @@ public static class StewardshipCasesEndpoints
         return Results.NoContent();
     }
 }
-

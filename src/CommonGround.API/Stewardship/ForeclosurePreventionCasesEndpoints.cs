@@ -11,7 +11,6 @@ using Wolverine.Http;
 
 namespace CommonGround.API.Stewardship;
 
-
 public static class ForeclosurePreventionCasesEndpoints
 {
     [WolverineGet("/api/stewardship/foreclosure-prevention/{id}")]
@@ -123,4 +122,3 @@ public static class ForeclosurePreventionCasesEndpoints
         return Results.NoContent();
     }
 }
-

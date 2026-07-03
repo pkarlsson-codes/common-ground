@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
 
-
 namespace CommonGround.API.Homeownership;
 
 public static class PurchaseWorkflowsEndpoints
@@ -363,4 +362,3 @@ public static class PurchaseWorkflowsEndpoints
             view.ResolutionTargetDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
     }
 }
-

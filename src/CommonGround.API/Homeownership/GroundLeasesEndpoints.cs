@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
 
-
 namespace CommonGround.API.Homeownership;
 
 public static class GroundLeasesEndpoints
@@ -168,4 +167,3 @@ public static class GroundLeasesEndpoints
         return Results.Ok(new ResaleEstimateResponse(maxResalePrice));
     }
 }
-

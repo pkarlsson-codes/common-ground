@@ -6,11 +6,9 @@ using CommonGround.PropertyRegistry.Application.Queries;
 using CommonGround.PropertyRegistry.Application.ReadModels;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Infrastructure.API;
-using CommonGround.SharedKernel.Infrastructure.Querying;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
-
 
 namespace CommonGround.API.PropertyRegistry;
 
@@ -121,4 +119,3 @@ public static class LandParcelsEndpoints
         return Results.NoContent();
     }
 }
-
