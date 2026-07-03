@@ -203,7 +203,7 @@ public class GroundLeaseTests
             "Covenants",
             ResalePolicyTerms.AppraisalBased(0.25m),
             StaffUser);
-        template.Deactivate(StaffUser);
+        template.Archive(StaffUser);
 
         var act = () => GroundLease.CreateFromPurchase(
             template,

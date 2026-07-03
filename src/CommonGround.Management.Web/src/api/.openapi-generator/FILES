@@ -49,6 +49,7 @@ models/ForeclosurePreventionCaseResponse.ts
 models/GroundLeaseListItemResponse.ts
 models/GroundLeaseResponse.ts
 models/GroundLeaseTemplateListItemResponse.ts
+models/GroundLeaseTemplateResponse.ts
 models/HomeAssessmentItemResponse.ts
 models/HomeListItemResponse.ts
 models/HomeResponse.ts

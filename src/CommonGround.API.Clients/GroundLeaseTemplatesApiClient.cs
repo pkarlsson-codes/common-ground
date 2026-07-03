@@ -31,4 +31,25 @@ public sealed class GroundLeaseTemplatesApiClient(
         return await PostAsync<CreateGroundLeaseTemplateRequest, CreateGroundLeaseTemplateResponse>(
             "api/ground-lease-templates", request, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task<GroundLeaseTemplateResponse> GetGroundLeaseTemplateAsync(string id, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        return await GetAsync<GroundLeaseTemplateResponse>($"api/ground-lease-templates/{id}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task ArchiveGroundLeaseTemplateAsync(string id, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        await PostAsync($"api/ground-lease-templates/{id}/archive", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task RestoreGroundLeaseTemplateAsync(string id, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        await PostAsync($"api/ground-lease-templates/{id}/restore", cancellationToken).ConfigureAwait(false);
+    }
 }

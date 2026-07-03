@@ -79,34 +79,34 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
         return template;
     }
 
-    /// <summary>Activates this template.</summary>
-    public void Activate(UserId activatedBy)
+    /// <summary>Restores this template to active status.</summary>
+    public void Restore(UserId restoredBy)
     {
-        ArgumentNullException.ThrowIfNull(activatedBy);
+        ArgumentNullException.ThrowIfNull(restoredBy);
 
         if (Status == GroundLeaseTemplateStatus.Active)
         {
-            throw BusinessRuleViolation.GroundLeaseTemplate.Activate.AlreadyActive();
+            throw BusinessRuleViolation.GroundLeaseTemplate.Restore.AlreadyActive();
         }
 
         ApplyChange(new GroundLeaseTemplateRestored(
             Id.Value,
-            activatedBy.Value));
+            restoredBy.Value));
     }
 
-    /// <summary>Deactivates this template.</summary>
-    public void Deactivate(UserId deactivatedBy)
+    /// <summary>Archives this template, making it inactive.</summary>
+    public void Archive(UserId archivedBy)
     {
-        ArgumentNullException.ThrowIfNull(deactivatedBy);
+        ArgumentNullException.ThrowIfNull(archivedBy);
 
         if (Status == GroundLeaseTemplateStatus.Inactive)
         {
-            throw BusinessRuleViolation.GroundLeaseTemplate.Deactivate.AlreadyInactive();
+            throw BusinessRuleViolation.GroundLeaseTemplate.Archive.AlreadyInactive();
         }
 
         ApplyChange(new GroundLeaseTemplateArchived(
             Id.Value,
-            deactivatedBy.Value));
+            archivedBy.Value));
     }
 
     /// <inheritdoc/>

@@ -199,18 +199,18 @@ public static class BusinessRuleViolation
                     "homeownership.ground_lease_template.create.covenant_terms_required");
         }
 
-        public static class Activate
+        public static class Restore
         {
             public static BusinessRuleViolationException AlreadyActive()
                 => new(
-                    "homeownership.ground_lease_template.activate.already_active");
+                    "homeownership.ground_lease_template.restore.already_active");
         }
 
-        public static class Deactivate
+        public static class Archive
         {
             public static BusinessRuleViolationException AlreadyInactive()
                 => new(
-                    "homeownership.ground_lease_template.deactivate.already_inactive");
+                    "homeownership.ground_lease_template.archive.already_inactive");
         }
     }
 

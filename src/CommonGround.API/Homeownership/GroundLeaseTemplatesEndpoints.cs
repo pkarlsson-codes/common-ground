@@ -65,4 +65,49 @@ public static class GroundLeaseTemplatesEndpoints
 
         return Results.Ok(response);
     }
+
+    [WolverineGet("/api/ground-lease-templates/{id}")]
+    public static async Task<IResult> GetGroundLeaseTemplate(
+        string id,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        var templateId = GroundLeaseTemplateId.Create(id);
+        var view = await bus.InvokeForTenantAsync<GroundLeaseTemplateDetailView>(
+            bus.TenantId!, new GetGroundLeaseTemplate(templateId), cancellationToken);
+        return Results.Ok(new GroundLeaseTemplateResponse(
+            view.Id, view.TemplateName, view.TermYears, view.CovenantTerms, view.Status,
+            view.FormulaKind, view.AppreciationShare, view.IndexType, view.BaselineIndexValue,
+            view.AnnualPercentage, view.ImprovementsCap,
+            view.CreatedAt.ToString("O"), view.CreatedBy));
+    }
+
+    [WolverinePost("/api/ground-lease-templates/{id}/archive")]
+    public static async Task<IResult> ArchiveGroundLeaseTemplate(
+        string id,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        var userId = httpContext.GetUserId();
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new ArchiveGroundLeaseTemplate(GroundLeaseTemplateId.Create(id), userId), cancellationToken);
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/ground-lease-templates/{id}/restore")]
+    public static async Task<IResult> RestoreGroundLeaseTemplate(
+        string id,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        var userId = httpContext.GetUserId();
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new RestoreGroundLeaseTemplate(GroundLeaseTemplateId.Create(id), userId), cancellationToken);
+        return Results.NoContent();
+    }
 }

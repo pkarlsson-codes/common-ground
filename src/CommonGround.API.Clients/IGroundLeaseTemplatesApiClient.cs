@@ -18,4 +18,22 @@ public interface IGroundLeaseTemplatesApiClient
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>The ID of the newly created ground lease template.</returns>
     Task<CreateGroundLeaseTemplateResponse> CreateGroundLeaseTemplateAsync(CreateGroundLeaseTemplateRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Gets a single ground lease template by ID.</summary>
+    /// <param name="id">The ground lease template ID.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The ground lease template detail.</returns>
+    Task<GroundLeaseTemplateResponse> GetGroundLeaseTemplateAsync(string id, CancellationToken cancellationToken);
+
+    /// <summary>Archives a ground lease template.</summary>
+    /// <param name="id">The ground lease template ID.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task ArchiveGroundLeaseTemplateAsync(string id, CancellationToken cancellationToken);
+
+    /// <summary>Restores a ground lease template.</summary>
+    /// <param name="id">The ground lease template ID.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task RestoreGroundLeaseTemplateAsync(string id, CancellationToken cancellationToken);
 }

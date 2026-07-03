@@ -31,4 +31,40 @@ public static class GroundLeaseTemplatesEndpoints
         var result = await client.GetGroundLeaseTemplatesAsync(querySpec, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
+
+    [WolverineGet("/api/v1/ground-lease-templates/{id}")]
+    [ProducesResponseType<GroundLeaseTemplateResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetGroundLeaseTemplate(
+        string id,
+        IGroundLeaseTemplatesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        var result = await client.GetGroundLeaseTemplateAsync(id, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+
+    [WolverinePost("/api/v1/ground-lease-templates/{id}/archive")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> ArchiveGroundLeaseTemplate(
+        string id,
+        IGroundLeaseTemplatesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        await client.ArchiveGroundLeaseTemplateAsync(id, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/v1/ground-lease-templates/{id}/restore")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> RestoreGroundLeaseTemplate(
+        string id,
+        IGroundLeaseTemplatesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        await client.RestoreGroundLeaseTemplateAsync(id, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
 }

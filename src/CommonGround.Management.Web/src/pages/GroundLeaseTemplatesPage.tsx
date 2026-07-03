@@ -3,6 +3,7 @@ import { useGroundLeaseTemplates } from '../hooks/groundLeaseTemplates'
 import { statusLabel } from '../hooks/types'
 import GroundLeaseTemplatesTable from './ground-lease-templates/GroundLeaseTemplatesTable'
 import CreateGroundLeaseTemplatePanel from './ground-lease-templates/CreateGroundLeaseTemplatePanel'
+import GroundLeaseTemplateDetailPanel from './ground-lease-templates/GroundLeaseTemplateDetailPanel'
 
 const TEMPLATE_STATUSES = ['Active', 'Inactive'] as const
 
@@ -10,6 +11,7 @@ export default function GroundLeaseTemplatesPage() {
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState('')
   const [panel, setPanel] = useState<'create' | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const { data, isLoading, isError } = useGroundLeaseTemplates(page, undefined, statusFilter || undefined)
 
@@ -56,12 +58,20 @@ export default function GroundLeaseTemplatesPage() {
         totalPages={Number(data?.totalPages ?? 0)}
         totalCount={Number(data?.totalCount ?? 0)}
         onPage={setPage}
+        onSelect={id => setSelectedId(id)}
       />
 
       <CreateGroundLeaseTemplatePanel
         open={panel === 'create'}
         onClose={() => setPanel(null)}
       />
+
+      {selectedId !== null && (
+        <GroundLeaseTemplateDetailPanel
+          templateId={selectedId}
+          onClose={() => setSelectedId(null)}
+        />
+      )}
     </div>
   )
 }

@@ -32,3 +32,33 @@ export function useCreateGroundLeaseTemplate() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['ground-lease-templates'] }),
   })
 }
+
+export function useGroundLeaseTemplate(id: string | null) {
+  return useQuery({
+    queryKey: ['ground-lease-template', id],
+    queryFn: () => api.getGroundLeaseTemplate({ id: id! }),
+    enabled: !!id,
+  })
+}
+
+export function useArchiveGroundLeaseTemplate() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.archiveGroundLeaseTemplate({ id }),
+    onSuccess: (_data, id) => {
+      qc.invalidateQueries({ queryKey: ['ground-lease-templates'] })
+      qc.invalidateQueries({ queryKey: ['ground-lease-template', id] })
+    },
+  })
+}
+
+export function useRestoreGroundLeaseTemplate() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.restoreGroundLeaseTemplate({ id }),
+    onSuccess: (_data, id) => {
+      qc.invalidateQueries({ queryKey: ['ground-lease-templates'] })
+      qc.invalidateQueries({ queryKey: ['ground-lease-template', id] })
+    },
+  })
+}

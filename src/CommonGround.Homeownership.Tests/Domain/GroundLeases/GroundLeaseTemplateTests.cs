@@ -82,7 +82,7 @@ public class GroundLeaseTemplateTests
     }
 
     [Fact]
-    public void Deactivate_ActiveTemplate_SetsInactive()
+    public void Archive_ActiveTemplate_SetsInactive()
     {
         var template = GroundLeaseTemplate.Create(
             "Template",
@@ -91,13 +91,13 @@ public class GroundLeaseTemplateTests
             ResalePolicyTerms.FixedPercentage(0.03m),
             StaffUser);
 
-        template.Deactivate(StaffUser);
+        template.Archive(StaffUser);
 
         template.Status.Should().Be(GroundLeaseTemplateStatus.Inactive);
     }
 
     [Fact]
-    public void Deactivate_AlreadyInactive_Throws()
+    public void Archive_AlreadyInactive_Throws()
     {
         var template = GroundLeaseTemplate.Create(
             "Template",
@@ -105,15 +105,15 @@ public class GroundLeaseTemplateTests
             "Terms",
             ResalePolicyTerms.FixedPercentage(0.03m),
             StaffUser);
-        template.Deactivate(StaffUser);
+        template.Archive(StaffUser);
 
-        var act = () => template.Deactivate(StaffUser);
+        var act = () => template.Archive(StaffUser);
 
         act.Should().Throw<BusinessRuleViolationException>();
     }
 
     [Fact]
-    public void Activate_InactiveTemplate_SetsActive()
+    public void Restore_InactiveTemplate_SetsActive()
     {
         var template = GroundLeaseTemplate.Create(
             "Template",
@@ -121,15 +121,15 @@ public class GroundLeaseTemplateTests
             "Terms",
             ResalePolicyTerms.FixedPercentage(0.03m),
             StaffUser);
-        template.Deactivate(StaffUser);
+        template.Archive(StaffUser);
 
-        template.Activate(StaffUser);
+        template.Restore(StaffUser);
 
         template.Status.Should().Be(GroundLeaseTemplateStatus.Active);
     }
 
     [Fact]
-    public void Activate_AlreadyActive_Throws()
+    public void Restore_AlreadyActive_Throws()
     {
         var template = GroundLeaseTemplate.Create(
             "Template",
@@ -138,13 +138,13 @@ public class GroundLeaseTemplateTests
             ResalePolicyTerms.FixedPercentage(0.03m),
             StaffUser);
 
-        var act = () => template.Activate(StaffUser);
+        var act = () => template.Restore(StaffUser);
 
         act.Should().Throw<BusinessRuleViolationException>();
     }
 
     [Fact]
-    public void Deactivate_EmitsArchivedEvent()
+    public void Archive_EmitsArchivedEvent()
     {
         var template = GroundLeaseTemplate.Create(
             "Template",
@@ -153,14 +153,14 @@ public class GroundLeaseTemplateTests
             ResalePolicyTerms.FixedPercentage(0.03m),
             StaffUser);
 
-        template.Deactivate(StaffUser);
+        template.Archive(StaffUser);
 
         var evt = template.UncommittedEvents.OfType<GroundLeaseTemplateArchived>().Single();
         evt.ArchivedBy.Should().Be(StaffUser.Value);
     }
 
     [Fact]
-    public void Activate_EmitsRestoredEvent()
+    public void Restore_EmitsRestoredEvent()
     {
         var template = GroundLeaseTemplate.Create(
             "Template",
@@ -168,9 +168,9 @@ public class GroundLeaseTemplateTests
             "Terms",
             ResalePolicyTerms.FixedPercentage(0.03m),
             StaffUser);
-        template.Deactivate(StaffUser);
+        template.Archive(StaffUser);
 
-        template.Activate(StaffUser);
+        template.Restore(StaffUser);
 
         var evt = template.UncommittedEvents.OfType<GroundLeaseTemplateRestored>().Single();
         evt.RestoredBy.Should().Be(StaffUser.Value);

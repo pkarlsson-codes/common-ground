@@ -18,6 +18,7 @@ import * as runtime from '../runtime';
 import type {
   CreateGroundLeaseTemplateRequest,
   CreateGroundLeaseTemplateResponse,
+  GroundLeaseTemplateResponse,
   PaginatedResponseOfGroundLeaseTemplateListItemResponse,
   ProblemDetails,
 } from '../models/index';
@@ -26,14 +27,24 @@ import {
     CreateGroundLeaseTemplateRequestToJSON,
     CreateGroundLeaseTemplateResponseFromJSON,
     CreateGroundLeaseTemplateResponseToJSON,
+    GroundLeaseTemplateResponseFromJSON,
+    GroundLeaseTemplateResponseToJSON,
     PaginatedResponseOfGroundLeaseTemplateListItemResponseFromJSON,
     PaginatedResponseOfGroundLeaseTemplateListItemResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
 } from '../models/index';
 
+export interface ArchiveGroundLeaseTemplateRequest {
+    id: string;
+}
+
 export interface CreateGroundLeaseTemplateOperationRequest {
     createGroundLeaseTemplateRequest: CreateGroundLeaseTemplateRequest;
+}
+
+export interface GetGroundLeaseTemplateRequest {
+    id: string;
 }
 
 export interface GetGroundLeaseTemplatesRequest {
@@ -43,6 +54,10 @@ export interface GetGroundLeaseTemplatesRequest {
     status?: string | null;
 }
 
+export interface RestoreGroundLeaseTemplateRequest {
+    id: string;
+}
+
 /**
  * GroundLeaseTemplatesApi - interface
  * 
@@ -50,6 +65,19 @@ export interface GetGroundLeaseTemplatesRequest {
  * @interface GroundLeaseTemplatesApiInterface
  */
 export interface GroundLeaseTemplatesApiInterface {
+    /**
+     * 
+     * @param {string} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeaseTemplatesApiInterface
+     */
+    archiveGroundLeaseTemplateRaw(requestParameters: ArchiveGroundLeaseTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    archiveGroundLeaseTemplate(requestParameters: ArchiveGroundLeaseTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
     /**
      * 
      * @param {CreateGroundLeaseTemplateRequest} createGroundLeaseTemplateRequest 
@@ -62,6 +90,19 @@ export interface GroundLeaseTemplatesApiInterface {
     /**
      */
     createGroundLeaseTemplate(requestParameters: CreateGroundLeaseTemplateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {string} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeaseTemplatesApiInterface
+     */
+    getGroundLeaseTemplateRaw(requestParameters: GetGroundLeaseTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GroundLeaseTemplateResponse>>;
+
+    /**
+     */
+    getGroundLeaseTemplate(requestParameters: GetGroundLeaseTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GroundLeaseTemplateResponse>;
 
     /**
      * 
@@ -79,12 +120,67 @@ export interface GroundLeaseTemplatesApiInterface {
      */
     getGroundLeaseTemplates(requestParameters: GetGroundLeaseTemplatesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfGroundLeaseTemplateListItemResponse>;
 
+    /**
+     * 
+     * @param {string} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeaseTemplatesApiInterface
+     */
+    restoreGroundLeaseTemplateRaw(requestParameters: RestoreGroundLeaseTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    restoreGroundLeaseTemplate(requestParameters: RestoreGroundLeaseTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
 }
 
 /**
  * 
  */
 export class GroundLeaseTemplatesApi extends runtime.BaseAPI implements GroundLeaseTemplatesApiInterface {
+
+    /**
+     */
+    async archiveGroundLeaseTemplateRaw(requestParameters: ArchiveGroundLeaseTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling archiveGroundLeaseTemplate().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/ground-lease-templates/{id}/archive`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async archiveGroundLeaseTemplate(requestParameters: ArchiveGroundLeaseTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.archiveGroundLeaseTemplateRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
 
     /**
      */
@@ -120,6 +216,41 @@ export class GroundLeaseTemplatesApi extends runtime.BaseAPI implements GroundLe
      */
     async createGroundLeaseTemplate(requestParameters: CreateGroundLeaseTemplateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.createGroundLeaseTemplateRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getGroundLeaseTemplateRaw(requestParameters: GetGroundLeaseTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GroundLeaseTemplateResponse>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling getGroundLeaseTemplate().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/ground-lease-templates/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => GroundLeaseTemplateResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getGroundLeaseTemplate(requestParameters: GetGroundLeaseTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GroundLeaseTemplateResponse> {
+        const response = await this.getGroundLeaseTemplateRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -164,6 +295,48 @@ export class GroundLeaseTemplatesApi extends runtime.BaseAPI implements GroundLe
     async getGroundLeaseTemplates(requestParameters: GetGroundLeaseTemplatesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfGroundLeaseTemplateListItemResponse> {
         const response = await this.getGroundLeaseTemplatesRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async restoreGroundLeaseTemplateRaw(requestParameters: RestoreGroundLeaseTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling restoreGroundLeaseTemplate().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/ground-lease-templates/{id}/restore`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async restoreGroundLeaseTemplate(requestParameters: RestoreGroundLeaseTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.restoreGroundLeaseTemplateRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
 }

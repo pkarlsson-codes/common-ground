@@ -22,6 +22,7 @@ interface Props {
   totalPages: number
   totalCount: number
   onPage: (page: number) => void
+  onSelect: (id: string) => void
 }
 
 export default function GroundLeaseTemplatesTable({
@@ -32,6 +33,7 @@ export default function GroundLeaseTemplatesTable({
   totalPages,
   totalCount,
   onPage,
+  onSelect,
 }: Props) {
   return (
     <div className="registry-table-wrap">
@@ -63,7 +65,7 @@ export default function GroundLeaseTemplatesTable({
             </thead>
             <tbody>
               {templates.map(t => (
-                <tr key={t.id}>
+                <tr key={t.id} onClick={() => onSelect(t.id!)} style={{ cursor: 'pointer' }}>
                   <td>{t.templateName ?? <span style={{ color: 'var(--text-dim)' }}>—</span>}</td>
                   <td><StatusBadge status={t.status ?? ''} /></td>
                 </tr>

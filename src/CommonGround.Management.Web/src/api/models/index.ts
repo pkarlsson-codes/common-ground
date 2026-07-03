@@ -37,6 +37,7 @@ export * from './ForeclosurePreventionCaseResponse';
 export * from './GroundLeaseListItemResponse';
 export * from './GroundLeaseResponse';
 export * from './GroundLeaseTemplateListItemResponse';
+export * from './GroundLeaseTemplateResponse';
 export * from './HomeAssessmentItemResponse';
 export * from './HomeListItemResponse';
 export * from './HomeResponse';
