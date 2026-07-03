@@ -652,6 +652,71 @@
         }
       }
     },
+    "/api/v1/homeowner-applications/{applicationId}/withdraw": {
+      "post": {
+        "tags": [
+          "ApplicantSelection"
+        ],
+        "operationId": "WithdrawApplication",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "WithdrawApplicationRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawApplicationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/development-projects": {
       "get": {
         "tags": [
@@ -5886,6 +5951,20 @@
           },
           "deniedDate": {
             "type": "string"
+          }
+        }
+      },
+      "WithdrawApplicationRequest": {
+        "type": "object",
+        "description": "Request to withdraw an application.",
+        "additionalProperties": false,
+        "properties": {
+          "withdrawnDate": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
           }
         }
       },

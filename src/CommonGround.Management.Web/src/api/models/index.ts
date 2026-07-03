@@ -112,4 +112,5 @@ export * from './TitleDetailsDto';
 export * from './UpdateDocumentMetadataRequest';
 export * from './UploadDocumentResponse';
 export * from './VerifyOccupancyRequest';
+export * from './WithdrawApplicationRequest';
 export * from './WithdrawPurchaseRequest';

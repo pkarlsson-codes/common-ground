@@ -141,4 +141,18 @@ public static class ApplicantSelectionEndpoints
         await client.DenyApplicationAsync(applicationId, request, cancellationToken).ConfigureAwait(false);
         return Results.NoContent();
     }
+
+    [WolverinePost("/api/v1/homeowner-applications/{applicationId}/withdraw")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> WithdrawApplication(
+        string applicationId,
+        WithdrawApplicationRequest request,
+        IApplicantSelectionApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.WithdrawApplicationAsync(applicationId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
 }

@@ -28,6 +28,7 @@ import type {
   SelectApplicantRequest,
   SubmitApplicationRequest,
   SubmitApplicationResponse,
+  WithdrawApplicationRequest,
 } from '../models/index';
 import {
     ApproveEligibilityRequestFromJSON,
@@ -54,6 +55,8 @@ import {
     SubmitApplicationRequestToJSON,
     SubmitApplicationResponseFromJSON,
     SubmitApplicationResponseToJSON,
+    WithdrawApplicationRequestFromJSON,
+    WithdrawApplicationRequestToJSON,
 } from '../models/index';
 
 export interface ApproveEligibilityOperationRequest {
@@ -104,6 +107,11 @@ export interface SelectApplicantOperationRequest {
 
 export interface SubmitApplicationOperationRequest {
     submitApplicationRequest: SubmitApplicationRequest;
+}
+
+export interface WithdrawApplicationOperationRequest {
+    applicationId: string;
+    withdrawApplicationRequest: WithdrawApplicationRequest;
 }
 
 /**
@@ -252,6 +260,20 @@ export interface ApplicantSelectionApiInterface {
     /**
      */
     submitApplication(requestParameters: SubmitApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {string} applicationId 
+     * @param {WithdrawApplicationRequest} withdrawApplicationRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApplicantSelectionApiInterface
+     */
+    withdrawApplicationRaw(requestParameters: WithdrawApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    withdrawApplication(requestParameters: WithdrawApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
 }
 
@@ -737,6 +759,58 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     async submitApplication(requestParameters: SubmitApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.submitApplicationRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async withdrawApplicationRaw(requestParameters: WithdrawApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['applicationId'] == null) {
+            throw new runtime.RequiredError(
+                'applicationId',
+                'Required parameter "applicationId" was null or undefined when calling withdrawApplication().'
+            );
+        }
+
+        if (requestParameters['withdrawApplicationRequest'] == null) {
+            throw new runtime.RequiredError(
+                'withdrawApplicationRequest',
+                'Required parameter "withdrawApplicationRequest" was null or undefined when calling withdrawApplication().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/homeowner-applications/{applicationId}/withdraw`;
+        urlPath = urlPath.replace(`{${"applicationId"}}`, encodeURIComponent(String(requestParameters['applicationId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: WithdrawApplicationRequestToJSON(requestParameters['withdrawApplicationRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async withdrawApplication(requestParameters: WithdrawApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.withdrawApplicationRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
 }

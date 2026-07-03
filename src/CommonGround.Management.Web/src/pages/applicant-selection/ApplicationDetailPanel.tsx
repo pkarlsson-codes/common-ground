@@ -10,6 +10,7 @@ import RecordCltOrientationPanel from './RecordCltOrientationPanel'
 import RecordMortgagePrequalificationPanel from './RecordMortgagePrequalificationPanel'
 import SelectApplicantPanel from './SelectApplicantPanel'
 import DenyApplicationPanel from './DenyApplicationPanel'
+import WithdrawApplicationPanel from './WithdrawApplicationPanel'
 import { getResponseStatus } from '../../lib/getErrorMessage'
 
 type Props = {
@@ -52,6 +53,7 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
     | 'record-mortgage-prequalification'
     | 'select-applicant'
     | 'deny-application'
+    | 'withdraw-application'
     | null
   >(null)
 
@@ -264,6 +266,9 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
                   <button className="btn btn-ghost btn-sm" onClick={() => setActionPanel('deny-application')}>
                     Deny Application
                   </button>
+                  <button className="btn btn-ghost btn-sm" onClick={() => setActionPanel('withdraw-application')}>
+                    Withdraw Application
+                  </button>
                 </>
               )}
 
@@ -295,6 +300,9 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
       )}
       {actionPanel === 'deny-application' && (
         <DenyApplicationPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />
+      )}
+      {actionPanel === 'withdraw-application' && (
+        <WithdrawApplicationPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />
       )}
     </SlideOver>
   )
