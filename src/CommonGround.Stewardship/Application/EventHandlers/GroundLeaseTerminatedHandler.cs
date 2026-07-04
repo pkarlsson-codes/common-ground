@@ -18,7 +18,11 @@ public sealed class GroundLeaseTerminatedHandler(IDocumentSession session)
             .FirstOrDefaultAsync(ct).ConfigureAwait(false);
 
         if (view is null)
-            throw new InvalidOperationException($"No active StewardshipCase found for ground lease {@event.GroundLeaseId}.");
+        {
+            // No active case found - most likely a redelivery of this event after the case was
+            // already closed. Treat as a no-op rather than an error.
+            return;
+        }
 
         var stream = await session.Events.FetchForWriting<StewardshipCase>(view.Id, ct).ConfigureAwait(false);
         var sc = stream.Aggregate ?? throw new AggregateNotFoundException(view.Id);

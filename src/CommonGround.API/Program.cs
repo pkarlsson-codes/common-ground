@@ -47,7 +47,13 @@ try
                 rabbit.Port = rabbitMqOptions.Port;
                 rabbit.UserName = rabbitMqOptions.Username;
                 rabbit.Password = rabbitMqOptions.Password;
-            }).AutoProvision().UseConventionalRouting();
+            }).AutoProvision().UseConventionalRouting(routing =>
+            {
+                routing.IncludeTypes(t =>
+                    t.Namespace?.EndsWith(".Events", StringComparison.Ordinal) == true &&
+                    t.Assembly.GetName().Name?.EndsWith(".Contracts", StringComparison.Ordinal) == true);
+                routing.OnlyApplyToOutboundMessages();
+            });
 
             opts.Policies.ConventionalLocalRoutingIsAdditive();
         }
