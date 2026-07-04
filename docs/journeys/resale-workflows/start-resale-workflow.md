@@ -10,7 +10,7 @@
 8. User clicks "Initiate Purchase Workflow →"
 9. Max resale price is calculated and shown (e.g. "Max resale: $123,000"); user can click "Back" to revise inputs
 10. Step 3 of 3: Initiate — Ground Lease is shown read-only; Purchase Price is pre-filled with the calculated max resale price (editable, with "Formula max" shown as a hint)
-11. User enters Buyer Full Name and Buyer Email (required), and optionally Buyer Phone in E.164 format (e.g. +11231231234)
+11. User enters Buyer Full Name and Buyer Email (required), and optionally Buyer Phone (formatted as-you-type, e.g. (202) 555-1234)
 12. User clicks "Initiate Workflow"
 13. Toast: "Purchase workflow initiated"
 14. Panel closes, user is navigated to Purchase Workflows with the new workflow's detail panel open
