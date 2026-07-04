@@ -142,7 +142,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
             homeId,
             buyer.FullName,
             buyer.Email,
-            buyer.Phone,
+            buyer.Phone?.Value,
             purchasePrice,
             initiatedBy.Value,
             applicationId));

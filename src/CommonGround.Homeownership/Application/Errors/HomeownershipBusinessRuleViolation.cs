@@ -166,15 +166,6 @@ public static class BusinessRuleViolation
                     {
                         ["email"] = email,
                     });
-
-            public static BusinessRuleViolationException PhoneInvalidFormat(string phone)
-                => new(
-                    "homeownership.homeowner.create.phone_invalid_format",
-                    new Dictionary<string, object?>
-                    {
-                        ["phone"] = phone,
-                        ["expectedFormat"] = "E.164",
-                    });
         }
     }
 

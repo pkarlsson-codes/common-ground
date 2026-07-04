@@ -11,6 +11,7 @@ import RecordMortgagePrequalificationPanel from './RecordMortgagePrequalificatio
 import DenyApplicationPanel from './DenyApplicationPanel'
 import WithdrawApplicationPanel from './WithdrawApplicationPanel'
 import { getResponseStatus } from '../../lib/getErrorMessage'
+import { formatPhoneDisplay } from '../../lib/phone'
 
 type Props = {
   applicationId: string
@@ -66,7 +67,7 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
   return (
     <SlideOver
       title={detail?.applicantFullName ?? 'Application'}
-      subtitle={detail?.applicantEmail ?? detail?.applicantPhone ?? undefined}
+      subtitle={detail?.applicantEmail ?? formatPhoneDisplay(detail?.applicantPhone)}
       onClose={onClose}
       footer={<button className="btn btn-ghost" onClick={onClose}>Close</button>}
     >
@@ -112,7 +113,7 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
             </div>
             <div className="detail-field">
               <div className="detail-field__label">Phone</div>
-              <div className="detail-field__value">{detail.applicantPhone ?? '—'}</div>
+              <div className="detail-field__value">{formatPhoneDisplay(detail.applicantPhone) ?? '—'}</div>
             </div>
             <div className="detail-field">
               <div className="detail-field__label">Household Size</div>

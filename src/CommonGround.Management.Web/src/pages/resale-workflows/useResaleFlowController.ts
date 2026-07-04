@@ -3,6 +3,7 @@ import { useCalculateResaleEstimate, useGroundLease } from '../../hooks/groundLe
 import { useInitiatePurchaseWorkflow } from '../../hooks/purchaseWorkflows'
 import type { InitiateWorkflowForm, ResaleEstimateForm } from '../../hooks/types'
 import { getErrorMessage } from '../../lib/getErrorMessage'
+import { isValidPhone, toE164 } from '../../lib/phone'
 
 const emptyEstimate = (): ResaleEstimateForm => ({
   originalPurchasePrice: 0,
@@ -71,12 +72,18 @@ export function useResaleFlowController({ groundLeaseId, onSuccess }: Props) {
       return
     }
 
+    if (initiateForm.buyerPhone && !isValidPhone(initiateForm.buyerPhone)) {
+      setInitiateError('Enter a valid buyer phone number.')
+      return
+    }
+
     try {
       const result = await initiateMutation.mutateAsync({
         ...initiateForm,
         groundLeaseTemplateId: lease.groundLeaseTemplateId,
         landParcelId: lease.landParcelId ?? '',
         homeId: lease.homeId ?? '',
+        buyerPhone: initiateForm.buyerPhone ? toE164(initiateForm.buyerPhone) ?? '' : '',
         purchasePrice: Number(initiateForm.purchasePrice),
       })
       onSuccess(hasPurchaseWorkflowId(result) ? result.purchaseWorkflowId : undefined)

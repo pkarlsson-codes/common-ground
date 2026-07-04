@@ -1,6 +1,7 @@
 import type { PurchaseWorkflowResponse } from '../../api'
 import NavIdLink from '../../components/NavIdLink'
 import StatusBadge from '../../components/StatusBadge'
+import { formatPhoneDisplay } from '../../lib/phone'
 
 const fmtCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
@@ -53,7 +54,7 @@ export default function PurchaseWorkflowSnapshotSection({ detail }: PurchaseWork
         {detail.buyerPhone && (
           <div className="detail-field">
             <div className="detail-field__label">Phone</div>
-            <div className="detail-field__value mono">{detail.buyerPhone}</div>
+            <div className="detail-field__value mono">{formatPhoneDisplay(detail.buyerPhone)}</div>
           </div>
         )}
         <div className="detail-field full-span">

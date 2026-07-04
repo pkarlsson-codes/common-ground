@@ -2,6 +2,7 @@ import { useState } from 'react'
 import SlideOver from '../../components/SlideOver'
 import type { GroundLeaseListItemResponse } from '../../api'
 import { FORMULA_KIND_LABELS } from '../../hooks/types'
+import { formatPhoneInput } from '../../lib/phone'
 import { useResaleFlowController } from './useResaleFlowController'
 
 const fmtCurrency = (n: number) =>
@@ -257,11 +258,13 @@ export default function ResaleSlideOver({ groundLeaseId, lease, onClose, onSucce
                 <input
                   className="form-input"
                   type="tel"
-                  placeholder="+11231231234"
+                  placeholder="(202) 555-1234"
                   value={ctrl.initiateForm.buyerPhone}
-                  onChange={e => ctrl.setInitiateForm(f => ({ ...f, buyerPhone: e.target.value }))}
+                  onChange={e => {
+                    const next = formatPhoneInput(e.target.value, ctrl.initiateForm.buyerPhone)
+                    ctrl.setInitiateForm(f => ({ ...f, buyerPhone: next }))
+                  }}
                 />
-                <div className="form-help">Use E.164 format, for example +11231231234.</div>
               </div>
             </div>
 

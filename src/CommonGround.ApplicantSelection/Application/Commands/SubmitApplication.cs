@@ -7,9 +7,7 @@ namespace CommonGround.ApplicantSelection.Application.Commands;
 
 /// <summary>Submits a new homeowner application.</summary>
 public sealed record SubmitApplication(
-    string ApplicantFullName,
-    string ApplicantEmail,
-    string? ApplicantPhone,
+    Applicant Applicant,
     int HouseholdSize,
     decimal AnnualIncome,
     bool AccessibilityRequired,
@@ -26,7 +24,7 @@ public static class SubmitApplicationHandler
         ArgumentNullException.ThrowIfNull(command);
 
         var application = HomeownerApplication.Submit(
-            new Applicant(command.ApplicantFullName, command.ApplicantEmail, command.ApplicantPhone),
+            command.Applicant,
             new HouseholdInfo(command.HouseholdSize, command.AnnualIncome, command.AccessibilityRequired),
             command.SubmittedBy);
 

@@ -31,7 +31,6 @@ internal static class BusinessRuleErrorMessageMap
             ["homeownership.ground_lease.terminate.status_not_active"] = "Only active ground leases can be terminated.",
             ["homeownership.homeowner.create.email_invalid"] = "Enter a valid email address.",
             ["homeownership.homeowner.create.full_name_invalid"] = "Enter a valid full name (up to {maxLength} characters).",
-            ["homeownership.homeowner.create.phone_invalid_format"] = "Enter a valid phone number in {expectedFormat} format.",
             ["homeownership.purchase_workflow.fail_purchase.failure_reason_required"] = "Failure reason is required.",
             ["homeownership.purchase_workflow.initiate.purchase_price_non_positive"] = "Purchase price must be greater than zero.",
             ["homeownership.purchase_workflow.modify.terminal_phase"] = "This purchase workflow is in a terminal phase and cannot be modified.",
@@ -59,6 +58,8 @@ internal static class BusinessRuleErrorMessageMap
             ["property_registry.land_parcel.withdraw_for_redevelopment.parcel_decommissioned"] = "Decommissioned parcels cannot be withdrawn for redevelopment.",
             ["property_registry.unit_assessment.create.assessed_value_negative"] = "Assessed value cannot be negative.",
             ["property_registry.unit_assessment.create.assessment_date_in_future"] = "Assessment date cannot be in the future.",
+
+            ["shared.phone.invalid_format"] = "Enter a valid phone number.",
 
             ["stewardship.foreclosure_prevention_case.activate_cure_period.invalid_cure_period_days"] = "Cure period days must be greater than zero.",
             ["stewardship.foreclosure_prevention_case.activate_cure_period.lra_id_required"] = "LRA case identifier is required to activate cure period.",

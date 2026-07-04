@@ -4,6 +4,7 @@ import SlideOver from '../../components/SlideOver'
 import { useSubmitApplication } from '../../hooks/applicantSelection'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
+import { formatPhoneInput, isValidPhone, toE164 } from '../../lib/phone'
 
 type FormState = {
   applicantFullName: string
@@ -30,18 +31,25 @@ type Props = {
 export default function SubmitApplicationPanel({ onClose }: Props) {
   const [form, setForm] = useState<FormState>(emptyForm)
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
+  const [phoneError, setPhoneError] = useState<string | null>(null)
   const submitMutation = useSubmitApplication()
   const { success } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setProblem(null)
+    setPhoneError(null)
+
+    if (form.applicantPhone && !isValidPhone(form.applicantPhone)) {
+      setPhoneError('Enter a valid phone number.')
+      return
+    }
 
     try {
       const result = await submitMutation.mutateAsync({
         applicantFullName: form.applicantFullName,
         applicantEmail: form.applicantEmail,
-        applicantPhone: form.applicantPhone || undefined,
+        applicantPhone: form.applicantPhone ? toE164(form.applicantPhone) : undefined,
         householdSize: Number(form.householdSize),
         annualIncome: Number(form.annualIncome),
         accessibilityRequired: form.accessibilityRequired,
@@ -101,9 +109,14 @@ export default function SubmitApplicationPanel({ onClose }: Props) {
               className="form-input"
               type="tel"
               value={form.applicantPhone}
-              onChange={e => setForm(f => ({ ...f, applicantPhone: e.target.value }))}
-              placeholder="Optional"
+              onChange={e => {
+                const next = formatPhoneInput(e.target.value, form.applicantPhone)
+                setPhoneError(null)
+                setForm(f => ({ ...f, applicantPhone: next }))
+              }}
+              placeholder="Optional, e.g. (202) 555-1234"
             />
+            {phoneError && <div className="form-error">{phoneError}</div>}
           </div>
           <div className="form-field">
             <label className="form-label">Household Size</label>

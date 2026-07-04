@@ -132,7 +132,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             createdBy.Value,
             purchaseWorkflow.Buyer.FullName,
             purchaseWorkflow.Buyer.Email,
-            purchaseWorkflow.Buyer.Phone));
+            purchaseWorkflow.Buyer.Phone?.Value));
 
         return lease;
     }

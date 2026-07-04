@@ -55,7 +55,7 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
             HomeownerApplicationId.Generate().Value,
             applicant.FullName,
             applicant.Email,
-            applicant.Phone,
+            applicant.Phone?.Value,
             householdInfo.HouseholdSize,
             householdInfo.AnnualIncome,
             householdInfo.AccessibilityRequired,
@@ -160,7 +160,7 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
             Id.Value,
             Applicant.FullName,
             Applicant.Email,
-            Applicant.Phone,
+            Applicant.Phone?.Value,
             homeId,
             landParcelId,
             groundLeaseTemplateId,
@@ -207,7 +207,7 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     private void Apply(ApplicationSubmitted e)
     {
         Id = HomeownerApplicationId.Create(e.AggregateId);
-        Applicant = new Applicant(e.ApplicantFullName, e.ApplicantEmail, e.ApplicantPhone);
+        Applicant = new Applicant(e.ApplicantFullName, e.ApplicantEmail, PhoneNumber.FromOptional(e.ApplicantPhone));
         HouseholdInfo = new HouseholdInfo(e.HouseholdSize, e.AnnualIncome, e.AccessibilityRequired);
         Phase = ApplicationPhase.Submitted;
         SubmittedAt = e.OccurredAt;

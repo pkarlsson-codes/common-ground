@@ -6,6 +6,7 @@ using CommonGround.ApplicantSelection.Application.Commands;
 using CommonGround.ApplicantSelection.Application.Queries;
 using CommonGround.ApplicantSelection.Application.ReadModels;
 using CommonGround.ApplicantSelection.Domain.HomeownerApplications;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
@@ -26,9 +27,7 @@ public static class HomeownerApplicationsEndpoints
         var userId = httpContext.GetUserId();
 
         var command = new SubmitApplication(
-            request.ApplicantFullName,
-            request.ApplicantEmail,
-            request.ApplicantPhone,
+            new Applicant(request.ApplicantFullName, request.ApplicantEmail, PhoneNumber.FromOptional(request.ApplicantPhone)),
             request.HouseholdSize,
             request.AnnualIncome,
             request.AccessibilityRequired,

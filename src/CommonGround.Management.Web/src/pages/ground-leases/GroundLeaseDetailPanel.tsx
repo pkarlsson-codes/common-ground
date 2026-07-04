@@ -6,6 +6,7 @@ import NavIdLink from '../../components/NavIdLink'
 import SlideOver from '../../components/SlideOver'
 import StatusBadge from '../../components/StatusBadge'
 import { getErrorMessage } from '../../lib/getErrorMessage'
+import { formatPhoneDisplay } from '../../lib/phone'
 import { useToast } from '../../hooks/useToast'
 
 function SkeletonRows() {
@@ -115,7 +116,7 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
             {detail.homeownerPhone && (
               <div className="detail-field">
                 <div className="detail-field__label">Phone</div>
-                <div className="detail-field__value mono">{detail.homeownerPhone}</div>
+                <div className="detail-field__value mono">{formatPhoneDisplay(detail.homeownerPhone)}</div>
               </div>
             )}
             {detail.covenantTerms && (
