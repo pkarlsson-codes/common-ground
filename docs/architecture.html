@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CommonGround — Architecture</title>
+  <script src="./diagram-panzoom.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    import elkLayouts from 'https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs';
+    mermaid.registerLayoutLoaders(elkLayouts);
+    mermaid.initialize({ startOnLoad: false, theme: 'dark', layout: 'elk' });
+    await mermaid.run();
+    setupPanZoom();
+  </script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: #f8fafc;
+    }
+    p.subtitle {
+      color: #94a3b8;
+      margin-top: 0;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+    }
+    .diagram-container {
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-radius: 0.75rem;
+      padding: 0;
+      flex: 1;
+      min-height: 300px;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+    }
+    .diagram-container:active {
+      cursor: grabbing;
+    }
+    .diagram-container .mermaid {
+      display: block;
+    }
+    .diagram-hint {
+      position: absolute;
+      bottom: 0.75rem;
+      right: 1rem;
+      font-size: 0.75rem;
+      color: #475569;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .legend {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 2rem;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .legend-line {
+      width: 2rem;
+      height: 2px;
+      background: #64748b;
+    }
+    .legend-line.dashed {
+      background: repeating-linear-gradient(90deg, #64748b 0, #64748b 4px, transparent 4px, transparent 8px);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>CommonGround — Architecture</h1>
+  <p class="subtitle">Processes, the layers inside each, and the local infrastructure they depend on. Source of truth: <code>docs/architecture.md</code>.</p>
+
+  <div class="diagram-container">
+    <div class="diagram-hint">scroll to zoom · drag to pan</div>
+    <div class="mermaid">
+flowchart TB
+    subgraph GatewayMgmt["Process: Management Gateway (:4000)"]
+        MgmtEndpoints["Endpoints"]
+        MgmtClients["API Clients"]
+        MgmtEndpoints --> MgmtClients
+    end
+
+    subgraph GatewayHome["Process: Homeowner Gateway"]
+        HomeEndpoints["Endpoints"]
+        HomeClients["API Clients"]
+        HomeEndpoints --> HomeClients
+    end
+
+    subgraph API["Process: API (:5000)"]
+        ApiEndpoints["Endpoints"]
+        subgraph Contexts["Bounded contexts"]
+            direction LR
+            ApplicantSelection["ApplicantSelection"]
+            Documents["Documents"]
+            Homeownership["Homeownership"]
+            Identity["Identity"]
+            PropertyRegistry["PropertyRegistry"]
+            Stewardship["Stewardship"]
+            TrustManagement["TrustManagement"]
+        end
+        ApiEndpoints --> ApplicantSelection
+        ApiEndpoints --> Documents
+        ApiEndpoints --> Homeownership
+        ApiEndpoints --> Identity
+        ApiEndpoints --> PropertyRegistry
+        ApiEndpoints --> Stewardship
+        ApiEndpoints --> TrustManagement
+    end
+
+    subgraph Infra["Local Infra (docker-compose)"]
+        Postgres[("PostgreSQL<br/>(pgvector)")]
+        Redis[("Redis")]
+        RabbitMQ[("RabbitMQ")]
+        Keycloak["Keycloak"]
+        MinIO[("MinIO")]
+        Seq["Seq"]
+    end
+
+    MgmtClients -- "internal JWT" --> ApiEndpoints
+    HomeClients -- "internal JWT" --> ApiEndpoints
+    MgmtEndpoints -- "OIDC login" --> Keycloak
+    MgmtEndpoints -- "session tokens" --> Redis
+    HomeEndpoints -- "OIDC login" --> Keycloak
+    HomeEndpoints -- "session tokens" --> Redis
+
+    Contexts --> Postgres
+    Contexts --> RabbitMQ
+    Documents --> MinIO
+    ApiEndpoints -.-> Seq
+    MgmtEndpoints -.-> Seq
+    HomeEndpoints -.-> Seq
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-line"></span> synchronous call / dependency</div>
+    <div class="legend-item"><span class="legend-line dashed"></span> logging (Seq)</div>
+  </div>
+
+</body>
+</html>

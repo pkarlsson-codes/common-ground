@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CommonGround — Authentication Flow</title>
+  <script src="./diagram-panzoom.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+    await mermaid.run();
+    setupPanZoom();
+  </script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 2rem;
+      box-sizing: border-box;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: #f8fafc;
+    }
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-top: 2.5rem;
+    }
+    p.subtitle {
+      color: #94a3b8;
+      margin-top: 0;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+    }
+    p.note {
+      color: #94a3b8;
+      font-size: 0.875rem;
+      max-width: 70ch;
+    }
+    code {
+      background: #1e2330;
+      border-radius: 0.25rem;
+      padding: 0.1rem 0.35rem;
+      font-size: 0.85em;
+    }
+    .diagram-container {
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-radius: 0.75rem;
+      padding: 0;
+      height: 70vh;
+      min-height: 300px;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+    }
+    .diagram-container:active {
+      cursor: grabbing;
+    }
+    .diagram-container .mermaid {
+      display: block;
+    }
+    .diagram-hint {
+      position: absolute;
+      bottom: 0.75rem;
+      right: 1rem;
+      font-size: 0.75rem;
+      color: #475569;
+      pointer-events: none;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>CommonGround — Authentication Flow</h1>
+  <p class="subtitle">How a user gets a session and how that session becomes an authenticated API call. Management Gateway (:4000); the Homeowner Gateway follows the same pattern. Source of truth: <code>docs/auth-flow.md</code>.</p>
+
+  <h2>Login</h2>
+  <div class="diagram-container">
+    <div class="diagram-hint">scroll to zoom · drag to pan</div>
+    <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant B as Browser
+    participant G as Gateway
+    participant K as Keycloak
+    participant R as Redis
+    participant A as API
+
+    B->>G: GET /auth/login?returnUrl=…
+    G-->>B: 302 to Keycloak authorize (PKCE + state)
+    B->>K: authorize request, user signs in
+    K-->>B: 302 to gateway OIDC callback (authorization code)
+    B->>G: callback with code
+    G->>K: exchange code for tokens
+    K-->>G: access + refresh + id tokens
+    Note over G: OnTokenValidated
+    G->>A: EnsureUser(sub, email, name, trustId?)<br/>service JWT (sub=gateway-service, actor=gateway)
+    A-->>G: canonical userId + trustId (created if new)
+    G->>R: save tokens under random sessionId<br/>(userId, trustId, access/refresh/id)
+    G-->>B: Set-Cookie cg_auth, cg_session (HttpOnly), cg_csrf<br/>302 to returnUrl
+    </div>
+  </div>
+  <p class="note">User provisioning is just-in-time — the gateway calls the API's <code>EnsureUser</code> during login using a <em>service</em> token (no <code>user_id</code> yet), and the API's canonical user ID is what goes into the session, not the Keycloak subject.</p>
+
+  <h2>Authenticated API call</h2>
+  <div class="diagram-container">
+    <div class="diagram-hint">scroll to zoom · drag to pan</div>
+    <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant B as Browser
+    participant G as Gateway
+    participant R as Redis
+    participant A as API
+
+    B->>G: GET /api/… (cookies: cg_auth, cg_session)
+    Note over G: cookie auth establishes principal
+    Note over G: InternalGatewayAuthHandler (on outbound API client)
+    G->>G: user_id from claims principal
+    G->>R: lookup session by cg_session
+    R-->>G: userId (fallback), trustId
+    G->>G: mint internal JWT (5 min, HS256)<br/>claims: user_id, tenant_id, session_id
+    G->>A: forward request, Bearer internal JWT
+    Note over A: validate issuer/audience/signature,<br/>identity = user_id claim
+    A-->>G: response
+    G-->>B: response
+    </div>
+  </div>
+  <p class="note">The trust ID always comes from the Redis session lookup, not from claims — a request with a valid <code>cg_auth</code> cookie but no Redis session gets a JWT without <code>tenant_id</code>. Keycloak tokens never cross the gateway→API boundary; the internal JWT is the only credential the API ever sees.</p>
+
+  <h2>Token refresh</h2>
+  <div class="diagram-container">
+    <div class="diagram-hint">scroll to zoom · drag to pan</div>
+    <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant B as Browser
+    participant G as Gateway
+    participant R as Redis
+    participant K as Keycloak
+
+    B->>G: POST /auth/refresh (cg_session)
+    G->>R: lookup refresh token
+    alt no session or no refresh token
+        G-->>B: 401
+    end
+    G->>K: refresh_token grant
+    K-->>G: new access (+ refresh) token
+    G->>R: remove old sessionId,<br/>save tokens under NEW sessionId
+    G-->>B: Set-Cookie new cg_session + cg_csrf, 200
+    </div>
+  </div>
+  <p class="note">Refresh rotates the session ID: the old Redis entry is deleted and new cookies are issued, so a captured <code>cg_session</code> value goes stale after the next refresh. Logout (<code>GET /auth/logout</code>) deletes the Redis entry and cookies, then signs out of both the cookie scheme and Keycloak using the stored <code>id_token</code> as the logout hint.</p>
+
+</body>
+</html>
