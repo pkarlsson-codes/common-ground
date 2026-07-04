@@ -75,6 +75,14 @@ public sealed class ApplicantSelectionApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<HomeCandidateResponse>> GetHomeCandidatesAsync(string homeId, string? search, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+        var query = string.IsNullOrWhiteSpace(search) ? string.Empty : $"?search={Uri.EscapeDataString(search)}";
+        return await GetAsync<IReadOnlyList<HomeCandidateResponse>>($"api/homes/{homeId}/applicant-candidates{query}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task SelectApplicantAsync(string applicationId, SelectApplicantRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);

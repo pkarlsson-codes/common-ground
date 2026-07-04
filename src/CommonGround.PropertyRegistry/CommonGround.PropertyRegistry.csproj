@@ -5,6 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CommonGround.ApplicantSelection.Contracts\CommonGround.ApplicantSelection.Contracts.csproj" />
+    <ProjectReference Include="..\CommonGround.PropertyRegistry.Contracts\CommonGround.PropertyRegistry.Contracts.csproj" />
     <ProjectReference Include="..\CommonGround.SharedKernel\CommonGround.SharedKernel.csproj" />
     <ProjectReference Include="..\CommonGround.TrustManagement\CommonGround.TrustManagement.csproj" />
   </ItemGroup>

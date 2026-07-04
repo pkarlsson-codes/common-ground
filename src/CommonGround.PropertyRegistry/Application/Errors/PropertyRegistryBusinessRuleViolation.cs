@@ -79,6 +79,13 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class MarkUnderContract
+        {
+            public static BusinessRuleViolationException HomeNotAvailable()
+                => new(
+                    "property_registry.home.mark_under_contract.home_not_available");
+        }
+
         public static class RecordAssessment
         {
             public static BusinessRuleViolationException AssessedValueNegative(decimal assessedValue)

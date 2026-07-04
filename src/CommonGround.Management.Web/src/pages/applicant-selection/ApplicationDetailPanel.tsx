@@ -8,7 +8,6 @@ import DenyEligibilityPanel from './DenyEligibilityPanel'
 import RecordHousingCounselingPanel from './RecordHousingCounselingPanel'
 import RecordCltOrientationPanel from './RecordCltOrientationPanel'
 import RecordMortgagePrequalificationPanel from './RecordMortgagePrequalificationPanel'
-import SelectApplicantPanel from './SelectApplicantPanel'
 import DenyApplicationPanel from './DenyApplicationPanel'
 import WithdrawApplicationPanel from './WithdrawApplicationPanel'
 import { getResponseStatus } from '../../lib/getErrorMessage'
@@ -51,7 +50,6 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
     | 'record-housing-counseling'
     | 'record-clt-orientation'
     | 'record-mortgage-prequalification'
-    | 'select-applicant'
     | 'deny-application'
     | 'withdraw-application'
     | null
@@ -258,11 +256,6 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
 
               {(isActivePhase || isWaitlistedPhase) && (
                 <>
-                  {isWaitlistedPhase && (
-                    <button className="btn btn-primary btn-sm" onClick={() => setActionPanel('select-applicant')}>
-                      Select Applicant
-                    </button>
-                  )}
                   <button className="btn btn-ghost btn-sm" onClick={() => setActionPanel('deny-application')}>
                     Deny Application
                   </button>
@@ -294,9 +287,6 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
       )}
       {actionPanel === 'record-mortgage-prequalification' && (
         <RecordMortgagePrequalificationPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />
-      )}
-      {actionPanel === 'select-applicant' && (
-        <SelectApplicantPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />
       )}
       {actionPanel === 'deny-application' && (
         <DenyApplicationPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />

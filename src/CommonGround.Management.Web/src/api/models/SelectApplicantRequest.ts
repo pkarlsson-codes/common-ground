@@ -15,7 +15,7 @@
 
 import { mapValues } from '../runtime';
 /**
- * Request to select an applicant for a home.
+ * Request to select an applicant for a home. LandParcelId is resolved server-side from the home.
  * @export
  * @interface SelectApplicantRequest
  */
@@ -26,12 +26,6 @@ export interface SelectApplicantRequest {
      * @memberof SelectApplicantRequest
      */
     homeId?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SelectApplicantRequest
-     */
-    landParcelId?: string;
     /**
      * 
      * @type {string}
@@ -70,7 +64,6 @@ export function SelectApplicantRequestFromJSONTyped(json: any, ignoreDiscriminat
     return {
         
         'homeId': json['homeId'] == null ? undefined : json['homeId'],
-        'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
         'groundLeaseTemplateId': json['groundLeaseTemplateId'] == null ? undefined : json['groundLeaseTemplateId'],
         'purchasePrice': json['purchasePrice'] == null ? undefined : json['purchasePrice'],
         'selectedDate': json['selectedDate'] == null ? undefined : json['selectedDate'],
@@ -89,7 +82,6 @@ export function SelectApplicantRequestToJSONTyped(value?: SelectApplicantRequest
     return {
         
         'homeId': value['homeId'],
-        'landParcelId': value['landParcelId'],
         'groundLeaseTemplateId': value['groundLeaseTemplateId'],
         'purchasePrice': value['purchasePrice'],
         'selectedDate': value['selectedDate'],

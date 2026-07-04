@@ -28,6 +28,9 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <summary>Gets the home ID of the property being purchased.</summary>
     public string HomeId { get; private set; }
 
+    /// <summary>Gets the homeowner application this workflow was initiated from, or null for manual/resale-initiated workflows.</summary>
+    public string? ApplicationId { get; private set; }
+
     /// <summary>Gets the prospective buyer.</summary>
     public Homeowner Buyer { get; private set; }
 
@@ -109,6 +112,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <param name="buyer">The prospective buyer.</param>
     /// <param name="purchasePrice">The offer price. Must be positive.</param>
     /// <param name="initiatedBy">The user initiating the workflow.</param>
+    /// <param name="applicationId">The homeowner application this workflow originates from, or null for manual/resale-initiated workflows.</param>
     /// <returns>A new purchase workflow instance.</returns>
     public static PurchaseWorkflow Initiate(
         GroundLeaseTemplateId groundLeaseTemplateId,
@@ -116,7 +120,8 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         string homeId,
         Homeowner buyer,
         decimal purchasePrice,
-        UserId initiatedBy)
+        UserId initiatedBy,
+        string? applicationId = null)
     {
         ArgumentNullException.ThrowIfNull(groundLeaseTemplateId);
         ArgumentNullException.ThrowIfNull(landParcelId);
@@ -139,7 +144,8 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
             buyer.Email,
             buyer.Phone,
             purchasePrice,
-            initiatedBy.Value));
+            initiatedBy.Value,
+            applicationId));
 
         return workflow;
     }
@@ -365,6 +371,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         Phase = WorkflowPhase.Initiated;
         InitiatedBy = UserId.Create(e.InitiatedBy);
         CreatedAt = e.OccurredAt;
+        ApplicationId = e.ApplicationId;
     }
 
     private void Apply(BuyerEligibilityVerified e)

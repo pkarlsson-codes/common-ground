@@ -12,6 +12,9 @@ public class HomeownerApplicationListItemView
     /// <summary>Gets or sets the applicant email address.</summary>
     public string ApplicantEmail { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the applicant phone number.</summary>
+    public string? ApplicantPhone { get; set; }
+
     /// <summary>Gets or sets the household size.</summary>
     public int HouseholdSize { get; set; }
 

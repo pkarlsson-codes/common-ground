@@ -1,36 +1,21 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import {
-  useInitiatePurchaseWorkflow,
-  usePurchaseWorkflows,
-} from '../hooks/purchaseWorkflows'
-import {
-  statusLabel,
-  WORKFLOW_PHASES,
-  type InitiateWorkflowForm,
-} from '../hooks/types'
+import { usePurchaseWorkflows } from '../hooks/purchaseWorkflows'
+import { statusLabel, WORKFLOW_PHASES } from '../hooks/types'
 import EntityCombobox from '../components/EntityCombobox'
 import Pagination from '../components/Pagination'
-import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
-import { GroundLeaseTemplatesApi, HomesApi, LandParcelsApi } from '../api'
+import { GroundLeaseTemplatesApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
-import { getErrorMessage } from '../lib/getErrorMessage'
 import PurchaseWorkflowDetailPanel from './purchase-workflows/PurchaseWorkflowDetailPanel'
 import { useToast } from '../hooks/useToast'
 
 const groundLeaseTemplatesApi = new GroundLeaseTemplatesApi(apiConfig)
-const landParcelsApi = new LandParcelsApi(apiConfig)
-const homesApi = new HomesApi(apiConfig)
-const E164_PHONE_PATTERN = /^\+[1-9]\d{1,14}$/
 
-type Panel = 'detail' | 'initiate' | null
+type Panel = 'detail' | null
 
 const fmtCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
-
-const isValidE164Phone = (value: string) => E164_PHONE_PATTERN.test(value)
-
 
 function SkeletonRows() {
   return (
@@ -39,16 +24,6 @@ function SkeletonRows() {
     </div>
   )
 }
-
-const emptyInitiate = (): InitiateWorkflowForm => ({
-  groundLeaseTemplateId: '',
-  landParcelId: '',
-  homeId: '',
-  buyerFullName: '',
-  buyerEmail: '',
-  buyerPhone: '',
-  purchasePrice: 150000,
-})
 
 export default function PurchaseWorkflowsPage() {
   const location = useLocation()
@@ -60,14 +35,9 @@ export default function PurchaseWorkflowsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [panel, setPanel] = useState<Panel>(null)
 
-  const [initiateForm, setInitiateForm] = useState<InitiateWorkflowForm>(emptyInitiate)
-
-  const [initiateError, setInitiateError] = useState<string | null>(null)
   const { success, error } = useToast()
 
   const { data, isLoading, isError } = usePurchaseWorkflows(page, templateFilter || undefined, phaseFilter || undefined)
-
-  const initiateMutation = useInitiatePurchaseWorkflow()
 
   const showToast = (msg: string, kind: 'success' | 'error' = 'success') => {
     if (kind === 'error') {
@@ -81,12 +51,6 @@ export default function PurchaseWorkflowsPage() {
   const openDetail = (id: string) => {
     setSelectedId(id)
     setPanel('detail')
-  }
-
-  const openInitiate = () => {
-    setInitiateForm(emptyInitiate())
-    setInitiateError(null)
-    setPanel('initiate')
   }
 
   useEffect(() => {
@@ -105,30 +69,6 @@ export default function PurchaseWorkflowsPage() {
   const closePanel = () => {
     setPanel(null)
     setSelectedId(null)
-  }
-
-  const handleInitiate = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const buyerPhone = initiateForm.buyerPhone.trim()
-    if (buyerPhone && !isValidE164Phone(buyerPhone)) {
-      setInitiateError('Buyer phone must be in E.164 format, for example +11231231234.')
-      return
-    }
-
-    setInitiateError(null)
-
-    try {
-      await initiateMutation.mutateAsync({
-        ...initiateForm,
-        buyerPhone,
-        purchasePrice: Number(initiateForm.purchasePrice),
-      })
-      closePanel()
-      showToast('Purchase workflow initiated')
-    } catch (error) {
-      setInitiateError(await getErrorMessage(error, 'Failed to initiate workflow.'))
-    }
   }
 
   const clearTemplateFilter = () => {
@@ -150,12 +90,6 @@ export default function PurchaseWorkflowsPage() {
             </div>
           )}
         </div>
-        <button className="btn btn-primary" onClick={openInitiate}>
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-            <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-          </svg>
-          Initiate Workflow
-        </button>
       </div>
 
       <div className="filter-bar">
@@ -205,7 +139,7 @@ export default function PurchaseWorkflowsPage() {
           <div className="empty-state">
             <div className="empty-state__glyph">⊡</div>
             <div className="empty-state__title">No workflows found</div>
-            <div className="empty-state__sub">Initiate a purchase workflow from an active lease template.</div>
+            <div className="empty-state__sub">Workflows start from selecting an applicant on a home, or from a resale listing.</div>
           </div>
         )}
 
@@ -261,137 +195,6 @@ export default function PurchaseWorkflowsPage() {
           onClose={closePanel}
           showToast={showToast}
         />
-      )}
-
-      {/* ── Initiate panel ─── */}
-      {panel === 'initiate' && (
-        <SlideOver
-          title="Initiate Purchase Workflow"
-          subtitle="Start a new purchase process from an active lease template"
-          onClose={closePanel}
-          footer={
-            <>
-              <button className="btn btn-ghost" onClick={closePanel}>Cancel</button>
-              <button
-                className="btn btn-primary"
-                type="submit"
-                form="initiate-workflow-form"
-                disabled={
-                  initiateMutation.isPending ||
-                  !initiateForm.groundLeaseTemplateId ||
-                  !initiateForm.landParcelId ||
-                  !initiateForm.homeId
-                }
-              >
-                {initiateMutation.isPending ? 'Initiating…' : 'Initiate Workflow'}
-              </button>
-            </>
-          }
-        >
-          <form id="initiate-workflow-form" onSubmit={handleInitiate}>
-            <div className="form-grid">
-              <div className="form-field full">
-                <label className="form-label">Lease Template</label>
-                <EntityCombobox
-                  value={initiateForm.groundLeaseTemplateId || null}
-                  onChange={id => setInitiateForm(f => ({ ...f, groundLeaseTemplateId: id ?? '' }))}
-                  fetchOptions={async q => {
-                    const result = await groundLeaseTemplatesApi.getGroundLeaseTemplates({ search: q, status: 'Active', pageSize: 10 })
-                    return (result.items ?? []).map(t => ({
-                      id: t.id!,
-                      label: t.templateName ?? t.id!,
-                    }))
-                  }}
-                  placeholder="Search active templates…"
-                />
-              </div>
-              <div className="form-field full">
-                <label className="form-label">Land Parcel</label>
-                <EntityCombobox
-                  value={initiateForm.landParcelId || null}
-                  onChange={id => setInitiateForm(f => ({ ...f, landParcelId: id ?? '', homeId: '' }))}
-                  fetchOptions={async q => {
-                    const result = await landParcelsApi.getLandParcels({ search: q, pageSize: 10 })
-                    return (result.items ?? []).map(p => ({
-                      id: p.id!,
-                      label: [p.legalParcelNumber, p.address].filter(Boolean).join(' — '),
-                    }))
-                  }}
-                  placeholder="Search parcels…"
-                />
-              </div>
-              <div className="form-field full">
-                <label className="form-label">Home</label>
-                <EntityCombobox
-                  value={initiateForm.homeId || null}
-                  onChange={id => setInitiateForm(f => ({ ...f, homeId: id ?? '' }))}
-                  fetchOptions={async q => {
-                    const result = await homesApi.getHomes({ landParcelIds: [initiateForm.landParcelId], pageSize: 10 })
-                    const lower = q.toLowerCase()
-                    const items = result.items ?? []
-                    const filtered = lower ? items.filter(b =>
-                      `${b.homeType} ${b.bedrooms} ${b.bathrooms} ${b.squareFootage}`.toLowerCase().includes(lower)
-                    ) : items
-                    return filtered.map(b => ({
-                      id: b.id!,
-                      label: `${b.homeType}, ${b.bedrooms}bd/${b.bathrooms}ba, ${b.squareFootage} sqft`,
-                    }))
-                  }}
-                  placeholder={initiateForm.landParcelId ? 'Search homes on this parcel…' : 'Select a parcel first'}
-                  disabled={!initiateForm.landParcelId}
-                />
-              </div>
-              <div className="form-field full">
-                <label className="form-label">Buyer Full Name</label>
-                <input
-                  className="form-input"
-                  value={initiateForm.buyerFullName}
-                  onChange={e => setInitiateForm(f => ({ ...f, buyerFullName: e.target.value }))}
-                  required
-                />
-              </div>
-              <div className="form-field">
-                <label className="form-label">Buyer Email</label>
-                <input
-                  className="form-input"
-                  type="email"
-                  value={initiateForm.buyerEmail}
-                  onChange={e => setInitiateForm(f => ({ ...f, buyerEmail: e.target.value }))}
-                  required
-                />
-              </div>
-              <div className="form-field">
-                <label className="form-label">Buyer Phone (optional)</label>
-                <input
-                  className="form-input"
-                  type="tel"
-                  placeholder="+11231231234"
-                  value={initiateForm.buyerPhone}
-                  onChange={e => {
-                    setInitiateError(null)
-                    setInitiateForm(f => ({ ...f, buyerPhone: e.target.value }))
-                  }}
-                />
-                <div className="form-help">Use E.164 format, for example +11231231234.</div>
-              </div>
-              <div className="form-field full">
-                <label className="form-label">Purchase Price ($)</label>
-                <input
-                  className="form-input"
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={initiateForm.purchasePrice}
-                  onChange={e => setInitiateForm(f => ({ ...f, purchasePrice: parseFloat(e.target.value) || 0 }))}
-                  required
-                />
-              </div>
-            </div>
-            {(initiateError || initiateMutation.isError) && (
-              <div className="form-error">{initiateError ?? 'Failed to initiate workflow.'}</div>
-            )}
-          </form>
-        </SlideOver>
       )}
 
     </div>

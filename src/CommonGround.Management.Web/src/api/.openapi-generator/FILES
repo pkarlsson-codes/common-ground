@@ -51,6 +51,7 @@ models/GroundLeaseResponse.ts
 models/GroundLeaseTemplateListItemResponse.ts
 models/GroundLeaseTemplateResponse.ts
 models/HomeAssessmentItemResponse.ts
+models/HomeCandidateResponse.ts
 models/HomeListItemResponse.ts
 models/HomeResponse.ts
 models/HomeownerApplicationListItemResponse.ts

@@ -19,7 +19,7 @@ internal sealed class DomainExceptionHandler(IProblemDetailsService problemDetai
         Exception exception,
         CancellationToken cancellationToken)
     {
-        if (exception is not DomainException domainException)
+        if (UnwrapDomainException(exception) is not DomainException domainException)
         {
             return false;
         }
@@ -47,6 +47,25 @@ internal sealed class DomainExceptionHandler(IProblemDetailsService problemDetai
             Exception = exception,
             ProblemDetails = problemDetails,
         }).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Walks the exception chain to find a <see cref="DomainException"/>. Inline Marten
+    /// projections (e.g. concurrency guards that throw from an Apply method) surface their
+    /// exceptions wrapped in a JasperFx <c>ApplyEventException</c>, so a direct type check
+    /// on the top-level exception is not sufficient.
+    /// </summary>
+    private static DomainException? UnwrapDomainException(Exception exception)
+    {
+        for (var current = exception; current is not null; current = current.InnerException)
+        {
+            if (current is DomainException domainException)
+            {
+                return domainException;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>

@@ -12,7 +12,7 @@ namespace CommonGround.Homeownership.Application.EventHandlers;
 public static class ApplicantSelectedHandler
 {
     /// <summary>Creates a purchase workflow when an applicant is selected for a home.</summary>
-    public static PurchaseWorkflowId Handle(
+    public static void Handle(
         ApplicantSelected @event,
         IDocumentSession session)
     {
@@ -24,10 +24,9 @@ public static class ApplicantSelectedHandler
             @event.HomeId,
             new Homeowner(@event.ApplicantFullName, @event.ApplicantEmail, @event.ApplicantPhone),
             @event.PurchasePrice,
-            UserId.Create(@event.SelectedBy));
+            UserId.Create(@event.SelectedBy),
+            @event.ApplicationId);
 
         session.CreateAggregate<PurchaseWorkflow, PurchaseWorkflowId>(workflow);
-
-        return workflow.Id;
     }
 }

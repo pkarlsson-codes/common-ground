@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useHomeownerApplications } from '../hooks/applicantSelection'
 import ApplicationDetailPanel from './applicant-selection/ApplicationDetailPanel'
 import ApplicantSelectionTable from './applicant-selection/ApplicantSelectionTable'
@@ -19,6 +20,9 @@ const PHASES = [
 ]
 
 export default function ApplicantSelectionPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
+
   const [page, setPage] = useState(1)
   const [phaseFilter, setPhaseFilter] = useState('')
   const [searchFilter, setSearchFilter] = useState('')
@@ -44,6 +48,19 @@ export default function ApplicantSelectionPage() {
     setPanel(null)
     setSelectedId(null)
   }
+
+  useEffect(() => {
+    const openId = (location.state as { openId?: string } | null)?.openId
+    if (!openId) {
+      return
+    }
+
+    openDetail(openId)
+    navigate(
+      { pathname: location.pathname, search: location.search, hash: location.hash },
+      { replace: true, state: null },
+    )
+  }, [location, navigate])
 
   const hasFilters = Boolean(phaseFilter || searchFilter)
 

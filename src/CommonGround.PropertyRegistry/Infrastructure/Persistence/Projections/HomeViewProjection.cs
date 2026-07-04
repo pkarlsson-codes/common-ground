@@ -1,4 +1,5 @@
 using CommonGround.PropertyRegistry.Application.ReadModels;
+using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.Homes.Events;
 using JasperFx.Events;
 using Marten.Events.Aggregation;
@@ -20,7 +21,7 @@ internal sealed class HomeViewProjection : SingleStreamProjection<HomeView, stri
             SquareFootage = e.Data.SquareFootage,
             YearBuilt = e.Data.YearBuilt,
             AssessedValue = e.Data.InitialAssessedValue,
-            Status = "Available",
+            Status = HomeStatus.Available.DisplayName,
             RegisteredAt = e.Data.OccurredAt,
         };
 
@@ -30,5 +31,11 @@ internal sealed class HomeViewProjection : SingleStreamProjection<HomeView, stri
         view.AssessedValue = e.AssessedValue;
         view.LastAssessedDate = e.AssessmentDate;
         view.ConditionNotes = e.ConditionNotes;
+    }
+
+    /// <summary>Applies an under-contract status change.</summary>
+    public static void Apply(HomeView view, HomeUnderContract e)
+    {
+        view.Status = HomeStatus.UnderContract.DisplayName;
     }
 }

@@ -66,4 +66,15 @@ public static class BusinessRuleViolation
                     });
         }
     }
+
+    public static class HomeAvailabilityClaim
+    {
+        public static BusinessRuleViolationException AlreadyClaimed(string homeId)
+            => new(
+                "applicant_selection.home_availability_claim.already_claimed",
+                new Dictionary<string, object?>
+                {
+                    ["homeId"] = homeId,
+                });
+    }
 }

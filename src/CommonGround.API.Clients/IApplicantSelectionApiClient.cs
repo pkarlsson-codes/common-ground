@@ -36,6 +36,9 @@ public interface IApplicantSelectionApiClient
     /// <summary>Records mortgage prequalification.</summary>
     Task RecordMortgagePrequalificationAsync(string applicationId, RecordMortgagePrequalificationRequest request, CancellationToken cancellationToken);
 
+    /// <summary>Gets applications eligible to be selected for a given home.</summary>
+    Task<IReadOnlyList<HomeCandidateResponse>> GetHomeCandidatesAsync(string homeId, string? search, CancellationToken cancellationToken);
+
     /// <summary>Selects an applicant for a home.</summary>
     Task SelectApplicantAsync(string applicationId, SelectApplicantRequest request, CancellationToken cancellationToken);
 

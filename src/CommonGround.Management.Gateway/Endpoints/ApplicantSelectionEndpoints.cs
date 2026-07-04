@@ -114,6 +114,19 @@ public static class ApplicantSelectionEndpoints
         return Results.NoContent();
     }
 
+    [WolverineGet("/api/v1/homes/{homeId}/applicant-candidates")]
+    [ProducesResponseType<IReadOnlyList<HomeCandidateResponse>>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetHomeCandidates(
+        string homeId,
+        [FromQuery] string? search,
+        IApplicantSelectionApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+        var result = await client.GetHomeCandidatesAsync(homeId, search, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+
     [WolverinePost("/api/v1/homeowner-applications/{applicationId}/select")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> SelectApplicant(

@@ -197,6 +197,28 @@ public static class HomeownerApplicationsEndpoints
         return Results.NoContent();
     }
 
+    [WolverineGet("/api/homes/{homeId}/applicant-candidates")]
+    public static async Task<IResult> GetHomeCandidates(
+        string homeId,
+        [FromQuery] string? search,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+
+        var candidates = await bus.InvokeForTenantAsync<IReadOnlyList<HomeownerApplicationListItemView>>(bus.TenantId!,
+            new GetHomeCandidates(homeId, search),
+            cancellationToken);
+
+        var response = candidates.Select(v => new HomeCandidateResponse(
+            v.Id,
+            v.ApplicantFullName,
+            v.ApplicantEmail,
+            v.ApplicantPhone));
+
+        return Results.Ok(response);
+    }
+
     [WolverinePost("/api/homeowner-applications/{applicationId}/select")]
     public static async Task<IResult> SelectApplicant(
         string applicationId,
@@ -214,7 +236,6 @@ public static class HomeownerApplicationsEndpoints
             new SelectApplicant(
                 HomeownerApplicationId.Create(applicationId),
                 request.HomeId,
-                request.LandParcelId,
                 request.GroundLeaseTemplateId,
                 request.PurchasePrice,
                 DateOnly.Parse(request.SelectedDate, CultureInfo.InvariantCulture),

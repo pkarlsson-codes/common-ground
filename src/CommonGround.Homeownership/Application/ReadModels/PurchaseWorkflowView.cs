@@ -15,6 +15,9 @@ public class PurchaseWorkflowView
     /// <summary>Gets or sets the home ID.</summary>
     public string HomeId { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the homeowner application this workflow was initiated from, or null for manual/resale-initiated workflows.</summary>
+    public string? ApplicationId { get; set; }
+
     /// <summary>Gets or sets the current workflow phase.</summary>
     public string Phase { get; set; } = string.Empty;
 

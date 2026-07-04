@@ -522,6 +522,67 @@
         }
       }
     },
+    "/api/v1/homes/{homeId}/applicant-candidates": {
+      "get": {
+        "tags": [
+          "ApplicantSelection"
+        ],
+        "operationId": "GetHomeCandidates",
+        "parameters": [
+          {
+            "name": "homeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HomeCandidateResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/homeowner-applications/{applicationId}/select": {
       "post": {
         "tags": [
@@ -5918,15 +5979,32 @@
           }
         }
       },
+      "HomeCandidateResponse": {
+        "type": "object",
+        "description": "Summary item for a homeowner application candidate for a home.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "applicantFullName": {
+            "type": "string"
+          },
+          "applicantEmail": {
+            "type": "string"
+          },
+          "applicantPhone": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "SelectApplicantRequest": {
         "type": "object",
-        "description": "Request to select an applicant for a home.",
+        "description": "Request to select an applicant for a home. LandParcelId is resolved server-side from the home.",
         "additionalProperties": false,
         "properties": {
           "homeId": {
-            "type": "string"
-          },
-          "landParcelId": {
             "type": "string"
           },
           "groundLeaseTemplateId": {
@@ -7443,6 +7521,10 @@
           },
           "homeId": {
             "type": "string"
+          },
+          "applicationId": {
+            "type": "string",
+            "nullable": true
           },
           "phase": {
             "type": "string"

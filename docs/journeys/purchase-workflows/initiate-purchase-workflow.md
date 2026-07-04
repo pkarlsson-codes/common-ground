@@ -1,15 +1,8 @@
 # Initiate Purchase Workflow
 
-1. User navigates to Purchase Workflows
-2. User clicks "Initiate Workflow"
-3. "Initiate Purchase Workflow" panel opens with Purchase Price defaulted to 150000
-4. User searches for and selects a Lease Template (only Active templates are offered)
-5. User searches for and selects a Land Parcel
-6. User searches for and selects a Home on that parcel (disabled until a parcel is selected; changing the parcel clears the home)
-7. User enters Buyer Full Name and Buyer Email (required), and optionally Buyer Phone in E.164 format (e.g. +11231231234)
-8. User optionally adjusts Purchase Price
-9. User clicks "Initiate Workflow" (disabled until a Lease Template, Land Parcel, and Home are all selected)
-10. Toast: "Purchase workflow initiated"
-11. Panel closes, new workflow appears in the Purchase Workflows table in the Initiated phase
+Purchase Workflows no longer has a toolbar entry point for starting a workflow. A workflow is now always initiated from one of two places:
 
-The ground lease itself is not created yet — it is created automatically when the purchase closes. See [Record Purchase Closed](record-purchase-closed.md).
+1. **New purchase** — starts from Home detail by selecting a waitlisted applicant for an Available home. See [Select Applicant From Home](../applicant-selection/select-applicant.md).
+2. **Resale** — starts from a Ground Lease's "Start Resale" action. See [Start Resale Workflow](../resale-workflows/start-resale-workflow.md).
+
+Either path lands the user on Purchase Workflows with the new workflow's detail panel open. See [View Purchase Workflow Detail](view-purchase-workflow-detail.md).

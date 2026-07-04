@@ -15,6 +15,7 @@ internal sealed class HomeownerApplicationListItemViewProjection : SingleStreamP
             Id = e.Data.AggregateId,
             ApplicantFullName = e.Data.ApplicantFullName,
             ApplicantEmail = e.Data.ApplicantEmail,
+            ApplicantPhone = e.Data.ApplicantPhone,
             HouseholdSize = e.Data.HouseholdSize,
             AccessibilityRequired = e.Data.AccessibilityRequired,
             Phase = ApplicationPhase.Submitted.DisplayName,

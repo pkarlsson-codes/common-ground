@@ -6,7 +6,7 @@
 4. If the applicant has been selected, the panel shows "Open Selected Land Parcel" and "Open Selected Home" links
 5. Unless the application is in the Submitted phase, the panel also shows a Buyer Preparation Checklist with Housing Counseling, CLT Orientation, and Mortgage Prequalification, each marked done or pending
 6. If a mortgage prequalification has been recorded and the application is past the Submitted phase, a Mortgage Prequalification section shows lender name, prequalified amount, and expiry date
-7. A Workflow Actions section shows the actions available for the current phase (or "No actions available for this phase" if Selected or closed)
+7. A Workflow Actions section shows the actions available for the current phase (Deny Application, Withdraw Application; or "No actions available for this phase" if Selected or closed) — selecting an applicant is no longer done from here, see [Select Applicant From Home](select-applicant.md)
 8. User closes the panel
 
 Continues in: [view-land-parcel-detail](../land-parcels/view-land-parcel-detail.md), [view-home-detail](../homes/view-home-detail.md) <!-- when the applicant has been selected -->

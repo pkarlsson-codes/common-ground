@@ -39,6 +39,7 @@ export * from './GroundLeaseResponse';
 export * from './GroundLeaseTemplateListItemResponse';
 export * from './GroundLeaseTemplateResponse';
 export * from './HomeAssessmentItemResponse';
+export * from './HomeCandidateResponse';
 export * from './HomeListItemResponse';
 export * from './HomeResponse';
 export * from './HomeownerApplicationListItemResponse';

@@ -4,11 +4,13 @@
 2. User clicks a row in the Homes table
 3. Detail panel opens showing the home type, bedrooms/bathrooms, and square footage in the header
 4. "Details" tab shows status, year built, assessed value, last assessed date, condition notes (if any), a link to the home's land parcel, and registered at
-5. Panel also shows a Development Projects section listing projects on the home's parcel with their name and status
-6. Panel also shows an Assessments section listing recorded assessments with date, assessed value, and assessor
-7. User can switch to the "Documents" tab to view, upload, remove, or version documents attached to the home
-8. User closes the panel
+5. If the home's status is Available, a "Select Applicant" action is also shown next to the status; it is hidden for any other status (PendingOccupancy, Occupied, Resale, UnderContract, etc.)
+6. Panel also shows a Development Projects section listing projects on the home's parcel with their name and status
+7. Panel also shows an Assessments section listing recorded assessments with date, assessed value, and assessor
+8. User can switch to the "Documents" tab to view, upload, remove, or version documents attached to the home
+9. User closes the panel
 
 Continues in: [Upload Home Document](upload-home-document.md)
 Continues in: [Remove Home Document](remove-home-document.md)
 Continues in: [Manage Home Document Versions](manage-home-document-versions.md)
+Continues in: [Select Applicant From Home](../applicant-selection/select-applicant.md)

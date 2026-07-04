@@ -340,6 +340,7 @@ public static class PurchaseWorkflowsEndpoints
             view.GroundLeaseTemplateId,
             view.LandParcelId,
             view.HomeId,
+            view.ApplicationId,
             view.Phase,
             view.InitiatedBy,
             view.BuyerFullName,

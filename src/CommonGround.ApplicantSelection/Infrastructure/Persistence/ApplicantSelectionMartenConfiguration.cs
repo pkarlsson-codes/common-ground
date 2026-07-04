@@ -27,11 +27,14 @@ public static class ApplicantSelectionMartenConfiguration
             .Index(x => x.ApplicantFullName)
             .Index(x => x.ApplicantEmail)
             .Index(x => x.Phase);
+        options.Schema.For<HomeAvailabilityClaimView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<HomeLandParcelView>().DatabaseSchemaName(SchemaName);
     }
 
     private static void ConfigureProjections(StoreOptions options)
     {
         options.Projections.Add<HomeownerApplicationViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HomeownerApplicationListItemViewProjection>(ProjectionLifecycle.Inline);
+        options.Projections.Add<HomeAvailabilityClaimViewProjection>(ProjectionLifecycle.Inline);
     }
 }

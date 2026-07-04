@@ -2,6 +2,7 @@ using CommonGround.PropertyRegistry.Domain.Homes.Events;
 using CommonGround.PropertyRegistry.Application.Errors;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
+using CommonGround.SharedKernel.Domain.Exceptions;
 
 namespace CommonGround.PropertyRegistry.Domain.Homes;
 
@@ -93,6 +94,17 @@ public sealed class Home : AggregateRoot<HomeId>
         return home;
     }
 
+    /// <summary>Mark the home under contract.</summary>
+    public void MarkUnderContract()
+    {
+        if (Status != HomeStatus.Available)
+        {
+            throw BusinessRuleViolation.Home.MarkUnderContract.HomeNotAvailable();
+        }
+        
+        ApplyChange(new HomeUnderContract(Id.Value));
+    }
+    
     /// <summary>Records a new assessed value for this unit.</summary>
     public void RecordAssessment(decimal assessedValue, DateOnly assessmentDate, string? appraiserName, string? conditionNotes, UserId recordedById)
     {
@@ -111,6 +123,7 @@ public sealed class Home : AggregateRoot<HomeId>
         {
             case HomeRegistered e: Apply(e); break;
             case HomeAssessed e: Apply(e); break;
+            case HomeUnderContract e: Apply(e); break;
             default: throw new InvalidOperationException($"Unknown event: {domainEvent?.GetType().Name}");
         }
     }
@@ -138,5 +151,10 @@ public sealed class Home : AggregateRoot<HomeId>
     private void Apply(HomeAssessed e)
     {
         _assessments.Add(UnitAssessment.Reconstitute(e.AssessedValue, e.AssessmentDate, e.AppraiserName, e.ConditionNotes, UserId.Create(e.RecordedById), e.OccurredAt));
+    }
+
+    private void Apply(HomeUnderContract _)
+    {
+        Status = HomeStatus.UnderContract;
     }
 }
