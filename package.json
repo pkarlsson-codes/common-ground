@@ -24,6 +24,8 @@
     "management:web:guardrails": "cd src/CommonGround.Management.Web && npm run lint:guardrails",
     "management:web:test": "cd src/CommonGround.Management.Web && npm run test",
     "management:web:generate": "bash ./scripts/generate-api-clients.sh",
+    "templates:install": "dotnet new install ./templates/ddd-aggregate --force && dotnet new install ./templates/ddd-vo --force && dotnet new install ./templates/ddd-entity --force && dotnet new install ./templates/ddd-enum --force",
+    "templates:uninstall": "dotnet new uninstall ./templates/ddd-aggregate && dotnet new uninstall ./templates/ddd-vo && dotnet new uninstall ./templates/ddd-entity && dotnet new uninstall ./templates/ddd-enum",
     "prepare": "husky"
   },
   "devDependencies": {

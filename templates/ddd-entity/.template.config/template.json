@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Peter Karlsson",
+  "classifications": ["DDD", "Domain"],
+  "identity": "Ddd.Templates.Entity.CSharp",
+  "name": "DDD entity",
+  "shortName": "ddd-entity",
+  "description": "Adds a domain entity with its strongly-typed, prefix-validated ID.",
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  },
+  "sourceName": "DddEntity",
+  "preferNameDirectory": false,
+  "forms": {
+    "lc": {
+      "identifier": "lowerCaseInvariant"
+    }
+  },
+  "symbols": {
+    "namespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "isRequired": true,
+      "replaces": "DddNamespace",
+      "description": "Full namespace for the generated files (e.g. CommonGround.PropertyRegistry.Domain.Garages)."
+    },
+    "prefix": {
+      "type": "parameter",
+      "datatype": "text",
+      "description": "ID prefix (e.g. 'home' produces home-<ulid>). Defaults to the lower-cased entity name."
+    },
+    "prefixDefault": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "lc"
+    },
+    "prefixFinal": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "prefix",
+        "fallbackVariableName": "prefixDefault"
+      },
+      "replaces": "dddprefix"
+    }
+  }
+}

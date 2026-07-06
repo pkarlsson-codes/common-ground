@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Peter Karlsson",
+  "classifications": ["DDD", "Domain"],
+  "identity": "Ddd.Templates.ValueObject.CSharp",
+  "name": "DDD value object",
+  "shortName": "ddd-vo",
+  "description": "Adds a value object with a private constructor, validating static Create factory, and equality components.",
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  },
+  "sourceName": "DddValueObject",
+  "preferNameDirectory": false,
+  "symbols": {
+    "namespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "isRequired": true,
+      "replaces": "DddNamespace",
+      "description": "Full namespace for the generated file (e.g. CommonGround.PropertyRegistry.Domain.Garages)."
+    }
+  }
+}

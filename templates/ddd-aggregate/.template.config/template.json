@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Peter Karlsson",
+  "classifications": ["DDD", "Domain", "Event Sourcing"],
+  "identity": "Ddd.Templates.Aggregate.CSharp",
+  "name": "DDD event-sourced aggregate root",
+  "shortName": "ddd-aggregate",
+  "description": "Adds an event-sourced aggregate root, its strongly-typed ID, and an initial Created domain event, in a plural-named folder.",
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  },
+  "sourceName": "DddAggregate",
+  "preferNameDirectory": false,
+  "forms": {
+    "lc": {
+      "identifier": "lowerCaseInvariant"
+    }
+  },
+  "symbols": {
+    "namespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "isRequired": true,
+      "replaces": "DddNamespace",
+      "description": "Parent namespace of the new folder (e.g. CommonGround.PropertyRegistry.Domain); the plural segment is appended in generated files."
+    },
+    "plural": {
+      "type": "parameter",
+      "datatype": "text",
+      "description": "Plural form used for the folder and namespace segment. Defaults to <name>s."
+    },
+    "pluralDefault": {
+      "type": "generated",
+      "generator": "join",
+      "parameters": {
+        "symbols": [
+          {
+            "type": "ref",
+            "value": "name"
+          },
+          {
+            "type": "const",
+            "value": "s"
+          }
+        ]
+      }
+    },
+    "pluralFinal": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "plural",
+        "fallbackVariableName": "pluralDefault"
+      },
+      "replaces": "DddPluralFolder",
+      "fileRename": "DddPluralFolder"
+    },
+    "prefix": {
+      "type": "parameter",
+      "datatype": "text",
+      "description": "ID prefix (e.g. 'home' produces home-<ulid>). Defaults to the lower-cased aggregate name."
+    },
+    "prefixDefault": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "lc"
+    },
+    "prefixFinal": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "prefix",
+        "fallbackVariableName": "prefixDefault"
+      },
+      "replaces": "dddprefix"
+    }
+  }
+}
