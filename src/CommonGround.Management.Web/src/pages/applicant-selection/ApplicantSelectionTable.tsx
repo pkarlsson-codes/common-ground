@@ -85,7 +85,7 @@ export default function ApplicantSelectionTable({
           </div>
           <div className="empty-state__sub">
             {hasFilters
-              ? 'Try clearing phase/search filters and run the query again.'
+              ? 'Try clearing the phase filter and run the query again.'
               : 'Submit an application to start the selection pipeline.'}
           </div>
         </div>
@@ -111,8 +111,8 @@ export default function ApplicantSelectionTable({
                   onClick={() => onRowClick(application.id!)}
                   className={selectedId === application.id && panel === 'detail' ? 'row--selected' : ''}
                 >
-                  <td>{application.applicantFullName ?? '—'}</td>
-                  <td>{application.applicantEmail ?? '—'}</td>
+                  <td>{application.primaryContact?.name ?? '—'}</td>
+                  <td>{application.primaryContact?.email ?? '—'}</td>
                   <td><span className="cell-mono">{application.householdSize ?? '—'}</span></td>
                   <td>{application.accessibilityRequired ? 'Yes' : 'No'}</td>
                   <td><ApplicationPhaseBadge phase={application.phase} /></td>

@@ -6,11 +6,11 @@ import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
 
 type Props = {
-  applicationId: string
+  householdId: string
   onClose: () => void
 }
 
-export default function RecordCltOrientationPanel({ applicationId, onClose }: Props) {
+export default function RecordCltOrientationPanel({ householdId, onClose }: Props) {
   const [completedDate, setCompletedDate] = useState(new Date().toISOString().slice(0, 10))
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   const mutation = useRecordCltOrientation()
@@ -22,7 +22,7 @@ export default function RecordCltOrientationPanel({ applicationId, onClose }: Pr
 
     try {
       await mutation.mutateAsync({
-        applicationId,
+        householdId,
         request: { completedDate },
       })
       success('CLT orientation recorded')

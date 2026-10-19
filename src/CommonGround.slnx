@@ -4,8 +4,6 @@
   <Project Path="CommonGround.API/CommonGround.API.csproj" />
   <Project Path="CommonGround.API.Clients/CommonGround.API.Clients.csproj" />
   <Project Path="CommonGround.API.Contracts/CommonGround.API.Contracts.csproj" />
-  <Project Path="CommonGround.ApplicantSelection.Contracts/CommonGround.ApplicantSelection.Contracts.csproj" />
-  <Project Path="CommonGround.ApplicantSelection/CommonGround.ApplicantSelection.csproj" />
   <Project Path="CommonGround.Documents.Tests/CommonGround.Documents.Tests.csproj" />
   <Project Path="CommonGround.Documents/CommonGround.Documents.csproj" />
   <Project Path="CommonGround.Homeownership.Contracts/CommonGround.Homeownership.Contracts.csproj" />
@@ -21,5 +19,7 @@
   <Project Path="CommonGround.TrustManagement.Contracts/CommonGround.TrustManagement.Contracts.csproj" />
   <Project Path="CommonGround.TrustManagement/CommonGround.TrustManagement.csproj" />
   <Project Path="CommonGround.Management.Gateway/CommonGround.Management.Gateway.csproj" />
+  <Project Path="CommonGround.HomeBuyers.Contracts\CommonGround.HomeBuyers.Contracts.csproj" />
+  <Project Path="CommonGround.HomeBuyers\CommonGround.HomeBuyers.csproj" />
   <Project Path="CommonGround.Homeowner.Gateway/CommonGround.Homeowner.Gateway.csproj" />
 </Solution>

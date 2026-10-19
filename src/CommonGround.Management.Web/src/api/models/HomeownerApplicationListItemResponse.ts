@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { HouseholdContactDto } from './HouseholdContactDto';
+import {
+    HouseholdContactDtoFromJSON,
+    HouseholdContactDtoFromJSONTyped,
+    HouseholdContactDtoToJSON,
+    HouseholdContactDtoToJSONTyped,
+} from './HouseholdContactDto';
+
 /**
  * Summary item for homeowner application list responses.
  * @export
@@ -31,13 +39,13 @@ export interface HomeownerApplicationListItemResponse {
      * @type {string}
      * @memberof HomeownerApplicationListItemResponse
      */
-    applicantFullName?: string;
+    householdId?: string;
     /**
      * 
-     * @type {string}
+     * @type {HouseholdContactDto}
      * @memberof HomeownerApplicationListItemResponse
      */
-    applicantEmail?: string;
+    primaryContact?: HouseholdContactDto | null;
     /**
      * 
      * @type {number}
@@ -82,8 +90,8 @@ export function HomeownerApplicationListItemResponseFromJSONTyped(json: any, ign
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
-        'applicantFullName': json['applicantFullName'] == null ? undefined : json['applicantFullName'],
-        'applicantEmail': json['applicantEmail'] == null ? undefined : json['applicantEmail'],
+        'householdId': json['householdId'] == null ? undefined : json['householdId'],
+        'primaryContact': json['primaryContact'] == null ? undefined : HouseholdContactDtoFromJSON(json['primaryContact']),
         'householdSize': json['householdSize'] == null ? undefined : json['householdSize'],
         'accessibilityRequired': json['accessibilityRequired'] == null ? undefined : json['accessibilityRequired'],
         'phase': json['phase'] == null ? undefined : json['phase'],
@@ -103,8 +111,8 @@ export function HomeownerApplicationListItemResponseToJSONTyped(value?: Homeowne
     return {
         
         'id': value['id'],
-        'applicantFullName': value['applicantFullName'],
-        'applicantEmail': value['applicantEmail'],
+        'householdId': value['householdId'],
+        'primaryContact': HouseholdContactDtoToJSON(value['primaryContact']),
         'householdSize': value['householdSize'],
         'accessibilityRequired': value['accessibilityRequired'],
         'phase': value['phase'],

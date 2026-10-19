@@ -4,7 +4,7 @@
 2. User clicks a row for a home with status Available to open the detail panel
 3. User clicks "Select Applicant" next to the home's status (only shown while the home is Available)
 4. "Select Applicant" panel opens with Selected Date defaulted to today; the home is fixed to the one just opened
-5. User searches for and selects an Applicant from a combobox listing Waitlisted-phase homeowner applications (name and email shown; income/AMI eligibility filtering against the home is not yet implemented, so every Waitlisted application is offered)
+5. User picks an Applicant from a combobox listing Approved-phase homeowner applications by primary contact name and email; typing filters the list locally (income/AMI eligibility filtering against the home is not yet implemented, so every Approved application is offered)
 6. User searches for and selects an active Ground Lease Template, and enters a Purchase Price
 7. User optionally adjusts Selected Date
 8. User clicks "Select Applicant" (disabled until Applicant, Ground Lease Template, Purchase Price, and Selected Date are all set)

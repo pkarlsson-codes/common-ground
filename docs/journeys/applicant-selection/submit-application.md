@@ -2,10 +2,11 @@
 
 1. User navigates to Applicant Selection
 2. User clicks "New Application"
-3. "Submit Application" panel opens
-4. User enters Applicant Full Name and Applicant Email (required), and optionally Applicant Phone
-5. User enters Household Size (defaults to 1) and Annual Income
-6. User optionally checks "Accessibility accommodations required"
-7. User clicks "Submit Application" (disabled until Applicant Full Name and Applicant Email are set)
-8. Toast: "Application submitted (<id>...)"
-9. Panel closes, new application appears in the Applicant Selection table in the Submitted phase
+3. "Submit Application" panel opens with one empty household member, marked as primary contact
+4. For each household member, user enters Full Name, Email, and Phone (all required); "Add Member" adds another member and "Remove" removes one (at least one member always remains)
+5. User picks exactly one member as "Primary contact"; Household Size is shown as the number of members
+6. User enters Annual Income and optionally checks "Accessibility accommodations required"
+7. User clicks "Submit Application" (disabled until every member has Full Name, Email, and Phone); invalid phone numbers show an inline error
+8. The household is registered, then an application is submitted for it, capturing household size, income, and accessibility as declared at submission
+9. Toast: "Application submitted (<id>...)"
+10. Panel closes, new application appears in the Applicant Selection table in the Submitted phase, showing the primary contact's name and email

@@ -2,20 +2,16 @@ import { statusLabel } from '../../utils/statusLabel'
 
 const PHASE_CLASS: Record<string, string> = {
   Submitted: 'badge-initiated',
-  Active: 'badge-inprogress',
-  Waitlisted: 'badge-available',
+  Approved: 'badge-available',
   Selected: 'badge-closed',
-  EligibilityDenied: 'badge-failed',
   Denied: 'badge-failed',
   Withdrawn: 'badge-withdrawn',
 }
 
 const PHASE_LABEL: Record<string, string> = {
   Submitted: 'Submitted',
-  Active: 'Active',
-  Waitlisted: 'Waitlisted',
+  Approved: 'Approved',
   Selected: 'Selected',
-  EligibilityDenied: 'Eligibility Denied',
   Denied: 'Denied',
   Withdrawn: 'Withdrawn',
 }

@@ -90,13 +90,15 @@ export default function SelectApplicantPanel({ homeId, onClose }: Props) {
               value={form.applicationId || null}
               onChange={id => setForm(f => ({ ...f, applicationId: id ?? '' }))}
               fetchOptions={async q => {
-                const result = await applicantSelectionApi.getHomeCandidates({ homeId, search: q || undefined })
-                return (result ?? []).map(c => ({
+                const result = await applicantSelectionApi.getHomeCandidates({ homeId })
+                const options = (result ?? []).map(c => ({
                   id: c.id!,
-                  label: [c.applicantFullName, c.applicantEmail].filter(Boolean).join(' — '),
+                  label: [c.primaryContact?.name, c.primaryContact?.email].filter(Boolean).join(' — ') || c.id!,
                 }))
+                const term = q.trim().toLowerCase()
+                return term ? options.filter(o => o.label.toLowerCase().includes(term)) : options
               }}
-              placeholder="Search waitlisted applicants…"
+              placeholder="Search approved applicants…"
             />
           </div>
           <div className="form-field full">

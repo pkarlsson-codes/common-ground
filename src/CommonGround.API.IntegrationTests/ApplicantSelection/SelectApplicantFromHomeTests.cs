@@ -7,7 +7,7 @@ using CommonGround.API.Contracts.Homeownership.Requests;
 using CommonGround.API.Contracts.Homeownership.Responses;
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
-using CommonGround.ApplicantSelection.Contracts.Events;
+using CommonGround.HomeBuyers.Contracts.Events;
 using CommonGround.SharedKernel.Infrastructure.API;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,7 +44,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
         await SeedHomeLandParcelViewAsync(homeId, landParcelId);
 
         var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
-        var applicant = await CreateWaitlistedApplicationAsync(client, "Happy Path Applicant", "happy-path@example.com");
+        var applicant = await CreateApprovedApplicationAsync(client, "Happy Path Applicant", "happy-path@example.com");
 
         const string selectedDate = "2026-07-20";
         var selectResponse = await client.PostAsJsonAsync(
@@ -57,7 +57,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
         application!.Phase.Should().Be("Selected");
 
         await InvokeApplicantSelectedForwardingAsync(
-            applicant.ApplicationId, applicant.FullName, applicant.Email,
+            applicant.ApplicationId, applicant.HouseholdId, applicant.FullName, applicant.Email,
             homeId, landParcelId, templateId, 200000m, selectedDate);
 
         var home = await (await client.GetAsync($"/api/homes/{homeId}"))
@@ -84,8 +84,8 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
         await SeedHomeLandParcelViewAsync(homeId, landParcelId);
 
         var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
-        var firstApplicant = await CreateWaitlistedApplicationAsync(client, "First Claimant", "first-claimant@example.com");
-        var secondApplicant = await CreateWaitlistedApplicationAsync(client, "Second Claimant", "second-claimant@example.com");
+        var firstApplicant = await CreateApprovedApplicationAsync(client, "First Claimant", "first-claimant@example.com");
+        var secondApplicant = await CreateApprovedApplicationAsync(client, "Second Claimant", "second-claimant@example.com");
 
         const string selectedDate = "2026-07-20";
 
@@ -102,7 +102,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
         var secondApplication = await (await client.GetAsync($"/api/homeowner-applications/{secondApplicant.ApplicationId}"))
             .Content.ReadFromJsonAsync<HomeownerApplicationResponse>();
         secondApplication!.Phase.Should().Be(
-            "Waitlisted", "the rejected selection must not advance the second applicant's phase");
+            "Approved", "the rejected selection must not advance the second applicant's phase");
     }
 
     private async Task SeedHomeLandParcelViewAsync(string homeId, string landParcelId)
@@ -116,7 +116,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
     }
 
     private async Task InvokeApplicantSelectedForwardingAsync(
-        string applicationId, string applicantFullName, string applicantEmail,
+        string applicationId, string householdId, string applicantFullName, string applicantEmail,
         string homeId, string landParcelId, string groundLeaseTemplateId,
         decimal purchasePrice, string selectedDate)
     {
@@ -125,8 +125,9 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
 
         await bus.InvokeForTenantAsync(
             ApiFactory.TestTrustId,
-            new ApplicantSelected(
+            new ApplicationSelected(
                 applicationId,
+                householdId,
                 applicantFullName,
                 applicantEmail,
                 null,
@@ -192,36 +193,52 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
         return created!.GroundLeaseTemplateId;
     }
 
-    private static async Task<(string ApplicationId, string FullName, string Email)> CreateWaitlistedApplicationAsync(
+    private static async Task<(string ApplicationId, string HouseholdId, string FullName, string Email)> CreateApprovedApplicationAsync(
         HttpClient client, string fullName, string email)
     {
+        var registerResponse = await client.PostAsJsonAsync("/api/households",
+            new RegisterHouseholdRequest(
+                [
+                    new HouseholdMemberRequest(fullName, email, "555-0100", true),
+                    new HouseholdMemberRequest("Second Member", "second-member@example.com", "555-0101", false),
+                    new HouseholdMemberRequest("Third Member", "third-member@example.com", "555-0102", false),
+                ],
+                false,
+                65000m));
+        registerResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+        var registered = await registerResponse.Content.ReadFromJsonAsync<RegisterHouseholdResponse>();
+        var householdId = registered!.HouseholdId;
+
+        (await client.PostAsJsonAsync($"/api/households/{householdId}/housing-counseling",
+            new RecordHousingCounselingRequest("CERT-001", "2026-06-02", "Test Counseling Org")))
+            .StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        (await client.PostAsJsonAsync($"/api/households/{householdId}/clt-orientation",
+            new RecordCltOrientationRequest("2026-06-03")))
+            .StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        (await client.PostAsJsonAsync($"/api/households/{householdId}/mortgage-prequalification",
+            new RecordMortgagePrequalificationRequest("Test Lender", 210000m, "2027-01-01")))
+            .StatusCode.Should().Be(HttpStatusCode.NoContent);
+
         var submitResponse = await client.PostAsJsonAsync("/api/homeowner-applications",
-            new SubmitApplicationRequest(fullName, email, null, 3, 65000m, false));
+            new SubmitApplicationRequest(householdId));
         submitResponse.StatusCode.Should().Be(HttpStatusCode.Created);
         var submitted = await submitResponse.Content.ReadFromJsonAsync<SubmitApplicationResponse>();
         var applicationId = submitted!.ApplicationId;
 
-        (await client.PostAsJsonAsync($"/api/homeowner-applications/{applicationId}/eligibility/approve",
+        (await client.PostAsJsonAsync($"/api/homeowner-applications/{applicationId}/approve",
             new ApproveEligibilityRequest("2026-06-01", null)))
-            .StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-        (await client.PostAsJsonAsync($"/api/homeowner-applications/{applicationId}/housing-counseling",
-            new RecordHousingCounselingRequest("CERT-001", "2026-06-02", "Test Counseling Org")))
-            .StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-        (await client.PostAsJsonAsync($"/api/homeowner-applications/{applicationId}/clt-orientation",
-            new RecordCltOrientationRequest("2026-06-03")))
-            .StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-        (await client.PostAsJsonAsync($"/api/homeowner-applications/{applicationId}/mortgage-prequalification",
-            new RecordMortgagePrequalificationRequest("Test Lender", 210000m, "2027-01-01")))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var application = await (await client.GetAsync($"/api/homeowner-applications/{applicationId}"))
             .Content.ReadFromJsonAsync<HomeownerApplicationResponse>();
-        application!.Phase.Should().Be("Waitlisted");
+        application!.Phase.Should().Be("Approved");
+        application.HouseholdId.Should().Be(householdId);
+        application.HouseholdSize.Should().Be(3);
+        application.PrimaryContact.Should().Be(new HouseholdContactDto(fullName, email, "555-0100"));
 
-        return (applicationId, fullName, email);
+        return (applicationId, householdId, fullName, email);
     }
 
     private static async Task<PurchaseWorkflowListItemResponse?> FindPurchaseWorkflowAsync(HttpClient client, string groundLeaseTemplateId)

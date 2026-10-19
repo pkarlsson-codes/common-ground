@@ -2,9 +2,8 @@ import { useState } from 'react'
 import SlideOver from '../../components/SlideOver'
 import NavIdLink from '../../components/NavIdLink'
 import StatusBadge from '../../components/StatusBadge'
-import { useHomeownerApplication } from '../../hooks/applicantSelection'
-import ApproveEligibilityPanel from './ApproveEligibilityPanel'
-import DenyEligibilityPanel from './DenyEligibilityPanel'
+import { useHomeownerApplication, useHousehold } from '../../hooks/applicantSelection'
+import ApproveApplicationPanel from './ApproveApplicationPanel'
 import RecordHousingCounselingPanel from './RecordHousingCounselingPanel'
 import RecordCltOrientationPanel from './RecordCltOrientationPanel'
 import RecordMortgagePrequalificationPanel from './RecordMortgagePrequalificationPanel'
@@ -45,9 +44,9 @@ function SkeletonRows() {
 
 export default function ApplicationDetailPanel({ applicationId, onClose }: Props) {
   const { data: detail, isLoading, isError, error, refetch } = useHomeownerApplication(applicationId)
+  const { data: household, isError: isHouseholdError } = useHousehold(detail?.householdId)
   const [actionPanel, setActionPanel] = useState<
-    | 'approve-eligibility'
-    | 'deny-eligibility'
+    | 'approve-application'
     | 'record-housing-counseling'
     | 'record-clt-orientation'
     | 'record-mortgage-prequalification'
@@ -58,16 +57,15 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
 
   const phase = (detail?.phase ?? '').toLowerCase()
   const status = getResponseStatus(error)
-  const isEligibilityPhase = phase === 'submitted'
-  const isActivePhase = phase === 'active'
-  const isWaitlistedPhase = phase === 'waitlisted'
-  const isSelectedOrCompleted = phase === 'selected'
-  const isClosed = phase === 'denied' || phase === 'eligibilitydenied' || phase === 'withdrawn'
+  const isSubmittedPhase = phase === 'submitted'
+  const isApprovedPhase = phase === 'approved'
+  const isOpen = isSubmittedPhase || isApprovedPhase
+  const prequalification = household?.mortgagePrequalification
 
   return (
     <SlideOver
-      title={detail?.applicantFullName ?? 'Application'}
-      subtitle={detail?.applicantEmail ?? formatPhoneDisplay(detail?.applicantPhone)}
+      title={detail?.primaryContact?.name ?? 'Application'}
+      subtitle={detail?.primaryContact?.email ?? formatPhoneDisplay(detail?.primaryContact?.phone)}
       onClose={onClose}
       footer={<button className="btn btn-ghost" onClick={onClose}>Close</button>}
     >
@@ -113,24 +111,24 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
             </div>
             <div className="detail-field">
               <div className="detail-field__label">Phone</div>
-              <div className="detail-field__value">{formatPhoneDisplay(detail.applicantPhone) ?? '—'}</div>
+              <div className="detail-field__value">{formatPhoneDisplay(detail.primaryContact?.phone) ?? '—'}</div>
             </div>
             <div className="detail-field">
-              <div className="detail-field__label">Household Size</div>
+              <div className="detail-field__label">Declared Household Size</div>
               <div className="detail-field__value mono">{detail.householdSize ?? '—'}</div>
             </div>
             <div className="detail-field">
-              <div className="detail-field__label">Annual Income</div>
+              <div className="detail-field__label">Declared Annual Income</div>
               <div className="detail-field__value mono">
                 {typeof detail.annualIncome === 'number' ? fmtCurrency(detail.annualIncome) : '—'}
               </div>
             </div>
             <div className="detail-field">
-              <div className="detail-field__label">Accessibility Required</div>
+              <div className="detail-field__label">Declared Accessibility Need</div>
               <div className="detail-field__value">{detail.accessibilityRequired ? 'Yes' : 'No'}</div>
             </div>
             <div className="detail-field">
-              <div className="detail-field__label">Eligibility Approved Date</div>
+              <div className="detail-field__label">Approved Date</div>
               <div className="detail-field__value mono">{fmtDateTime(detail.eligibilityApprovedDate)}</div>
             </div>
             <div className="detail-field">
@@ -161,53 +159,72 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
             )}
           </div>
 
-          {!isEligibilityPhase && (
+          <div className="detail-section" style={{ marginTop: 16 }}>
+            <div className="detail-section__title">Household Members</div>
+            {isHouseholdError && (
+              <div className="detail-field__value">Could not load household.</div>
+            )}
+            {household && (
+              <div className="detail-grid" style={{ marginTop: 10 }}>
+                {(household.members ?? []).map((member, i) => (
+                  <div className="detail-field full-span" key={`${member.email}-${i}`}>
+                    <div className="detail-field__label">{member.isPrimary ? 'Primary Contact' : 'Member'}</div>
+                    <div className="detail-field__value">
+                      {[member.name, member.email, formatPhoneDisplay(member.phone)].filter(Boolean).join(' · ')}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {household && (
             <div className="detail-section" style={{ marginTop: 16 }}>
               <div className="detail-section__title">Buyer Preparation Checklist</div>
               <div className="checklist">
-                <div className={`checklist-item${detail.isHousingCounselingCompleted ? ' checklist-item--done' : ''}`}>
-                  <div className={`checklist-item__icon${detail.isHousingCounselingCompleted ? ' checklist-item__icon--done' : ' checklist-item__icon--pending'}`}>
-                    {detail.isHousingCounselingCompleted ? '✓' : '○'}
+                <div className={`checklist-item${household.isHousingCounselingCompleted ? ' checklist-item--done' : ''}`}>
+                  <div className={`checklist-item__icon${household.isHousingCounselingCompleted ? ' checklist-item__icon--done' : ' checklist-item__icon--pending'}`}>
+                    {household.isHousingCounselingCompleted ? '✓' : '○'}
                   </div>
                   <span className="checklist-item__label">Housing Counseling</span>
-                  {detail.isHousingCounselingCompleted && (
-                    <span className="checklist-item__status">Completed</span>
+                  {household.isHousingCounselingCompleted && (
+                    <span className="checklist-item__status">Completed {fmtDate(household.housingCounselingCompletedDate)}</span>
                   )}
-                  {!detail.isHousingCounselingCompleted && (isActivePhase || isWaitlistedPhase) && (
+                  {!household.isHousingCounselingCompleted && isOpen && (
                     <button className="btn btn-secondary btn-sm" onClick={() => setActionPanel('record-housing-counseling')}>
                       Record
                     </button>
                   )}
                 </div>
 
-                <div className={`checklist-item${detail.isCltOrientationCompleted ? ' checklist-item--done' : ''}`}>
-                  <div className={`checklist-item__icon${detail.isCltOrientationCompleted ? ' checklist-item__icon--done' : ' checklist-item__icon--pending'}`}>
-                    {detail.isCltOrientationCompleted ? '✓' : '○'}
+                <div className={`checklist-item${household.isCltOrientationCompleted ? ' checklist-item--done' : ''}`}>
+                  <div className={`checklist-item__icon${household.isCltOrientationCompleted ? ' checklist-item__icon--done' : ' checklist-item__icon--pending'}`}>
+                    {household.isCltOrientationCompleted ? '✓' : '○'}
                   </div>
                   <span className="checklist-item__label">CLT Orientation</span>
-                  {detail.isCltOrientationCompleted && (
-                    <span className="checklist-item__status">Completed</span>
+                  {household.isCltOrientationCompleted && (
+                    <span className="checklist-item__status">Completed {fmtDate(household.cltOrientationCompletedDate)}</span>
                   )}
-                  {!detail.isCltOrientationCompleted && (isActivePhase || isWaitlistedPhase) && (
+                  {!household.isCltOrientationCompleted && isOpen && (
                     <button className="btn btn-secondary btn-sm" onClick={() => setActionPanel('record-clt-orientation')}>
                       Record
                     </button>
                   )}
                 </div>
 
-                <div className={`checklist-item${detail.mortgagePrequalification ? ' checklist-item--done' : ''}`}>
-                  <div className={`checklist-item__icon${detail.mortgagePrequalification ? ' checklist-item__icon--done' : ' checklist-item__icon--pending'}`}>
-                    {detail.mortgagePrequalification ? '✓' : '○'}
+                <div className={`checklist-item${prequalification ? ' checklist-item--done' : ''}`}>
+                  <div className={`checklist-item__icon${prequalification ? ' checklist-item__icon--done' : ' checklist-item__icon--pending'}`}>
+                    {prequalification ? '✓' : '○'}
                   </div>
                   <span className="checklist-item__label">Mortgage Prequalification</span>
-                  {detail.mortgagePrequalification && (
+                  {prequalification && (
                     <span className="checklist-item__status">
-                      {detail.mortgagePrequalification.lenderName} · expires {fmtDate(detail.mortgagePrequalification.expiryDate)}
+                      {prequalification.lenderName} · expires {fmtDate(prequalification.expiryDate)}
                     </span>
                   )}
-                  {(isActivePhase || isWaitlistedPhase) && (
+                  {isOpen && (
                     <button className="btn btn-secondary btn-sm" onClick={() => setActionPanel('record-mortgage-prequalification')}>
-                      {detail.mortgagePrequalification ? 'Update' : 'Record'}
+                      {prequalification ? 'Update' : 'Record'}
                     </button>
                   )}
                 </div>
@@ -215,26 +232,26 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
             </div>
           )}
 
-          {detail.mortgagePrequalification && !isEligibilityPhase && (
+          {prequalification && (
             <div className="detail-section" style={{ marginTop: 16 }}>
               <div className="detail-section__title">Mortgage Prequalification</div>
               <div className="detail-grid" style={{ marginTop: 10 }}>
                 <div className="detail-field">
                   <div className="detail-field__label">Lender Name</div>
-                  <div className="detail-field__value">{detail.mortgagePrequalification.lenderName ?? '—'}</div>
+                  <div className="detail-field__value">{prequalification.lenderName ?? '—'}</div>
                 </div>
                 <div className="detail-field">
                   <div className="detail-field__label">Prequalified Amount</div>
                   <div className="detail-field__value mono">
-                    {typeof detail.mortgagePrequalification.approvedAmount === 'number'
-                      ? fmtCurrency(detail.mortgagePrequalification.approvedAmount)
+                    {typeof prequalification.approvedAmount === 'number'
+                      ? fmtCurrency(prequalification.approvedAmount)
                       : '—'}
                   </div>
                 </div>
                 <div className="detail-field">
                   <div className="detail-field__label">Prequalification Expiry</div>
                   <div className="detail-field__value mono">
-                    {fmtDate(detail.mortgagePrequalification.expiryDate)}
+                    {fmtDate(prequalification.expiryDate)}
                   </div>
                 </div>
               </div>
@@ -244,18 +261,13 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
           <div className="detail-section" style={{ marginTop: 16 }}>
             <div className="detail-section__title">Workflow Actions</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {isEligibilityPhase && (
-                <>
-                  <button className="btn btn-secondary btn-sm" onClick={() => setActionPanel('approve-eligibility')}>
-                    Approve Eligibility
-                  </button>
-                  <button className="btn btn-ghost btn-sm" onClick={() => setActionPanel('deny-eligibility')}>
-                    Deny Eligibility
-                  </button>
-                </>
+              {isSubmittedPhase && (
+                <button className="btn btn-secondary btn-sm" onClick={() => setActionPanel('approve-application')}>
+                  Approve Application
+                </button>
               )}
 
-              {(isActivePhase || isWaitlistedPhase) && (
+              {isOpen && (
                 <>
                   <button className="btn btn-ghost btn-sm" onClick={() => setActionPanel('deny-application')}>
                     Deny Application
@@ -266,7 +278,7 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
                 </>
               )}
 
-              {(isClosed || isSelectedOrCompleted) && (
+              {!isOpen && (
                 <div className="detail-field__value">No actions available for this phase.</div>
               )}
             </div>
@@ -274,20 +286,17 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
         </>
       )}
 
-      {actionPanel === 'approve-eligibility' && (
-        <ApproveEligibilityPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />
+      {actionPanel === 'approve-application' && (
+        <ApproveApplicationPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />
       )}
-      {actionPanel === 'deny-eligibility' && (
-        <DenyEligibilityPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />
+      {actionPanel === 'record-housing-counseling' && detail?.householdId && (
+        <RecordHousingCounselingPanel householdId={detail.householdId} onClose={() => setActionPanel(null)} />
       )}
-      {actionPanel === 'record-housing-counseling' && (
-        <RecordHousingCounselingPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />
+      {actionPanel === 'record-clt-orientation' && detail?.householdId && (
+        <RecordCltOrientationPanel householdId={detail.householdId} onClose={() => setActionPanel(null)} />
       )}
-      {actionPanel === 'record-clt-orientation' && (
-        <RecordCltOrientationPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />
-      )}
-      {actionPanel === 'record-mortgage-prequalification' && (
-        <RecordMortgagePrequalificationPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />
+      {actionPanel === 'record-mortgage-prequalification' && detail?.householdId && (
+        <RecordMortgagePrequalificationPanel householdId={detail.householdId} onClose={() => setActionPanel(null)} />
       )}
       {actionPanel === 'deny-application' && (
         <DenyApplicationPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />

@@ -1,4 +1,4 @@
-using CommonGround.ApplicantSelection.Contracts.Events;
+using CommonGround.HomeBuyers.Contracts.Events;
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Extensions;
@@ -11,7 +11,7 @@ public static class ApplicantSelectedHandler
 {
     /// <summary>Creates a purchase workflow when an applicant is selected for a home.</summary>
     public static async Task Handle(
-        ApplicantSelected @event,
+        ApplicationSelected @event,
         IDocumentSession session)
     {
         ArgumentNullException.ThrowIfNull(@event);

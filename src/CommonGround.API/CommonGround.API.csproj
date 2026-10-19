@@ -11,9 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CommonGround.HomeBuyers\CommonGround.HomeBuyers.csproj" />
     <ProjectReference Include="..\CommonGround.SharedKernel\CommonGround.SharedKernel.csproj" />
     <ProjectReference Include="..\CommonGround.API.Contracts\CommonGround.API.Contracts.csproj" />
-    <ProjectReference Include="..\CommonGround.ApplicantSelection\CommonGround.ApplicantSelection.csproj" />
     <ProjectReference Include="..\CommonGround.Documents\CommonGround.Documents.csproj" />
     <ProjectReference Include="..\CommonGround.Homeownership\CommonGround.Homeownership.csproj" />
     <ProjectReference Include="..\CommonGround.Identity\CommonGround.Identity.csproj" />

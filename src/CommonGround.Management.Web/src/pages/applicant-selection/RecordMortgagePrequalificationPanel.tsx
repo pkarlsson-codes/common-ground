@@ -18,11 +18,11 @@ const emptyForm = (): FormState => ({
 })
 
 type Props = {
-  applicationId: string
+  householdId: string
   onClose: () => void
 }
 
-export default function RecordMortgagePrequalificationPanel({ applicationId, onClose }: Props) {
+export default function RecordMortgagePrequalificationPanel({ householdId, onClose }: Props) {
   const [form, setForm] = useState<FormState>(emptyForm)
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   const mutation = useRecordMortgagePrequalification()
@@ -34,7 +34,7 @@ export default function RecordMortgagePrequalificationPanel({ applicationId, onC
 
     try {
       await mutation.mutateAsync({
-        applicationId,
+        householdId,
         request: {
           lenderName: form.lenderName,
           approvedAmount: Number(form.approvedAmount),

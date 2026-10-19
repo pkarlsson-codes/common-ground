@@ -1,4 +1,4 @@
-using CommonGround.ApplicantSelection.Contracts.Events;
+using CommonGround.HomeBuyers.Contracts.Events;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
@@ -21,7 +21,7 @@ public static class ApplicantSelectedHandler
 
     /// <summary>Creates a purchase workflow when an applicant is selected for a home, unless an open workflow already exists for the application.</summary>
     public static async Task Handle(
-        ApplicantSelected @event,
+        ApplicationSelected @event,
         IDocumentSession session,
         CancellationToken ct)
     {

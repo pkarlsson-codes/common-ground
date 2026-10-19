@@ -14,16 +14,17 @@
  */
 
 import { mapValues } from '../runtime';
-import type { MortgagePrequalificationDto } from './MortgagePrequalificationDto';
+import type { HouseholdContactDto } from './HouseholdContactDto';
 import {
-    MortgagePrequalificationDtoFromJSON,
-    MortgagePrequalificationDtoFromJSONTyped,
-    MortgagePrequalificationDtoToJSON,
-    MortgagePrequalificationDtoToJSONTyped,
-} from './MortgagePrequalificationDto';
+    HouseholdContactDtoFromJSON,
+    HouseholdContactDtoFromJSONTyped,
+    HouseholdContactDtoToJSON,
+    HouseholdContactDtoToJSONTyped,
+} from './HouseholdContactDto';
 
 /**
- * Detail response for a homeowner application.
+ * Detail response for a homeowner application. Household size, income and accessibility are the
+ * snapshot taken at submission; current household state is served by HouseholdResponse.
  * @export
  * @interface HomeownerApplicationResponse
  */
@@ -39,19 +40,13 @@ export interface HomeownerApplicationResponse {
      * @type {string}
      * @memberof HomeownerApplicationResponse
      */
-    applicantFullName?: string;
+    householdId?: string;
     /**
      * 
-     * @type {string}
+     * @type {HouseholdContactDto}
      * @memberof HomeownerApplicationResponse
      */
-    applicantEmail?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof HomeownerApplicationResponse
-     */
-    applicantPhone?: string | null;
+    primaryContact?: HouseholdContactDto | null;
     /**
      * 
      * @type {number}
@@ -94,24 +89,6 @@ export interface HomeownerApplicationResponse {
      * @memberof HomeownerApplicationResponse
      */
     eligibilityApprovedDate?: string | null;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof HomeownerApplicationResponse
-     */
-    isHousingCounselingCompleted?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof HomeownerApplicationResponse
-     */
-    isCltOrientationCompleted?: boolean;
-    /**
-     * 
-     * @type {MortgagePrequalificationDto}
-     * @memberof HomeownerApplicationResponse
-     */
-    mortgagePrequalification?: MortgagePrequalificationDto | null;
     /**
      * 
      * @type {string}
@@ -174,9 +151,8 @@ export function HomeownerApplicationResponseFromJSONTyped(json: any, ignoreDiscr
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
-        'applicantFullName': json['applicantFullName'] == null ? undefined : json['applicantFullName'],
-        'applicantEmail': json['applicantEmail'] == null ? undefined : json['applicantEmail'],
-        'applicantPhone': json['applicantPhone'] == null ? undefined : json['applicantPhone'],
+        'householdId': json['householdId'] == null ? undefined : json['householdId'],
+        'primaryContact': json['primaryContact'] == null ? undefined : HouseholdContactDtoFromJSON(json['primaryContact']),
         'householdSize': json['householdSize'] == null ? undefined : json['householdSize'],
         'annualIncome': json['annualIncome'] == null ? undefined : json['annualIncome'],
         'accessibilityRequired': json['accessibilityRequired'] == null ? undefined : json['accessibilityRequired'],
@@ -184,9 +160,6 @@ export function HomeownerApplicationResponseFromJSONTyped(json: any, ignoreDiscr
         'submittedAt': json['submittedAt'] == null ? undefined : json['submittedAt'],
         'submittedBy': json['submittedBy'] == null ? undefined : json['submittedBy'],
         'eligibilityApprovedDate': json['eligibilityApprovedDate'] == null ? undefined : json['eligibilityApprovedDate'],
-        'isHousingCounselingCompleted': json['isHousingCounselingCompleted'] == null ? undefined : json['isHousingCounselingCompleted'],
-        'isCltOrientationCompleted': json['isCltOrientationCompleted'] == null ? undefined : json['isCltOrientationCompleted'],
-        'mortgagePrequalification': json['mortgagePrequalification'] == null ? undefined : MortgagePrequalificationDtoFromJSON(json['mortgagePrequalification']),
         'denialReason': json['denialReason'] == null ? undefined : json['denialReason'],
         'withdrawalReason': json['withdrawalReason'] == null ? undefined : json['withdrawalReason'],
         'addedToWaitingListDate': json['addedToWaitingListDate'] == null ? undefined : json['addedToWaitingListDate'],
@@ -209,9 +182,8 @@ export function HomeownerApplicationResponseToJSONTyped(value?: HomeownerApplica
     return {
         
         'id': value['id'],
-        'applicantFullName': value['applicantFullName'],
-        'applicantEmail': value['applicantEmail'],
-        'applicantPhone': value['applicantPhone'],
+        'householdId': value['householdId'],
+        'primaryContact': HouseholdContactDtoToJSON(value['primaryContact']),
         'householdSize': value['householdSize'],
         'annualIncome': value['annualIncome'],
         'accessibilityRequired': value['accessibilityRequired'],
@@ -219,9 +191,6 @@ export function HomeownerApplicationResponseToJSONTyped(value?: HomeownerApplica
         'submittedAt': value['submittedAt'],
         'submittedBy': value['submittedBy'],
         'eligibilityApprovedDate': value['eligibilityApprovedDate'],
-        'isHousingCounselingCompleted': value['isHousingCounselingCompleted'],
-        'isCltOrientationCompleted': value['isCltOrientationCompleted'],
-        'mortgagePrequalification': MortgagePrequalificationDtoToJSON(value['mortgagePrequalification']),
         'denialReason': value['denialReason'],
         'withdrawalReason': value['withdrawalReason'],
         'addedToWaitingListDate': value['addedToWaitingListDate'],

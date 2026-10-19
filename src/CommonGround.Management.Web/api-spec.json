@@ -105,15 +105,6 @@
               "nullable": true
             },
             "x-position": 3
-          },
-          {
-            "name": "search",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 4
           }
         ],
         "responses": {
@@ -197,12 +188,12 @@
         }
       }
     },
-    "/api/v1/homeowner-applications/{applicationId}/eligibility/approve": {
+    "/api/v1/homeowner-applications/{applicationId}/approve": {
       "post": {
         "tags": [
           "ApplicantSelection"
         ],
-        "operationId": "ApproveEligibility",
+        "operationId": "ApproveApplication",
         "parameters": [
           {
             "name": "applicationId",
@@ -262,266 +253,6 @@
         }
       }
     },
-    "/api/v1/homeowner-applications/{applicationId}/eligibility/deny": {
-      "post": {
-        "tags": [
-          "ApplicantSelection"
-        ],
-        "operationId": "DenyEligibility",
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "DenyEligibilityRequest",
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DenyEligibilityRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": ""
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/homeowner-applications/{applicationId}/housing-counseling": {
-      "post": {
-        "tags": [
-          "ApplicantSelection"
-        ],
-        "operationId": "RecordHousingCounseling",
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "RecordHousingCounselingRequest",
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RecordHousingCounselingRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": ""
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/homeowner-applications/{applicationId}/clt-orientation": {
-      "post": {
-        "tags": [
-          "ApplicantSelection"
-        ],
-        "operationId": "RecordCltOrientation",
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "RecordCltOrientationRequest",
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RecordCltOrientationRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": ""
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/homeowner-applications/{applicationId}/mortgage-prequalification": {
-      "post": {
-        "tags": [
-          "ApplicantSelection"
-        ],
-        "operationId": "RecordMortgagePrequalification",
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "RecordMortgagePrequalificationRequest",
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RecordMortgagePrequalificationRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": ""
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/homes/{homeId}/applicant-candidates": {
       "get": {
         "tags": [
@@ -537,15 +268,6 @@
               "type": "string"
             },
             "x-position": 1
-          },
-          {
-            "name": "search",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 2
           }
         ],
         "responses": {
@@ -2533,6 +2255,311 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PaginatedResponseOfHomeAssessmentItemResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/households": {
+      "post": {
+        "tags": [
+          "Household"
+        ],
+        "operationId": "RegisterHousehold",
+        "requestBody": {
+          "x-name": "RegisterHouseholdRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterHouseholdRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterHouseholdResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/households/{householdId}": {
+      "get": {
+        "tags": [
+          "Household"
+        ],
+        "operationId": "GetHousehold",
+        "parameters": [
+          {
+            "name": "householdId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HouseholdResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/households/{householdId}/housing-counseling": {
+      "post": {
+        "tags": [
+          "Household"
+        ],
+        "operationId": "RecordHousingCounseling",
+        "parameters": [
+          {
+            "name": "householdId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordHousingCounselingRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordHousingCounselingRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/households/{householdId}/clt-orientation": {
+      "post": {
+        "tags": [
+          "Household"
+        ],
+        "operationId": "RecordCltOrientation",
+        "parameters": [
+          {
+            "name": "householdId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordCltOrientationRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordCltOrientationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/households/{householdId}/mortgage-prequalification": {
+      "post": {
+        "tags": [
+          "Household"
+        ],
+        "operationId": "RecordMortgagePrequalification",
+        "parameters": [
+          {
+            "name": "householdId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordMortgagePrequalificationRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordMortgagePrequalificationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
                 }
               }
             }
@@ -5678,26 +5705,8 @@
         "description": "Request to submit a new homeowner application.",
         "additionalProperties": false,
         "properties": {
-          "applicantFullName": {
+          "householdId": {
             "type": "string"
-          },
-          "applicantEmail": {
-            "type": "string"
-          },
-          "applicantPhone": {
-            "type": "string",
-            "nullable": true
-          },
-          "householdSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "annualIncome": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "accessibilityRequired": {
-            "type": "boolean"
           }
         }
       },
@@ -5782,11 +5791,16 @@
           "id": {
             "type": "string"
           },
-          "applicantFullName": {
+          "householdId": {
             "type": "string"
           },
-          "applicantEmail": {
-            "type": "string"
+          "primaryContact": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/HouseholdContactDto"
+              }
+            ]
           },
           "householdSize": {
             "type": "integer",
@@ -5803,23 +5817,40 @@
           }
         }
       },
+      "HouseholdContactDto": {
+        "type": "object",
+        "description": "Contact details for a household's primary member.",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        }
+      },
       "HomeownerApplicationResponse": {
         "type": "object",
-        "description": "Detail response for a homeowner application.",
+        "description": "Detail response for a homeowner application. Household size, income and accessibility are the\nsnapshot taken at submission; current household state is served by HouseholdResponse.",
         "additionalProperties": false,
         "properties": {
           "id": {
             "type": "string"
           },
-          "applicantFullName": {
+          "householdId": {
             "type": "string"
           },
-          "applicantEmail": {
-            "type": "string"
-          },
-          "applicantPhone": {
-            "type": "string",
-            "nullable": true
+          "primaryContact": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/HouseholdContactDto"
+              }
+            ]
           },
           "householdSize": {
             "type": "integer",
@@ -5844,20 +5875,6 @@
           "eligibilityApprovedDate": {
             "type": "string",
             "nullable": true
-          },
-          "isHousingCounselingCompleted": {
-            "type": "boolean"
-          },
-          "isCltOrientationCompleted": {
-            "type": "boolean"
-          },
-          "mortgagePrequalification": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/MortgagePrequalificationDto"
-              }
-            ]
           },
           "denialReason": {
             "type": "string",
@@ -5889,26 +5906,6 @@
           }
         }
       },
-      "MortgagePrequalificationDto": {
-        "type": "object",
-        "description": "Mortgage prequalification details.",
-        "additionalProperties": false,
-        "properties": {
-          "lenderName": {
-            "type": "string",
-            "description": "Name of the lender."
-          },
-          "approvedAmount": {
-            "type": "number",
-            "description": "Approved amount.",
-            "format": "decimal"
-          },
-          "expiryDate": {
-            "type": "string",
-            "description": "Prequalification expiry date."
-          }
-        }
-      },
       "ApproveEligibilityRequest": {
         "type": "object",
         "description": "Request to approve eligibility.",
@@ -5923,62 +5920,6 @@
           }
         }
       },
-      "DenyEligibilityRequest": {
-        "type": "object",
-        "description": "Request to deny eligibility.",
-        "additionalProperties": false,
-        "properties": {
-          "reason": {
-            "type": "string"
-          },
-          "deniedDate": {
-            "type": "string"
-          }
-        }
-      },
-      "RecordHousingCounselingRequest": {
-        "type": "object",
-        "description": "Request to record housing counseling completion.",
-        "additionalProperties": false,
-        "properties": {
-          "certificationNumber": {
-            "type": "string"
-          },
-          "completedDate": {
-            "type": "string"
-          },
-          "counselorOrganization": {
-            "type": "string"
-          }
-        }
-      },
-      "RecordCltOrientationRequest": {
-        "type": "object",
-        "description": "Request to record CLT orientation completion.",
-        "additionalProperties": false,
-        "properties": {
-          "completedDate": {
-            "type": "string"
-          }
-        }
-      },
-      "RecordMortgagePrequalificationRequest": {
-        "type": "object",
-        "description": "Request to record mortgage prequalification.",
-        "additionalProperties": false,
-        "properties": {
-          "lenderName": {
-            "type": "string"
-          },
-          "approvedAmount": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "expiryDate": {
-            "type": "string"
-          }
-        }
-      },
       "HomeCandidateResponse": {
         "type": "object",
         "description": "Summary item for a homeowner application candidate for a home.",
@@ -5987,15 +5928,16 @@
           "id": {
             "type": "string"
           },
-          "applicantFullName": {
+          "householdId": {
             "type": "string"
           },
-          "applicantEmail": {
-            "type": "string"
-          },
-          "applicantPhone": {
-            "type": "string",
-            "nullable": true
+          "primaryContact": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/HouseholdContactDto"
+              }
+            ]
           }
         }
       },
@@ -7302,6 +7244,200 @@
           "recordedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "RegisterHouseholdResponse": {
+        "type": "object",
+        "description": "Response returned after registering a household.",
+        "additionalProperties": false,
+        "properties": {
+          "householdId": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterHouseholdRequest": {
+        "type": "object",
+        "description": "Request to register a new household.",
+        "additionalProperties": false,
+        "properties": {
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HouseholdMemberRequest"
+            }
+          },
+          "requiresAccessibility": {
+            "type": "boolean"
+          },
+          "annualIncome": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "HouseholdMemberRequest": {
+        "type": "object",
+        "description": "A household member supplied when registering a household.",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "isPrimary": {
+            "type": "boolean"
+          }
+        }
+      },
+      "HouseholdResponse": {
+        "type": "object",
+        "description": "Detail response for a household's current state.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HouseholdMemberDto"
+            }
+          },
+          "householdSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "annualIncome": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "accessibilityRequired": {
+            "type": "boolean"
+          },
+          "isHousingCounselingCompleted": {
+            "type": "boolean"
+          },
+          "housingCounselingCompletedDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "housingCounselingCertificationNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "housingCounselorOrganization": {
+            "type": "string",
+            "nullable": true
+          },
+          "isCltOrientationCompleted": {
+            "type": "boolean"
+          },
+          "cltOrientationCompletedDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "mortgagePrequalification": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MortgagePrequalificationDto"
+              }
+            ]
+          },
+          "registeredAt": {
+            "type": "string"
+          },
+          "registeredBy": {
+            "type": "string"
+          }
+        }
+      },
+      "HouseholdMemberDto": {
+        "type": "object",
+        "description": "A household member.",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "isPrimary": {
+            "type": "boolean"
+          }
+        }
+      },
+      "MortgagePrequalificationDto": {
+        "type": "object",
+        "description": "Mortgage prequalification details.",
+        "additionalProperties": false,
+        "properties": {
+          "lenderName": {
+            "type": "string",
+            "description": "Name of the lender."
+          },
+          "approvedAmount": {
+            "type": "number",
+            "description": "Approved amount.",
+            "format": "decimal"
+          },
+          "expiryDate": {
+            "type": "string",
+            "description": "Prequalification expiry date."
+          }
+        }
+      },
+      "RecordHousingCounselingRequest": {
+        "type": "object",
+        "description": "Request to record housing counseling completion.",
+        "additionalProperties": false,
+        "properties": {
+          "certificationNumber": {
+            "type": "string"
+          },
+          "completedDate": {
+            "type": "string"
+          },
+          "counselorOrganization": {
+            "type": "string"
+          }
+        }
+      },
+      "RecordCltOrientationRequest": {
+        "type": "object",
+        "description": "Request to record CLT orientation completion.",
+        "additionalProperties": false,
+        "properties": {
+          "completedDate": {
+            "type": "string"
+          }
+        }
+      },
+      "RecordMortgagePrequalificationRequest": {
+        "type": "object",
+        "description": "Request to record mortgage prequalification.",
+        "additionalProperties": false,
+        "properties": {
+          "lenderName": {
+            "type": "string"
+          },
+          "approvedAmount": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "expiryDate": {
+            "type": "string"
           }
         }
       },

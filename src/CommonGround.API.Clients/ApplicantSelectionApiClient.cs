@@ -35,51 +35,18 @@ public sealed class ApplicantSelectionApiClient(
     }
 
     /// <inheritdoc/>
-    public async Task ApproveEligibilityAsync(string applicationId, ApproveEligibilityRequest request, CancellationToken cancellationToken)
+    public async Task ApproveApplicationAsync(string applicationId, ApproveEligibilityRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
         ArgumentNullException.ThrowIfNull(request);
-        await PostAsync($"api/homeowner-applications/{applicationId}/eligibility/approve", request, cancellationToken).ConfigureAwait(false);
+        await PostAsync($"api/homeowner-applications/{applicationId}/approve", request, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
-    public async Task DenyEligibilityAsync(string applicationId, DenyEligibilityRequest request, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
-        ArgumentNullException.ThrowIfNull(request);
-        await PostAsync($"api/homeowner-applications/{applicationId}/eligibility/deny", request, cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
-    public async Task RecordHousingCounselingAsync(string applicationId, RecordHousingCounselingRequest request, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
-        ArgumentNullException.ThrowIfNull(request);
-        await PostAsync($"api/homeowner-applications/{applicationId}/housing-counseling", request, cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
-    public async Task RecordCltOrientationAsync(string applicationId, RecordCltOrientationRequest request, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
-        ArgumentNullException.ThrowIfNull(request);
-        await PostAsync($"api/homeowner-applications/{applicationId}/clt-orientation", request, cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
-    public async Task RecordMortgagePrequalificationAsync(string applicationId, RecordMortgagePrequalificationRequest request, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
-        ArgumentNullException.ThrowIfNull(request);
-        await PostAsync($"api/homeowner-applications/{applicationId}/mortgage-prequalification", request, cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
-    public async Task<IReadOnlyList<HomeCandidateResponse>> GetHomeCandidatesAsync(string homeId, string? search, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<HomeCandidateResponse>> GetHomeCandidatesAsync(string homeId, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
-        var query = string.IsNullOrWhiteSpace(search) ? string.Empty : $"?search={Uri.EscapeDataString(search)}";
-        return await GetAsync<IReadOnlyList<HomeCandidateResponse>>($"api/homes/{homeId}/applicant-candidates{query}", cancellationToken).ConfigureAwait(false);
+        return await GetAsync<IReadOnlyList<HomeCandidateResponse>>($"api/homes/{homeId}/applicant-candidates", cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

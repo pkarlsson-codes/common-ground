@@ -1,16 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   ApplicantSelectionApi,
+  HouseholdApi,
   type ApproveEligibilityRequest,
   type DenyApplicationRequest,
-  type DenyEligibilityRequest,
   type HomeownerApplicationResponse,
+  type HouseholdResponse,
   type PaginatedResponseOfHomeownerApplicationListItemResponse,
   type RecordCltOrientationRequest,
   type RecordHousingCounselingRequest,
   type RecordMortgagePrequalificationRequest,
   type SelectApplicantRequest,
-  type SubmitApplicationRequest,
+  type RegisterHouseholdRequest,
+  type RegisterHouseholdResponse,
   type SubmitApplicationResponse,
   type WithdrawApplicationRequest,
 } from '../api'
@@ -18,12 +20,12 @@ import { ResponseError } from '../api/runtime'
 import { apiConfig } from '../lib/apiConfig'
 
 const api = new ApplicantSelectionApi(apiConfig)
+const householdApi = new HouseholdApi(apiConfig)
 
 export type HomeownerApplicationsQueryParams = {
   pageNumber: number
   pageSize?: number
   phase?: string
-  search?: string
 }
 
 const invalidateApplication = (qc: ReturnType<typeof useQueryClient>, applicationId: string) => {
@@ -45,13 +47,12 @@ const shouldRetryQuery = (failureCount: number, error: unknown): boolean => {
 
 export function useHomeownerApplications(params: HomeownerApplicationsQueryParams) {
   return useQuery<PaginatedResponseOfHomeownerApplicationListItemResponse>({
-    queryKey: ['homeowner-applications', params.pageNumber, params.pageSize, params.phase, params.search],
+    queryKey: ['homeowner-applications', params.pageNumber, params.pageSize, params.phase],
     queryFn: () =>
       api.getHomeownerApplications({
         pageNumber: params.pageNumber,
         pageSize: params.pageSize ?? 20,
         phase: params.phase,
-        search: params.search,
       }),
     retry: shouldRetryQuery,
   })
@@ -66,33 +67,36 @@ export function useHomeownerApplication(applicationId: string | null) {
   })
 }
 
+export function useHousehold(householdId: string | null | undefined) {
+  return useQuery<HouseholdResponse>({
+    queryKey: ['household', householdId],
+    queryFn: () => householdApi.getHousehold({ householdId: householdId! }),
+    enabled: !!householdId,
+    retry: shouldRetryQuery,
+  })
+}
+
+/** Registers a household, then submits an application for it. */
 export function useSubmitApplication() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (submitApplicationRequest: SubmitApplicationRequest) =>
-      api.submitApplication({ submitApplicationRequest }) as Promise<SubmitApplicationResponse>,
+    mutationFn: async (registerHouseholdRequest: RegisterHouseholdRequest) => {
+      const household = await householdApi.registerHousehold({ registerHouseholdRequest }) as RegisterHouseholdResponse
+      return await api.submitApplication({
+        submitApplicationRequest: { householdId: household.householdId },
+      }) as SubmitApplicationResponse
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['homeowner-applications'] })
     },
   })
 }
 
-export function useApproveEligibility() {
+export function useApproveApplication() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ applicationId, request }: { applicationId: string; request: ApproveEligibilityRequest }) =>
-      api.approveEligibility({ applicationId, approveEligibilityRequest: request }),
-    onSuccess: (_data, variables) => {
-      invalidateApplication(qc, variables.applicationId)
-    },
-  })
-}
-
-export function useDenyEligibility() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ applicationId, request }: { applicationId: string; request: DenyEligibilityRequest }) =>
-      api.denyEligibility({ applicationId, denyEligibilityRequest: request }),
+      api.approveApplication({ applicationId, approveEligibilityRequest: request }),
     onSuccess: (_data, variables) => {
       invalidateApplication(qc, variables.applicationId)
     },
@@ -102,10 +106,10 @@ export function useDenyEligibility() {
 export function useRecordHousingCounseling() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ applicationId, request }: { applicationId: string; request: RecordHousingCounselingRequest }) =>
-      api.recordHousingCounseling({ applicationId, recordHousingCounselingRequest: request }),
+    mutationFn: ({ householdId, request }: { householdId: string; request: RecordHousingCounselingRequest }) =>
+      householdApi.recordHousingCounseling({ householdId, recordHousingCounselingRequest: request }),
     onSuccess: (_data, variables) => {
-      invalidateApplication(qc, variables.applicationId)
+      qc.invalidateQueries({ queryKey: ['household', variables.householdId] })
     },
   })
 }
@@ -113,10 +117,10 @@ export function useRecordHousingCounseling() {
 export function useRecordCltOrientation() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ applicationId, request }: { applicationId: string; request: RecordCltOrientationRequest }) =>
-      api.recordCltOrientation({ applicationId, recordCltOrientationRequest: request }),
+    mutationFn: ({ householdId, request }: { householdId: string; request: RecordCltOrientationRequest }) =>
+      householdApi.recordCltOrientation({ householdId, recordCltOrientationRequest: request }),
     onSuccess: (_data, variables) => {
-      invalidateApplication(qc, variables.applicationId)
+      qc.invalidateQueries({ queryKey: ['household', variables.householdId] })
     },
   })
 }
@@ -124,10 +128,10 @@ export function useRecordCltOrientation() {
 export function useRecordMortgagePrequalification() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ applicationId, request }: { applicationId: string; request: RecordMortgagePrequalificationRequest }) =>
-      api.recordMortgagePrequalification({ applicationId, recordMortgagePrequalificationRequest: request }),
+    mutationFn: ({ householdId, request }: { householdId: string; request: RecordMortgagePrequalificationRequest }) =>
+      householdApi.recordMortgagePrequalification({ householdId, recordMortgagePrequalificationRequest: request }),
     onSuccess: (_data, variables) => {
-      invalidateApplication(qc, variables.applicationId)
+      qc.invalidateQueries({ queryKey: ['household', variables.householdId] })
     },
   })
 }

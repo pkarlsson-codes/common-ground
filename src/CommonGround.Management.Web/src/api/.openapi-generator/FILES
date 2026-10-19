@@ -6,6 +6,7 @@ apis/DocumentsApi.ts
 apis/GroundLeaseTemplatesApi.ts
 apis/GroundLeasesApi.ts
 apis/HomesApi.ts
+apis/HouseholdApi.ts
 apis/LandParcelsApi.ts
 apis/OidcApi.ts
 apis/PurchaseWorkflowsApi.ts
@@ -32,7 +33,6 @@ models/CurePeriodActivationResponse.ts
 models/CureViolationRequest.ts
 models/CurrentUserDto.ts
 models/DenyApplicationRequest.ts
-models/DenyEligibilityRequest.ts
 models/DevelopmentProjectListItemResponse.ts
 models/DocumentAttachmentResponse.ts
 models/DocumentLibraryItemResponse.ts
@@ -56,6 +56,10 @@ models/HomeListItemResponse.ts
 models/HomeResponse.ts
 models/HomeownerApplicationListItemResponse.ts
 models/HomeownerApplicationResponse.ts
+models/HouseholdContactDto.ts
+models/HouseholdMemberDto.ts
+models/HouseholdMemberRequest.ts
+models/HouseholdResponse.ts
 models/IdentifyViolationRequest.ts
 models/InitiateDevelopmentProjectRequest.ts
 models/InitiateDevelopmentProjectResponse.ts
@@ -106,6 +110,8 @@ models/RecordStewardshipCheckInRequest.ts
 models/RecordTitleClearedRequest.ts
 models/RegisterHomeRequest.ts
 models/RegisterHomeResponse.ts
+models/RegisterHouseholdRequest.ts
+models/RegisterHouseholdResponse.ts
 models/RegisterLandParcelRequest.ts
 models/RegisterLandParcelResponse.ts
 models/RequestForbearanceRequest.ts

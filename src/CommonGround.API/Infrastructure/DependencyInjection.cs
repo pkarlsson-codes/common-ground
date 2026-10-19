@@ -1,10 +1,10 @@
 using System.Text;
 using CommonGround.API.Infrastructure.ExceptionHandling;
 using CommonGround.API.Infrastructure.Seeding;
-using CommonGround.ApplicantSelection.Infrastructure;
-using CommonGround.ApplicantSelection.Infrastructure.Persistence;
 using CommonGround.Documents.Infrastructure;
 using CommonGround.Documents.Infrastructure.Persistence;
+using CommonGround.HomeBuyers.Infrastructure;
+using CommonGround.HomeBuyers.Infrastructure.Persistence;
 using CommonGround.Homeownership.Infrastructure;
 using CommonGround.Homeownership.Infrastructure.Persistence;
 using CommonGround.Identity.Infrastructure;

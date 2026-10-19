@@ -25,37 +25,7 @@ export interface SubmitApplicationRequest {
      * @type {string}
      * @memberof SubmitApplicationRequest
      */
-    applicantFullName?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SubmitApplicationRequest
-     */
-    applicantEmail?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SubmitApplicationRequest
-     */
-    applicantPhone?: string | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof SubmitApplicationRequest
-     */
-    householdSize?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof SubmitApplicationRequest
-     */
-    annualIncome?: number;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof SubmitApplicationRequest
-     */
-    accessibilityRequired?: boolean;
+    householdId?: string;
 }
 
 /**
@@ -75,12 +45,7 @@ export function SubmitApplicationRequestFromJSONTyped(json: any, ignoreDiscrimin
     }
     return {
         
-        'applicantFullName': json['applicantFullName'] == null ? undefined : json['applicantFullName'],
-        'applicantEmail': json['applicantEmail'] == null ? undefined : json['applicantEmail'],
-        'applicantPhone': json['applicantPhone'] == null ? undefined : json['applicantPhone'],
-        'householdSize': json['householdSize'] == null ? undefined : json['householdSize'],
-        'annualIncome': json['annualIncome'] == null ? undefined : json['annualIncome'],
-        'accessibilityRequired': json['accessibilityRequired'] == null ? undefined : json['accessibilityRequired'],
+        'householdId': json['householdId'] == null ? undefined : json['householdId'],
     };
 }
 
@@ -95,12 +60,7 @@ export function SubmitApplicationRequestToJSONTyped(value?: SubmitApplicationReq
 
     return {
         
-        'applicantFullName': value['applicantFullName'],
-        'applicantEmail': value['applicantEmail'],
-        'applicantPhone': value['applicantPhone'],
-        'householdSize': value['householdSize'],
-        'annualIncome': value['annualIncome'],
-        'accessibilityRequired': value['accessibilityRequired'],
+        'householdId': value['householdId'],
     };
 }
 

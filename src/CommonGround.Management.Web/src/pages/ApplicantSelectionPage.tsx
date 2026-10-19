@@ -11,10 +11,8 @@ const PAGE_SIZE = 20
 
 const PHASES = [
   'Submitted',
-  'Active',
-  'Waitlisted',
+  'Approved',
   'Selected',
-  'EligibilityDenied',
   'Denied',
   'Withdrawn',
 ]
@@ -25,8 +23,6 @@ export default function ApplicantSelectionPage() {
 
   const [page, setPage] = useState(1)
   const [phaseFilter, setPhaseFilter] = useState('')
-  const [searchFilter, setSearchFilter] = useState('')
-  const [searchInput, setSearchInput] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [panel, setPanel] = useState<Panel>(null)
 
@@ -34,7 +30,6 @@ export default function ApplicantSelectionPage() {
     pageNumber: page,
     pageSize: PAGE_SIZE,
     phase: phaseFilter || undefined,
-    search: searchFilter || undefined,
   })
 
   const applications = data?.items ?? []
@@ -62,7 +57,7 @@ export default function ApplicantSelectionPage() {
     )
   }, [location, navigate])
 
-  const hasFilters = Boolean(phaseFilter || searchFilter)
+  const hasFilters = Boolean(phaseFilter)
 
   return (
     <div className="page">
@@ -95,46 +90,6 @@ export default function ApplicantSelectionPage() {
             <option key={phase} value={phase}>{phase}</option>
           ))}
         </select>
-
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 260 }}>
-          <input
-            className="form-input"
-            type="search"
-            placeholder="Search by applicant name or email..."
-            value={searchInput}
-            onChange={e => setSearchInput(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter') {
-                setSearchFilter(searchInput.trim())
-                setPage(1)
-              }
-            }}
-            style={{ flex: 1 }}
-          />
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm"
-            onClick={() => {
-              setSearchFilter(searchInput.trim())
-              setPage(1)
-            }}
-          >
-            Search
-          </button>
-          {(searchFilter || searchInput) && (
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm"
-              onClick={() => {
-                setSearchInput('')
-                setSearchFilter('')
-                setPage(1)
-              }}
-            >
-              Clear
-            </button>
-          )}
-        </div>
       </div>
 
       <ApplicantSelectionTable

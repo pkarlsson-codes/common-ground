@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { HouseholdContactDto } from './HouseholdContactDto';
+import {
+    HouseholdContactDtoFromJSON,
+    HouseholdContactDtoFromJSONTyped,
+    HouseholdContactDtoToJSON,
+    HouseholdContactDtoToJSONTyped,
+} from './HouseholdContactDto';
+
 /**
  * Summary item for a homeowner application candidate for a home.
  * @export
@@ -31,19 +39,13 @@ export interface HomeCandidateResponse {
      * @type {string}
      * @memberof HomeCandidateResponse
      */
-    applicantFullName?: string;
+    householdId?: string;
     /**
      * 
-     * @type {string}
+     * @type {HouseholdContactDto}
      * @memberof HomeCandidateResponse
      */
-    applicantEmail?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof HomeCandidateResponse
-     */
-    applicantPhone?: string | null;
+    primaryContact?: HouseholdContactDto | null;
 }
 
 /**
@@ -64,9 +66,8 @@ export function HomeCandidateResponseFromJSONTyped(json: any, ignoreDiscriminato
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
-        'applicantFullName': json['applicantFullName'] == null ? undefined : json['applicantFullName'],
-        'applicantEmail': json['applicantEmail'] == null ? undefined : json['applicantEmail'],
-        'applicantPhone': json['applicantPhone'] == null ? undefined : json['applicantPhone'],
+        'householdId': json['householdId'] == null ? undefined : json['householdId'],
+        'primaryContact': json['primaryContact'] == null ? undefined : HouseholdContactDtoFromJSON(json['primaryContact']),
     };
 }
 
@@ -82,9 +83,8 @@ export function HomeCandidateResponseToJSONTyped(value?: HomeCandidateResponse |
     return {
         
         'id': value['id'],
-        'applicantFullName': value['applicantFullName'],
-        'applicantEmail': value['applicantEmail'],
-        'applicantPhone': value['applicantPhone'],
+        'householdId': value['householdId'],
+        'primaryContact': HouseholdContactDtoToJSON(value['primaryContact']),
     };
 }
 

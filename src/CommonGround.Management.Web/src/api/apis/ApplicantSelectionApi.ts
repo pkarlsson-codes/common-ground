@@ -18,14 +18,10 @@ import * as runtime from '../runtime';
 import type {
   ApproveEligibilityRequest,
   DenyApplicationRequest,
-  DenyEligibilityRequest,
   HomeCandidateResponse,
   HomeownerApplicationResponse,
   PaginatedResponseOfHomeownerApplicationListItemResponse,
   ProblemDetails,
-  RecordCltOrientationRequest,
-  RecordHousingCounselingRequest,
-  RecordMortgagePrequalificationRequest,
   SelectApplicantRequest,
   SubmitApplicationRequest,
   SubmitApplicationResponse,
@@ -36,8 +32,6 @@ import {
     ApproveEligibilityRequestToJSON,
     DenyApplicationRequestFromJSON,
     DenyApplicationRequestToJSON,
-    DenyEligibilityRequestFromJSON,
-    DenyEligibilityRequestToJSON,
     HomeCandidateResponseFromJSON,
     HomeCandidateResponseToJSON,
     HomeownerApplicationResponseFromJSON,
@@ -46,12 +40,6 @@ import {
     PaginatedResponseOfHomeownerApplicationListItemResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
-    RecordCltOrientationRequestFromJSON,
-    RecordCltOrientationRequestToJSON,
-    RecordHousingCounselingRequestFromJSON,
-    RecordHousingCounselingRequestToJSON,
-    RecordMortgagePrequalificationRequestFromJSON,
-    RecordMortgagePrequalificationRequestToJSON,
     SelectApplicantRequestFromJSON,
     SelectApplicantRequestToJSON,
     SubmitApplicationRequestFromJSON,
@@ -62,7 +50,7 @@ import {
     WithdrawApplicationRequestToJSON,
 } from '../models/index';
 
-export interface ApproveEligibilityOperationRequest {
+export interface ApproveApplicationRequest {
     applicationId: string;
     approveEligibilityRequest: ApproveEligibilityRequest;
 }
@@ -72,14 +60,8 @@ export interface DenyApplicationOperationRequest {
     denyApplicationRequest: DenyApplicationRequest;
 }
 
-export interface DenyEligibilityOperationRequest {
-    applicationId: string;
-    denyEligibilityRequest: DenyEligibilityRequest;
-}
-
 export interface GetHomeCandidatesRequest {
     homeId: string;
-    search?: string | null;
 }
 
 export interface GetHomeownerApplicationRequest {
@@ -90,22 +72,6 @@ export interface GetHomeownerApplicationsRequest {
     pageNumber?: number;
     pageSize?: number;
     phase?: string | null;
-    search?: string | null;
-}
-
-export interface RecordCltOrientationOperationRequest {
-    applicationId: string;
-    recordCltOrientationRequest: RecordCltOrientationRequest;
-}
-
-export interface RecordHousingCounselingOperationRequest {
-    applicationId: string;
-    recordHousingCounselingRequest: RecordHousingCounselingRequest;
-}
-
-export interface RecordMortgagePrequalificationOperationRequest {
-    applicationId: string;
-    recordMortgagePrequalificationRequest: RecordMortgagePrequalificationRequest;
 }
 
 export interface SelectApplicantOperationRequest {
@@ -137,11 +103,11 @@ export interface ApplicantSelectionApiInterface {
      * @throws {RequiredError}
      * @memberof ApplicantSelectionApiInterface
      */
-    approveEligibilityRaw(requestParameters: ApproveEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+    approveApplicationRaw(requestParameters: ApproveApplicationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
      */
-    approveEligibility(requestParameters: ApproveEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+    approveApplication(requestParameters: ApproveApplicationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -159,22 +125,7 @@ export interface ApplicantSelectionApiInterface {
 
     /**
      * 
-     * @param {string} applicationId 
-     * @param {DenyEligibilityRequest} denyEligibilityRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ApplicantSelectionApiInterface
-     */
-    denyEligibilityRaw(requestParameters: DenyEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
-
-    /**
-     */
-    denyEligibility(requestParameters: DenyEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
-
-    /**
-     * 
      * @param {string} homeId 
-     * @param {string} [search] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ApplicantSelectionApiInterface
@@ -203,7 +154,6 @@ export interface ApplicantSelectionApiInterface {
      * @param {number} [pageNumber] 
      * @param {number} [pageSize] 
      * @param {string} [phase] 
-     * @param {string} [search] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ApplicantSelectionApiInterface
@@ -213,48 +163,6 @@ export interface ApplicantSelectionApiInterface {
     /**
      */
     getHomeownerApplications(requestParameters: GetHomeownerApplicationsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeownerApplicationListItemResponse>;
-
-    /**
-     * 
-     * @param {string} applicationId 
-     * @param {RecordCltOrientationRequest} recordCltOrientationRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ApplicantSelectionApiInterface
-     */
-    recordCltOrientationRaw(requestParameters: RecordCltOrientationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
-
-    /**
-     */
-    recordCltOrientation(requestParameters: RecordCltOrientationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
-
-    /**
-     * 
-     * @param {string} applicationId 
-     * @param {RecordHousingCounselingRequest} recordHousingCounselingRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ApplicantSelectionApiInterface
-     */
-    recordHousingCounselingRaw(requestParameters: RecordHousingCounselingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
-
-    /**
-     */
-    recordHousingCounseling(requestParameters: RecordHousingCounselingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
-
-    /**
-     * 
-     * @param {string} applicationId 
-     * @param {RecordMortgagePrequalificationRequest} recordMortgagePrequalificationRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ApplicantSelectionApiInterface
-     */
-    recordMortgagePrequalificationRaw(requestParameters: RecordMortgagePrequalificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
-
-    /**
-     */
-    recordMortgagePrequalification(requestParameters: RecordMortgagePrequalificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -306,18 +214,18 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
 
     /**
      */
-    async approveEligibilityRaw(requestParameters: ApproveEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+    async approveApplicationRaw(requestParameters: ApproveApplicationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['applicationId'] == null) {
             throw new runtime.RequiredError(
                 'applicationId',
-                'Required parameter "applicationId" was null or undefined when calling approveEligibility().'
+                'Required parameter "applicationId" was null or undefined when calling approveApplication().'
             );
         }
 
         if (requestParameters['approveEligibilityRequest'] == null) {
             throw new runtime.RequiredError(
                 'approveEligibilityRequest',
-                'Required parameter "approveEligibilityRequest" was null or undefined when calling approveEligibility().'
+                'Required parameter "approveEligibilityRequest" was null or undefined when calling approveApplication().'
             );
         }
 
@@ -328,7 +236,7 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
         headerParameters['Content-Type'] = 'application/json';
 
 
-        let urlPath = `/api/v1/homeowner-applications/{applicationId}/eligibility/approve`;
+        let urlPath = `/api/v1/homeowner-applications/{applicationId}/approve`;
         urlPath = urlPath.replace(`{${"applicationId"}}`, encodeURIComponent(String(requestParameters['applicationId'])));
 
         const response = await this.request({
@@ -344,8 +252,8 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
 
     /**
      */
-    async approveEligibility(requestParameters: ApproveEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
-        const response = await this.approveEligibilityRaw(requestParameters, initOverrides);
+    async approveApplication(requestParameters: ApproveApplicationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.approveApplicationRaw(requestParameters, initOverrides);
         switch (response.raw.status) {
             case 204:
                 return null;
@@ -410,58 +318,6 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
 
     /**
      */
-    async denyEligibilityRaw(requestParameters: DenyEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters['applicationId'] == null) {
-            throw new runtime.RequiredError(
-                'applicationId',
-                'Required parameter "applicationId" was null or undefined when calling denyEligibility().'
-            );
-        }
-
-        if (requestParameters['denyEligibilityRequest'] == null) {
-            throw new runtime.RequiredError(
-                'denyEligibilityRequest',
-                'Required parameter "denyEligibilityRequest" was null or undefined when calling denyEligibility().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-
-        let urlPath = `/api/v1/homeowner-applications/{applicationId}/eligibility/deny`;
-        urlPath = urlPath.replace(`{${"applicationId"}}`, encodeURIComponent(String(requestParameters['applicationId'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: DenyEligibilityRequestToJSON(requestParameters['denyEligibilityRequest']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse<any>(response);
-    }
-
-    /**
-     */
-    async denyEligibility(requestParameters: DenyEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
-        const response = await this.denyEligibilityRaw(requestParameters, initOverrides);
-        switch (response.raw.status) {
-            case 204:
-                return null;
-            case 200:
-                return await response.value();
-            default:
-                return await response.value();
-        }
-    }
-
-    /**
-     */
     async getHomeCandidatesRaw(requestParameters: GetHomeCandidatesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<HomeCandidateResponse>>> {
         if (requestParameters['homeId'] == null) {
             throw new runtime.RequiredError(
@@ -471,10 +327,6 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
         }
 
         const queryParameters: any = {};
-
-        if (requestParameters['search'] != null) {
-            queryParameters['search'] = requestParameters['search'];
-        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -551,10 +403,6 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
             queryParameters['phase'] = requestParameters['phase'];
         }
 
-        if (requestParameters['search'] != null) {
-            queryParameters['search'] = requestParameters['search'];
-        }
-
         const headerParameters: runtime.HTTPHeaders = {};
 
 
@@ -575,162 +423,6 @@ export class ApplicantSelectionApi extends runtime.BaseAPI implements ApplicantS
     async getHomeownerApplications(requestParameters: GetHomeownerApplicationsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeownerApplicationListItemResponse> {
         const response = await this.getHomeownerApplicationsRaw(requestParameters, initOverrides);
         return await response.value();
-    }
-
-    /**
-     */
-    async recordCltOrientationRaw(requestParameters: RecordCltOrientationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters['applicationId'] == null) {
-            throw new runtime.RequiredError(
-                'applicationId',
-                'Required parameter "applicationId" was null or undefined when calling recordCltOrientation().'
-            );
-        }
-
-        if (requestParameters['recordCltOrientationRequest'] == null) {
-            throw new runtime.RequiredError(
-                'recordCltOrientationRequest',
-                'Required parameter "recordCltOrientationRequest" was null or undefined when calling recordCltOrientation().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-
-        let urlPath = `/api/v1/homeowner-applications/{applicationId}/clt-orientation`;
-        urlPath = urlPath.replace(`{${"applicationId"}}`, encodeURIComponent(String(requestParameters['applicationId'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: RecordCltOrientationRequestToJSON(requestParameters['recordCltOrientationRequest']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse<any>(response);
-    }
-
-    /**
-     */
-    async recordCltOrientation(requestParameters: RecordCltOrientationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
-        const response = await this.recordCltOrientationRaw(requestParameters, initOverrides);
-        switch (response.raw.status) {
-            case 204:
-                return null;
-            case 200:
-                return await response.value();
-            default:
-                return await response.value();
-        }
-    }
-
-    /**
-     */
-    async recordHousingCounselingRaw(requestParameters: RecordHousingCounselingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters['applicationId'] == null) {
-            throw new runtime.RequiredError(
-                'applicationId',
-                'Required parameter "applicationId" was null or undefined when calling recordHousingCounseling().'
-            );
-        }
-
-        if (requestParameters['recordHousingCounselingRequest'] == null) {
-            throw new runtime.RequiredError(
-                'recordHousingCounselingRequest',
-                'Required parameter "recordHousingCounselingRequest" was null or undefined when calling recordHousingCounseling().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-
-        let urlPath = `/api/v1/homeowner-applications/{applicationId}/housing-counseling`;
-        urlPath = urlPath.replace(`{${"applicationId"}}`, encodeURIComponent(String(requestParameters['applicationId'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: RecordHousingCounselingRequestToJSON(requestParameters['recordHousingCounselingRequest']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse<any>(response);
-    }
-
-    /**
-     */
-    async recordHousingCounseling(requestParameters: RecordHousingCounselingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
-        const response = await this.recordHousingCounselingRaw(requestParameters, initOverrides);
-        switch (response.raw.status) {
-            case 204:
-                return null;
-            case 200:
-                return await response.value();
-            default:
-                return await response.value();
-        }
-    }
-
-    /**
-     */
-    async recordMortgagePrequalificationRaw(requestParameters: RecordMortgagePrequalificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters['applicationId'] == null) {
-            throw new runtime.RequiredError(
-                'applicationId',
-                'Required parameter "applicationId" was null or undefined when calling recordMortgagePrequalification().'
-            );
-        }
-
-        if (requestParameters['recordMortgagePrequalificationRequest'] == null) {
-            throw new runtime.RequiredError(
-                'recordMortgagePrequalificationRequest',
-                'Required parameter "recordMortgagePrequalificationRequest" was null or undefined when calling recordMortgagePrequalification().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-
-        let urlPath = `/api/v1/homeowner-applications/{applicationId}/mortgage-prequalification`;
-        urlPath = urlPath.replace(`{${"applicationId"}}`, encodeURIComponent(String(requestParameters['applicationId'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: RecordMortgagePrequalificationRequestToJSON(requestParameters['recordMortgagePrequalificationRequest']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse<any>(response);
-    }
-
-    /**
-     */
-    async recordMortgagePrequalification(requestParameters: RecordMortgagePrequalificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
-        const response = await this.recordMortgagePrequalificationRaw(requestParameters, initOverrides);
-        switch (response.raw.status) {
-            case 204:
-                return null;
-            case 200:
-                return await response.value();
-            default:
-                return await response.value();
-        }
     }
 
     /**

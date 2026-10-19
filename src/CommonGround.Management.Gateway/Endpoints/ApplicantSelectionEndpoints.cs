@@ -44,9 +44,9 @@ public static class ApplicantSelectionEndpoints
         return Results.Ok(result);
     }
 
-    [WolverinePost("/api/v1/homeowner-applications/{applicationId}/eligibility/approve")]
+    [WolverinePost("/api/v1/homeowner-applications/{applicationId}/approve")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public static async Task<IResult> ApproveEligibility(
+    public static async Task<IResult> ApproveApplication(
         string applicationId,
         ApproveEligibilityRequest request,
         IApplicantSelectionApiClient client,
@@ -54,63 +54,7 @@ public static class ApplicantSelectionEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
         ArgumentNullException.ThrowIfNull(request);
-        await client.ApproveEligibilityAsync(applicationId, request, cancellationToken).ConfigureAwait(false);
-        return Results.NoContent();
-    }
-
-    [WolverinePost("/api/v1/homeowner-applications/{applicationId}/eligibility/deny")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public static async Task<IResult> DenyEligibility(
-        string applicationId,
-        DenyEligibilityRequest request,
-        IApplicantSelectionApiClient client,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
-        ArgumentNullException.ThrowIfNull(request);
-        await client.DenyEligibilityAsync(applicationId, request, cancellationToken).ConfigureAwait(false);
-        return Results.NoContent();
-    }
-
-    [WolverinePost("/api/v1/homeowner-applications/{applicationId}/housing-counseling")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public static async Task<IResult> RecordHousingCounseling(
-        string applicationId,
-        RecordHousingCounselingRequest request,
-        IApplicantSelectionApiClient client,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
-        ArgumentNullException.ThrowIfNull(request);
-        await client.RecordHousingCounselingAsync(applicationId, request, cancellationToken).ConfigureAwait(false);
-        return Results.NoContent();
-    }
-
-    [WolverinePost("/api/v1/homeowner-applications/{applicationId}/clt-orientation")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public static async Task<IResult> RecordCltOrientation(
-        string applicationId,
-        RecordCltOrientationRequest request,
-        IApplicantSelectionApiClient client,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
-        ArgumentNullException.ThrowIfNull(request);
-        await client.RecordCltOrientationAsync(applicationId, request, cancellationToken).ConfigureAwait(false);
-        return Results.NoContent();
-    }
-
-    [WolverinePost("/api/v1/homeowner-applications/{applicationId}/mortgage-prequalification")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public static async Task<IResult> RecordMortgagePrequalification(
-        string applicationId,
-        RecordMortgagePrequalificationRequest request,
-        IApplicantSelectionApiClient client,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
-        ArgumentNullException.ThrowIfNull(request);
-        await client.RecordMortgagePrequalificationAsync(applicationId, request, cancellationToken).ConfigureAwait(false);
+        await client.ApproveApplicationAsync(applicationId, request, cancellationToken).ConfigureAwait(false);
         return Results.NoContent();
     }
 
@@ -118,12 +62,11 @@ public static class ApplicantSelectionEndpoints
     [ProducesResponseType<IReadOnlyList<HomeCandidateResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetHomeCandidates(
         string homeId,
-        [FromQuery] string? search,
         IApplicantSelectionApiClient client,
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
-        var result = await client.GetHomeCandidatesAsync(homeId, search, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetHomeCandidatesAsync(homeId, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
 

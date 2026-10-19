@@ -21,23 +21,11 @@ public interface IApplicantSelectionApiClient
     /// <summary>Gets a homeowner application by ID.</summary>
     Task<HomeownerApplicationResponse> GetHomeownerApplicationAsync(string applicationId, CancellationToken cancellationToken);
 
-    /// <summary>Approves eligibility for a homeowner application.</summary>
-    Task ApproveEligibilityAsync(string applicationId, ApproveEligibilityRequest request, CancellationToken cancellationToken);
-
-    /// <summary>Denies eligibility for a homeowner application.</summary>
-    Task DenyEligibilityAsync(string applicationId, DenyEligibilityRequest request, CancellationToken cancellationToken);
-
-    /// <summary>Records housing counseling completion.</summary>
-    Task RecordHousingCounselingAsync(string applicationId, RecordHousingCounselingRequest request, CancellationToken cancellationToken);
-
-    /// <summary>Records CLT orientation completion.</summary>
-    Task RecordCltOrientationAsync(string applicationId, RecordCltOrientationRequest request, CancellationToken cancellationToken);
-
-    /// <summary>Records mortgage prequalification.</summary>
-    Task RecordMortgagePrequalificationAsync(string applicationId, RecordMortgagePrequalificationRequest request, CancellationToken cancellationToken);
+    /// <summary>Approves a homeowner application.</summary>
+    Task ApproveApplicationAsync(string applicationId, ApproveEligibilityRequest request, CancellationToken cancellationToken);
 
     /// <summary>Gets applications eligible to be selected for a given home.</summary>
-    Task<IReadOnlyList<HomeCandidateResponse>> GetHomeCandidatesAsync(string homeId, string? search, CancellationToken cancellationToken);
+    Task<IReadOnlyList<HomeCandidateResponse>> GetHomeCandidatesAsync(string homeId, CancellationToken cancellationToken);
 
     /// <summary>Selects an applicant for a home.</summary>
     Task SelectApplicantAsync(string applicationId, SelectApplicantRequest request, CancellationToken cancellationToken);

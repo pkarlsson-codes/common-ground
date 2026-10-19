@@ -18,11 +18,11 @@ const emptyForm = (): FormState => ({
 })
 
 type Props = {
-  applicationId: string
+  householdId: string
   onClose: () => void
 }
 
-export default function RecordHousingCounselingPanel({ applicationId, onClose }: Props) {
+export default function RecordHousingCounselingPanel({ householdId, onClose }: Props) {
   const [form, setForm] = useState<FormState>(emptyForm)
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   const mutation = useRecordHousingCounseling()
@@ -34,7 +34,7 @@ export default function RecordHousingCounselingPanel({ applicationId, onClose }:
 
     try {
       await mutation.mutateAsync({
-        applicationId,
+        householdId,
         request: {
           certificationNumber: form.certificationNumber,
           completedDate: form.completedDate,
