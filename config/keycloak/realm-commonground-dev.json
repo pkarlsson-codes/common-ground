@@ -253,6 +253,22 @@
           "temporary": false
         }
       ]
+    },
+    {
+      "id": "00000000-0000-0000-0000-0000000000e2",
+      "username": "e2e",
+      "email": "e2e@example.com",
+      "firstName": "E2E",
+      "lastName": "Tester",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "e2e",
+          "temporary": false
+        }
+      ]
     }
   ],
   "browserFlow": "browser",

@@ -26,3 +26,9 @@ dist/
 Thumbs.db
 
 /docs/vendors/
+
+# Local working notes and reference material
+docs/*[Pp]lan.md
+docs/clt-manuals/
+docs/spec/
+docs/stories/
