@@ -27,14 +27,22 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
 
     public bool IsTerminal => Phase.IsTerminal;
 
+    /// <summary>
+    /// Submits a new application for a household. Rejected when <paramref name="openApplicationId"/>
+    /// (the household's existing non-terminal application, if any) is set.
+    /// </summary>
     public static HomeownerApplication Submit(
         HouseholdId householdId,
         Declaration declaration,
+        HomeownerApplicationId? openApplicationId,
         UserId submittedBy)
     {
         ArgumentNullException.ThrowIfNull(householdId);
         ArgumentNullException.ThrowIfNull(declaration);
         ArgumentNullException.ThrowIfNull(submittedBy);
+
+        if (openApplicationId is not null)
+            throw BusinessRuleViolation.HomeownerApplication.Submit.HouseholdHasOpenApplication(openApplicationId);
 
         var application = new HomeownerApplication();
         application.ApplyChange(new ApplicationSubmitted(
@@ -59,14 +67,19 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
         ApplyChange(new ApplicationApproved(Id.Value, approvedDate, notes, recordedBy.Value));
     }
 
+    /// <summary>
+    /// Selects the application for a home. The household must be this application's household,
+    /// have completed readiness, and hold a prequalification still valid on <paramref name="selectedDate"/>.
+    /// </summary>
     public void SelectForHome(
-        string applicantFullName, string applicantEmail, string? applicantPhone,
+        Household household,
         string homeId, string landParcelId, string groundLeaseTemplateId,
         decimal purchasePrice, DateOnly selectedDate, UserId selectedBy)
     {
+        ArgumentNullException.ThrowIfNull(household);
         ArgumentNullException.ThrowIfNull(selectedBy);
-        ArgumentException.ThrowIfNullOrWhiteSpace(applicantFullName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(applicantEmail);
+        if (household.Id != HouseholdId)
+            throw new ArgumentException("Household does not belong to this application.", nameof(household));
         GuardNotTerminal();
 
         if (Phase != ApplicationPhase.Approved)
@@ -75,12 +88,23 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
         if (purchasePrice <= 0)
             throw BusinessRuleViolation.HomeownerApplication.SelectApplicant.PurchasePriceNonPositive(purchasePrice);
 
+        var applicant = household.PrimaryMember
+            ?? throw BusinessRuleViolation.Household.SelectApplicant.NoPrimaryMember(household.Id);
+
+        if (!household.IsReadinessComplete)
+            throw BusinessRuleViolation.HomeownerApplication.SelectApplicant.HouseholdReadinessIncomplete(
+                household.OutstandingReadinessItems);
+
+        if (!household.IsPrequalificationValidOn(selectedDate))
+            throw BusinessRuleViolation.HomeownerApplication.SelectApplicant.PrequalificationExpired(
+                household.MortgagePrequalification!.ExpiryDate, selectedDate);
+
         ApplyChange(new ApplicationSelectedForHome(
             Id.Value,
             HouseholdId.Value,
-            applicantFullName,
-            applicantEmail,
-            applicantPhone,
+            applicant.Name,
+            applicant.Email,
+            applicant.Phone,
             homeId,
             landParcelId,
             groundLeaseTemplateId,

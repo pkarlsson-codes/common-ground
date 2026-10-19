@@ -13,6 +13,7 @@ test('selecting an approved applicant puts the home under contract and starts a 
   const { groundLeaseTemplateId, templateName } = await createGroundLeaseTemplate(page)
   const approved = await createApplication(page, `Approved ${id}`)
   const submitted = await createApplication(page, `Submitted ${id}`, { approve: false })
+  const notReady = await createApplication(page, `Not Ready ${id}`, { ready: false })
 
   // Open the home via the parcel filter (the parcel is unique to this test).
   await page.goto('/homes')
@@ -25,12 +26,13 @@ test('selecting an approved applicant puts the home under contract and starts a 
   await page.getByRole('button', { name: 'Select Applicant' }).click()
   const select = panel(page, 'Select Applicant')
 
-  // Only Approved applications are offered; typing filters locally.
+  // Only Approved applications whose household is ready are offered; typing filters locally.
   await field(select, 'Applicant').click()
   const search = page.getByPlaceholder('Search approved applicants…')
   await search.fill(id)
   await expect(page.getByRole('listbox').getByRole('option')).toHaveText([`${approved.name} — ${approved.email}`])
   await expect(page.getByRole('listbox').getByRole('option', { name: new RegExp(submitted.name) })).toHaveCount(0)
+  await expect(page.getByRole('listbox').getByRole('option', { name: new RegExp(notReady.name) })).toHaveCount(0)
   await page.getByRole('listbox').getByRole('option', { name: new RegExp(approved.name) }).click()
 
   const submit = select.getByRole('button', { name: 'Select Applicant' })

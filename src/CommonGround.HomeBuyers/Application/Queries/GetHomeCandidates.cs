@@ -1,5 +1,6 @@
 using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
+using CommonGround.SharedKernel.Domain.Services;
 using Marten;
 
 namespace CommonGround.HomeBuyers.Application.Queries;
@@ -17,12 +18,13 @@ public sealed record GetHomeCandidates(string HomeId);
 public static class GetHomeCandidatesHandler
 {
     /// <summary>
-    /// Returns all Approved-phase applications — the only phase from which an applicant
-    /// can actually be selected (see <see cref="HomeownerApplication.SelectForHome"/>).
+    /// Returns Approved-phase applications whose household has completed readiness and holds a
+    /// prequalification valid today — the same conditions <see cref="HomeownerApplication.SelectForHome"/>
+    /// enforces.
     ///
     /// Eligibility filtering against the home (income/household-size/AMI matching) is
-    /// undefined today and needs a product decision; until then this returns every
-    /// Approved application unfiltered, ignoring <see cref="GetHomeCandidates.HomeId"/>.
+    /// undefined today and needs a product decision; until then <see cref="GetHomeCandidates.HomeId"/>
+    /// is ignored.
     /// </summary>
     public static async Task<IReadOnlyList<HomeCandidate>> Handle(
         GetHomeCandidates request,
@@ -39,10 +41,13 @@ public static class GetHomeCandidatesHandler
         var households = await session
             .LoadManyAsync<HouseholdListItemView>(cancellationToken, applications.Select(a => a.HouseholdId).Distinct())
             .ConfigureAwait(false);
-        var householdsById = households.ToDictionary(h => h.Id);
+        var today = DateOnly.FromDateTime(TimeProviderContext.Current.UtcNow.UtcDateTime);
+        var readyHouseholds = households
+            .Where(h => h.IsReadyForSelectionOn(today))
+            .ToDictionary(h => h.Id);
 
-        return [.. applications.Select(a => new HomeCandidate(
-            a,
-            householdsById.TryGetValue(a.HouseholdId, out var household) ? HouseholdContact.From(household) : null))];
+        return [.. applications
+            .Where(a => readyHouseholds.ContainsKey(a.HouseholdId))
+            .Select(a => new HomeCandidate(a, HouseholdContact.From(readyHouseholds[a.HouseholdId])))];
     }
 }

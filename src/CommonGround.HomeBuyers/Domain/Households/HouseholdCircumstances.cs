@@ -1,3 +1,4 @@
+using CommonGround.HomeBuyers.Application.Errors;
 using CommonGround.SharedKernel.Domain;
 
 namespace CommonGround.HomeBuyers.Domain.Households;
@@ -12,11 +13,12 @@ public sealed class HouseholdCircumstances : ValueObject
     }
 
     /// <summary>Creates and validates a new <see cref="HouseholdCircumstances"/>.</summary>
-    public static HouseholdCircumstances Create(bool value, decimal annualIncome)
+    public static HouseholdCircumstances Create(bool requiresAccessibility, decimal annualIncome)
     {
-        // TODO: Validate and throw
-        
-        return new HouseholdCircumstances(value, annualIncome);
+        if (annualIncome < 0)
+            throw BusinessRuleViolation.Household.Circumstances.AnnualIncomeNegative(annualIncome);
+
+        return new HouseholdCircumstances(requiresAccessibility, annualIncome);
     }
 
     /// <summary>Household accessibility requirement.</summary>

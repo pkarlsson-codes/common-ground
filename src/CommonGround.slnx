@@ -21,5 +21,6 @@
   <Project Path="CommonGround.Management.Gateway/CommonGround.Management.Gateway.csproj" />
   <Project Path="CommonGround.HomeBuyers.Contracts\CommonGround.HomeBuyers.Contracts.csproj" />
   <Project Path="CommonGround.HomeBuyers\CommonGround.HomeBuyers.csproj" />
+  <Project Path="CommonGround.HomeBuyers.Tests/CommonGround.HomeBuyers.Tests.csproj" />
   <Project Path="CommonGround.Homeowner.Gateway/CommonGround.Homeowner.Gateway.csproj" />
 </Solution>

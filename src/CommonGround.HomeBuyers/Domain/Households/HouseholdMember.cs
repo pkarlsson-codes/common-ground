@@ -2,7 +2,7 @@ using CommonGround.SharedKernel.Domain;
 
 namespace CommonGround.HomeBuyers.Domain.Households;
 
-/// <summary>TODO: Describe the HouseholdMember entity.</summary>
+/// <summary>A person who belongs to a household.</summary>
 public sealed class HouseholdMember : Entity<HouseholdMemberId>
 {
     private HouseholdMember(HouseholdMemberId id, string name, string email, string phone, bool isPrimary)
@@ -29,10 +29,24 @@ public sealed class HouseholdMember : Entity<HouseholdMemberId>
     /// <summary>Creates a new HouseholdMember.</summary>
     public static HouseholdMember Create(string name, string email, string phone, bool isPrimary)
     {
+        ValidateContactDetails(name, email, phone);
+        return new HouseholdMember(HouseholdMemberId.Generate(), name, email, phone, isPrimary);
+    }
+
+    /// <summary>Validates contact details for a household member.</summary>
+    internal static void ValidateContactDetails(string name, string email, string phone)
+    {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
         ArgumentException.ThrowIfNullOrWhiteSpace(phone);
-        return new HouseholdMember(HouseholdMemberId.Generate(), name, email, phone, isPrimary);
+    }
+
+    /// <summary>Replaces the member's contact details. Called only when applying a stored event.</summary>
+    internal void ChangeContactDetails(string name, string email, string phone)
+    {
+        Name = name;
+        Email = email;
+        Phone = phone;
     }
 
     /// <summary>Reconstitutes a <see cref="HouseholdMember"/> from a stored event without revalidating.</summary>

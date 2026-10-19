@@ -71,8 +71,11 @@ export async function createGroundLeaseTemplate(page: Page) {
   return { groundLeaseTemplateId, templateName }
 }
 
-/** Registers a one-member household and submits its application; approves it unless told otherwise. */
-export async function createApplication(page: Page, name: string, { approve = true } = {}) {
+/**
+ * Registers a one-member household, records its readiness, and submits its application; approves it unless told
+ * otherwise. `ready: false` skips CLT orientation, leaving readiness incomplete.
+ */
+export async function createApplication(page: Page, name: string, { approve = true, ready = true } = {}) {
   const email = `${name.toLowerCase().replace(/\s+/g, '-')}@example.com`
   const { householdId } = await post<{ householdId: string }>(page, '/api/v1/households', {
     members: [{ name, email, phone: '+12025550143', isPrimary: true }],
@@ -82,7 +85,9 @@ export async function createApplication(page: Page, name: string, { approve = tr
   await post(page, `/api/v1/households/${householdId}/housing-counseling`, {
     certificationNumber: 'CERT-E2E', completedDate: isoDate(-7), counselorOrganization: 'E2E Counseling Org',
   })
-  await post(page, `/api/v1/households/${householdId}/clt-orientation`, { completedDate: isoDate(-3) })
+  if (ready) {
+    await post(page, `/api/v1/households/${householdId}/clt-orientation`, { completedDate: isoDate(-3) })
+  }
   await post(page, `/api/v1/households/${householdId}/mortgage-prequalification`, {
     lenderName: 'E2E Lender', approvedAmount: 210000, expiryDate: isoDate(90),
   })

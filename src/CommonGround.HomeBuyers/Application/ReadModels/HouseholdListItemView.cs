@@ -6,6 +6,9 @@ public class HouseholdListItemView
     /// <summary>Gets or sets the unique identifier.</summary>
     public string Id { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the primary member's identifier.</summary>
+    public string PrimaryMemberId { get; set; } = string.Empty;
+
     /// <summary>Gets or sets the primary member's name.</summary>
     public string PrimaryMemberName { get; set; } = string.Empty;
 
@@ -21,9 +24,27 @@ public class HouseholdListItemView
     /// <summary>Gets or sets if accessibility is required.</summary>
     public bool AccessibilityRequired { get; set; }
 
+    /// <summary>Gets or sets housing counseling completion status.</summary>
+    public bool IsHousingCounselingCompleted { get; set; }
+
+    /// <summary>Gets or sets CLT orientation completion status.</summary>
+    public bool IsCltOrientationCompleted { get; set; }
+
+    /// <summary>Gets or sets the current mortgage prequalification's expiry date, if one is on record.</summary>
+    public DateOnly? MortgagePrequalificationExpiryDate { get; set; }
+
     /// <summary>Gets or sets id of user who registered household.</summary>
     public string RegisteredBy { get; set; } = string.Empty;
 
     /// <summary>Gets or sets registered date/time.</summary>
     public DateTimeOffset RegisteredAt { get; set; }
+
+    /// <summary>
+    /// Whether readiness is complete and the prequalification is still valid on <paramref name="date"/>.
+    /// Mirrors the selection guard in <c>HomeownerApplication.SelectForHome</c>.
+    /// </summary>
+    public bool IsReadyForSelectionOn(DateOnly date) =>
+        IsHousingCounselingCompleted &&
+        IsCltOrientationCompleted &&
+        MortgagePrequalificationExpiryDate >= date;
 }

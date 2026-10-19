@@ -10,7 +10,7 @@ public sealed class BusinessRuleViolationException : DomainException
     /// </summary>
     /// <param name="code">The stable machine-readable business rule code.</param>
     public BusinessRuleViolationException(string code)
-        : base(code)
+        : base(code, (IReadOnlyDictionary<string, object?>?)null)
     {
     }
 

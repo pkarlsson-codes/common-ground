@@ -43,9 +43,22 @@ public static class BusinessRuleViolation
                         ["requiredPhase"] = ApplicationPhase.Approved.DisplayName,
                     });
 
-            public static BusinessRuleViolationException PrequalificationExpired()
+            public static BusinessRuleViolationException HouseholdReadinessIncomplete(IReadOnlyList<string> outstandingItems)
                 => new(
-                    "home_buyers.homeowner_application.select_applicant.prequalification_expired");
+                    "home_buyers.homeowner_application.select_applicant.household_readiness_incomplete",
+                    new Dictionary<string, object?>
+                    {
+                        ["outstandingItems"] = outstandingItems,
+                    });
+
+            public static BusinessRuleViolationException PrequalificationExpired(DateOnly expiryDate, DateOnly selectedDate)
+                => new(
+                    "home_buyers.homeowner_application.select_applicant.prequalification_expired",
+                    new Dictionary<string, object?>
+                    {
+                        ["expiryDate"] = expiryDate,
+                        ["selectedDate"] = selectedDate,
+                    });
 
             public static BusinessRuleViolationException PurchasePriceNonPositive(decimal purchasePrice)
                 => new(
@@ -53,6 +66,17 @@ public static class BusinessRuleViolation
                     new Dictionary<string, object?>
                     {
                         ["purchasePrice"] = purchasePrice,
+                    });
+        }
+
+        public static class Submit
+        {
+            public static BusinessRuleViolationException HouseholdHasOpenApplication(HomeownerApplicationId openApplicationId)
+                => new(
+                    "home_buyers.homeowner_application.submit.household_has_open_application",
+                    new Dictionary<string, object?>
+                    {
+                        ["openApplicationId"] = openApplicationId.Value,
                     });
         }
 
@@ -86,6 +110,36 @@ public static class BusinessRuleViolation
             public static BusinessRuleViolationException MustHaveExactlyOnePrimaryMember()
                 => new(
                     "home_buyers.household.register.must_have_exactly_one_primary_member");
+        }
+
+        public static class Members
+        {
+            public static BusinessRuleViolationException MemberNotFound(HouseholdMemberId memberId)
+                => new(
+                    "home_buyers.household.members.member_not_found",
+                    new Dictionary<string, object?>
+                    {
+                        ["memberId"] = memberId.Value,
+                    });
+
+            public static BusinessRuleViolationException CannotRemovePrimaryMember(HouseholdMemberId memberId)
+                => new(
+                    "home_buyers.household.members.cannot_remove_primary_member",
+                    new Dictionary<string, object?>
+                    {
+                        ["memberId"] = memberId.Value,
+                    });
+        }
+
+        public static class Circumstances
+        {
+            public static BusinessRuleViolationException AnnualIncomeNegative(decimal annualIncome)
+                => new(
+                    "home_buyers.household.circumstances.annual_income_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["annualIncome"] = annualIncome,
+                    });
         }
 
         public static class SelectApplicant

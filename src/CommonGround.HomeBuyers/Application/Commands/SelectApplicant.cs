@@ -1,4 +1,3 @@
-using CommonGround.HomeBuyers.Application.Errors;
 using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.Households;
@@ -37,18 +36,13 @@ public static class SelectApplicantHandler
             .LoadAggregateAsync<Household>(application.HouseholdId, cancellationToken)
             .ConfigureAwait(false);
 
-        var primaryMember = household.PrimaryMember
-            ?? throw BusinessRuleViolation.Household.SelectApplicant.NoPrimaryMember(household.Id);
-
         var homeLandParcel = await session
             .LoadAsync<HomeLandParcelView>(command.HomeId, cancellationToken)
             .ConfigureAwait(false)
             ?? throw new AggregateNotFoundException(command.HomeId);
 
         application.SelectForHome(
-            primaryMember.Name,
-            primaryMember.Email,
-            primaryMember.Phone,
+            household,
             command.HomeId,
             homeLandParcel.LandParcelId,
             command.GroundLeaseTemplateId,

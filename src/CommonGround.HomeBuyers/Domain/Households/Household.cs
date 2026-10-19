@@ -13,11 +13,6 @@ public class Household : AggregateRoot<HouseholdId>
     private Household() { }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-    private bool AllChecklistItemsSatisfied =>
-        IsHousingCounselingCompleted &&
-        IsCltOrientationCompleted &&
-        MortgagePrequalification is not null;
-
     private readonly List<HouseholdMember> _members = [];
     public IReadOnlyList<HouseholdMember> Members { get => _members.AsReadOnly(); }
     public HouseholdMember? PrimaryMember => Members.FirstOrDefault(m => m.IsPrimary);
@@ -27,9 +22,25 @@ public class Household : AggregateRoot<HouseholdId>
     public bool IsCltOrientationCompleted { get; private set; }
     public Declaration Declare() => new(Members.Count, Circumstances);
 
-    public bool IsPrequalificationExpired =>
-        MortgagePrequalification is not null &&
-        MortgagePrequalification.ExpiryDate < DateOnly.FromDateTime(DateTime.UtcNow);
+    /// <summary>Readiness items the household has not completed yet; empty when readiness is complete.</summary>
+    public IReadOnlyList<string> OutstandingReadinessItems
+    {
+        get
+        {
+            var items = new List<string>();
+            if (!IsHousingCounselingCompleted) items.Add("HousingCounseling");
+            if (!IsCltOrientationCompleted) items.Add("CltOrientation");
+            if (MortgagePrequalification is null) items.Add("MortgagePrequalification");
+            return items;
+        }
+    }
+
+    /// <summary>Whether counseling, orientation and a mortgage prequalification are all on record.</summary>
+    public bool IsReadinessComplete => OutstandingReadinessItems.Count == 0;
+
+    /// <summary>Whether the household holds a mortgage prequalification that is still valid on <paramref name="date"/>.</summary>
+    public bool IsPrequalificationValidOn(DateOnly date) =>
+        MortgagePrequalification is not null && MortgagePrequalification.ExpiryDate >= date;
 
     /// <summary>
     /// Registers a household.
@@ -52,6 +63,51 @@ public class Household : AggregateRoot<HouseholdId>
         return household;
     }
     
+    /// <summary>Adds a non-primary member to the household.</summary>
+    /// <returns>The new member's ID.</returns>
+    public HouseholdMemberId AddMember(string name, string email, string phone, UserId addedBy)
+    {
+        ArgumentNullException.ThrowIfNull(addedBy);
+        var member = HouseholdMember.Create(name, email, phone, isPrimary: false);
+
+        ApplyChange(new HouseholdMemberAdded(
+            Id.Value, member.Id.Value, member.Name, member.Email, member.Phone, addedBy.Value));
+        return member.Id;
+    }
+
+    /// <summary>Updates a member's contact details. No-op when nothing changed.</summary>
+    public void UpdateMember(HouseholdMemberId memberId, string name, string email, string phone, UserId updatedBy)
+    {
+        ArgumentNullException.ThrowIfNull(updatedBy);
+        HouseholdMember.ValidateContactDetails(name, email, phone);
+        var member = FindMember(memberId);
+        if (member.Name == name && member.Email == email && member.Phone == phone) return;
+
+        ApplyChange(new HouseholdMemberUpdated(Id.Value, memberId.Value, name, email, phone, updatedBy.Value));
+    }
+
+    /// <summary>Removes a non-primary member from the household.</summary>
+    public void RemoveMember(HouseholdMemberId memberId, UserId removedBy)
+    {
+        ArgumentNullException.ThrowIfNull(removedBy);
+        var member = FindMember(memberId);
+        if (member.IsPrimary)
+            throw BusinessRuleViolation.Household.Members.CannotRemovePrimaryMember(memberId);
+
+        ApplyChange(new HouseholdMemberRemoved(Id.Value, memberId.Value, removedBy.Value));
+    }
+
+    /// <summary>Replaces the household's circumstances. No-op when nothing changed.</summary>
+    public void UpdateCircumstances(HouseholdCircumstances circumstances, UserId updatedBy)
+    {
+        ArgumentNullException.ThrowIfNull(circumstances);
+        ArgumentNullException.ThrowIfNull(updatedBy);
+        if (Circumstances == circumstances) return;
+
+        ApplyChange(new HouseholdCircumstancesUpdated(
+            Id.Value, circumstances.AnnualIncome, circumstances.RequiresAccessibility, updatedBy.Value));
+    }
+
     /// <summary>Records CLT orientation completion. Idempotent.</summary>
     public void RecordCltOrientation(DateOnly completedDate, UserId recordedBy)
     {
@@ -98,6 +154,10 @@ public class Household : AggregateRoot<HouseholdId>
         switch (domainEvent)
         {
             case HouseholdRegistered e: Apply(e); break;
+            case HouseholdMemberAdded e: Apply(e); break;
+            case HouseholdMemberUpdated e: Apply(e); break;
+            case HouseholdMemberRemoved e: Apply(e); break;
+            case HouseholdCircumstancesUpdated e: Apply(e); break;
             case MortgagePrequalificationRecorded e: Apply(e); break;
             case MortgagePrequalificationExpired e: Apply(e); break;
             case HousingCounselingRecorded e: Apply(e); break;
@@ -114,6 +174,26 @@ public class Household : AggregateRoot<HouseholdId>
         _members.AddRange(e.Members.Select(m => HouseholdMember.Reconstitute(HouseholdMemberId.Create(m.MemberId), m.Name, m.Email, m.Phone, m.IsPrimary)));
     }
     
+    private void Apply(HouseholdMemberAdded e)
+    {
+        _members.Add(HouseholdMember.Reconstitute(HouseholdMemberId.Create(e.MemberId), e.Name, e.Email, e.Phone, isPrimary: false));
+    }
+
+    private void Apply(HouseholdMemberUpdated e)
+    {
+        FindMember(HouseholdMemberId.Create(e.MemberId)).ChangeContactDetails(e.Name, e.Email, e.Phone);
+    }
+
+    private void Apply(HouseholdMemberRemoved e)
+    {
+        _members.RemoveAll(m => m.Id.Value == e.MemberId);
+    }
+
+    private void Apply(HouseholdCircumstancesUpdated e)
+    {
+        Circumstances = HouseholdCircumstances.Create(e.RequiresAccessibility, e.AnnualIncome);
+    }
+
     private void Apply(MortgagePrequalificationRecorded e)
     {
         MortgagePrequalification = new MortgagePrequalification(
@@ -133,5 +213,12 @@ public class Household : AggregateRoot<HouseholdId>
     private void Apply(CltOrientationRecorded _)
     {
         IsCltOrientationCompleted = true;
+    }
+
+    private HouseholdMember FindMember(HouseholdMemberId memberId)
+    {
+        ArgumentNullException.ThrowIfNull(memberId);
+        return _members.FirstOrDefault(m => m.Id == memberId)
+            ?? throw BusinessRuleViolation.Household.Members.MemberNotFound(memberId);
     }
 }
