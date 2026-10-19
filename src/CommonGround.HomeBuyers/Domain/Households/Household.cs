@@ -45,7 +45,7 @@ public class Household : AggregateRoot<HouseholdId>
         household.ApplyChange(
             new HouseholdRegistered(
                 HouseholdId.Generate().Value,
-                [..members.Select(m => new RegisteredMember(m.Name, m.Email, m.Phone, m.IsPrimary))],
+                [..members.Select(m => new RegisteredMember(m.Id.Value, m.Name, m.Email, m.Phone, m.IsPrimary))],
                 circumstances.AnnualIncome,
                 circumstances.RequiresAccessibility,
                 registeredById.Value));
@@ -111,7 +111,7 @@ public class Household : AggregateRoot<HouseholdId>
     {
         Id = HouseholdId.Create(e.AggregateId);
         Circumstances = HouseholdCircumstances.Create(e.RequiresAccessibility, e.AnnualIncome);
-        _members.AddRange(e.Members.Select(m => HouseholdMember.Create(m.Name, m.Email, m.Phone, m.IsPrimary)));
+        _members.AddRange(e.Members.Select(m => HouseholdMember.Reconstitute(HouseholdMemberId.Create(m.MemberId), m.Name, m.Email, m.Phone, m.IsPrimary)));
     }
     
     private void Apply(MortgagePrequalificationRecorded e)

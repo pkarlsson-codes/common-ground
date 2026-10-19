@@ -49,6 +49,9 @@ public class HouseholdView
 /// <summary>A household member.</summary>
 public class HouseholdMemberEntry
 {
+    /// <summary>Gets or sets the member identifier.</summary>
+    public string Id { get; set; } = string.Empty;
+
     /// <summary>Gets or sets the member name.</summary>
     public string Name { get; set; } = string.Empty;
 

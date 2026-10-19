@@ -13,6 +13,7 @@ internal sealed class HouseholdViewProjection : SingleStreamProjection<Household
             Id = e.AggregateId,
             Members = [.. e.Members.Select(m => new HouseholdMemberEntry
             {
+                Id = m.MemberId,
                 Name = m.Name,
                 Email = m.Email,
                 Phone = m.Phone,

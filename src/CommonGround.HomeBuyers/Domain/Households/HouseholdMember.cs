@@ -34,4 +34,8 @@ public sealed class HouseholdMember : Entity<HouseholdMemberId>
         ArgumentException.ThrowIfNullOrWhiteSpace(phone);
         return new HouseholdMember(HouseholdMemberId.Generate(), name, email, phone, isPrimary);
     }
+
+    /// <summary>Reconstitutes a <see cref="HouseholdMember"/> from a stored event without revalidating.</summary>
+    internal static HouseholdMember Reconstitute(HouseholdMemberId id, string name, string email, string phone, bool isPrimary)
+        => new(id, name, email, phone, isPrimary);
 }

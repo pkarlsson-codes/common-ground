@@ -11,6 +11,7 @@ public sealed record HouseholdRegistered(
     : DomainEvent(AggregateId);
 
 public sealed record RegisteredMember(
+    string MemberId,
     string Name,
     string Email,
     string Phone,
