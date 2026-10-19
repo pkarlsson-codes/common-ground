@@ -45,7 +45,7 @@ internal static class CommonGroundServiceCollectionExtensions
         services.AddCommonGroundHealthChecks();
         services.AddCommonGroundAuthentication(configuration, environment);
         services.AddCommonGroundAuthorization();
-        services.AddApplicantSelection();
+        services.AddHomeBuyers();
         services.AddPropertyRegistry();
         services.AddHomeownership();
         services.AddIdentity();
@@ -80,7 +80,7 @@ internal static class CommonGroundServiceCollectionExtensions
 
         services.AddMartenServices(connectionString, opts =>
         {
-            ApplicantSelectionMartenConfiguration.Configure(opts);
+            HomeBuyersMartenConfiguration.Configure(opts);
             PropertyRegistryMartenConfiguration.Configure(opts);
             HomeownershipMartenConfiguration.Configure(opts);
             IdentityMartenConfiguration.Configure(opts);

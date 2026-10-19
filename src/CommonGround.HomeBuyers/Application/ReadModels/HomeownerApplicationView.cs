@@ -27,17 +27,14 @@ public class HomeownerApplicationView
     /// <summary>Gets or sets the user who submitted the application.</summary>
     public string SubmittedBy { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the eligibility approval date.</summary>
-    public DateOnly? EligibilityApprovedDate { get; set; }
+    /// <summary>Gets or sets the approval date.</summary>
+    public DateOnly? ApprovedDate { get; set; }
     
     /// <summary>Gets or sets the denial reason, if any.</summary>
     public string? DenialReason { get; set; }
 
     /// <summary>Gets or sets the withdrawal reason, if any.</summary>
     public string? WithdrawalReason { get; set; }
-
-    /// <summary>Gets or sets when the application was added to the waiting list.</summary>
-    public DateOnly? AddedToWaitingListDate { get; set; }
 
     /// <summary>Gets or sets when the applicant was selected.</summary>
     public DateOnly? SelectedDate { get; set; }

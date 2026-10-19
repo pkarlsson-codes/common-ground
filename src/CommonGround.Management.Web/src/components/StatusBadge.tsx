@@ -25,9 +25,8 @@ const CSS_CLASS: Record<string, string> = {
   Failed:           'badge-failed',
   Withdrawn:        'badge-withdrawn',
   Stalled:          'badge-stalled',
-  // Applicant Selection phases
-  EligibilityReview:'badge-inprogress',
-  Eligible:         'badge-available',
+  // Application phases
+  Approved:         'badge-available',
   Selected:         'badge-closed',
   Denied:           'badge-failed',
   // Occupancy Verification

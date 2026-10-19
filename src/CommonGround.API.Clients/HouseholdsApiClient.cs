@@ -1,5 +1,5 @@
-using CommonGround.API.Contracts.ApplicantSelection.Requests;
-using CommonGround.API.Contracts.ApplicantSelection.Responses;
+using CommonGround.API.Contracts.HomeBuyers.Requests;
+using CommonGround.API.Contracts.HomeBuyers.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.Extensions.Logging;
 

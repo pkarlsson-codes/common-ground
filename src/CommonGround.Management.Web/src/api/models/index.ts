@@ -3,7 +3,7 @@
 /* eslint-disable */
 export * from './ActivateCurePeriodRequest';
 export * from './AddDocumentVersionResponse';
-export * from './ApproveEligibilityRequest';
+export * from './ApproveApplicationRequest';
 export * from './AttachDocumentRequest';
 export * from './CalculateResaleEstimateRequest';
 export * from './CancelPropertyInspectionRequest';

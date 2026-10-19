@@ -7,7 +7,7 @@ import NavIdLink from '../../components/NavIdLink'
 import DocumentList from '../../components/DocumentList'
 import { useToast } from '../../hooks/useToast'
 import DevelopmentProjectsSection from '../land-parcels/DevelopmentProjectsSection'
-import SelectApplicantPanel from '../applicant-selection/SelectApplicantPanel'
+import SelectApplicantPanel from '../applications/SelectApplicantPanel'
 
 type Tab = 'details' | 'documents'
 

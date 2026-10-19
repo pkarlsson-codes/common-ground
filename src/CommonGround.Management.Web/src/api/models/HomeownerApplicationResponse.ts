@@ -88,7 +88,7 @@ export interface HomeownerApplicationResponse {
      * @type {string}
      * @memberof HomeownerApplicationResponse
      */
-    eligibilityApprovedDate?: string | null;
+    approvedDate?: string | null;
     /**
      * 
      * @type {string}
@@ -101,12 +101,6 @@ export interface HomeownerApplicationResponse {
      * @memberof HomeownerApplicationResponse
      */
     withdrawalReason?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof HomeownerApplicationResponse
-     */
-    addedToWaitingListDate?: string | null;
     /**
      * 
      * @type {string}
@@ -159,10 +153,9 @@ export function HomeownerApplicationResponseFromJSONTyped(json: any, ignoreDiscr
         'phase': json['phase'] == null ? undefined : json['phase'],
         'submittedAt': json['submittedAt'] == null ? undefined : json['submittedAt'],
         'submittedBy': json['submittedBy'] == null ? undefined : json['submittedBy'],
-        'eligibilityApprovedDate': json['eligibilityApprovedDate'] == null ? undefined : json['eligibilityApprovedDate'],
+        'approvedDate': json['approvedDate'] == null ? undefined : json['approvedDate'],
         'denialReason': json['denialReason'] == null ? undefined : json['denialReason'],
         'withdrawalReason': json['withdrawalReason'] == null ? undefined : json['withdrawalReason'],
-        'addedToWaitingListDate': json['addedToWaitingListDate'] == null ? undefined : json['addedToWaitingListDate'],
         'selectedDate': json['selectedDate'] == null ? undefined : json['selectedDate'],
         'selectedHomeId': json['selectedHomeId'] == null ? undefined : json['selectedHomeId'],
         'selectedLandParcelId': json['selectedLandParcelId'] == null ? undefined : json['selectedLandParcelId'],
@@ -190,10 +183,9 @@ export function HomeownerApplicationResponseToJSONTyped(value?: HomeownerApplica
         'phase': value['phase'],
         'submittedAt': value['submittedAt'],
         'submittedBy': value['submittedBy'],
-        'eligibilityApprovedDate': value['eligibilityApprovedDate'],
+        'approvedDate': value['approvedDate'],
         'denialReason': value['denialReason'],
         'withdrawalReason': value['withdrawalReason'],
-        'addedToWaitingListDate': value['addedToWaitingListDate'],
         'selectedDate': value['selectedDate'],
         'selectedHomeId': value['selectedHomeId'],
         'selectedLandParcelId': value['selectedLandParcelId'],

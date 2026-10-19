@@ -1,6 +1,6 @@
 using System.Globalization;
-using CommonGround.API.Contracts.ApplicantSelection.Requests;
-using CommonGround.API.Contracts.ApplicantSelection.Responses;
+using CommonGround.API.Contracts.HomeBuyers.Requests;
+using CommonGround.API.Contracts.HomeBuyers.Responses;
 using CommonGround.API.Infrastructure.Auth;
 using CommonGround.HomeBuyers.Application.Commands;
 using CommonGround.HomeBuyers.Application.Queries;
@@ -75,7 +75,7 @@ public static class HomeownerApplicationsEndpoints
     [WolverinePost("/api/homeowner-applications/{applicationId}/approve")]
     public static async Task<IResult> ApproveApplication(
         string applicationId,
-        ApproveEligibilityRequest request,
+        ApproveApplicationRequest request,
         HttpContext httpContext,
         IMessageBus bus,
         CancellationToken cancellationToken)
@@ -204,10 +204,9 @@ public static class HomeownerApplicationsEndpoints
             view.Phase,
             view.SubmittedAt.ToString("O", CultureInfo.InvariantCulture),
             view.SubmittedBy,
-            view.EligibilityApprovedDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            view.ApprovedDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             view.DenialReason,
             view.WithdrawalReason,
-            view.AddedToWaitingListDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             view.SelectedDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             view.SelectedHomeId,
             view.SelectedLandParcelId,

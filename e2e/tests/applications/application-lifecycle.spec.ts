@@ -1,0 +1,176 @@
+import { expect, test, type Page } from '@playwright/test'
+import { detailValue, expectToast, field, isoDate, panel, uniqueId } from '../support/ui'
+
+// Journeys: docs/journeys/applications/
+//   submit-application, view-application-detail, record-housing-counseling,
+//   record-clt-orientation, record-mortgage-prequalification, approve-application,
+//   deny-application, withdraw-application
+
+type Member = { name: string; email: string; phone: string }
+
+const newHousehold = (): { primary: Member; other: Member } => {
+  const id = uniqueId()
+  return {
+    primary: { name: `Primary ${id}`, email: `primary-${id}@example.com`, phone: '(202) 555-0143' },
+    other: { name: `Member ${id}`, email: `member-${id}@example.com`, phone: '(202) 555-0187' },
+  }
+}
+
+async function submitApplication(page: Page, members: Member[], primaryIndex = 0) {
+  await page.goto('/applications')
+  await page.getByRole('button', { name: 'New Application' }).click()
+
+  const form = panel(page, 'Submit Application')
+  for (let i = 0; i < members.length; i++) {
+    if (i > 0) await form.getByRole('button', { name: 'Add Member' }).click()
+    await field(form, 'Full Name', i).fill(members[i].name)
+    await field(form, 'Email', i).fill(members[i].email)
+    await field(form, 'Phone', i).fill(members[i].phone)
+  }
+  await form.getByRole('radio', { name: 'Primary contact' }).nth(primaryIndex).check()
+  await field(form, 'Annual Income ($)').fill('65000')
+
+  await expect(form.locator('.form-field', { hasText: 'Household Size' })).toContainText(String(members.length))
+
+  await form.getByRole('button', { name: 'Submit Application' }).click()
+  await expectToast(page, 'Application submitted')
+  await expect(form).toBeHidden()
+}
+
+async function openApplication(page: Page, primaryName: string) {
+  await page.getByRole('row', { name: new RegExp(primaryName) }).click()
+  return panel(page, primaryName)
+}
+
+test('submitted application shows household, checklist and phase-appropriate actions', async ({ page }) => {
+  const { primary, other } = newHousehold()
+  // Make the second member the primary contact to check the radio is honoured.
+  await submitApplication(page, [other, primary], 1)
+
+  const row = page.getByRole('row', { name: new RegExp(primary.name) })
+  await expect(row).toContainText(primary.email)
+  await expect(row).toContainText('Submitted')
+  await expect(row.getByRole('cell').nth(2)).toHaveText('2')
+
+  const detail = await openApplication(page, primary.name)
+  await expect(detail.locator('.slideover-header__subtitle')).toHaveText(primary.email)
+  await expect(detailValue(detail, 'Phase')).toHaveText('Submitted')
+  await expect(detailValue(detail, 'Declared Household Size')).toHaveText('2')
+  await expect(detailValue(detail, 'Declared Annual Income')).toHaveText('$65,000')
+  await expect(detailValue(detail, 'Declared Accessibility Need')).toHaveText('No')
+
+  const members = detail.locator('.detail-section', { hasText: 'Household Members' })
+  await expect(detailValue(members, 'Primary Contact')).toContainText(primary.name)
+  await expect(detailValue(members, 'Member')).toContainText(other.name)
+
+  const checklist = detail.locator('.checklist')
+  await expect(checklist.locator('.checklist-item--done')).toHaveCount(0)
+  await expect(checklist.getByRole('button', { name: 'Record' })).toHaveCount(3)
+
+  const actions = detail.locator('.detail-section', { hasText: 'Workflow Actions' })
+  await expect(actions.getByRole('button')).toHaveText([
+    'Approve Application',
+    'Deny Application',
+    'Withdraw Application',
+  ])
+})
+
+test('recording the checklist and approving moves the application to Approved', async ({ page }) => {
+  const { primary } = newHousehold()
+  await submitApplication(page, [primary])
+  const detail = await openApplication(page, primary.name)
+  const checklist = detail.locator('.checklist')
+  const item = (label: string) => checklist.locator('.checklist-item', { hasText: label })
+
+  await item('Housing Counseling').getByRole('button', { name: 'Record' }).click()
+  const counseling = panel(page, 'Record Housing Counseling')
+  await field(counseling, 'Certification Number').fill('CERT-E2E')
+  await field(counseling, 'Completed Date').fill(isoDate(-7))
+  await field(counseling, 'Counselor Organization').fill('E2E Counseling Org')
+  await counseling.getByRole('button', { name: 'Record Counseling' }).click()
+  await expectToast(page, 'Housing counseling recorded')
+  await expect(item('Housing Counseling')).toHaveClass(/checklist-item--done/)
+
+  await item('CLT Orientation').getByRole('button', { name: 'Record' }).click()
+  const orientation = panel(page, 'Record CLT Orientation')
+  await field(orientation, 'Completed Date').fill(isoDate(-3))
+  await orientation.getByRole('button', { name: 'Record Orientation' }).click()
+  await expectToast(page, 'CLT orientation recorded')
+  await expect(item('CLT Orientation')).toHaveClass(/checklist-item--done/)
+
+  await item('Mortgage Prequalification').getByRole('button', { name: 'Record' }).click()
+  const prequal = panel(page, 'Record Mortgage Prequalification')
+  await field(prequal, 'Lender Name').fill('E2E Lender')
+  await field(prequal, 'Approved Amount ($)').fill('210000')
+  await field(prequal, 'Expiry Date').fill(isoDate(90))
+  await prequal.getByRole('button', { name: 'Record Prequalification' }).click()
+  await expectToast(page, 'Mortgage prequalification recorded')
+  await expect(item('Mortgage Prequalification')).toHaveClass(/checklist-item--done/)
+  await expect(item('Mortgage Prequalification').getByRole('button')).toHaveText('Update')
+
+  const prequalSection = detail.locator('.detail-section', { has: page.locator('.detail-section__title', { hasText: /^Mortgage Prequalification$/ }) })
+  await expect(detailValue(prequalSection, 'Lender Name')).toHaveText('E2E Lender')
+  await expect(detailValue(prequalSection, 'Prequalified Amount')).toHaveText('$210,000')
+
+  await detail.getByRole('button', { name: 'Approve Application' }).click()
+  const approve = panel(page, 'Approve Application')
+  await approve.getByRole('button', { name: 'Approve', exact: true }).click()
+  await expectToast(page, 'Application approved')
+
+  await expect(detailValue(detail, 'Phase')).toHaveText('Approved')
+  await expect(detailValue(detail, 'Approved Date')).not.toHaveText('—')
+  const actions = detail.locator('.detail-section', { hasText: 'Workflow Actions' })
+  await expect(actions.getByRole('button')).toHaveText(['Deny Application', 'Withdraw Application'])
+})
+
+test('denying a submitted application ends it', async ({ page }) => {
+  const { primary } = newHousehold()
+  await submitApplication(page, [primary])
+  const detail = await openApplication(page, primary.name)
+
+  await detail.getByRole('button', { name: 'Deny Application' }).click()
+  const deny = panel(page, 'Deny Application')
+  await field(deny, 'Reason').fill('Income above limit')
+  await deny.getByRole('button', { name: 'Deny Application' }).click()
+  await expectToast(page, 'Application denied')
+
+  await expect(detailValue(detail, 'Phase')).toHaveText('Denied')
+  await expect(detailValue(detail, 'Denial Reason')).toHaveText('Income above limit')
+  await expect(detail.getByText('No actions available for this phase.')).toBeVisible()
+  await expect(detail.locator('.checklist').getByRole('button')).toHaveCount(0)
+})
+
+test('withdrawing a submitted application ends it', async ({ page }) => {
+  const { primary } = newHousehold()
+  await submitApplication(page, [primary])
+  const detail = await openApplication(page, primary.name)
+
+  await detail.getByRole('button', { name: 'Withdraw Application' }).click()
+  const withdraw = panel(page, 'Withdraw Application')
+  await field(withdraw, 'Reason').fill('Moving away')
+  await withdraw.getByRole('button', { name: 'Withdraw', exact: true }).click()
+  await expectToast(page, 'Application withdrawn')
+
+  await expect(detailValue(detail, 'Phase')).toHaveText('Withdrawn')
+  await expect(detailValue(detail, 'Withdrawal Reason')).toHaveText('Moving away')
+  await expect(detail.getByText('No actions available for this phase.')).toBeVisible()
+})
+
+test('submit is blocked until every member has name, email and phone', async ({ page }) => {
+  await page.goto('/applications')
+  await page.getByRole('button', { name: 'New Application' }).click()
+  const form = panel(page, 'Submit Application')
+  const submit = form.getByRole('button', { name: 'Submit Application' })
+
+  await expect(submit).toBeDisabled()
+  await field(form, 'Full Name').fill('Only Name')
+  await field(form, 'Email').fill('only@example.com')
+  await expect(submit).toBeDisabled()
+  await field(form, 'Phone').fill('(202) 555-0100')
+  await expect(submit).toBeEnabled()
+
+  await form.getByRole('button', { name: 'Add Member' }).click()
+  await expect(submit).toBeDisabled()
+  await form.getByRole('button', { name: 'Remove' }).nth(1).click()
+  await expect(submit).toBeEnabled()
+})

@@ -1,6 +1,6 @@
 using System.Globalization;
-using CommonGround.API.Contracts.ApplicantSelection.Requests;
-using CommonGround.API.Contracts.ApplicantSelection.Responses;
+using CommonGround.API.Contracts.HomeBuyers.Requests;
+using CommonGround.API.Contracts.HomeBuyers.Responses;
 using CommonGround.API.Infrastructure.Auth;
 using CommonGround.HomeBuyers.Application.Commands;
 using CommonGround.HomeBuyers.Application.Queries;

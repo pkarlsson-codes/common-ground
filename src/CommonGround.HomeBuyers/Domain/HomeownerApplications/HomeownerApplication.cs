@@ -8,9 +8,8 @@ using Marten.Linq.CreatedAt;
 namespace CommonGround.HomeBuyers.Domain.HomeownerApplications;
 
 /// <summary>
-/// Tracks a prospective homeowner from initial application through selection for a home.
-/// Parallel checklist: housing counseling, CLT orientation, and mortgage prequalification
-/// must all be satisfied before an applicant can be added to the waiting list.
+/// A household's application to buy a CLT home, from submission through approval to selection
+/// for a specific home. Captures a snapshot of the household at submission.
 /// </summary>
 public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
 {
@@ -55,7 +54,7 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
         GuardNotTerminal();
 
         if (Phase != ApplicationPhase.Submitted)
-            throw BusinessRuleViolation.HomeownerApplication.ApproveEligibility.PhaseNotSubmitted(Phase);
+            throw BusinessRuleViolation.HomeownerApplication.Approve.PhaseNotSubmitted(Phase);
 
         ApplyChange(new ApplicationApproved(Id.Value, approvedDate, notes, recordedBy.Value));
     }

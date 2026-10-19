@@ -13,4 +13,4 @@
 Continues in: [Upload Home Document](upload-home-document.md)
 Continues in: [Remove Home Document](remove-home-document.md)
 Continues in: [Manage Home Document Versions](manage-home-document-versions.md)
-Continues in: [Select Applicant From Home](../applicant-selection/select-applicant.md)
+Continues in: [Select Applicant From Home](../applications/select-applicant.md)

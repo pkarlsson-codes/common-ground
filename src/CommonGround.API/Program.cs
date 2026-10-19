@@ -59,7 +59,7 @@ try
         }
 
         opts.Discovery.IncludeAssembly(typeof(CommonGroundApiAssemblyReference).Assembly);
-        opts.Discovery.IncludeAssembly(typeof(ApplicantSelectionAssemblyReference).Assembly);
+        opts.Discovery.IncludeAssembly(typeof(HomeBuyersAssemblyReference).Assembly);
         opts.Discovery.IncludeAssembly(typeof(PropertyRegistryAssemblyReference).Assembly);
         opts.Discovery.IncludeAssembly(typeof(HomeownershipAssemblyReference).Assembly);
         opts.Discovery.IncludeAssembly(typeof(IdentityAssemblyReference).Assembly);

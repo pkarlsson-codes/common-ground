@@ -1,10 +1,10 @@
 .openapi-generator-ignore
-apis/ApplicantSelectionApi.ts
 apis/AuthApi.ts
 apis/DevelopmentProjectsApi.ts
 apis/DocumentsApi.ts
 apis/GroundLeaseTemplatesApi.ts
 apis/GroundLeasesApi.ts
+apis/HomeownerApplicationsApi.ts
 apis/HomesApi.ts
 apis/HouseholdApi.ts
 apis/LandParcelsApi.ts
@@ -16,7 +16,7 @@ apis/index.ts
 index.ts
 models/ActivateCurePeriodRequest.ts
 models/AddDocumentVersionResponse.ts
-models/ApproveEligibilityRequest.ts
+models/ApproveApplicationRequest.ts
 models/AttachDocumentRequest.ts
 models/CalculateResaleEstimateRequest.ts
 models/CancelPropertyInspectionRequest.ts

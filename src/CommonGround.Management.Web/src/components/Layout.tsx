@@ -125,11 +125,11 @@ export default function Layout() {
             Purchase Workflows
           </NavLink>
           <NavLink
-            to="/applicant-selection"
+            to="/applications"
             className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
           >
             <IconWorkflow />
-            Applicant Selection
+            Applications
           </NavLink>
 
           <div className="sidebar-nav__section">Documents</div>

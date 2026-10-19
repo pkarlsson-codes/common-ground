@@ -20,7 +20,7 @@ flowchart TB
         ApiEndpoints["Endpoints"]
         subgraph Contexts["Bounded contexts"]
             direction LR
-            ApplicantSelection["ApplicantSelection"]
+            HomeBuyers["HomeBuyers"]
             Documents["Documents"]
             Homeownership["Homeownership"]
             Identity["Identity"]
@@ -28,7 +28,7 @@ flowchart TB
             Stewardship["Stewardship"]
             TrustManagement["TrustManagement"]
         end
-        ApiEndpoints --> ApplicantSelection
+        ApiEndpoints --> HomeBuyers
         ApiEndpoints --> Documents
         ApiEndpoints --> Homeownership
         ApiEndpoints --> Identity
@@ -65,5 +65,5 @@ flowchart TB
 
 - Frontends (Management Web today, Homeowner Web upcoming) aren't shown as boxes yet — they just proxy `/api` and `/auth` to their gateway's endpoints layer.
 - Each gateway is a BFF: its endpoints layer owns the OIDC/session boundary (tokens in Redis), and its API Clients layer crosses the process boundary to call the API's endpoints layer with a minted internal JWT. Gateways never talk to Postgres/RabbitMQ/MinIO directly.
-- The API is one process today: its endpoints layer (minimal API endpoints, one file set per module under `src/CommonGround.API/<Module>/`) dispatches into the bounded contexts, each implemented as its own project (`CommonGround.ApplicantSelection`, `CommonGround.Stewardship`, etc.) but all hosted together.
+- The API is one process today: its endpoints layer (minimal API endpoints, one file set per module under `src/CommonGround.API/<Module>/`) dispatches into the bounded contexts, each implemented as its own project (`CommonGround.HomeBuyers`, `CommonGround.Stewardship`, etc.) but all hosted together.
 - Only `Documents` talks to MinIO; all bounded contexts share Postgres (via Marten) and RabbitMQ (via Wolverine).

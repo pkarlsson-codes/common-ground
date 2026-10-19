@@ -1,5 +1,5 @@
-using CommonGround.API.Contracts.ApplicantSelection.Requests;
-using CommonGround.API.Contracts.ApplicantSelection.Responses;
+using CommonGround.API.Contracts.HomeBuyers.Requests;
+using CommonGround.API.Contracts.HomeBuyers.Responses;
 
 #pragma warning disable SA1611
 #pragma warning disable SA1615

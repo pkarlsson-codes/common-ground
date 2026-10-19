@@ -40,7 +40,7 @@ internal static class CorePlatformClientExtensions
             client.BaseAddress = new Uri(corePlatformBaseAddress))
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
-        services.AddHttpClient<IApplicantSelectionApiClient, ApplicantSelectionApiClient>(client =>
+        services.AddHttpClient<IHomeownerApplicationsApiClient, HomeownerApplicationsApiClient>(client =>
             client.BaseAddress = new Uri(corePlatformBaseAddress))
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 

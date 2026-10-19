@@ -13,5 +13,5 @@
 Continues in: [View Ground Lease Template Detail](../ground-lease-templates/view-ground-lease-template-detail.md)
 Continues in: [View Land Parcel Detail](../land-parcels/view-land-parcel-detail.md)
 Continues in: [View Home Detail](../homes/view-home-detail.md)
-Continues in: [View Application Detail](../applicant-selection/view-application-detail.md) <!-- when the workflow originated from applicant selection -->
+Continues in: [View Application Detail](../applications/view-application-detail.md) <!-- when the workflow originated from applicant selection -->
 

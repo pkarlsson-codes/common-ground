@@ -25,7 +25,7 @@ internal sealed class HomeownerApplicationViewProjection : SingleStreamProjectio
     public static void Apply(HomeownerApplicationView view, ApplicationApproved e)
     {
         view.Phase = ApplicationPhase.Approved.DisplayName;
-        view.EligibilityApprovedDate = e.ApprovedDate;
+        view.ApprovedDate = e.ApprovedDate;
     }
 
     public static void Apply(HomeownerApplicationView view, ApplicationDenied e)
