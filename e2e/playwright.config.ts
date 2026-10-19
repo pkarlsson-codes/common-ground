@@ -8,6 +8,10 @@ const authFile = 'playwright/.auth/user.json'
 // "http://localhost:<port> is already used" instead. Stop your dev servers before running e2e.
 // Docker infra (npm run infra:start) must already be running.
 
+// SLOWMO=<ms> pauses before every browser action, for watching a run as a demo (npm run e2e:demo).
+// Slowed runs can't fit the normal per-test timeout, so it's disabled while SLOWMO is set.
+const slowMo = Number(process.env.SLOWMO ?? 0)
+
 const waitFor = (url: string) =>
   `until curl -sf ${url} >/dev/null; do sleep 1; done`
 
@@ -17,12 +21,13 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: 0,
   reporter: [['list'], ['html', { open: 'never' }]],
-  timeout: 30_000,
+  timeout: slowMo ? 0 : 30_000,
   expect: { timeout: 10_000 },
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    launchOptions: { slowMo },
   },
   projects: [
     { name: 'setup', testMatch: /auth\.setup\.ts/ },

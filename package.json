@@ -27,6 +27,7 @@
     "e2e:install": "cd e2e && npm install && npx playwright install chromium",
     "e2e": "cd e2e && npx playwright test",
     "e2e:ui": "cd e2e && npx playwright test --ui",
+    "e2e:demo": "cd e2e && SLOWMO=${SLOWMO:-400} npx playwright test --headed --workers=1",
     "e2e:report": "cd e2e && npx playwright show-report",
     "templates:install": "dotnet new install ./templates/ddd-aggregate --force && dotnet new install ./templates/ddd-vo --force && dotnet new install ./templates/ddd-entity --force && dotnet new install ./templates/ddd-enum --force",
     "templates:uninstall": "dotnet new uninstall ./templates/ddd-aggregate && dotnet new uninstall ./templates/ddd-vo && dotnet new uninstall ./templates/ddd-entity && dotnet new uninstall ./templates/ddd-enum",

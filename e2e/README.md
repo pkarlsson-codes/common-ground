@@ -10,6 +10,9 @@ npm run infra:start   # docker infra must be up
 npm run e2e           # or e2e:ui for the interactive runner, e2e:report for the last HTML report
 ```
 
+To watch a run as a demo, `npm run e2e:demo` runs headed, one test at a time, pausing 400 ms before each action.
+Set `SLOWMO` to change the pause, and pass a path to run one area: `SLOWMO=800 npm run e2e:demo -- tests/purchase-workflows`.
+
 Playwright builds the solution and starts the API (:5000), Management gateway (:4000), and web app (:3000) itself,
 then stops them when the run ends. **Stop your own dev servers first** — a run fails fast with
 `http://localhost:<port> is already used` rather than testing against a server that may be running stale code.
