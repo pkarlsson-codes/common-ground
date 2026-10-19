@@ -16,6 +16,8 @@ apis/index.ts
 index.ts
 models/ActivateCurePeriodRequest.ts
 models/AddDocumentVersionResponse.ts
+models/AddHouseholdMemberRequest.ts
+models/AddHouseholdMemberResponse.ts
 models/ApproveApplicationRequest.ts
 models/AttachDocumentRequest.ts
 models/CalculateResaleEstimateRequest.ts
@@ -56,7 +58,9 @@ models/HomeListItemResponse.ts
 models/HomeResponse.ts
 models/HomeownerApplicationListItemResponse.ts
 models/HomeownerApplicationResponse.ts
+models/HouseholdApplicationDto.ts
 models/HouseholdContactDto.ts
+models/HouseholdListItemResponse.ts
 models/HouseholdMemberDto.ts
 models/HouseholdMemberRequest.ts
 models/HouseholdResponse.ts
@@ -87,6 +91,7 @@ models/PaginatedResponseOfGroundLeaseTemplateListItemResponse.ts
 models/PaginatedResponseOfHomeAssessmentItemResponse.ts
 models/PaginatedResponseOfHomeListItemResponse.ts
 models/PaginatedResponseOfHomeownerApplicationListItemResponse.ts
+models/PaginatedResponseOfHouseholdListItemResponse.ts
 models/PaginatedResponseOfLandParcelListItemResponse.ts
 models/PaginatedResponseOfPurchaseWorkflowListItemResponse.ts
 models/PaginatedResponseOfStewardshipCaseResponse.ts
@@ -129,6 +134,8 @@ models/SubmitOccupancyVerificationRequest.ts
 models/TagDocumentRequest.ts
 models/TitleDetailsDto.ts
 models/UpdateDocumentMetadataRequest.ts
+models/UpdateHouseholdCircumstancesRequest.ts
+models/UpdateHouseholdMemberRequest.ts
 models/UploadDocumentResponse.ts
 models/VerifyOccupancyRequest.ts
 models/WithdrawApplicationRequest.ts

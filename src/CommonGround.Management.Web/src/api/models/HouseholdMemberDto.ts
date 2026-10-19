@@ -25,6 +25,12 @@ export interface HouseholdMemberDto {
      * @type {string}
      * @memberof HouseholdMemberDto
      */
+    id?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof HouseholdMemberDto
+     */
     name?: string;
     /**
      * 
@@ -63,6 +69,7 @@ export function HouseholdMemberDtoFromJSONTyped(json: any, ignoreDiscriminator: 
     }
     return {
         
+        'id': json['id'] == null ? undefined : json['id'],
         'name': json['name'] == null ? undefined : json['name'],
         'email': json['email'] == null ? undefined : json['email'],
         'phone': json['phone'] == null ? undefined : json['phone'],
@@ -81,6 +88,7 @@ export function HouseholdMemberDtoToJSONTyped(value?: HouseholdMemberDto | null,
 
     return {
         
+        'id': value['id'],
         'name': value['name'],
         'email': value['email'],
         'phone': value['phone'],

@@ -6,6 +6,8 @@ using CommonGround.HomeBuyers.Application.Commands;
 using CommonGround.HomeBuyers.Application.Queries;
 using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.Households;
+using CommonGround.SharedKernel.Infrastructure.API;
+using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
 
@@ -35,6 +37,29 @@ public static class HouseholdEndpoints
         return Results.Created($"/api/households/{id.Value}", new RegisterHouseholdResponse(id.Value));
     }
 
+    [WolverineGet("/api/households")]
+    public static async Task<IResult> GetHouseholds(
+        [FromQuery] GetHouseholdsQuerySpec request,
+        IMessageBus bus,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetHouseholds(request.Page, request.Search);
+
+        var result = await bus.InvokeForTenantAsync<PaginatedResponse<HouseholdListItemView>>(bus.TenantId!, query, cancellationToken);
+
+        var response = result.MapItems(h => new HouseholdListItemResponse(
+            h.Id,
+            new HouseholdContactDto(h.PrimaryMemberName, h.PrimaryMemberEmail, h.PrimaryMemberPhone),
+            h.HouseholdSize,
+            h.AccessibilityRequired,
+            h.IsHousingCounselingCompleted,
+            h.IsCltOrientationCompleted,
+            h.MortgagePrequalificationExpiryDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            h.RegisteredAt.ToString("O", CultureInfo.InvariantCulture)));
+
+        return Results.Ok(response);
+    }
+
     [WolverineGet("/api/households/{householdId}")]
     public static async Task<IResult> GetHousehold(
         string householdId,
@@ -43,11 +68,111 @@ public static class HouseholdEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(householdId);
 
-        var view = await bus.InvokeForTenantAsync<HouseholdView>(bus.TenantId!,
+        var details = await bus.InvokeForTenantAsync<HouseholdDetails>(bus.TenantId!,
             new GetHousehold(HouseholdId.Create(householdId)),
             cancellationToken);
 
-        return Results.Ok(MapToResponse(view));
+        return Results.Ok(MapToResponse(details));
+    }
+
+    [WolverinePost("/api/households/{householdId}/members")]
+    public static async Task<IResult> AddHouseholdMember(
+        string householdId,
+        AddHouseholdMemberRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(householdId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        var userId = httpContext.GetUserId();
+
+        var memberId = await bus.InvokeForTenantAsync<HouseholdMemberId>(bus.TenantId!,
+            new AddHouseholdMember(
+                HouseholdId.Create(householdId),
+                request.Name,
+                request.Email,
+                request.Phone,
+                userId),
+            cancellationToken);
+
+        return Results.Created($"/api/households/{householdId}", new AddHouseholdMemberResponse(memberId.Value));
+    }
+
+    [WolverinePut("/api/households/{householdId}/members/{memberId}")]
+    public static async Task<IResult> UpdateHouseholdMember(
+        string householdId,
+        string memberId,
+        UpdateHouseholdMemberRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(householdId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(memberId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        var userId = httpContext.GetUserId();
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new UpdateHouseholdMember(
+                HouseholdId.Create(householdId),
+                HouseholdMemberId.Create(memberId),
+                request.Name,
+                request.Email,
+                request.Phone,
+                userId),
+            cancellationToken);
+
+        return Results.NoContent();
+    }
+
+    [WolverineDelete("/api/households/{householdId}/members/{memberId}")]
+    public static async Task<IResult> RemoveHouseholdMember(
+        string householdId,
+        string memberId,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(householdId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(memberId);
+
+        var userId = httpContext.GetUserId();
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new RemoveHouseholdMember(
+                HouseholdId.Create(householdId),
+                HouseholdMemberId.Create(memberId),
+                userId),
+            cancellationToken);
+
+        return Results.NoContent();
+    }
+
+    [WolverinePut("/api/households/{householdId}/circumstances")]
+    public static async Task<IResult> UpdateHouseholdCircumstances(
+        string householdId,
+        UpdateHouseholdCircumstancesRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(householdId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        var userId = httpContext.GetUserId();
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new UpdateHouseholdCircumstances(
+                HouseholdId.Create(householdId),
+                request.RequiresAccessibility,
+                request.AnnualIncome,
+                userId),
+            cancellationToken);
+
+        return Results.NoContent();
     }
 
     [WolverinePost("/api/households/{householdId}/housing-counseling")]
@@ -123,8 +248,13 @@ public static class HouseholdEndpoints
         return Results.NoContent();
     }
 
-    private static HouseholdResponse MapToResponse(HouseholdView view)
+    private static HouseholdResponse MapToResponse(HouseholdDetails details)
     {
+        var view = details.Household;
+        var applications = details.Applications
+            .Select(a => new HouseholdApplicationDto(a.Id, a.Phase, a.SubmittedAt.ToString("O", CultureInfo.InvariantCulture)))
+            .ToList();
+
         var mortgagePrequalification = view.MortgagePrequalification is null ? null
             : new MortgagePrequalificationDto(
                 view.MortgagePrequalification.LenderName,
@@ -133,7 +263,7 @@ public static class HouseholdEndpoints
 
         return new HouseholdResponse(
             view.Id,
-            [.. view.Members.Select(m => new HouseholdMemberDto(m.Name, m.Email, m.Phone, m.IsPrimary))],
+            [.. view.Members.Select(m => new HouseholdMemberDto(m.Id, m.Name, m.Email, m.Phone, m.IsPrimary))],
             view.HouseholdSize,
             view.AnnualIncome,
             view.AccessibilityRequired,
@@ -145,6 +275,7 @@ public static class HouseholdEndpoints
             view.CltOrientationCompletedDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             mortgagePrequalification,
             view.RegisteredAt.ToString("O", CultureInfo.InvariantCulture),
-            view.RegisteredBy);
+            view.RegisteredBy,
+            applications);
     }
 }

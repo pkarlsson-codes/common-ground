@@ -114,6 +114,24 @@ public abstract partial class BaseApiClient
     }
 
     /// <summary>
+    /// Performs a PUT request with a request body but no response body (e.g., 204 No Content).
+    /// </summary>
+    /// <typeparam name="TRequest">The type of the request data.</typeparam>
+    /// <param name="endpoint">The API endpoint to call.</param>
+    /// <param name="request">The request data to send.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    protected Task PutAsync<TRequest>(string endpoint, TRequest request, CancellationToken cancellationToken = default)
+        where TRequest : class
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return ExecuteAsync(
+            endpoint,
+            ctx => HttpClient.PutAsJsonAsync(endpoint, request, JsonOptions, ctx.CancellationToken),
+            cancellationToken);
+    }
+
+    /// <summary>
     /// Performs a DELETE request.
     /// </summary>
     /// <param name="endpoint">The API endpoint to call.</param>

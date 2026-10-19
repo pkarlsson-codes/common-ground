@@ -16,17 +16,28 @@
 
 import * as runtime from '../runtime';
 import type {
+  AddHouseholdMemberRequest,
+  AddHouseholdMemberResponse,
   HouseholdResponse,
+  PaginatedResponseOfHouseholdListItemResponse,
   ProblemDetails,
   RecordCltOrientationRequest,
   RecordHousingCounselingRequest,
   RecordMortgagePrequalificationRequest,
   RegisterHouseholdRequest,
   RegisterHouseholdResponse,
+  UpdateHouseholdCircumstancesRequest,
+  UpdateHouseholdMemberRequest,
 } from '../models/index';
 import {
+    AddHouseholdMemberRequestFromJSON,
+    AddHouseholdMemberRequestToJSON,
+    AddHouseholdMemberResponseFromJSON,
+    AddHouseholdMemberResponseToJSON,
     HouseholdResponseFromJSON,
     HouseholdResponseToJSON,
+    PaginatedResponseOfHouseholdListItemResponseFromJSON,
+    PaginatedResponseOfHouseholdListItemResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
     RecordCltOrientationRequestFromJSON,
@@ -39,10 +50,25 @@ import {
     RegisterHouseholdRequestToJSON,
     RegisterHouseholdResponseFromJSON,
     RegisterHouseholdResponseToJSON,
+    UpdateHouseholdCircumstancesRequestFromJSON,
+    UpdateHouseholdCircumstancesRequestToJSON,
+    UpdateHouseholdMemberRequestFromJSON,
+    UpdateHouseholdMemberRequestToJSON,
 } from '../models/index';
+
+export interface AddHouseholdMemberOperationRequest {
+    householdId: string;
+    addHouseholdMemberRequest: AddHouseholdMemberRequest;
+}
 
 export interface GetHouseholdRequest {
     householdId: string;
+}
+
+export interface GetHouseholdsRequest {
+    pageNumber?: number;
+    pageSize?: number;
+    search?: string | null;
 }
 
 export interface RecordCltOrientationOperationRequest {
@@ -64,6 +90,22 @@ export interface RegisterHouseholdOperationRequest {
     registerHouseholdRequest: RegisterHouseholdRequest;
 }
 
+export interface RemoveHouseholdMemberRequest {
+    householdId: string;
+    memberId: string;
+}
+
+export interface UpdateHouseholdCircumstancesOperationRequest {
+    householdId: string;
+    updateHouseholdCircumstancesRequest: UpdateHouseholdCircumstancesRequest;
+}
+
+export interface UpdateHouseholdMemberOperationRequest {
+    householdId: string;
+    memberId: string;
+    updateHouseholdMemberRequest: UpdateHouseholdMemberRequest;
+}
+
 /**
  * HouseholdApi - interface
  * 
@@ -71,6 +113,20 @@ export interface RegisterHouseholdOperationRequest {
  * @interface HouseholdApiInterface
  */
 export interface HouseholdApiInterface {
+    /**
+     * 
+     * @param {string} householdId 
+     * @param {AddHouseholdMemberRequest} addHouseholdMemberRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof HouseholdApiInterface
+     */
+    addHouseholdMemberRaw(requestParameters: AddHouseholdMemberOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    addHouseholdMember(requestParameters: AddHouseholdMemberOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
     /**
      * 
      * @param {string} householdId 
@@ -83,6 +139,21 @@ export interface HouseholdApiInterface {
     /**
      */
     getHousehold(requestParameters: GetHouseholdRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HouseholdResponse>;
+
+    /**
+     * 
+     * @param {number} [pageNumber] 
+     * @param {number} [pageSize] 
+     * @param {string} [search] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof HouseholdApiInterface
+     */
+    getHouseholdsRaw(requestParameters: GetHouseholdsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfHouseholdListItemResponse>>;
+
+    /**
+     */
+    getHouseholds(requestParameters: GetHouseholdsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHouseholdListItemResponse>;
 
     /**
      * 
@@ -139,12 +210,100 @@ export interface HouseholdApiInterface {
      */
     registerHousehold(requestParameters: RegisterHouseholdOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
+    /**
+     * 
+     * @param {string} householdId 
+     * @param {string} memberId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof HouseholdApiInterface
+     */
+    removeHouseholdMemberRaw(requestParameters: RemoveHouseholdMemberRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    removeHouseholdMember(requestParameters: RemoveHouseholdMemberRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {string} householdId 
+     * @param {UpdateHouseholdCircumstancesRequest} updateHouseholdCircumstancesRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof HouseholdApiInterface
+     */
+    updateHouseholdCircumstancesRaw(requestParameters: UpdateHouseholdCircumstancesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    updateHouseholdCircumstances(requestParameters: UpdateHouseholdCircumstancesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {string} householdId 
+     * @param {string} memberId 
+     * @param {UpdateHouseholdMemberRequest} updateHouseholdMemberRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof HouseholdApiInterface
+     */
+    updateHouseholdMemberRaw(requestParameters: UpdateHouseholdMemberOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    updateHouseholdMember(requestParameters: UpdateHouseholdMemberOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
 }
 
 /**
  * 
  */
 export class HouseholdApi extends runtime.BaseAPI implements HouseholdApiInterface {
+
+    /**
+     */
+    async addHouseholdMemberRaw(requestParameters: AddHouseholdMemberOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['householdId'] == null) {
+            throw new runtime.RequiredError(
+                'householdId',
+                'Required parameter "householdId" was null or undefined when calling addHouseholdMember().'
+            );
+        }
+
+        if (requestParameters['addHouseholdMemberRequest'] == null) {
+            throw new runtime.RequiredError(
+                'addHouseholdMemberRequest',
+                'Required parameter "addHouseholdMemberRequest" was null or undefined when calling addHouseholdMember().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/households/{householdId}/members`;
+        urlPath = urlPath.replace(`{${"householdId"}}`, encodeURIComponent(String(requestParameters['householdId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: AddHouseholdMemberRequestToJSON(requestParameters['addHouseholdMemberRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async addHouseholdMember(requestParameters: AddHouseholdMemberOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.addHouseholdMemberRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      */
@@ -178,6 +337,45 @@ export class HouseholdApi extends runtime.BaseAPI implements HouseholdApiInterfa
      */
     async getHousehold(requestParameters: GetHouseholdRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HouseholdResponse> {
         const response = await this.getHouseholdRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getHouseholdsRaw(requestParameters: GetHouseholdsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfHouseholdListItemResponse>> {
+        const queryParameters: any = {};
+
+        if (requestParameters['pageNumber'] != null) {
+            queryParameters['pageNumber'] = requestParameters['pageNumber'];
+        }
+
+        if (requestParameters['pageSize'] != null) {
+            queryParameters['pageSize'] = requestParameters['pageSize'];
+        }
+
+        if (requestParameters['search'] != null) {
+            queryParameters['search'] = requestParameters['search'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/households`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedResponseOfHouseholdListItemResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getHouseholds(requestParameters: GetHouseholdsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHouseholdListItemResponse> {
+        const response = await this.getHouseholdsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -372,6 +570,168 @@ export class HouseholdApi extends runtime.BaseAPI implements HouseholdApiInterfa
     async registerHousehold(requestParameters: RegisterHouseholdOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.registerHouseholdRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async removeHouseholdMemberRaw(requestParameters: RemoveHouseholdMemberRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['householdId'] == null) {
+            throw new runtime.RequiredError(
+                'householdId',
+                'Required parameter "householdId" was null or undefined when calling removeHouseholdMember().'
+            );
+        }
+
+        if (requestParameters['memberId'] == null) {
+            throw new runtime.RequiredError(
+                'memberId',
+                'Required parameter "memberId" was null or undefined when calling removeHouseholdMember().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/households/{householdId}/members/{memberId}`;
+        urlPath = urlPath.replace(`{${"householdId"}}`, encodeURIComponent(String(requestParameters['householdId'])));
+        urlPath = urlPath.replace(`{${"memberId"}}`, encodeURIComponent(String(requestParameters['memberId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async removeHouseholdMember(requestParameters: RemoveHouseholdMemberRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.removeHouseholdMemberRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
+    async updateHouseholdCircumstancesRaw(requestParameters: UpdateHouseholdCircumstancesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['householdId'] == null) {
+            throw new runtime.RequiredError(
+                'householdId',
+                'Required parameter "householdId" was null or undefined when calling updateHouseholdCircumstances().'
+            );
+        }
+
+        if (requestParameters['updateHouseholdCircumstancesRequest'] == null) {
+            throw new runtime.RequiredError(
+                'updateHouseholdCircumstancesRequest',
+                'Required parameter "updateHouseholdCircumstancesRequest" was null or undefined when calling updateHouseholdCircumstances().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/households/{householdId}/circumstances`;
+        urlPath = urlPath.replace(`{${"householdId"}}`, encodeURIComponent(String(requestParameters['householdId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdateHouseholdCircumstancesRequestToJSON(requestParameters['updateHouseholdCircumstancesRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async updateHouseholdCircumstances(requestParameters: UpdateHouseholdCircumstancesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.updateHouseholdCircumstancesRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
+    async updateHouseholdMemberRaw(requestParameters: UpdateHouseholdMemberOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['householdId'] == null) {
+            throw new runtime.RequiredError(
+                'householdId',
+                'Required parameter "householdId" was null or undefined when calling updateHouseholdMember().'
+            );
+        }
+
+        if (requestParameters['memberId'] == null) {
+            throw new runtime.RequiredError(
+                'memberId',
+                'Required parameter "memberId" was null or undefined when calling updateHouseholdMember().'
+            );
+        }
+
+        if (requestParameters['updateHouseholdMemberRequest'] == null) {
+            throw new runtime.RequiredError(
+                'updateHouseholdMemberRequest',
+                'Required parameter "updateHouseholdMemberRequest" was null or undefined when calling updateHouseholdMember().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/households/{householdId}/members/{memberId}`;
+        urlPath = urlPath.replace(`{${"householdId"}}`, encodeURIComponent(String(requestParameters['householdId'])));
+        urlPath = urlPath.replace(`{${"memberId"}}`, encodeURIComponent(String(requestParameters['memberId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdateHouseholdMemberRequestToJSON(requestParameters['updateHouseholdMemberRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async updateHouseholdMember(requestParameters: UpdateHouseholdMemberOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.updateHouseholdMemberRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
 }

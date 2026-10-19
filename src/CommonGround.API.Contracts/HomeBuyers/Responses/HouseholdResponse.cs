@@ -15,10 +15,12 @@ public sealed record HouseholdResponse(
     string? CltOrientationCompletedDate,
     MortgagePrequalificationDto? MortgagePrequalification,
     string RegisteredAt,
-    string RegisteredBy);
+    string RegisteredBy,
+    IReadOnlyList<HouseholdApplicationDto> Applications);
 
 /// <summary>A household member.</summary>
 public sealed record HouseholdMemberDto(
+    string Id,
     string Name,
     string Email,
     string Phone,
@@ -32,3 +34,12 @@ public sealed record MortgagePrequalificationDto(
     string LenderName,
     decimal ApprovedAmount,
     string ExpiryDate);
+
+/// <summary>An application submitted by the household.</summary>
+/// <param name="Id">Application identifier.</param>
+/// <param name="Phase">Current application phase.</param>
+/// <param name="SubmittedAt">When the application was submitted.</param>
+public sealed record HouseholdApplicationDto(
+    string Id,
+    string Phase,
+    string SubmittedAt);

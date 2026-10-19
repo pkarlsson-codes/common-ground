@@ -18,10 +18,53 @@ public sealed class HouseholdsApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task<PaginatedResponse<HouseholdListItemResponse>> GetHouseholdsAsync(
+        GetHouseholdsQuerySpec querySpec,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(querySpec);
+        return await GetAsync<PaginatedResponse<HouseholdListItemResponse>>(
+            $"api/households{querySpec.ToQueryString()}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task<HouseholdResponse> GetHouseholdAsync(string householdId, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(householdId);
         return await GetAsync<HouseholdResponse>($"api/households/{householdId}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<AddHouseholdMemberResponse> AddHouseholdMemberAsync(string householdId, AddHouseholdMemberRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(householdId);
+        ArgumentNullException.ThrowIfNull(request);
+        return await PostAsync<AddHouseholdMemberRequest, AddHouseholdMemberResponse>($"api/households/{householdId}/members", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task UpdateHouseholdMemberAsync(string householdId, string memberId, UpdateHouseholdMemberRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(householdId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(memberId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PutAsync($"api/households/{householdId}/members/{memberId}", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task RemoveHouseholdMemberAsync(string householdId, string memberId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(householdId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(memberId);
+        await DeleteAsync($"api/households/{householdId}/members/{memberId}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task UpdateHouseholdCircumstancesAsync(string householdId, UpdateHouseholdCircumstancesRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(householdId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PutAsync($"api/households/{householdId}/circumstances", request, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

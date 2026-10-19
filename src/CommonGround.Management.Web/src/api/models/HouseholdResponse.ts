@@ -14,6 +14,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { HouseholdApplicationDto } from './HouseholdApplicationDto';
+import {
+    HouseholdApplicationDtoFromJSON,
+    HouseholdApplicationDtoFromJSONTyped,
+    HouseholdApplicationDtoToJSON,
+    HouseholdApplicationDtoToJSONTyped,
+} from './HouseholdApplicationDto';
 import type { MortgagePrequalificationDto } from './MortgagePrequalificationDto';
 import {
     MortgagePrequalificationDtoFromJSON,
@@ -119,6 +126,12 @@ export interface HouseholdResponse {
      * @memberof HouseholdResponse
      */
     registeredBy?: string;
+    /**
+     * 
+     * @type {Array<HouseholdApplicationDto>}
+     * @memberof HouseholdResponse
+     */
+    applications?: Array<HouseholdApplicationDto>;
 }
 
 /**
@@ -152,6 +165,7 @@ export function HouseholdResponseFromJSONTyped(json: any, ignoreDiscriminator: b
         'mortgagePrequalification': json['mortgagePrequalification'] == null ? undefined : MortgagePrequalificationDtoFromJSON(json['mortgagePrequalification']),
         'registeredAt': json['registeredAt'] == null ? undefined : json['registeredAt'],
         'registeredBy': json['registeredBy'] == null ? undefined : json['registeredBy'],
+        'applications': json['applications'] == null ? undefined : ((json['applications'] as Array<any>).map(HouseholdApplicationDtoFromJSON)),
     };
 }
 
@@ -180,6 +194,7 @@ export function HouseholdResponseToJSONTyped(value?: HouseholdResponse | null, i
         'mortgagePrequalification': MortgagePrequalificationDtoToJSON(value['mortgagePrequalification']),
         'registeredAt': value['registeredAt'],
         'registeredBy': value['registeredBy'],
+        'applications': value['applications'] == null ? undefined : ((value['applications'] as Array<any>).map(HouseholdApplicationDtoToJSON)),
     };
 }
 
