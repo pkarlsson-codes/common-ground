@@ -8,7 +8,7 @@ public sealed class GetHouseholdsQuerySpec : PaginationQuerySpecV2
     /// <summary>Initializes a new instance with optional filters.</summary>
     /// <param name="pageNumber">1-based page number.</param>
     /// <param name="pageSize">Number of items per page.</param>
-    /// <param name="search">Optional text matched against the primary member's name or email.</param>
+    /// <param name="search">Optional text matched against any member's name or email.</param>
     public GetHouseholdsQuerySpec(
         int pageNumber = 1,
         int pageSize = DefaultPageSize,
@@ -18,7 +18,7 @@ public sealed class GetHouseholdsQuerySpec : PaginationQuerySpecV2
         Search = search;
     }
 
-    /// <summary>Gets optional text matched against the primary member's name or email.</summary>
+    /// <summary>Gets optional text matched against any member's name or email.</summary>
     public string? Search { get; }
 
     /// <inheritdoc cref="PaginationQuerySpecV2.AppendFilterParts"/>

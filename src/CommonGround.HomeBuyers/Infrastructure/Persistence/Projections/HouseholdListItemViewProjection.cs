@@ -18,6 +18,7 @@ internal sealed class HouseholdListItemViewProjection : SingleStreamProjection<H
             PrimaryMemberName = primary.Name,
             PrimaryMemberEmail = primary.Email,
             PrimaryMemberPhone = primary.Phone,
+            Members = [.. e.Members.Select(m => new HouseholdMemberEntry { Id = m.MemberId, Name = m.Name, Email = m.Email })],
             AccessibilityRequired = e.RequiresAccessibility,
             HouseholdSize = e.Members.Count,
             RegisteredAt = e.OccurredAt,
@@ -25,18 +26,24 @@ internal sealed class HouseholdListItemViewProjection : SingleStreamProjection<H
         };
     }
 
-    public static void Apply(HouseholdListItemView view, HouseholdMemberAdded _)
+    public static void Apply(HouseholdListItemView view, HouseholdMemberAdded e)
     {
+        view.Members.Add(new HouseholdMemberEntry { Id = e.MemberId, Name = e.Name, Email = e.Email });
         view.HouseholdSize++;
     }
 
-    public static void Apply(HouseholdListItemView view, HouseholdMemberRemoved _)
+    public static void Apply(HouseholdListItemView view, HouseholdMemberRemoved e)
     {
+        view.Members.RemoveAll(m => m.Id == e.MemberId);
         view.HouseholdSize--;
     }
 
     public static void Apply(HouseholdListItemView view, HouseholdMemberUpdated e)
     {
+        var member = view.Members.Single(m => m.Id == e.MemberId);
+        member.Name = e.Name;
+        member.Email = e.Email;
+
         if (e.MemberId != view.PrimaryMemberId) return;
 
         view.PrimaryMemberName = e.Name;

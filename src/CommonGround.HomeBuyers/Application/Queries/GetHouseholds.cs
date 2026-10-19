@@ -6,7 +6,7 @@ using Marten.Pagination;
 
 namespace CommonGround.HomeBuyers.Application.Queries;
 
-/// <summary>Returns a paginated list of households, optionally filtered by the primary member's name or email.</summary>
+/// <summary>Returns a paginated list of households, optionally filtered by any member's name or email.</summary>
 public sealed record GetHouseholds(
     PageSpec Page,
     string? Search = null);
@@ -27,9 +27,9 @@ public static class GetHouseholdsHandler
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var s = request.Search;
-            query = query.Where(v =>
-                v.PrimaryMemberName.Contains(s, StringComparison.OrdinalIgnoreCase) ||
-                v.PrimaryMemberEmail.Contains(s, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(v => v.Members.Any(m =>
+                m.Name.Contains(s, StringComparison.OrdinalIgnoreCase) ||
+                m.Email.Contains(s, StringComparison.OrdinalIgnoreCase)));
         }
 
         var page = await query

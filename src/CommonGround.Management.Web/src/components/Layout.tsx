@@ -131,6 +131,13 @@ export default function Layout() {
             <IconWorkflow />
             Applications
           </NavLink>
+          <NavLink
+            to="/households"
+            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          >
+            <IconWorkflow />
+            Households
+          </NavLink>
 
           <div className="sidebar-nav__section">Documents</div>
           <NavLink

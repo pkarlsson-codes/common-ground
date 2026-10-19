@@ -11,4 +11,4 @@
 9. Toast: "Application submitted (<id>...)"
 10. Panel closes, new application appears in the Applications table in the Submitted phase, showing the primary contact's name and email
 
-The API rejects an application for a household that already has an open (Submitted or Approved) application. This panel always registers a new household, so the rule doesn't trigger here.
+The API rejects an application for a household that already has an open (Submitted or Approved) application. This panel always registers a new household, so the rule doesn't trigger here. To apply for a household that's already registered, use [Start Application](../households/start-application.md) instead.

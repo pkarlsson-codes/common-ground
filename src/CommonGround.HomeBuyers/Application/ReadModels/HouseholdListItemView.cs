@@ -18,6 +18,9 @@ public class HouseholdListItemView
     /// <summary>Gets or sets the primary member's phone.</summary>
     public string PrimaryMemberPhone { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets every member's name and email, for search across the whole household.</summary>
+    public List<HouseholdMemberEntry> Members { get; set; } = [];
+
     /// <summary>Gets or sets household size.</summary>
     public int HouseholdSize { get; set; }
 

@@ -28,6 +28,24 @@ public class HouseholdEndpointsTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task GetHouseholds_SearchByOtherMemberName_ReturnsHouseholdUsingTheMembersCurrentName()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var householdId = await RegisterHouseholdAsync(client, $"other-member-{Guid.NewGuid():N}@example.com");
+        var added = await client.PostAsJsonAsync($"/api/households/{householdId}/members",
+            new AddHouseholdMemberRequest("Partner", "partner@example.com", "555-0101"));
+        var memberId = (await added.Content.ReadFromJsonAsync<AddHouseholdMemberResponse>())!.MemberId;
+        var newName = $"Renamed-{Guid.NewGuid():N}";
+        await client.PutAsJsonAsync($"/api/households/{householdId}/members/{memberId}",
+            new UpdateHouseholdMemberRequest(newName, "partner@example.com", "555-0101"));
+
+        var page = await client.GetFromJsonAsync<PaginatedResponse<HouseholdListItemResponse>>(
+            $"/api/households?search={Uri.EscapeDataString(newName.ToLowerInvariant())}");
+
+        page!.Items.Should().ContainSingle().Which.Id.Should().Be(householdId);
+    }
+
+    [Fact]
     public async Task HouseholdMembers_AddUpdateRemove_AreReflectedOnHouseholdDetail()
     {
         var client = factory.CreateClient().WithAuthToken();

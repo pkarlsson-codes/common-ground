@@ -5,7 +5,6 @@ import {
   type ApproveApplicationRequest,
   type DenyApplicationRequest,
   type HomeownerApplicationResponse,
-  type HouseholdResponse,
   type PaginatedResponseOfHomeownerApplicationListItemResponse,
   type RecordCltOrientationRequest,
   type RecordHousingCounselingRequest,
@@ -67,15 +66,6 @@ export function useHomeownerApplication(applicationId: string | null) {
   })
 }
 
-export function useHousehold(householdId: string | null | undefined) {
-  return useQuery<HouseholdResponse>({
-    queryKey: ['household', householdId],
-    queryFn: () => householdApi.getHousehold({ householdId: householdId! }),
-    enabled: !!householdId,
-    retry: shouldRetryQuery,
-  })
-}
-
 /** Registers a household, then submits an application for it. */
 export function useSubmitApplication() {
   const qc = useQueryClient()
@@ -88,6 +78,7 @@ export function useSubmitApplication() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['homeowner-applications'] })
+      qc.invalidateQueries({ queryKey: ['households'] })
     },
   })
 }
@@ -110,6 +101,7 @@ export function useRecordHousingCounseling() {
       householdApi.recordHousingCounseling({ householdId, recordHousingCounselingRequest: request }),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['household', variables.householdId] })
+      qc.invalidateQueries({ queryKey: ['households'] })
     },
   })
 }
@@ -121,6 +113,7 @@ export function useRecordCltOrientation() {
       householdApi.recordCltOrientation({ householdId, recordCltOrientationRequest: request }),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['household', variables.householdId] })
+      qc.invalidateQueries({ queryKey: ['households'] })
     },
   })
 }
@@ -132,6 +125,7 @@ export function useRecordMortgagePrequalification() {
       householdApi.recordMortgagePrequalification({ householdId, recordMortgagePrequalificationRequest: request }),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['household', variables.householdId] })
+      qc.invalidateQueries({ queryKey: ['households'] })
     },
   })
 }
