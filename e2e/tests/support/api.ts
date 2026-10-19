@@ -97,3 +97,40 @@ export async function createApplication(page: Page, name: string, { approve = tr
   }
   return { applicationId, householdId, name, email }
 }
+
+/**
+ * Starts a purchase workflow on a fresh parcel, home, and lease template. By default it's initiated directly; with
+ * `fromApplication` it's started the way the app does it, by selecting an approved applicant for the home.
+ */
+export async function createPurchaseWorkflow(page: Page, buyerName: string, { fromApplication = false } = {}) {
+  const { parcelId } = await createLandParcel(page)
+  const homeId = await createHome(page, parcelId)
+  const { groundLeaseTemplateId, templateName } = await createGroundLeaseTemplate(page)
+  const purchasePrice = 200000
+
+  let applicationId: string | undefined
+  if (fromApplication) {
+    applicationId = (await createApplication(page, buyerName)).applicationId
+    await post(page, `/api/v1/homeowner-applications/${applicationId}/select`, {
+      homeId, groundLeaseTemplateId, purchasePrice, selectedDate: isoDate(),
+    })
+    // The workflow is started by an integration event, so poll for it.
+    await expect.poll(async () => {
+      const workflows = await get<{ items: unknown[] }>(
+        page, `/api/v1/purchase-workflows?groundLeaseTemplateId=${groundLeaseTemplateId}`)
+      return workflows.items.length
+    }).toBe(1)
+  } else {
+    await post(page, '/api/v1/purchase-workflows', {
+      groundLeaseTemplateId,
+      landParcelId: parcelId,
+      homeId,
+      buyerFullName: buyerName,
+      buyerEmail: `${buyerName.toLowerCase().replace(/\s+/g, '-')}@example.com`,
+      buyerPhone: '+12025550143',
+      purchasePrice,
+    })
+  }
+
+  return { parcelId, homeId, groundLeaseTemplateId, templateName, applicationId, buyerName }
+}

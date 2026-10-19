@@ -11,5 +11,5 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 export function statusLabel(status: string): string {
-  return STATUS_LABELS[status] ?? status
+  return STATUS_LABELS[status] ?? status.replace(/([a-z])([A-Z])/g, '$1 $2')
 }
