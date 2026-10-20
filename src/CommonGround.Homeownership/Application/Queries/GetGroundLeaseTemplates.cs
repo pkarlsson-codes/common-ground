@@ -6,7 +6,7 @@ using Marten.Pagination;
 
 namespace CommonGround.Homeownership.Application.Queries;
 
-/// <summary>Returns a paginated list of ground lease templates with optional filters.</summary>
+/// <summary>Returns a paginated list of ground lease templates, ordered by name, with optional filters.</summary>
 public sealed record GetGroundLeaseTemplates(
     PageSpec Page,
     string? Search = null,
@@ -28,7 +28,7 @@ public static class GetGroundLeaseTemplatesHandler
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var s = request.Search;
-            query = query.Where(v => v.TemplateName.Contains(s));
+            query = query.Where(v => v.TemplateName.Contains(s, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!string.IsNullOrWhiteSpace(request.Status))
@@ -38,6 +38,7 @@ public static class GetGroundLeaseTemplatesHandler
         }
 
         var page = await query
+            .OrderBy(v => v.TemplateName)
             .ToPagedListAsync(request.Page.Number, request.Page.Size, cancellationToken)
             .ConfigureAwait(false);
 

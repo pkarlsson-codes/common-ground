@@ -24,11 +24,10 @@ const emptyCreate = (): CreateGroundLeaseTemplateForm => ({
 })
 
 interface Props {
-  open: boolean
   onClose: () => void
 }
 
-export default function CreateGroundLeaseTemplatePanel({ open, onClose }: Props) {
+export default function CreateGroundLeaseTemplatePanel({ onClose }: Props) {
   const [form, setForm] = useState<CreateGroundLeaseTemplateForm>(emptyCreate)
   const [error, setError] = useState<string | null>(null)
   const mutation = useCreateGroundLeaseTemplate()
@@ -45,8 +44,6 @@ export default function CreateGroundLeaseTemplatePanel({ open, onClose }: Props)
       setError(await getErrorMessage(err, 'Failed to create ground lease template.'))
     }
   }
-
-  if (!open) return null
 
   return (
     <SlideOver

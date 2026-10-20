@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { useGroundLeaseTemplate, useArchiveGroundLeaseTemplate, useRestoreGroundLeaseTemplate } from '../../hooks/groundLeaseTemplates'
 import { FORMULA_KIND_LABELS, statusLabel } from '../../hooks/types'
 import SlideOver from '../../components/SlideOver'
 import StatusBadge from '../../components/StatusBadge'
 import { useToast } from '../../hooks/useToast'
+import { getErrorMessage } from '../../lib/getErrorMessage'
 
 function SkeletonRows() {
   return (
@@ -27,17 +29,28 @@ export default function GroundLeaseTemplateDetailPanel({ templateId, onClose }: 
   const archiveMutation = useArchiveGroundLeaseTemplate()
   const restoreMutation = useRestoreGroundLeaseTemplate()
   const { success } = useToast()
+  const [error, setError] = useState<string | null>(null)
 
   const handleArchive = async () => {
-    await archiveMutation.mutateAsync(templateId)
-    success('Template archived')
-    onClose()
+    setError(null)
+    try {
+      await archiveMutation.mutateAsync(templateId)
+      success('Template archived')
+      onClose()
+    } catch (err) {
+      setError(await getErrorMessage(err, 'Failed to archive template.'))
+    }
   }
 
   const handleRestore = async () => {
-    await restoreMutation.mutateAsync(templateId)
-    success('Template restored')
-    onClose()
+    setError(null)
+    try {
+      await restoreMutation.mutateAsync(templateId)
+      success('Template restored')
+      onClose()
+    } catch (err) {
+      setError(await getErrorMessage(err, 'Failed to restore template.'))
+    }
   }
 
   const isPending = archiveMutation.isPending || restoreMutation.isPending
@@ -67,6 +80,7 @@ export default function GroundLeaseTemplateDetailPanel({ templateId, onClose }: 
       footer={footer}
     >
       {isLoading || !detail ? <SkeletonRows /> : (
+        <>
         <div className="detail-grid">
           <div className="detail-field">
             <div className="detail-field__label">Status</div>
@@ -123,6 +137,8 @@ export default function GroundLeaseTemplateDetailPanel({ templateId, onClose }: 
             </div>
           </div>
         </div>
+        {error && <div className="form-error">{error}</div>}
+        </>
       )}
     </SlideOver>
   )

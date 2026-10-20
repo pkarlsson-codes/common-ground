@@ -14,10 +14,20 @@ export default function GroundLeaseTemplatesPage() {
 
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [search, setSearch] = useState('')
   const [panel, setPanel] = useState<'create' | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  const { data, isLoading, isError } = useGroundLeaseTemplates(page, undefined, statusFilter || undefined)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setSearch(searchInput.trim())
+      setPage(1)
+    }, 300)
+    return () => clearTimeout(timeout)
+  }, [searchInput])
+
+  const { data, isLoading, isError } = useGroundLeaseTemplates(page, search || undefined, statusFilter || undefined)
 
   useEffect(() => {
     const openId = (location.state as { openId?: string } | null)?.openId
@@ -55,6 +65,15 @@ export default function GroundLeaseTemplatesPage() {
       </div>
 
       <div className="filter-bar">
+        <input
+          className="form-input"
+          type="search"
+          placeholder="Search by name"
+          aria-label="Search ground lease templates"
+          value={searchInput}
+          onChange={e => setSearchInput(e.target.value)}
+          style={{ maxWidth: 320 }}
+        />
         <select
           className="select"
           value={statusFilter}
@@ -78,10 +97,9 @@ export default function GroundLeaseTemplatesPage() {
         onSelect={id => setSelectedId(id)}
       />
 
-      <CreateGroundLeaseTemplatePanel
-        open={panel === 'create'}
-        onClose={() => setPanel(null)}
-      />
+      {panel === 'create' && (
+        <CreateGroundLeaseTemplatePanel onClose={() => setPanel(null)} />
+      )}
 
       {selectedId !== null && (
         <GroundLeaseTemplateDetailPanel

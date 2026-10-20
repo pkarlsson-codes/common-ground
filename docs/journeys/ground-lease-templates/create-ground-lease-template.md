@@ -2,7 +2,7 @@
 
 1. User navigates to Ground Lease Templates
 2. User clicks "New Template"
-3. "New Template" panel opens
+3. "New Template" panel opens with a fresh form (Cancel discards anything entered)
 4. User enters Template Name, Term (years, default 99), and Covenant Terms
 5. User selects a Resale Formula: Appraisal Based, Index Based, or Fixed Percentage (default Appraisal Based)
 6. If Appraisal Based, user enters Appreciation Share (decimal fraction, e.g. 0.25 = 25%, default 0.25)
