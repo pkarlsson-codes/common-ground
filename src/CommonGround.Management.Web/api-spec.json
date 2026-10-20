@@ -3012,6 +3012,14 @@
               "nullable": true
             },
             "x-position": 3
+          },
+          {
+            "name": "includeDecommissioned",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "x-position": 4
           }
         ],
         "responses": {

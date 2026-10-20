@@ -67,7 +67,7 @@ public static class LandParcelsEndpoints
         IMessageBus bus,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetLandParcels(request.Page, request.Search);
+        var query = new GetLandParcels(request.Page, request.Search, request.IncludeDecommissioned);
 
         var result = await bus
             .InvokeForTenantAsync<PaginatedResponse<LandParcelListItemView>>(

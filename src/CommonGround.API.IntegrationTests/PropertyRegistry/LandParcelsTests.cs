@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
+using CommonGround.SharedKernel.Infrastructure.API;
 using FluentAssertions;
 
 namespace CommonGround.API.IntegrationTests.PropertyRegistry;
@@ -80,5 +81,26 @@ public class LandParcelsTests(ApiFactory factory)
         var getResponse = await client.GetAsync($"/api/land-parcels/{created.ParcelId}");
 
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task GetLandParcels_DecommissionedParcel_ListedOnlyWhenIncluded()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var apn = $"APN-DECOM-{Guid.NewGuid():N}";
+        var createResponse = await client.PostAsJsonAsync("/api/land-parcels",
+            new RegisterLandParcelRequest(apn, "1 Retired Way", 0.2m, new DateOnly(2021, 5, 1), "Purchase", null));
+        createResponse.EnsureSuccessStatusCode();
+        var created = await createResponse.Content.ReadFromJsonAsync<RegisterLandParcelResponse>();
+        (await client.PostAsJsonAsync($"/api/land-parcels/{created!.ParcelId}/decommission", new DecommissionParcelRequest()))
+            .EnsureSuccessStatusCode();
+
+        var byDefault = await client.GetFromJsonAsync<PaginatedResponse<LandParcelListItemResponse>>(
+            $"/api/land-parcels?search={apn}");
+        var included = await client.GetFromJsonAsync<PaginatedResponse<LandParcelListItemResponse>>(
+            $"/api/land-parcels?search={apn}&includeDecommissioned=true");
+
+        byDefault!.Items.Should().BeEmpty();
+        included!.Items.Should().ContainSingle(p => p.Id == created.ParcelId && p.IsDecommissioned);
     }
 }

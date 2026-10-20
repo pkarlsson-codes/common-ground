@@ -20,6 +20,8 @@ interface EntityComboboxProps {
   value: string | null
   onChange: (id: string | null) => void
   fetchOptions: (q: string) => Promise<Option[]>
+  /** Resolves the label for a value set by the caller (e.g. a pre-filled field), rather than picked from the list. */
+  fetchLabel?: (id: string) => Promise<string>
   placeholder?: string
   disabled?: boolean
   id?: string
@@ -29,6 +31,7 @@ export default function EntityCombobox({
   value,
   onChange,
   fetchOptions,
+  fetchLabel,
   placeholder = 'Search…',
   disabled = false,
   id,
@@ -57,6 +60,15 @@ export default function EntityCombobox({
       setSelectedLabel(null)
     }
   }, [value])
+
+  useEffect(() => {
+    if (!value || selectedLabel !== null || !fetchLabel) return
+    let cancelled = false
+    fetchLabel(value)
+      .then(label => { if (!cancelled) setSelectedLabel(label) })
+      .catch(() => { /* leave the placeholder showing */ })
+    return () => { cancelled = true }
+  }, [value, selectedLabel, fetchLabel])
 
   const runFetch = (q: string) => {
     const seq = ++fetchSeqRef.current
@@ -102,7 +114,7 @@ export default function EntityCombobox({
     setOpen(false)
   }
 
-  const displayLabel = selectedLabel ?? (value ? value : null)
+  const displayLabel = selectedLabel ?? (value && !fetchLabel ? value : null)
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>

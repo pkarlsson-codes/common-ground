@@ -8,15 +8,11 @@ const api = new LandParcelsApi(apiConfig)
 const dateStr = (d: Date | null | undefined) =>
   d instanceof Date ? d.toISOString().substring(0, 10) : undefined
 
-export function useLandParcels(pageNumber: number, isDecommissioned?: boolean, search?: string) {
+export function useLandParcels(pageNumber: number, includeDecommissioned: boolean, search?: string) {
   return useQuery({
-    queryKey: ['land-parcels', pageNumber, isDecommissioned, search],
+    queryKey: ['land-parcels', pageNumber, includeDecommissioned, search],
     queryFn: async () => {
-      const params: Parameters<typeof api.getLandParcels>[0] = { pageNumber, pageSize: 20, search }
-      if (isDecommissioned !== undefined) {
-        (params as Record<string, unknown>)['isDecommissioned'] = isDecommissioned
-      }
-      const result = await api.getLandParcels(params)
+      const result = await api.getLandParcels({ pageNumber, pageSize: 20, search, includeDecommissioned })
       return {
         ...result,
         items: result.items?.map(p => ({

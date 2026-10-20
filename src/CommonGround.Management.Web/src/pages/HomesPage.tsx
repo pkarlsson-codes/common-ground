@@ -93,7 +93,7 @@ export default function HomesPage() {
             value={parcelFilter || null}
             onChange={id => { setParcelFilter(id ?? ''); setPage(1) }}
             fetchOptions={async q => {
-              const result = await landParcelsApi.getLandParcels({ search: q, pageSize: 10 })
+              const result = await landParcelsApi.getLandParcels({ search: q, pageSize: 10, includeDecommissioned: true })
               return (result.items ?? []).map(p => ({
                 id: p.id!,
                 label: [p.legalParcelNumber, p.address].filter(Boolean).join(' — '),

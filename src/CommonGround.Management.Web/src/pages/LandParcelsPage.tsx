@@ -13,10 +13,20 @@ export default function LandParcelsPage() {
 
   const [page,               setPage]               = useState(1)
   const [showDecommissioned, setShowDecommissioned] = useState(false)
+  const [searchInput,        setSearchInput]        = useState('')
+  const [search,             setSearch]             = useState('')
   const [selectedId,         setSelectedId]         = useState<string | null>(null)
   const [panel,              setPanel]              = useState<Panel>(null)
 
-  const { data, isLoading, isError } = useLandParcels(page, showDecommissioned ? true : undefined)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setSearch(searchInput.trim())
+      setPage(1)
+    }, 300)
+    return () => clearTimeout(timeout)
+  }, [searchInput])
+
+  const { data, isLoading, isError } = useLandParcels(page, showDecommissioned, search || undefined)
 
   const openDetail = (id: string) => {
     setSelectedId(id)
@@ -64,6 +74,15 @@ export default function LandParcelsPage() {
       </div>
 
       <div className="filter-bar">
+        <input
+          className="form-input"
+          type="search"
+          placeholder="Search by parcel number or address"
+          aria-label="Search land parcels"
+          value={searchInput}
+          onChange={e => setSearchInput(e.target.value)}
+          style={{ maxWidth: 320 }}
+        />
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-secondary)', cursor: 'pointer' }}>
           <input
             type="checkbox"

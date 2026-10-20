@@ -48,6 +48,7 @@ export interface GetLandParcelsRequest {
     pageNumber?: number;
     pageSize?: number;
     search?: string | null;
+    includeDecommissioned?: boolean;
 }
 
 export interface RecommissionLandParcelRequest {
@@ -98,6 +99,7 @@ export interface LandParcelsApiInterface {
      * @param {number} [pageNumber] 
      * @param {number} [pageSize] 
      * @param {string} [search] 
+     * @param {boolean} [includeDecommissioned] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof LandParcelsApiInterface
@@ -244,6 +246,10 @@ export class LandParcelsApi extends runtime.BaseAPI implements LandParcelsApiInt
 
         if (requestParameters['search'] != null) {
             queryParameters['search'] = requestParameters['search'];
+        }
+
+        if (requestParameters['includeDecommissioned'] != null) {
+            queryParameters['includeDecommissioned'] = requestParameters['includeDecommissioned'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

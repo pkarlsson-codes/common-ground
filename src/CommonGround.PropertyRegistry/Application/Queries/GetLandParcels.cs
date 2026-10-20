@@ -10,9 +10,11 @@ namespace CommonGround.PropertyRegistry.Application.Queries;
 /// <summary>Returns a paginated list of land parcels with optional filters.</summary>
 /// <param name="Page">Pagination spec (page number + size).</param>
 /// <param name="Search">Optional text search across legal parcel number and address.</param>
+/// <param name="IncludeDecommissioned">Whether to include decommissioned parcels.</param>
 public sealed record GetLandParcels(
     PageSpec Page,
-    string? Search = null);
+    string? Search = null,
+    bool IncludeDecommissioned = false);
 
 /// <summary>Handles <see cref="GetLandParcels"/>.</summary>
 public static class GetLandParcelsHandler
@@ -26,6 +28,11 @@ public static class GetLandParcelsHandler
         ArgumentNullException.ThrowIfNull(request);
 
         IQueryable<LandParcelListItemView> query = session.Query<LandParcelListItemView>();
+
+        if (!request.IncludeDecommissioned)
+        {
+            query = query.Where(p => !p.IsDecommissioned);
+        }
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {

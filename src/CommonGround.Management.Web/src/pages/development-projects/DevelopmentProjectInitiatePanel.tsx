@@ -23,6 +23,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 const landParcelsApi = new LandParcelsApi(apiConfig)
 const homesApi = new HomesApi(apiConfig)
 
+const parcelLabel = (p: { legalParcelNumber?: string | null; address?: string | null }) =>
+  [p.legalParcelNumber, p.address].filter(Boolean).join(' — ')
+
+const fetchParcelLabel = async (landParcelId: string) =>
+  parcelLabel(await landParcelsApi.getLandParcel({ landParcelId }))
+
 const emptyForm = (
   parcelId = '',
   homeIds: string[] = [],
@@ -256,11 +262,9 @@ export default function DevelopmentProjectInitiatePanel({
               disabled={parcelSelectionLocked}
               fetchOptions={async q => {
                 const result = await landParcelsApi.getLandParcels({ search: q, pageSize: 10 })
-                return (result.items ?? []).map(p => ({
-                  id: p.id!,
-                  label: [p.legalParcelNumber, p.address].filter(Boolean).join(' — '),
-                }))
+                return (result.items ?? []).map(p => ({ id: p.id!, label: parcelLabel(p) }))
               }}
+              fetchLabel={fetchParcelLabel}
               placeholder="Search parcels…"
             />
           </div>

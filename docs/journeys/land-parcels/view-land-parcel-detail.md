@@ -1,6 +1,6 @@
 # View Land Parcel Detail
 
-1. User navigates to Land Parcels
+1. User navigates to Land Parcels, optionally searching by parcel number or address to narrow the table
 2. User clicks a row in the Land Parcels table
 3. Detail panel opens showing status (Active or Decommissioned), area (acres), acquisition method, acquisition date, registered by, covenant terms (if any), and registered at
 4. Panel also shows a Homes section listing homes on the parcel with their type, bedrooms/bathrooms, and status
