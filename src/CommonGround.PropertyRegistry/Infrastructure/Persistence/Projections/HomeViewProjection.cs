@@ -21,6 +21,7 @@ internal sealed class HomeViewProjection : SingleStreamProjection<HomeView, stri
             SquareFootage = e.Data.SquareFootage,
             YearBuilt = e.Data.YearBuilt,
             AssessedValue = e.Data.InitialAssessedValue,
+            LastAssessedDate = e.Data.InitiallyAssessedAt,
             Status = HomeStatus.Available.DisplayName,
             RegisteredAt = e.Data.OccurredAt,
         };

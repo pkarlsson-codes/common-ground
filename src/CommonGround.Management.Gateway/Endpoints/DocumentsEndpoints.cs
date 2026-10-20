@@ -60,14 +60,11 @@ public static class DocumentsEndpoints
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> SoftDeleteDocument(
         string documentId,
-        HttpContext httpContext,
+        SoftDeleteDocumentRequest request,
         IDocumentsApiClient client,
         CancellationToken cancellationToken)
     {
-        var request = await JsonSerializer.DeserializeAsync<SoftDeleteDocumentRequest>(
-            httpContext.Request.Body,
-            cancellationToken: cancellationToken).ConfigureAwait(false)
-            ?? throw new InvalidOperationException("Request body required");
+        ArgumentNullException.ThrowIfNull(request);
         await client.SoftDeleteDocumentAsync(documentId, request, cancellationToken).ConfigureAwait(false);
         return Results.NoContent();
     }
@@ -75,10 +72,11 @@ public static class DocumentsEndpoints
     [WolverineGet("/api/v1/documents/{documentId}/download")]
     public static async Task<IResult> DownloadDocument(
         string documentId,
+        string? versionId,
         IDocumentsApiClient client,
         CancellationToken cancellationToken)
     {
-        var url = await client.GetDownloadUrlAsync(documentId, cancellationToken).ConfigureAwait(false);
+        var url = await client.GetDownloadUrlAsync(documentId, versionId, cancellationToken).ConfigureAwait(false);
         return Results.Redirect(url.ToString());
     }
 

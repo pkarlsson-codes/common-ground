@@ -1,6 +1,7 @@
 export interface RecordHomeAssessmentRequest {
   assessedValue: number
   assessmentDate: string
+  appraiserName?: string
   conditionNotes?: string
 }
 

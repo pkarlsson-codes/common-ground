@@ -366,6 +366,19 @@
             "x-position": 1
           }
         ],
+        "requestBody": {
+          "x-name": "SoftDeleteDocumentRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SoftDeleteDocumentRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
         "responses": {
           "204": {
             "description": ""
@@ -544,6 +557,15 @@
               "type": "string"
             },
             "x-position": 1
+          },
+          {
+            "name": "versionId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 2
           }
         ],
         "responses": {
@@ -6324,6 +6346,16 @@
           }
         }
       },
+      "SoftDeleteDocumentRequest": {
+        "type": "object",
+        "description": "Soft-deletes a document with a reason.",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
       "AddDocumentVersionResponse": {
         "type": "object",
         "description": "Response from a successful add-version request.",
@@ -7498,7 +7530,8 @@
             "format": "decimal"
           },
           "appraiserName": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "assessmentDate": {
             "type": "string",
@@ -7577,7 +7610,11 @@
             "type": "string",
             "nullable": true
           },
-          "assessedBy": {
+          "appraiserName": {
+            "type": "string",
+            "nullable": true
+          },
+          "recordedBy": {
             "type": "string"
           },
           "recordedAt": {

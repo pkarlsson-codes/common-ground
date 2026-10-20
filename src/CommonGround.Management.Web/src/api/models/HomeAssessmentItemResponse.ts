@@ -55,7 +55,13 @@ export interface HomeAssessmentItemResponse {
      * @type {string}
      * @memberof HomeAssessmentItemResponse
      */
-    assessedBy?: string;
+    appraiserName?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof HomeAssessmentItemResponse
+     */
+    recordedBy?: string;
     /**
      * 
      * @type {Date}
@@ -86,7 +92,8 @@ export function HomeAssessmentItemResponseFromJSONTyped(json: any, ignoreDiscrim
         'assessedValue': json['assessedValue'] == null ? undefined : json['assessedValue'],
         'assessmentDate': json['assessmentDate'] == null ? undefined : (new Date(json['assessmentDate'])),
         'conditionNotes': json['conditionNotes'] == null ? undefined : json['conditionNotes'],
-        'assessedBy': json['assessedBy'] == null ? undefined : json['assessedBy'],
+        'appraiserName': json['appraiserName'] == null ? undefined : json['appraiserName'],
+        'recordedBy': json['recordedBy'] == null ? undefined : json['recordedBy'],
         'recordedAt': json['recordedAt'] == null ? undefined : (new Date(json['recordedAt'])),
     };
 }
@@ -107,7 +114,8 @@ export function HomeAssessmentItemResponseToJSONTyped(value?: HomeAssessmentItem
         'assessedValue': value['assessedValue'],
         'assessmentDate': value['assessmentDate'] == null ? undefined : ((value['assessmentDate']).toISOString().substring(0,10)),
         'conditionNotes': value['conditionNotes'],
-        'assessedBy': value['assessedBy'],
+        'appraiserName': value['appraiserName'],
+        'recordedBy': value['recordedBy'],
         'recordedAt': value['recordedAt'] == null ? undefined : ((value['recordedAt']).toISOString()),
     };
 }

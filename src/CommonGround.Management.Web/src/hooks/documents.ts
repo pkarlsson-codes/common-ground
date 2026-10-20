@@ -150,8 +150,8 @@ export function useAttachDocument() {
 export function useSoftDeleteDocument() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ documentId }: { documentId: string }) =>
-      api.softDeleteDocument({ documentId }),
+    mutationFn: ({ documentId, reason }: { documentId: string; reason: string }) =>
+      api.softDeleteDocument({ documentId, softDeleteDocumentRequest: { reason } }),
     onSuccess: (_d, v) => {
       qc.invalidateQueries({ queryKey: KEYS.doc(v.documentId) })
       qc.invalidateQueries({ queryKey: ['documents'] })

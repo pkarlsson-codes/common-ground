@@ -55,4 +55,45 @@ public class DocumentsSmokeTests(ApiFactory factory)
         dl.Headers.Location.Should().NotBeNull();
         dl.Headers.Location!.ToString().Should().StartWith("https://fake-minio.local/");
     }
+
+    [Fact]
+    public async Task Download_WithVersionId_RedirectsToThatVersion()
+    {
+        var client = factory.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+        }).WithAuthToken();
+
+        using var form = new MultipartFormDataContent();
+        form.Add(JsonContent.Create(new UploadDocumentMetadata("Versioned deed", "Internal", "Permanent", null)), "metadata");
+        form.Add(TextFile("first"), "file", "deed-v1.txt");
+        var uploadResp = await client.PostAsync("/api/documents", form);
+        uploadResp.EnsureSuccessStatusCode();
+        var upload = await uploadResp.Content.ReadFromJsonAsync<UploadDocumentResponse>();
+        var documentId = upload!.DocumentId;
+
+        var firstVersionId = (await client.GetFromJsonAsync<DocumentResponse>($"/api/documents/{documentId}"))!.CurrentVersionId;
+
+        using var versionForm = new MultipartFormDataContent();
+        versionForm.Add(TextFile("second"), "file", "deed-v2.txt");
+        var versionResp = await client.PostAsync($"/api/documents/{documentId}/versions", versionForm);
+        versionResp.EnsureSuccessStatusCode();
+        var secondVersionId = (await versionResp.Content.ReadFromJsonAsync<AddDocumentVersionResponse>())!.VersionId;
+
+        var current = await client.GetAsync($"/api/documents/{documentId}/download");
+        var first = await client.GetAsync($"/api/documents/{documentId}/download?versionId={firstVersionId}");
+        var unknown = await client.GetAsync($"/api/documents/{documentId}/download?versionId=ver-missing");
+
+        current.Headers.Location!.ToString().Should().Contain(Uri.EscapeDataString(secondVersionId));
+        first.StatusCode.Should().Be(HttpStatusCode.Redirect);
+        first.Headers.Location!.ToString().Should().Contain(Uri.EscapeDataString(firstVersionId));
+        unknown.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    private static ByteArrayContent TextFile(string text)
+    {
+        var content = new ByteArrayContent(Encoding.UTF8.GetBytes(text));
+        content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
+        return content;
+    }
 }

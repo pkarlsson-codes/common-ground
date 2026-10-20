@@ -31,7 +31,7 @@ export interface RecordHomeAssessmentRequest {
      * @type {string}
      * @memberof RecordHomeAssessmentRequest
      */
-    appraiserName?: string;
+    appraiserName?: string | null;
     /**
      * 
      * @type {Date}

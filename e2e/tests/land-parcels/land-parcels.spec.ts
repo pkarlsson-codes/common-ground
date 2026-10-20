@@ -167,7 +167,8 @@ test('initiating a development project from a parcel locks the parcel and lists 
 
   const name = `Project ${uniqueId()}`
   await field(initiate, 'Name').fill(name)
-  await field(initiate, 'Description (optional)').fill('Four new cottages')
+  await expect(initiate.getByRole('button', { name: 'Initiate Project' })).toBeDisabled()
+  await field(initiate, 'Description').fill('Four new cottages')
   await initiate.getByRole('button', { name: 'Initiate Project' }).click()
   await expectToast(page, 'Development project initiated')
   await expect(initiate).toBeHidden()

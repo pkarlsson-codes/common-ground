@@ -5,8 +5,8 @@ using Marten;
 
 namespace CommonGround.Documents.Application.Queries;
 
-/// <summary>Returns a short-lived presigned URL for the current version of a document.</summary>
-public sealed record GetDocumentDownloadUrl(DocumentId DocumentId);
+/// <summary>Returns a short-lived presigned URL for a version of a document (the current one unless specified).</summary>
+public sealed record GetDocumentDownloadUrl(DocumentId DocumentId, string? VersionId = null);
 
 /// <summary>Handles <see cref="GetDocumentDownloadUrl"/>.</summary>
 public static class GetDocumentDownloadUrlHandler
@@ -25,7 +25,9 @@ public static class GetDocumentDownloadUrlHandler
         var view = await session.LoadAsync<DocumentView>(request.DocumentId.Value, cancellationToken).ConfigureAwait(false)
             ?? throw new AggregateNotFoundException(request.DocumentId.Value);
 
-        var current = view.Versions.Single(v => v.VersionId == view.CurrentVersionId);
-        return await blobs.GetPresignedDownloadUrlAsync(current.BlobKey, PresignedExpiry, cancellationToken).ConfigureAwait(false);
+        var versionId = request.VersionId ?? view.CurrentVersionId;
+        var version = view.Versions.SingleOrDefault(v => v.VersionId == versionId)
+            ?? throw new AggregateNotFoundException($"Version {versionId} of document {request.DocumentId.Value} was not found.");
+        return await blobs.GetPresignedDownloadUrlAsync(version.BlobKey, PresignedExpiry, cancellationToken).ConfigureAwait(false);
     }
 }

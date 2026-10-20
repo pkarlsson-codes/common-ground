@@ -7,8 +7,8 @@
 5. User searches for and selects a land parcel in the Land Parcel combobox
 6. User enters a project Name
 7. If Project Type is "Rehabilitation", a Homes field appears; user selects one or more homes registered on the chosen parcel (the list loads once a parcel is selected; at least one home must be selected to submit)
-8. User optionally enters a Description
-9. User clicks "Initiate Project" (disabled until Land Parcel and Name are set, and — for Rehabilitation — at least one Home is selected)
+8. User enters a Description
+9. User clicks "Initiate Project" (disabled until Land Parcel, Name, and Description are set, and — for Rehabilitation — at least one Home is selected)
 10. Toast: "Development project initiated"
 11. Panel closes, new project appears in the Development Projects table
 

@@ -7,5 +7,6 @@ public sealed record HomeAssessmentItemResponse(
     decimal AssessedValue,
     DateOnly AssessmentDate,
     string? ConditionNotes,
-    string AssessedBy,
+    string? AppraiserName,
+    string RecordedBy,
     DateTimeOffset RecordedAt);

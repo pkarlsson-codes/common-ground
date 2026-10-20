@@ -142,12 +142,12 @@ public static class DocumentsEndpoints
     }
 
     [WolverineGet("/api/documents/{documentId}/download")]
-    public static async Task<IResult> Download(string documentId, HttpContext httpContext, IMessageBus bus, CancellationToken cancellationToken)
+    public static async Task<IResult> Download(string documentId, string? versionId, HttpContext httpContext, IMessageBus bus, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
 
         var url = await bus.InvokeForTenantAsync<Uri>(bus.TenantId!,
-            new GetDocumentDownloadUrl(DocumentId.Create(documentId)), cancellationToken).ConfigureAwait(false);
+            new GetDocumentDownloadUrl(DocumentId.Create(documentId), versionId), cancellationToken).ConfigureAwait(false);
 
         return Results.Redirect(url.ToString());
     }

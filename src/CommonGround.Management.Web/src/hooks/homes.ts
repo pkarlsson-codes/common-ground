@@ -66,6 +66,7 @@ export function useRecordHomeAssessment() {
         recordHomeAssessmentRequest: {
           assessedValue: req.assessedValue,
           assessmentDate: new Date(req.assessmentDate),
+          appraiserName: req.appraiserName,
           conditionNotes: req.conditionNotes,
         },
       }),

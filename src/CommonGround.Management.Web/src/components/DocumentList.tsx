@@ -46,7 +46,8 @@ export default function DocumentList({ entityType, entityId }: Props) {
   const [page, setPage] = useState(1)
   const [showUpload, setShowUpload] = useState(false)
   const [form, setForm] = useState<UploadForm>(emptyForm)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [removing, setRemoving] = useState<{ documentId: string; title: string } | null>(null)
+  const [removeReason, setRemoveReason] = useState('')
   const [dragOver, setDragOver] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
@@ -92,18 +93,20 @@ export default function DocumentList({ entityType, entityId }: Props) {
     }
   }
 
-  const handleDelete = async (documentId: string, title: string) => {
-    if (!window.confirm(`Delete "${title}"? This can be restored later.`)) return
-    setDeletingId(documentId)
+  const startRemove = (documentId: string, title: string) => {
+    setRemoving({ documentId, title })
+    setRemoveReason('')
+  }
+
+  const handleRemove = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!removing) return
     try {
-      await deleteMutation.mutateAsync({
-        documentId,
-      })
+      await deleteMutation.mutateAsync({ documentId: removing.documentId, reason: removeReason.trim() })
+      setRemoving(null)
       success('Document removed')
     } catch {
       toastError('Delete failed')
-    } finally {
-      setDeletingId(null)
     }
   }
 
@@ -285,14 +288,54 @@ export default function DocumentList({ entityType, entityId }: Props) {
                     type="button"
                     className="btn btn-ghost btn-sm"
                     style={{ color: 'var(--red)' }}
-                    onClick={() => handleDelete(item.documentId ?? '', item.title ?? '')}
-                    disabled={deletingId === item.documentId}
+                    onClick={() => startRemove(item.documentId ?? '', item.title ?? '')}
+                    disabled={removing?.documentId === item.documentId}
                     title="Remove"
                   >
-                    {deletingId === item.documentId ? '…' : 'Remove'}
+                    Remove
                   </button>
                 </div>
               </div>
+              {removing && removing.documentId === item.documentId && (
+                <form
+                  onSubmit={handleRemove}
+                  style={{
+                    padding: '10px 12px',
+                    border: '1px solid var(--border)',
+                    borderTop: 'none',
+                    background: 'var(--surface-1)',
+                    display: 'grid',
+                    gap: 8,
+                  }}
+                >
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                    Remove "{removing.title}"? It can be restored later.
+                  </div>
+                  <div className="form-field">
+                    <label className="form-label">Reason</label>
+                    <input
+                      className="form-input"
+                      type="text"
+                      value={removeReason}
+                      onChange={e => setRemoveReason(e.target.value)}
+                      placeholder="Why is this document being removed?"
+                      autoFocus
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button
+                      type="submit"
+                      className="btn btn-secondary btn-sm"
+                      disabled={deleteMutation.isPending || !removeReason.trim()}
+                    >
+                      {deleteMutation.isPending ? 'Removing…' : 'Confirm Remove'}
+                    </button>
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => setRemoving(null)}>
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
               {expandedId === item.documentId && (
                 <DocumentVersionPanel documentId={item.documentId ?? ''} entityId={entityId} />
               )}
@@ -476,7 +519,7 @@ function DocumentVersionPanel({ documentId }: VersionPanelProps) {
                 type="button"
                 className="btn btn-ghost btn-sm"
                 style={{ fontSize: 11 }}
-                onClick={() => window.open(`/api/v1/documents/${documentId}/download`, '_blank')}
+                onClick={() => window.open(`/api/v1/documents/${documentId}/download?versionId=${encodeURIComponent(v.versionId ?? '')}`, '_blank')}
                 title="Download this version"
               >
                 DL

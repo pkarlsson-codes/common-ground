@@ -22,6 +22,7 @@ import type {
   PaginatedResponseOfDocumentLibraryItemResponse,
   PaginatedResponseOfEntityDocumentItemResponse,
   ProblemDetails,
+  SoftDeleteDocumentRequest,
   TagDocumentRequest,
   UpdateDocumentMetadataRequest,
   UploadDocumentResponse,
@@ -39,6 +40,8 @@ import {
     PaginatedResponseOfEntityDocumentItemResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
+    SoftDeleteDocumentRequestFromJSON,
+    SoftDeleteDocumentRequestToJSON,
     TagDocumentRequestFromJSON,
     TagDocumentRequestToJSON,
     UpdateDocumentMetadataRequestFromJSON,
@@ -58,6 +61,7 @@ export interface AttachDocumentOperationRequest {
 
 export interface DownloadDocumentRequest {
     documentId: string;
+    versionId?: string | null;
 }
 
 export interface GetDocumentRequest {
@@ -81,8 +85,9 @@ export interface ListDocumentsRequest {
     expiringBefore?: Date | null;
 }
 
-export interface SoftDeleteDocumentRequest {
+export interface SoftDeleteDocumentOperationRequest {
     documentId: string;
+    softDeleteDocumentRequest: SoftDeleteDocumentRequest;
 }
 
 export interface TagDocumentOperationRequest {
@@ -137,6 +142,7 @@ export interface DocumentsApiInterface {
     /**
      * 
      * @param {string} documentId 
+     * @param {string} [versionId] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
@@ -198,15 +204,16 @@ export interface DocumentsApiInterface {
     /**
      * 
      * @param {string} documentId 
+     * @param {SoftDeleteDocumentRequest} softDeleteDocumentRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
      */
-    softDeleteDocumentRaw(requestParameters: SoftDeleteDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+    softDeleteDocumentRaw(requestParameters: SoftDeleteDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
 
     /**
      */
-    softDeleteDocument(requestParameters: SoftDeleteDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+    softDeleteDocument(requestParameters: SoftDeleteDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -367,6 +374,10 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
         }
 
         const queryParameters: any = {};
+
+        if (requestParameters['versionId'] != null) {
+            queryParameters['versionId'] = requestParameters['versionId'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -534,7 +545,7 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
 
     /**
      */
-    async softDeleteDocumentRaw(requestParameters: SoftDeleteDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+    async softDeleteDocumentRaw(requestParameters: SoftDeleteDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['documentId'] == null) {
             throw new runtime.RequiredError(
                 'documentId',
@@ -542,9 +553,18 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
             );
         }
 
+        if (requestParameters['softDeleteDocumentRequest'] == null) {
+            throw new runtime.RequiredError(
+                'softDeleteDocumentRequest',
+                'Required parameter "softDeleteDocumentRequest" was null or undefined when calling softDeleteDocument().'
+            );
+        }
+
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
 
 
         let urlPath = `/api/v1/documents/{documentId}`;
@@ -555,6 +575,7 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
             method: 'DELETE',
             headers: headerParameters,
             query: queryParameters,
+            body: SoftDeleteDocumentRequestToJSON(requestParameters['softDeleteDocumentRequest']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse<any>(response);
@@ -562,7 +583,7 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
 
     /**
      */
-    async softDeleteDocument(requestParameters: SoftDeleteDocumentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+    async softDeleteDocument(requestParameters: SoftDeleteDocumentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
         const response = await this.softDeleteDocumentRaw(requestParameters, initOverrides);
         switch (response.raw.status) {
             case 204:

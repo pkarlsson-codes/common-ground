@@ -15,6 +15,20 @@ internal sealed class HomeAssessmentViewProjection : EventProjection
             AssessedValue = e.Data.AssessedValue,
             AssessmentDate = e.Data.AssessmentDate,
             ConditionNotes = e.Data.ConditionNotes,
+            AppraiserName = e.Data.AppraiserName,
+            RecordedBy = e.Data.RecordedById,
+            RecordedAt = e.Data.OccurredAt,
+        };
+
+    public static HomeAssessmentView Create(IEvent<HomeRegistered> e) =>
+        new()
+        {
+            Id = e.Id,
+            UnitId = e.Data.AggregateId,
+            AssessedValue = e.Data.InitialAssessedValue,
+            AssessmentDate = e.Data.InitiallyAssessedAt,
+            AppraiserName = e.Data.InitialAppraiserName,
+            RecordedBy = e.Data.RegisteredBy,
             RecordedAt = e.Data.OccurredAt,
         };
 }

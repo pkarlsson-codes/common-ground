@@ -139,6 +139,8 @@ public class HomesTests(ApiFactory factory)
         var home = await getResponse.Content.ReadFromJsonAsync<HomeResponse>();
         home!.Id.Should().Be(homeId);
         home.LandParcelId.Should().Be(parcelId);
+        home.AssessedValue.Should().Be(420000m);
+        home.LastAssessedDate.Should().Be(new DateOnly(2024, 1, 1));
     }
 
     [Fact]
@@ -150,7 +152,7 @@ public class HomesTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task GetHomeAssessments_AfterRecordingAssessments_ReturnsPaginatedListNewestFirst()
+    public async Task GetHomeAssessments_AfterRecordingAssessments_ReturnsThemWithTheInitialAssessmentNewestFirst()
     {
         var parcelId = await CreateLandParcelAsync();
         var client = factory.CreateClient().WithAuthToken();
@@ -184,7 +186,7 @@ public class HomesTests(ApiFactory factory)
         await client.PostAsJsonAsync($"/api/homes/{homeId}/assessments",
             new RecordHomeAssessmentRequest(
                 325000m,
-                "Test Appraiser",
+                null,
                 secondDate,
                 "Excellent condition"));
 
@@ -193,9 +195,11 @@ public class HomesTests(ApiFactory factory)
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content.ReadFromJsonAsync<PaginatedResponse<HomeAssessmentItemResponse>>();
-        result!.Items.Should().HaveCount(2);
-        result.Items[0].AssessmentDate.Should().Be(secondDate);
-        result.Items[1].AssessmentDate.Should().Be(firstDate);
+        result!.Items.Select(a => (a.AssessmentDate, a.AssessedValue, a.AppraiserName)).Should().Equal(
+            (secondDate, 325000m, (string?)null),
+            (firstDate, 310000m, "Test Appraiser"),
+            (new DateOnly(2024, 1, 1), 300000m, "Test Appraiser"));
+        result.Items.Should().AllSatisfy(a => a.RecordedBy.Should().NotBeNullOrEmpty());
     }
 
     private async Task<string> CreateLandParcelAsync()

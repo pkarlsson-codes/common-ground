@@ -96,9 +96,10 @@ public interface IDocumentsApiClient
         string entityType, string entityId, GetEntityDocumentsQuerySpec querySpec, CancellationToken cancellationToken);
 
     /// <summary>Gets the absolute URL the client should redirect to for downloading.</summary>
-    /// <remarks>Implementation should call the API and surface the 302 location header without following.</remarks>
+    /// <remarks>Surfaces the API's 302 location header, so the HttpClient must be configured not to follow redirects.</remarks>
     /// <param name="documentId">The ID of the document to download.</param>
+    /// <param name="versionId">The version to download, or null for the current version.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>The URI to redirect to for downloading the document.</returns>
-    Task<Uri> GetDownloadUrlAsync(string documentId, CancellationToken cancellationToken);
+    Task<Uri> GetDownloadUrlAsync(string documentId, string? versionId, CancellationToken cancellationToken);
 }

@@ -112,19 +112,12 @@ public sealed class DocumentsApiClient(
     }
 
     /// <inheritdoc/>
-    public async Task<Uri> GetDownloadUrlAsync(string documentId, CancellationToken cancellationToken)
+    public async Task<Uri> GetDownloadUrlAsync(string documentId, string? versionId, CancellationToken cancellationToken)
     {
-        using var clientNoRedirect = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false })
-        {
-            BaseAddress = HttpClient.BaseAddress,
-        };
-        if (HttpClient.DefaultRequestHeaders.Authorization is { } auth)
-        {
-            clientNoRedirect.DefaultRequestHeaders.Authorization = auth;
-        }
-
-        using var resp = await clientNoRedirect.GetAsync(
-            $"api/documents/{documentId}/download", cancellationToken).ConfigureAwait(false);
+        var path = versionId is null
+            ? $"api/documents/{documentId}/download"
+            : $"api/documents/{documentId}/download?versionId={Uri.EscapeDataString(versionId)}";
+        using var resp = await HttpClient.GetAsync(path, cancellationToken).ConfigureAwait(false);
 
         if ((int)resp.StatusCode is not(>= 300 and < 400) || resp.Headers.Location is null)
         {

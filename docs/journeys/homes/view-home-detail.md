@@ -6,7 +6,7 @@
 4. "Details" tab shows status, year built, assessed value, last assessed date, condition notes (if any), a link to the home's land parcel, and registered at
 5. If the home's status is Available, a "Select Applicant" action is also shown next to the status; it is hidden for any other status (PendingOccupancy, Occupied, Resale, UnderContract, etc.)
 6. Panel also shows a Development Projects section listing projects on the home's parcel with their name and status
-7. Panel also shows an Assessments section listing recorded assessments with date, assessed value, and assessor
+7. Panel also shows an Assessments section listing assessments newest first, starting from the initial assessment entered at registration, each with its date, assessed value, and appraiser name (or "—" if none was entered)
 8. User can switch to the "Documents" tab to view, upload, remove, or version documents attached to the home
 9. User closes the panel
 

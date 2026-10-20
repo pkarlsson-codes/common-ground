@@ -72,8 +72,10 @@ internal static class CorePlatformClientExtensions
             client.BaseAddress = new Uri(corePlatformBaseAddress))
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
+        // Downloads hand the API's redirect to the presigned blob URL back to the browser, so don't follow it.
         services.AddHttpClient<IDocumentsApiClient, DocumentsApiClient>(client =>
             client.BaseAddress = new Uri(corePlatformBaseAddress))
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false })
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
         services.AddHttpClient<IDevelopmentProjectsApiClient, DevelopmentProjectsApiClient>(client =>

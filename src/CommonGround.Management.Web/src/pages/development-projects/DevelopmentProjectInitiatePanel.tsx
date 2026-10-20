@@ -193,6 +193,7 @@ export default function DevelopmentProjectInitiatePanel({
   const canSubmit =
     !!form.landParcelId &&
     !!form.name?.trim() &&
+    !!form.description?.trim() &&
     (!isRehab || (form.existingHomes?.length ?? 0) > 0) &&
     !initiateMutation.isPending
 
@@ -203,7 +204,7 @@ export default function DevelopmentProjectInitiatePanel({
         landParcelId: form.landParcelId,
         name: form.name,
         type: form.type,
-        description: form.description || undefined,
+        description: form.description,
         existingHomes: isRehab ? form.existingHomes : undefined,
       })
       success('Development project initiated')
@@ -300,7 +301,7 @@ export default function DevelopmentProjectInitiatePanel({
           )}
 
           <div className="form-field full">
-            <label className="form-label">Description (optional)</label>
+            <label className="form-label">Description</label>
             <textarea
               className="form-textarea"
               value={form.description ?? ''}

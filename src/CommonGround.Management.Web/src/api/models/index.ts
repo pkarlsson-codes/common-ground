@@ -112,6 +112,7 @@ export * from './ResolveForeclosurePreventionCaseRequest';
 export * from './ScheduleClosingRequest';
 export * from './SchedulePropertyInspectionRequest';
 export * from './SelectApplicantRequest';
+export * from './SoftDeleteDocumentRequest';
 export * from './StallWorkflowRequest';
 export * from './StewardshipCaseResponse';
 export * from './StewardshipCheckInDto';

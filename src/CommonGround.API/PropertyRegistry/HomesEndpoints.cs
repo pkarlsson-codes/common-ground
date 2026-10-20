@@ -137,7 +137,7 @@ public static class HomesEndpoints
         var result = await bus.InvokeForTenantAsync<PaginatedResponse<HomeAssessmentView>>(bus.TenantId!, query, cancellationToken);
 
         var response = result.MapItems(v => new HomeAssessmentItemResponse(
-            v.Id.ToString(), v.UnitId, v.AssessedValue, v.AssessmentDate, v.ConditionNotes, v.AssessedBy, v.RecordedAt));
+            v.Id.ToString(), v.UnitId, v.AssessedValue, v.AssessmentDate, v.ConditionNotes, v.AppraiserName, v.RecordedBy, v.RecordedAt));
 
         return Results.Ok(response);
     }

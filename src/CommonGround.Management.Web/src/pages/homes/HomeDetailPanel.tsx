@@ -27,6 +27,7 @@ const fmtNumber = (n: number) => new Intl.NumberFormat('en-US').format(n)
 const emptyAssessment = (): RecordHomeAssessmentRequest => ({
   assessedValue: 0,
   assessmentDate: new Date().toISOString().slice(0, 10),
+  appraiserName: '',
   conditionNotes: '',
 })
 
@@ -61,6 +62,7 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
         req: {
           ...assessment,
           assessedValue: Number(assessment.assessedValue),
+          appraiserName: assessment.appraiserName || undefined,
           conditionNotes: assessment.conditionNotes || undefined,
         },
       })
@@ -219,6 +221,15 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
                           />
                         </div>
                         <div className="form-field full">
+                          <label className="form-label">Appraiser Name (optional)</label>
+                          <input
+                            className="form-input"
+                            type="text"
+                            value={assessment.appraiserName}
+                            onChange={e => setAssessment(a => ({ ...a, appraiserName: e.target.value }))}
+                          />
+                        </div>
+                        <div className="form-field full">
                           <label className="form-label">Condition Notes (optional)</label>
                           <textarea
                             className="form-textarea"
@@ -263,13 +274,13 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
                           }}
                         >
                           <span className="detail-field__label" style={{ marginBottom: 0 }}>
-                            {item.assessmentDate?.toLocaleDateString() ?? '—'}
+                            {item.assessmentDate?.toISOString().slice(0, 10) ?? '—'}
                           </span>
                           <span className="detail-field__value mono" style={{ marginBottom: 0 }}>
                             {fmtCurrency(Number(item.assessedValue ?? 0))}
                           </span>
                           <span className="detail-field__value" style={{ marginBottom: 0, whiteSpace: 'nowrap' }}>
-                            {item.assessedBy?.slice(0, 10) ?? '—'}
+                            {item.appraiserName ?? '—'}
                           </span>
                         </div>
                       ))}
