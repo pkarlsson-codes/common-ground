@@ -134,3 +134,18 @@ export async function createPurchaseWorkflow(page: Page, buyerName: string, { fr
 
   return { parcelId, homeId, groundLeaseTemplateId, templateName, applicationId, buyerName }
 }
+
+/** Uploads a text file as a document attached to a home. */
+export async function uploadHomeDocument(page: Page, homeId: string, title: string, fileName: string, contents: string) {
+  const response = await page.request.post('/api/v1/documents', {
+    headers: await headers(page),
+    multipart: {
+      metadata: JSON.stringify({
+        title, sensitivity: 'Internal', retention: 'Standard3yr',
+        initialAttachment: { entityType: 'Building', entityId: homeId },
+      }),
+      file: { name: fileName, mimeType: 'text/plain', buffer: Buffer.from(contents) },
+    },
+  })
+  return ok<{ documentId: string }>(response, 'POST /api/v1/documents')
+}
