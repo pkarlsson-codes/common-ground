@@ -109,6 +109,7 @@ export async function createPurchaseWorkflow(page: Page, buyerName: string, { fr
   const purchasePrice = 200000
 
   let applicationId: string | undefined
+  let workflowId: string
   if (fromApplication) {
     applicationId = (await createApplication(page, buyerName)).applicationId
     await post(page, `/api/v1/homeowner-applications/${applicationId}/select`, {
@@ -120,8 +121,11 @@ export async function createPurchaseWorkflow(page: Page, buyerName: string, { fr
         page, `/api/v1/purchase-workflows?groundLeaseTemplateId=${groundLeaseTemplateId}`)
       return workflows.items.length
     }).toBe(1)
+    const workflows = await get<{ items: { id: string }[] }>(
+      page, `/api/v1/purchase-workflows?groundLeaseTemplateId=${groundLeaseTemplateId}`)
+    workflowId = workflows.items[0].id
   } else {
-    await post(page, '/api/v1/purchase-workflows', {
+    ;({ purchaseWorkflowId: workflowId } = await post<{ purchaseWorkflowId: string }>(page, '/api/v1/purchase-workflows', {
       groundLeaseTemplateId,
       landParcelId: parcelId,
       homeId,
@@ -129,10 +133,36 @@ export async function createPurchaseWorkflow(page: Page, buyerName: string, { fr
       buyerEmail: `${buyerName.toLowerCase().replace(/\s+/g, '-')}@example.com`,
       buyerPhone: '+12025550143',
       purchasePrice,
-    })
+    }))
   }
 
-  return { parcelId, homeId, groundLeaseTemplateId, templateName, applicationId, buyerName }
+  return { workflowId, parcelId, homeId, groundLeaseTemplateId, templateName, applicationId, buyerName }
+}
+
+/**
+ * Takes a purchase through every track to closing, which creates an active ground lease for the buyer (from the
+ * workflow's lease template, so it can be resold).
+ */
+export async function createLeaseFromPurchase(page: Page, buyerName: string) {
+  const workflow = await createPurchaseWorkflow(page, buyerName)
+  const path = `/api/v1/purchase-workflows/${workflow.workflowId}`
+  await post(page, `${path}/eligibility`, { verifiedDate: isoDate(-10), notes: null })
+  await post(page, `${path}/financing`, { lenderName: 'E2E Lender', committedAmount: 180000, preapprovalLetterDate: isoDate(-9) })
+  await post(page, `${path}/inspection`, { inspectionDate: isoDate(-8), inspectorName: 'E2E Inspector', notes: null })
+  await post(page, `${path}/title`, { clearedDate: isoDate(-7), titleCompanyName: null })
+  await post(page, `${path}/lease-execution`, { signedDate: isoDate(-6) })
+  await post(page, `${path}/closing/schedule`, { scheduledClosingDate: isoDate(-1) })
+  await post(page, `${path}/closing/record`, { actualClosingDate: isoDate(-1), notes: null })
+
+  // The lease is created by an event handler, so poll for it.
+  let leaseId = ''
+  await expect.poll(async () => {
+    const leases = await get<{ items: { id: string }[] }>(page, `/api/v1/ground-leases?homeId=${workflow.homeId}`)
+    leaseId = leases.items[0]?.id ?? ''
+    return leaseId
+  }).not.toBe('')
+
+  return { ...workflow, leaseId, buyerEmail: `${buyerName.toLowerCase().replace(/\s+/g, '-')}@example.com` }
 }
 
 /** Uploads a text file as a document attached to a home. */
