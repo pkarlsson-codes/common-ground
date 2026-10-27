@@ -29,6 +29,9 @@ interface Props {
   onSuccess: (workflowId?: string) => void
 }
 
+export const NO_TEMPLATE_MESSAGE =
+  'This ground lease has no lease template, so a purchase workflow cannot be initiated from it.'
+
 const hasPurchaseWorkflowId = (value: unknown): value is { purchaseWorkflowId?: string } =>
   typeof value === 'object' && value !== null && 'purchaseWorkflowId' in value
 
@@ -68,7 +71,7 @@ export function useResaleFlowController({ groundLeaseId, onSuccess }: Props) {
     setInitiateError(null)
 
     if (!lease?.groundLeaseTemplateId) {
-      setInitiateError('This ground lease has no lease template, so a purchase workflow cannot be initiated from it.')
+      setInitiateError(NO_TEMPLATE_MESSAGE)
       return
     }
 
@@ -93,6 +96,9 @@ export function useResaleFlowController({ groundLeaseId, onSuccess }: Props) {
   }
 
   return {
+    lease,
+    // Known once the lease has loaded; leases created directly (not from a purchase) have no template.
+    missingTemplate: !!lease && !lease.groundLeaseTemplateId,
     step,
     nextStep,
     prevStep,

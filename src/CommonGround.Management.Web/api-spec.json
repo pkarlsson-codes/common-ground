@@ -6818,6 +6818,9 @@
           "status": {
             "type": "string"
           },
+          "formulaKind": {
+            "type": "string"
+          },
           "homeownerFullName": {
             "type": "string",
             "nullable": true

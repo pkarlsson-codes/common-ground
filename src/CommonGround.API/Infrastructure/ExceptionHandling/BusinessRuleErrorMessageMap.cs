@@ -42,6 +42,7 @@ internal static class BusinessRuleErrorMessageMap
             ["homeownership.resale_policy_terms.create.improvements_cap_non_positive"] = "Improvements cap must be greater than zero when provided.",
             ["homeownership.resale_policy_terms.fixed_percentage.annual_percentage_out_of_range"] = "Annual percentage must be between {min} and {max}.",
             ["homeownership.resale_policy_terms.index_based.baseline_index_non_positive"] = "Baseline index value must be greater than zero.",
+            ["homeownership.resale_policy_terms.index_based.current_index_value_required"] = "Current index value is required to estimate an index-based resale price.",
             ["homeownership.resale_policy_terms.index_based.index_type_required"] = "Index type is required.",
 
             ["property_registry.development_project.initiate.description_required"] = "Project description is required.",

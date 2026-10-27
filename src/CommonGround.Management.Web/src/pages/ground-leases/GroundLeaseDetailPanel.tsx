@@ -40,6 +40,10 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
   const [checkInError, setCheckInError] = useState<string | null>(null)
   const { success } = useToast()
 
+  // Most recent visit first; same-day check-ins in the order they were recorded, newest first.
+  const checkIns = [...(detail?.stewardshipCheckIns ?? [])].sort((a, b) =>
+    (b.checkInDate ?? '').localeCompare(a.checkInDate ?? '') || (b.occurredAt ?? '').localeCompare(a.occurredAt ?? ''))
+
   const handleCheckIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setCheckInError(null)
@@ -145,9 +149,9 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
 
           <div className="detail-section">
             <div className="detail-section__title">Stewardship Check-Ins</div>
-            {(detail.stewardshipCheckIns ?? []).length > 0 && (
+            {checkIns.length > 0 && (
               <div style={{ marginBottom: 14 }}>
-                {(detail.stewardshipCheckIns ?? []).map((c, i) => (
+                {checkIns.map((c, i) => (
                   <div
                     key={i}
                     style={{
@@ -182,12 +186,13 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
                   />
                 </div>
                 <div className="form-field full">
-                  <label className="form-label">Notes (optional)</label>
+                  <label className="form-label">Notes</label>
                   <textarea
                     className="form-textarea"
                     value={checkInForm.notes}
                     onChange={e => setCheckInForm(f => ({ ...f, notes: e.target.value }))}
                     placeholder="Observations from the visit…"
+                    required
                   />
                 </div>
               </div>

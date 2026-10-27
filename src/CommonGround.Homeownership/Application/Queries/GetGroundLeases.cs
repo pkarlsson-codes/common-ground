@@ -7,7 +7,7 @@ using Marten.Pagination;
 
 namespace CommonGround.Homeownership.Application.Queries;
 
-/// <summary>Returns a paginated list of ground leases with optional filters.</summary>
+/// <summary>Returns a paginated list of ground leases with optional filters, newest first.</summary>
 public sealed record GetGroundLeases(
     PageSpec Page,
     IReadOnlyList<GroundLeaseStatus>? Statuses = null,
@@ -53,6 +53,7 @@ public static class GetGroundLeasesHandler
         }
 
         var page = await query
+            .OrderByDescending(v => v.CreatedAt)
             .ToPagedListAsync(request.Page.Number, request.Page.Size, cancellationToken)
             .ConfigureAwait(false);
 

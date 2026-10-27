@@ -1,4 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
+using CommonGround.SharedKernel.Domain.Exceptions;
 using FluentAssertions;
 
 namespace CommonGround.Homeownership.Tests.Domain.GroundLeases;
@@ -51,6 +52,17 @@ public class ResalePriceCalculatorTests
         var input = StandardInput with { ApprovedImprovements = null, CurrentIndexValue = 100m };
 
         ResalePriceCalculator.Calculate(terms, input).Should().Be(200_000m);
+    }
+
+    [Fact]
+    public void IndexBased_WithoutCurrentIndexValue_Throws()
+    {
+        var terms = ResalePolicyTerms.IndexBased("CPI", 100m);
+
+        var act = () => ResalePriceCalculator.Calculate(terms, StandardInput);
+
+        act.Should().Throw<BusinessRuleViolationException>()
+            .Which.Code.Should().Be("homeownership.resale_policy_terms.index_based.current_index_value_required");
     }
 
     // --- Fixed-percentage parity ---

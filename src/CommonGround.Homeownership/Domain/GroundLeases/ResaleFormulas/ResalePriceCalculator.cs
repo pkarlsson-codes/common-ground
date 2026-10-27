@@ -1,9 +1,13 @@
+using CommonGround.Homeownership.Application.Errors;
+using CommonGround.SharedKernel.Domain.Exceptions;
+
 namespace CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 
 /// <summary>Calculates the resale price based on policy terms and runtime inputs.</summary>
 public static class ResalePriceCalculator
 {
     /// <summary>Calculates the maximum allowable resale price.</summary>
+    /// <exception cref="BusinessRuleViolationException">Thrown when an index-based price is calculated without a current index value.</exception>
     public static decimal Calculate(ResalePolicyTerms terms, ResaleCalculationInput input)
     {
         ArgumentNullException.ThrowIfNull(terms);
@@ -34,7 +38,10 @@ public static class ResalePriceCalculator
 
     private static decimal CalculateIndexBased(ResalePolicyTerms terms, ResaleCalculationInput input)
     {
-        return input.OriginalPurchasePrice * (input.CurrentIndexValue!.Value / terms.BaselineIndexValue!.Value);
+        if (input.CurrentIndexValue is not { } currentIndexValue)
+            throw BusinessRuleViolation.ResalePolicyTerms.IndexBased.CurrentIndexValueRequired();
+
+        return input.OriginalPurchasePrice * (currentIndexValue / terms.BaselineIndexValue!.Value);
     }
 
     private static decimal CalculateFixedPercentage(ResalePolicyTerms terms, ResaleCalculationInput input)

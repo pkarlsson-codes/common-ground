@@ -17,10 +17,20 @@ export default function GroundLeasesPage() {
 
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [panel, setPanel] = useState<Panel>(null)
 
-  const { data, isLoading, isError } = useGroundLeases(page, statusFilter || undefined)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setSearch(searchInput.trim())
+      setPage(1)
+    }, 300)
+    return () => clearTimeout(timeout)
+  }, [searchInput])
+
+  const { data, isLoading, isError } = useGroundLeases(page, statusFilter || undefined, undefined, undefined, search || undefined)
 
   const openDetail = (id: string) => {
     setSelectedId(id)
@@ -72,6 +82,15 @@ export default function GroundLeasesPage() {
       </div>
 
       <div className="filter-bar">
+        <input
+          className="form-input"
+          type="search"
+          placeholder="Search by homeowner name or email"
+          aria-label="Search ground leases"
+          value={searchInput}
+          onChange={e => setSearchInput(e.target.value)}
+          style={{ maxWidth: 320 }}
+        />
         <select
           className="select"
           value={statusFilter}

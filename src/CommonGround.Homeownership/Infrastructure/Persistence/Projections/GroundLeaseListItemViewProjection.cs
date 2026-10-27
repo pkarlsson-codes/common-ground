@@ -17,6 +17,7 @@ internal sealed class GroundLeaseListItemViewProjection : SingleStreamProjection
             LeaseStartDate = e.Data.LeaseStartDate,
             TermYears = e.Data.TermYears,
             Status = "Active",
+            FormulaKind = e.Data.FormulaKind.ToString(),
             CreatedAt = e.Data.OccurredAt,
         };
 
@@ -29,6 +30,7 @@ internal sealed class GroundLeaseListItemViewProjection : SingleStreamProjection
             LeaseStartDate = e.Data.LeaseStartDate,
             TermYears = e.Data.TermYears,
             Status = "Active",
+            FormulaKind = e.Data.FormulaKind.ToString(),
             CreatedAt = e.Data.OccurredAt,
             HomeownerFullName = e.Data.BuyerFullName,
             HomeownerEmail = e.Data.BuyerEmail,

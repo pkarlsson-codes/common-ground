@@ -69,6 +69,7 @@ public static class GroundLeasesEndpoints
             v.LeaseStartDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             v.TermYears,
             v.Status,
+            v.FormulaKind,
             v.HomeownerFullName,
             v.HomeownerEmail,
             v.CreatedAt.ToString("O", CultureInfo.InvariantCulture)));

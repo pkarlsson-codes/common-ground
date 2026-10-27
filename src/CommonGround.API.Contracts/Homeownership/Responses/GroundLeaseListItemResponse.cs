@@ -8,6 +8,7 @@ public sealed record GroundLeaseListItemResponse(
     string LeaseStartDate,
     int TermYears,
     string Status,
+    string FormulaKind,
     string? HomeownerFullName,
     string? HomeownerEmail,
     string CreatedAt);

@@ -133,12 +133,13 @@ export default function GroundLeaseCreatePanel({ onClose }: Props) {
             />
           </div>
           <div className="form-field full">
-            <label className="form-label">Covenant Terms (optional)</label>
+            <label className="form-label">Covenant Terms</label>
             <textarea
               className="form-textarea"
               value={createForm.covenantTerms}
               onChange={e => setCreateForm(f => ({ ...f, covenantTerms: e.target.value }))}
-              placeholder="Describe any covenant restrictions…"
+              placeholder="Describe the covenant restrictions…"
+              required
             />
           </div>
 

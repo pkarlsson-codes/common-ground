@@ -6,7 +6,7 @@
 4. User searches and selects a Land Parcel
 5. User searches and selects a Home on that parcel (disabled until a parcel is chosen)
 6. User enters Lease Start Date (default today) and Term (years, default 99)
-7. User optionally enters Covenant Terms
+7. User enters Covenant Terms (required)
 8. User selects a Resale Formula: Appraisal Based, Index Based, or Fixed Percentage (default Appraisal Based)
 9. If Appraisal Based, user enters Appreciation Share (decimal fraction, e.g. 0.25 = 25%, default 0.25)
 10. If Index Based, user selects Index Type (CPI, AMI, or Custom, default CPI) and enters Baseline Index Value (default 100)
@@ -14,4 +14,4 @@
 12. User optionally checks "Set improvements cap" and enters an Improvements Cap ($, default 25000 when first checked)
 13. User clicks "Create Lease" (disabled until Land Parcel and Home are both selected)
 14. Toast: "Ground lease created"
-15. Panel closes, new lease appears in the Ground Leases table
+15. Panel closes, new lease appears at the top of the Ground Leases table (newest first)

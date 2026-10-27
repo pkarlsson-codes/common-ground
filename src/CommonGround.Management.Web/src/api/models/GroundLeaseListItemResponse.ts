@@ -61,6 +61,12 @@ export interface GroundLeaseListItemResponse {
      * @type {string}
      * @memberof GroundLeaseListItemResponse
      */
+    formulaKind?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GroundLeaseListItemResponse
+     */
     homeownerFullName?: string | null;
     /**
      * 
@@ -99,6 +105,7 @@ export function GroundLeaseListItemResponseFromJSONTyped(json: any, ignoreDiscri
         'leaseStartDate': json['leaseStartDate'] == null ? undefined : json['leaseStartDate'],
         'termYears': json['termYears'] == null ? undefined : json['termYears'],
         'status': json['status'] == null ? undefined : json['status'],
+        'formulaKind': json['formulaKind'] == null ? undefined : json['formulaKind'],
         'homeownerFullName': json['homeownerFullName'] == null ? undefined : json['homeownerFullName'],
         'homeownerEmail': json['homeownerEmail'] == null ? undefined : json['homeownerEmail'],
         'createdAt': json['createdAt'] == null ? undefined : json['createdAt'],
@@ -122,6 +129,7 @@ export function GroundLeaseListItemResponseToJSONTyped(value?: GroundLeaseListIt
         'leaseStartDate': value['leaseStartDate'],
         'termYears': value['termYears'],
         'status': value['status'],
+        'formulaKind': value['formulaKind'],
         'homeownerFullName': value['homeownerFullName'],
         'homeownerEmail': value['homeownerEmail'],
         'createdAt': value['createdAt'],

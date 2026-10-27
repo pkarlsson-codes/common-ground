@@ -233,6 +233,10 @@ public static class BusinessRuleViolation
                     {
                         ["baselineIndexValue"] = baselineIndexValue,
                     });
+
+            public static BusinessRuleViolationException CurrentIndexValueRequired()
+                => new(
+                    "homeownership.resale_policy_terms.index_based.current_index_value_required");
         }
 
         public static class FixedPercentage

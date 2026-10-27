@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useGroundLeases } from '../hooks/groundLeases'
-import { FORMULA_KIND_LABELS, statusLabel } from '../hooks/types'
+import { FORMULA_KIND_LABELS } from '../hooks/types'
 import StatusBadge from '../components/StatusBadge'
 import Pagination from '../components/Pagination'
 import ResaleSlideOver from './resale-workflows/ResaleSlideOver'
 import { useToast } from '../hooks/useToast'
-import type { GroundLeaseListItemResponse } from '../api'
 
 function SkeletonRows() {
   return (
@@ -23,8 +22,18 @@ export default function ResaleWorkflowsPage() {
 
   const [page, setPage] = useState(1)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [searchInput, setSearchInput] = useState('')
+  const [search, setSearch] = useState('')
 
-  const { data, isLoading, isError } = useGroundLeases(page, 'Active')
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setSearch(searchInput.trim())
+      setPage(1)
+    }, 300)
+    return () => clearTimeout(timeout)
+  }, [searchInput])
+
+  const { data, isLoading, isError } = useGroundLeases(page, 'Active', undefined, undefined, search || undefined)
 
   useEffect(() => {
     const openLeaseId = (location.state as { openLeaseId?: string } | null)?.openLeaseId
@@ -38,10 +47,6 @@ export default function ResaleWorkflowsPage() {
   }, [location, navigate])
 
   const leases = data?.items ?? []
-
-  const selectedLease: GroundLeaseListItemResponse | undefined = selectedId
-    ? leases.find(l => l.id === selectedId)
-    : undefined
 
   const handleSuccess = (workflowId?: string) => {
     setSelectedId(null)
@@ -63,6 +68,18 @@ export default function ResaleWorkflowsPage() {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="filter-bar">
+        <input
+          className="form-input"
+          type="search"
+          placeholder="Search by homeowner name or email"
+          aria-label="Search active ground leases"
+          value={searchInput}
+          onChange={e => setSearchInput(e.target.value)}
+          style={{ maxWidth: 320 }}
+        />
       </div>
 
       <div className="registry-table-wrap">
@@ -89,7 +106,7 @@ export default function ResaleWorkflowsPage() {
               <thead>
                 <tr>
                   <th>Homeowner</th>
-                  <th>Address</th>
+                  <th>Start Date</th>
                   <th>Formula</th>
                   <th>Status</th>
                   <th>Action</th>
@@ -99,12 +116,8 @@ export default function ResaleWorkflowsPage() {
                 {leases.map(l => (
                   <tr key={l.id} className={selectedId === l.id ? 'row--selected' : ''}>
                     <td>{l.homeownerFullName ?? <span style={{ color: 'var(--text-dim)' }}>—</span>}</td>
-                    <td><span style={{ color: 'var(--text-dim)' }}>—</span></td>
-                    <td>
-                      {(l as { formulaKind?: string }).formulaKind
-                        ? FORMULA_KIND_LABELS[(l as { formulaKind?: string }).formulaKind!] ?? statusLabel((l as { formulaKind?: string }).formulaKind!)
-                        : <span style={{ color: 'var(--text-dim)' }}>—</span>}
-                    </td>
+                    <td><span className="cell-mono">{l.leaseStartDate}</span></td>
+                    <td>{FORMULA_KIND_LABELS[l.formulaKind ?? ''] ?? l.formulaKind}</td>
                     <td><StatusBadge status={l.status ?? ''} /></td>
                     <td>
                       <button
@@ -135,7 +148,6 @@ export default function ResaleWorkflowsPage() {
       {selectedId && (
         <ResaleSlideOver
           groundLeaseId={selectedId}
-          lease={selectedLease}
           onClose={() => setSelectedId(null)}
           onSuccess={handleSuccess}
         />

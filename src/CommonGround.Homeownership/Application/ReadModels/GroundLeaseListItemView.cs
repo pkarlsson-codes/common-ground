@@ -21,6 +21,9 @@ public class GroundLeaseListItemView
     /// <summary>Gets or sets the lease status.</summary>
     public string Status { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the resale formula kind.</summary>
+    public string FormulaKind { get; set; } = string.Empty;
+
     /// <summary>Gets or sets the current homeowner's full name.</summary>
     public string? HomeownerFullName { get; set; }
 

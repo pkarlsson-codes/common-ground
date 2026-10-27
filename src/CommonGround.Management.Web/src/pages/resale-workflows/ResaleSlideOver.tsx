@@ -1,24 +1,23 @@
 import { useState } from 'react'
 import SlideOver from '../../components/SlideOver'
-import type { GroundLeaseListItemResponse } from '../../api'
 import { FORMULA_KIND_LABELS } from '../../hooks/types'
 import { formatPhoneInput } from '../../lib/phone'
-import { useResaleFlowController } from './useResaleFlowController'
+import { NO_TEMPLATE_MESSAGE, useResaleFlowController } from './useResaleFlowController'
 
 const fmtCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 
 interface Props {
   groundLeaseId: string
-  lease: GroundLeaseListItemResponse | undefined
   onClose: () => void
   onSuccess: (workflowId?: string) => void
 }
 
 const STEP_TITLES = ['Intent', 'Estimate', 'Initiate']
 
-export default function ResaleSlideOver({ groundLeaseId, lease, onClose, onSuccess }: Props) {
+export default function ResaleSlideOver({ groundLeaseId, onClose, onSuccess }: Props) {
   const ctrl = useResaleFlowController({ groundLeaseId, onSuccess })
+  const lease = ctrl.lease
   const [noticeDate, setNoticeDate] = useState(new Date().toISOString().slice(0, 10))
 
   const title = `Resale — ${lease?.homeownerFullName ?? groundLeaseId.slice(0, 8) + '…'}`
@@ -43,8 +42,8 @@ export default function ResaleSlideOver({ groundLeaseId, lease, onClose, onSucce
             <div className="detail-field">
               <div className="detail-field__label">Formula</div>
               <div className="detail-field__value">
-                {(lease as { formulaKind?: string } | undefined)?.formulaKind
-                  ? FORMULA_KIND_LABELS[(lease as { formulaKind?: string }).formulaKind!] ?? (lease as { formulaKind?: string }).formulaKind
+                {lease?.formulaKind
+                  ? FORMULA_KIND_LABELS[lease.formulaKind] ?? lease.formulaKind
                   : <span style={{ color: 'var(--text-dim)' }}>—</span>}
               </div>
             </div>
@@ -149,9 +148,9 @@ export default function ResaleSlideOver({ groundLeaseId, lease, onClose, onSucce
                   className="form-input"
                   type="number"
                   min="0"
-                  step="0.1"
+                  step="1"
                   value={ctrl.estimateForm.ownershipYears || ''}
-                  onChange={e => ctrl.setEstimateForm(f => ({ ...f, ownershipYears: parseFloat(e.target.value) || 0 }))}
+                  onChange={e => ctrl.setEstimateForm(f => ({ ...f, ownershipYears: parseInt(e.target.value) || 0 }))}
                   required
                 />
               </div>
@@ -268,15 +267,17 @@ export default function ResaleSlideOver({ groundLeaseId, lease, onClose, onSucce
               </div>
             </div>
 
-            {ctrl.initiateError && (
-              <div className="form-error" style={{ marginBottom: 12 }}>{ctrl.initiateError}</div>
+            {(ctrl.initiateError ?? (ctrl.missingTemplate ? NO_TEMPLATE_MESSAGE : null)) && (
+              <div className="form-error" style={{ marginBottom: 12 }}>
+                {ctrl.initiateError ?? NO_TEMPLATE_MESSAGE}
+              </div>
             )}
 
             <div style={{ display: 'flex', gap: 10 }}>
               <button type="button" className="btn btn-secondary" onClick={ctrl.prevStep}>
                 Back
               </button>
-              <button type="submit" className="btn btn-primary" disabled={ctrl.initiatePending}>
+              <button type="submit" className="btn btn-primary" disabled={ctrl.initiatePending || ctrl.missingTemplate}>
                 {ctrl.initiatePending ? 'Initiating…' : 'Initiate Workflow'}
               </button>
             </div>
