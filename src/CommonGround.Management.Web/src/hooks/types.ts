@@ -157,3 +157,24 @@ export interface CreateGroundLeaseTemplateForm {
   improvementsCap: number | null
   hasImprovementsCap: boolean
 }
+
+// ── Stewardship ────────────────────────────────────────────────────────────
+
+export const LEASE_VIOLATION_TYPE_LABELS: Record<string, string> = {
+  Occupancy:             'Occupancy',
+  UnpermittedAlteration: 'Unpermitted Alteration',
+  PhysicalCondition:     'Physical Condition',
+  LeaseTermViolation:    'Lease Term Violation',
+}
+export const COUNSELING_OUTCOME_LABELS: Record<string, string> = {
+  CounselingCompleted:   'Counseling Completed',
+  HomeownerUnresponsive: 'Homeowner Unresponsive',
+  NotEligible:           'Not Eligible',
+}
+export const FORBEARANCE_OUTCOMES = ['Granted', 'Denied'] as const
+export const FORECLOSURE_PREVENTION_OUTCOME_LABELS: Record<string, string> = {
+  InterventionSuccessful: 'Intervention Successful',
+  HomeownerSold:          'Homeowner Sold',
+  CurePeriodExercised:    'Cure Period Exercised',
+  LeaseTerminated:        'Lease Terminated',
+}

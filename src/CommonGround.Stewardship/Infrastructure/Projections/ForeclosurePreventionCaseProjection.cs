@@ -28,7 +28,12 @@ public sealed class ForeclosurePreventionCaseProjection : SingleStreamProjection
     /// </summary>
     public static void Apply(ForeclosurePreventionCaseView view, ServicerDelinquencyRecorded e)
     {
-        // No structural change to the view — delinquency data not surfaced here
+        view.ServicerDelinquencies.Add(new ServicerDelinquencyRecord
+        {
+            ServicerName = e.ServicerName,
+            DelinquentMonths = e.DelinquentMonths,
+            RecordedDate = e.RecordedDate
+        });
     }
 
     /// <summary>

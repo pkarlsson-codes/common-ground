@@ -47,6 +47,18 @@ public class ForeclosurePreventionCaseTests
         fpc.UncommittedEvents.Should().Contain(e => e is ServicerDelinquencyRecorded);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void RecordServicerDelinquency_NonPositiveMonths_Throws(int months)
+    {
+        var fpc = OpenCase();
+
+        var act = () => fpc.RecordServicerDelinquency("First National Bank", months, Today, Staff);
+
+        act.Should().Throw<BusinessRuleViolationException>();
+    }
+
     [Fact]
     public void MakeCounselingReferral_FromOpened_AdvancesToActive()
     {

@@ -1,17 +1,21 @@
-import { useState, useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { ForeclosurePreventionCaseResponse } from '../../api/models/ForeclosurePreventionCaseResponse'
-import type { GroundLeaseListItemResponse } from '../../api'
-import { useAllForeclosurePreventionCases } from '../../hooks/stewardship'
-import { useAllActiveGroundLeases } from '../../hooks/groundLeases'
+import { useForeclosurePreventionQueue } from '../../hooks/stewardship'
 import { statusLabel } from '../../hooks/types'
 import StatusBadge from '../../components/StatusBadge'
+import Pagination from '../../components/Pagination'
 import StewardshipFpcDetailPanel from '../../components/stewardship/StewardshipFpcDetailPanel'
 import FpcOpenCasePanel from '../../components/stewardship/FpcOpenCasePanel'
+import { fmtD } from '../../components/stewardship/format'
+
+const PAGE_SIZE = 20
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function delinquencySummary(fpc: ForeclosurePreventionCaseResponse): string {
-  return statusLabel(fpc.trigger ?? '')
+/** The most recently recorded servicer delinquency, e.g. "First National · 3 mo". */
+function delinquencySummary(fpc: ForeclosurePreventionCaseResponse): string | null {
+  const latest = (fpc.servicerDelinquencies ?? []).at(-1)
+  return latest ? `${latest.servicerName} · ${latest.delinquentMonths} mo` : null
 }
 
 function openInterventionCount(fpc: ForeclosurePreventionCaseResponse): number {
@@ -28,34 +32,33 @@ function SkeletonRows() {
   )
 }
 
+interface SelectedCase {
+  id: string
+  homeownerFullName: string | null
+  address: string | null
+}
+
 // ── Main component ───────────────────────────────────────────────────────────
 
 export default function ForeclosurePreventionTab() {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [selectedCase, setSelectedCase] = useState<ForeclosurePreventionCaseResponse | null>(null)
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const [selected, setSelected] = useState<SelectedCase | null>(null)
   const [openingNewCase, setOpeningNewCase] = useState(false)
 
-  const { data: casePage, isLoading: casesLoading, isError } = useAllForeclosurePreventionCases(currentPage)
-  const { data: leasePage, isLoading: leasesLoading } = useAllActiveGroundLeases()
+  const { data: queue, isLoading, isError } = useForeclosurePreventionQueue()
 
-  const isLoading = casesLoading || leasesLoading
+  const filtered = useMemo(() => {
+    const items = queue ?? []
+    const term = search.trim().toLowerCase()
+    if (!term) return items
+    return items.filter(i =>
+      (i.homeownerFullName ?? '').toLowerCase().includes(term)
+      || (i.address ?? '').toLowerCase().includes(term))
+  }, [queue, search])
 
-  const leaseIndex = useMemo(() => {
-    const map = new Map<string, GroundLeaseListItemResponse>()
-    for (const l of leasePage?.items ?? []) {
-      if (l.id) map.set(l.id, l)
-    }
-    return map
-  }, [leasePage])
-
-  const fpcCases = casePage?.items ?? []
-  const pagination = casePage
-    ? { pageNumber: casePage.pageNumber, totalPages: casePage.totalPages, totalCount: casePage.totalCount, hasNextPage: casePage.hasNextPage ?? false }
-    : null
-
-  const selectedLease = selectedCase?.groundLeaseId
-    ? leaseIndex.get(selectedCase.groundLeaseId)
-    : null
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const pageItems = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   if (isLoading) return <SkeletonRows />
 
@@ -73,11 +76,21 @@ export default function ForeclosurePreventionTab() {
       <div
         style={{
           display: 'flex',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between',
           alignItems: 'center',
+          gap: 12,
           marginBottom: 16,
         }}
       >
+        <input
+          className="form-input"
+          type="search"
+          placeholder="Search by homeowner or address"
+          aria-label="Search foreclosure prevention cases"
+          value={search}
+          onChange={e => { setSearch(e.target.value); setPage(1) }}
+          style={{ maxWidth: 320 }}
+        />
         <button
           className="btn btn-primary"
           onClick={() => setOpeningNewCase(true)}
@@ -89,13 +102,13 @@ export default function ForeclosurePreventionTab() {
         </button>
       </div>
 
-      {fpcCases.length === 0 ? (
+      {filtered.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state__glyph">⊡</div>
-          <div className="empty-state__title">No foreclosure prevention cases</div>
-          <div className="empty-state__sub">
-            No open or active cases.
+          <div className="empty-state__title">
+            {search.trim() ? 'No matching foreclosure prevention cases' : 'No foreclosure prevention cases'}
           </div>
+          {!search.trim() && <div className="empty-state__sub">No open or active cases.</div>}
         </div>
       ) : (
         <div className="registry-table-wrap">
@@ -112,26 +125,28 @@ export default function ForeclosurePreventionTab() {
               </tr>
             </thead>
             <tbody>
-              {fpcCases.map(fpc => {
-                const lease = fpc.groundLeaseId ? leaseIndex.get(fpc.groundLeaseId) : undefined
+              {pageItems.map(({ foreclosurePreventionCase: fpc, homeownerFullName, address }) => {
                 const openCount = openInterventionCount(fpc)
+                const delinquency = delinquencySummary(fpc)
                 return (
                   <tr
                     key={fpc.id}
-                    onClick={() => setSelectedCase(fpc)}
+                    onClick={() => setSelected({
+                      id: fpc.id!,
+                      homeownerFullName: homeownerFullName ?? null,
+                      address: address ?? null,
+                    })}
                     style={{ cursor: 'pointer' }}
-                    className={selectedCase?.id === fpc.id ? 'row--selected' : ''}
+                    className={selected?.id === fpc.id ? 'row--selected' : ''}
                   >
-                    <td>{lease?.homeownerFullName ?? '—'}</td>
-                    <td>
-                      {(lease as { parcelAddress?: string } | undefined)?.parcelAddress ?? '—'}
-                    </td>
+                    <td>{homeownerFullName ?? '—'}</td>
+                    <td>{address ?? '—'}</td>
                     <td><StatusBadge status={fpc.status ?? ''} /></td>
                     <td>{statusLabel(fpc.trigger ?? '')}</td>
                     <td>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>
-                        {delinquencySummary(fpc)}
-                      </span>
+                      {delinquency
+                        ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{delinquency}</span>
+                        : <span style={{ color: 'var(--text-dim)' }}>—</span>}
                     </td>
                     <td>
                       {openCount > 0
@@ -139,46 +154,31 @@ export default function ForeclosurePreventionTab() {
                         : <span style={{ color: 'var(--text-dim)' }}>—</span>}
                     </td>
                     <td>
-                      <span className="cell-mono">
-                        {fpc.openedDate ? fpc.openedDate.toISOString().slice(0, 10) : '—'}
-                      </span>
+                      <span className="cell-mono">{fmtD(fpc.openedDate) ?? '—'}</span>
                     </td>
                   </tr>
                 )
               })}
             </tbody>
           </table>
+          {totalPages > 1 && (
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              totalCount={filtered.length}
+              pageSize={PAGE_SIZE}
+              onPage={setPage}
+            />
+          )}
         </div>
       )}
 
-      {pagination && pagination.totalPages > 1 && (
-        <div className="pagination-controls" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, justifyContent: 'flex-end', fontSize: 13 }}>
-          <button
-            className="btn btn-secondary"
-            disabled={pagination.pageNumber <= 1}
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-          >
-            Previous
-          </button>
-          <span style={{ color: 'var(--text-secondary)' }}>
-            Page {pagination.pageNumber} of {pagination.totalPages}
-          </span>
-          <button
-            className="btn btn-secondary"
-            disabled={!pagination.hasNextPage}
-            onClick={() => setCurrentPage(p => p + 1)}
-          >
-            Next
-          </button>
-        </div>
-      )}
-
-      {selectedCase && (
+      {selected && (
         <StewardshipFpcDetailPanel
-          fpcCase={selectedCase}
-          homeownerName={selectedLease?.homeownerFullName ?? 'Foreclosure Prevention Case'}
-          address={(selectedLease as { parcelAddress?: string } | undefined)?.parcelAddress ?? ''}
-          onClose={() => setSelectedCase(null)}
+          caseId={selected.id}
+          homeownerName={selected.homeownerFullName ?? 'Foreclosure Prevention Case'}
+          address={selected.address ?? ''}
+          onClose={() => setSelected(null)}
         />
       )}
 

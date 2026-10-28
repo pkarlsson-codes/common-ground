@@ -1,31 +1,31 @@
 import { useState } from 'react'
 import StatusBadge from '../StatusBadge'
 import {
-  useStewardshipCase,
   useSchedulePropertyInspection,
   useCompletePropertyInspection,
   useCancelPropertyInspection,
 } from '../../hooks/stewardship'
-import type { PropertyInspectionResponse } from '../../api/models'
+import type { PropertyInspectionResponse, StewardshipCaseResponse } from '../../api/models'
 import { useToast } from '../../hooks/useToast'
+import { getErrorMessage } from '../../lib/getErrorMessage'
+import { fmtD, today } from './format'
 
 interface Props {
-  groundLeaseId: string
-  caseId: string
+  sc: StewardshipCaseResponse
 }
 
-const today = () => new Date().toISOString().slice(0, 10)
-
-export default function PropertyInspectionSection({ groundLeaseId, caseId }: Props) {
-  const { data: sc } = useStewardshipCase(groundLeaseId)
+export default function PropertyInspectionSection({ sc }: Props) {
+  const caseId = sc.id!
   const { success, error: showError } = useToast()
 
-  const scheduleMutation = useSchedulePropertyInspection(groundLeaseId)
-  const completeMutation = useCompletePropertyInspection(groundLeaseId)
-  const cancelMutation = useCancelPropertyInspection(groundLeaseId)
+  const scheduleMutation = useSchedulePropertyInspection()
+  const completeMutation = useCompletePropertyInspection()
+  const cancelMutation = useCancelPropertyInspection()
 
-  const scheduled = (sc?.propertyInspections ?? []).find(i => i.status === 'Scheduled') ?? null
-  const history = (sc?.propertyInspections ?? [])
+  const fail = async (err: unknown, fallback: string) => showError(await getErrorMessage(err, fallback))
+
+  const scheduled = (sc.propertyInspections ?? []).find(i => i.status === 'Scheduled') ?? null
+  const history = (sc.propertyInspections ?? [])
     .filter(i => i.status !== 'Scheduled')
     .sort((a, b) => new Date(b.scheduledDate ?? 0).getTime() - new Date(a.scheduledDate ?? 0).getTime())
 
@@ -41,7 +41,7 @@ export default function PropertyInspectionSection({ groundLeaseId, caseId }: Pro
   const [historyOpen, setHistoryOpen] = useState(false)
 
   const isOverdue =
-    scheduled && new Date(scheduled.scheduledDate ?? '') < new Date(today())
+    scheduled && (fmtD(scheduled.scheduledDate) ?? '') < today()
 
   const handleSchedule = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,8 +50,8 @@ export default function PropertyInspectionSection({ groundLeaseId, caseId }: Pro
       success('Inspection scheduled')
       setScheduleForm({ scheduledDate: today(), inspectorName: '' })
       setScheduleFormOpen(false)
-    } catch {
-      showError('Failed to schedule inspection')
+    } catch (err) {
+      await fail(err, 'Failed to schedule inspection')
     }
   }
 
@@ -67,8 +67,8 @@ export default function PropertyInspectionSection({ groundLeaseId, caseId }: Pro
         completedDate: completeForm.completedDate,
       })
       success('Inspection completed')
-    } catch {
-      showError('Failed to complete inspection')
+    } catch (err) {
+      await fail(err, 'Failed to complete inspection')
     }
   }
 
@@ -83,8 +83,8 @@ export default function PropertyInspectionSection({ groundLeaseId, caseId }: Pro
       })
       success('Inspection cancelled')
       setCancelForm({ reason: '' })
-    } catch {
-      showError('Failed to cancel inspection')
+    } catch (err) {
+      await fail(err, 'Failed to cancel inspection')
     }
   }
 
@@ -95,14 +95,21 @@ export default function PropertyInspectionSection({ groundLeaseId, caseId }: Pro
         style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
       >
         <span>Property Inspection</span>
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm"
-          onClick={() => setScheduleFormOpen(!scheduleFormOpen)}
-        >
-          {scheduleFormOpen ? '×' : '+'}
-        </button>
+        {!scheduled && (
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            aria-label={scheduleFormOpen ? 'Close inspection form' : 'Schedule inspection'}
+            onClick={() => setScheduleFormOpen(!scheduleFormOpen)}
+          >
+            {scheduleFormOpen ? '×' : '+'}
+          </button>
+        )}
       </div>
+
+      {!scheduled && !scheduleFormOpen && (
+        <div style={{ color: 'var(--text-dim)', fontSize: 13 }}>No inspection scheduled.</div>
+      )}
 
       {/* Schedule form */}
       {scheduleFormOpen && !scheduled && (
@@ -135,7 +142,6 @@ export default function PropertyInspectionSection({ groundLeaseId, caseId }: Pro
           >
             {scheduleMutation.isPending ? 'Scheduling…' : 'Schedule Inspection'}
           </button>
-          {scheduleMutation.isError && <div className="form-error">Failed to schedule.</div>}
         </form>
       )}
 
@@ -153,7 +159,7 @@ export default function PropertyInspectionSection({ groundLeaseId, caseId }: Pro
             }}
           >
             <div style={{ fontFamily: 'var(--font-mono)' }}>
-              {String(scheduled.scheduledDate)} · {scheduled.inspectorName}
+              {fmtD(scheduled.scheduledDate)} · {scheduled.inspectorName}
               {isOverdue && ' · OVERDUE'}
             </div>
           </div>
@@ -201,7 +207,6 @@ export default function PropertyInspectionSection({ groundLeaseId, caseId }: Pro
               >
                 {completeMutation.isPending ? 'Completing…' : 'Complete'}
               </button>
-              {completeMutation.isError && <div className="form-error">Failed.</div>}
             </form>
 
             <form onSubmit={handleCancel}>
@@ -223,7 +228,6 @@ export default function PropertyInspectionSection({ groundLeaseId, caseId }: Pro
               >
                 {cancelMutation.isPending ? 'Cancelling…' : 'Cancel'}
               </button>
-              {cancelMutation.isError && <div className="form-error">Failed.</div>}
             </form>
           </div>
         </>
@@ -263,8 +267,13 @@ function InspectionHistoryRow({ i }: { i: PropertyInspectionResponse }) {
       }}
     >
       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-secondary)' }}>
-        {String(i.scheduledDate)} · {i.inspectorName} · <StatusBadge status={i.status ?? ''} />
+        {fmtD(i.completedDate ?? i.scheduledDate)} · {i.inspectorName} · <StatusBadge status={i.status ?? ''} />
       </div>
+      {i.status === 'Completed' && (
+        <div style={{ color: 'var(--text-dim)', marginTop: 2 }}>
+          {i.occupancyConfirmed ? 'Occupancy confirmed' : 'Occupancy not confirmed'}
+        </div>
+      )}
       {i.conditionNotes && (
         <div style={{ color: 'var(--text-dim)', marginTop: 2 }}>{i.conditionNotes}</div>
       )}

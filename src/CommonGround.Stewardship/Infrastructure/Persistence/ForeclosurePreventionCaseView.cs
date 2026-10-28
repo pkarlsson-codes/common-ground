@@ -17,12 +17,25 @@ public sealed class ForeclosurePreventionCaseView
     public DateOnly OpenedDate { get; set; }
     /// <summary>Gets or sets the date the case was resolved, if applicable.</summary>
     public DateOnly? ResolvedDate { get; set; }
+    /// <summary>Gets or sets the servicer delinquencies recorded against the case, oldest first.</summary>
+    public List<ServicerDelinquencyRecord> ServicerDelinquencies { get; set; } = [];
     /// <summary>Gets or sets the list of counseling referrals.</summary>
     public List<CounselingReferralRecord> CounselingReferrals { get; set; } = [];
     /// <summary>Gets or sets the list of forbearance requests.</summary>
     public List<ForbearanceRequestRecord> ForbearanceRequests { get; set; } = [];
     /// <summary>Gets or sets the list of cure period activations.</summary>
     public List<CurePeriodActivationRecord> CurePeriodActivations { get; set; } = [];
+}
+
+/// <summary>Record of a servicer delinquency within a foreclosure prevention case.</summary>
+public sealed class ServicerDelinquencyRecord
+{
+    /// <summary>Gets or sets the name of the mortgage servicer.</summary>
+    public string ServicerName { get; set; } = string.Empty;
+    /// <summary>Gets or sets the number of months delinquent.</summary>
+    public int DelinquentMonths { get; set; }
+    /// <summary>Gets or sets the date the delinquency was recorded.</summary>
+    public DateOnly RecordedDate { get; set; }
 }
 
 /// <summary>Record of a counseling referral within a foreclosure prevention case.</summary>

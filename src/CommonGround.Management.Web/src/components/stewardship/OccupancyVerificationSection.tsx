@@ -1,38 +1,39 @@
 import { useState } from 'react'
 import StatusBadge from '../StatusBadge'
 import {
-  useStewardshipCase,
   useInitiateOccupancyVerification,
   useSubmitOccupancyVerification,
   useMarkOccupancyVerificationOverdue,
   useVerifyOccupancy,
   useFailOccupancy,
 } from '../../hooks/stewardship'
-import type { OccupancyVerificationResponse } from '../../api/models'
+import type { OccupancyVerificationResponse, StewardshipCaseResponse } from '../../api/models'
 import { useToast } from '../../hooks/useToast'
+import { getErrorMessage } from '../../lib/getErrorMessage'
+import { fmtD, today } from './format'
 
 interface Props {
-  groundLeaseId: string
-  caseId: string
+  sc: StewardshipCaseResponse
 }
 
-const today = () => new Date().toISOString().slice(0, 10)
 const currentYear = () => new Date().getFullYear()
 
-export default function OccupancyVerificationSection({ groundLeaseId, caseId }: Props) {
-  const { data: sc } = useStewardshipCase(groundLeaseId)
+export default function OccupancyVerificationSection({ sc }: Props) {
+  const caseId = sc.id!
   const { success, error: showError } = useToast()
 
-  const initiateMutation = useInitiateOccupancyVerification(groundLeaseId)
-  const submitMutation = useSubmitOccupancyVerification(groundLeaseId)
-  const overdueMutation = useMarkOccupancyVerificationOverdue(groundLeaseId)
-  const verifyMutation = useVerifyOccupancy(groundLeaseId)
-  const failMutation = useFailOccupancy(groundLeaseId)
+  const initiateMutation = useInitiateOccupancyVerification()
+  const submitMutation = useSubmitOccupancyVerification()
+  const overdueMutation = useMarkOccupancyVerificationOverdue()
+  const verifyMutation = useVerifyOccupancy()
+  const failMutation = useFailOccupancy()
+
+  const fail = async (err: unknown, fallback: string) => showError(await getErrorMessage(err, fallback))
 
   // ── Current-year verification ─────────────────────────────────────────────
   const year = currentYear()
-  const current = sc?.occupancyVerifications?.find(v => v.periodYear === year) ?? null
-  const history = (sc?.occupancyVerifications ?? [])
+  const current = sc.occupancyVerifications?.find(v => v.periodYear === year) ?? null
+  const history = (sc.occupancyVerifications ?? [])
     .filter(v => v.periodYear !== year)
     .sort((a, b) => (b.periodYear ?? 0) - (a.periodYear ?? 0))
 
@@ -50,8 +51,8 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
       success(`${year} occupancy verification initiated`)
       setInitiateForm({ surveyDeadline: '' })
       setInitiateFormOpen(false)
-    } catch {
-      showError('Failed to initiate verification')
+    } catch (err) {
+      await fail(err, 'Failed to initiate verification')
     }
   }
 
@@ -75,8 +76,8 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
         submittedDate: submitForm.submittedDate,
       })
       success('Verification response submitted')
-    } catch {
-      showError('Failed to submit response')
+    } catch (err) {
+      await fail(err, 'Failed to submit response')
     }
   }
 
@@ -92,8 +93,8 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
         deadline: overdueForm.deadline,
       })
       success('Verification marked overdue')
-    } catch {
-      showError('Failed to mark overdue')
+    } catch (err) {
+      await fail(err, 'Failed to mark overdue')
     }
   }
 
@@ -109,8 +110,8 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
         verifiedDate: verifyForm.verifiedDate,
       })
       success('Occupancy verified')
-    } catch {
-      showError('Failed to verify')
+    } catch (err) {
+      await fail(err, 'Failed to verify')
     }
   }
 
@@ -127,13 +128,15 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
         failedDate: failForm.failedDate,
       })
       success('Verification failed')
-    } catch {
-      showError('Failed to record failure')
+    } catch (err) {
+      await fail(err, 'Failed to record failure')
     }
   }
 
   // ── History ───────────────────────────────────────────────────────────────
   const [historyOpen, setHistoryOpen] = useState(false)
+
+  const awaitingResponse = current?.status === 'Pending' || current?.status === 'Overdue'
 
   return (
     <div className="detail-section">
@@ -142,14 +145,21 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
         style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
       >
         <span>Occupancy Verification</span>
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm"
-          onClick={() => setInitiateFormOpen(!initiateFormOpen)}
-        >
-          {initiateFormOpen ? '×' : '+'}
-        </button>
+        {!current && (
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            aria-label={initiateFormOpen ? 'Close verification form' : 'Start verification'}
+            onClick={() => setInitiateFormOpen(!initiateFormOpen)}
+          >
+            {initiateFormOpen ? '×' : '+'}
+          </button>
+        )}
       </div>
+
+      {!current && !initiateFormOpen && (
+        <div style={{ color: 'var(--text-dim)', fontSize: 13 }}>No verification started for {year}.</div>
+      )}
 
       {/* Initiate form */}
       {initiateFormOpen && !current && (
@@ -172,16 +182,17 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
           >
             {initiateMutation.isPending ? 'Starting…' : 'Start Verification'}
           </button>
-          {initiateMutation.isError && <div className="form-error">Failed to initiate.</div>}
         </form>
       )}
 
-      {/* Pending — submit response + mark overdue */}
-      {current?.status === 'Pending' && (
+      {/* Pending or Overdue — submit response (and mark overdue while Pending) */}
+      {awaitingResponse && current && (
         <>
           <div style={{ marginBottom: 12, fontSize: 13, color: 'var(--text-secondary)' }}>
-            Verification initiated. Awaiting homeowner response.
-            {current.surveyDeadline && ` Deadline: ${current.surveyDeadline}`}
+            {current.status === 'Overdue'
+              ? <><StatusBadge status="Overdue" /> No response by the deadline. A late response can still be submitted.</>
+              : 'Verification initiated. Awaiting homeowner response.'}
+            {current.surveyDeadline && ` Deadline: ${fmtD(current.surveyDeadline)}`}
           </div>
 
           <form onSubmit={handleSubmit} style={{ marginBottom: 12 }}>
@@ -228,31 +239,31 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
             >
               {submitMutation.isPending ? 'Submitting…' : 'Submit Response'}
             </button>
-            {submitMutation.isError && <div className="form-error">Failed to submit.</div>}
           </form>
 
-          <form onSubmit={handleOverdue}>
-            <div className="form-grid" style={{ marginBottom: 12 }}>
-              <div className="form-field">
-                <label className="form-label">Mark Overdue as of Date</label>
-                <input
-                  className="form-input"
-                  type="date"
-                  value={overdueForm.deadline}
-                  onChange={e => setOverdueForm(f => ({ ...f, deadline: e.target.value }))}
-                  required
-                />
+          {current.status === 'Pending' && (
+            <form onSubmit={handleOverdue}>
+              <div className="form-grid" style={{ marginBottom: 12 }}>
+                <div className="form-field">
+                  <label className="form-label">Mark Overdue as of Date</label>
+                  <input
+                    className="form-input"
+                    type="date"
+                    value={overdueForm.deadline}
+                    onChange={e => setOverdueForm(f => ({ ...f, deadline: e.target.value }))}
+                    required
+                  />
+                </div>
               </div>
-            </div>
-            <button
-              type="submit"
-              className="btn btn-secondary btn-ghost"
-              disabled={overdueMutation.isPending}
-            >
-              {overdueMutation.isPending ? 'Marking…' : 'Mark Overdue'}
-            </button>
-            {overdueMutation.isError && <div className="form-error">Failed to mark overdue.</div>}
-          </form>
+              <button
+                type="submit"
+                className="btn btn-secondary btn-ghost"
+                disabled={overdueMutation.isPending}
+              >
+                {overdueMutation.isPending ? 'Marking…' : 'Mark Overdue'}
+              </button>
+            </form>
+          )}
         </>
       )}
 
@@ -260,7 +271,11 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
       {current?.status === 'Submitted' && (
         <>
           <div style={{ marginBottom: 12, fontSize: 13 }}>
-            Response submitted {String(current.submittedDate)}. Verify or reject.
+            Response submitted {fmtD(current.submittedDate)}
+            {' · '}{current.isPrimaryResident ? 'Primary resident' : 'Not primary resident'}
+            {current.subletDisclosed && ' · Sublet disclosed'}
+            {current.majorChanges && ` · Changes: ${current.majorChanges}`}
+            . Verify or reject.
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -284,7 +299,6 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
               >
                 {verifyMutation.isPending ? 'Verifying…' : 'Verify'}
               </button>
-              {verifyMutation.isError && <div className="form-error">Failed.</div>}
             </form>
 
             <form onSubmit={handleFail}>
@@ -316,7 +330,6 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
               >
                 {failMutation.isPending ? 'Failing…' : 'Reject'}
               </button>
-              {failMutation.isError && <div className="form-error">Failed.</div>}
             </form>
           </div>
         </>
@@ -333,12 +346,12 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
             color: 'var(--success)',
           }}
         >
-          Verified {String(current.decisionDate)} — occupancy confirmed for {year}.
+          Verified {fmtD(current.decisionDate)} — occupancy confirmed for {year}.
         </div>
       )}
 
-      {/* Failed or Overdue — show reason */}
-      {(current?.status === 'Failed' || current?.status === 'Overdue') && (
+      {/* Failed — show reason */}
+      {current?.status === 'Failed' && (
         <div
           style={{
             padding: '10px 14px',
@@ -347,7 +360,8 @@ export default function OccupancyVerificationSection({ groundLeaseId, caseId }: 
             borderLeft: '3px solid var(--red)',
           }}
         >
-          <StatusBadge status={current.status ?? ''} />
+          <StatusBadge status={current.status} />
+          <span style={{ fontSize: 12, marginLeft: 8 }}>{fmtD(current.decisionDate)}</span>
           {current.reason && <div style={{ fontSize: 12, marginTop: 4 }}>{current.reason}</div>}
         </div>
       )}
@@ -389,7 +403,7 @@ function VerificationHistoryRow({ v }: { v: OccupancyVerificationResponse }) {
         {v.periodYear} · <StatusBadge status={v.status ?? ''} />
       </div>
       {v.decisionDate && (
-        <div style={{ color: 'var(--text-dim)', marginTop: 2 }}>{String(v.decisionDate)}</div>
+        <div style={{ color: 'var(--text-dim)', marginTop: 2 }}>{fmtD(v.decisionDate)}</div>
       )}
       {v.reason && <div style={{ color: 'var(--text-dim)', marginTop: 2 }}>{v.reason}</div>}
     </div>

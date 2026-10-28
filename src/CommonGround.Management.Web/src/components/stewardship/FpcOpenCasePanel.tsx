@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import SlideOver from '../SlideOver'
 import EntityCombobox from '../EntityCombobox'
-import { useOpenFpcCase } from '../../hooks/stewardship'
+import { useOpenForeclosurePreventionCase } from '../../hooks/stewardship'
 import { useToast } from '../../hooks/useToast'
 import { GroundLeasesApi } from '../../api'
 import { apiConfig } from '../../lib/apiConfig'
+import { getErrorMessage } from '../../lib/getErrorMessage'
 
 const groundLeasesApi = new GroundLeasesApi(apiConfig)
 
@@ -21,7 +22,8 @@ interface Props {
 
 export default function FpcOpenCasePanel({ onClose }: Props) {
   const { success } = useToast()
-  const openCase = useOpenFpcCase()
+  const openCase = useOpenForeclosurePreventionCase()
+  const [error, setError] = useState<string | null>(null)
 
   const [form, setForm] = useState<OpenFpcForm>({
     groundLeaseId: '',
@@ -33,6 +35,7 @@ export default function FpcOpenCasePanel({ onClose }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.groundLeaseId || !form.servicerName || !form.delinquentMonths || !form.recordedDate) return
+    setError(null)
     try {
       await openCase.mutateAsync({
         groundLeaseId: form.groundLeaseId,
@@ -42,8 +45,8 @@ export default function FpcOpenCasePanel({ onClose }: Props) {
       })
       success('Foreclosure prevention case opened')
       onClose()
-    } catch {
-      // error shown inline via openCase.isError
+    } catch (err) {
+      setError(await getErrorMessage(err, 'Failed to open case. Check inputs and try again.'))
     }
   }
 
@@ -79,14 +82,14 @@ export default function FpcOpenCasePanel({ onClose }: Props) {
               value={form.groundLeaseId || null}
               onChange={id => setForm(f => ({ ...f, groundLeaseId: id ?? '' }))}
               fetchOptions={async q => {
-                const result = await groundLeasesApi.getGroundLeases({ search: q, pageSize: 10 })
+                const result = await groundLeasesApi.getGroundLeases({ search: q, pageSize: 10, statuses: ['Active'] })
                 return (result.items ?? []).map(l => ({
                   id: l.id!,
-                  label: [l.homeownerFullName, (l as { parcelAddress?: string }).parcelAddress]
+                  label: [l.homeownerFullName ?? 'No homeowner', l.homeownerEmail]
                     .filter(Boolean).join(' — '),
                 }))
               }}
-              placeholder="Search ground leases…"
+              placeholder="Search by homeowner name or email…"
             />
           </div>
           <div className="form-field">
@@ -126,9 +129,7 @@ export default function FpcOpenCasePanel({ onClose }: Props) {
             />
           </div>
         </div>
-        {openCase.isError && (
-          <div className="form-error">Failed to open case. Check inputs and try again.</div>
-        )}
+        {error && <div className="form-error" role="alert">{error}</div>}
       </form>
     </SlideOver>
   )

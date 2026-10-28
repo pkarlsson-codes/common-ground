@@ -73,6 +73,8 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         ArgumentNullException.ThrowIfNull(recordedBy);
         if (string.IsNullOrWhiteSpace(servicerName))
             throw new BusinessRuleViolationException("Servicer name is required.");
+        if (delinquentMonths <= 0)
+            throw new BusinessRuleViolationException("Delinquent months must be positive.");
 
         ApplyChange(new ServicerDelinquencyRecorded(
             Id.Value, servicerName, delinquentMonths, recordedDate,

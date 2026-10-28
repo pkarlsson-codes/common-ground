@@ -1,14 +1,15 @@
 import { useMemo, useState } from 'react'
-import { useAllStewardshipCases } from '../../hooks/stewardship'
-import { useAllActiveGroundLeases } from '../../hooks/groundLeases'
-import type { GroundLeaseListItemResponse } from '../../api'
+import { useStewardshipQueue } from '../../hooks/stewardship'
 import type { OccupancyVerificationResponse } from '../../api/models/OccupancyVerificationResponse'
 import {
   buildStewardshipQueue,
-  type StewardshipQueueRow,
   type UrgencyLevel,
 } from './stewardshipSortUtils'
 import StewardshipCaseDetailPanel from '../../components/stewardship/StewardshipCaseDetailPanel'
+import Pagination from '../../components/Pagination'
+import { fmtD } from '../../components/stewardship/format'
+
+const PAGE_SIZE = 20
 
 // ── Urgency styling ──────────────────────────────────────────────────────────
 
@@ -65,33 +66,24 @@ function ViolationCell({ count }: { count: number }) {
 export default function StewardshipCasesTab() {
   const currentYear = new Date().getFullYear()
 
-  const [currentPage, setCurrentPage] = useState(1)
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null)
 
-  const { data: casePage, isLoading: casesLoading, isError: casesError } = useAllStewardshipCases(currentPage)
-  const { data: leasePage, isLoading: leasesLoading } = useAllActiveGroundLeases()
+  const { data: queue, isLoading, isError } = useStewardshipQueue()
 
-  const isLoading = casesLoading || leasesLoading
-  const isError = casesError
+  const rows = useMemo(() => buildStewardshipQueue(queue ?? []), [queue])
 
-  const [selectedRow, setSelectedRow] = useState<StewardshipQueueRow | null>(null)
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase()
+    if (!term) return rows
+    return rows.filter(r =>
+      r.homeownerName.toLowerCase().includes(term) || r.address.toLowerCase().includes(term))
+  }, [rows, search])
 
-  const leaseIndex = useMemo(() => {
-    const map = new Map<string, GroundLeaseListItemResponse>()
-    for (const l of leasePage?.items ?? []) {
-      if (l.id) map.set(l.id, l)
-    }
-    return map
-  }, [leasePage])
-
-  const cases = casePage?.items ?? []
-  const pagination = casePage
-    ? { pageNumber: casePage.pageNumber, totalPages: casePage.totalPages, totalCount: casePage.totalCount, hasNextPage: casePage.hasNextPage ?? false }
-    : null
-
-  const rows = useMemo(
-    () => buildStewardshipQueue(cases, leaseIndex as Map<string, { homeownerFullName?: string | null; parcelAddress?: string | null }>),
-    [cases, leaseIndex],
-  )
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const selectedRow = rows.find(r => r.caseId === selectedCaseId) ?? null
 
   if (isLoading) return <SkeletonRows />
 
@@ -118,69 +110,74 @@ export default function StewardshipCasesTab() {
 
   return (
     <>
-      <div className="registry-table-wrap">
-        <table className="registry-table">
-          <thead>
-            <tr>
-              <th>Homeowner</th>
-              <th>Address</th>
-              <th>Occupancy {currentYear}</th>
-              <th>Active violations</th>
-              <th>Next inspection</th>
-              <th>Opened</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(row => (
-              <tr
-                key={row.caseId}
-                className={URGENCY_ROW_CLASS[row.urgency]}
-                onClick={() => setSelectedRow(row)}
-                style={{ cursor: 'pointer' }}
-              >
-                <td>{row.homeownerName}</td>
-                <td>{row.address}</td>
-                <td><OccupancyCell verification={row.currentVerification} /></td>
-                <td><ViolationCell count={row.activeViolationCount} /></td>
-                <td>
-                  {row.nextInspectionDate
-                    ? <span className="cell-mono">{row.nextInspectionDate.toISOString().slice(0, 10)}</span>
-                    : <span style={{ color: 'var(--text-dim)' }}>—</span>}
-                </td>
-                <td><span className="cell-mono">{row.openedDate.toISOString().slice(0, 10)}</span></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div style={{ marginBottom: 16 }}>
+        <input
+          className="form-input"
+          type="search"
+          placeholder="Search by homeowner or address"
+          aria-label="Search stewardship cases"
+          value={search}
+          onChange={e => { setSearch(e.target.value); setPage(1) }}
+          style={{ maxWidth: 320 }}
+        />
       </div>
 
-      {pagination && pagination.totalPages > 1 && (
-        <div className="pagination-controls" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, justifyContent: 'flex-end', fontSize: 13 }}>
-          <button
-            className="btn btn-secondary"
-            disabled={pagination.pageNumber <= 1}
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-          >
-            Previous
-          </button>
-          <span style={{ color: 'var(--text-secondary)' }}>
-            Page {pagination.pageNumber} of {pagination.totalPages}
-          </span>
-          <button
-            className="btn btn-secondary"
-            disabled={!pagination.hasNextPage}
-            onClick={() => setCurrentPage(p => p + 1)}
-          >
-            Next
-          </button>
+      {filtered.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-state__title">No matching stewardship cases</div>
+        </div>
+      ) : (
+        <div className="registry-table-wrap">
+          <table className="registry-table">
+            <thead>
+              <tr>
+                <th>Homeowner</th>
+                <th>Address</th>
+                <th>Occupancy {currentYear}</th>
+                <th>Active violations</th>
+                <th>Next inspection</th>
+                <th>Opened</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pageRows.map(row => (
+                <tr
+                  key={row.caseId}
+                  className={[URGENCY_ROW_CLASS[row.urgency], selectedCaseId === row.caseId ? 'row--selected' : '']
+                    .filter(Boolean).join(' ')}
+                  onClick={() => setSelectedCaseId(row.caseId)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <td>{row.homeownerName}</td>
+                  <td>{row.address}</td>
+                  <td><OccupancyCell verification={row.currentVerification} /></td>
+                  <td><ViolationCell count={row.activeViolationCount} /></td>
+                  <td>
+                    {row.nextInspectionDate
+                      ? <span className="cell-mono">{fmtD(row.nextInspectionDate)}</span>
+                      : <span style={{ color: 'var(--text-dim)' }}>—</span>}
+                  </td>
+                  <td><span className="cell-mono">{fmtD(row.openedDate)}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {totalPages > 1 && (
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              totalCount={filtered.length}
+              pageSize={PAGE_SIZE}
+              onPage={setPage}
+            />
+          )}
         </div>
       )}
 
       {selectedRow && (
         <StewardshipCaseDetailPanel
           row={selectedRow}
-          lease={leaseIndex.get(selectedRow.groundLeaseId)}
-          onClose={() => setSelectedRow(null)}
+          onClose={() => setSelectedCaseId(null)}
         />
       )}
     </>

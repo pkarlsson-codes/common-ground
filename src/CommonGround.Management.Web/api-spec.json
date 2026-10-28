@@ -5198,6 +5198,88 @@
         }
       }
     },
+    "/api/v1/stewardship/queue/cases": {
+      "get": {
+        "tags": [
+          "Stewardship"
+        ],
+        "operationId": "GetStewardshipQueue",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StewardshipQueueItemResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/stewardship/queue/foreclosure-prevention": {
+      "get": {
+        "tags": [
+          "Stewardship"
+        ],
+        "operationId": "GetForeclosurePreventionQueue",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ForeclosurePreventionQueueItemResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/stewardship/foreclosure-prevention": {
       "get": {
         "tags": [
@@ -9079,47 +9161,59 @@
           }
         }
       },
-      "PaginatedResponseOfForeclosurePreventionCaseResponse": {
+      "StewardshipQueueItemResponse": {
         "type": "object",
-        "description": "Generic paginated response wrapper for API endpoints.",
+        "description": "An open stewardship case with the homeowner and address of its ground lease.",
         "additionalProperties": false,
         "required": [
-          "pageNumber",
-          "pageSize",
-          "totalCount",
-          "totalPages"
+          "stewardshipCase"
         ],
         "properties": {
-          "items": {
-            "type": "array",
-            "description": "The items for the current page.",
-            "items": {
-              "$ref": "#/components/schemas/ForeclosurePreventionCaseResponse"
-            }
+          "stewardshipCase": {
+            "description": "Gets the stewardship case.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/StewardshipCaseResponse"
+              }
+            ]
           },
-          "hasNextPage": {
-            "type": "boolean",
-            "description": "Indicates whether there is a next page of results."
+          "homeownerFullName": {
+            "type": "string",
+            "description": "Gets the lease's homeowner, or null if none is onboarded.",
+            "nullable": true
           },
-          "pageNumber": {
-            "type": "integer",
-            "description": "The current page number (1-based).",
-            "format": "int64"
+          "address": {
+            "type": "string",
+            "description": "Gets the address of the lease's land parcel, or null if unknown.",
+            "nullable": true
+          }
+        }
+      },
+      "ForeclosurePreventionQueueItemResponse": {
+        "type": "object",
+        "description": "An unresolved foreclosure prevention case with the homeowner and address of its ground lease.",
+        "additionalProperties": false,
+        "required": [
+          "foreclosurePreventionCase"
+        ],
+        "properties": {
+          "foreclosurePreventionCase": {
+            "description": "Gets the foreclosure prevention case.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ForeclosurePreventionCaseResponse"
+              }
+            ]
           },
-          "pageSize": {
-            "type": "integer",
-            "description": "The number of items per page.",
-            "format": "int64"
+          "homeownerFullName": {
+            "type": "string",
+            "description": "Gets the lease's homeowner, or null if none is onboarded.",
+            "nullable": true
           },
-          "totalCount": {
-            "type": "integer",
-            "description": "The total number of items across all pages.",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "description": "The total number of pages.",
-            "format": "int64"
+          "address": {
+            "type": "string",
+            "description": "Gets the address of the lease's land parcel, or null if unknown.",
+            "nullable": true
           }
         }
       },
@@ -9153,6 +9247,12 @@
             "format": "date",
             "nullable": true
           },
+          "servicerDelinquencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServicerDelinquencyResponse"
+            }
+          },
           "counselingReferrals": {
             "type": "array",
             "items": {
@@ -9170,6 +9270,24 @@
             "items": {
               "$ref": "#/components/schemas/CurePeriodActivationResponse"
             }
+          }
+        }
+      },
+      "ServicerDelinquencyResponse": {
+        "type": "object",
+        "description": "Servicer delinquency entry within a foreclosure prevention case.",
+        "additionalProperties": false,
+        "properties": {
+          "servicerName": {
+            "type": "string"
+          },
+          "delinquentMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recordedDate": {
+            "type": "string",
+            "format": "date"
           }
         }
       },
@@ -9251,6 +9369,50 @@
           "cureDeadline": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "PaginatedResponseOfForeclosurePreventionCaseResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/ForeclosurePreventionCaseResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
           }
         }
       },

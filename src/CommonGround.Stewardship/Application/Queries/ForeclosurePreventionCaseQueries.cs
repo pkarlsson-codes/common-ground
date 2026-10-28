@@ -41,6 +41,8 @@ public static class GetForeclosurePreventionCasesByGroundLeaseHandler
     {
         var page = await session.Query<ForeclosurePreventionCaseView>()
             .Where(x => x.GroundLeaseId == query.GroundLeaseId)
+            .OrderByDescending(x => x.OpenedDate)
+            .ThenByDescending(x => x.Id)
             .ToPagedListAsync(query.Page.Number, query.Page.Size, ct)
             .ConfigureAwait(false);
 
@@ -58,11 +60,13 @@ public static class GetForeclosurePreventionCasesByGroundLeaseHandler
 /// <summary>Handles <see cref="GetAllForeclosurePreventionCasesQuery"/>.</summary>
 public static class GetAllForeclosurePreventionCasesHandler
 {
-    /// <summary>Returns paginated foreclosure prevention cases not in the Resolved terminal state (Opened + Active).</summary>
+    /// <summary>Returns paginated foreclosure prevention cases not in the Resolved terminal state (Opened + Active), newest first.</summary>
     public static async Task<PaginatedResponse<ForeclosurePreventionCaseView>> Handle(GetAllForeclosurePreventionCasesQuery query, IQuerySession session, CancellationToken ct)
     {
         var page = await session.Query<ForeclosurePreventionCaseView>()
             .Where(x => x.Status != "Resolved")
+            .OrderByDescending(x => x.OpenedDate)
+            .ThenByDescending(x => x.Id)
             .ToPagedListAsync(query.Page.Number, query.Page.Size, ct)
             .ConfigureAwait(false);
 

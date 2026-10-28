@@ -1,22 +1,24 @@
 import SlideOver from '../SlideOver'
+import NavIdLink from '../NavIdLink'
 import { statusLabel } from '../../hooks/types'
-import type { ForeclosurePreventionCaseResponse } from '../../api/models/ForeclosurePreventionCaseResponse'
+import { useForeclosurePreventionCase } from '../../hooks/stewardship'
 import ForeclosurePreventionCaseCard from './ForeclosurePreventionCaseCard'
 
 interface Props {
-  fpcCase: ForeclosurePreventionCaseResponse
+  caseId: string
   homeownerName: string
   address: string
   onClose: () => void
 }
 
 export default function StewardshipFpcDetailPanel({
-  fpcCase,
+  caseId,
   homeownerName,
   address,
   onClose,
 }: Props) {
-  const subtitle = [address, statusLabel(fpcCase.status ?? '')].filter(Boolean).join(' · ')
+  const { data: fpc } = useForeclosurePreventionCase(caseId)
+  const subtitle = [address, fpc ? statusLabel(fpc.status ?? '') : null].filter(Boolean).join(' · ')
 
   return (
     <SlideOver
@@ -24,10 +26,14 @@ export default function StewardshipFpcDetailPanel({
       subtitle={subtitle}
       onClose={onClose}
     >
-      <ForeclosurePreventionCaseCard
-        fpc={fpcCase}
-        groundLeaseId={fpcCase.groundLeaseId ?? ''}
-      />
+      {fpc && (
+        <>
+          <div className="detail-section">
+            <NavIdLink id={fpc.groundLeaseId} to="/ground-leases" label="Open Ground Lease" />
+          </div>
+          <ForeclosurePreventionCaseCard key={fpc.id} fpc={fpc} />
+        </>
+      )}
     </SlideOver>
   )
 }

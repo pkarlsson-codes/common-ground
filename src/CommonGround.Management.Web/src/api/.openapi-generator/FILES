@@ -49,6 +49,7 @@ models/FailPurchaseRequest.ts
 models/FinancingDetailsDto.ts
 models/ForbearanceRequestResponse.ts
 models/ForeclosurePreventionCaseResponse.ts
+models/ForeclosurePreventionQueueItemResponse.ts
 models/GroundLeaseListItemResponse.ts
 models/GroundLeaseResponse.ts
 models/GroundLeaseTemplateListItemResponse.ts
@@ -126,10 +127,12 @@ models/ResolveForeclosurePreventionCaseRequest.ts
 models/ScheduleClosingRequest.ts
 models/SchedulePropertyInspectionRequest.ts
 models/SelectApplicantRequest.ts
+models/ServicerDelinquencyResponse.ts
 models/SoftDeleteDocumentRequest.ts
 models/StallWorkflowRequest.ts
 models/StewardshipCaseResponse.ts
 models/StewardshipCheckInDto.ts
+models/StewardshipQueueItemResponse.ts
 models/SubmitApplicationRequest.ts
 models/SubmitApplicationResponse.ts
 models/SubmitOccupancyVerificationRequest.ts

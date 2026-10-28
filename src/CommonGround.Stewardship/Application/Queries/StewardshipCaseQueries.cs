@@ -58,11 +58,13 @@ public static class GetStewardshipCasesByGroundLeaseHandler
 /// <summary>Handles <see cref="GetAllStewardshipCasesQuery"/>.</summary>
 public static class GetAllStewardshipCasesHandler
 {
-    /// <summary>Returns paginated stewardship cases whose status is Active (i.e. not yet closed).</summary>
+    /// <summary>Returns paginated stewardship cases whose status is Active (i.e. not yet closed), oldest first.</summary>
     public static async Task<PaginatedResponse<StewardshipCaseView>> Handle(GetAllStewardshipCasesQuery query, IQuerySession session, CancellationToken ct)
     {
         var page = await session.Query<StewardshipCaseView>()
             .Where(x => x.Status == "Active")
+            .OrderBy(x => x.OpenedDate)
+            .ThenBy(x => x.Id)
             .ToPagedListAsync(query.Page.Number, query.Page.Size, ct)
             .ConfigureAwait(false);
 

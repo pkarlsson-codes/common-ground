@@ -95,7 +95,11 @@ public static class ForeclosurePreventionCasesEndpoints
     {
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
-        var outcome = ForbearanceOutcome.FromDisplayName(request.Outcome);
+        if (!ForbearanceOutcome.TryFromDisplayName(request.Outcome, out var outcome))
+        {
+            return Results.BadRequest($"Unrecognized forbearance outcome: '{request.Outcome}'.");
+        }
+
         await bus.InvokeForTenantAsync(bus.TenantId!, new RecordForbearanceOutcomeCommand(
             id, requestId, outcome, request.OutcomeDate, request.Notes, userId), ct);
         return Results.NoContent();
@@ -116,7 +120,12 @@ public static class ForeclosurePreventionCasesEndpoints
     {
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
-        var outcome = Enum.Parse<ForeclosurePreventionOutcome>(request.Outcome);
+        if (!Enum.TryParse<ForeclosurePreventionOutcome>(request.Outcome, out var outcome)
+            || !Enum.IsDefined(outcome))
+        {
+            return Results.BadRequest($"Unrecognized resolution outcome: '{request.Outcome}'.");
+        }
+
         await bus.InvokeForTenantAsync(bus.TenantId!, new ResolveForeclosurePreventionCaseCommand(
             id, outcome, request.ResolvedDate, userId), ct);
         return Results.NoContent();

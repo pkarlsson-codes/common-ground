@@ -1,44 +1,36 @@
 import { useState } from 'react'
 import StatusBadge from '../StatusBadge'
 import {
-  useStewardshipCase,
   useIdentifyViolation,
   useIssueViolationNotice,
   useCureViolation,
   useEscalateViolation,
 } from '../../hooks/stewardship'
-import type { LeaseViolationResponse } from '../../api/models'
+import type { LeaseViolationResponse, StewardshipCaseResponse } from '../../api/models'
 import { useToast } from '../../hooks/useToast'
-
-const fmtD = (d: Date | null | undefined) => d ? d.toISOString().slice(0, 10) : undefined
+import { getErrorMessage } from '../../lib/getErrorMessage'
+import { LEASE_VIOLATION_TYPE_LABELS } from '../../hooks/types'
+import { fmtD, today } from './format'
 
 interface Props {
-  groundLeaseId: string
-  caseId: string
+  sc: StewardshipCaseResponse
 }
 
-const today = () => new Date().toISOString().slice(0, 10)
-
-const VIOLATION_TYPES = [
-  { value: 'Occupancy', label: 'Occupancy' },
-  { value: 'UnpermittedAlteration', label: 'Unpermitted Alteration' },
-  { value: 'PhysicalCondition', label: 'Physical Condition' },
-  { value: 'LeaseTermViolation', label: 'Lease Term Violation' },
-]
+const violationTypeLabel = (t?: string | null) => LEASE_VIOLATION_TYPE_LABELS[t ?? ''] ?? t
 
 const ACTIVE_STATUSES = new Set(['Identified', 'NoticeIssued'])
 const TERMINAL_STATUSES = new Set(['Cured', 'Escalated'])
 
-export default function LeaseViolationSection({ groundLeaseId, caseId }: Props) {
-  const { data: sc } = useStewardshipCase(groundLeaseId)
+export default function LeaseViolationSection({ sc }: Props) {
+  const caseId = sc.id!
   const { success, error: showError } = useToast()
 
-  const identifyMutation = useIdentifyViolation(groundLeaseId)
-  const noticeMutation = useIssueViolationNotice(groundLeaseId)
-  const cureMutation = useCureViolation(groundLeaseId)
-  const escalateMutation = useEscalateViolation(groundLeaseId)
+  const identifyMutation = useIdentifyViolation()
+  const noticeMutation = useIssueViolationNotice()
+  const cureMutation = useCureViolation()
+  const escalateMutation = useEscalateViolation()
 
-  const violations = sc?.leaseViolations ?? []
+  const violations = sc.leaseViolations ?? []
   const active = violations.filter(v => ACTIVE_STATUSES.has(v.status ?? ''))
   const history = violations
     .filter(v => TERMINAL_STATUSES.has(v.status ?? ''))
@@ -59,8 +51,8 @@ export default function LeaseViolationSection({ groundLeaseId, caseId }: Props) 
       success('Violation identified')
       setIdentifyForm({ violationType: 'Occupancy', description: '', identifiedDate: today() })
       setIdentifyOpen(false)
-    } catch {
-      showError('Failed to identify violation')
+    } catch (err) {
+      showError(await getErrorMessage(err, 'Failed to identify violation'))
     }
   }
 
@@ -74,6 +66,7 @@ export default function LeaseViolationSection({ groundLeaseId, caseId }: Props) 
         <button
           type="button"
           className="btn btn-ghost btn-sm"
+          aria-label={identifyOpen ? 'Close violation form' : 'Identify violation'}
           onClick={() => setIdentifyOpen(!identifyOpen)}
         >
           {identifyOpen ? '×' : '+'}
@@ -93,9 +86,9 @@ export default function LeaseViolationSection({ groundLeaseId, caseId }: Props) 
                   setIdentifyForm(f => ({ ...f, violationType: e.target.value }))
                 }
               >
-                {VIOLATION_TYPES.map(t => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
+                {Object.entries(LEASE_VIOLATION_TYPE_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
                   </option>
                 ))}
               </select>
@@ -131,7 +124,6 @@ export default function LeaseViolationSection({ groundLeaseId, caseId }: Props) 
           >
             {identifyMutation.isPending ? 'Identifying…' : 'Identify Violation'}
           </button>
-          {identifyMutation.isError && <div className="form-error">Failed to identify.</div>}
         </form>
       )}
 
@@ -186,6 +178,13 @@ interface ViolationCardProps {
   success: (msg: string) => void
 }
 
+/** Default cure deadline: 30 days after the notice. */
+const plus30Days = () => {
+  const d = new Date()
+  d.setDate(d.getDate() + 30)
+  return d.toISOString().slice(0, 10)
+}
+
 function ViolationCard({
   v,
   caseId,
@@ -195,17 +194,14 @@ function ViolationCard({
   showError,
   success,
 }: ViolationCardProps) {
-  const getTodayString = () => new Date().toISOString().slice(0, 10)
   const isCureOverdue =
-    v.cureDeadline &&
-    v.status === 'NoticeIssued' &&
-    new Date(v.cureDeadline) < new Date(getTodayString())
+    v.status === 'NoticeIssued' && (fmtD(v.cureDeadline) ?? '9999') < today()
 
-  const [noticeForm, setNoticeForm] = useState({ noticeDate: getTodayString(), cureDeadline: '' })
-  const [cureForm, setCureForm] = useState({ curedDate: getTodayString() })
+  const [noticeForm, setNoticeForm] = useState({ noticeDate: today(), cureDeadline: plus30Days() })
+  const [cureForm, setCureForm] = useState({ curedDate: today() })
   const [escalateForm, setEscalateForm] = useState({
     reason: '',
-    escalatedDate: getTodayString(),
+    escalatedDate: today(),
   })
 
   const handleNotice = async (e: React.FormEvent) => {
@@ -213,8 +209,8 @@ function ViolationCard({
     try {
       await noticeMutation.mutateAsync({ caseId, violationId: v.id!, ...noticeForm })
       success('Notice issued')
-    } catch {
-      showError('Failed to issue notice')
+    } catch (err) {
+      showError(await getErrorMessage(err, 'Failed to issue notice'))
     }
   }
 
@@ -223,8 +219,8 @@ function ViolationCard({
     try {
       await cureMutation.mutateAsync({ caseId, violationId: v.id!, ...cureForm })
       success('Violation cured')
-    } catch {
-      showError('Failed to cure')
+    } catch (err) {
+      showError(await getErrorMessage(err, 'Failed to cure'))
     }
   }
 
@@ -233,8 +229,8 @@ function ViolationCard({
     try {
       await escalateMutation.mutateAsync({ caseId, violationId: v.id!, ...escalateForm })
       success('Violation escalated')
-    } catch {
-      showError('Failed to escalate')
+    } catch (err) {
+      showError(await getErrorMessage(err, 'Failed to escalate'))
     }
   }
 
@@ -248,7 +244,7 @@ function ViolationCard({
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{v.violationType}</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{violationTypeLabel(v.violationType)}</span>
         <StatusBadge status={v.status ?? ''} />
       </div>
       <div style={{ fontSize: 13, marginBottom: 6 }}>{v.description}</div>
@@ -291,7 +287,6 @@ function ViolationCard({
           >
             {noticeMutation.isPending ? 'Issuing…' : 'Issue Notice'}
           </button>
-          {noticeMutation.isError && <div className="form-error">Failed.</div>}
         </form>
       )}
 
@@ -318,7 +313,6 @@ function ViolationCard({
             >
               {cureMutation.isPending ? 'Curing…' : 'Mark Cured'}
             </button>
-            {cureMutation.isError && <div className="form-error">Failed.</div>}
           </form>
 
           <form onSubmit={handleEscalate}>
@@ -350,7 +344,6 @@ function ViolationCard({
             >
               {escalateMutation.isPending ? 'Escalating…' : 'Escalate'}
             </button>
-            {escalateMutation.isError && <div className="form-error">Failed.</div>}
           </form>
         </div>
       )}
@@ -369,7 +362,8 @@ function ViolationHistoryRow({ v }: { v: LeaseViolationResponse }) {
       }}
     >
       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-secondary)' }}>
-        {v.violationType} · {fmtD(v.identifiedDate)} · <StatusBadge status={v.status ?? ''} />
+        {violationTypeLabel(v.violationType)} · {fmtD(v.identifiedDate)} · <StatusBadge status={v.status ?? ''} />
+        {v.resolutionDate && ` · ${fmtD(v.resolutionDate)}`}
       </div>
       <div style={{ color: 'var(--text-dim)', marginTop: 2 }}>{v.description}</div>
       {v.resolutionNotes && (

@@ -24,6 +24,7 @@ import type {
   EscalateViolationRequest,
   FailOccupancyRequest,
   ForeclosurePreventionCaseResponse,
+  ForeclosurePreventionQueueItemResponse,
   IdentifyViolationRequest,
   InitiateOccupancyVerificationRequest,
   IssueViolationNoticeRequest,
@@ -41,6 +42,7 @@ import type {
   ResolveForeclosurePreventionCaseRequest,
   SchedulePropertyInspectionRequest,
   StewardshipCaseResponse,
+  StewardshipQueueItemResponse,
   SubmitOccupancyVerificationRequest,
   VerifyOccupancyRequest,
 } from '../models/index';
@@ -61,6 +63,8 @@ import {
     FailOccupancyRequestToJSON,
     ForeclosurePreventionCaseResponseFromJSON,
     ForeclosurePreventionCaseResponseToJSON,
+    ForeclosurePreventionQueueItemResponseFromJSON,
+    ForeclosurePreventionQueueItemResponseToJSON,
     IdentifyViolationRequestFromJSON,
     IdentifyViolationRequestToJSON,
     InitiateOccupancyVerificationRequestFromJSON,
@@ -95,6 +99,8 @@ import {
     SchedulePropertyInspectionRequestToJSON,
     StewardshipCaseResponseFromJSON,
     StewardshipCaseResponseToJSON,
+    StewardshipQueueItemResponseFromJSON,
+    StewardshipQueueItemResponseToJSON,
     SubmitOccupancyVerificationRequestFromJSON,
     SubmitOccupancyVerificationRequestToJSON,
     VerifyOccupancyRequestFromJSON,
@@ -376,6 +382,18 @@ export interface StewardshipApiInterface {
 
     /**
      * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StewardshipApiInterface
+     */
+    getForeclosurePreventionQueueRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ForeclosurePreventionQueueItemResponse>>>;
+
+    /**
+     */
+    getForeclosurePreventionQueue(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ForeclosurePreventionQueueItemResponse>>;
+
+    /**
+     * 
      * @param {string} caseId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -401,6 +419,18 @@ export interface StewardshipApiInterface {
     /**
      */
     getStewardshipCases(requestParameters: GetStewardshipCasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfStewardshipCaseResponse>;
+
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StewardshipApiInterface
+     */
+    getStewardshipQueueRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<StewardshipQueueItemResponse>>>;
+
+    /**
+     */
+    getStewardshipQueue(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<StewardshipQueueItemResponse>>;
 
     /**
      * 
@@ -1090,6 +1120,33 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
 
     /**
      */
+    async getForeclosurePreventionQueueRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ForeclosurePreventionQueueItemResponse>>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/stewardship/queue/foreclosure-prevention`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(ForeclosurePreventionQueueItemResponseFromJSON));
+    }
+
+    /**
+     */
+    async getForeclosurePreventionQueue(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ForeclosurePreventionQueueItemResponse>> {
+        const response = await this.getForeclosurePreventionQueueRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
     async getStewardshipCaseRaw(requestParameters: GetStewardshipCaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StewardshipCaseResponse>> {
         if (requestParameters['caseId'] == null) {
             throw new runtime.RequiredError(
@@ -1159,6 +1216,33 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
      */
     async getStewardshipCases(requestParameters: GetStewardshipCasesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfStewardshipCaseResponse> {
         const response = await this.getStewardshipCasesRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getStewardshipQueueRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<StewardshipQueueItemResponse>>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/stewardship/queue/cases`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(StewardshipQueueItemResponseFromJSON));
+    }
+
+    /**
+     */
+    async getStewardshipQueue(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<StewardshipQueueItemResponse>> {
+        const response = await this.getStewardshipQueueRaw(initOverrides);
         return await response.value();
     }
 

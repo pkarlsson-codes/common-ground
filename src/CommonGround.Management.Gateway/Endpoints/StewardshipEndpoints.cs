@@ -1,7 +1,11 @@
 using CommonGround.API.Clients;
+using CommonGround.API.Contracts.Homeownership.Requests;
+using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.Stewardship.Requests;
 using CommonGround.API.Contracts.Stewardship.Responses;
+using CommonGround.Management.Gateway.Models;
 using CommonGround.SharedKernel.Infrastructure.API;
+using CommonGround.SharedKernel.Infrastructure.Querying;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine.Http;
 
@@ -224,6 +228,51 @@ public static class StewardshipEndpoints
         return Results.NoContent();
     }
 
+    // Queues: every open case, with the homeowner and address of its lease, for the Stewardship page to sort and page.
+    [WolverineGet("/api/v1/stewardship/queue/cases")]
+    [ProducesResponseType<IReadOnlyList<StewardshipQueueItemResponse>>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetStewardshipQueue(
+        IStewardshipApiClient client,
+        IGroundLeasesApiClient groundLeases,
+        ILandParcelsApiClient landParcels,
+        CancellationToken cancellationToken)
+    {
+        var cases = await FetchAllAsync(
+            page => client.GetStewardshipCasesAsync(
+                new GetStewardshipCasesQuerySpec(page, PaginationQuerySpecV2.MaxPageSize), cancellationToken)).ConfigureAwait(false);
+        var subjects = await GetLeaseSubjectsAsync(groundLeases, landParcels, cancellationToken).ConfigureAwait(false);
+
+        return Results.Ok(cases
+            .Select(c =>
+            {
+                var subject = subjects.GetValueOrDefault(c.GroundLeaseId);
+                return new StewardshipQueueItemResponse { StewardshipCase = c, HomeownerFullName = subject.HomeownerFullName, Address = subject.Address };
+            })
+            .ToList());
+    }
+
+    [WolverineGet("/api/v1/stewardship/queue/foreclosure-prevention")]
+    [ProducesResponseType<IReadOnlyList<ForeclosurePreventionQueueItemResponse>>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetForeclosurePreventionQueue(
+        IStewardshipApiClient client,
+        IGroundLeasesApiClient groundLeases,
+        ILandParcelsApiClient landParcels,
+        CancellationToken cancellationToken)
+    {
+        var cases = await FetchAllAsync(
+            page => client.GetForeclosurePreventionCasesAsync(
+                new GetForeclosurePreventionCasesQuerySpec(page, PaginationQuerySpecV2.MaxPageSize), cancellationToken)).ConfigureAwait(false);
+        var subjects = await GetLeaseSubjectsAsync(groundLeases, landParcels, cancellationToken).ConfigureAwait(false);
+
+        return Results.Ok(cases
+            .Select(c =>
+            {
+                var subject = subjects.GetValueOrDefault(c.GroundLeaseId);
+                return new ForeclosurePreventionQueueItemResponse { ForeclosurePreventionCase = c, HomeownerFullName = subject.HomeownerFullName, Address = subject.Address };
+            })
+            .ToList());
+    }
+
     // Foreclosure Prevention Cases
     [WolverineGet("/api/v1/stewardship/foreclosure-prevention")]
     [ProducesResponseType<PaginatedResponse<ForeclosurePreventionCaseResponse>>(StatusCodes.Status200OK)]
@@ -358,5 +407,39 @@ public static class StewardshipEndpoints
         ArgumentNullException.ThrowIfNull(request);
         await client.ResolveForeclosurePreventionCaseAsync(caseId, request, cancellationToken).ConfigureAwait(false);
         return Results.NoContent();
+    }
+
+    private static async Task<List<T>> FetchAllAsync<T>(Func<int, Task<PaginatedResponse<T>>> fetchPage)
+    {
+        var items = new List<T>();
+        for (var page = 1; ; page++)
+        {
+            var result = await fetchPage(page).ConfigureAwait(false);
+            items.AddRange(result.Items);
+            if (!result.HasNextPage)
+            {
+                return items;
+            }
+        }
+    }
+
+    /// <summary>Homeowner and parcel address for every ground lease, active or not, keyed by lease ID.</summary>
+    private static async Task<Dictionary<string, (string? HomeownerFullName, string? Address)>> GetLeaseSubjectsAsync(
+        IGroundLeasesApiClient groundLeases,
+        ILandParcelsApiClient landParcels,
+        CancellationToken cancellationToken)
+    {
+        var leasesTask = FetchAllAsync(
+            page => groundLeases.GetGroundLeasesAsync(
+                new GetGroundLeasesQuerySpec(page, PaginationQuerySpecV2.MaxPageSize), cancellationToken));
+        var parcelsTask = FetchAllAsync(
+            page => landParcels.GetLandParcelsAsync(
+                new GetLandParcelsQuerySpec(page, PaginationQuerySpecV2.MaxPageSize, includeDecommissioned: true), cancellationToken));
+        await Task.WhenAll(leasesTask, parcelsTask).ConfigureAwait(false);
+
+        var addresses = (await parcelsTask.ConfigureAwait(false)).ToDictionary(p => p.Id, p => p.Address);
+        return (await leasesTask.ConfigureAwait(false)).ToDictionary(
+            l => l.Id,
+            l => (l.HomeownerFullName, addresses.GetValueOrDefault(l.LandParcelId)));
     }
 }

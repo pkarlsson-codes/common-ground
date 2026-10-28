@@ -1,5 +1,6 @@
 import type { StewardshipCaseResponse } from '../../api/models/StewardshipCaseResponse'
 import type { OccupancyVerificationResponse } from '../../api/models/OccupancyVerificationResponse'
+import type { StewardshipQueueItemResponse } from '../../api/models/StewardshipQueueItemResponse'
 
 export type UrgencyLevel = 'red' | 'orange' | 'yellow' | 'neutral'
 
@@ -71,6 +72,13 @@ const URGENCY_WEIGHT: Record<UrgencyLevel, number> = {
   neutral: 3,
 }
 
+export const URGENCY_LABEL: Record<UrgencyLevel, string> = {
+  red: 'Urgent',
+  orange: 'High',
+  yellow: 'Elevated',
+  neutral: 'Normal',
+}
+
 export interface StewardshipQueueRow {
   caseId: string
   groundLeaseId: string
@@ -84,46 +92,41 @@ export interface StewardshipQueueRow {
 }
 
 /**
- * Joins stewardship cases with ground lease data and produces sorted queue rows.
+ * Turns the stewardship queue into rows sorted by urgency, then by open date.
  */
 export function buildStewardshipQueue(
-  cases: StewardshipCaseResponse[],
-  leaseIndex: Map<string, { homeownerFullName?: string | null; parcelAddress?: string | null }>,
+  items: StewardshipQueueItemResponse[],
   today: Date = new Date(),
 ): StewardshipQueueRow[] {
   const currentYear = today.getFullYear()
 
-  const rows: StewardshipQueueRow[] = cases
-    .filter(sc => sc.id && sc.groundLeaseId && sc.openedDate)
-    .map(sc => {
-      const lease = leaseIndex.get(sc.groundLeaseId!)
+  const rows: StewardshipQueueRow[] = items.map(({ stewardshipCase: sc, homeownerFullName, address }) => {
+    const currentVerification =
+      (sc.occupancyVerifications ?? []).find(v => v.periodYear === currentYear) ?? null
 
-      const currentVerification =
-        (sc.occupancyVerifications ?? []).find(v => v.periodYear === currentYear) ?? null
+    const activeViolationCount = (sc.leaseViolations ?? []).filter(
+      v => v.status === 'Identified' || v.status === 'NoticeIssued',
+    ).length
 
-      const activeViolationCount = (sc.leaseViolations ?? []).filter(
-        v => v.status === 'Identified' || v.status === 'NoticeIssued',
-      ).length
+    // Next inspection = earliest Scheduled inspection date
+    const scheduledDates = (sc.propertyInspections ?? [])
+      .filter(i => i.status === 'Scheduled' && i.scheduledDate)
+      .map(i => new Date(i.scheduledDate!))
+      .sort((a, b) => a.getTime() - b.getTime())
+    const nextInspectionDate = scheduledDates[0] ?? null
 
-      // Next inspection = earliest Scheduled inspection date
-      const scheduledDates = (sc.propertyInspections ?? [])
-        .filter(i => i.status === 'Scheduled' && i.scheduledDate)
-        .map(i => new Date(i.scheduledDate!))
-        .sort((a, b) => a.getTime() - b.getTime())
-      const nextInspectionDate = scheduledDates[0] ?? null
-
-      return {
-        caseId: sc.id!,
-        groundLeaseId: sc.groundLeaseId!,
-        homeownerName: lease?.homeownerFullName ?? '—',
-        address: lease?.parcelAddress ?? '—',
-        currentVerification,
-        activeViolationCount,
-        nextInspectionDate,
-        openedDate: sc.openedDate!,
-        urgency: classifyUrgency(sc, today),
-      }
-    })
+    return {
+      caseId: sc.id!,
+      groundLeaseId: sc.groundLeaseId!,
+      homeownerName: homeownerFullName ?? '—',
+      address: address ?? '—',
+      currentVerification,
+      activeViolationCount,
+      nextInspectionDate,
+      openedDate: sc.openedDate!,
+      urgency: classifyUrgency(sc, today),
+    }
+  })
 
   // Stable sort: urgency weight first, then openedDate ascending
   rows.sort((a, b) => {

@@ -21,6 +21,13 @@ import {
     CurePeriodActivationResponseToJSON,
     CurePeriodActivationResponseToJSONTyped,
 } from './CurePeriodActivationResponse';
+import type { ServicerDelinquencyResponse } from './ServicerDelinquencyResponse';
+import {
+    ServicerDelinquencyResponseFromJSON,
+    ServicerDelinquencyResponseFromJSONTyped,
+    ServicerDelinquencyResponseToJSON,
+    ServicerDelinquencyResponseToJSONTyped,
+} from './ServicerDelinquencyResponse';
 import type { ForbearanceRequestResponse } from './ForbearanceRequestResponse';
 import {
     ForbearanceRequestResponseFromJSON,
@@ -86,6 +93,12 @@ export interface ForeclosurePreventionCaseResponse {
     resolvedDate?: Date | null;
     /**
      * 
+     * @type {Array<ServicerDelinquencyResponse>}
+     * @memberof ForeclosurePreventionCaseResponse
+     */
+    servicerDelinquencies?: Array<ServicerDelinquencyResponse>;
+    /**
+     * 
      * @type {Array<CounselingReferralResponse>}
      * @memberof ForeclosurePreventionCaseResponse
      */
@@ -128,6 +141,7 @@ export function ForeclosurePreventionCaseResponseFromJSONTyped(json: any, ignore
         'outcome': json['outcome'] == null ? undefined : json['outcome'],
         'openedDate': json['openedDate'] == null ? undefined : (new Date(json['openedDate'])),
         'resolvedDate': json['resolvedDate'] == null ? undefined : (new Date(json['resolvedDate'])),
+        'servicerDelinquencies': json['servicerDelinquencies'] == null ? undefined : ((json['servicerDelinquencies'] as Array<any>).map(ServicerDelinquencyResponseFromJSON)),
         'counselingReferrals': json['counselingReferrals'] == null ? undefined : ((json['counselingReferrals'] as Array<any>).map(CounselingReferralResponseFromJSON)),
         'forbearanceRequests': json['forbearanceRequests'] == null ? undefined : ((json['forbearanceRequests'] as Array<any>).map(ForbearanceRequestResponseFromJSON)),
         'curePeriodActivations': json['curePeriodActivations'] == null ? undefined : ((json['curePeriodActivations'] as Array<any>).map(CurePeriodActivationResponseFromJSON)),
@@ -152,6 +166,7 @@ export function ForeclosurePreventionCaseResponseToJSONTyped(value?: Foreclosure
         'outcome': value['outcome'],
         'openedDate': value['openedDate'] == null ? undefined : ((value['openedDate']).toISOString().substring(0,10)),
         'resolvedDate': value['resolvedDate'] === null ? null : ((value['resolvedDate'] as any)?.toISOString().substring(0,10)),
+        'servicerDelinquencies': value['servicerDelinquencies'] == null ? undefined : ((value['servicerDelinquencies'] as Array<any>).map(ServicerDelinquencyResponseToJSON)),
         'counselingReferrals': value['counselingReferrals'] == null ? undefined : ((value['counselingReferrals'] as Array<any>).map(CounselingReferralResponseToJSON)),
         'forbearanceRequests': value['forbearanceRequests'] == null ? undefined : ((value['forbearanceRequests'] as Array<any>).map(ForbearanceRequestResponseToJSON)),
         'curePeriodActivations': value['curePeriodActivations'] == null ? undefined : ((value['curePeriodActivations'] as Array<any>).map(CurePeriodActivationResponseToJSON)),
