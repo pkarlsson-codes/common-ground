@@ -243,7 +243,7 @@ test('initiating a development project from a home locks its parcel and home', a
   await expect(field(initiate, 'Land Parcel')).toBeDisabled()
   await expect(field(initiate, 'Land Parcel')).toHaveText(`${apn} — ${apn} Elm St`)
   await expect(field(initiate, 'Homes')).toBeDisabled()
-  await expect(field(initiate, 'Homes')).toContainText('SingleFamily — 3bd / 2ba')
+  await expect(field(initiate, 'Homes')).toContainText('Single Family — 3bd / 2ba')
 
   const name = `Rehab ${uniqueId()}`
   await field(initiate, 'Name').fill(name)

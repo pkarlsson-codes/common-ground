@@ -112,9 +112,10 @@ export async function createPurchaseWorkflow(page: Page, buyerName: string, { fr
   let workflowId: string
   if (fromApplication) {
     applicationId = (await createApplication(page, buyerName)).applicationId
-    await post(page, `/api/v1/homeowner-applications/${applicationId}/select`, {
+    // HomeBuyers learns about the new home from an integration event, so retry until it has.
+    await expect(() => post(page, `/api/v1/homeowner-applications/${applicationId}/select`, {
       homeId, groundLeaseTemplateId, purchasePrice, selectedDate: isoDate(),
-    })
+    })).toPass()
     // The workflow is started by an integration event, so poll for it.
     await expect.poll(async () => {
       const workflows = await get<{ items: unknown[] }>(
