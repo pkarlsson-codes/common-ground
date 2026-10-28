@@ -45,20 +45,33 @@ export function useDocuments(params: {
   includeDeleted?: boolean
   contentType?: string
   tag?: string
-  expiringBefore?: Date | null
+  search?: string
+  /** ISO date (YYYY-MM-DD); only documents expiring before this date are returned, soonest first. */
+  expiringBefore?: string
 } = {}) {
-  const { page = 1, pageSize = 20, includeDeleted, contentType, tag, expiringBefore } = params
+  const { page = 1, pageSize = 20, includeDeleted, contentType, tag, search, expiringBefore } = params
   return useQuery({
-    queryKey: KEYS.list({ page, pageSize, includeDeleted, contentType, tag, expiringBefore }),
-    queryFn: () => api.listDocuments({ pageNumber: page, pageSize, includeDeleted, contentType, tag, expiringBefore }),
+    queryKey: KEYS.list({ page, pageSize, includeDeleted, contentType, tag, search, expiringBefore }),
+    queryFn: () => api.listDocuments({
+      pageNumber: page,
+      pageSize,
+      includeDeleted,
+      contentType,
+      tag,
+      search,
+      expiringBefore: expiringBefore ? new Date(expiringBefore) : undefined,
+    }),
   })
 }
 
-/** Convenience hook that returns documents expiring within the next N days. */
-export function useExpiringDocuments(daysAhead: number = 30) {
+/**
+ * Documents expiring within the next N days, including already-expired ones, soonest first.
+ * The cutoff is a whole date so the query key stays stable across renders.
+ */
+export function useExpiringDocuments(daysAhead: number, page = 1) {
   const cutoff = new Date()
-  cutoff.setDate(cutoff.getDate() + daysAhead)
-  return useDocuments({ expiringBefore: cutoff, pageSize: 50 })
+  cutoff.setUTCDate(cutoff.getUTCDate() + daysAhead + 1)
+  return useDocuments({ expiringBefore: cutoff.toISOString().slice(0, 10), page })
 }
 
 // ── Mutations ────────────────────────────────────────
@@ -180,6 +193,7 @@ export function useTagDocument() {
       api.tagDocument({ documentId, tagDocumentRequest: req }),
     onSuccess: (_d, v) => {
       qc.invalidateQueries({ queryKey: KEYS.doc(v.documentId) })
+      qc.invalidateQueries({ queryKey: ['documents'] })
     },
   })
 }
@@ -191,11 +205,13 @@ export function useUntagDocument() {
       api.untagDocument({ documentId, tag }),
     onSuccess: (_d, v) => {
       qc.invalidateQueries({ queryKey: KEYS.doc(v.documentId) })
+      qc.invalidateQueries({ queryKey: ['documents'] })
     },
   })
 }
 
-/** Downloads a document — opens the presigned URL in a new tab. */
-export function downloadDocument(documentId: string) {
-  window.open(`/api/v1/documents/${documentId}/download`, '_blank')
+/** Downloads a document (its current version, or the given one) — opens the presigned URL in a new tab. */
+export function downloadDocument(documentId: string, versionId?: string) {
+  const query = versionId ? `?versionId=${encodeURIComponent(versionId)}` : ''
+  window.open(`/api/v1/documents/${documentId}/download${query}`, '_blank')
 }

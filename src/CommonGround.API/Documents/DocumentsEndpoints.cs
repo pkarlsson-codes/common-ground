@@ -38,6 +38,16 @@ public static class DocumentsEndpoints
         var file = form.Files["file"]
             ?? throw new InvalidOperationException("'file' part missing");
 
+        if (!SensitivityLevel.TryFromDisplayName(metadata.Sensitivity, out var sensitivity))
+        {
+            return Results.BadRequest($"Unrecognized sensitivity: '{metadata.Sensitivity}'.");
+        }
+
+        if (!RetentionClass.TryFromDisplayName(metadata.Retention, out var retention))
+        {
+            return Results.BadRequest($"Unrecognized retention: '{metadata.Retention}'.");
+        }
+
         var userId = httpContext.GetUserId();
 
         var documentId = DocumentId.Generate();
@@ -56,8 +66,8 @@ public static class DocumentsEndpoints
 
             var command = new UploadDocument(
                 metadata.Title,
-                SensitivityLevel.FromDisplayName(metadata.Sensitivity),
-                RetentionClass.FromDisplayName(metadata.Retention),
+                sensitivity,
+                retention,
                 uploadResult.BlobKey,
                 file.FileName,
                 file.ContentType,
@@ -203,10 +213,14 @@ public static class DocumentsEndpoints
         ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
         ArgumentNullException.ThrowIfNull(request);
 
+        SensitivityLevel? sensitivity = null;
+        if (!string.IsNullOrWhiteSpace(request.Sensitivity)
+            && !SensitivityLevel.TryFromDisplayName(request.Sensitivity, out sensitivity))
+        {
+            return Results.BadRequest($"Unrecognized sensitivity: '{request.Sensitivity}'.");
+        }
+
         var userId = httpContext.GetUserId();
-        var sensitivity = string.IsNullOrWhiteSpace(request.Sensitivity)
-            ? null
-            : SensitivityLevel.FromDisplayName(request.Sensitivity);
 
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new UpdateDocumentMetadata(
@@ -226,6 +240,11 @@ public static class DocumentsEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
         ArgumentNullException.ThrowIfNull(request);
+
+        if (string.IsNullOrWhiteSpace(request.Tag))
+        {
+            return Results.BadRequest("Tag is required.");
+        }
 
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!,
@@ -251,14 +270,14 @@ public static class DocumentsEndpoints
 
     [WolverineGet("/api/documents")]
     public static async Task<IResult> ListDocuments(
-        [AsParameters] GetDocumentsQuerySpec spec,
+        [FromQuery] GetDocumentsQuerySpec spec,
         HttpContext httpContext,
         IMessageBus bus,
         CancellationToken cancellationToken = default)
     {
         var result = await bus.InvokeForTenantAsync<PaginatedResponse<DocumentLibraryItemView>>(
             bus.TenantId!,
-            new ListDocuments(spec.Page, spec.IncludeDeleted, spec.ContentType, spec.Tag, spec.ExpiringBefore),
+            new ListDocuments(spec.Page, spec.IncludeDeleted, spec.ContentType, spec.Tag, spec.ExpiringBefore, spec.Search),
             cancellationToken).ConfigureAwait(false);
 
         return Results.Ok(result.MapItems(d => new DocumentLibraryItemResponse(

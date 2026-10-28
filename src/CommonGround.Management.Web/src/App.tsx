@@ -40,8 +40,12 @@ function ProtectedRoute() {
     return null
   }
 
-  if (!user?.hasTrust && location.pathname !== '/onboarding' && location.pathname !== '/signup') {
+  const onOnboarding = location.pathname === '/onboarding' || location.pathname === '/signup'
+  if (!user?.hasTrust && !onOnboarding) {
     return <Navigate to="/onboarding" replace />
+  }
+  if (user?.hasTrust && onOnboarding) {
+    return <Navigate to="/" replace />
   }
 
   return <Outlet />

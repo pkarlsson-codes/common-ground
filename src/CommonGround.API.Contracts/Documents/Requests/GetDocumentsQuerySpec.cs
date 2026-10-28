@@ -12,19 +12,22 @@ public sealed class GetDocumentsQuerySpec : PaginationQuerySpecV2
     /// <param name="contentType">Content-type filter, or null to return all.</param>
     /// <param name="tag">Tag filter, or null to return all.</param>
     /// <param name="expiringBefore">Upper bound on expiry date, or null for no filter.</param>
+    /// <param name="search">Optional case-insensitive text matched against the title.</param>
     public GetDocumentsQuerySpec(
         int pageNumber = 1,
         int pageSize = DefaultPageSize,
         bool includeDeleted = false,
         string? contentType = null,
         string? tag = null,
-        DateTimeOffset? expiringBefore = null)
+        DateTimeOffset? expiringBefore = null,
+        string? search = null)
         : base(pageNumber, pageSize)
     {
         IncludeDeleted = includeDeleted;
         ContentType = contentType;
         Tag = tag;
         ExpiringBefore = expiringBefore;
+        Search = search;
     }
 
     /// <summary>Gets whether soft-deleted documents are included.</summary>
@@ -39,6 +42,9 @@ public sealed class GetDocumentsQuerySpec : PaginationQuerySpecV2
     /// <summary>Gets the upper bound on expiry date, or null for no filter.</summary>
     public DateTimeOffset? ExpiringBefore { get; }
 
+    /// <summary>Gets optional case-insensitive text matched against the title.</summary>
+    public string? Search { get; }
+
     /// <inheritdoc cref="PaginationQuerySpecV2.AppendFilterParts"/>
     protected override void AppendFilterParts(List<string> parts)
     {
@@ -49,6 +55,7 @@ public sealed class GetDocumentsQuerySpec : PaginationQuerySpecV2
 
         AddIfNotWhiteSpace(parts, "contentType", ContentType);
         AddIfNotWhiteSpace(parts, "tag", Tag);
+        AddIfNotWhiteSpace(parts, "search", Search);
 
         if (ExpiringBefore.HasValue)
         {

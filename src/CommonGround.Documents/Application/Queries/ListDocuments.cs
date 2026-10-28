@@ -10,13 +10,17 @@ namespace CommonGround.Documents.Application.Queries;
 /// <param name="IncludeDeleted">When true, includes soft-deleted documents in the result.</param>
 /// <param name="ContentType">Optional MIME content-type filter (exact match).</param>
 /// <param name="Tag">Optional tag filter (matches normalised lowercase tag).</param>
-/// <param name="ExpiringBefore">When provided, restricts results to documents whose <c>ExpiresAt</c> is before this date.</param>
+/// <param name="ExpiringBefore">
+/// When provided, restricts results to documents whose <c>ExpiresAt</c> is before this date, soonest expiry first.
+/// </param>
+/// <param name="Search">Optional case-insensitive text matched against the title.</param>
 public sealed record ListDocuments(
     PageSpec Page,
     bool IncludeDeleted = false,
     string? ContentType = null,
     string? Tag = null,
-    DateTimeOffset? ExpiringBefore = null);
+    DateTimeOffset? ExpiringBefore = null,
+    string? Search = null);
 
 /// <summary>Handles <see cref="ListDocuments"/>.</summary>
 public static class ListDocumentsHandler
@@ -48,6 +52,12 @@ public static class ListDocumentsHandler
             query = query.Where(d => d.Tags.Contains(tag));
         }
 
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var s = request.Search.Trim();
+            query = query.Where(d => d.Title.Contains(s, StringComparison.OrdinalIgnoreCase));
+        }
+
         if (request.ExpiringBefore.HasValue)
         {
             var cutoff = request.ExpiringBefore.Value;
@@ -56,8 +66,11 @@ public static class ListDocumentsHandler
 
         var totalCount = await query.LongCountAsync(cancellationToken).ConfigureAwait(false);
 
-        var items = await query
-            .OrderByDescending(d => d.LastModifiedAt)
+        var ordered = request.ExpiringBefore.HasValue
+            ? query.OrderBy(d => d.ExpiresAt).ThenBy(d => d.Id)
+            : query.OrderByDescending(d => d.LastModifiedAt).ThenByDescending(d => d.Id);
+
+        var items = await ordered
             .Skip((request.Page.Number - 1) * request.Page.Size)
             .Take(request.Page.Size)
             .ToListAsync(cancellationToken).ConfigureAwait(false);

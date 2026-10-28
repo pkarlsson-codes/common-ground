@@ -317,6 +317,15 @@
               "nullable": true
             },
             "x-position": 6
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 7
           }
         ],
         "responses": {

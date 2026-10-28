@@ -83,6 +83,7 @@ export interface ListDocumentsRequest {
     contentType?: string | null;
     tag?: string | null;
     expiringBefore?: Date | null;
+    search?: string | null;
 }
 
 export interface SoftDeleteDocumentOperationRequest {
@@ -191,6 +192,7 @@ export interface DocumentsApiInterface {
      * @param {string} [contentType] 
      * @param {string} [tag] 
      * @param {Date} [expiringBefore] 
+     * @param {string} [search] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
@@ -519,6 +521,10 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
 
         if (requestParameters['expiringBefore'] != null) {
             queryParameters['expiringBefore'] = (requestParameters['expiringBefore'] as any).toISOString();
+        }
+
+        if (requestParameters['search'] != null) {
+            queryParameters['search'] = requestParameters['search'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export default function OnboardingPage() {
   return (
     <div
@@ -83,8 +85,8 @@ export default function OnboardingPage() {
               Starting a new Community Land Trust? Create one here and invite your team.
             </p>
           </div>
-          <a
-            href='/signup'
+          <Link
+            to='/signup'
             style={{
               display: 'inline-flex',
               justifyContent: 'center',
@@ -102,7 +104,7 @@ export default function OnboardingPage() {
             }}
           >
             Create a trust
-          </a>
+          </Link>
         </div>
       </div>
     </div>
