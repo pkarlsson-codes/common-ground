@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Check, ChevronsUpDown, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useInitiateDevelopmentProject } from '../../hooks/developmentProjects'
@@ -6,9 +6,12 @@ import type { InitiateDevelopmentProjectRequest } from '../../api'
 import type { HomeListItemResponse } from '../../api'
 import EntityCombobox from '../../components/EntityCombobox'
 import SlideOver from '../../components/SlideOver'
-import { LandParcelsApi, HomesApi } from '../../api'
+import { LandParcelsApi } from '../../api'
+import { useHomes } from '../../hooks/homes'
 import { apiConfig } from '../../lib/apiConfig'
 import { useToast } from '../../hooks/useToast'
+import { HOME_TYPE_LABELS } from '../../hooks/types'
+import { getErrorMessage } from '../../lib/getErrorMessage'
 import { Badge } from '@/components/ui/badge'
 import {
   Command,
@@ -21,7 +24,6 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
-const homesApi = new HomesApi(apiConfig)
 
 const parcelLabel = (p: { legalParcelNumber?: string | null; address?: string | null }) =>
   [p.legalParcelNumber, p.address].filter(Boolean).join(' — ')
@@ -42,7 +44,7 @@ const emptyForm = (
 
 function homeLabel(h: HomeListItemResponse): string {
   const parts: string[] = []
-  if (h.homeType) parts.push(h.homeType)
+  if (h.homeType) parts.push(HOME_TYPE_LABELS[h.homeType] ?? h.homeType)
   const details: string[] = []
   if (h.bedrooms != null) details.push(`${h.bedrooms}bd`)
   if (h.bathrooms != null) details.push(`${h.bathrooms}ba`)
@@ -159,8 +161,7 @@ export default function DevelopmentProjectInitiatePanel({
   const [form, setForm] = useState<InitiateDevelopmentProjectRequest>(() =>
     emptyForm(initialParcelId, initialHomeIds ?? []),
   )
-  const [availableHomes, setAvailableHomes] = useState<HomeListItemResponse[]>([])
-  const [homesLoading, setHomesLoading] = useState(false)
+  const [initiateError, setInitiateError] = useState<string | null>(null)
   const initiateMutation = useInitiateDevelopmentProject()
   const { success } = useToast()
 
@@ -168,17 +169,13 @@ export default function DevelopmentProjectInitiatePanel({
   const homesSelectionLocked = initialHomeIds !== undefined
   const isRehab = form.type === 'Rehabilitation'
 
-  useEffect(() => {
-    if (!isRehab || !form.landParcelId) {
-      setAvailableHomes([])
-      return
-    }
-    setHomesLoading(true)
-    homesApi
-      .getHomes({ landParcelIds: [form.landParcelId], pageSize: 100 })
-      .then(r => setAvailableHomes(r.items ?? []))
-      .finally(() => setHomesLoading(false))
-  }, [isRehab, form.landParcelId])
+  const { data: parcelHomes, isLoading: homesLoading } = useHomes({
+    pageNumber: 1,
+    pageSize: 100,
+    landParcelId: form.landParcelId,
+    enabled: isRehab && !!form.landParcelId,
+  })
+  const availableHomes = parcelHomes?.items ?? []
 
   const toggleHome = (id: string) => {
     setForm(f => {
@@ -199,6 +196,7 @@ export default function DevelopmentProjectInitiatePanel({
 
   const handleSubmit = async (e: { preventDefault(): void }) => {
     e.preventDefault()
+    setInitiateError(null)
     try {
       await initiateMutation.mutateAsync({
         landParcelId: form.landParcelId,
@@ -209,7 +207,9 @@ export default function DevelopmentProjectInitiatePanel({
       })
       success('Development project initiated')
       onClose()
-    } catch { /* error shown in form */ }
+    } catch (error) {
+      setInitiateError(await getErrorMessage(error, 'Failed to initiate project. Check the details and try again.'))
+    }
   }
 
   return (
@@ -311,8 +311,8 @@ export default function DevelopmentProjectInitiatePanel({
           </div>
         </div>
 
-        {initiateMutation.isError && (
-          <div className="form-error">Failed to initiate project. Check the details and try again.</div>
+        {initiateError && (
+          <div className="form-error">{initiateError}</div>
         )}
       </form>
     </SlideOver>

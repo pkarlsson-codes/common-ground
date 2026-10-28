@@ -45,6 +45,7 @@ internal static class BusinessRuleErrorMessageMap
             ["homeownership.resale_policy_terms.index_based.current_index_value_required"] = "Current index value is required to estimate an index-based resale price.",
             ["homeownership.resale_policy_terms.index_based.index_type_required"] = "Index type is required.",
 
+            ["property_registry.development_project.initiate.name_required"] = "Project name is required.",
             ["property_registry.development_project.initiate.description_required"] = "Project description is required.",
             ["property_registry.development_project.initiate_rehabilitation.home_ids_required"] = "Select at least one home for rehabilitation.",
             ["property_registry.home.record_assessment.assessed_value_negative"] = "Assessed value cannot be negative.",

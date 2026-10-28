@@ -162,6 +162,55 @@
         }
       }
     },
+    "/api/v1/development-projects/{projectId}": {
+      "get": {
+        "tags": [
+          "DevelopmentProjects"
+        ],
+        "operationId": "GetDevelopmentProject",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/documents": {
       "post": {
         "tags": [
@@ -6152,6 +6201,45 @@
           "instance": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "DevelopmentProjectResponse": {
+        "type": "object",
+        "description": "Response DTO for a single development project.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The project ID."
+          },
+          "landParcelId": {
+            "type": "string",
+            "description": "The associated land parcel ID."
+          },
+          "name": {
+            "type": "string",
+            "description": "The project name."
+          },
+          "description": {
+            "type": "string",
+            "description": "The project description.",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "description": "The current project status."
+          },
+          "projectType": {
+            "type": "string",
+            "description": "The project type: NewConstruction or Rehabilitation."
+          },
+          "homeIds": {
+            "type": "array",
+            "description": "The homes included in the project; empty for new construction.",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },

@@ -36,6 +36,22 @@ public static class DevelopmentProjectsEndpoints
         return Results.Ok(response);
     }
 
+    [WolverineGet("/api/development-projects/{projectId}")]
+    public static async Task<IResult> GetDevelopmentProject(
+        string projectId,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(projectId);
+
+        var view = await bus.InvokeForTenantAsync<DevelopmentProjectListItemView>(bus.TenantId!,
+            new GetDevelopmentProject(DevelopmentProjectId.Create(projectId)),
+            cancellationToken);
+
+        return Results.Ok(new DevelopmentProjectResponse(
+            view.Id, view.LandParcelId, view.Name, view.Description, view.Status, view.ProjectType, view.HomeIds));
+    }
+
     [WolverinePost("/api/development-projects")]
     public static async Task<IResult> InitiateDevelopmentProject(
         InitiateDevelopmentProjectRequest request,

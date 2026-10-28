@@ -19,7 +19,8 @@ public class DevelopmentProjectListItemViewProjection : SingleStreamProjection<D
             Name = @event.Name,
             Description = @event.Description,
             Status = "Initiated",
-            ProjectType = @event.ProjectType == 2 ? "Rehabilitation" : "NewConstruction"
+            ProjectType = @event.ProjectType == 2 ? "Rehabilitation" : "NewConstruction",
+            CreatedAt = @event.OccurredAt,
         };
     }
 }

@@ -16,12 +16,15 @@
 
 import * as runtime from '../runtime';
 import type {
+  DevelopmentProjectResponse,
   InitiateDevelopmentProjectRequest,
   InitiateDevelopmentProjectResponse,
   PaginatedResponseOfDevelopmentProjectListItemResponse,
   ProblemDetails,
 } from '../models/index';
 import {
+    DevelopmentProjectResponseFromJSON,
+    DevelopmentProjectResponseToJSON,
     InitiateDevelopmentProjectRequestFromJSON,
     InitiateDevelopmentProjectRequestToJSON,
     InitiateDevelopmentProjectResponseFromJSON,
@@ -31,6 +34,10 @@ import {
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
 } from '../models/index';
+
+export interface GetDevelopmentProjectRequest {
+    projectId: string;
+}
 
 export interface GetDevelopmentProjectsRequest {
     pageNumber?: number;
@@ -51,6 +58,19 @@ export interface InitiateDevelopmentProjectOperationRequest {
  * @interface DevelopmentProjectsApiInterface
  */
 export interface DevelopmentProjectsApiInterface {
+    /**
+     * 
+     * @param {string} projectId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DevelopmentProjectsApiInterface
+     */
+    getDevelopmentProjectRaw(requestParameters: GetDevelopmentProjectRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DevelopmentProjectResponse>>;
+
+    /**
+     */
+    getDevelopmentProject(requestParameters: GetDevelopmentProjectRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DevelopmentProjectResponse>;
+
     /**
      * 
      * @param {number} [pageNumber] 
@@ -87,6 +107,41 @@ export interface DevelopmentProjectsApiInterface {
  * 
  */
 export class DevelopmentProjectsApi extends runtime.BaseAPI implements DevelopmentProjectsApiInterface {
+
+    /**
+     */
+    async getDevelopmentProjectRaw(requestParameters: GetDevelopmentProjectRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DevelopmentProjectResponse>> {
+        if (requestParameters['projectId'] == null) {
+            throw new runtime.RequiredError(
+                'projectId',
+                'Required parameter "projectId" was null or undefined when calling getDevelopmentProject().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/development-projects/{projectId}`;
+        urlPath = urlPath.replace(`{${"projectId"}}`, encodeURIComponent(String(requestParameters['projectId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => DevelopmentProjectResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getDevelopmentProject(requestParameters: GetDevelopmentProjectRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DevelopmentProjectResponse> {
+        const response = await this.getDevelopmentProjectRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      */

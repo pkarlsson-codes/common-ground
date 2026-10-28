@@ -23,6 +23,7 @@ export * from './CureViolationRequest';
 export * from './CurrentUserDto';
 export * from './DenyApplicationRequest';
 export * from './DevelopmentProjectListItemResponse';
+export * from './DevelopmentProjectResponse';
 export * from './DocumentAttachmentResponse';
 export * from './DocumentLibraryItemResponse';
 export * from './DocumentResponse';

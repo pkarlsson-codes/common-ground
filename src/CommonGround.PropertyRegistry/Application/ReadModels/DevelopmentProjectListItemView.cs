@@ -23,4 +23,7 @@ public class DevelopmentProjectListItemView
 
     /// <summary>Gets or sets the project type.</summary>
     public string ProjectType { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets when the project was initiated.</summary>
+    public DateTimeOffset CreatedAt { get; set; }
 }

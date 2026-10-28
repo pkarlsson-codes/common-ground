@@ -51,6 +51,9 @@ public sealed class DevelopmentProject : AggregateRoot<DevelopmentProjectId>
         ArgumentNullException.ThrowIfNull(landParcelId);
         ArgumentNullException.ThrowIfNull(initiatedBy);
 
+        if (string.IsNullOrWhiteSpace(name))
+            throw BusinessRuleViolation.DevelopmentProject.Initiate.NameRequired();
+
         if (string.IsNullOrWhiteSpace(description))
             throw BusinessRuleViolation.DevelopmentProject.Initiate.DescriptionRequired();
 
@@ -83,6 +86,9 @@ public sealed class DevelopmentProject : AggregateRoot<DevelopmentProjectId>
     {
         ArgumentNullException.ThrowIfNull(landParcelId);
         ArgumentNullException.ThrowIfNull(initiatedBy);
+
+        if (string.IsNullOrWhiteSpace(name))
+            throw BusinessRuleViolation.DevelopmentProject.Initiate.NameRequired();
 
         if (string.IsNullOrWhiteSpace(description))
             throw BusinessRuleViolation.DevelopmentProject.Initiate.DescriptionRequired();

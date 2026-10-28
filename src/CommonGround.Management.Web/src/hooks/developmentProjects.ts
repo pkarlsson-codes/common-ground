@@ -5,19 +5,6 @@ import { apiConfig } from '../lib/apiConfig'
 
 const api = new DevelopmentProjectsApi(apiConfig)
 
-interface DevelopmentProjectDetail {
-  id: string
-  landParcelId: string
-  name?: string
-  description?: string
-  status: string
-  projectedStartDate?: string
-  projectedEndDate?: string
-  actualCompletionDate?: string
-  budget?: number
-  homeIds?: string[]
-}
-
 export function useDevelopmentProjects(params: { pageNumber: number; pageSize?: number; search?: string; landParcelId?: string }) {
   return useQuery({
     queryKey: ['development-projects', params.pageNumber, params.search, params.landParcelId],
@@ -31,15 +18,9 @@ export function useDevelopmentProjects(params: { pageNumber: number; pageSize?: 
 }
 
 export function useDevelopmentProject(id: string | null) {
-  return useQuery<DevelopmentProjectDetail>({
+  return useQuery({
     queryKey: ['development-project', id],
-    queryFn: async () => {
-      if (!id) return undefined as unknown as DevelopmentProjectDetail
-      // Gateway doesn't expose a single-item GET; fall back to listing and pick the item
-      const res = await api.getDevelopmentProjects({ pageNumber: 1, pageSize: 50 })
-      const item = (res.items ?? []).find((p: any) => p.id === id)
-      return (item ?? (undefined as unknown)) as DevelopmentProjectDetail
-    },
+    queryFn: () => api.getDevelopmentProject({ projectId: id! }),
     enabled: !!id,
   })
 }

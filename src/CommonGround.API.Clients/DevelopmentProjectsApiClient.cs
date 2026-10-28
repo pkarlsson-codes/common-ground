@@ -24,6 +24,13 @@ public sealed class DevelopmentProjectsApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task<DevelopmentProjectResponse> GetDevelopmentProjectAsync(string projectId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(projectId);
+        return await GetAsync<DevelopmentProjectResponse>($"api/development-projects/{projectId}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task<InitiateDevelopmentProjectResponse> InitiateDevelopmentProjectAsync(
         InitiateDevelopmentProjectRequest request, CancellationToken cancellationToken)
     {

@@ -14,6 +14,12 @@ public interface IDevelopmentProjectsApiClient
     Task<PaginatedResponse<DevelopmentProjectListItemResponse>> GetDevelopmentProjectsAsync(
         GetDevelopmentProjectsQuerySpec querySpec, CancellationToken cancellationToken);
 
+    /// <summary>Gets a single development project.</summary>
+    /// <param name="projectId">The ID of the project.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The development project.</returns>
+    Task<DevelopmentProjectResponse> GetDevelopmentProjectAsync(string projectId, CancellationToken cancellationToken);
+
     /// <summary>Initiates a new development project for a land parcel.</summary>
     /// <param name="request">The initiation request.</param>
     /// <param name="cancellationToken">Cancellation token.</param>

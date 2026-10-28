@@ -125,6 +125,10 @@ public static class BusinessRuleViolation
     {
         public static class Initiate
         {
+            public static BusinessRuleViolationException NameRequired()
+                => new(
+                    "property_registry.development_project.initiate.name_required");
+
             public static BusinessRuleViolationException DescriptionRequired()
                 => new(
                     "property_registry.development_project.initiate.description_required");

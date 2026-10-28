@@ -1,12 +1,13 @@
 import Pagination from '../../components/Pagination'
 import StatusBadge from '../../components/StatusBadge'
+import { PROJECT_TYPE_LABELS } from '../../hooks/types'
 
 interface DevelopmentProjectListItem {
   id: string
   landParcelId: string
   name: string
   status: string
-  projectedEndDate?: string
+  projectType: string
 }
 
 const PAGE_SIZE = 20
@@ -70,8 +71,8 @@ export default function DevelopmentProjectsTable({
               <tr>
                 <th>Name</th>
                 <th>Parcel</th>
+                <th>Type</th>
                 <th>Status</th>
-                <th>Projected End</th>
               </tr>
             </thead>
             <tbody>
@@ -87,12 +88,8 @@ export default function DevelopmentProjectsTable({
                       {p.landParcelId.slice(0, 8)}…
                     </span>
                   </td>
+                  <td>{PROJECT_TYPE_LABELS[p.projectType] ?? p.projectType}</td>
                   <td><StatusBadge status={p.status} /></td>
-                  <td>
-                    <span className="cell-mono">
-                      {p.projectedEndDate ? new Date(p.projectedEndDate).toLocaleDateString() : '—'}
-                    </span>
-                  </td>
                 </tr>
               ))}
             </tbody>

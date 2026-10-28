@@ -20,6 +20,18 @@ public static class DevelopmentProjectsEndpoints
         return Results.Ok(result);
     }
 
+    [WolverineGet("/api/v1/development-projects/{projectId}")]
+    [ProducesResponseType<DevelopmentProjectResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetDevelopmentProject(
+        string projectId,
+        IDevelopmentProjectsApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(projectId);
+        var result = await client.GetDevelopmentProjectAsync(projectId, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+
     [WolverinePost("/api/v1/development-projects")]
     [ProducesResponseType<InitiateDevelopmentProjectResponse>(StatusCodes.Status201Created)]
     public static async Task<IResult> InitiateDevelopmentProject(

@@ -18,13 +18,24 @@ export default function DevelopmentProjectsPage() {
   const navigate = useNavigate()
 
   const [page,      setPage]      = useState(1)
+  const [searchInput, setSearchInput] = useState('')
+  const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [panel,     setPanel]     = useState<Panel>(null)
   const [initiateParcelId, setInitiateParcelId] = useState<string | undefined>(undefined)
   const [initiateHomeIds, setInitiateHomeIds] = useState<string[] | undefined>(undefined)
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setSearch(searchInput.trim())
+      setPage(1)
+    }, 300)
+    return () => clearTimeout(timeout)
+  }, [searchInput])
+
   const { data, isLoading, isError } = useDevelopmentProjects({
     pageNumber: page,
+    search: search || undefined,
   })
 
   const openDetail = (id: string) => {
@@ -72,7 +83,7 @@ export default function DevelopmentProjectsPage() {
   }
 
   const projects = (data?.items ?? [])
-    .filter((p): p is { id: string; landParcelId: string; name?: string; status?: string } =>
+    .filter((p): p is typeof p & { id: string; landParcelId: string } =>
       typeof p.id === 'string' && typeof p.landParcelId === 'string',
     )
     .map(p => ({
@@ -80,6 +91,7 @@ export default function DevelopmentProjectsPage() {
       landParcelId: p.landParcelId,
       name: p.name ?? 'Untitled Project',
       status: p.status ?? '',
+      projectType: p.projectType ?? '',
     }))
 
   return (
@@ -100,6 +112,18 @@ export default function DevelopmentProjectsPage() {
           </svg>
           Initiate Project
         </button>
+      </div>
+
+      <div className="filter-bar">
+        <input
+          className="form-input"
+          type="search"
+          placeholder="Search by name or description"
+          aria-label="Search development projects"
+          value={searchInput}
+          onChange={e => setSearchInput(e.target.value)}
+          style={{ maxWidth: 320 }}
+        />
       </div>
 
       <DevelopmentProjectsTable

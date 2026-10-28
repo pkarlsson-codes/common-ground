@@ -9,15 +9,16 @@ const api = new HomesApi(apiConfig)
 const dateStr = (d: Date | null | undefined) =>
   d instanceof Date ? d.toISOString().substring(0, 10) : undefined
 
-export function useHomes(params: { pageNumber: number; pageSize?: number; landParcelId?: string; status?: string }) {
+export function useHomes(params: { pageNumber: number; pageSize?: number; landParcelId?: string; status?: string; enabled?: boolean }) {
   return useQuery({
-    queryKey: ['homes', params.pageNumber, params.landParcelId, params.status],
+    queryKey: ['homes', params.pageNumber, params.pageSize, params.landParcelId, params.status],
     queryFn: () => api.getHomes({
       pageNumber: params.pageNumber,
       pageSize: params.pageSize ?? 20,
       landParcelIds: params.landParcelId ? [params.landParcelId] : undefined,
       statuses: params.status ? [params.status] : undefined,
     }),
+    enabled: params.enabled ?? true,
   })
 }
 

@@ -1,4 +1,6 @@
 import { useDevelopmentProject } from '../../hooks/developmentProjects'
+import { useHomes } from '../../hooks/homes'
+import { HOME_TYPE_LABELS, PROJECT_TYPE_LABELS } from '../../hooks/types'
 import SlideOver from '../../components/SlideOver'
 import StatusBadge from '../../components/StatusBadge'
 import NavIdLink from '../../components/NavIdLink'
@@ -18,73 +20,66 @@ interface Props {
 
 export default function DevelopmentProjectDetailPanel({ projectId, onClose }: Props) {
   const { data: detail, isLoading } = useDevelopmentProject(projectId)
+  const projectHomeIds = detail?.homeIds ?? []
+  const { data: parcelHomes } = useHomes({
+    pageNumber: 1,
+    pageSize: 100,
+    landParcelId: detail?.landParcelId,
+    enabled: projectHomeIds.length > 0,
+  })
+  const homes = projectHomeIds.length > 0
+    ? (parcelHomes?.items ?? []).filter(h => h.id && projectHomeIds.includes(h.id))
+    : []
+  const typeLabel = detail ? (PROJECT_TYPE_LABELS[detail.projectType ?? ''] ?? detail.projectType) : ''
 
   return (
     <SlideOver
       title={detail?.name ?? '…'}
-      subtitle={detail ? `${detail.status}` : undefined}
+      subtitle={detail ? `${typeLabel} · ${detail.status}` : undefined}
       onClose={onClose}
     >
       {isLoading || !detail ? <SkeletonRows /> : (
-        <>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8, position: 'relative' }} />
-
-          {/* Action buttons removed — not supported by gateway */}
-
-          {/* Activate action removed — not supported by gateway */}
-
-          {/* Completion action removed — not supported by gateway */}
-
-          <div className="detail-grid">
-            <div className="detail-field">
-              <div className="detail-field__label">Status</div>
-              <div className="detail-field__value"><StatusBadge status={detail.status} /></div>
-            </div>
-            {detail.projectedStartDate && (
-              <div className="detail-field">
-                <div className="detail-field__label">Projected Start</div>
-                <div className="detail-field__value mono">
-                  {new Date(detail.projectedStartDate).toLocaleDateString()}
-                </div>
-              </div>
-            )}
-            {detail.projectedEndDate && (
-              <div className="detail-field">
-                <div className="detail-field__label">Projected End</div>
-                <div className="detail-field__value mono">
-                  {new Date(detail.projectedEndDate).toLocaleDateString()}
-                </div>
-              </div>
-            )}
-            {detail.actualCompletionDate && (
-              <div className="detail-field">
-                <div className="detail-field__label">Completed</div>
-                <div className="detail-field__value mono">
-                  {new Date(detail.actualCompletionDate).toLocaleDateString()}
-                </div>
-              </div>
-            )}
-            {detail.budget != null && (
-              <div className="detail-field">
-                <div className="detail-field__label">Budget</div>
-                <div className="detail-field__value mono">
-                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(detail.budget)}
-                </div>
-              </div>
-            )}
-            {detail.description && (
-              <div className="detail-field full-span">
-                <div className="detail-field__label">Description</div>
-                <div className="detail-field__value">{detail.description}</div>
-              </div>
-            )}
+        <div className="detail-grid">
+          <div className="detail-field">
+            <div className="detail-field__label">Status</div>
+            <div className="detail-field__value"><StatusBadge status={detail.status ?? ''} /></div>
+          </div>
+          <div className="detail-field">
+            <div className="detail-field__label">Type</div>
+            <div className="detail-field__value">{typeLabel}</div>
+          </div>
+          {detail.description && (
             <div className="detail-field full-span">
-              <div className="detail-field__value">
-                <NavIdLink id={detail.landParcelId} to="/land-parcels" label="Open Land Parcel" />
+              <div className="detail-field__label">Description</div>
+              <div className="detail-field__value">{detail.description}</div>
+            </div>
+          )}
+          {homes.length > 0 && (
+            <div className="detail-field full-span">
+              <div className="detail-field__label">Homes</div>
+              <div style={{ display: 'grid', gap: 6 }}>
+                {homes.map(h => (
+                  <div
+                    key={h.id}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}
+                  >
+                    <span className="detail-field__value">
+                      {HOME_TYPE_LABELS[h.homeType ?? ''] ?? h.homeType}
+                      {' · '}
+                      <span className="cell-mono">{h.bedrooms} bd / {Number(h.bathrooms).toFixed(1)} ba</span>
+                    </span>
+                    <NavIdLink id={h.id} to="/homes" label="Open Home" />
+                  </div>
+                ))}
               </div>
+            </div>
+          )}
+          <div className="detail-field full-span">
+            <div className="detail-field__value">
+              <NavIdLink id={detail.landParcelId} to="/land-parcels" label="Open Land Parcel" />
             </div>
           </div>
-        </>
+        </div>
       )}
     </SlideOver>
   )

@@ -5,7 +5,7 @@ namespace CommonGround.API.Contracts.PropertyRegistry.Requests;
 /// </summary>
 public sealed class GetDevelopmentProjectsFilter
 {
-    /// <summary>Optional free-text search across description.</summary>
+    /// <summary>Optional free-text search across name and description.</summary>
     public string? Search { get; init; }
 
     /// <summary>Optional land parcel ID filter.</summary>

@@ -6,11 +6,13 @@
 4. User selects Project Type: "New Construction" or "Rehabilitation"
 5. User searches for and selects a land parcel in the Land Parcel combobox
 6. User enters a project Name
-7. If Project Type is "Rehabilitation", a Homes field appears; user selects one or more homes registered on the chosen parcel (the list loads once a parcel is selected; at least one home must be selected to submit)
+7. If Project Type is "Rehabilitation", a Homes field appears; user selects one or more homes registered on the chosen parcel, each labeled by home type and size (e.g. "Single Family — 3bd / 2ba"; the list loads once a parcel is selected; at least one home must be selected to submit)
 8. User enters a Description
 9. User clicks "Initiate Project" (disabled until Land Parcel, Name, and Description are set, and — for Rehabilitation — at least one Home is selected)
 10. Toast: "Development project initiated"
-11. Panel closes, new project appears in the Development Projects table
+11. Panel closes, new project appears at the top of the Development Projects table
+
+If the API rejects the project (e.g. a blank name or description), the panel stays open and shows the reason.
 
 Note: switching Project Type clears any selected Homes (unless the Homes field is locked by the entry point, e.g. when opened from a home's detail panel).
 

@@ -29,6 +29,10 @@ export const HOME_TYPE_LABELS: Record<string, string> = {
 }
 export const HOME_STATUSES = ['Available', 'PendingOccupancy', 'Occupied', 'Resale'] as const
 export const DEVELOPMENT_PROJECT_STATUSES = ['Initiated', 'Active', 'Completed', 'Abandoned'] as const
+export const PROJECT_TYPE_LABELS: Record<string, string> = {
+  NewConstruction: 'New Construction',
+  Rehabilitation: 'Rehabilitation',
+}
 export const ACQUISITION_METHODS = ['Purchase', 'Donation', 'Transfer'] as const
 
 export const statusLabel = (s: string) => s.replace(/([A-Z])/g, ' $1').trim()
