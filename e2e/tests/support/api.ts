@@ -103,7 +103,7 @@ export async function createApplication(page: Page, name: string, { approve = tr
  * `fromApplication` it's started the way the app does it, by selecting an approved applicant for the home.
  */
 export async function createPurchaseWorkflow(page: Page, buyerName: string, { fromApplication = false } = {}) {
-  const { parcelId } = await createLandParcel(page)
+  const { parcelId, apn } = await createLandParcel(page)
   const homeId = await createHome(page, parcelId)
   const { groundLeaseTemplateId, templateName } = await createGroundLeaseTemplate(page)
   const purchasePrice = 200000
@@ -137,7 +137,7 @@ export async function createPurchaseWorkflow(page: Page, buyerName: string, { fr
     }))
   }
 
-  return { workflowId, parcelId, homeId, groundLeaseTemplateId, templateName, applicationId, buyerName }
+  return { workflowId, parcelId, apn, homeId, groundLeaseTemplateId, templateName, applicationId, buyerName }
 }
 
 /**
@@ -179,4 +179,20 @@ export async function uploadHomeDocument(page: Page, homeId: string, title: stri
     },
   })
   return ok<{ documentId: string }>(response, 'POST /api/v1/documents')
+}
+
+/**
+ * Closes a purchase so the buyer has an active ground lease, then waits for Stewardship to open the lease's
+ * stewardship case (it does so from an integration event).
+ */
+export async function createStewardshipCase(page: Page, buyerName: string) {
+  const lease = await createLeaseFromPurchase(page, buyerName)
+  let caseId = ''
+  await expect.poll(async () => {
+    const queue = await get<{ stewardshipCase: { id: string; groundLeaseId: string } }[]>(
+      page, '/api/v1/stewardship/queue/cases')
+    caseId = queue.find(i => i.stewardshipCase.groundLeaseId === lease.leaseId)?.stewardshipCase.id ?? ''
+    return caseId
+  }).not.toBe('')
+  return { ...lease, caseId }
 }
