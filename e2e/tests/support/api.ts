@@ -23,6 +23,11 @@ export async function post<T = void>(page: Page, path: string, body: unknown): P
   return ok<T>(response, `POST ${path}`)
 }
 
+export async function patch<T = void>(page: Page, path: string, body: unknown): Promise<T> {
+  const response = await page.request.patch(path, { data: body, headers: await headers(page) })
+  return ok<T>(response, `PATCH ${path}`)
+}
+
 export async function get<T>(page: Page, path: string): Promise<T> {
   return ok<T>(await page.request.get(path), `GET ${path}`)
 }
@@ -180,6 +185,25 @@ export async function uploadHomeDocument(page: Page, homeId: string, title: stri
   })
   return ok<{ documentId: string }>(response, 'POST /api/v1/documents')
 }
+
+/** Adds a text file as a new version of a document. */
+export async function addDocumentVersion(page: Page, documentId: string, fileName: string, contents: string) {
+  const response = await page.request.post(`/api/v1/documents/${documentId}/versions`, {
+    headers: await headers(page),
+    multipart: {
+      metadata: JSON.stringify({ note: null }),
+      file: { name: fileName, mimeType: 'text/plain', buffer: Buffer.from(contents) },
+    },
+  })
+  return ok<{ versionId: string }>(response, `POST /api/v1/documents/${documentId}/versions`)
+}
+
+/** Sets (or, with null, clears) a document's expiry date. */
+export const setDocumentExpiry = (page: Page, documentId: string, expiresOn: string | null) =>
+  patch(page, `/api/v1/documents/${documentId}`, expiresOn ? { expiresAt: expiresOn } : { clearExpiresAt: true })
+
+export const tagDocument = (page: Page, documentId: string, tag: string) =>
+  post(page, `/api/v1/documents/${documentId}/tags`, { tag })
 
 /**
  * Closes a purchase so the buyer has an active ground lease, then waits for Stewardship to open the lease's
