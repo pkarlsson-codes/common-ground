@@ -3,8 +3,7 @@ import { createApplication, post } from '../support/api'
 import { detailValue, expectToast, field, isoDate, panel, uniqueId } from '../support/ui'
 
 // Journeys: docs/journeys/applications/
-//   submit-application, view-application-detail, record-housing-counseling,
-//   record-clt-orientation, record-mortgage-prequalification, approve-application,
+//   submit-application, view-application-detail, approve-application,
 //   deny-application, withdraw-application (submit-application covers both New and Existing household)
 
 type Member = { name: string; email: string; phone: string }
@@ -54,7 +53,7 @@ async function openApplication(page: Page, primaryName: string) {
   return panel(page, primaryName)
 }
 
-test('submitted application shows household, checklist and phase-appropriate actions', async ({ page }) => {
+test('submitted application shows its declared snapshot, phase-appropriate actions and a link to the household', async ({ page }) => {
   const { primary, other } = newHousehold()
   // Make the second member the primary contact to check the radio is honoured.
   await submitApplication(page, [other, primary], 1)
@@ -71,13 +70,9 @@ test('submitted application shows household, checklist and phase-appropriate act
   await expect(detailValue(detail, 'Declared Annual Income')).toHaveText('$65,000')
   await expect(detailValue(detail, 'Declared Accessibility Need')).toHaveText('No')
 
-  const members = detail.locator('.detail-section', { hasText: 'Household Members' })
-  await expect(detailValue(members, 'Primary Contact')).toContainText(primary.name)
-  await expect(detailValue(members, 'Member')).toContainText(other.name)
-
-  const checklist = detail.locator('.checklist')
-  await expect(checklist.locator('.checklist-item--done')).toHaveCount(0)
-  await expect(checklist.getByRole('button', { name: 'Record' })).toHaveCount(3)
+  // Members and readiness live on the household, not the application.
+  await expect(detail.locator('.checklist')).toHaveCount(0)
+  await expect(detail.locator('.detail-section', { hasText: 'Household Members' })).toHaveCount(0)
 
   const actions = detail.locator('.detail-section', { hasText: 'Workflow Actions' })
   await expect(actions.getByRole('button')).toHaveText([
@@ -85,44 +80,19 @@ test('submitted application shows household, checklist and phase-appropriate act
     'Deny Application',
     'Withdraw Application',
   ])
+
+  await detail.getByRole('button', { name: 'Open Household' }).click()
+  await expect(page).toHaveURL(/\/households$/)
+  const household = panel(page, primary.name)
+  const members = household.locator('.detail-section', { hasText: 'Household Members' })
+  await expect(detailValue(members, 'Primary Contact')).toContainText(primary.name)
+  await expect(detailValue(members, 'Member')).toContainText(other.name)
 })
 
-test('recording the checklist and approving moves the application to Approved', async ({ page }) => {
+test('approving a submitted application moves it to Approved', async ({ page }) => {
   const { primary } = newHousehold()
   await submitApplication(page, [primary])
   const detail = await openApplication(page, primary.name)
-  const checklist = detail.locator('.checklist')
-  const item = (label: string) => checklist.locator('.checklist-item', { hasText: label })
-
-  await item('Housing Counseling').getByRole('button', { name: 'Record' }).click()
-  const counseling = panel(page, 'Record Housing Counseling')
-  await field(counseling, 'Certification Number').fill('CERT-E2E')
-  await field(counseling, 'Completed Date').fill(isoDate(-7))
-  await field(counseling, 'Counselor Organization').fill('E2E Counseling Org')
-  await counseling.getByRole('button', { name: 'Record Counseling' }).click()
-  await expectToast(page, 'Housing counseling recorded')
-  await expect(item('Housing Counseling')).toHaveClass(/checklist-item--done/)
-
-  await item('CLT Orientation').getByRole('button', { name: 'Record' }).click()
-  const orientation = panel(page, 'Record CLT Orientation')
-  await field(orientation, 'Completed Date').fill(isoDate(-3))
-  await orientation.getByRole('button', { name: 'Record Orientation' }).click()
-  await expectToast(page, 'CLT orientation recorded')
-  await expect(item('CLT Orientation')).toHaveClass(/checklist-item--done/)
-
-  await item('Mortgage Prequalification').getByRole('button', { name: 'Record' }).click()
-  const prequal = panel(page, 'Record Mortgage Prequalification')
-  await field(prequal, 'Lender Name').fill('E2E Lender')
-  await field(prequal, 'Approved Amount ($)').fill('210000')
-  await field(prequal, 'Expiry Date').fill(isoDate(90))
-  await prequal.getByRole('button', { name: 'Record Prequalification' }).click()
-  await expectToast(page, 'Mortgage prequalification recorded')
-  await expect(item('Mortgage Prequalification')).toHaveClass(/checklist-item--done/)
-  await expect(item('Mortgage Prequalification').getByRole('button')).toHaveText('Update')
-
-  const prequalSection = detail.locator('.detail-section', { has: page.locator('.detail-section__title', { hasText: /^Mortgage Prequalification$/ }) })
-  await expect(detailValue(prequalSection, 'Lender Name')).toHaveText('E2E Lender')
-  await expect(detailValue(prequalSection, 'Prequalified Amount')).toHaveText('$210,000')
 
   await detail.getByRole('button', { name: 'Approve Application' }).click()
   const approve = panel(page, 'Approve Application')
