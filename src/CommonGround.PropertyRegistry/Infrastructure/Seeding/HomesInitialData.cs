@@ -2,6 +2,8 @@ using System.Text.Json;
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Domain.Services;
+using CommonGround.TrustManagement.Domain.Trusts;
 using CommonGround.TrustManagement.Infrastructure.Seeding;
 using Marten;
 using Marten.Schema;
@@ -74,13 +76,21 @@ public sealed class HomesInitialData : IInitialData
                 }
             }
 
+            var now = TimeProviderContext.Current.UtcNow;
+            // Not ITrustClock: it depends on the document store this seeder runs while building.
+            var trust = await defaultSession.Events
+                .AggregateStreamAsync<Trust>(trustLookup.TrustId, token: cancellation)
+                .ConfigureAwait(false)
+                ?? throw new InvalidOperationException($"Trust stream '{trustLookup.TrustId}' does not exist for home seed '{entry.SeedKey}'.");
+            var today = trust.TimeZone.ToDate(now);
             var initialAssessment = UnitAssessment.Create(
                 entry.InitialAssessedValue,
                 new DateOnly(entry.YearBuilt, 1, 1),
                 appraiserName: null,
                 conditionNotes: null,
                 SeederUserId,
-                DateTimeOffset.UtcNow);
+                now,
+                today);
 
             var unit = Home.Register(
                 LandParcelId.Create(landParcelLookup.LandParcelId),

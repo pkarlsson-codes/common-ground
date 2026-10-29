@@ -16,12 +16,13 @@ public sealed class UnitAssessment : ValueObject
         RecordedAt = occurredAt;
     }
 
-    /// <summary>Creates and validates a new <see cref="UnitAssessment"/>.</summary>
-    public static UnitAssessment Create(decimal assessedValue, DateOnly assessmentDate, string? appraiserName, string? conditionNotes, UserId recordedById, DateTimeOffset occurredAt)
+    /// <summary>
+    /// Creates and validates a new <see cref="UnitAssessment"/>. <paramref name="today"/> is today in the
+    /// trust's time zone; the assessment date may not be after it.
+    /// </summary>
+    public static UnitAssessment Create(decimal assessedValue, DateOnly assessmentDate, string? appraiserName, string? conditionNotes, UserId recordedById, DateTimeOffset occurredAt, DateOnly today)
     {
         ArgumentNullException.ThrowIfNull(recordedById);
-
-        var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.DateTime);
 
         if (assessedValue < 0)
             throw BusinessRuleViolation.UnitAssessment.Create.AssessedValueNegative(assessedValue);

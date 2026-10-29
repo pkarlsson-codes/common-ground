@@ -116,6 +116,8 @@ public class ApiFactory : WebApplicationFactory<Program>
                 }
             });
 
+            services.InitializeMartenWith<TestTrustInitialData>();
+
             services.AddSingleton<IDocumentBlobStore, InMemoryDocumentBlobStore>();
 
             services.AddWolverineExtension<MediatorOnlyExtension>();

@@ -1,6 +1,7 @@
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Domain.Services;
 using CommonGround.SharedKernel.Extensions;
 using Marten;
 
@@ -33,11 +34,16 @@ public sealed record RegisterHome(
 public static class RegisterHomeHandler
 {
     /// <summary>Creates a new Home and returns its ID.</summary>
-    public static HomeId Handle(
+    public static async Task<HomeId> Handle(
         RegisterHome command,
-        IDocumentSession session)
+        IDocumentSession session,
+        ITrustClock trustClock,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
+
+        var now = TimeProviderContext.Current.UtcNow;
+        var today = await trustClock.ToTrustDateAsync(session.TenantId, now, cancellationToken).ConfigureAwait(false);
 
         var initialAssessment = UnitAssessment.Create(
             command.InitialAssessedValue,
@@ -45,7 +51,8 @@ public static class RegisterHomeHandler
             command.AppraiserName,
             conditionNotes: null,
             command.RegisteredBy,
-            DateTimeOffset.UtcNow);
+            now,
+            today);
 
         var home = Home.Register(
             command.LandParcelId,

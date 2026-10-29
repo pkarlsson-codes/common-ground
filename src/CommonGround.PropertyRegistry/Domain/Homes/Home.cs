@@ -3,6 +3,7 @@ using CommonGround.PropertyRegistry.Application.Errors;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.SharedKernel.Domain.Services;
 
 namespace CommonGround.PropertyRegistry.Domain.Homes;
 
@@ -62,7 +63,7 @@ public sealed class Home : AggregateRoot<HomeId>
         ArgumentNullException.ThrowIfNull(registeredBy);
 
         var minYear = 1800;
-        var maxYear = DateTimeOffset.UtcNow.Year + 5;
+        var maxYear = TimeProviderContext.Current.UtcNow.Year + 5;
 
         if (bedrooms < 0)
             throw BusinessRuleViolation.Home.Register.BedroomsNegative(bedrooms);

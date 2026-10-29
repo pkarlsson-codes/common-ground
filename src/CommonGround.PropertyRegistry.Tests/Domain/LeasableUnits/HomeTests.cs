@@ -12,7 +12,7 @@ public class HomeTests
     private static readonly LandParcelId ParcelId = LandParcelId.Generate();
 
     private static readonly UnitAssessment _initialAssessment =
-        UnitAssessment.Create(280000m, new DateOnly(2024, 1, 1), null, null, StaffUser, DateTimeOffset.UtcNow);
+        UnitAssessment.Create(280000m, new DateOnly(2024, 1, 1), null, null, StaffUser, DateTimeOffset.UtcNow, new DateOnly(2026, 1, 1));
 
     private static Home RegisterHome() =>
         Home.Register(

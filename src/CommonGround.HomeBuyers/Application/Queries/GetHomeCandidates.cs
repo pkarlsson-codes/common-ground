@@ -29,6 +29,7 @@ public static class GetHomeCandidatesHandler
     public static async Task<IReadOnlyList<HomeCandidate>> Handle(
         GetHomeCandidates request,
         IQuerySession session,
+        ITrustClock trustClock,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -41,7 +42,7 @@ public static class GetHomeCandidatesHandler
         var households = await session
             .LoadManyAsync<HouseholdListItemView>(cancellationToken, applications.Select(a => a.HouseholdId).Distinct())
             .ConfigureAwait(false);
-        var today = DateOnly.FromDateTime(TimeProviderContext.Current.UtcNow.UtcDateTime);
+        var today = await trustClock.TodayAsync(session.TenantId, cancellationToken).ConfigureAwait(false);
         var readyHouseholds = households
             .Where(h => h.IsReadyForSelectionOn(today))
             .ToDictionary(h => h.Id);

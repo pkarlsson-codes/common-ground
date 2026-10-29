@@ -27,6 +27,7 @@ public static class GetWaitingListHandler
     public static async Task<PaginatedResponse<WaitingListEntry>> Handle(
         GetWaitingList request,
         IQuerySession session,
+        ITrustClock trustClock,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -57,7 +58,7 @@ public static class GetWaitingListHandler
             .LoadManyAsync<HouseholdListItemView>(cancellationToken, page.Select(a => a.HouseholdId).Distinct())
             .ConfigureAwait(false);
         var householdsById = households.ToDictionary(h => h.Id);
-        var today = DateOnly.FromDateTime(TimeProviderContext.Current.UtcNow.UtcDateTime);
+        var today = await trustClock.TodayAsync(session.TenantId, cancellationToken).ConfigureAwait(false);
 
         return new PaginatedResponse<WaitingListEntry>
         {
