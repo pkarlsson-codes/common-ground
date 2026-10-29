@@ -1,3 +1,4 @@
+using System.Globalization;
 using CommonGround.SharedKernel.Infrastructure.Querying;
 
 namespace CommonGround.API.Contracts.Documents.Requests;
@@ -19,7 +20,7 @@ public sealed class GetDocumentsQuerySpec : PaginationQuerySpecV2
         bool includeDeleted = false,
         string? contentType = null,
         string? tag = null,
-        DateTimeOffset? expiringBefore = null,
+        DateOnly? expiringBefore = null,
         string? search = null)
         : base(pageNumber, pageSize)
     {
@@ -40,7 +41,7 @@ public sealed class GetDocumentsQuerySpec : PaginationQuerySpecV2
     public string? Tag { get; }
 
     /// <summary>Gets the upper bound on expiry date, or null for no filter.</summary>
-    public DateTimeOffset? ExpiringBefore { get; }
+    public DateOnly? ExpiringBefore { get; }
 
     /// <summary>Gets optional case-insensitive text matched against the title.</summary>
     public string? Search { get; }
@@ -59,7 +60,7 @@ public sealed class GetDocumentsQuerySpec : PaginationQuerySpecV2
 
         if (ExpiringBefore.HasValue)
         {
-            parts.Add($"expiringBefore={Uri.EscapeDataString(ExpiringBefore.Value.ToString("O"))}");
+            parts.Add($"expiringBefore={Uri.EscapeDataString(ExpiringBefore.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))}");
         }
     }
 }

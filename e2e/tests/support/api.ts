@@ -200,7 +200,7 @@ export async function addDocumentVersion(page: Page, documentId: string, fileNam
 
 /** Sets (or, with null, clears) a document's expiry date. */
 export const setDocumentExpiry = (page: Page, documentId: string, expiresOn: string | null) =>
-  patch(page, `/api/v1/documents/${documentId}`, expiresOn ? { expiresAt: expiresOn } : { clearExpiresAt: true })
+  patch(page, `/api/v1/documents/${documentId}`, expiresOn ? { expiresOn } : { clearExpiresOn: true })
 
 export const tagDocument = (page: Page, documentId: string, tag: string) =>
   post(page, `/api/v1/documents/${documentId}/tags`, { tag })

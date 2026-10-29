@@ -198,25 +198,25 @@ public sealed class DocumentTests
     public void UpdateMetadata_changes_only_supplied_fields()
     {
         var doc = NewDoc();
-        var newExpiry = DateTimeOffset.UtcNow.AddDays(30);
+        var newExpiry = new DateOnly(2026, 11, 27);
 
-        doc.UpdateMetadata("New Title", null, newExpiry, clearExpiresAt: false, User);
+        doc.UpdateMetadata("New Title", null, newExpiry, clearExpiresOn: false, User);
 
         doc.Title.Should().Be("New Title");
         doc.Sensitivity.Should().Be(SensitivityLevel.Internal);
-        doc.ExpiresAt.Should().Be(newExpiry);
+        doc.ExpiresOn.Should().Be(newExpiry);
     }
 
     [Fact]
     public void UpdateMetadata_can_clear_expiry_explicitly()
     {
         var doc = NewDoc();
-        doc.UpdateMetadata(null, null, DateTimeOffset.UtcNow, false, User);
-        doc.ExpiresAt.Should().NotBeNull();
+        doc.UpdateMetadata(null, null, new DateOnly(2026, 10, 28), false, User);
+        doc.ExpiresOn.Should().NotBeNull();
 
-        doc.UpdateMetadata(null, null, null, clearExpiresAt: true, User);
+        doc.UpdateMetadata(null, null, null, clearExpiresOn: true, User);
 
-        doc.ExpiresAt.Should().BeNull();
+        doc.ExpiresOn.Should().BeNull();
     }
 
     [Fact]

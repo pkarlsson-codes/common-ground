@@ -97,7 +97,7 @@ export interface DocumentLibraryItemResponse {
      * @type {Date}
      * @memberof DocumentLibraryItemResponse
      */
-    expiresAt?: Date | null;
+    expiresOn?: Date | null;
     /**
      * 
      * @type {Array<string>}
@@ -135,7 +135,7 @@ export function DocumentLibraryItemResponseFromJSONTyped(json: any, ignoreDiscri
         'uploadedAt': json['uploadedAt'] == null ? undefined : (new Date(json['uploadedAt'])),
         'lastModifiedAt': json['lastModifiedAt'] == null ? undefined : (new Date(json['lastModifiedAt'])),
         'isDeleted': json['isDeleted'] == null ? undefined : json['isDeleted'],
-        'expiresAt': json['expiresAt'] == null ? undefined : (new Date(json['expiresAt'])),
+        'expiresOn': json['expiresOn'] == null ? undefined : (new Date(json['expiresOn'])),
         'tags': json['tags'] == null ? undefined : json['tags'],
     };
 }
@@ -163,7 +163,7 @@ export function DocumentLibraryItemResponseToJSONTyped(value?: DocumentLibraryIt
         'uploadedAt': value['uploadedAt'] == null ? undefined : ((value['uploadedAt']).toISOString()),
         'lastModifiedAt': value['lastModifiedAt'] == null ? undefined : ((value['lastModifiedAt']).toISOString()),
         'isDeleted': value['isDeleted'],
-        'expiresAt': value['expiresAt'] === null ? null : ((value['expiresAt'] as any)?.toISOString()),
+        'expiresOn': value['expiresOn'] === null ? null : ((value['expiresOn'] as any)?.toISOString().substring(0,10)),
         'tags': value['tags'],
     };
 }

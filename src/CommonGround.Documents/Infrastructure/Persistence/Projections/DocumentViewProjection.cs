@@ -90,7 +90,7 @@ internal sealed class DocumentViewProjection : SingleStreamProjection<DocumentVi
     {
         view.Title = e.Title;
         view.Sensitivity = e.Sensitivity;
-        view.ExpiresAt = e.ClearExpiresAt ? null : e.ExpiresAt;
+        view.ExpiresOn = e.ClearExpiresOn ? null : e.ExpiresOn;
     }
 
     /// <summary>Adds a tag to the view (deduped).</summary>

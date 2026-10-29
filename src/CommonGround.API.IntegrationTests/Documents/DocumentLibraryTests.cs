@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -33,12 +34,12 @@ public class DocumentLibraryTests(ApiFactory factory)
         var later = await UploadAsync(client, $"Later {marker}");
         var sooner = await UploadAsync(client, $"Sooner {marker}");
         var notExpiring = await UploadAsync(client, $"Never {marker}");
-        var now = DateTimeOffset.UtcNow;
-        await PatchAsync(client, later, new UpdateDocumentMetadataRequest(ExpiresAt: now.AddDays(20)));
-        await PatchAsync(client, sooner, new UpdateDocumentMetadataRequest(ExpiresAt: now.AddDays(-2)));
+        var today = new DateOnly(2026, 10, 28);
+        await PatchAsync(client, later, new UpdateDocumentMetadataRequest(ExpiresOn: today.AddDays(20)));
+        await PatchAsync(client, sooner, new UpdateDocumentMetadataRequest(ExpiresOn: today.AddDays(-2)));
         _ = notExpiring;
 
-        var cutoff = Uri.EscapeDataString(now.AddDays(90).ToString("O"));
+        var cutoff = today.AddDays(90).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         var page = await ListAsync(client, $"search={marker}&expiringBefore={cutoff}");
 
         page.Items.Select(i => i.Id).Should().Equal(sooner, later);

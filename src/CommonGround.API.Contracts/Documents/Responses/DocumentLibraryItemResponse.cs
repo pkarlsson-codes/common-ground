@@ -14,5 +14,5 @@ public sealed record DocumentLibraryItemResponse(
     DateTimeOffset UploadedAt,
     DateTimeOffset LastModifiedAt,
     bool IsDeleted,
-    DateTimeOffset? ExpiresAt,
+    DateOnly? ExpiresOn,
     IReadOnlyList<string> Tags);

@@ -24,7 +24,7 @@ internal sealed class DocumentLibraryItemViewProjection : SingleStreamProjection
             UploadedAt = e.Data.OccurredAt,
             LastModifiedAt = e.Data.OccurredAt,
             IsDeleted = false,
-            ExpiresAt = null,
+            ExpiresOn = null,
             Tags = [],
         };
 
@@ -43,7 +43,7 @@ internal sealed class DocumentLibraryItemViewProjection : SingleStreamProjection
     {
         view.Title = e.Title;
         view.Sensitivity = e.Sensitivity;
-        view.ExpiresAt = e.ClearExpiresAt ? null : e.ExpiresAt;
+        view.ExpiresOn = e.ClearExpiresOn ? null : e.ExpiresOn;
         view.LastModifiedAt = e.OccurredAt;
     }
 

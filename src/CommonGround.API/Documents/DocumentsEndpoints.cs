@@ -109,7 +109,7 @@ public static class DocumentsEndpoints
             view.UploadedBy,
             view.UploadedAt,
             view.IsDeleted,
-            view.ExpiresAt,
+            view.ExpiresOn,
             [.. view.Tags],
             versions,
             attachments);
@@ -227,8 +227,8 @@ public static class DocumentsEndpoints
                 DocumentId.Create(documentId),
                 request.Title,
                 sensitivity,
-                request.ExpiresAt,
-                request.ClearExpiresAt,
+                request.ExpiresOn,
+                request.ClearExpiresOn,
                 userId),
             cancellationToken).ConfigureAwait(false);
 
@@ -283,7 +283,7 @@ public static class DocumentsEndpoints
         return Results.Ok(result.MapItems(d => new DocumentLibraryItemResponse(
             d.Id, d.Title, d.Sensitivity, d.Retention,
             d.CurrentFileName, d.CurrentContentType, d.CurrentSizeBytes, d.CurrentVersionNumber,
-            d.UploadedBy, d.UploadedAt, d.LastModifiedAt, d.IsDeleted, d.ExpiresAt,
+            d.UploadedBy, d.UploadedAt, d.LastModifiedAt, d.IsDeleted, d.ExpiresOn,
             [.. d.Tags])));
     }
 

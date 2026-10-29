@@ -33,17 +33,17 @@ export interface UpdateDocumentMetadataRequest {
      */
     sensitivity?: string | null;
     /**
-     * New expiry timestamp, or null to leave unchanged (combined with ClearExpiresAt).
+     * New expiry date, or null to leave unchanged (combined with ClearExpiresOn).
      * @type {Date}
      * @memberof UpdateDocumentMetadataRequest
      */
-    expiresAt?: Date | null;
+    expiresOn?: Date | null;
     /**
      * When true, explicitly clears the expiry instead of leaving it.
      * @type {boolean}
      * @memberof UpdateDocumentMetadataRequest
      */
-    clearExpiresAt?: boolean;
+    clearExpiresOn?: boolean;
 }
 
 /**
@@ -65,8 +65,8 @@ export function UpdateDocumentMetadataRequestFromJSONTyped(json: any, ignoreDisc
         
         'title': json['title'] == null ? undefined : json['title'],
         'sensitivity': json['sensitivity'] == null ? undefined : json['sensitivity'],
-        'expiresAt': json['expiresAt'] == null ? undefined : (new Date(json['expiresAt'])),
-        'clearExpiresAt': json['clearExpiresAt'] == null ? undefined : json['clearExpiresAt'],
+        'expiresOn': json['expiresOn'] == null ? undefined : (new Date(json['expiresOn'])),
+        'clearExpiresOn': json['clearExpiresOn'] == null ? undefined : json['clearExpiresOn'],
     };
 }
 
@@ -83,8 +83,8 @@ export function UpdateDocumentMetadataRequestToJSONTyped(value?: UpdateDocumentM
         
         'title': value['title'],
         'sensitivity': value['sensitivity'],
-        'expiresAt': value['expiresAt'] === null ? null : ((value['expiresAt'] as any)?.toISOString()),
-        'clearExpiresAt': value['clearExpiresAt'],
+        'expiresOn': value['expiresOn'] === null ? null : ((value['expiresOn'] as any)?.toISOString().substring(0,10)),
+        'clearExpiresOn': value['clearExpiresOn'],
     };
 }
 

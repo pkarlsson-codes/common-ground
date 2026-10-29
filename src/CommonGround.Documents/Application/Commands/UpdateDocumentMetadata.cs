@@ -9,15 +9,15 @@ namespace CommonGround.Documents.Application.Commands;
 /// <param name="DocumentId">The document to update.</param>
 /// <param name="Title">New title, or null to leave unchanged.</param>
 /// <param name="Sensitivity">New sensitivity, or null to leave unchanged.</param>
-/// <param name="ExpiresAt">New expiry, or null when <paramref name="ClearExpiresAt"/> is false to leave unchanged.</param>
-/// <param name="ClearExpiresAt">When true, explicitly clears the expiry instead of leaving it.</param>
+/// <param name="ExpiresOn">New expiry, or null when <paramref name="ClearExpiresOn"/> is false to leave unchanged.</param>
+/// <param name="ClearExpiresOn">When true, explicitly clears the expiry instead of leaving it.</param>
 /// <param name="UpdatedBy">The staff user making the change.</param>
 public sealed record UpdateDocumentMetadata(
     DocumentId DocumentId,
     string? Title,
     SensitivityLevel? Sensitivity,
-    DateTimeOffset? ExpiresAt,
-    bool ClearExpiresAt,
+    DateOnly? ExpiresOn,
+    bool ClearExpiresOn,
     UserId UpdatedBy);
 
 /// <summary>Handles <see cref="UpdateDocumentMetadata"/>.</summary>
@@ -36,7 +36,7 @@ public static class UpdateDocumentMetadataHandler
             .ConfigureAwait(false);
         var doc = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(Document), command.DocumentId.Value);
 
-        doc.UpdateMetadata(command.Title, command.Sensitivity, command.ExpiresAt, command.ClearExpiresAt, command.UpdatedBy);
+        doc.UpdateMetadata(command.Title, command.Sensitivity, command.ExpiresOn, command.ClearExpiresOn, command.UpdatedBy);
         doc.ValidateInvariants();
         stream.AppendMany(doc.UncommittedEvents.ToArray());
         doc.UncommittedEvents.MarkAsCommitted();

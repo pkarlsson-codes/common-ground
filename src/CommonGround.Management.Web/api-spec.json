@@ -313,7 +313,7 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "format": "date-time",
+              "format": "date",
               "nullable": true
             },
             "x-position": 6
@@ -6498,9 +6498,9 @@
           "isDeleted": {
             "type": "boolean"
           },
-          "expiresAt": {
+          "expiresOn": {
             "type": "string",
-            "format": "date-time",
+            "format": "date",
             "nullable": true
           },
           "tags": {
@@ -6630,13 +6630,13 @@
             "description": "New sensitivity display name, or null to leave unchanged.",
             "nullable": true
           },
-          "expiresAt": {
+          "expiresOn": {
             "type": "string",
-            "description": "New expiry timestamp, or null to leave unchanged (combined with ClearExpiresAt).",
-            "format": "date-time",
+            "description": "New expiry date, or null to leave unchanged (combined with ClearExpiresOn).",
+            "format": "date",
             "nullable": true
           },
-          "clearExpiresAt": {
+          "clearExpiresOn": {
             "type": "boolean",
             "description": "When true, explicitly clears the expiry instead of leaving it."
           }
@@ -6741,9 +6741,9 @@
           "isDeleted": {
             "type": "boolean"
           },
-          "expiresAt": {
+          "expiresOn": {
             "type": "string",
-            "format": "date-time",
+            "format": "date",
             "nullable": true
           },
           "tags": {

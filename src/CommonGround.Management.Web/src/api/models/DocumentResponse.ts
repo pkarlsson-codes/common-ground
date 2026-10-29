@@ -106,7 +106,7 @@ export interface DocumentResponse {
      * @type {Date}
      * @memberof DocumentResponse
      */
-    expiresAt?: Date | null;
+    expiresOn?: Date | null;
     /**
      * 
      * @type {Array<string>}
@@ -155,7 +155,7 @@ export function DocumentResponseFromJSONTyped(json: any, ignoreDiscriminator: bo
         'uploadedBy': json['uploadedBy'] == null ? undefined : json['uploadedBy'],
         'uploadedAt': json['uploadedAt'] == null ? undefined : (new Date(json['uploadedAt'])),
         'isDeleted': json['isDeleted'] == null ? undefined : json['isDeleted'],
-        'expiresAt': json['expiresAt'] == null ? undefined : (new Date(json['expiresAt'])),
+        'expiresOn': json['expiresOn'] == null ? undefined : (new Date(json['expiresOn'])),
         'tags': json['tags'] == null ? undefined : json['tags'],
         'versions': json['versions'] == null ? undefined : ((json['versions'] as Array<any>).map(DocumentVersionResponseFromJSON)),
         'attachments': json['attachments'] == null ? undefined : ((json['attachments'] as Array<any>).map(DocumentAttachmentResponseFromJSON)),
@@ -184,7 +184,7 @@ export function DocumentResponseToJSONTyped(value?: DocumentResponse | null, ign
         'uploadedBy': value['uploadedBy'],
         'uploadedAt': value['uploadedAt'] == null ? undefined : ((value['uploadedAt']).toISOString()),
         'isDeleted': value['isDeleted'],
-        'expiresAt': value['expiresAt'] === null ? null : ((value['expiresAt'] as any)?.toISOString()),
+        'expiresOn': value['expiresOn'] === null ? null : ((value['expiresOn'] as any)?.toISOString().substring(0,10)),
         'tags': value['tags'],
         'versions': value['versions'] == null ? undefined : ((value['versions'] as Array<any>).map(DocumentVersionResponseToJSON)),
         'attachments': value['attachments'] == null ? undefined : ((value['attachments'] as Array<any>).map(DocumentAttachmentResponseToJSON)),

@@ -11,7 +11,7 @@ namespace CommonGround.Documents.Application.Queries;
 /// <param name="ContentType">Optional MIME content-type filter (exact match).</param>
 /// <param name="Tag">Optional tag filter (matches normalised lowercase tag).</param>
 /// <param name="ExpiringBefore">
-/// When provided, restricts results to documents whose <c>ExpiresAt</c> is before this date, soonest expiry first.
+/// When provided, restricts results to documents whose <c>ExpiresOn</c> is before this date, soonest expiry first.
 /// </param>
 /// <param name="Search">Optional case-insensitive text matched against the title.</param>
 public sealed record ListDocuments(
@@ -19,7 +19,7 @@ public sealed record ListDocuments(
     bool IncludeDeleted = false,
     string? ContentType = null,
     string? Tag = null,
-    DateTimeOffset? ExpiringBefore = null,
+    DateOnly? ExpiringBefore = null,
     string? Search = null);
 
 /// <summary>Handles <see cref="ListDocuments"/>.</summary>
@@ -61,13 +61,13 @@ public static class ListDocumentsHandler
         if (request.ExpiringBefore.HasValue)
         {
             var cutoff = request.ExpiringBefore.Value;
-            query = query.Where(d => d.ExpiresAt != null && d.ExpiresAt < cutoff);
+            query = query.Where(d => d.ExpiresOn != null && d.ExpiresOn < cutoff);
         }
 
         var totalCount = await query.LongCountAsync(cancellationToken).ConfigureAwait(false);
 
         var ordered = request.ExpiringBefore.HasValue
-            ? query.OrderBy(d => d.ExpiresAt).ThenBy(d => d.Id)
+            ? query.OrderBy(d => d.ExpiresOn).ThenBy(d => d.Id)
             : query.OrderByDescending(d => d.LastModifiedAt).ThenByDescending(d => d.Id);
 
         var items = await ordered

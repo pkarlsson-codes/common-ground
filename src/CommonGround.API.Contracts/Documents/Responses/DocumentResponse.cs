@@ -13,7 +13,7 @@ public sealed record DocumentResponse(
     string UploadedBy,
     DateTimeOffset UploadedAt,
     bool IsDeleted,
-    DateTimeOffset? ExpiresAt,
+    DateOnly? ExpiresOn,
     IReadOnlyList<string> Tags,
     IReadOnlyList<DocumentVersionResponse> Versions,
     IReadOnlyList<DocumentAttachmentResponse> Attachments);

@@ -45,8 +45,8 @@ public sealed class Document : AggregateRoot<DocumentId>
     /// <summary>Gets a value indicating whether this document is soft-deleted.</summary>
     public bool IsDeleted { get; private set; }
 
-    /// <summary>Gets the optional expiry timestamp.</summary>
-    public DateTimeOffset? ExpiresAt { get; private set; }
+    /// <summary>Gets the optional expiry date (a calendar date, no time zone).</summary>
+    public DateOnly? ExpiresOn { get; private set; }
 
     /// <summary>Gets the lowercase, deduplicated set of tags applied to this document.</summary>
     public IReadOnlyCollection<string> Tags => _tags;
@@ -212,8 +212,8 @@ public sealed class Document : AggregateRoot<DocumentId>
     public void UpdateMetadata(
         string? title,
         SensitivityLevel? sensitivity,
-        DateTimeOffset? expiresAt,
-        bool clearExpiresAt,
+        DateOnly? expiresOn,
+        bool clearExpiresOn,
         UserId updatedBy)
     {
         ArgumentNullException.ThrowIfNull(updatedBy);
@@ -226,17 +226,17 @@ public sealed class Document : AggregateRoot<DocumentId>
 
         var newTitle = title ?? Title;
         var newSensitivity = sensitivity?.DisplayName ?? Sensitivity.DisplayName;
-        var newExpiresAt = clearExpiresAt ? (DateTimeOffset?)null : (expiresAt ?? ExpiresAt);
+        var newExpiresOn = clearExpiresOn ? (DateOnly?)null : (expiresOn ?? ExpiresOn);
 
         if (newTitle == Title
             && newSensitivity == Sensitivity.DisplayName
-            && newExpiresAt == ExpiresAt)
+            && newExpiresOn == ExpiresOn)
         {
             return;
         }
 
         ApplyChange(new DocumentMetadataUpdated(
-            Id.Value, newTitle, newSensitivity, newExpiresAt, clearExpiresAt,
+            Id.Value, newTitle, newSensitivity, newExpiresOn, clearExpiresOn,
             updatedBy.Value));
     }
 
@@ -350,7 +350,7 @@ public sealed class Document : AggregateRoot<DocumentId>
     {
         Title = e.Title;
         Sensitivity = SensitivityLevel.FromDisplayName(e.Sensitivity);
-        ExpiresAt = e.ClearExpiresAt ? null : e.ExpiresAt;
+        ExpiresOn = e.ClearExpiresOn ? null : e.ExpiresOn;
     }
 
     private void Apply(DocumentTagged e)

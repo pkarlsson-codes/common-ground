@@ -50,7 +50,7 @@ export default function DocumentDetailPanel({ documentId, onClose }: Props) {
             </button>
           </div>
           {/* Keyed so the forms reset to the saved values when the document changes. */}
-          <DetailsSection key={`${doc.title}|${doc.sensitivity}|${doc.expiresAt?.toISOString() ?? ''}`} doc={doc} />
+          <DetailsSection key={`${doc.title}|${doc.sensitivity}|${doc.expiresOn?.toISOString() ?? ''}`} doc={doc} />
           <TagsSection doc={doc} />
           <VersionsSection doc={doc} />
           <AttachmentsSection doc={doc} />
@@ -66,10 +66,10 @@ function DetailsSection({ doc }: { doc: DocumentResponse }) {
   const [form, setForm] = useState({
     title: doc.title ?? '',
     sensitivity: doc.sensitivity ?? 'Internal',
-    expiresOn: doc.expiresAt ? expiryIso(doc.expiresAt) : '',
+    expiresOn: doc.expiresOn ? expiryIso(doc.expiresOn) : '',
   })
 
-  const savedExpiresOn = doc.expiresAt ? expiryIso(doc.expiresAt) : ''
+  const savedExpiresOn = doc.expiresOn ? expiryIso(doc.expiresOn) : ''
   const dirty = form.title.trim() !== doc.title
     || form.sensitivity !== doc.sensitivity
     || form.expiresOn !== savedExpiresOn
@@ -82,8 +82,8 @@ function DetailsSection({ doc }: { doc: DocumentResponse }) {
         req: {
           title: form.title.trim(),
           sensitivity: form.sensitivity,
-          expiresAt: form.expiresOn ? new Date(form.expiresOn) : null,
-          clearExpiresAt: !form.expiresOn,
+          expiresOn: form.expiresOn ? new Date(form.expiresOn) : null,
+          clearExpiresOn: !form.expiresOn,
         },
       })
       success('Document updated')
@@ -97,9 +97,9 @@ function DetailsSection({ doc }: { doc: DocumentResponse }) {
       <div className="detail-section__title">Details</div>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', fontSize: 12 }}>
         {doc.sensitivity && <DocumentSensitivityBadge sensitivity={doc.sensitivity} />}
-        {doc.expiresAt && (
-          <span style={{ color: isExpiringSoon(doc.expiresAt) ? 'var(--amber-bright)' : 'var(--text-secondary)' }}>
-            {isExpired(doc.expiresAt) ? 'Expired' : 'Expires'} {fmtExpiry(doc.expiresAt)}
+        {doc.expiresOn && (
+          <span style={{ color: isExpiringSoon(doc.expiresOn) ? 'var(--amber-bright)' : 'var(--text-secondary)' }}>
+            {isExpired(doc.expiresOn) ? 'Expired' : 'Expires'} {fmtExpiry(doc.expiresOn)}
           </span>
         )}
       </div>

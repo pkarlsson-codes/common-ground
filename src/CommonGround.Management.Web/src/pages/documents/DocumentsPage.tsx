@@ -262,9 +262,9 @@ function LibraryRow({ item, selected, onOpen, onTag }: {
             <span>v{item.currentVersionNumber}</span>
           )}
           <span>{fmtDate(item.lastModifiedAt)}</span>
-          {item.expiresAt && (
-            <span style={{ color: isExpiringSoon(item.expiresAt) ? 'var(--amber-bright)' : 'inherit' }}>
-              {isExpired(item.expiresAt) ? 'expired' : 'expires'} {fmtExpiry(item.expiresAt)}
+          {item.expiresOn && (
+            <span style={{ color: isExpiringSoon(item.expiresOn) ? 'var(--amber-bright)' : 'inherit' }}>
+              {isExpired(item.expiresOn) ? 'expired' : 'expires'} {fmtExpiry(item.expiresOn)}
             </span>
           )}
         </div>
@@ -301,8 +301,8 @@ function LibraryRow({ item, selected, onOpen, onTag }: {
 }
 
 function ExpiringRow({ item, onOpen }: { item: DocumentLibraryItemResponse; onOpen: () => void }) {
-  const expiresAt = item.expiresAt!
-  const soon = isExpiringSoon(expiresAt)
+  const expiresOn = item.expiresOn!
+  const soon = isExpiringSoon(expiresOn)
 
   return (
     <div style={rowStyle(soon, false)} onClick={onOpen} data-testid="document-row">
@@ -312,7 +312,7 @@ function ExpiringRow({ item, onOpen }: { item: DocumentLibraryItemResponse; onOp
         </span>
         <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
           <span style={{ color: soon ? 'var(--amber-bright)' : 'inherit', fontWeight: 500 }}>
-            {isExpired(expiresAt) ? 'Expired' : 'Expires'} {fmtExpiry(expiresAt)}
+            {isExpired(expiresOn) ? 'Expired' : 'Expires'} {fmtExpiry(expiresOn)}
           </span>
           {' · '}
           <span style={{ fontFamily: 'var(--font-mono)' }}>{item.currentFileName}</span>

@@ -520,7 +520,7 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
         }
 
         if (requestParameters['expiringBefore'] != null) {
-            queryParameters['expiringBefore'] = (requestParameters['expiringBefore'] as any).toISOString();
+            queryParameters['expiringBefore'] = (requestParameters['expiringBefore'] as any).toISOString().substring(0,10);
         }
 
         if (requestParameters['search'] != null) {
