@@ -132,6 +132,13 @@ export default function Layout() {
             Applications
           </NavLink>
           <NavLink
+            to="/waiting-list"
+            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          >
+            <IconWorkflow />
+            Waiting List
+          </NavLink>
+          <NavLink
             to="/households"
             className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
           >

@@ -8,6 +8,7 @@ import GroundLeaseTemplatesPage from './pages/GroundLeaseTemplatesPage'
 import HomesPage from './pages/HomesPage'
 import ApplicationsPage from './pages/ApplicationsPage'
 import HouseholdsPage from './pages/HouseholdsPage'
+import WaitingListPage from './pages/WaitingListPage'
 import LandParcelsPage from './pages/LandParcelsPage'
 import OnboardingPage from './pages/OnboardingPage'
 import PurchaseWorkflowsPage from './pages/PurchaseWorkflowsPage'
@@ -68,6 +69,7 @@ export default function App() {
               <Route path="/ground-lease-templates" element={<GroundLeaseTemplatesPage />} />
               <Route path="/applications" element={<ApplicationsPage />} />
               <Route path="/households"   element={<HouseholdsPage />} />
+              <Route path="/waiting-list" element={<WaitingListPage />} />
               <Route path="/resale-workflows"    element={<ResaleWorkflowsPage />} />
               <Route path="/purchase-workflows"  element={<PurchaseWorkflowsPage />} />
               <Route path="/documents"           element={<DocumentsPage />} />

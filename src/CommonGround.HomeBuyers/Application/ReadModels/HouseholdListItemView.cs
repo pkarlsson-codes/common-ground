@@ -36,6 +36,12 @@ public class HouseholdListItemView
     /// <summary>Gets or sets the current mortgage prequalification's expiry date, if one is on record.</summary>
     public DateOnly? MortgagePrequalificationExpiryDate { get; set; }
 
+    /// <summary>
+    /// Gets or sets the expiry date of a prequalification that has lapsed and not yet been replaced.
+    /// Distinguishes a household that needs re-verification from one that was never prequalified.
+    /// </summary>
+    public DateOnly? MortgagePrequalificationLapsedOn { get; set; }
+
     /// <summary>Gets or sets id of user who registered household.</summary>
     public string RegisteredBy { get; set; } = string.Empty;
 
@@ -50,4 +56,12 @@ public class HouseholdListItemView
         IsHousingCounselingCompleted &&
         IsCltOrientationCompleted &&
         MortgagePrequalificationExpiryDate >= date;
+
+    /// <summary>
+    /// Whether the household held a prequalification that is no longer valid on <paramref name="date"/>:
+    /// either already lapsed, or past its expiry date before the scheduled lapse has run.
+    /// </summary>
+    public bool NeedsReverificationOn(DateOnly date) =>
+        MortgagePrequalificationLapsedOn is not null ||
+        MortgagePrequalificationExpiryDate < date;
 }

@@ -50,6 +50,16 @@ public sealed class HomeownerApplicationsApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task<PaginatedResponse<WaitingListEntryResponse>> GetWaitingListAsync(
+        GetWaitingListQuerySpec querySpec,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(querySpec);
+        return await GetAsync<PaginatedResponse<WaitingListEntryResponse>>(
+            $"api/waiting-list{querySpec.ToQueryString()}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task SelectApplicantAsync(string applicationId, SelectApplicantRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);

@@ -10,7 +10,7 @@ const PHASE_CLASS: Record<string, string> = {
 
 const PHASE_LABEL: Record<string, string> = {
   Submitted: 'Submitted',
-  Approved: 'Approved',
+  Approved: 'Approved · on waiting list',
   Selected: 'Selected',
   Denied: 'Denied',
   Withdrawn: 'Withdrawn',

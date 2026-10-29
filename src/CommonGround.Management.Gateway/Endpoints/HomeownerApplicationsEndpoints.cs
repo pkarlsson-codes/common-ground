@@ -70,6 +70,17 @@ public static class HomeownerApplicationsEndpoints
         return Results.Ok(result);
     }
 
+    [WolverineGet("/api/v1/waiting-list")]
+    [ProducesResponseType<PaginatedResponse<WaitingListEntryResponse>>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetWaitingList(
+        [FromQuery] GetWaitingListQuerySpec querySpec,
+        IHomeownerApplicationsApiClient client,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await client.GetWaitingListAsync(querySpec, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+
     [WolverinePost("/api/v1/homeowner-applications/{applicationId}/select")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> SelectApplicant(

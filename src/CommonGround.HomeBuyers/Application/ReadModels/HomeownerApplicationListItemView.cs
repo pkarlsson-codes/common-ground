@@ -20,4 +20,7 @@ public class HomeownerApplicationListItemView
 
     /// <summary>Gets or sets when the application was submitted.</summary>
     public DateTimeOffset SubmittedAt { get; set; }
+
+    /// <summary>Gets or sets the approval date; the household has been on the waiting list since then.</summary>
+    public DateOnly? ApprovedDate { get; set; }
 }

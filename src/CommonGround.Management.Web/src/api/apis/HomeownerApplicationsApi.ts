@@ -21,6 +21,7 @@ import type {
   HomeCandidateResponse,
   HomeownerApplicationResponse,
   PaginatedResponseOfHomeownerApplicationListItemResponse,
+  PaginatedResponseOfWaitingListEntryResponse,
   ProblemDetails,
   SelectApplicantRequest,
   SubmitApplicationRequest,
@@ -38,6 +39,8 @@ import {
     HomeownerApplicationResponseToJSON,
     PaginatedResponseOfHomeownerApplicationListItemResponseFromJSON,
     PaginatedResponseOfHomeownerApplicationListItemResponseToJSON,
+    PaginatedResponseOfWaitingListEntryResponseFromJSON,
+    PaginatedResponseOfWaitingListEntryResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
     SelectApplicantRequestFromJSON,
@@ -72,6 +75,12 @@ export interface GetHomeownerApplicationsRequest {
     pageNumber?: number;
     pageSize?: number;
     phase?: string | null;
+}
+
+export interface GetWaitingListRequest {
+    pageNumber?: number;
+    pageSize?: number;
+    search?: string | null;
 }
 
 export interface SelectApplicantOperationRequest {
@@ -163,6 +172,21 @@ export interface HomeownerApplicationsApiInterface {
     /**
      */
     getHomeownerApplications(requestParameters: GetHomeownerApplicationsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeownerApplicationListItemResponse>;
+
+    /**
+     * 
+     * @param {number} [pageNumber] 
+     * @param {number} [pageSize] 
+     * @param {string} [search] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof HomeownerApplicationsApiInterface
+     */
+    getWaitingListRaw(requestParameters: GetWaitingListRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfWaitingListEntryResponse>>;
+
+    /**
+     */
+    getWaitingList(requestParameters: GetWaitingListRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfWaitingListEntryResponse>;
 
     /**
      * 
@@ -422,6 +446,45 @@ export class HomeownerApplicationsApi extends runtime.BaseAPI implements Homeown
      */
     async getHomeownerApplications(requestParameters: GetHomeownerApplicationsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeownerApplicationListItemResponse> {
         const response = await this.getHomeownerApplicationsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getWaitingListRaw(requestParameters: GetWaitingListRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfWaitingListEntryResponse>> {
+        const queryParameters: any = {};
+
+        if (requestParameters['pageNumber'] != null) {
+            queryParameters['pageNumber'] = requestParameters['pageNumber'];
+        }
+
+        if (requestParameters['pageSize'] != null) {
+            queryParameters['pageSize'] = requestParameters['pageSize'];
+        }
+
+        if (requestParameters['search'] != null) {
+            queryParameters['search'] = requestParameters['search'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/waiting-list`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedResponseOfWaitingListEntryResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getWaitingList(requestParameters: GetWaitingListRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfWaitingListEntryResponse> {
+        const response = await this.getWaitingListRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

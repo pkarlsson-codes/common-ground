@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import SlideOver from '../../components/SlideOver'
 import NavIdLink from '../../components/NavIdLink'
-import StatusBadge from '../../components/StatusBadge'
 import { useHomeownerApplication } from '../../hooks/applications'
 import ApproveApplicationPanel from './ApproveApplicationPanel'
 import DenyApplicationPanel from './DenyApplicationPanel'
+import ApplicationPhaseBadge from './ApplicationPhaseBadge'
 import WithdrawApplicationPanel from './WithdrawApplicationPanel'
 import { getResponseStatus } from '../../lib/getErrorMessage'
 import { formatPhoneDisplay } from '../../lib/phone'
@@ -84,7 +84,7 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
           <div className="detail-grid">
             <div className="detail-field">
               <div className="detail-field__label">Phase</div>
-              <div className="detail-field__value"><StatusBadge status={detail.phase ?? 'Unknown'} /></div>
+              <div className="detail-field__value"><ApplicationPhaseBadge phase={detail.phase} /></div>
             </div>
             <div className="detail-field">
               <div className="detail-field__label">Submitted At</div>

@@ -20,9 +20,10 @@ internal sealed class HomeownerApplicationListItemViewProjection : SingleStreamP
             SubmittedAt = e.Data.OccurredAt,
         };
 
-    public static void Apply(HomeownerApplicationListItemView view, ApplicationApproved _)
+    public static void Apply(HomeownerApplicationListItemView view, ApplicationApproved e)
     {
         view.Phase = ApplicationPhase.Approved.DisplayName;
+        view.ApprovedDate = e.ApprovedDate;
     }
 
     public static void Apply(HomeownerApplicationListItemView view, ApplicationSelectedForHome _)

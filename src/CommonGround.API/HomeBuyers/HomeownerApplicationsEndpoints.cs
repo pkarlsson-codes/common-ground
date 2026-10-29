@@ -116,6 +116,32 @@ public static class HomeownerApplicationsEndpoints
         return Results.Ok(response);
     }
 
+    [WolverineGet("/api/waiting-list")]
+    public static async Task<IResult> GetWaitingList(
+        [FromQuery] GetWaitingListQuerySpec request,
+        IMessageBus bus,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await bus.InvokeForTenantAsync<PaginatedResponse<WaitingListEntry>>(bus.TenantId!,
+            new GetWaitingList(request.Page, request.Search),
+            cancellationToken);
+
+        var response = result.MapItems(e => new WaitingListEntryResponse(
+            e.Application.Id,
+            e.Application.HouseholdId,
+            e.Household is null ? null : MapContact(HouseholdContact.From(e.Household)),
+            e.Application.HouseholdSize,
+            e.Application.AccessibilityRequired,
+            e.Application.ApprovedDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            e.Household?.IsHousingCounselingCompleted ?? false,
+            e.Household?.IsCltOrientationCompleted ?? false,
+            e.Household?.MortgagePrequalificationExpiryDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            e.IsReadyForSelection,
+            e.NeedsReverification));
+
+        return Results.Ok(response);
+    }
+
     [WolverinePost("/api/homeowner-applications/{applicationId}/select")]
     public static async Task<IResult> SelectApplicant(
         string applicationId,

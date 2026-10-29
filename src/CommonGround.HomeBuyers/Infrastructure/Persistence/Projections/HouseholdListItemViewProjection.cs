@@ -69,10 +69,12 @@ internal sealed class HouseholdListItemViewProjection : SingleStreamProjection<H
     public static void Apply(HouseholdListItemView view, MortgagePrequalificationRecorded e)
     {
         view.MortgagePrequalificationExpiryDate = e.ExpiryDate;
+        view.MortgagePrequalificationLapsedOn = null;
     }
 
-    public static void Apply(HouseholdListItemView view, MortgagePrequalificationExpired _)
+    public static void Apply(HouseholdListItemView view, MortgagePrequalificationExpired e)
     {
         view.MortgagePrequalificationExpiryDate = null;
+        view.MortgagePrequalificationLapsedOn = e.OriginalExpiryDate;
     }
 }

@@ -6,6 +6,7 @@ import {
   type DenyApplicationRequest,
   type HomeownerApplicationResponse,
   type PaginatedResponseOfHomeownerApplicationListItemResponse,
+  type PaginatedResponseOfWaitingListEntryResponse,
   type SelectApplicantRequest,
   type RegisterHouseholdRequest,
   type RegisterHouseholdResponse,
@@ -49,6 +50,23 @@ export function useHomeownerApplications(params: HomeownerApplicationsQueryParam
         pageNumber: params.pageNumber,
         pageSize: params.pageSize ?? 20,
         phase: params.phase,
+      }),
+    retry: shouldRetryQuery,
+  })
+}
+
+/**
+ * The waiting list of approved applications, longest waiting first. Keyed under
+ * 'homeowner-applications' so application and household changes refresh it.
+ */
+export function useWaitingList(params: { pageNumber: number; pageSize?: number; search?: string }) {
+  return useQuery<PaginatedResponseOfWaitingListEntryResponse>({
+    queryKey: ['homeowner-applications', 'waiting-list', params.pageNumber, params.pageSize, params.search],
+    queryFn: () =>
+      api.getWaitingList({
+        pageNumber: params.pageNumber,
+        pageSize: params.pageSize ?? 20,
+        search: params.search,
       }),
     retry: shouldRetryQuery,
   })

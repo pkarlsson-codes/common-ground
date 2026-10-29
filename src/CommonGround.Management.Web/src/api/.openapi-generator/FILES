@@ -97,6 +97,7 @@ models/PaginatedResponseOfHouseholdListItemResponse.ts
 models/PaginatedResponseOfLandParcelListItemResponse.ts
 models/PaginatedResponseOfPurchaseWorkflowListItemResponse.ts
 models/PaginatedResponseOfStewardshipCaseResponse.ts
+models/PaginatedResponseOfWaitingListEntryResponse.ts
 models/ProblemDetails.ts
 models/PropertyInspectionResponse.ts
 models/PurchaseWorkflowListItemResponse.ts
@@ -143,6 +144,7 @@ models/UpdateHouseholdCircumstancesRequest.ts
 models/UpdateHouseholdMemberRequest.ts
 models/UploadDocumentResponse.ts
 models/VerifyOccupancyRequest.ts
+models/WaitingListEntryResponse.ts
 models/WithdrawApplicationRequest.ts
 models/WithdrawPurchaseRequest.ts
 models/index.ts

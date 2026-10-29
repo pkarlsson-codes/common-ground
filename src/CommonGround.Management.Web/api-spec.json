@@ -1841,6 +1841,73 @@
         }
       }
     },
+    "/api/v1/waiting-list": {
+      "get": {
+        "tags": [
+          "HomeownerApplications"
+        ],
+        "operationId": "GetWaitingList",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfWaitingListEntryResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/homeowner-applications/{applicationId}/select": {
       "post": {
         "tags": [
@@ -7471,6 +7538,98 @@
                 "$ref": "#/components/schemas/HouseholdContactDto"
               }
             ]
+          }
+        }
+      },
+      "PaginatedResponseOfWaitingListEntryResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/WaitingListEntryResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "WaitingListEntryResponse": {
+        "type": "object",
+        "description": "An approved application on the waiting list, with its household's readiness as of today.",
+        "additionalProperties": false,
+        "properties": {
+          "applicationId": {
+            "type": "string"
+          },
+          "householdId": {
+            "type": "string"
+          },
+          "primaryContact": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/HouseholdContactDto"
+              }
+            ]
+          },
+          "householdSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "accessibilityRequired": {
+            "type": "boolean"
+          },
+          "approvedDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "isHousingCounselingCompleted": {
+            "type": "boolean"
+          },
+          "isCltOrientationCompleted": {
+            "type": "boolean"
+          },
+          "mortgagePrequalificationExpiryDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "isReadyForSelection": {
+            "type": "boolean"
+          },
+          "needsReverification": {
+            "type": "boolean"
           }
         }
       },
