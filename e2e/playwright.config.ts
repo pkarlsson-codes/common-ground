@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
+import { E2E_TIME_ZONE } from './tests/support/timeZone'
 
 const repoRoot = new URL('..', import.meta.url).pathname
 const authFile = 'playwright/.auth/user.json'
@@ -25,6 +26,7 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   use: {
     baseURL: 'http://localhost:3000',
+    timezoneId: E2E_TIME_ZONE,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     launchOptions: { slowMo },

@@ -23,6 +23,15 @@ async function openParcel(page: Page, apn: string) {
 const section = (detail: Locator, title: string) =>
   detail.locator('.detail-section').filter({ has: detail.page().getByRole('button', { name: new RegExp(`^[▾▸] ${title}`) }) })
 
+test("late in the evening the acquisition date still defaults to the trust's today", async ({ page }) => {
+  // 23:30 in the trust's time zone is already the next day in UTC.
+  await page.clock.setFixedTime(new Date('2026-10-28T23:30:00-06:00'))
+  await page.goto('/land-parcels')
+  await page.getByRole('button', { name: 'Register Parcel' }).click()
+
+  await expect(field(panel(page, 'Register Land Parcel'), 'Acquisition Date')).toHaveValue('2026-10-28')
+})
+
 test('registering a parcel adds it to the registry with the entered details', async ({ page }) => {
   await page.goto('/land-parcels')
   const apn = `APN-${uniqueId()}`

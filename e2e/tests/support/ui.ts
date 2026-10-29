@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test'
+import { E2E_TIME_ZONE } from './timeZone'
 
 /** Unique suffix so tests can run in parallel against a database that already holds data. */
 export const uniqueId = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
@@ -35,11 +36,13 @@ export const detailValue = (scope: Locator, label: string) =>
 export const expectToast = (page: Page, message: string) =>
   expect(page.locator('[data-sonner-toast]', { hasText: message }).first()).toBeVisible()
 
-/** Local ISO date (YYYY-MM-DD) offset from today, for date inputs; matches the app's notion of today. */
+/** The trust's date (YYYY-MM-DD) offset from today, for date inputs; matches the app's trustToday(). */
 export const isoDate = (offsetDays = 0) => {
-  const d = new Date()
-  d.setDate(d.getDate() + offsetDays)
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  // en-CA formats as YYYY-MM-DD.
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: E2E_TIME_ZONE }).format(new Date())
+  const d = new Date(`${today}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + offsetDays)
+  return d.toISOString().slice(0, 10)
 }
 
 function escapeRegExp(s: string) {

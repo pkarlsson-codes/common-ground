@@ -23,6 +23,10 @@ then stops them when the run ends. **Stop your own dev servers first** — a run
 first run against a fresh database, creates the user's trust via onboarding. The session is saved to
 `playwright/.auth/user.json` and reused by every test.
 
+The browser runs in `E2E_TIME_ZONE` (`tests/support/timeZone.ts`, America/Denver), so the trust it creates gets that
+time zone and `isoDate()` gives the trust's today. A trust created before this was set may be in another zone; run
+`npm run db:reset` if dates are off by one.
+
 The realm file is only imported when the realm doesn't exist yet, so on an existing Keycloak either run
 `npm run infra:reset`, or create the user with Keycloak's admin CLI.
 
