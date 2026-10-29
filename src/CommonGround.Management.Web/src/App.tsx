@@ -16,18 +16,21 @@ import ResaleWorkflowsPage from './pages/ResaleWorkflowsPage'
 import SignupPage from './pages/SignupPage'
 import StewardshipPage from './pages/stewardship/StewardshipPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { useCurrentTrust } from './hooks/trusts'
+import { setTrustTimeZone } from './lib/calendarDate'
 
-function ProtectedRoute() {
-  const { isLoading, isAuthenticated, user, error } = useAuth()
-  const location = useLocation()
-  if (isLoading) return (
+function Loading() {
+  return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', fontSize: '12px', letterSpacing: '0.1em' }}>
         Loading…
       </span>
     </div>
   )
-  if (error) return (
+}
+
+function ConnectionError({ error }: { error: string }) {
+  return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
       <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--error-bright)', fontSize: '12px', letterSpacing: '0.1em' }}>
         Connection error
@@ -35,6 +38,13 @@ function ProtectedRoute() {
       <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{error}</span>
     </div>
   )
+}
+
+function ProtectedRoute() {
+  const { isLoading, isAuthenticated, user, error } = useAuth()
+  const location = useLocation()
+  if (isLoading) return <Loading />
+  if (error) return <ConnectionError error={error} />
   if (!isAuthenticated) {
     const returnUrl = `${location.pathname}${location.search}${location.hash}`
     window.location.href = `/auth/login?returnUrl=${encodeURIComponent(returnUrl)}`
@@ -52,6 +62,16 @@ function ProtectedRoute() {
   return <Outlet />
 }
 
+/** Holds the app until the trust's time zone is known, so every "today" follows it. */
+function TrustRoute() {
+  const { data: trust, isLoading, isError } = useCurrentTrust()
+  if (isLoading) return <Loading />
+  if (isError || !trust) return <ConnectionError error='Could not load your trust. Reload to try again.' />
+
+  setTrustTimeZone(trust.timeZone)
+  return <Outlet />
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -60,20 +80,22 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
-            <Route element={<Layout />}>
-              <Route index element={<Navigate to="/land-parcels" replace />} />
-              <Route path="/land-parcels"        element={<LandParcelsPage />} />
-              <Route path="/homes"               element={<HomesPage />} />
-              <Route path="/development"         element={<DevelopmentProjectsPage />} />
-              <Route path="/ground-leases"          element={<GroundLeasesPage />} />
-              <Route path="/ground-lease-templates" element={<GroundLeaseTemplatesPage />} />
-              <Route path="/applications" element={<ApplicationsPage />} />
-              <Route path="/households"   element={<HouseholdsPage />} />
-              <Route path="/waiting-list" element={<WaitingListPage />} />
-              <Route path="/resale-workflows"    element={<ResaleWorkflowsPage />} />
-              <Route path="/purchase-workflows"  element={<PurchaseWorkflowsPage />} />
-              <Route path="/documents"           element={<DocumentsPage />} />
-              <Route path="/stewardship"          element={<StewardshipPage />} />
+            <Route element={<TrustRoute />}>
+              <Route element={<Layout />}>
+                <Route index element={<Navigate to="/land-parcels" replace />} />
+                <Route path="/land-parcels"        element={<LandParcelsPage />} />
+                <Route path="/homes"               element={<HomesPage />} />
+                <Route path="/development"         element={<DevelopmentProjectsPage />} />
+                <Route path="/ground-leases"          element={<GroundLeasesPage />} />
+                <Route path="/ground-lease-templates" element={<GroundLeaseTemplatesPage />} />
+                <Route path="/applications" element={<ApplicationsPage />} />
+                <Route path="/households"   element={<HouseholdsPage />} />
+                <Route path="/waiting-list" element={<WaitingListPage />} />
+                <Route path="/resale-workflows"    element={<ResaleWorkflowsPage />} />
+                <Route path="/purchase-workflows"  element={<PurchaseWorkflowsPage />} />
+                <Route path="/documents"           element={<DocumentsPage />} />
+                <Route path="/stewardship"          element={<StewardshipPage />} />
+              </Route>
             </Route>
           </Route>
         </Routes>
