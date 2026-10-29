@@ -60,7 +60,7 @@ test('household with an open application links to it instead of offering a new o
 
   await expect(page).toHaveURL(/\/applications$/)
   const application = panel(page, name)
-  await expect(detailValue(application, 'Phase')).toHaveText('Approved')
+  await expect(detailValue(application, 'Phase')).toHaveText('Approved · on waiting list')
 })
 
 test('starting an application for a household whose last one was withdrawn', async ({ page }) => {

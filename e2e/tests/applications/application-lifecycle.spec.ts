@@ -99,7 +99,7 @@ test('approving a submitted application moves it to Approved', async ({ page }) 
   await approve.getByRole('button', { name: 'Approve', exact: true }).click()
   await expectToast(page, 'Application approved')
 
-  await expect(detailValue(detail, 'Phase')).toHaveText('Approved')
+  await expect(detailValue(detail, 'Phase')).toHaveText('Approved · on waiting list')
   await expect(detailValue(detail, 'Approved Date')).not.toHaveText('—')
   const actions = detail.locator('.detail-section', { hasText: 'Workflow Actions' })
   await expect(actions.getByRole('button')).toHaveText(['Deny Application', 'Withdraw Application'])
