@@ -19,4 +19,24 @@ public static class BusinessRuleViolation
                     ["phone"] = phone,
                 });
     }
+
+    /// <summary>Violations raised by <see cref="IanaTimeZone"/>.</summary>
+    public static class TimeZone
+    {
+        /// <summary>Creates the violation for a missing time zone.</summary>
+        /// <returns>The business rule violation exception.</returns>
+        public static BusinessRuleViolationException Required()
+            => new("shared.time_zone.required");
+
+        /// <summary>Creates the violation for a value that is not a known IANA time zone id.</summary>
+        /// <param name="timeZone">The rejected input.</param>
+        /// <returns>The business rule violation exception.</returns>
+        public static BusinessRuleViolationException Unknown(string timeZone)
+            => new(
+                "shared.time_zone.unknown",
+                new Dictionary<string, object?>
+                {
+                    ["timeZone"] = timeZone,
+                });
+    }
 }

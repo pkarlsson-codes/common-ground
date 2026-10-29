@@ -31,7 +31,7 @@ public static class TrustsEndpoints
         var correlationId = httpContext.GetCorrelationId() ?? httpContext.TraceIdentifier;
 
         var result = await bus.InvokeAsync<CreateTrustResult>(
-            new CreateTrust(request.Name, userId, correlationId),
+            new CreateTrust(request.Name, request.TimeZone, userId, correlationId),
             cancellationToken).ConfigureAwait(false);
 
         return Results.Ok(new CreateTrustResponse(result.TrustId));

@@ -6,9 +6,10 @@ namespace CommonGround.TrustManagement.Application.Commands;
 
 /// <summary>Creates a new trust with the specified name.</summary>
 /// <param name="Name">The name of the trust to create.</param>
+/// <param name="TimeZone">The IANA time zone id the trust operates in.</param>
 /// <param name="CreatorUserId">The authenticated user initiating trust creation.</param>
 /// <param name="CorrelationId">Correlation id used for cross-BC tracing and idempotency context.</param>
-public sealed record CreateTrust(string Name, UserId CreatorUserId, string CorrelationId);
+public sealed record CreateTrust(string Name, string TimeZone, UserId CreatorUserId, string CorrelationId);
 
 /// <summary>Result of <see cref="CreateTrust"/>.</summary>
 public sealed record CreateTrustResult(string TrustId);
@@ -24,7 +25,7 @@ public static class CreateTrustHandler
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var trust = Trust.Create(command.Name);
+        var trust = Trust.Create(command.Name, IanaTimeZone.Create(command.TimeZone));
         trust.RequestOnboarding(command.CreatorUserId, command.CorrelationId);
         trust.ValidateInvariants();
         session.Events.StartStream<Trust>(trust.Id.Value, trust.UncommittedEvents.ToArray());

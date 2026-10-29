@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.TrustManagement.Domain.Trusts;
 using Marten;
 using Marten.Schema;
@@ -39,7 +40,7 @@ public sealed class TrustsInitialData : IInitialData
                 }
             }
 
-            var trust = Trust.Create(entry.Name);
+            var trust = Trust.Create(entry.Name, IanaTimeZone.Create(entry.TimeZone));
             session.Events.StartStream<Trust>(trust.Id.Value, trust.UncommittedEvents.ToArray());
             trust.UncommittedEvents.MarkAsCommitted();
 
@@ -89,5 +90,5 @@ public sealed class TrustsInitialData : IInitialData
         }
     }
 
-    private sealed record TrustSeedEntry(string SeedKey, string Name);
+    private sealed record TrustSeedEntry(string SeedKey, string Name, string TimeZone);
 }

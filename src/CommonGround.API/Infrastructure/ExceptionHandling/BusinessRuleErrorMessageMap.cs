@@ -62,6 +62,8 @@ internal static class BusinessRuleErrorMessageMap
             ["property_registry.unit_assessment.create.assessment_date_in_future"] = "Assessment date cannot be in the future.",
 
             ["shared.phone.invalid_format"] = "Enter a valid phone number.",
+            ["shared.time_zone.required"] = "Time zone is required.",
+            ["shared.time_zone.unknown"] = "Choose a valid time zone.",
 
             ["stewardship.foreclosure_prevention_case.activate_cure_period.invalid_cure_period_days"] = "Cure period days must be greater than zero.",
             ["stewardship.foreclosure_prevention_case.activate_cure_period.lra_id_required"] = "LRA case identifier is required to activate cure period.",

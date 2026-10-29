@@ -1,3 +1,3 @@
 [
-  { "seedKey": "dev-default", "name": "Default Development CLT" }
+  { "seedKey": "dev-default", "name": "Default Development CLT", "timeZone": "America/Denver" }
 ]

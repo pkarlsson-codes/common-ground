@@ -5,6 +5,7 @@ using CommonGround.API.Contracts.Identity.Responses;
 using CommonGround.API.Contracts.TrustManagement.Requests;
 using CommonGround.API.Contracts.TrustManagement.Responses;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CommonGround.API.IntegrationTests.TrustManagement;
 
@@ -18,7 +19,7 @@ public class TrustsCreateTests(ApiFactory factory)
 
         var response = await client.PostAsJsonAsync(
             "/api/trusts",
-            new CreateTrustRequest($"My Trust {Guid.NewGuid():N}"));
+            new CreateTrustRequest($"My Trust {Guid.NewGuid():N}", "America/Denver"));
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
@@ -42,13 +43,38 @@ public class TrustsCreateTests(ApiFactory factory)
 
         var response = await client.PostAsJsonAsync(
             "/api/trusts",
-            new CreateTrustRequest($"Self Create Trust {Guid.NewGuid():N}"));
+            new CreateTrustRequest($"Self Create Trust {Guid.NewGuid():N}", "America/Denver"));
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var payload = await response.Content.ReadFromJsonAsync<CreateTrustResponse>();
         payload.Should().NotBeNull();
         payload!.TrustId.Should().StartWith("trust-");
+    }
+
+    [Theory]
+    [InlineData("", "Time zone is required.")]
+    [InlineData("Mountain Standard Time", "Choose a valid time zone.")]
+    public async Task CreateTrust_InvalidTimeZone_Returns422(string timeZone, string expectedDetail)
+    {
+        var subject = $"self-create-bad-tz-{Guid.NewGuid():N}";
+
+        var bootstrapClient = factory.CreateClient().WithAuthToken(trustId: string.Empty);
+
+        var ensureResponse = await bootstrapClient.PostAsJsonAsync(
+            "/api/users/ensure",
+            new EnsureUserRequest(subject, "badtz@example.com", "Bad Time Zone", TrustId: null));
+
+        var ensurePayload = await ensureResponse.Content.ReadFromJsonAsync<EnsureUserResponse>();
+        var client = factory.CreateClient().WithAuthToken(userId: ensurePayload!.UserId, trustId: string.Empty);
+
+        var response = await client.PostAsJsonAsync(
+            "/api/trusts",
+            new CreateTrustRequest($"Bad Time Zone Trust {Guid.NewGuid():N}", timeZone));
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        problem!.Detail.Should().Be(expectedDetail);
     }
 
     [Fact]
@@ -71,7 +97,7 @@ public class TrustsCreateTests(ApiFactory factory)
 
         var response = await client.PostAsJsonAsync(
             "/api/trusts",
-            new CreateTrustRequest($"Blocked Trust {Guid.NewGuid():N}"));
+            new CreateTrustRequest($"Blocked Trust {Guid.NewGuid():N}", "America/Denver"));
 
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
@@ -94,7 +120,7 @@ public class TrustsCreateTests(ApiFactory factory)
 
         var first = await client.PostAsJsonAsync(
             "/api/trusts",
-            new CreateTrustRequest($"Duplicate Trust {Guid.NewGuid():N}"));
+            new CreateTrustRequest($"Duplicate Trust {Guid.NewGuid():N}", "America/Denver"));
 
         first.StatusCode.Should().Be(HttpStatusCode.OK);
         var firstPayload = await first.Content.ReadFromJsonAsync<CreateTrustResponse>();
@@ -103,7 +129,7 @@ public class TrustsCreateTests(ApiFactory factory)
 
         var second = await client.PostAsJsonAsync(
             "/api/trusts",
-            new CreateTrustRequest($"Duplicate Trust {Guid.NewGuid():N}"));
+            new CreateTrustRequest($"Duplicate Trust {Guid.NewGuid():N}", "America/Denver"));
 
         second.StatusCode.Should().Be(HttpStatusCode.OK);
         var secondPayload = await second.Content.ReadFromJsonAsync<CreateTrustResponse>();
