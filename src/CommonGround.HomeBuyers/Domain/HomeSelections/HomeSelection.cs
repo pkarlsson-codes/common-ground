@@ -1,3 +1,4 @@
+using CommonGround.HomeBuyers.Application.Errors;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections.Events;
 using CommonGround.HomeBuyers.Domain.Households;
@@ -24,6 +25,43 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
     public IReadOnlyList<SelectionCandidate> Candidates { get; private set; }
     public HomeownerApplicationId? SelectedApplicationId { get; private set; }
     public string? CancellationReason { get; private set; }
+
+    /// <summary>
+    /// Starts choosing a household for a home from a snapshot of the waiting list. Rejected when
+    /// <paramref name="activeSelectionId"/> (the home's open or completed selection, if any) is set,
+    /// or when nobody is waiting.
+    /// </summary>
+    public static HomeSelection Start(
+        string homeId,
+        IReadOnlyList<SelectionCandidate> candidates,
+        HomeSelectionId? activeSelectionId,
+        UserId startedBy)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+        ArgumentNullException.ThrowIfNull(candidates);
+        ArgumentNullException.ThrowIfNull(startedBy);
+
+        if (activeSelectionId is not null)
+            throw BusinessRuleViolation.HomeSelection.Start.HomeHasActiveSelection(homeId, activeSelectionId);
+
+        if (candidates.Count == 0)
+            throw BusinessRuleViolation.HomeSelection.Start.WaitingListEmpty(homeId);
+
+        var selection = new HomeSelection();
+        selection.ApplyChange(new HomeSelectionStarted(
+            HomeSelectionId.Generate().Value,
+            homeId,
+            [.. candidates.Select(c => new SnapshotCandidate(
+                c.ApplicationId.Value,
+                c.HouseholdId.Value,
+                c.AnnualIncome,
+                c.HouseholdSize,
+                c.RequiresAccessibility,
+                c.WaitingSince))],
+            startedBy.Value));
+
+        return selection;
+    }
 
     /// <inheritdoc/>
     protected override void ApplyEvent(IDomainEvent domainEvent)

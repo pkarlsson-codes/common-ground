@@ -28,6 +28,9 @@ public static class HomeBuyersMartenConfiguration
             .Index(x => x.Phase);
         options.Schema.For<HomeAvailabilityClaimView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<HomeFactsView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<HomeSelectionView>()
+            .DatabaseSchemaName(SchemaName)
+            .Index(x => x.HomeId);
         options.Schema.For<HouseholdView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<HouseholdListItemView>().DatabaseSchemaName(SchemaName);
     }
@@ -37,6 +40,7 @@ public static class HomeBuyersMartenConfiguration
         options.Projections.Add<HomeownerApplicationViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HomeownerApplicationListItemViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HomeAvailabilityClaimViewProjection>(ProjectionLifecycle.Inline);
+        options.Projections.Add<HomeSelectionViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HouseholdViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HouseholdListItemViewProjection>(ProjectionLifecycle.Inline);
     }

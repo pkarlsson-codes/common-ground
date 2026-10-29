@@ -1,4 +1,5 @@
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
+using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.SharedKernel.Domain.Exceptions;
 
@@ -88,6 +89,29 @@ public static class BusinessRuleViolation
                     new Dictionary<string, object?>
                     {
                         ["phase"] = phase.DisplayName,
+                    });
+        }
+    }
+
+    public static class HomeSelection
+    {
+        public static class Start
+        {
+            public static BusinessRuleViolationException HomeHasActiveSelection(string homeId, HomeSelectionId activeSelectionId)
+                => new(
+                    "home_buyers.home_selection.start.home_has_active_selection",
+                    new Dictionary<string, object?>
+                    {
+                        ["homeId"] = homeId,
+                        ["activeSelectionId"] = activeSelectionId.Value,
+                    });
+
+            public static BusinessRuleViolationException WaitingListEmpty(string homeId)
+                => new(
+                    "home_buyers.home_selection.start.waiting_list_empty",
+                    new Dictionary<string, object?>
+                    {
+                        ["homeId"] = homeId,
                     });
         }
     }
