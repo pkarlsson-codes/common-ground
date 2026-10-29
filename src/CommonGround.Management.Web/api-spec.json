@@ -6006,6 +6006,44 @@
         }
       }
     },
+    "/api/v1/trusts/current": {
+      "get": {
+        "tags": [
+          "Trusts"
+        ],
+        "operationId": "GetCurrentTrust",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/trusts": {
       "post": {
         "tags": [
@@ -9726,6 +9764,25 @@
           "resolvedDate": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "TrustResponse": {
+        "type": "object",
+        "description": "A trust.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The trust identifier."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the trust."
+          },
+          "timeZone": {
+            "type": "string",
+            "description": "The IANA time zone id the trust operates in; \"today\" follows it."
           }
         }
       },

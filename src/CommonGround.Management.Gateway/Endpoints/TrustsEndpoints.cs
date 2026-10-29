@@ -10,6 +10,16 @@ namespace CommonGround.Management.Gateway.Endpoints;
 
 public static class TrustsEndpoints
 {
+    [WolverineGet("/api/v1/trusts/current")]
+    [ProducesResponseType<TrustResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetCurrentTrust(
+        ITrustsApiClient client,
+        CancellationToken cancellationToken)
+    {
+        var result = await client.GetCurrentTrustAsync(cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+
     [WolverinePost("/api/v1/trusts")]
     [ProducesResponseType<CreateTrustResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]

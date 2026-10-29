@@ -19,6 +19,7 @@ import type {
   CreateTrustRequest,
   CreateTrustResponse,
   ProblemDetails,
+  TrustResponse,
 } from '../models/index';
 import {
     CreateTrustRequestFromJSON,
@@ -27,6 +28,8 @@ import {
     CreateTrustResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
+    TrustResponseFromJSON,
+    TrustResponseToJSON,
 } from '../models/index';
 
 export interface CreateTrustOperationRequest {
@@ -52,6 +55,18 @@ export interface TrustsApiInterface {
     /**
      */
     createTrust(requestParameters: CreateTrustOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateTrustResponse>;
+
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TrustsApiInterface
+     */
+    getCurrentTrustRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrustResponse>>;
+
+    /**
+     */
+    getCurrentTrust(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrustResponse>;
 
 }
 
@@ -94,6 +109,33 @@ export class TrustsApi extends runtime.BaseAPI implements TrustsApiInterface {
      */
     async createTrust(requestParameters: CreateTrustOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateTrustResponse> {
         const response = await this.createTrustRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getCurrentTrustRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrustResponse>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/trusts/current`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TrustResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getCurrentTrust(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrustResponse> {
+        const response = await this.getCurrentTrustRaw(initOverrides);
         return await response.value();
     }
 

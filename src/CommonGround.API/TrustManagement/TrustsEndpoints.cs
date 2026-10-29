@@ -3,6 +3,8 @@ using CommonGround.API.Contracts.TrustManagement.Responses;
 using CommonGround.API.Infrastructure.Auth;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.TrustManagement.Application.Commands;
+using CommonGround.TrustManagement.Application.Queries;
+using CommonGround.TrustManagement.Domain.Trusts;
 using Microsoft.AspNetCore.Authorization;
 using Wolverine;
 using Wolverine.Http;
@@ -11,6 +13,21 @@ namespace CommonGround.API.TrustManagement;
 
 public static class TrustsEndpoints
 {
+    [WolverineGet("/api/trusts/current")]
+    public static async Task<IResult> GetCurrentTrust(
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        var trustId = httpContext.GetTenantId();
+
+        var trust = await bus.InvokeAsync<Trust?>(new GetTrust(trustId.Value), cancellationToken).ConfigureAwait(false);
+
+        return trust is null
+            ? Results.NotFound()
+            : Results.Ok(new TrustResponse(trust.Id.Value, trust.Name, trust.TimeZone.Value));
+    }
+
     [WolverinePost("/api/trusts")]
     [NotTenanted]
     [Authorize]

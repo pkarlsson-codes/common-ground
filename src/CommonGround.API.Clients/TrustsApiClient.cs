@@ -13,6 +13,10 @@ public sealed class TrustsApiClient(
     ILogger<TrustsApiClient> logger) : BaseApiClient(httpClient, logger), ITrustsApiClient
 {
     /// <inheritdoc/>
+    public async Task<TrustResponse> GetCurrentTrustAsync(CancellationToken ct = default)
+        => await GetAsync<TrustResponse>("api/trusts/current", ct).ConfigureAwait(false);
+
+    /// <inheritdoc/>
     public async Task<CreateTrustResponse> CreateTrustAsync(CreateTrustRequest request, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(request);

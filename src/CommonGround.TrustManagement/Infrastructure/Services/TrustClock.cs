@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Services;
-using CommonGround.TrustManagement.Domain.Trusts;
+using CommonGround.TrustManagement.Application.Queries;
 using Marten;
 
 namespace CommonGround.TrustManagement.Infrastructure.Services;
@@ -21,10 +21,7 @@ public sealed class TrustClock(IDocumentStore store) : ITrustClock
             return cached;
         }
 
-        // Trust streams are not tenanted: they are written from the default-tenant session.
-        var session = store.QuerySession();
-        await using var _ = session.ConfigureAwait(false);
-        var trust = await session.Events.AggregateStreamAsync<Trust>(trustId, token: cancellationToken).ConfigureAwait(false)
+        var trust = await GetTrustHandler.Handle(new GetTrust(trustId), store, cancellationToken).ConfigureAwait(false)
             ?? throw new InvalidOperationException($"Trust '{trustId}' was not found.");
 
         return _timeZones.GetOrAdd(trustId, trust.TimeZone);

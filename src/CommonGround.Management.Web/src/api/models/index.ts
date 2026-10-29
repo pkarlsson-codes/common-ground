@@ -126,6 +126,7 @@ export * from './SubmitApplicationResponse';
 export * from './SubmitOccupancyVerificationRequest';
 export * from './TagDocumentRequest';
 export * from './TitleDetailsDto';
+export * from './TrustResponse';
 export * from './UpdateDocumentMetadataRequest';
 export * from './UpdateHouseholdCircumstancesRequest';
 export * from './UpdateHouseholdMemberRequest';
