@@ -26,7 +26,7 @@ namespace CommonGround.API.IntegrationTests.HomeBuyers;
 /// therefore constructed directly and dispatched via <c>InvokeForTenantAsync</c>, skipping the
 /// domain-event-to-integration-event translation step (which is not part of what this test
 /// covers) while still exercising the real local handlers that react to those integration events:
-/// - PropertyRegistry.Contracts.Events.HomeRegistered → seeds HomeBuyers's HomeLandParcelView.
+/// - PropertyRegistry.Contracts.Events.HomeRegistered → seeds HomeBuyers's HomeFactsView.
 /// - HomeBuyers.Contracts.Events.ApplicationSelected → fans out to PropertyRegistry's
 ///   (marks the Home UnderContract) and Homeownership's (creates the PurchaseWorkflow) handlers.
 /// </summary>
@@ -40,7 +40,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
 
         var landParcelId = await CreateLandParcelAsync(client);
         var homeId = await CreateHomeAsync(client, landParcelId);
-        await SeedHomeLandParcelViewAsync(homeId, landParcelId);
+        await SeedHomeFactsViewAsync(homeId, landParcelId);
 
         var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
         var applicant = await CreateApprovedApplicationAsync(client, "Happy Path Applicant", "happy-path@example.com");
@@ -81,7 +81,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
 
         var landParcelId = await CreateLandParcelAsync(client);
         var homeId = await CreateHomeAsync(client, landParcelId);
-        await SeedHomeLandParcelViewAsync(homeId, landParcelId);
+        await SeedHomeFactsViewAsync(homeId, landParcelId);
 
         var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
         var firstApplicant = await CreateApprovedApplicationAsync(client, "First Claimant", "first-claimant@example.com");
@@ -105,7 +105,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
             "Approved", "the rejected selection must not advance the second applicant's phase");
     }
 
-    private async Task SeedHomeLandParcelViewAsync(string homeId, string landParcelId)
+    private async Task SeedHomeFactsViewAsync(string homeId, string landParcelId)
     {
         using var scope = factory.Services.CreateScope();
         var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();

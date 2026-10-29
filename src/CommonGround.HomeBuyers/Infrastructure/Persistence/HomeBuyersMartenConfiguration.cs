@@ -27,7 +27,7 @@ public static class HomeBuyersMartenConfiguration
             .Index(x => x.HouseholdId)
             .Index(x => x.Phase);
         options.Schema.For<HomeAvailabilityClaimView>().DatabaseSchemaName(SchemaName);
-        options.Schema.For<HomeLandParcelView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<HomeFactsView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<HouseholdView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<HouseholdListItemView>().DatabaseSchemaName(SchemaName);
     }

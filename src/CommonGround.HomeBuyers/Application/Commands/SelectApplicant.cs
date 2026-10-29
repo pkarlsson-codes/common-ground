@@ -37,7 +37,7 @@ public static class SelectApplicantHandler
             .ConfigureAwait(false);
 
         var homeLandParcel = await session
-            .LoadAsync<HomeLandParcelView>(command.HomeId, cancellationToken)
+            .LoadAsync<HomeFactsView>(command.HomeId, cancellationToken)
             .ConfigureAwait(false)
             ?? throw new AggregateNotFoundException(command.HomeId);
 
