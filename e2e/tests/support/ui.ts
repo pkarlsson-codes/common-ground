@@ -35,11 +35,11 @@ export const detailValue = (scope: Locator, label: string) =>
 export const expectToast = (page: Page, message: string) =>
   expect(page.locator('[data-sonner-toast]', { hasText: message }).first()).toBeVisible()
 
-/** ISO date (YYYY-MM-DD) offset from today, for date inputs. */
+/** Local ISO date (YYYY-MM-DD) offset from today, for date inputs; matches the app's notion of today. */
 export const isoDate = (offsetDays = 0) => {
   const d = new Date()
   d.setDate(d.getDate() + offsetDays)
-  return d.toISOString().slice(0, 10)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 function escapeRegExp(s: string) {
