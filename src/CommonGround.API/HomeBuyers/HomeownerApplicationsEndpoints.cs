@@ -88,7 +88,7 @@ public static class HomeownerApplicationsEndpoints
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new ApproveApplication(
                 HomeownerApplicationId.Create(applicationId),
-                DateOnly.Parse(request.ApprovedDate, CultureInfo.InvariantCulture),
+                request.ApprovedDate,
                 request.Notes,
                 userId),
             cancellationToken);
@@ -132,10 +132,10 @@ public static class HomeownerApplicationsEndpoints
             e.Household is null ? null : MapContact(HouseholdContact.From(e.Household)),
             e.Application.HouseholdSize,
             e.Application.AccessibilityRequired,
-            e.Application.ApprovedDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            e.Application.ApprovedDate,
             e.Household?.IsHousingCounselingCompleted ?? false,
             e.Household?.IsCltOrientationCompleted ?? false,
-            e.Household?.MortgagePrequalificationExpiryDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            e.Household?.MortgagePrequalificationExpiryDate,
             e.IsReadyForSelection,
             e.NeedsReverification));
 
@@ -161,7 +161,7 @@ public static class HomeownerApplicationsEndpoints
                 request.HomeId,
                 request.GroundLeaseTemplateId,
                 request.PurchasePrice,
-                DateOnly.Parse(request.SelectedDate, CultureInfo.InvariantCulture),
+                request.SelectedDate,
                 userId),
             cancellationToken);
 
@@ -185,7 +185,7 @@ public static class HomeownerApplicationsEndpoints
             new DenyApplication(
                 HomeownerApplicationId.Create(applicationId),
                 request.Reason,
-                DateOnly.Parse(request.DeniedDate, CultureInfo.InvariantCulture),
+                request.DeniedDate,
                 userId),
             cancellationToken);
 
@@ -208,7 +208,7 @@ public static class HomeownerApplicationsEndpoints
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new WithdrawApplication(
                 HomeownerApplicationId.Create(applicationId),
-                DateOnly.Parse(request.WithdrawnDate, CultureInfo.InvariantCulture),
+                request.WithdrawnDate,
                 request.Reason,
                 userId),
             cancellationToken);
@@ -230,10 +230,10 @@ public static class HomeownerApplicationsEndpoints
             view.Phase,
             view.SubmittedAt.ToString("O", CultureInfo.InvariantCulture),
             view.SubmittedBy,
-            view.ApprovedDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            view.ApprovedDate,
             view.DenialReason,
             view.WithdrawalReason,
-            view.SelectedDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            view.SelectedDate,
             view.SelectedHomeId,
             view.SelectedLandParcelId,
             view.SelectedBy);

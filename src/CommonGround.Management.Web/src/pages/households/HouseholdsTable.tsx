@@ -19,14 +19,12 @@ type Props = {
   onRetry: () => void
 }
 
-const today = () => trustToday()
-
 /** Mirrors the selection readiness rule: counseling, orientation and a prequalification valid today. */
 const isReady = (household: HouseholdListItemResponse) =>
   Boolean(household.isHousingCounselingCompleted) &&
   Boolean(household.isCltOrientationCompleted) &&
   Boolean(household.mortgagePrequalificationExpiryDate) &&
-  household.mortgagePrequalificationExpiryDate! >= today()
+  household.mortgagePrequalificationExpiryDate! >= trustToday()
 
 function SkeletonRows() {
   return (

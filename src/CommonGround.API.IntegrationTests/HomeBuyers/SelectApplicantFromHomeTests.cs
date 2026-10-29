@@ -46,7 +46,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
         var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
         var applicant = await CreateApprovedApplicationAsync(client, "Happy Path Applicant", "happy-path@example.com");
 
-        const string selectedDate = "2026-07-20";
+        var selectedDate = new DateOnly(2026, 7, 20);
         var selectResponse = await client.PostAsJsonAsync(
             $"/api/homeowner-applications/{applicant.ApplicationId}/select",
             new SelectApplicantRequest(homeId, templateId, 200000m, selectedDate));
@@ -88,7 +88,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
         var firstApplicant = await CreateApprovedApplicationAsync(client, "First Claimant", "first-claimant@example.com");
         var secondApplicant = await CreateApprovedApplicationAsync(client, "Second Claimant", "second-claimant@example.com");
 
-        const string selectedDate = "2026-07-20";
+        var selectedDate = new DateOnly(2026, 7, 20);
 
         var firstSelectResponse = await client.PostAsJsonAsync(
             $"/api/homeowner-applications/{firstApplicant.ApplicationId}/select",
@@ -119,7 +119,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
     private async Task InvokeApplicationSelectedForwardingAsync(
         string applicationId, string householdId, string applicantFullName, string applicantEmail,
         string homeId, string landParcelId, string groundLeaseTemplateId,
-        decimal purchasePrice, string selectedDate)
+        decimal purchasePrice, DateOnly selectedDate)
     {
         using var scope = factory.Services.CreateScope();
         var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
@@ -136,7 +136,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
                 landParcelId,
                 groundLeaseTemplateId,
                 purchasePrice,
-                DateOnly.Parse(selectedDate, CultureInfo.InvariantCulture),
+                selectedDate,
                 "user-test"));
     }
 
@@ -211,15 +211,15 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
         var householdId = registered!.HouseholdId;
 
         (await client.PostAsJsonAsync($"/api/households/{householdId}/housing-counseling",
-            new RecordHousingCounselingRequest("CERT-001", "2026-06-02", "Test Counseling Org")))
+            new RecordHousingCounselingRequest("CERT-001", new DateOnly(2026, 6, 2), "Test Counseling Org")))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         (await client.PostAsJsonAsync($"/api/households/{householdId}/clt-orientation",
-            new RecordCltOrientationRequest("2026-06-03")))
+            new RecordCltOrientationRequest(new DateOnly(2026, 6, 3))))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         (await client.PostAsJsonAsync($"/api/households/{householdId}/mortgage-prequalification",
-            new RecordMortgagePrequalificationRequest("Test Lender", 210000m, "2027-01-01")))
+            new RecordMortgagePrequalificationRequest("Test Lender", 210000m, new DateOnly(2027, 1, 1))))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var submitResponse = await client.PostAsJsonAsync("/api/homeowner-applications",
@@ -229,7 +229,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
         var applicationId = submitted!.ApplicationId;
 
         (await client.PostAsJsonAsync($"/api/homeowner-applications/{applicationId}/approve",
-            new ApproveApplicationRequest("2026-06-01", null)))
+            new ApproveApplicationRequest(new DateOnly(2026, 6, 1), null)))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var application = await (await client.GetAsync($"/api/homeowner-applications/{applicationId}"))

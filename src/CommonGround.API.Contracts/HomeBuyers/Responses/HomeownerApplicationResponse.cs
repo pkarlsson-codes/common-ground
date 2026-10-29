@@ -14,10 +14,10 @@ public sealed record HomeownerApplicationResponse(
     string Phase,
     string SubmittedAt,
     string SubmittedBy,
-    string? ApprovedDate,
+    DateOnly? ApprovedDate,
     string? DenialReason,
     string? WithdrawalReason,
-    string? SelectedDate,
+    DateOnly? SelectedDate,
     string? SelectedHomeId,
     string? SelectedLandParcelId,
     string? SelectedBy);

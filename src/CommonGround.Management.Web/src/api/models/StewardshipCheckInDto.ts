@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * DTO for a stewardship check-in entry.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface StewardshipCheckInDto {
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof StewardshipCheckInDto
      */
-    checkInDate?: string;
+    checkInDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -63,7 +71,7 @@ export function StewardshipCheckInDtoFromJSONTyped(json: any, ignoreDiscriminato
     }
     return {
         
-        'checkInDate': json['checkInDate'] == null ? undefined : json['checkInDate'],
+        'checkInDate': json['checkInDate'] == null ? undefined : CalendarDateFromJSON(json['checkInDate']),
         'notes': json['notes'] == null ? undefined : json['notes'],
         'recordedBy': json['recordedBy'] == null ? undefined : json['recordedBy'],
         'occurredAt': json['occurredAt'] == null ? undefined : json['occurredAt'],
@@ -81,7 +89,7 @@ export function StewardshipCheckInDtoToJSONTyped(value?: StewardshipCheckInDto |
 
     return {
         
-        'checkInDate': value['checkInDate'],
+        'checkInDate': CalendarDateToJSON(value['checkInDate']),
         'notes': value['notes'],
         'recordedBy': value['recordedBy'],
         'occurredAt': value['occurredAt'],

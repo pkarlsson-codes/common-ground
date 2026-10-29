@@ -5,4 +5,4 @@ public sealed record SelectApplicantRequest(
     string HomeId,
     string GroundLeaseTemplateId,
     decimal PurchasePrice,
-    string SelectedDate);
+    DateOnly SelectedDate);

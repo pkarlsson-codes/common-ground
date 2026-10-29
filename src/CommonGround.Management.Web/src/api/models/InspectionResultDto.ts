@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Inspection result details.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface InspectionResultDto {
     /**
      * Date of inspection.
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof InspectionResultDto
      */
-    inspectionDate?: string;
+    inspectionDate?: CalendarDate;
     /**
      * Name of inspector.
      * @type {string}
@@ -57,7 +65,7 @@ export function InspectionResultDtoFromJSONTyped(json: any, ignoreDiscriminator:
     }
     return {
         
-        'inspectionDate': json['inspectionDate'] == null ? undefined : json['inspectionDate'],
+        'inspectionDate': json['inspectionDate'] == null ? undefined : CalendarDateFromJSON(json['inspectionDate']),
         'inspectorName': json['inspectorName'] == null ? undefined : json['inspectorName'],
         'notes': json['notes'] == null ? undefined : json['notes'],
     };
@@ -74,7 +82,7 @@ export function InspectionResultDtoToJSONTyped(value?: InspectionResultDto | nul
 
     return {
         
-        'inspectionDate': value['inspectionDate'],
+        'inspectionDate': CalendarDateToJSON(value['inspectionDate']),
         'inspectorName': value['inspectorName'],
         'notes': value['notes'],
     };

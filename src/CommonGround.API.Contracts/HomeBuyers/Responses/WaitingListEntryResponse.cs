@@ -7,9 +7,9 @@ public sealed record WaitingListEntryResponse(
     HouseholdContactDto? PrimaryContact,
     int HouseholdSize,
     bool AccessibilityRequired,
-    string? ApprovedDate,
+    DateOnly? ApprovedDate,
     bool IsHousingCounselingCompleted,
     bool IsCltOrientationCompleted,
-    string? MortgagePrequalificationExpiryDate,
+    DateOnly? MortgagePrequalificationExpiryDate,
     bool IsReadyForSelection,
     bool NeedsReverification);

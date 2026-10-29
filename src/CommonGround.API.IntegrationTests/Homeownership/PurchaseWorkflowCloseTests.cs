@@ -21,7 +21,7 @@ namespace CommonGround.API.IntegrationTests.Homeownership;
 [Collection(IntegrationCollection.Name)]
 public class PurchaseWorkflowCloseTests(ApiFactory factory)
 {
-    private const string ClosingDate = "2026-07-15";
+    private static readonly DateOnly ClosingDate = new DateOnly(2026, 7, 15);
 
     [Fact]
     public async Task ClosePurchase_HappyPath_CreatesGroundLeaseFromTemplate()
@@ -95,7 +95,7 @@ public class PurchaseWorkflowCloseTests(ApiFactory factory)
             ApiFactory.TestTrustId,
             new PurchaseClosed(
                 workflowId,
-                DateOnly.Parse(ClosingDate, CultureInfo.InvariantCulture),
+                ClosingDate,
                 null,
                 "user-test"));
     }
@@ -142,15 +142,15 @@ public class PurchaseWorkflowCloseTests(ApiFactory factory)
         var responses = new List<HttpResponseMessage>
         {
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/eligibility",
-                new RecordEligibilityVerifiedRequest("2026-06-01", null)),
+                new RecordEligibilityVerifiedRequest(new DateOnly(2026, 6, 1), null)),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/financing",
-                new RecordFinancingCommittedRequest("Test Lender", 140000m, "2026-06-02")),
+                new RecordFinancingCommittedRequest("Test Lender", 140000m, new DateOnly(2026, 6, 2))),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/inspection",
-                new RecordInspectionCompletedRequest("2026-06-03", "Jane Inspector", null)),
+                new RecordInspectionCompletedRequest(new DateOnly(2026, 6, 3), "Jane Inspector", null)),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/title",
-                new RecordTitleClearedRequest("2026-06-04", "Test Title Co")),
+                new RecordTitleClearedRequest(new DateOnly(2026, 6, 4), "Test Title Co")),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/lease-execution",
-                new RecordLeaseExecutedRequest("2026-06-05")),
+                new RecordLeaseExecutedRequest(new DateOnly(2026, 6, 5))),
         };
 
         responses.Should().AllSatisfy(r => r.StatusCode.Should().Be(HttpStatusCode.NoContent));

@@ -8,11 +8,11 @@ public sealed record HouseholdResponse(
     decimal AnnualIncome,
     bool AccessibilityRequired,
     bool IsHousingCounselingCompleted,
-    string? HousingCounselingCompletedDate,
+    DateOnly? HousingCounselingCompletedDate,
     string? HousingCounselingCertificationNumber,
     string? HousingCounselorOrganization,
     bool IsCltOrientationCompleted,
-    string? CltOrientationCompletedDate,
+    DateOnly? CltOrientationCompletedDate,
     MortgagePrequalificationDto? MortgagePrequalification,
     string RegisteredAt,
     string RegisteredBy,
@@ -33,7 +33,7 @@ public sealed record HouseholdMemberDto(
 public sealed record MortgagePrequalificationDto(
     string LenderName,
     decimal ApprovedAmount,
-    string ExpiryDate);
+    DateOnly ExpiryDate);
 
 /// <summary>An application submitted by the household.</summary>
 /// <param name="Id">Application identifier.</param>

@@ -24,7 +24,7 @@ public class HomeownerApplicationEligibilityTests(ApiFactory factory)
         duplicate.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
 
         (await client.PostAsJsonAsync($"/api/homeowner-applications/{firstApplicationId}/withdraw",
-            new WithdrawApplicationRequest("2026-06-05", null)))
+            new WithdrawApplicationRequest(new DateOnly(2026, 6, 5), null)))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var resubmit = await client.PostAsJsonAsync("/api/homeowner-applications", new SubmitApplicationRequest(householdId));
@@ -63,13 +63,13 @@ public class HomeownerApplicationEligibilityTests(ApiFactory factory)
     private static async Task RecordReadinessAsync(HttpClient client, string householdId)
     {
         (await client.PostAsJsonAsync($"/api/households/{householdId}/housing-counseling",
-            new RecordHousingCounselingRequest("CERT-001", "2026-06-02", "Test Counseling Org")))
+            new RecordHousingCounselingRequest("CERT-001", new DateOnly(2026, 6, 2), "Test Counseling Org")))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
         (await client.PostAsJsonAsync($"/api/households/{householdId}/clt-orientation",
-            new RecordCltOrientationRequest("2026-06-03")))
+            new RecordCltOrientationRequest(new DateOnly(2026, 6, 3))))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
         (await client.PostAsJsonAsync($"/api/households/{householdId}/mortgage-prequalification",
-            new RecordMortgagePrequalificationRequest("Test Lender", 210000m, "2099-01-01")))
+            new RecordMortgagePrequalificationRequest("Test Lender", 210000m, new DateOnly(2099, 1, 1))))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
@@ -84,7 +84,7 @@ public class HomeownerApplicationEligibilityTests(ApiFactory factory)
     {
         var applicationId = await SubmitAsync(client, householdId);
         (await client.PostAsJsonAsync($"/api/homeowner-applications/{applicationId}/approve",
-            new ApproveApplicationRequest("2026-06-01", null)))
+            new ApproveApplicationRequest(new DateOnly(2026, 6, 1), null)))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
         return applicationId;
     }

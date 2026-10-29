@@ -23,12 +23,12 @@ public class WaitingListTests(ApiFactory factory)
     {
         var client = factory.CreateClient().WithAuthToken();
 
-        var laterId = await SubmitAndApproveAsync(client, await RegisterHouseholdAsync(client, "waiting-later@example.com"), "2026-05-01");
-        var earlierId = await SubmitAndApproveAsync(client, await RegisterHouseholdAsync(client, "waiting-earlier@example.com"), "2026-03-01");
+        var laterId = await SubmitAndApproveAsync(client, await RegisterHouseholdAsync(client, "waiting-later@example.com"), new DateOnly(2026, 5, 1));
+        var earlierId = await SubmitAndApproveAsync(client, await RegisterHouseholdAsync(client, "waiting-earlier@example.com"), new DateOnly(2026, 3, 1));
         var submittedId = await SubmitAsync(client, await RegisterHouseholdAsync(client, "waiting-submitted@example.com"));
-        var withdrawnId = await SubmitAndApproveAsync(client, await RegisterHouseholdAsync(client, "waiting-withdrawn@example.com"), "2026-03-01");
+        var withdrawnId = await SubmitAndApproveAsync(client, await RegisterHouseholdAsync(client, "waiting-withdrawn@example.com"), new DateOnly(2026, 3, 1));
         (await client.PostAsJsonAsync($"/api/homeowner-applications/{withdrawnId}/withdraw",
-            new WithdrawApplicationRequest("2026-06-05", null)))
+            new WithdrawApplicationRequest(new DateOnly(2026, 6, 5), null)))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var waitingList = await GetWholeWaitingListAsync(client);
@@ -38,7 +38,7 @@ public class WaitingListTests(ApiFactory factory)
         ids.Should().ContainInOrder(earlierId, laterId);
 
         var earlier = waitingList.Single(e => e.ApplicationId == earlierId);
-        earlier.ApprovedDate.Should().Be("2026-03-01");
+        earlier.ApprovedDate.Should().Be(new DateOnly(2026, 3, 1));
         earlier.PrimaryContact!.Email.Should().Be("waiting-earlier@example.com");
     }
 
@@ -48,20 +48,20 @@ public class WaitingListTests(ApiFactory factory)
         var client = factory.CreateClient().WithAuthToken();
 
         var readyHouseholdId = await RegisterHouseholdAsync(client, "waiting-ready@example.com");
-        await RecordReadinessAsync(client, readyHouseholdId, "2099-01-01");
-        var readyId = await SubmitAndApproveAsync(client, readyHouseholdId, "2026-06-01");
+        await RecordReadinessAsync(client, readyHouseholdId, new DateOnly(2099, 1, 1));
+        var readyId = await SubmitAndApproveAsync(client, readyHouseholdId, new DateOnly(2026, 6, 1));
 
         var neverPrequalifiedId = await SubmitAndApproveAsync(
-            client, await RegisterHouseholdAsync(client, "waiting-never-prequalified@example.com"), "2026-06-01");
+            client, await RegisterHouseholdAsync(client, "waiting-never-prequalified@example.com"), new DateOnly(2026, 6, 1));
 
         var pastExpiryHouseholdId = await RegisterHouseholdAsync(client, "waiting-past-expiry@example.com");
-        await RecordReadinessAsync(client, pastExpiryHouseholdId, "2026-01-01");
-        var pastExpiryId = await SubmitAndApproveAsync(client, pastExpiryHouseholdId, "2026-06-01");
+        await RecordReadinessAsync(client, pastExpiryHouseholdId, new DateOnly(2026, 1, 1));
+        var pastExpiryId = await SubmitAndApproveAsync(client, pastExpiryHouseholdId, new DateOnly(2026, 6, 1));
 
         var lapsedHouseholdId = await RegisterHouseholdAsync(client, "waiting-lapsed@example.com");
-        await RecordReadinessAsync(client, lapsedHouseholdId, "2026-02-01");
+        await RecordReadinessAsync(client, lapsedHouseholdId, new DateOnly(2026, 2, 1));
         await ExpirePrequalificationAsync(lapsedHouseholdId, new DateOnly(2026, 2, 1));
-        var lapsedId = await SubmitAndApproveAsync(client, lapsedHouseholdId, "2026-06-01");
+        var lapsedId = await SubmitAndApproveAsync(client, lapsedHouseholdId, new DateOnly(2026, 6, 1));
 
         var waitingList = (await GetWholeWaitingListAsync(client)).ToDictionary(e => e.ApplicationId);
 
@@ -69,7 +69,7 @@ public class WaitingListTests(ApiFactory factory)
         {
             IsHousingCounselingCompleted = true,
             IsCltOrientationCompleted = true,
-            MortgagePrequalificationExpiryDate = "2099-01-01",
+            MortgagePrequalificationExpiryDate = new DateOnly(2099, 1, 1),
             IsReadyForSelection = true,
             NeedsReverification = false,
         });
@@ -81,7 +81,7 @@ public class WaitingListTests(ApiFactory factory)
         });
         waitingList[pastExpiryId].Should().BeEquivalentTo(new
         {
-            MortgagePrequalificationExpiryDate = "2026-01-01",
+            MortgagePrequalificationExpiryDate = new DateOnly(2026, 1, 1),
             IsReadyForSelection = false,
             NeedsReverification = true,
         });
@@ -108,8 +108,8 @@ public class WaitingListTests(ApiFactory factory)
                 false,
                 65000m));
         var householdId = (await householdResponse.Content.ReadFromJsonAsync<RegisterHouseholdResponse>())!.HouseholdId;
-        var matchingId = await SubmitAndApproveAsync(client, householdId, "2026-06-01");
-        await SubmitAndApproveAsync(client, await RegisterHouseholdAsync(client, "waiting-unsearched@example.com"), "2026-06-01");
+        var matchingId = await SubmitAndApproveAsync(client, householdId, new DateOnly(2026, 6, 1));
+        await SubmitAndApproveAsync(client, await RegisterHouseholdAsync(client, "waiting-unsearched@example.com"), new DateOnly(2026, 6, 1));
 
         var page = await client.GetFromJsonAsync<PaginatedResponse<WaitingListEntryResponse>>(
             $"/api/waiting-list{new GetWaitingListQuerySpec(search: $"SECOND {marker}").ToQueryString()}");
@@ -151,13 +151,13 @@ public class WaitingListTests(ApiFactory factory)
         return (await response.Content.ReadFromJsonAsync<RegisterHouseholdResponse>())!.HouseholdId;
     }
 
-    private static async Task RecordReadinessAsync(HttpClient client, string householdId, string prequalificationExpiryDate)
+    private static async Task RecordReadinessAsync(HttpClient client, string householdId, DateOnly prequalificationExpiryDate)
     {
         (await client.PostAsJsonAsync($"/api/households/{householdId}/housing-counseling",
-            new RecordHousingCounselingRequest("CERT-001", "2026-01-02", "Test Counseling Org")))
+            new RecordHousingCounselingRequest("CERT-001", new DateOnly(2026, 1, 2), "Test Counseling Org")))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
         (await client.PostAsJsonAsync($"/api/households/{householdId}/clt-orientation",
-            new RecordCltOrientationRequest("2026-01-03")))
+            new RecordCltOrientationRequest(new DateOnly(2026, 1, 3))))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
         (await client.PostAsJsonAsync($"/api/households/{householdId}/mortgage-prequalification",
             new RecordMortgagePrequalificationRequest("Test Lender", 210000m, prequalificationExpiryDate)))
@@ -171,7 +171,7 @@ public class WaitingListTests(ApiFactory factory)
         return (await response.Content.ReadFromJsonAsync<SubmitApplicationResponse>())!.ApplicationId;
     }
 
-    private static async Task<string> SubmitAndApproveAsync(HttpClient client, string householdId, string approvedDate)
+    private static async Task<string> SubmitAndApproveAsync(HttpClient client, string householdId, DateOnly approvedDate)
     {
         var applicationId = await SubmitAsync(client, householdId);
         (await client.PostAsJsonAsync($"/api/homeowner-applications/{applicationId}/approve",

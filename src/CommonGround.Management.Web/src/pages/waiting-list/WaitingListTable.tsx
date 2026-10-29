@@ -1,6 +1,6 @@
 import type { WaitingListEntryResponse } from '../../api'
 import Pagination from '../../components/Pagination'
-import { trustToday } from '../../lib/calendarDate'
+import { daysBetween, formatCalendarDate, numericDate, trustToday, type CalendarDate } from '../../lib/calendarDate'
 import { getResponseStatus } from '../../lib/getErrorMessage'
 
 type Props = {
@@ -19,22 +19,10 @@ type Props = {
   onRetry: () => void
 }
 
-/** Formats a YYYY-MM-DD date without the UTC shift new Date() applies to date-only strings. */
-const fmtDate = (value?: string | null) => {
-  if (!value) return '—'
-  const [year, month, day] = value.split('-').map(Number)
-  return new Date(year, month - 1, day).toLocaleDateString()
-}
+const fmtDate = (value?: CalendarDate | null) => (value ? formatCalendarDate(value, numericDate) : '—')
 
-/** Whole days from a YYYY-MM-DD date to the user's local today. */
-const daysSince = (value?: string | null) => {
-  if (!value) return '—'
-  const toUtcDay = (iso: string) => {
-    const [year, month, day] = iso.split('-').map(Number)
-    return Date.UTC(year, month - 1, day) / 86_400_000
-  }
-  return toUtcDay(trustToday()) - toUtcDay(value)
-}
+/** Whole days from a date to the trust's today. */
+const daysSince = (value?: CalendarDate | null) => (value ? daysBetween(value, trustToday()) : '—')
 
 function ReadinessBadge({ entry }: { entry: WaitingListEntryResponse }) {
   if (entry.needsReverification) return <span className="badge badge-stalled">Needs re-verification</span>

@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Eligibility verification details.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface EligibilityDetailsDto {
     /**
      * Date eligibility was verified.
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof EligibilityDetailsDto
      */
-    verifiedDate?: string;
+    verifiedDate?: CalendarDate;
     /**
      * Optional notes.
      * @type {string}
@@ -51,7 +59,7 @@ export function EligibilityDetailsDtoFromJSONTyped(json: any, ignoreDiscriminato
     }
     return {
         
-        'verifiedDate': json['verifiedDate'] == null ? undefined : json['verifiedDate'],
+        'verifiedDate': json['verifiedDate'] == null ? undefined : CalendarDateFromJSON(json['verifiedDate']),
         'notes': json['notes'] == null ? undefined : json['notes'],
     };
 }
@@ -67,7 +75,7 @@ export function EligibilityDetailsDtoToJSONTyped(value?: EligibilityDetailsDto |
 
     return {
         
-        'verifiedDate': value['verifiedDate'],
+        'verifiedDate': CalendarDateToJSON(value['verifiedDate']),
         'notes': value['notes'],
     };
 }

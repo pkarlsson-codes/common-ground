@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to create a new ground lease.
  * @export
@@ -34,10 +42,10 @@ export interface CreateGroundLeaseRequest {
     homeId?: string;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof CreateGroundLeaseRequest
      */
-    leaseStartDate?: string;
+    leaseStartDate?: CalendarDate;
     /**
      * 
      * @type {number}
@@ -107,7 +115,7 @@ export function CreateGroundLeaseRequestFromJSONTyped(json: any, ignoreDiscrimin
         
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
         'homeId': json['homeId'] == null ? undefined : json['homeId'],
-        'leaseStartDate': json['leaseStartDate'] == null ? undefined : json['leaseStartDate'],
+        'leaseStartDate': json['leaseStartDate'] == null ? undefined : CalendarDateFromJSON(json['leaseStartDate']),
         'termYears': json['termYears'] == null ? undefined : json['termYears'],
         'covenantTerms': json['covenantTerms'] == null ? undefined : json['covenantTerms'],
         'formulaKind': json['formulaKind'] == null ? undefined : json['formulaKind'],
@@ -132,7 +140,7 @@ export function CreateGroundLeaseRequestToJSONTyped(value?: CreateGroundLeaseReq
         
         'landParcelId': value['landParcelId'],
         'homeId': value['homeId'],
-        'leaseStartDate': value['leaseStartDate'],
+        'leaseStartDate': CalendarDateToJSON(value['leaseStartDate']),
         'termYears': value['termYears'],
         'covenantTerms': value['covenantTerms'],
         'formulaKind': value['formulaKind'],

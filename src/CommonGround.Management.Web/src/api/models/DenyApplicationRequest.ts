@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to deny an application.
  * @export
@@ -28,10 +36,10 @@ export interface DenyApplicationRequest {
     reason?: string;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof DenyApplicationRequest
      */
-    deniedDate?: string;
+    deniedDate?: CalendarDate;
 }
 
 /**
@@ -52,7 +60,7 @@ export function DenyApplicationRequestFromJSONTyped(json: any, ignoreDiscriminat
     return {
         
         'reason': json['reason'] == null ? undefined : json['reason'],
-        'deniedDate': json['deniedDate'] == null ? undefined : json['deniedDate'],
+        'deniedDate': json['deniedDate'] == null ? undefined : CalendarDateFromJSON(json['deniedDate']),
     };
 }
 
@@ -68,7 +76,7 @@ export function DenyApplicationRequestToJSONTyped(value?: DenyApplicationRequest
     return {
         
         'reason': value['reason'],
-        'deniedDate': value['deniedDate'],
+        'deniedDate': CalendarDateToJSON(value['deniedDate']),
     };
 }
 

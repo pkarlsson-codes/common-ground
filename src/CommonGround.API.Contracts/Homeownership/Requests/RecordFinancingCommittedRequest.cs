@@ -4,4 +4,4 @@ namespace CommonGround.API.Contracts.Homeownership.Requests;
 public sealed record RecordFinancingCommittedRequest(
     string LenderName,
     decimal CommittedAmount,
-    string PreapprovalLetterDate);
+    DateOnly PreapprovalLetterDate);

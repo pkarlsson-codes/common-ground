@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record mortgage prequalification.
  * @export
@@ -34,10 +42,10 @@ export interface RecordMortgagePrequalificationRequest {
     approvedAmount?: number;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof RecordMortgagePrequalificationRequest
      */
-    expiryDate?: string;
+    expiryDate?: CalendarDate;
 }
 
 /**
@@ -59,7 +67,7 @@ export function RecordMortgagePrequalificationRequestFromJSONTyped(json: any, ig
         
         'lenderName': json['lenderName'] == null ? undefined : json['lenderName'],
         'approvedAmount': json['approvedAmount'] == null ? undefined : json['approvedAmount'],
-        'expiryDate': json['expiryDate'] == null ? undefined : json['expiryDate'],
+        'expiryDate': json['expiryDate'] == null ? undefined : CalendarDateFromJSON(json['expiryDate']),
     };
 }
 
@@ -76,7 +84,7 @@ export function RecordMortgagePrequalificationRequestToJSONTyped(value?: RecordM
         
         'lenderName': value['lenderName'],
         'approvedAmount': value['approvedAmount'],
-        'expiryDate': value['expiryDate'],
+        'expiryDate': CalendarDateToJSON(value['expiryDate']),
     };
 }
 

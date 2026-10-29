@@ -14,6 +14,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
 import type { HouseholdApplicationDto } from './HouseholdApplicationDto';
 import {
     HouseholdApplicationDtoFromJSON,
@@ -80,10 +87,10 @@ export interface HouseholdResponse {
     isHousingCounselingCompleted?: boolean;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof HouseholdResponse
      */
-    housingCounselingCompletedDate?: string | null;
+    housingCounselingCompletedDate?: CalendarDate | null;
     /**
      * 
      * @type {string}
@@ -104,10 +111,10 @@ export interface HouseholdResponse {
     isCltOrientationCompleted?: boolean;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof HouseholdResponse
      */
-    cltOrientationCompletedDate?: string | null;
+    cltOrientationCompletedDate?: CalendarDate | null;
     /**
      * 
      * @type {MortgagePrequalificationDto}
@@ -157,11 +164,11 @@ export function HouseholdResponseFromJSONTyped(json: any, ignoreDiscriminator: b
         'annualIncome': json['annualIncome'] == null ? undefined : json['annualIncome'],
         'accessibilityRequired': json['accessibilityRequired'] == null ? undefined : json['accessibilityRequired'],
         'isHousingCounselingCompleted': json['isHousingCounselingCompleted'] == null ? undefined : json['isHousingCounselingCompleted'],
-        'housingCounselingCompletedDate': json['housingCounselingCompletedDate'] == null ? undefined : json['housingCounselingCompletedDate'],
+        'housingCounselingCompletedDate': json['housingCounselingCompletedDate'] == null ? undefined : CalendarDateFromJSON(json['housingCounselingCompletedDate']),
         'housingCounselingCertificationNumber': json['housingCounselingCertificationNumber'] == null ? undefined : json['housingCounselingCertificationNumber'],
         'housingCounselorOrganization': json['housingCounselorOrganization'] == null ? undefined : json['housingCounselorOrganization'],
         'isCltOrientationCompleted': json['isCltOrientationCompleted'] == null ? undefined : json['isCltOrientationCompleted'],
-        'cltOrientationCompletedDate': json['cltOrientationCompletedDate'] == null ? undefined : json['cltOrientationCompletedDate'],
+        'cltOrientationCompletedDate': json['cltOrientationCompletedDate'] == null ? undefined : CalendarDateFromJSON(json['cltOrientationCompletedDate']),
         'mortgagePrequalification': json['mortgagePrequalification'] == null ? undefined : MortgagePrequalificationDtoFromJSON(json['mortgagePrequalification']),
         'registeredAt': json['registeredAt'] == null ? undefined : json['registeredAt'],
         'registeredBy': json['registeredBy'] == null ? undefined : json['registeredBy'],
@@ -186,11 +193,11 @@ export function HouseholdResponseToJSONTyped(value?: HouseholdResponse | null, i
         'annualIncome': value['annualIncome'],
         'accessibilityRequired': value['accessibilityRequired'],
         'isHousingCounselingCompleted': value['isHousingCounselingCompleted'],
-        'housingCounselingCompletedDate': value['housingCounselingCompletedDate'],
+        'housingCounselingCompletedDate': CalendarDateToJSON(value['housingCounselingCompletedDate']),
         'housingCounselingCertificationNumber': value['housingCounselingCertificationNumber'],
         'housingCounselorOrganization': value['housingCounselorOrganization'],
         'isCltOrientationCompleted': value['isCltOrientationCompleted'],
-        'cltOrientationCompletedDate': value['cltOrientationCompletedDate'],
+        'cltOrientationCompletedDate': CalendarDateToJSON(value['cltOrientationCompletedDate']),
         'mortgagePrequalification': MortgagePrequalificationDtoToJSON(value['mortgagePrequalification']),
         'registeredAt': value['registeredAt'],
         'registeredBy': value['registeredBy'],

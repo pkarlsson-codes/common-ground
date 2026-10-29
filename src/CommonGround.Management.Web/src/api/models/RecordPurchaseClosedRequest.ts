@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record a purchase closed.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface RecordPurchaseClosedRequest {
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof RecordPurchaseClosedRequest
      */
-    actualClosingDate?: string;
+    actualClosingDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -51,7 +59,7 @@ export function RecordPurchaseClosedRequestFromJSONTyped(json: any, ignoreDiscri
     }
     return {
         
-        'actualClosingDate': json['actualClosingDate'] == null ? undefined : json['actualClosingDate'],
+        'actualClosingDate': json['actualClosingDate'] == null ? undefined : CalendarDateFromJSON(json['actualClosingDate']),
         'notes': json['notes'] == null ? undefined : json['notes'],
     };
 }
@@ -67,7 +75,7 @@ export function RecordPurchaseClosedRequestToJSONTyped(value?: RecordPurchaseClo
 
     return {
         
-        'actualClosingDate': value['actualClosingDate'],
+        'actualClosingDate': CalendarDateToJSON(value['actualClosingDate']),
         'notes': value['notes'],
     };
 }

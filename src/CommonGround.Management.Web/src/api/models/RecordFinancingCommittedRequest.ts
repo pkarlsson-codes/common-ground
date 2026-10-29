@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record financing committed by a lender.
  * @export
@@ -34,10 +42,10 @@ export interface RecordFinancingCommittedRequest {
     committedAmount?: number;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof RecordFinancingCommittedRequest
      */
-    preapprovalLetterDate?: string;
+    preapprovalLetterDate?: CalendarDate;
 }
 
 /**
@@ -59,7 +67,7 @@ export function RecordFinancingCommittedRequestFromJSONTyped(json: any, ignoreDi
         
         'lenderName': json['lenderName'] == null ? undefined : json['lenderName'],
         'committedAmount': json['committedAmount'] == null ? undefined : json['committedAmount'],
-        'preapprovalLetterDate': json['preapprovalLetterDate'] == null ? undefined : json['preapprovalLetterDate'],
+        'preapprovalLetterDate': json['preapprovalLetterDate'] == null ? undefined : CalendarDateFromJSON(json['preapprovalLetterDate']),
     };
 }
 
@@ -76,7 +84,7 @@ export function RecordFinancingCommittedRequestToJSONTyped(value?: RecordFinanci
         
         'lenderName': value['lenderName'],
         'committedAmount': value['committedAmount'],
-        'preapprovalLetterDate': value['preapprovalLetterDate'],
+        'preapprovalLetterDate': CalendarDateToJSON(value['preapprovalLetterDate']),
     };
 }
 

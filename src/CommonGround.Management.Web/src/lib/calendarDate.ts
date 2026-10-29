@@ -42,6 +42,10 @@ export const addDays = (date: CalendarDate, days: number): CalendarDate => {
   return fromUtcDate(d)
 }
 
+/** Whole days from one date to another; positive when `to` is later. */
+export const daysBetween = (from: CalendarDate, to: CalendarDate) =>
+  Math.round((toUtcDate(to).getTime() - toUtcDate(from).getTime()) / 86_400_000)
+
 export const yearOf = (date: CalendarDate) => Number(date.slice(0, 4))
 
 /** Today in the given IANA time zone. */
@@ -60,7 +64,9 @@ export const setTrustTimeZone = (timeZone: string | undefined) => {
 /** Today in the trust's time zone (the browser's until the trust has loaded), offset by whole days. */
 export const trustToday = (offsetDays = 0): CalendarDate => addDays(todayIn(trustTimeZone ?? browserTimeZone()), offsetDays)
 
-/** "Oct 28, 2026" by default. */
+export const numericDate: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'numeric', day: 'numeric' }
+
+/** "Oct 28, 2026" by default; "10/28/2026" with numericDate. */
 export const formatCalendarDate = (
   date: CalendarDate,
   options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' },

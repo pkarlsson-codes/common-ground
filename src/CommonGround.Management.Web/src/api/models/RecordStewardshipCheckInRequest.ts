@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record a stewardship check-in visit.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface RecordStewardshipCheckInRequest {
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof RecordStewardshipCheckInRequest
      */
-    checkInDate?: string;
+    checkInDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -51,7 +59,7 @@ export function RecordStewardshipCheckInRequestFromJSONTyped(json: any, ignoreDi
     }
     return {
         
-        'checkInDate': json['checkInDate'] == null ? undefined : json['checkInDate'],
+        'checkInDate': json['checkInDate'] == null ? undefined : CalendarDateFromJSON(json['checkInDate']),
         'notes': json['notes'] == null ? undefined : json['notes'],
     };
 }
@@ -67,7 +75,7 @@ export function RecordStewardshipCheckInRequestToJSONTyped(value?: RecordSteward
 
     return {
         
-        'checkInDate': value['checkInDate'],
+        'checkInDate': CalendarDateToJSON(value['checkInDate']),
         'notes': value['notes'],
     };
 }

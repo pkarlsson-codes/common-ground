@@ -5,7 +5,7 @@ public sealed record GroundLeaseListItemResponse(
     string Id,
     string LandParcelId,
     string HomeId,
-    string LeaseStartDate,
+    DateOnly LeaseStartDate,
     int TermYears,
     string Status,
     string FormulaKind,

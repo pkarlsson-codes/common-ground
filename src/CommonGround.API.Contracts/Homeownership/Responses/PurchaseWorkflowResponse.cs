@@ -20,37 +20,37 @@ public sealed record PurchaseWorkflowResponse(
     InspectionResultDto? InspectionResult,
     TitleDetailsDto? TitleDetails,
     LeaseExecutionDetailsDto? LeaseExecutionDetails,
-    string? ScheduledClosingDate,
-    string? ActualClosingDate,
+    DateOnly? ScheduledClosingDate,
+    DateOnly? ActualClosingDate,
     string? ClosingNotes,
     string? FailureReason,
     string? WithdrawalReason,
     string? StalledReason,
-    string? StalledDate,
-    string? ResolutionTargetDate);
+    DateOnly? StalledDate,
+    DateOnly? ResolutionTargetDate);
 
 /// <summary>Eligibility verification details.</summary>
 /// <param name="VerifiedDate">Date eligibility was verified.</param>
 /// <param name="Notes">Optional notes.</param>
-public sealed record EligibilityDetailsDto(string VerifiedDate, string? Notes);
+public sealed record EligibilityDetailsDto(DateOnly VerifiedDate, string? Notes);
 
 /// <summary>Financing commitment details.</summary>
 /// <param name="LenderName">Name of the lender.</param>
 /// <param name="CommittedAmount">Amount committed.</param>
 /// <param name="PreapprovalLetterDate">Date of pre-approval letter.</param>
-public sealed record FinancingDetailsDto(string LenderName, decimal CommittedAmount, string PreapprovalLetterDate);
+public sealed record FinancingDetailsDto(string LenderName, decimal CommittedAmount, DateOnly PreapprovalLetterDate);
 
 /// <summary>Inspection result details.</summary>
 /// <param name="InspectionDate">Date of inspection.</param>
 /// <param name="InspectorName">Name of inspector.</param>
 /// <param name="Notes">Optional notes.</param>
-public sealed record InspectionResultDto(string InspectionDate, string InspectorName, string? Notes);
+public sealed record InspectionResultDto(DateOnly InspectionDate, string InspectorName, string? Notes);
 
 /// <summary>Title clearance details.</summary>
 /// <param name="ClearedDate">Date title was cleared.</param>
 /// <param name="TitleCompanyName">Optional title company name.</param>
-public sealed record TitleDetailsDto(string ClearedDate, string? TitleCompanyName);
+public sealed record TitleDetailsDto(DateOnly ClearedDate, string? TitleCompanyName);
 
 /// <summary>Lease execution details.</summary>
 /// <param name="SignedDate">Date lease was signed.</param>
-public sealed record LeaseExecutionDetailsDto(string SignedDate);
+public sealed record LeaseExecutionDetailsDto(DateOnly SignedDate);

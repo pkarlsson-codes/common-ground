@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record housing counseling completion.
  * @export
@@ -28,10 +36,10 @@ export interface RecordHousingCounselingRequest {
     certificationNumber?: string;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof RecordHousingCounselingRequest
      */
-    completedDate?: string;
+    completedDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -58,7 +66,7 @@ export function RecordHousingCounselingRequestFromJSONTyped(json: any, ignoreDis
     return {
         
         'certificationNumber': json['certificationNumber'] == null ? undefined : json['certificationNumber'],
-        'completedDate': json['completedDate'] == null ? undefined : json['completedDate'],
+        'completedDate': json['completedDate'] == null ? undefined : CalendarDateFromJSON(json['completedDate']),
         'counselorOrganization': json['counselorOrganization'] == null ? undefined : json['counselorOrganization'],
     };
 }
@@ -75,7 +83,7 @@ export function RecordHousingCounselingRequestToJSONTyped(value?: RecordHousingC
     return {
         
         'certificationNumber': value['certificationNumber'],
-        'completedDate': value['completedDate'],
+        'completedDate': CalendarDateToJSON(value['completedDate']),
         'counselorOrganization': value['counselorOrganization'],
     };
 }

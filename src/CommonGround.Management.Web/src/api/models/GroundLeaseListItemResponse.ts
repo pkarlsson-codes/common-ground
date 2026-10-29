@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Summary item for ground lease list responses.
  * @export
@@ -40,10 +48,10 @@ export interface GroundLeaseListItemResponse {
     homeId?: string;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof GroundLeaseListItemResponse
      */
-    leaseStartDate?: string;
+    leaseStartDate?: CalendarDate;
     /**
      * 
      * @type {number}
@@ -102,7 +110,7 @@ export function GroundLeaseListItemResponseFromJSONTyped(json: any, ignoreDiscri
         'id': json['id'] == null ? undefined : json['id'],
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
         'homeId': json['homeId'] == null ? undefined : json['homeId'],
-        'leaseStartDate': json['leaseStartDate'] == null ? undefined : json['leaseStartDate'],
+        'leaseStartDate': json['leaseStartDate'] == null ? undefined : CalendarDateFromJSON(json['leaseStartDate']),
         'termYears': json['termYears'] == null ? undefined : json['termYears'],
         'status': json['status'] == null ? undefined : json['status'],
         'formulaKind': json['formulaKind'] == null ? undefined : json['formulaKind'],
@@ -126,7 +134,7 @@ export function GroundLeaseListItemResponseToJSONTyped(value?: GroundLeaseListIt
         'id': value['id'],
         'landParcelId': value['landParcelId'],
         'homeId': value['homeId'],
-        'leaseStartDate': value['leaseStartDate'],
+        'leaseStartDate': CalendarDateToJSON(value['leaseStartDate']),
         'termYears': value['termYears'],
         'status': value['status'],
         'formulaKind': value['formulaKind'],

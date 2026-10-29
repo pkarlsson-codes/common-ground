@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { formatCalendarDate, numericDate, type CalendarDate } from '../../lib/calendarDate'
 import type { HouseholdResponse } from '../../api'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
 import NavIdLink from '../../components/NavIdLink'
@@ -27,6 +28,8 @@ const fmtDate = (value?: string | null) => {
   if (Number.isNaN(date.getTime())) return value
   return date.toLocaleDateString()
 }
+
+const fmtCalendarDate = (value?: CalendarDate | null) => (value ? formatCalendarDate(value, numericDate) : '—')
 
 function SkeletonRows() {
   return (
@@ -220,14 +223,14 @@ export default function HouseholdDetailPanel({ householdId, onClose }: Props) {
               <ReadinessItem
                 label="Housing Counseling"
                 done={Boolean(household.isHousingCounselingCompleted)}
-                status={`Completed ${fmtDate(household.housingCounselingCompletedDate)}`}
+                status={`Completed ${fmtCalendarDate(household.housingCounselingCompletedDate)}`}
                 actionLabel={household.isHousingCounselingCompleted ? undefined : 'Record'}
                 onAction={() => setReadinessPanel('housing-counseling')}
               />
               <ReadinessItem
                 label="CLT Orientation"
                 done={Boolean(household.isCltOrientationCompleted)}
-                status={`Completed ${fmtDate(household.cltOrientationCompletedDate)}`}
+                status={`Completed ${fmtCalendarDate(household.cltOrientationCompletedDate)}`}
                 actionLabel={household.isCltOrientationCompleted ? undefined : 'Record'}
                 onAction={() => setReadinessPanel('clt-orientation')}
               />
@@ -235,7 +238,7 @@ export default function HouseholdDetailPanel({ householdId, onClose }: Props) {
                 label="Mortgage Prequalification"
                 done={Boolean(prequalification)}
                 status={prequalification
-                  ? `${prequalification.lenderName} · ${fmtCurrency(prequalification.approvedAmount ?? 0)} · expires ${fmtDate(prequalification.expiryDate)}`
+                  ? `${prequalification.lenderName} · ${fmtCurrency(prequalification.approvedAmount ?? 0)} · expires ${fmtCalendarDate(prequalification.expiryDate)}`
                   : undefined}
                 actionLabel={prequalification ? 'Update' : 'Record'}
                 onAction={() => setReadinessPanel('mortgage-prequalification')}

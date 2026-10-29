@@ -4,7 +4,7 @@ namespace CommonGround.API.Contracts.Homeownership.Requests;
 public sealed record CreateGroundLeaseRequest(
     string LandParcelId,
     string HomeId,
-    string LeaseStartDate,
+    DateOnly LeaseStartDate,
     int TermYears,
     string CovenantTerms,
     string FormulaKind,

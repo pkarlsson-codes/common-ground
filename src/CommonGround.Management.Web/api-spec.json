@@ -6889,7 +6889,8 @@
             "type": "string"
           },
           "leaseStartDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           },
           "termYears": {
             "type": "integer",
@@ -6950,7 +6951,8 @@
             "type": "string"
           },
           "leaseStartDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           },
           "termYears": {
             "type": "integer",
@@ -7021,7 +7023,8 @@
         "additionalProperties": false,
         "properties": {
           "checkInDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           },
           "notes": {
             "type": "string"
@@ -7093,7 +7096,8 @@
             "type": "string"
           },
           "leaseStartDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           },
           "termYears": {
             "type": "integer",
@@ -7124,7 +7128,8 @@
         "additionalProperties": false,
         "properties": {
           "checkInDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           },
           "notes": {
             "type": "string"
@@ -7516,6 +7521,7 @@
           },
           "approvedDate": {
             "type": "string",
+            "format": "date",
             "nullable": true
           },
           "denialReason": {
@@ -7528,6 +7534,7 @@
           },
           "selectedDate": {
             "type": "string",
+            "format": "date",
             "nullable": true
           },
           "selectedHomeId": {
@@ -7550,7 +7557,8 @@
         "additionalProperties": false,
         "properties": {
           "approvedDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           },
           "notes": {
             "type": "string",
@@ -7651,6 +7659,7 @@
           },
           "approvedDate": {
             "type": "string",
+            "format": "date",
             "nullable": true
           },
           "isHousingCounselingCompleted": {
@@ -7661,6 +7670,7 @@
           },
           "mortgagePrequalificationExpiryDate": {
             "type": "string",
+            "format": "date",
             "nullable": true
           },
           "isReadyForSelection": {
@@ -7687,7 +7697,8 @@
             "format": "decimal"
           },
           "selectedDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           }
         }
       },
@@ -7700,7 +7711,8 @@
             "type": "string"
           },
           "deniedDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           }
         }
       },
@@ -7710,7 +7722,8 @@
         "additionalProperties": false,
         "properties": {
           "withdrawnDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           },
           "reason": {
             "type": "string",
@@ -8121,6 +8134,7 @@
           },
           "mortgagePrequalificationExpiryDate": {
             "type": "string",
+            "format": "date",
             "nullable": true
           },
           "registeredAt": {
@@ -8158,6 +8172,7 @@
           },
           "housingCounselingCompletedDate": {
             "type": "string",
+            "format": "date",
             "nullable": true
           },
           "housingCounselingCertificationNumber": {
@@ -8173,6 +8188,7 @@
           },
           "cltOrientationCompletedDate": {
             "type": "string",
+            "format": "date",
             "nullable": true
           },
           "mortgagePrequalification": {
@@ -8235,7 +8251,8 @@
           },
           "expiryDate": {
             "type": "string",
-            "description": "Prequalification expiry date."
+            "description": "Prequalification expiry date.",
+            "format": "date"
           }
         }
       },
@@ -8323,7 +8340,8 @@
             "type": "string"
           },
           "completedDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           },
           "counselorOrganization": {
             "type": "string"
@@ -8336,7 +8354,8 @@
         "additionalProperties": false,
         "properties": {
           "completedDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           }
         }
       },
@@ -8353,7 +8372,8 @@
             "format": "decimal"
           },
           "expiryDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           }
         }
       },
@@ -8647,10 +8667,12 @@
           },
           "scheduledClosingDate": {
             "type": "string",
+            "format": "date",
             "nullable": true
           },
           "actualClosingDate": {
             "type": "string",
+            "format": "date",
             "nullable": true
           },
           "closingNotes": {
@@ -8671,10 +8693,12 @@
           },
           "stalledDate": {
             "type": "string",
+            "format": "date",
             "nullable": true
           },
           "resolutionTargetDate": {
             "type": "string",
+            "format": "date",
             "nullable": true
           }
         }
@@ -8686,7 +8710,8 @@
         "properties": {
           "verifiedDate": {
             "type": "string",
-            "description": "Date eligibility was verified."
+            "description": "Date eligibility was verified.",
+            "format": "date"
           },
           "notes": {
             "type": "string",
@@ -8711,7 +8736,8 @@
           },
           "preapprovalLetterDate": {
             "type": "string",
-            "description": "Date of pre-approval letter."
+            "description": "Date of pre-approval letter.",
+            "format": "date"
           }
         }
       },
@@ -8722,7 +8748,8 @@
         "properties": {
           "inspectionDate": {
             "type": "string",
-            "description": "Date of inspection."
+            "description": "Date of inspection.",
+            "format": "date"
           },
           "inspectorName": {
             "type": "string",
@@ -8742,7 +8769,8 @@
         "properties": {
           "clearedDate": {
             "type": "string",
-            "description": "Date title was cleared."
+            "description": "Date title was cleared.",
+            "format": "date"
           },
           "titleCompanyName": {
             "type": "string",
@@ -8758,7 +8786,8 @@
         "properties": {
           "signedDate": {
             "type": "string",
-            "description": "Date lease was signed."
+            "description": "Date lease was signed.",
+            "format": "date"
           }
         }
       },
@@ -8838,7 +8867,8 @@
         "additionalProperties": false,
         "properties": {
           "verifiedDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           },
           "notes": {
             "type": "string",
@@ -8859,7 +8889,8 @@
             "format": "decimal"
           },
           "preapprovalLetterDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           }
         }
       },
@@ -8869,7 +8900,8 @@
         "additionalProperties": false,
         "properties": {
           "inspectionDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           },
           "inspectorName": {
             "type": "string"
@@ -8886,7 +8918,8 @@
         "additionalProperties": false,
         "properties": {
           "clearedDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           },
           "titleCompanyName": {
             "type": "string",
@@ -8900,7 +8933,8 @@
         "additionalProperties": false,
         "properties": {
           "signedDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           }
         }
       },
@@ -8910,7 +8944,8 @@
         "additionalProperties": false,
         "properties": {
           "scheduledClosingDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           }
         }
       },
@@ -8920,7 +8955,8 @@
         "additionalProperties": false,
         "properties": {
           "actualClosingDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           },
           "notes": {
             "type": "string",
@@ -8937,7 +8973,8 @@
             "type": "string"
           },
           "failedDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           }
         }
       },
@@ -8947,7 +8984,8 @@
         "additionalProperties": false,
         "properties": {
           "withdrawnDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           },
           "reason": {
             "type": "string",
@@ -8964,10 +9002,12 @@
             "type": "string"
           },
           "stalledDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           },
           "resolutionTargetDate": {
-            "type": "string"
+            "type": "string",
+            "format": "date"
           }
         }
       },

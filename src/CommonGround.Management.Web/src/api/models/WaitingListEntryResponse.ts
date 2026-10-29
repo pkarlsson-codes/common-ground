@@ -21,6 +21,13 @@ import {
     HouseholdContactDtoToJSON,
     HouseholdContactDtoToJSONTyped,
 } from './HouseholdContactDto';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
 
 /**
  * An approved application on the waiting list, with its household's readiness as of today.
@@ -60,10 +67,10 @@ export interface WaitingListEntryResponse {
     accessibilityRequired?: boolean;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof WaitingListEntryResponse
      */
-    approvedDate?: string | null;
+    approvedDate?: CalendarDate | null;
     /**
      * 
      * @type {boolean}
@@ -78,10 +85,10 @@ export interface WaitingListEntryResponse {
     isCltOrientationCompleted?: boolean;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof WaitingListEntryResponse
      */
-    mortgagePrequalificationExpiryDate?: string | null;
+    mortgagePrequalificationExpiryDate?: CalendarDate | null;
     /**
      * 
      * @type {boolean}
@@ -118,10 +125,10 @@ export function WaitingListEntryResponseFromJSONTyped(json: any, ignoreDiscrimin
         'primaryContact': json['primaryContact'] == null ? undefined : HouseholdContactDtoFromJSON(json['primaryContact']),
         'householdSize': json['householdSize'] == null ? undefined : json['householdSize'],
         'accessibilityRequired': json['accessibilityRequired'] == null ? undefined : json['accessibilityRequired'],
-        'approvedDate': json['approvedDate'] == null ? undefined : json['approvedDate'],
+        'approvedDate': json['approvedDate'] == null ? undefined : CalendarDateFromJSON(json['approvedDate']),
         'isHousingCounselingCompleted': json['isHousingCounselingCompleted'] == null ? undefined : json['isHousingCounselingCompleted'],
         'isCltOrientationCompleted': json['isCltOrientationCompleted'] == null ? undefined : json['isCltOrientationCompleted'],
-        'mortgagePrequalificationExpiryDate': json['mortgagePrequalificationExpiryDate'] == null ? undefined : json['mortgagePrequalificationExpiryDate'],
+        'mortgagePrequalificationExpiryDate': json['mortgagePrequalificationExpiryDate'] == null ? undefined : CalendarDateFromJSON(json['mortgagePrequalificationExpiryDate']),
         'isReadyForSelection': json['isReadyForSelection'] == null ? undefined : json['isReadyForSelection'],
         'needsReverification': json['needsReverification'] == null ? undefined : json['needsReverification'],
     };
@@ -143,10 +150,10 @@ export function WaitingListEntryResponseToJSONTyped(value?: WaitingListEntryResp
         'primaryContact': HouseholdContactDtoToJSON(value['primaryContact']),
         'householdSize': value['householdSize'],
         'accessibilityRequired': value['accessibilityRequired'],
-        'approvedDate': value['approvedDate'],
+        'approvedDate': CalendarDateToJSON(value['approvedDate']),
         'isHousingCounselingCompleted': value['isHousingCounselingCompleted'],
         'isCltOrientationCompleted': value['isCltOrientationCompleted'],
-        'mortgagePrequalificationExpiryDate': value['mortgagePrequalificationExpiryDate'],
+        'mortgagePrequalificationExpiryDate': CalendarDateToJSON(value['mortgagePrequalificationExpiryDate']),
         'isReadyForSelection': value['isReadyForSelection'],
         'needsReverification': value['needsReverification'],
     };

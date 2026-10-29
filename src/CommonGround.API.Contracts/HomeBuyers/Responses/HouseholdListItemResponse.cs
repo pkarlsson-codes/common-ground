@@ -8,5 +8,5 @@ public sealed record HouseholdListItemResponse(
     bool AccessibilityRequired,
     bool IsHousingCounselingCompleted,
     bool IsCltOrientationCompleted,
-    string? MortgagePrequalificationExpiryDate,
+    DateOnly? MortgagePrequalificationExpiryDate,
     string RegisteredAt);

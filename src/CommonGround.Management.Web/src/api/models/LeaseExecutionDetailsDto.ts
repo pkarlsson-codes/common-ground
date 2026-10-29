@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Lease execution details.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface LeaseExecutionDetailsDto {
     /**
      * Date lease was signed.
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof LeaseExecutionDetailsDto
      */
-    signedDate?: string;
+    signedDate?: CalendarDate;
 }
 
 /**
@@ -45,7 +53,7 @@ export function LeaseExecutionDetailsDtoFromJSONTyped(json: any, ignoreDiscrimin
     }
     return {
         
-        'signedDate': json['signedDate'] == null ? undefined : json['signedDate'],
+        'signedDate': json['signedDate'] == null ? undefined : CalendarDateFromJSON(json['signedDate']),
     };
 }
 
@@ -60,7 +68,7 @@ export function LeaseExecutionDetailsDtoToJSONTyped(value?: LeaseExecutionDetail
 
     return {
         
-        'signedDate': value['signedDate'],
+        'signedDate': CalendarDateToJSON(value['signedDate']),
     };
 }
 

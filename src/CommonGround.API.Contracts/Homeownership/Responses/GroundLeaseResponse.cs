@@ -7,7 +7,7 @@ public sealed record GroundLeaseResponse(
     string? PurchaseWorkflowId,
     string LandParcelId,
     string HomeId,
-    string LeaseStartDate,
+    DateOnly LeaseStartDate,
     int TermYears,
     string CovenantTerms,
     string Status,
@@ -26,7 +26,7 @@ public sealed record GroundLeaseResponse(
 
 /// <summary>DTO for a stewardship check-in entry.</summary>
 public sealed record StewardshipCheckInDto(
-    string CheckInDate,
+    DateOnly CheckInDate,
     string Notes,
     string RecordedBy,
     string OccurredAt);

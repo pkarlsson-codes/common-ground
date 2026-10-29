@@ -21,6 +21,13 @@ import {
     LeaseExecutionDetailsDtoToJSON,
     LeaseExecutionDetailsDtoToJSONTyped,
 } from './LeaseExecutionDetailsDto';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
 import type { InspectionResultDto } from './InspectionResultDto';
 import {
     InspectionResultDtoFromJSON,
@@ -166,16 +173,16 @@ export interface PurchaseWorkflowResponse {
     leaseExecutionDetails?: LeaseExecutionDetailsDto | null;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof PurchaseWorkflowResponse
      */
-    scheduledClosingDate?: string | null;
+    scheduledClosingDate?: CalendarDate | null;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof PurchaseWorkflowResponse
      */
-    actualClosingDate?: string | null;
+    actualClosingDate?: CalendarDate | null;
     /**
      * 
      * @type {string}
@@ -202,16 +209,16 @@ export interface PurchaseWorkflowResponse {
     stalledReason?: string | null;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof PurchaseWorkflowResponse
      */
-    stalledDate?: string | null;
+    stalledDate?: CalendarDate | null;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof PurchaseWorkflowResponse
      */
-    resolutionTargetDate?: string | null;
+    resolutionTargetDate?: CalendarDate | null;
 }
 
 /**
@@ -249,14 +256,14 @@ export function PurchaseWorkflowResponseFromJSONTyped(json: any, ignoreDiscrimin
         'inspectionResult': json['inspectionResult'] == null ? undefined : InspectionResultDtoFromJSON(json['inspectionResult']),
         'titleDetails': json['titleDetails'] == null ? undefined : TitleDetailsDtoFromJSON(json['titleDetails']),
         'leaseExecutionDetails': json['leaseExecutionDetails'] == null ? undefined : LeaseExecutionDetailsDtoFromJSON(json['leaseExecutionDetails']),
-        'scheduledClosingDate': json['scheduledClosingDate'] == null ? undefined : json['scheduledClosingDate'],
-        'actualClosingDate': json['actualClosingDate'] == null ? undefined : json['actualClosingDate'],
+        'scheduledClosingDate': json['scheduledClosingDate'] == null ? undefined : CalendarDateFromJSON(json['scheduledClosingDate']),
+        'actualClosingDate': json['actualClosingDate'] == null ? undefined : CalendarDateFromJSON(json['actualClosingDate']),
         'closingNotes': json['closingNotes'] == null ? undefined : json['closingNotes'],
         'failureReason': json['failureReason'] == null ? undefined : json['failureReason'],
         'withdrawalReason': json['withdrawalReason'] == null ? undefined : json['withdrawalReason'],
         'stalledReason': json['stalledReason'] == null ? undefined : json['stalledReason'],
-        'stalledDate': json['stalledDate'] == null ? undefined : json['stalledDate'],
-        'resolutionTargetDate': json['resolutionTargetDate'] == null ? undefined : json['resolutionTargetDate'],
+        'stalledDate': json['stalledDate'] == null ? undefined : CalendarDateFromJSON(json['stalledDate']),
+        'resolutionTargetDate': json['resolutionTargetDate'] == null ? undefined : CalendarDateFromJSON(json['resolutionTargetDate']),
     };
 }
 
@@ -289,14 +296,14 @@ export function PurchaseWorkflowResponseToJSONTyped(value?: PurchaseWorkflowResp
         'inspectionResult': InspectionResultDtoToJSON(value['inspectionResult']),
         'titleDetails': TitleDetailsDtoToJSON(value['titleDetails']),
         'leaseExecutionDetails': LeaseExecutionDetailsDtoToJSON(value['leaseExecutionDetails']),
-        'scheduledClosingDate': value['scheduledClosingDate'],
-        'actualClosingDate': value['actualClosingDate'],
+        'scheduledClosingDate': CalendarDateToJSON(value['scheduledClosingDate']),
+        'actualClosingDate': CalendarDateToJSON(value['actualClosingDate']),
         'closingNotes': value['closingNotes'],
         'failureReason': value['failureReason'],
         'withdrawalReason': value['withdrawalReason'],
         'stalledReason': value['stalledReason'],
-        'stalledDate': value['stalledDate'],
-        'resolutionTargetDate': value['resolutionTargetDate'],
+        'stalledDate': CalendarDateToJSON(value['stalledDate']),
+        'resolutionTargetDate': CalendarDateToJSON(value['resolutionTargetDate']),
     };
 }
 

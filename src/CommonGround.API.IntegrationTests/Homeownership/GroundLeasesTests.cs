@@ -51,7 +51,7 @@ public class GroundLeasesTests(ApiFactory factory)
     {
         var response = await client.PostAsJsonAsync("/api/ground-leases",
             new CreateGroundLeaseRequest(
-                landParcelId, Guid.NewGuid().ToString(), "2024-01-01", 99, "Standard covenant", formulaKind,
+                landParcelId, Guid.NewGuid().ToString(), new DateOnly(2024, 1, 1), 99, "Standard covenant", formulaKind,
                 appreciationShare, indexType, baselineIndexValue, null, null));
         response.EnsureSuccessStatusCode();
         var created = await response.Content.ReadFromJsonAsync<CreateGroundLeaseResponse>();

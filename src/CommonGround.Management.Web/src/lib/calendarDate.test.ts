@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   addDays,
+  daysBetween,
   calendarDateOrNull,
   formatCalendarDate,
   isCalendarDate,
@@ -67,5 +68,11 @@ describe('trustToday', () => {
 describe('formatCalendarDate', () => {
   it('formats the date itself, whatever the browser time zone', () => {
     expect(formatCalendarDate(parseCalendarDate('2026-10-28'))).toBe('Oct 28, 2026')
+  })
+})
+
+describe('daysBetween', () => {
+  it('counts whole days across a daylight saving change', () => {
+    expect(daysBetween(parseCalendarDate('2026-10-28'), parseCalendarDate('2026-11-04'))).toBe(7)
   })
 })

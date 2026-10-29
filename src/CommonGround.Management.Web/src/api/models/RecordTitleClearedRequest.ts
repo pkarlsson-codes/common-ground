@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record title cleared.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface RecordTitleClearedRequest {
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof RecordTitleClearedRequest
      */
-    clearedDate?: string;
+    clearedDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -51,7 +59,7 @@ export function RecordTitleClearedRequestFromJSONTyped(json: any, ignoreDiscrimi
     }
     return {
         
-        'clearedDate': json['clearedDate'] == null ? undefined : json['clearedDate'],
+        'clearedDate': json['clearedDate'] == null ? undefined : CalendarDateFromJSON(json['clearedDate']),
         'titleCompanyName': json['titleCompanyName'] == null ? undefined : json['titleCompanyName'],
     };
 }
@@ -67,7 +75,7 @@ export function RecordTitleClearedRequestToJSONTyped(value?: RecordTitleClearedR
 
     return {
         
-        'clearedDate': value['clearedDate'],
+        'clearedDate': CalendarDateToJSON(value['clearedDate']),
         'titleCompanyName': value['titleCompanyName'],
     };
 }

@@ -4,4 +4,4 @@ namespace CommonGround.API.Contracts.HomeBuyers.Requests;
 public sealed record RecordMortgagePrequalificationRequest(
     string LenderName,
     decimal ApprovedAmount,
-    string ExpiryDate);
+    DateOnly ExpiryDate);

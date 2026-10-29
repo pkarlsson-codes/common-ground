@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to withdraw a purchase.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface WithdrawPurchaseRequest {
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof WithdrawPurchaseRequest
      */
-    withdrawnDate?: string;
+    withdrawnDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -51,7 +59,7 @@ export function WithdrawPurchaseRequestFromJSONTyped(json: any, ignoreDiscrimina
     }
     return {
         
-        'withdrawnDate': json['withdrawnDate'] == null ? undefined : json['withdrawnDate'],
+        'withdrawnDate': json['withdrawnDate'] == null ? undefined : CalendarDateFromJSON(json['withdrawnDate']),
         'reason': json['reason'] == null ? undefined : json['reason'],
     };
 }
@@ -67,7 +75,7 @@ export function WithdrawPurchaseRequestToJSONTyped(value?: WithdrawPurchaseReque
 
     return {
         
-        'withdrawnDate': value['withdrawnDate'],
+        'withdrawnDate': CalendarDateToJSON(value['withdrawnDate']),
         'reason': value['reason'],
     };
 }

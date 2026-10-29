@@ -54,7 +54,7 @@ public static class HouseholdEndpoints
             h.AccessibilityRequired,
             h.IsHousingCounselingCompleted,
             h.IsCltOrientationCompleted,
-            h.MortgagePrequalificationExpiryDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            h.MortgagePrequalificationExpiryDate,
             h.RegisteredAt.ToString("O", CultureInfo.InvariantCulture)));
 
         return Results.Ok(response);
@@ -192,7 +192,7 @@ public static class HouseholdEndpoints
             new RecordHousingCounseling(
                 HouseholdId.Create(householdId),
                 request.CertificationNumber,
-                DateOnly.Parse(request.CompletedDate, CultureInfo.InvariantCulture),
+                request.CompletedDate,
                 request.CounselorOrganization,
                 userId),
             cancellationToken);
@@ -216,7 +216,7 @@ public static class HouseholdEndpoints
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new RecordCltOrientation(
                 HouseholdId.Create(householdId),
-                DateOnly.Parse(request.CompletedDate, CultureInfo.InvariantCulture),
+                request.CompletedDate,
                 userId),
             cancellationToken);
 
@@ -241,7 +241,7 @@ public static class HouseholdEndpoints
                 HouseholdId.Create(householdId),
                 request.LenderName,
                 request.ApprovedAmount,
-                DateOnly.Parse(request.ExpiryDate, CultureInfo.InvariantCulture),
+                request.ExpiryDate,
                 userId),
             cancellationToken);
 
@@ -259,7 +259,7 @@ public static class HouseholdEndpoints
             : new MortgagePrequalificationDto(
                 view.MortgagePrequalification.LenderName,
                 view.MortgagePrequalification.ApprovedAmount,
-                view.MortgagePrequalification.ExpiryDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+                view.MortgagePrequalification.ExpiryDate);
 
         return new HouseholdResponse(
             view.Id,
@@ -268,11 +268,11 @@ public static class HouseholdEndpoints
             view.AnnualIncome,
             view.AccessibilityRequired,
             view.IsHousingCounselingCompleted,
-            view.HousingCounselingCompletedDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            view.HousingCounselingCompletedDate,
             view.HousingCounselingCertificationNumber,
             view.HousingCounselorOrganization,
             view.IsCltOrientationCompleted,
-            view.CltOrientationCompletedDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            view.CltOrientationCompletedDate,
             mortgagePrequalification,
             view.RegisteredAt.ToString("O", CultureInfo.InvariantCulture),
             view.RegisteredBy,

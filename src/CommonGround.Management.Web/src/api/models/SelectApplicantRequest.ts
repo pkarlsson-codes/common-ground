@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to select an applicant for a home. LandParcelId is resolved server-side from the home.
  * @export
@@ -40,10 +48,10 @@ export interface SelectApplicantRequest {
     purchasePrice?: number;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof SelectApplicantRequest
      */
-    selectedDate?: string;
+    selectedDate?: CalendarDate;
 }
 
 /**
@@ -66,7 +74,7 @@ export function SelectApplicantRequestFromJSONTyped(json: any, ignoreDiscriminat
         'homeId': json['homeId'] == null ? undefined : json['homeId'],
         'groundLeaseTemplateId': json['groundLeaseTemplateId'] == null ? undefined : json['groundLeaseTemplateId'],
         'purchasePrice': json['purchasePrice'] == null ? undefined : json['purchasePrice'],
-        'selectedDate': json['selectedDate'] == null ? undefined : json['selectedDate'],
+        'selectedDate': json['selectedDate'] == null ? undefined : CalendarDateFromJSON(json['selectedDate']),
     };
 }
 
@@ -84,7 +92,7 @@ export function SelectApplicantRequestToJSONTyped(value?: SelectApplicantRequest
         'homeId': value['homeId'],
         'groundLeaseTemplateId': value['groundLeaseTemplateId'],
         'purchasePrice': value['purchasePrice'],
-        'selectedDate': value['selectedDate'],
+        'selectedDate': CalendarDateToJSON(value['selectedDate']),
     };
 }
 

@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Title clearance details.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface TitleDetailsDto {
     /**
      * Date title was cleared.
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof TitleDetailsDto
      */
-    clearedDate?: string;
+    clearedDate?: CalendarDate;
     /**
      * Optional title company name.
      * @type {string}
@@ -51,7 +59,7 @@ export function TitleDetailsDtoFromJSONTyped(json: any, ignoreDiscriminator: boo
     }
     return {
         
-        'clearedDate': json['clearedDate'] == null ? undefined : json['clearedDate'],
+        'clearedDate': json['clearedDate'] == null ? undefined : CalendarDateFromJSON(json['clearedDate']),
         'titleCompanyName': json['titleCompanyName'] == null ? undefined : json['titleCompanyName'],
     };
 }
@@ -67,7 +75,7 @@ export function TitleDetailsDtoToJSONTyped(value?: TitleDetailsDto | null, ignor
 
     return {
         
-        'clearedDate': value['clearedDate'],
+        'clearedDate': CalendarDateToJSON(value['clearedDate']),
         'titleCompanyName': value['titleCompanyName'],
     };
 }

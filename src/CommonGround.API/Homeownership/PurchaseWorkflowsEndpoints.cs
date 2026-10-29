@@ -97,7 +97,7 @@ public static class PurchaseWorkflowsEndpoints
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new RecordEligibilityVerified(
                 PurchaseWorkflowId.Create(workflowId),
-                DateOnly.Parse(request.VerifiedDate, CultureInfo.InvariantCulture),
+                request.VerifiedDate,
                 request.Notes,
                 userId),
             cancellationToken);
@@ -123,7 +123,7 @@ public static class PurchaseWorkflowsEndpoints
                 PurchaseWorkflowId.Create(workflowId),
                 request.LenderName,
                 request.CommittedAmount,
-                DateOnly.Parse(request.PreapprovalLetterDate, CultureInfo.InvariantCulture),
+                request.PreapprovalLetterDate,
                 userId),
             cancellationToken);
 
@@ -146,7 +146,7 @@ public static class PurchaseWorkflowsEndpoints
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new RecordInspectionCompleted(
                 PurchaseWorkflowId.Create(workflowId),
-                DateOnly.Parse(request.InspectionDate, CultureInfo.InvariantCulture),
+                request.InspectionDate,
                 request.InspectorName,
                 request.Notes,
                 userId),
@@ -171,7 +171,7 @@ public static class PurchaseWorkflowsEndpoints
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new RecordTitleCleared(
                 PurchaseWorkflowId.Create(workflowId),
-                DateOnly.Parse(request.ClearedDate, CultureInfo.InvariantCulture),
+                request.ClearedDate,
                 request.TitleCompanyName,
                 userId),
             cancellationToken);
@@ -195,7 +195,7 @@ public static class PurchaseWorkflowsEndpoints
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new RecordLeaseExecuted(
                 PurchaseWorkflowId.Create(workflowId),
-                DateOnly.Parse(request.SignedDate, CultureInfo.InvariantCulture),
+                request.SignedDate,
                 userId),
             cancellationToken);
 
@@ -218,7 +218,7 @@ public static class PurchaseWorkflowsEndpoints
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new ScheduleClosing(
                 PurchaseWorkflowId.Create(workflowId),
-                DateOnly.Parse(request.ScheduledClosingDate, CultureInfo.InvariantCulture),
+                request.ScheduledClosingDate,
                 userId),
             cancellationToken);
 
@@ -241,7 +241,7 @@ public static class PurchaseWorkflowsEndpoints
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new RecordPurchaseClosed(
                 PurchaseWorkflowId.Create(workflowId),
-                DateOnly.Parse(request.ActualClosingDate, CultureInfo.InvariantCulture),
+                request.ActualClosingDate,
                 request.Notes,
                 userId),
             cancellationToken);
@@ -266,7 +266,7 @@ public static class PurchaseWorkflowsEndpoints
             new FailPurchase(
                 PurchaseWorkflowId.Create(workflowId),
                 request.FailureReason,
-                DateOnly.Parse(request.FailedDate, CultureInfo.InvariantCulture),
+                request.FailedDate,
                 userId),
             cancellationToken);
 
@@ -289,7 +289,7 @@ public static class PurchaseWorkflowsEndpoints
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new WithdrawPurchase(
                 PurchaseWorkflowId.Create(workflowId),
-                DateOnly.Parse(request.WithdrawnDate, CultureInfo.InvariantCulture),
+                request.WithdrawnDate,
                 request.Reason,
                 userId),
             cancellationToken);
@@ -314,8 +314,8 @@ public static class PurchaseWorkflowsEndpoints
             new StallWorkflow(
                 PurchaseWorkflowId.Create(workflowId),
                 request.StalledReason,
-                DateOnly.Parse(request.StalledDate, CultureInfo.InvariantCulture),
-                DateOnly.Parse(request.ResolutionTargetDate, CultureInfo.InvariantCulture),
+                request.StalledDate,
+                request.ResolutionTargetDate,
                 userId),
             cancellationToken);
 
@@ -325,15 +325,15 @@ public static class PurchaseWorkflowsEndpoints
     private static PurchaseWorkflowResponse MapToResponse(PurchaseWorkflowView view)
     {
         var eligibility = view.EligibilityDetails is null ? null
-            : new EligibilityDetailsDto(view.EligibilityDetails.VerifiedDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), view.EligibilityDetails.Notes);
+            : new EligibilityDetailsDto(view.EligibilityDetails.VerifiedDate, view.EligibilityDetails.Notes);
         var financing = view.FinancingDetails is null ? null
-            : new FinancingDetailsDto(view.FinancingDetails.LenderName, view.FinancingDetails.CommittedAmount, view.FinancingDetails.PreapprovalLetterDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+            : new FinancingDetailsDto(view.FinancingDetails.LenderName, view.FinancingDetails.CommittedAmount, view.FinancingDetails.PreapprovalLetterDate);
         var inspection = view.InspectionResult is null ? null
-            : new InspectionResultDto(view.InspectionResult.InspectionDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), view.InspectionResult.InspectorName, view.InspectionResult.Notes);
+            : new InspectionResultDto(view.InspectionResult.InspectionDate, view.InspectionResult.InspectorName, view.InspectionResult.Notes);
         var title = view.TitleDetails is null ? null
-            : new TitleDetailsDto(view.TitleDetails.ClearedDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), view.TitleDetails.TitleCompanyName);
+            : new TitleDetailsDto(view.TitleDetails.ClearedDate, view.TitleDetails.TitleCompanyName);
         var leaseExecution = view.LeaseExecutionDetails is null ? null
-            : new LeaseExecutionDetailsDto(view.LeaseExecutionDetails.SignedDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+            : new LeaseExecutionDetailsDto(view.LeaseExecutionDetails.SignedDate);
 
         return new PurchaseWorkflowResponse(
             view.Id,
@@ -354,13 +354,13 @@ public static class PurchaseWorkflowsEndpoints
             inspection,
             title,
             leaseExecution,
-            view.ScheduledClosingDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-            view.ActualClosingDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            view.ScheduledClosingDate,
+            view.ActualClosingDate,
             view.ClosingNotes,
             view.FailureReason,
             view.WithdrawalReason,
             view.StalledReason,
-            view.StalledDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-            view.ResolutionTargetDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+            view.StalledDate,
+            view.ResolutionTargetDate);
     }
 }

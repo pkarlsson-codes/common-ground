@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Financing commitment details.
  * @export
@@ -34,10 +42,10 @@ export interface FinancingDetailsDto {
     committedAmount?: number;
     /**
      * Date of pre-approval letter.
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof FinancingDetailsDto
      */
-    preapprovalLetterDate?: string;
+    preapprovalLetterDate?: CalendarDate;
 }
 
 /**
@@ -59,7 +67,7 @@ export function FinancingDetailsDtoFromJSONTyped(json: any, ignoreDiscriminator:
         
         'lenderName': json['lenderName'] == null ? undefined : json['lenderName'],
         'committedAmount': json['committedAmount'] == null ? undefined : json['committedAmount'],
-        'preapprovalLetterDate': json['preapprovalLetterDate'] == null ? undefined : json['preapprovalLetterDate'],
+        'preapprovalLetterDate': json['preapprovalLetterDate'] == null ? undefined : CalendarDateFromJSON(json['preapprovalLetterDate']),
     };
 }
 
@@ -76,7 +84,7 @@ export function FinancingDetailsDtoToJSONTyped(value?: FinancingDetailsDto | nul
         
         'lenderName': value['lenderName'],
         'committedAmount': value['committedAmount'],
-        'preapprovalLetterDate': value['preapprovalLetterDate'],
+        'preapprovalLetterDate': CalendarDateToJSON(value['preapprovalLetterDate']),
     };
 }
 

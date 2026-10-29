@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to approve eligibility.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface ApproveApplicationRequest {
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof ApproveApplicationRequest
      */
-    approvedDate?: string;
+    approvedDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -51,7 +59,7 @@ export function ApproveApplicationRequestFromJSONTyped(json: any, ignoreDiscrimi
     }
     return {
         
-        'approvedDate': json['approvedDate'] == null ? undefined : json['approvedDate'],
+        'approvedDate': json['approvedDate'] == null ? undefined : CalendarDateFromJSON(json['approvedDate']),
         'notes': json['notes'] == null ? undefined : json['notes'],
     };
 }
@@ -67,7 +75,7 @@ export function ApproveApplicationRequestToJSONTyped(value?: ApproveApplicationR
 
     return {
         
-        'approvedDate': value['approvedDate'],
+        'approvedDate': CalendarDateToJSON(value['approvedDate']),
         'notes': value['notes'],
     };
 }

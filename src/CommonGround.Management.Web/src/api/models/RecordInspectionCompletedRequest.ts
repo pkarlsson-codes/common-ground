@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record a completed home inspection.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface RecordInspectionCompletedRequest {
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof RecordInspectionCompletedRequest
      */
-    inspectionDate?: string;
+    inspectionDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -57,7 +65,7 @@ export function RecordInspectionCompletedRequestFromJSONTyped(json: any, ignoreD
     }
     return {
         
-        'inspectionDate': json['inspectionDate'] == null ? undefined : json['inspectionDate'],
+        'inspectionDate': json['inspectionDate'] == null ? undefined : CalendarDateFromJSON(json['inspectionDate']),
         'inspectorName': json['inspectorName'] == null ? undefined : json['inspectorName'],
         'notes': json['notes'] == null ? undefined : json['notes'],
     };
@@ -74,7 +82,7 @@ export function RecordInspectionCompletedRequestToJSONTyped(value?: RecordInspec
 
     return {
         
-        'inspectionDate': value['inspectionDate'],
+        'inspectionDate': CalendarDateToJSON(value['inspectionDate']),
         'inspectorName': value['inspectorName'],
         'notes': value['notes'],
     };

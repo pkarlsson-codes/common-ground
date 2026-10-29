@@ -21,6 +21,13 @@ import {
     HouseholdContactDtoToJSON,
     HouseholdContactDtoToJSONTyped,
 } from './HouseholdContactDto';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
 
 /**
  * Summary item for household list responses.
@@ -66,10 +73,10 @@ export interface HouseholdListItemResponse {
     isCltOrientationCompleted?: boolean;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof HouseholdListItemResponse
      */
-    mortgagePrequalificationExpiryDate?: string | null;
+    mortgagePrequalificationExpiryDate?: CalendarDate | null;
     /**
      * 
      * @type {string}
@@ -101,7 +108,7 @@ export function HouseholdListItemResponseFromJSONTyped(json: any, ignoreDiscrimi
         'accessibilityRequired': json['accessibilityRequired'] == null ? undefined : json['accessibilityRequired'],
         'isHousingCounselingCompleted': json['isHousingCounselingCompleted'] == null ? undefined : json['isHousingCounselingCompleted'],
         'isCltOrientationCompleted': json['isCltOrientationCompleted'] == null ? undefined : json['isCltOrientationCompleted'],
-        'mortgagePrequalificationExpiryDate': json['mortgagePrequalificationExpiryDate'] == null ? undefined : json['mortgagePrequalificationExpiryDate'],
+        'mortgagePrequalificationExpiryDate': json['mortgagePrequalificationExpiryDate'] == null ? undefined : CalendarDateFromJSON(json['mortgagePrequalificationExpiryDate']),
         'registeredAt': json['registeredAt'] == null ? undefined : json['registeredAt'],
     };
 }
@@ -123,7 +130,7 @@ export function HouseholdListItemResponseToJSONTyped(value?: HouseholdListItemRe
         'accessibilityRequired': value['accessibilityRequired'],
         'isHousingCounselingCompleted': value['isHousingCounselingCompleted'],
         'isCltOrientationCompleted': value['isCltOrientationCompleted'],
-        'mortgagePrequalificationExpiryDate': value['mortgagePrequalificationExpiryDate'],
+        'mortgagePrequalificationExpiryDate': CalendarDateToJSON(value['mortgagePrequalificationExpiryDate']),
         'registeredAt': value['registeredAt'],
     };
 }

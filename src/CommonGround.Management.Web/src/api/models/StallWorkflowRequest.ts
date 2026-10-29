@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to stall a purchase workflow.
  * @export
@@ -28,16 +36,16 @@ export interface StallWorkflowRequest {
     stalledReason?: string;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof StallWorkflowRequest
      */
-    stalledDate?: string;
+    stalledDate?: CalendarDate;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof StallWorkflowRequest
      */
-    resolutionTargetDate?: string;
+    resolutionTargetDate?: CalendarDate;
 }
 
 /**
@@ -58,8 +66,8 @@ export function StallWorkflowRequestFromJSONTyped(json: any, ignoreDiscriminator
     return {
         
         'stalledReason': json['stalledReason'] == null ? undefined : json['stalledReason'],
-        'stalledDate': json['stalledDate'] == null ? undefined : json['stalledDate'],
-        'resolutionTargetDate': json['resolutionTargetDate'] == null ? undefined : json['resolutionTargetDate'],
+        'stalledDate': json['stalledDate'] == null ? undefined : CalendarDateFromJSON(json['stalledDate']),
+        'resolutionTargetDate': json['resolutionTargetDate'] == null ? undefined : CalendarDateFromJSON(json['resolutionTargetDate']),
     };
 }
 
@@ -75,8 +83,8 @@ export function StallWorkflowRequestToJSONTyped(value?: StallWorkflowRequest | n
     return {
         
         'stalledReason': value['stalledReason'],
-        'stalledDate': value['stalledDate'],
-        'resolutionTargetDate': value['resolutionTargetDate'],
+        'stalledDate': CalendarDateToJSON(value['stalledDate']),
+        'resolutionTargetDate': CalendarDateToJSON(value['resolutionTargetDate']),
     };
 }
 

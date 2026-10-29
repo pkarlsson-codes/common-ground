@@ -21,6 +21,13 @@ import {
     HouseholdContactDtoToJSON,
     HouseholdContactDtoToJSONTyped,
 } from './HouseholdContactDto';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
 
 /**
  * Detail response for a homeowner application. Household size, income and accessibility are the
@@ -85,10 +92,10 @@ export interface HomeownerApplicationResponse {
     submittedBy?: string;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof HomeownerApplicationResponse
      */
-    approvedDate?: string | null;
+    approvedDate?: CalendarDate | null;
     /**
      * 
      * @type {string}
@@ -103,10 +110,10 @@ export interface HomeownerApplicationResponse {
     withdrawalReason?: string | null;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof HomeownerApplicationResponse
      */
-    selectedDate?: string | null;
+    selectedDate?: CalendarDate | null;
     /**
      * 
      * @type {string}
@@ -153,10 +160,10 @@ export function HomeownerApplicationResponseFromJSONTyped(json: any, ignoreDiscr
         'phase': json['phase'] == null ? undefined : json['phase'],
         'submittedAt': json['submittedAt'] == null ? undefined : json['submittedAt'],
         'submittedBy': json['submittedBy'] == null ? undefined : json['submittedBy'],
-        'approvedDate': json['approvedDate'] == null ? undefined : json['approvedDate'],
+        'approvedDate': json['approvedDate'] == null ? undefined : CalendarDateFromJSON(json['approvedDate']),
         'denialReason': json['denialReason'] == null ? undefined : json['denialReason'],
         'withdrawalReason': json['withdrawalReason'] == null ? undefined : json['withdrawalReason'],
-        'selectedDate': json['selectedDate'] == null ? undefined : json['selectedDate'],
+        'selectedDate': json['selectedDate'] == null ? undefined : CalendarDateFromJSON(json['selectedDate']),
         'selectedHomeId': json['selectedHomeId'] == null ? undefined : json['selectedHomeId'],
         'selectedLandParcelId': json['selectedLandParcelId'] == null ? undefined : json['selectedLandParcelId'],
         'selectedBy': json['selectedBy'] == null ? undefined : json['selectedBy'],
@@ -183,10 +190,10 @@ export function HomeownerApplicationResponseToJSONTyped(value?: HomeownerApplica
         'phase': value['phase'],
         'submittedAt': value['submittedAt'],
         'submittedBy': value['submittedBy'],
-        'approvedDate': value['approvedDate'],
+        'approvedDate': CalendarDateToJSON(value['approvedDate']),
         'denialReason': value['denialReason'],
         'withdrawalReason': value['withdrawalReason'],
-        'selectedDate': value['selectedDate'],
+        'selectedDate': CalendarDateToJSON(value['selectedDate']),
         'selectedHomeId': value['selectedHomeId'],
         'selectedLandParcelId': value['selectedLandParcelId'],
         'selectedBy': value['selectedBy'],

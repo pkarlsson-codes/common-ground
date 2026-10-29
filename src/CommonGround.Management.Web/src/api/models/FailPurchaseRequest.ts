@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to fail a purchase.
  * @export
@@ -28,10 +36,10 @@ export interface FailPurchaseRequest {
     failureReason?: string;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof FailPurchaseRequest
      */
-    failedDate?: string;
+    failedDate?: CalendarDate;
 }
 
 /**
@@ -52,7 +60,7 @@ export function FailPurchaseRequestFromJSONTyped(json: any, ignoreDiscriminator:
     return {
         
         'failureReason': json['failureReason'] == null ? undefined : json['failureReason'],
-        'failedDate': json['failedDate'] == null ? undefined : json['failedDate'],
+        'failedDate': json['failedDate'] == null ? undefined : CalendarDateFromJSON(json['failedDate']),
     };
 }
 
@@ -68,7 +76,7 @@ export function FailPurchaseRequestToJSONTyped(value?: FailPurchaseRequest | nul
     return {
         
         'failureReason': value['failureReason'],
-        'failedDate': value['failedDate'],
+        'failedDate': CalendarDateToJSON(value['failedDate']),
     };
 }
 

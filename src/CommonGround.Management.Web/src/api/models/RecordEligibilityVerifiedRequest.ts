@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record buyer eligibility verified.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface RecordEligibilityVerifiedRequest {
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof RecordEligibilityVerifiedRequest
      */
-    verifiedDate?: string;
+    verifiedDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -51,7 +59,7 @@ export function RecordEligibilityVerifiedRequestFromJSONTyped(json: any, ignoreD
     }
     return {
         
-        'verifiedDate': json['verifiedDate'] == null ? undefined : json['verifiedDate'],
+        'verifiedDate': json['verifiedDate'] == null ? undefined : CalendarDateFromJSON(json['verifiedDate']),
         'notes': json['notes'] == null ? undefined : json['notes'],
     };
 }
@@ -67,7 +75,7 @@ export function RecordEligibilityVerifiedRequestToJSONTyped(value?: RecordEligib
 
     return {
         
-        'verifiedDate': value['verifiedDate'],
+        'verifiedDate': CalendarDateToJSON(value['verifiedDate']),
         'notes': value['notes'],
     };
 }

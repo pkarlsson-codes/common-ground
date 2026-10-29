@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record lease executed.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface RecordLeaseExecutedRequest {
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof RecordLeaseExecutedRequest
      */
-    signedDate?: string;
+    signedDate?: CalendarDate;
 }
 
 /**
@@ -45,7 +53,7 @@ export function RecordLeaseExecutedRequestFromJSONTyped(json: any, ignoreDiscrim
     }
     return {
         
-        'signedDate': json['signedDate'] == null ? undefined : json['signedDate'],
+        'signedDate': json['signedDate'] == null ? undefined : CalendarDateFromJSON(json['signedDate']),
     };
 }
 
@@ -60,7 +68,7 @@ export function RecordLeaseExecutedRequestToJSONTyped(value?: RecordLeaseExecute
 
     return {
         
-        'signedDate': value['signedDate'],
+        'signedDate': CalendarDateToJSON(value['signedDate']),
     };
 }
 

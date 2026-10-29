@@ -38,7 +38,7 @@ public static class GroundLeasesEndpoints
         var command = new CreateGroundLease(
             request.LandParcelId,
             request.HomeId,
-            DateOnly.Parse(request.LeaseStartDate, CultureInfo.InvariantCulture),
+            request.LeaseStartDate,
             request.TermYears,
             request.CovenantTerms,
             resalePolicyTerms,
@@ -66,7 +66,7 @@ public static class GroundLeasesEndpoints
             v.Id,
             v.LandParcelId,
             v.HomeId,
-            v.LeaseStartDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            v.LeaseStartDate,
             v.TermYears,
             v.Status,
             v.FormulaKind,
@@ -95,7 +95,7 @@ public static class GroundLeasesEndpoints
             view.PurchaseWorkflowId,
             view.LandParcelId,
             view.HomeId,
-            view.LeaseStartDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            view.LeaseStartDate,
             view.TermYears,
             view.CovenantTerms,
             view.Status,
@@ -109,7 +109,7 @@ public static class GroundLeasesEndpoints
             view.HomeownerEmail,
             view.HomeownerPhone,
             view.StewardshipCheckIns.Select(c => new StewardshipCheckInDto(
-                c.CheckInDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                c.CheckInDate,
                 c.Notes,
                 c.RecordedBy,
                 c.OccurredAt.ToString("O", CultureInfo.InvariantCulture))).ToList().AsReadOnly(),
@@ -135,7 +135,7 @@ public static class GroundLeasesEndpoints
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new RecordStewardshipCheckIn(
                 GroundLeaseId.Create(groundLeaseId),
-                DateOnly.Parse(request.CheckInDate, CultureInfo.InvariantCulture),
+                request.CheckInDate,
                 request.Notes,
                 userId),
             cancellationToken);

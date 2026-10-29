@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { formatCalendarDate, numericDate, type CalendarDate } from '../../lib/calendarDate'
 import SlideOver from '../../components/SlideOver'
 import NavIdLink from '../../components/NavIdLink'
 import { useHomeownerApplication } from '../../hooks/applications'
@@ -23,6 +24,8 @@ const fmtDateTime = (value?: string | null) => {
   if (Number.isNaN(date.getTime())) return value
   return date.toLocaleString()
 }
+
+const fmtDate = (value?: CalendarDate | null) => (value ? formatCalendarDate(value, numericDate) : '—')
 
 function SkeletonRows() {
   return (
@@ -114,11 +117,11 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
             </div>
             <div className="detail-field">
               <div className="detail-field__label">Approved Date</div>
-              <div className="detail-field__value mono">{fmtDateTime(detail.approvedDate)}</div>
+              <div className="detail-field__value mono">{fmtDate(detail.approvedDate)}</div>
             </div>
             <div className="detail-field">
               <div className="detail-field__label">Selected Date</div>
-              <div className="detail-field__value mono">{fmtDateTime(detail.selectedDate)}</div>
+              <div className="detail-field__value mono">{fmtDate(detail.selectedDate)}</div>
             </div>
             <div className="detail-field full-span">
               <div className="detail-field__label">Denial Reason</div>

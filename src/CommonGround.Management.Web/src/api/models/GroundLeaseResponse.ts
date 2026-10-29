@@ -14,6 +14,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
 import type { StewardshipCheckInDto } from './StewardshipCheckInDto';
 import {
     StewardshipCheckInDtoFromJSON,
@@ -60,10 +67,10 @@ export interface GroundLeaseResponse {
     homeId?: string;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof GroundLeaseResponse
      */
-    leaseStartDate?: string;
+    leaseStartDate?: CalendarDate;
     /**
      * 
      * @type {number}
@@ -178,7 +185,7 @@ export function GroundLeaseResponseFromJSONTyped(json: any, ignoreDiscriminator:
         'purchaseWorkflowId': json['purchaseWorkflowId'] == null ? undefined : json['purchaseWorkflowId'],
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
         'homeId': json['homeId'] == null ? undefined : json['homeId'],
-        'leaseStartDate': json['leaseStartDate'] == null ? undefined : json['leaseStartDate'],
+        'leaseStartDate': json['leaseStartDate'] == null ? undefined : CalendarDateFromJSON(json['leaseStartDate']),
         'termYears': json['termYears'] == null ? undefined : json['termYears'],
         'covenantTerms': json['covenantTerms'] == null ? undefined : json['covenantTerms'],
         'status': json['status'] == null ? undefined : json['status'],
@@ -213,7 +220,7 @@ export function GroundLeaseResponseToJSONTyped(value?: GroundLeaseResponse | nul
         'purchaseWorkflowId': value['purchaseWorkflowId'],
         'landParcelId': value['landParcelId'],
         'homeId': value['homeId'],
-        'leaseStartDate': value['leaseStartDate'],
+        'leaseStartDate': CalendarDateToJSON(value['leaseStartDate']),
         'termYears': value['termYears'],
         'covenantTerms': value['covenantTerms'],
         'status': value['status'],

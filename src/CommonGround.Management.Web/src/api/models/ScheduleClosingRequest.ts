@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to schedule the closing date.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface ScheduleClosingRequest {
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof ScheduleClosingRequest
      */
-    scheduledClosingDate?: string;
+    scheduledClosingDate?: CalendarDate;
 }
 
 /**
@@ -45,7 +53,7 @@ export function ScheduleClosingRequestFromJSONTyped(json: any, ignoreDiscriminat
     }
     return {
         
-        'scheduledClosingDate': json['scheduledClosingDate'] == null ? undefined : json['scheduledClosingDate'],
+        'scheduledClosingDate': json['scheduledClosingDate'] == null ? undefined : CalendarDateFromJSON(json['scheduledClosingDate']),
     };
 }
 
@@ -60,7 +68,7 @@ export function ScheduleClosingRequestToJSONTyped(value?: ScheduleClosingRequest
 
     return {
         
-        'scheduledClosingDate': value['scheduledClosingDate'],
+        'scheduledClosingDate': CalendarDateToJSON(value['scheduledClosingDate']),
     };
 }
 

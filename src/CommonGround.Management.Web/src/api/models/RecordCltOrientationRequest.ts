@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record CLT orientation completion.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface RecordCltOrientationRequest {
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof RecordCltOrientationRequest
      */
-    completedDate?: string;
+    completedDate?: CalendarDate;
 }
 
 /**
@@ -45,7 +53,7 @@ export function RecordCltOrientationRequestFromJSONTyped(json: any, ignoreDiscri
     }
     return {
         
-        'completedDate': json['completedDate'] == null ? undefined : json['completedDate'],
+        'completedDate': json['completedDate'] == null ? undefined : CalendarDateFromJSON(json['completedDate']),
     };
 }
 
@@ -60,7 +68,7 @@ export function RecordCltOrientationRequestToJSONTyped(value?: RecordCltOrientat
 
     return {
         
-        'completedDate': value['completedDate'],
+        'completedDate': CalendarDateToJSON(value['completedDate']),
     };
 }
 
