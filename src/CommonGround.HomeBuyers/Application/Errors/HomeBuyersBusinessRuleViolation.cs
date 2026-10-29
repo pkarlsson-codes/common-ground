@@ -114,6 +114,38 @@ public static class BusinessRuleViolation
                         ["homeId"] = homeId,
                     });
         }
+
+        public static class DrawLottery
+        {
+            public static BusinessRuleViolationException TiedPoolTooSmall(int poolSize)
+                => new(
+                    "home_buyers.home_selection.draw_lottery.tied_pool_too_small",
+                    new Dictionary<string, object?>
+                    {
+                        ["poolSize"] = poolSize,
+                        ["minimumPoolSize"] = 2,
+                    });
+        }
+
+        public static class Modify
+        {
+            public static BusinessRuleViolationException NotOpen(HomeSelectionStatus status)
+                => new(
+                    "home_buyers.home_selection.modify.not_open",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                        ["requiredStatus"] = HomeSelectionStatus.Open.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException NotACandidate(HomeownerApplicationId applicationId)
+                => new(
+                    "home_buyers.home_selection.modify.not_a_candidate",
+                    new Dictionary<string, object?>
+                    {
+                        ["applicationId"] = applicationId.Value,
+                    });
+        }
     }
 
     public static class HomeAvailabilityClaim

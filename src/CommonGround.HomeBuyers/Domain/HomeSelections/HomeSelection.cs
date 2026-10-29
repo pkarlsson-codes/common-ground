@@ -63,6 +63,95 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
         return selection;
     }
 
+    /// <summary>
+    /// Chooses <paramref name="applicationId"/>, citing the <paramref name="priorities"/> that put
+    /// it ahead of the other candidates and explaining the choice in <paramref name="reason"/>.
+    /// </summary>
+    public void SelectByPriority(
+        HomeownerApplicationId applicationId,
+        IReadOnlyCollection<SelectionPriority> priorities,
+        string reason,
+        UserId selectedBy)
+    {
+        ArgumentNullException.ThrowIfNull(applicationId);
+        ArgumentNullException.ThrowIfNull(priorities);
+        ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+        ArgumentNullException.ThrowIfNull(selectedBy);
+        if (priorities.Count == 0)
+            throw new ArgumentException("At least one priority must be cited.", nameof(priorities));
+
+        EnsureOpen();
+        EnsureCandidate(applicationId);
+
+        ApplyChange(new HouseholdSelectedByPriority(
+            Id.Value,
+            applicationId.Value,
+            [.. priorities.Distinct().Select(p => p.DisplayName)],
+            reason,
+            selectedBy.Value));
+    }
+
+    /// <summary>
+    /// Chooses a candidate by lottery. The pool is <paramref name="tiedApplicationIds"/> when staff
+    /// found some candidates tied, otherwise every candidate. <paramref name="seed"/> is recorded so
+    /// the draw can be re-run and checked.
+    /// </summary>
+    public void DrawLottery(
+        IReadOnlyCollection<HomeownerApplicationId>? tiedApplicationIds,
+        int seed,
+        UserId drawnBy)
+    {
+        ArgumentNullException.ThrowIfNull(drawnBy);
+
+        EnsureOpen();
+
+        IReadOnlyCollection<HomeownerApplicationId> pool;
+        if (tiedApplicationIds is null)
+        {
+            pool = [.. Candidates.Select(c => c.ApplicationId)];
+        }
+        else
+        {
+            pool = [.. tiedApplicationIds.Distinct()];
+            if (pool.Count < 2)
+                throw BusinessRuleViolation.HomeSelection.DrawLottery.TiedPoolTooSmall(pool.Count);
+            foreach (var applicationId in pool)
+                EnsureCandidate(applicationId);
+        }
+
+        var winner = SelectionLottery.Draw(pool, seed);
+
+        ApplyChange(new HouseholdSelectedByLottery(
+            Id.Value,
+            winner.Value,
+            [.. pool.Select(id => id.Value).Order(StringComparer.Ordinal)],
+            seed,
+            drawnBy.Value));
+    }
+
+    /// <summary>Cancels the selection without choosing anyone, freeing the home for a new selection.</summary>
+    public void Cancel(string reason, UserId cancelledBy)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+        ArgumentNullException.ThrowIfNull(cancelledBy);
+
+        EnsureOpen();
+
+        ApplyChange(new HomeSelectionCancelled(Id.Value, reason, cancelledBy.Value));
+    }
+
+    private void EnsureOpen()
+    {
+        if (Status != HomeSelectionStatus.Open)
+            throw BusinessRuleViolation.HomeSelection.Modify.NotOpen(Status);
+    }
+
+    private void EnsureCandidate(HomeownerApplicationId applicationId)
+    {
+        if (!Candidates.Any(c => c.ApplicationId == applicationId))
+            throw BusinessRuleViolation.HomeSelection.Modify.NotACandidate(applicationId);
+    }
+
     /// <inheritdoc/>
     protected override void ApplyEvent(IDomainEvent domainEvent)
     {
