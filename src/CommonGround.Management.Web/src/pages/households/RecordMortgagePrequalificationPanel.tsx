@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
 import SlideOver from '../../components/SlideOver'
-import { useRecordMortgagePrequalification } from '../../hooks/applications'
+import { useRecordMortgagePrequalification } from '../../hooks/households'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
 
@@ -25,7 +25,7 @@ type Props = {
 export default function RecordMortgagePrequalificationPanel({ householdId, onClose }: Props) {
   const [form, setForm] = useState<FormState>(emptyForm)
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
-  const mutation = useRecordMortgagePrequalification()
+  const mutation = useRecordMortgagePrequalification(householdId)
   const { success } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,12 +34,9 @@ export default function RecordMortgagePrequalificationPanel({ householdId, onClo
 
     try {
       await mutation.mutateAsync({
-        householdId,
-        request: {
-          lenderName: form.lenderName,
-          approvedAmount: Number(form.approvedAmount),
-          expiryDate: form.expiryDate,
-        },
+        lenderName: form.lenderName,
+        approvedAmount: Number(form.approvedAmount),
+        expiryDate: form.expiryDate,
       })
       success('Mortgage prequalification recorded')
       onClose()

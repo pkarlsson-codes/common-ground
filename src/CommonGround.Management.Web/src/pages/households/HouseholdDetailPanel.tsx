@@ -9,6 +9,9 @@ import { getApiProblem, getResponseStatus, type ApiProblemDetails } from '../../
 import { formatPhoneDisplay } from '../../lib/phone'
 import ApplicationPhaseBadge from '../applications/ApplicationPhaseBadge'
 import HouseholdMembersSection from './HouseholdMembersSection'
+import RecordCltOrientationPanel from './RecordCltOrientationPanel'
+import RecordHousingCounselingPanel from './RecordHousingCounselingPanel'
+import RecordMortgagePrequalificationPanel from './RecordMortgagePrequalificationPanel'
 
 type Props = {
   householdId: string
@@ -33,7 +36,15 @@ function SkeletonRows() {
   )
 }
 
-function ReadinessItem({ label, done, status }: { label: string; done: boolean; status?: string }) {
+type ReadinessPanel = 'housing-counseling' | 'clt-orientation' | 'mortgage-prequalification'
+
+function ReadinessItem({ label, done, status, actionLabel, onAction }: {
+  label: string
+  done: boolean
+  status?: string
+  actionLabel?: string
+  onAction: () => void
+}) {
   return (
     <div className={`checklist-item${done ? ' checklist-item--done' : ''}`}>
       <div className={`checklist-item__icon${done ? ' checklist-item__icon--done' : ' checklist-item__icon--pending'}`}>
@@ -41,6 +52,11 @@ function ReadinessItem({ label, done, status }: { label: string; done: boolean; 
       </div>
       <span className="checklist-item__label">{label}</span>
       {done && status && <span className="checklist-item__status">{status}</span>}
+      {actionLabel && (
+        <button className="btn btn-secondary btn-sm" type="button" aria-label={`${actionLabel} ${label}`} onClick={onAction}>
+          {actionLabel}
+        </button>
+      )}
     </div>
   )
 }
@@ -151,6 +167,7 @@ export default function HouseholdDetailPanel({ householdId, onClose }: Props) {
   const startApplication = useStartApplication()
   const { success } = useToast()
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
+  const [readinessPanel, setReadinessPanel] = useState<ReadinessPanel | null>(null)
 
   const status = getResponseStatus(error)
   const primary = household?.members?.find(m => m.isPrimary)
@@ -204,11 +221,15 @@ export default function HouseholdDetailPanel({ householdId, onClose }: Props) {
                 label="Housing Counseling"
                 done={Boolean(household.isHousingCounselingCompleted)}
                 status={`Completed ${fmtDate(household.housingCounselingCompletedDate)}`}
+                actionLabel={household.isHousingCounselingCompleted ? undefined : 'Record'}
+                onAction={() => setReadinessPanel('housing-counseling')}
               />
               <ReadinessItem
                 label="CLT Orientation"
                 done={Boolean(household.isCltOrientationCompleted)}
                 status={`Completed ${fmtDate(household.cltOrientationCompletedDate)}`}
+                actionLabel={household.isCltOrientationCompleted ? undefined : 'Record'}
+                onAction={() => setReadinessPanel('clt-orientation')}
               />
               <ReadinessItem
                 label="Mortgage Prequalification"
@@ -216,6 +237,8 @@ export default function HouseholdDetailPanel({ householdId, onClose }: Props) {
                 status={prequalification
                   ? `${prequalification.lenderName} · ${fmtCurrency(prequalification.approvedAmount ?? 0)} · expires ${fmtDate(prequalification.expiryDate)}`
                   : undefined}
+                actionLabel={prequalification ? 'Update' : 'Record'}
+                onAction={() => setReadinessPanel('mortgage-prequalification')}
               />
             </div>
           </div>
@@ -265,6 +288,16 @@ export default function HouseholdDetailPanel({ householdId, onClose }: Props) {
             </div>
           </div>
         </>
+      )}
+
+      {readinessPanel === 'housing-counseling' && (
+        <RecordHousingCounselingPanel householdId={householdId} onClose={() => setReadinessPanel(null)} />
+      )}
+      {readinessPanel === 'clt-orientation' && (
+        <RecordCltOrientationPanel householdId={householdId} onClose={() => setReadinessPanel(null)} />
+      )}
+      {readinessPanel === 'mortgage-prequalification' && (
+        <RecordMortgagePrequalificationPanel householdId={householdId} onClose={() => setReadinessPanel(null)} />
       )}
     </SlideOver>
   )

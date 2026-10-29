@@ -4,6 +4,9 @@ import {
   HouseholdApi,
   type HouseholdResponse,
   type PaginatedResponseOfHouseholdListItemResponse,
+  type RecordCltOrientationRequest,
+  type RecordHousingCounselingRequest,
+  type RecordMortgagePrequalificationRequest,
   type SubmitApplicationResponse,
 } from '../api'
 import { ResponseError } from '../api/runtime'
@@ -107,4 +110,19 @@ export function useRemoveHouseholdMember(householdId: string) {
 export function useUpdateHouseholdCircumstances(householdId: string) {
   return useHouseholdMutation(householdId, (req: { annualIncome: number; requiresAccessibility: boolean }) =>
     api.updateHouseholdCircumstances({ householdId, updateHouseholdCircumstancesRequest: req }))
+}
+
+export function useRecordHousingCounseling(householdId: string) {
+  return useHouseholdMutation(householdId, (request: RecordHousingCounselingRequest) =>
+    api.recordHousingCounseling({ householdId, recordHousingCounselingRequest: request }))
+}
+
+export function useRecordCltOrientation(householdId: string) {
+  return useHouseholdMutation(householdId, (request: RecordCltOrientationRequest) =>
+    api.recordCltOrientation({ householdId, recordCltOrientationRequest: request }))
+}
+
+export function useRecordMortgagePrequalification(householdId: string) {
+  return useHouseholdMutation(householdId, (request: RecordMortgagePrequalificationRequest) =>
+    api.recordMortgagePrequalification({ householdId, recordMortgagePrequalificationRequest: request }))
 }

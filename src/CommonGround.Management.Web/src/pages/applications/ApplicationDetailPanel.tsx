@@ -3,11 +3,7 @@ import SlideOver from '../../components/SlideOver'
 import NavIdLink from '../../components/NavIdLink'
 import StatusBadge from '../../components/StatusBadge'
 import { useHomeownerApplication } from '../../hooks/applications'
-import { useHousehold } from '../../hooks/households'
 import ApproveApplicationPanel from './ApproveApplicationPanel'
-import RecordHousingCounselingPanel from './RecordHousingCounselingPanel'
-import RecordCltOrientationPanel from './RecordCltOrientationPanel'
-import RecordMortgagePrequalificationPanel from './RecordMortgagePrequalificationPanel'
 import DenyApplicationPanel from './DenyApplicationPanel'
 import WithdrawApplicationPanel from './WithdrawApplicationPanel'
 import { getResponseStatus } from '../../lib/getErrorMessage'
@@ -28,13 +24,6 @@ const fmtDateTime = (value?: string | null) => {
   return date.toLocaleString()
 }
 
-const fmtDate = (value?: string | null) => {
-  if (!value) return '—'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleDateString()
-}
-
 function SkeletonRows() {
   return (
     <div className="skeleton-rows">
@@ -45,12 +34,8 @@ function SkeletonRows() {
 
 export default function ApplicationDetailPanel({ applicationId, onClose }: Props) {
   const { data: detail, isLoading, isError, error, refetch } = useHomeownerApplication(applicationId)
-  const { data: household, isError: isHouseholdError } = useHousehold(detail?.householdId)
   const [actionPanel, setActionPanel] = useState<
     | 'approve-application'
-    | 'record-housing-counseling'
-    | 'record-clt-orientation'
-    | 'record-mortgage-prequalification'
     | 'deny-application'
     | 'withdraw-application'
     | null
@@ -61,7 +46,6 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
   const isSubmittedPhase = phase === 'submitted'
   const isApprovedPhase = phase === 'approved'
   const isOpen = isSubmittedPhase || isApprovedPhase
-  const prequalification = household?.mortgagePrequalification
 
   return (
     <SlideOver
@@ -144,6 +128,11 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
               <div className="detail-field__label">Withdrawal Reason</div>
               <div className="detail-field__value">{detail.withdrawalReason ?? '—'}</div>
             </div>
+            <div className="detail-field full-span">
+              <div className="detail-field__value">
+                <NavIdLink id={detail.householdId} to="/households" label="Open Household" />
+              </div>
+            </div>
             {detail.selectedLandParcelId && (
               <div className="detail-field full-span">
                 <div className="detail-field__value">
@@ -159,105 +148,6 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
               </div>
             )}
           </div>
-
-          <div className="detail-section" style={{ marginTop: 16 }}>
-            <div className="detail-section__title">Household Members</div>
-            {isHouseholdError && (
-              <div className="detail-field__value">Could not load household.</div>
-            )}
-            {household && (
-              <div className="detail-grid" style={{ marginTop: 10 }}>
-                {(household.members ?? []).map((member, i) => (
-                  <div className="detail-field full-span" key={`${member.email}-${i}`}>
-                    <div className="detail-field__label">{member.isPrimary ? 'Primary Contact' : 'Member'}</div>
-                    <div className="detail-field__value">
-                      {[member.name, member.email, formatPhoneDisplay(member.phone)].filter(Boolean).join(' · ')}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {household && (
-            <div className="detail-section" style={{ marginTop: 16 }}>
-              <div className="detail-section__title">Buyer Preparation Checklist</div>
-              <div className="checklist">
-                <div className={`checklist-item${household.isHousingCounselingCompleted ? ' checklist-item--done' : ''}`}>
-                  <div className={`checklist-item__icon${household.isHousingCounselingCompleted ? ' checklist-item__icon--done' : ' checklist-item__icon--pending'}`}>
-                    {household.isHousingCounselingCompleted ? '✓' : '○'}
-                  </div>
-                  <span className="checklist-item__label">Housing Counseling</span>
-                  {household.isHousingCounselingCompleted && (
-                    <span className="checklist-item__status">Completed {fmtDate(household.housingCounselingCompletedDate)}</span>
-                  )}
-                  {!household.isHousingCounselingCompleted && isOpen && (
-                    <button className="btn btn-secondary btn-sm" onClick={() => setActionPanel('record-housing-counseling')}>
-                      Record
-                    </button>
-                  )}
-                </div>
-
-                <div className={`checklist-item${household.isCltOrientationCompleted ? ' checklist-item--done' : ''}`}>
-                  <div className={`checklist-item__icon${household.isCltOrientationCompleted ? ' checklist-item__icon--done' : ' checklist-item__icon--pending'}`}>
-                    {household.isCltOrientationCompleted ? '✓' : '○'}
-                  </div>
-                  <span className="checklist-item__label">CLT Orientation</span>
-                  {household.isCltOrientationCompleted && (
-                    <span className="checklist-item__status">Completed {fmtDate(household.cltOrientationCompletedDate)}</span>
-                  )}
-                  {!household.isCltOrientationCompleted && isOpen && (
-                    <button className="btn btn-secondary btn-sm" onClick={() => setActionPanel('record-clt-orientation')}>
-                      Record
-                    </button>
-                  )}
-                </div>
-
-                <div className={`checklist-item${prequalification ? ' checklist-item--done' : ''}`}>
-                  <div className={`checklist-item__icon${prequalification ? ' checklist-item__icon--done' : ' checklist-item__icon--pending'}`}>
-                    {prequalification ? '✓' : '○'}
-                  </div>
-                  <span className="checklist-item__label">Mortgage Prequalification</span>
-                  {prequalification && (
-                    <span className="checklist-item__status">
-                      {prequalification.lenderName} · expires {fmtDate(prequalification.expiryDate)}
-                    </span>
-                  )}
-                  {isOpen && (
-                    <button className="btn btn-secondary btn-sm" onClick={() => setActionPanel('record-mortgage-prequalification')}>
-                      {prequalification ? 'Update' : 'Record'}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {prequalification && (
-            <div className="detail-section" style={{ marginTop: 16 }}>
-              <div className="detail-section__title">Mortgage Prequalification</div>
-              <div className="detail-grid" style={{ marginTop: 10 }}>
-                <div className="detail-field">
-                  <div className="detail-field__label">Lender Name</div>
-                  <div className="detail-field__value">{prequalification.lenderName ?? '—'}</div>
-                </div>
-                <div className="detail-field">
-                  <div className="detail-field__label">Prequalified Amount</div>
-                  <div className="detail-field__value mono">
-                    {typeof prequalification.approvedAmount === 'number'
-                      ? fmtCurrency(prequalification.approvedAmount)
-                      : '—'}
-                  </div>
-                </div>
-                <div className="detail-field">
-                  <div className="detail-field__label">Prequalification Expiry</div>
-                  <div className="detail-field__value mono">
-                    {fmtDate(prequalification.expiryDate)}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           <div className="detail-section" style={{ marginTop: 16 }}>
             <div className="detail-section__title">Workflow Actions</div>
@@ -289,15 +179,6 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
 
       {actionPanel === 'approve-application' && (
         <ApproveApplicationPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />
-      )}
-      {actionPanel === 'record-housing-counseling' && detail?.householdId && (
-        <RecordHousingCounselingPanel householdId={detail.householdId} onClose={() => setActionPanel(null)} />
-      )}
-      {actionPanel === 'record-clt-orientation' && detail?.householdId && (
-        <RecordCltOrientationPanel householdId={detail.householdId} onClose={() => setActionPanel(null)} />
-      )}
-      {actionPanel === 'record-mortgage-prequalification' && detail?.householdId && (
-        <RecordMortgagePrequalificationPanel householdId={detail.householdId} onClose={() => setActionPanel(null)} />
       )}
       {actionPanel === 'deny-application' && (
         <DenyApplicationPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />

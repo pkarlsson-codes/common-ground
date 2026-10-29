@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
 import SlideOver from '../../components/SlideOver'
-import { useRecordHousingCounseling } from '../../hooks/applications'
+import { useRecordHousingCounseling } from '../../hooks/households'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
 
@@ -25,7 +25,7 @@ type Props = {
 export default function RecordHousingCounselingPanel({ householdId, onClose }: Props) {
   const [form, setForm] = useState<FormState>(emptyForm)
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
-  const mutation = useRecordHousingCounseling()
+  const mutation = useRecordHousingCounseling(householdId)
   const { success } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,12 +34,9 @@ export default function RecordHousingCounselingPanel({ householdId, onClose }: P
 
     try {
       await mutation.mutateAsync({
-        householdId,
-        request: {
-          certificationNumber: form.certificationNumber,
-          completedDate: form.completedDate,
-          counselorOrganization: form.counselorOrganization,
-        },
+        certificationNumber: form.certificationNumber,
+        completedDate: form.completedDate,
+        counselorOrganization: form.counselorOrganization,
       })
       success('Housing counseling recorded')
       onClose()
