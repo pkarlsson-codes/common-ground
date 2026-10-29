@@ -6,6 +6,7 @@ import { useToast } from '../../hooks/useToast'
 import { GroundLeasesApi } from '../../api'
 import { apiConfig } from '../../lib/apiConfig'
 import { getErrorMessage } from '../../lib/getErrorMessage'
+import { localToday } from '../../lib/dates'
 
 const groundLeasesApi = new GroundLeasesApi(apiConfig)
 
@@ -29,7 +30,7 @@ export default function FpcOpenCasePanel({ onClose }: Props) {
     groundLeaseId: '',
     servicerName: '',
     delinquentMonths: '',
-    recordedDate: new Date().toISOString().slice(0, 10),
+    recordedDate: localToday(),
   })
 
   const handleSubmit = async (e: React.FormEvent) => {

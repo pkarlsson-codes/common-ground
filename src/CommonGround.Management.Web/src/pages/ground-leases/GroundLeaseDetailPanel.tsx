@@ -8,6 +8,7 @@ import StatusBadge from '../../components/StatusBadge'
 import { getErrorMessage } from '../../lib/getErrorMessage'
 import { formatPhoneDisplay } from '../../lib/phone'
 import { useToast } from '../../hooks/useToast'
+import { localToday } from '../../lib/dates'
 
 function SkeletonRows() {
   return (
@@ -23,7 +24,7 @@ const fmtCurrency = (n: number) =>
 const fmtPct = (n: number) => `${(n * 100).toFixed(1)}%`
 
 const emptyCheckIn = (): RecordCheckInForm => ({
-  checkInDate: new Date().toISOString().slice(0, 10),
+  checkInDate: localToday(),
   notes: '',
 })
 

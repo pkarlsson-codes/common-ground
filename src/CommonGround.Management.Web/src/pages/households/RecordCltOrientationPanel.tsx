@@ -4,6 +4,7 @@ import SlideOver from '../../components/SlideOver'
 import { useRecordCltOrientation } from '../../hooks/households'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
+import { localToday } from '../../lib/dates'
 
 type Props = {
   householdId: string
@@ -11,7 +12,7 @@ type Props = {
 }
 
 export default function RecordCltOrientationPanel({ householdId, onClose }: Props) {
-  const [completedDate, setCompletedDate] = useState(new Date().toISOString().slice(0, 10))
+  const [completedDate, setCompletedDate] = useState(localToday())
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   const mutation = useRecordCltOrientation(householdId)
   const { success } = useToast()

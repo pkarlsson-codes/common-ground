@@ -12,6 +12,7 @@ import {
 import { useToast } from '../../hooks/useToast'
 import { apiConfig } from '../../lib/apiConfig'
 import { getErrorMessage } from '../../lib/getErrorMessage'
+import { localToday } from '../../lib/dates'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
 const homesApi = new HomesApi(apiConfig)
@@ -19,7 +20,7 @@ const homesApi = new HomesApi(apiConfig)
 const emptyCreate = (): CreateGroundLeaseForm => ({
   landParcelId: '',
   homeId: '',
-  leaseStartDate: new Date().toISOString().slice(0, 10),
+  leaseStartDate: localToday(),
   termYears: 99,
   covenantTerms: '',
   formulaKind: 'AppraisalBased',

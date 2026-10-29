@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { DocumentsApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
+import { localToday } from '../lib/dates'
 import { getCsrfToken } from '../lib/csrf'
 import type {
   AttachDocumentRequest,
@@ -69,9 +70,7 @@ export function useDocuments(params: {
  * The cutoff is a whole date so the query key stays stable across renders.
  */
 export function useExpiringDocuments(daysAhead: number, page = 1) {
-  const cutoff = new Date()
-  cutoff.setUTCDate(cutoff.getUTCDate() + daysAhead + 1)
-  return useDocuments({ expiringBefore: cutoff.toISOString().slice(0, 10), page })
+  return useDocuments({ expiringBefore: localToday(daysAhead + 1), page })
 }
 
 // ── Mutations ────────────────────────────────────────

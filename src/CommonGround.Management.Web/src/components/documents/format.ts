@@ -1,3 +1,5 @@
+import { localToday } from '../../lib/dates'
+
 // Expiry is a calendar date stored as midnight UTC, so it is read and compared in UTC; other timestamps are local.
 
 export const fmtSize = (bytes: number): string => {
@@ -17,13 +19,7 @@ export const fmtExpiry = (d: Date | string) =>
 /** The expiry as YYYY-MM-DD, for date inputs and comparisons. */
 export const expiryIso = (d: Date | string) => toDate(d).toISOString().slice(0, 10)
 
-const localIso = (offsetDays = 0) => {
-  const d = new Date()
-  d.setDate(d.getDate() + offsetDays)
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
-export const isExpired = (d: Date | string) => expiryIso(d) < localIso()
+export const isExpired = (d: Date | string) => expiryIso(d) < localToday()
 
 /** Expired, or expiring within 30 days. */
-export const isExpiringSoon = (d: Date | string) => expiryIso(d) <= localIso(30)
+export const isExpiringSoon = (d: Date | string) => expiryIso(d) <= localToday(30)

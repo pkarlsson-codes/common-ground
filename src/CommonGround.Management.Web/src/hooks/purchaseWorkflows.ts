@@ -16,6 +16,7 @@ import type {
 } from './types'
 import type { PurchaseWorkflowResponse } from '../api/models/PurchaseWorkflowResponse'
 import type { PurchaseWorkflowListItemResponse } from '../api/models/PurchaseWorkflowListItemResponse'
+import { localToday } from '../lib/dates'
 
 const api = new PurchaseWorkflowsApi(apiConfig)
 
@@ -326,7 +327,7 @@ export function useFailPurchase() {
         workflowId,
         failPurchaseRequest: {
           failureReason: form.reason,
-          failedDate: new Date().toISOString().slice(0, 10),
+          failedDate: localToday(),
         },
       }),
     onMutate: async ({ workflowId }) => {
@@ -351,7 +352,7 @@ export function useWithdrawPurchase() {
         workflowId,
         withdrawPurchaseRequest: {
           reason: form.reason,
-          withdrawnDate: new Date().toISOString().slice(0, 10),
+          withdrawnDate: localToday(),
         },
       }),
     onMutate: async ({ workflowId }) => {
@@ -376,7 +377,7 @@ export function useStallWorkflow() {
         workflowId,
         stallWorkflowRequest: {
           stalledReason: form.reason,
-          stalledDate: new Date().toISOString().slice(0, 10),
+          stalledDate: localToday(),
           resolutionTargetDate: form.resolutionTargetDate || undefined,
         },
       }),

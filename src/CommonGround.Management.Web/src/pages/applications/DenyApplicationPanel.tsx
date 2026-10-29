@@ -4,6 +4,7 @@ import SlideOver from '../../components/SlideOver'
 import { useDenyApplication } from '../../hooks/applications'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
+import { localToday } from '../../lib/dates'
 
 type FormState = {
   reason: string
@@ -12,7 +13,7 @@ type FormState = {
 
 const emptyForm = (): FormState => ({
   reason: '',
-  deniedDate: new Date().toISOString().slice(0, 10),
+  deniedDate: localToday(),
 })
 
 type Props = {

@@ -8,6 +8,7 @@ import DocumentList from '../../components/DocumentList'
 import { useToast } from '../../hooks/useToast'
 import DevelopmentProjectsSection from '../land-parcels/DevelopmentProjectsSection'
 import SelectApplicantPanel from '../applications/SelectApplicantPanel'
+import { localToday } from '../../lib/dates'
 
 type Tab = 'details' | 'documents'
 
@@ -26,7 +27,7 @@ const fmtNumber = (n: number) => new Intl.NumberFormat('en-US').format(n)
 
 const emptyAssessment = (): RecordHomeAssessmentRequest => ({
   assessedValue: 0,
-  assessmentDate: new Date().toISOString().slice(0, 10),
+  assessmentDate: localToday(),
   appraiserName: '',
   conditionNotes: '',
 })

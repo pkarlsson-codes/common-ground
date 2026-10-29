@@ -3,12 +3,13 @@ import { useRegisterLandParcel } from '../../hooks/landParcels'
 import { ACQUISITION_METHODS, type RegisterLandParcelRequest } from '../../hooks/types'
 import SlideOver from '../../components/SlideOver'
 import { useToast } from '../../hooks/useToast'
+import { localToday } from '../../lib/dates'
 
 const emptyForm = (): RegisterLandParcelRequest => ({
   legalParcelNumber: '',
   address: '',
   areaAcres: 0,
-  acquisitionDate: new Date().toISOString().slice(0, 10),
+  acquisitionDate: localToday(),
   acquisitionMethod: 'Purchase',
   covenantTerms: '',
 })

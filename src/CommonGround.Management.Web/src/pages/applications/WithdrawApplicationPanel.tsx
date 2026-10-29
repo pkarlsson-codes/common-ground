@@ -4,6 +4,7 @@ import SlideOver from '../../components/SlideOver'
 import { useWithdrawApplication } from '../../hooks/applications'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
+import { localToday } from '../../lib/dates'
 
 type FormState = {
   withdrawnDate: string
@@ -11,7 +12,7 @@ type FormState = {
 }
 
 const emptyForm = (): FormState => ({
-  withdrawnDate: new Date().toISOString().slice(0, 10),
+  withdrawnDate: localToday(),
   reason: '',
 })
 

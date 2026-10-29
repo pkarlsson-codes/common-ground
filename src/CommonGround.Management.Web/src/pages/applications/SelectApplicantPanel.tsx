@@ -7,6 +7,7 @@ import { useSelectApplicant } from '../../hooks/applications'
 import { useToast } from '../../hooks/useToast'
 import { apiConfig } from '../../lib/apiConfig'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
+import { localToday } from '../../lib/dates'
 
 const homeownerApplicationsApi = new HomeownerApplicationsApi(apiConfig)
 const groundLeaseTemplatesApi = new GroundLeaseTemplatesApi(apiConfig)
@@ -22,7 +23,7 @@ const emptyForm = (): FormState => ({
   applicationId: '',
   groundLeaseTemplateId: '',
   purchasePrice: 0,
-  selectedDate: new Date().toISOString().slice(0, 10),
+  selectedDate: localToday(),
 })
 
 type Props = {

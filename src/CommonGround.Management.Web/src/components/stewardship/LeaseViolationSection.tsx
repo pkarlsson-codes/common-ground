@@ -9,6 +9,7 @@ import {
 import type { LeaseViolationResponse, StewardshipCaseResponse } from '../../api/models'
 import { useToast } from '../../hooks/useToast'
 import { getErrorMessage } from '../../lib/getErrorMessage'
+import { localToday } from '../../lib/dates'
 import { LEASE_VIOLATION_TYPE_LABELS } from '../../hooks/types'
 import { fmtD, today } from './format'
 
@@ -179,11 +180,7 @@ interface ViolationCardProps {
 }
 
 /** Default cure deadline: 30 days after the notice. */
-const plus30Days = () => {
-  const d = new Date()
-  d.setDate(d.getDate() + 30)
-  return d.toISOString().slice(0, 10)
-}
+const plus30Days = () => localToday(30)
 
 function ViolationCard({
   v,
