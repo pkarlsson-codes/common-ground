@@ -1,5 +1,6 @@
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections.Events;
+using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 
@@ -20,6 +21,7 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
     public HomeSelectionStatus Status { get; private set; }
     public UserId StartedBy { get; private set; }
     public DateTimeOffset StartedAt { get; private set; }
+    public IReadOnlyList<SelectionCandidate> Candidates { get; private set; }
     public HomeownerApplicationId? SelectedApplicationId { get; private set; }
     public string? CancellationReason { get; private set; }
 
@@ -43,6 +45,15 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
         Status = HomeSelectionStatus.Open;
         StartedBy = UserId.Create(e.StartedBy);
         StartedAt = e.OccurredAt;
+        Candidates = e.Candidates
+            .Select(c => SelectionCandidate.Create(
+                HomeownerApplicationId.Create(c.ApplicationId),
+                HouseholdId.Create(c.HouseholdId),
+                c.AnnualIncome,
+                c.HouseholdSize,
+                c.RequiresAccessibility,
+                c.WaitingSince))
+            .ToList();
     }
 
     private void Apply(HouseholdSelectedByPriority e)
