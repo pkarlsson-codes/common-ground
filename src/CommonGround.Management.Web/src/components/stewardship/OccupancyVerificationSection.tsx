@@ -10,13 +10,14 @@ import {
 import type { OccupancyVerificationResponse, StewardshipCaseResponse } from '../../api/models'
 import { useToast } from '../../hooks/useToast'
 import { getErrorMessage } from '../../lib/getErrorMessage'
-import { fmtD, today } from './format'
+import { trustToday, yearOf, type CalendarDate } from '../../lib/calendarDate'
+import { DateInput } from '../DateInput'
 
 interface Props {
   sc: StewardshipCaseResponse
 }
 
-const currentYear = () => new Date().getFullYear()
+const currentYear = () => yearOf(trustToday())
 
 export default function OccupancyVerificationSection({ sc }: Props) {
   const caseId = sc.id!
@@ -39,17 +40,17 @@ export default function OccupancyVerificationSection({ sc }: Props) {
 
   // ── Initiate form ─────────────────────────────────────────────────────────
   const [initiateFormOpen, setInitiateFormOpen] = useState(false)
-  const [initiateForm, setInitiateForm] = useState({ surveyDeadline: '' })
+  const [initiateForm, setInitiateForm] = useState<{ surveyDeadline: CalendarDate | null }>({ surveyDeadline: null })
   const handleInitiate = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
       await initiateMutation.mutateAsync({
         caseId,
         periodYear: year,
-        surveyDeadline: initiateForm.surveyDeadline || undefined,
+        surveyDeadline: initiateForm.surveyDeadline ?? undefined,
       })
       success(`${year} occupancy verification initiated`)
-      setInitiateForm({ surveyDeadline: '' })
+      setInitiateForm({ surveyDeadline: null })
       setInitiateFormOpen(false)
     } catch (err) {
       await fail(err, 'Failed to initiate verification')
@@ -61,7 +62,7 @@ export default function OccupancyVerificationSection({ sc }: Props) {
     isPrimaryResident: true,
     subletDisclosed: false,
     majorChanges: '',
-    submittedDate: today(),
+    submittedDate: trustToday(),
   })
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -82,7 +83,7 @@ export default function OccupancyVerificationSection({ sc }: Props) {
   }
 
   // ── Overdue form ──────────────────────────────────────────────────────────
-  const [overdueForm, setOverdueForm] = useState({ deadline: today() })
+  const [overdueForm, setOverdueForm] = useState({ deadline: trustToday() })
   const handleOverdue = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!current) return
@@ -99,7 +100,7 @@ export default function OccupancyVerificationSection({ sc }: Props) {
   }
 
   // ── Verify form ───────────────────────────────────────────────────────────
-  const [verifyForm, setVerifyForm] = useState({ verifiedDate: today() })
+  const [verifyForm, setVerifyForm] = useState({ verifiedDate: trustToday() })
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!current) return
@@ -116,7 +117,7 @@ export default function OccupancyVerificationSection({ sc }: Props) {
   }
 
   // ── Fail form ─────────────────────────────────────────────────────────────
-  const [failForm, setFailForm] = useState({ reason: '', failedDate: today() })
+  const [failForm, setFailForm] = useState({ reason: '', failedDate: trustToday() })
   const handleFail = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!current) return
@@ -167,11 +168,10 @@ export default function OccupancyVerificationSection({ sc }: Props) {
           <div className="form-grid" style={{ marginBottom: 10 }}>
             <div className="form-field">
               <label className="form-label">Survey Deadline (optional)</label>
-              <input
+              <DateInput
                 className="form-input"
-                type="date"
                 value={initiateForm.surveyDeadline}
-                onChange={e => setInitiateForm(f => ({ ...f, surveyDeadline: e.target.value }))}
+                onChange={v => setInitiateForm(f => ({ ...f, surveyDeadline: v }))}
               />
             </div>
           </div>
@@ -192,7 +192,7 @@ export default function OccupancyVerificationSection({ sc }: Props) {
             {current.status === 'Overdue'
               ? <><StatusBadge status="Overdue" /> No response by the deadline. A late response can still be submitted.</>
               : 'Verification initiated. Awaiting homeowner response.'}
-            {current.surveyDeadline && ` Deadline: ${fmtD(current.surveyDeadline)}`}
+            {current.surveyDeadline && ` Deadline: ${current.surveyDeadline}`}
           </div>
 
           <form onSubmit={handleSubmit} style={{ marginBottom: 12 }}>
@@ -223,11 +223,10 @@ export default function OccupancyVerificationSection({ sc }: Props) {
               </div>
               <div className="form-field">
                 <label className="form-label">Submitted Date</label>
-                <input
+                <DateInput
                   className="form-input"
-                  type="date"
                   value={submitForm.submittedDate}
-                  onChange={e => setSubmitForm(f => ({ ...f, submittedDate: e.target.value }))}
+                  onChange={v => setSubmitForm(f => ({ ...f, submittedDate: v }))}
                   required
                 />
               </div>
@@ -246,11 +245,10 @@ export default function OccupancyVerificationSection({ sc }: Props) {
               <div className="form-grid" style={{ marginBottom: 12 }}>
                 <div className="form-field">
                   <label className="form-label">Mark Overdue as of Date</label>
-                  <input
+                  <DateInput
                     className="form-input"
-                    type="date"
                     value={overdueForm.deadline}
-                    onChange={e => setOverdueForm(f => ({ ...f, deadline: e.target.value }))}
+                    onChange={v => setOverdueForm(f => ({ ...f, deadline: v }))}
                     required
                   />
                 </div>
@@ -271,7 +269,7 @@ export default function OccupancyVerificationSection({ sc }: Props) {
       {current?.status === 'Submitted' && (
         <>
           <div style={{ marginBottom: 12, fontSize: 13 }}>
-            Response submitted {fmtD(current.submittedDate)}
+            Response submitted {current.submittedDate}
             {' · '}{current.isPrimaryResident ? 'Primary resident' : 'Not primary resident'}
             {current.subletDisclosed && ' · Sublet disclosed'}
             {current.majorChanges && ` · Changes: ${current.majorChanges}`}
@@ -283,11 +281,10 @@ export default function OccupancyVerificationSection({ sc }: Props) {
               <div className="form-grid" style={{ marginBottom: 12 }}>
                 <div className="form-field">
                   <label className="form-label">Verified Date</label>
-                  <input
+                  <DateInput
                     className="form-input"
-                    type="date"
                     value={verifyForm.verifiedDate}
-                    onChange={e => setVerifyForm(f => ({ ...f, verifiedDate: e.target.value }))}
+                    onChange={v => setVerifyForm(f => ({ ...f, verifiedDate: v }))}
                     required
                   />
                 </div>
@@ -314,11 +311,10 @@ export default function OccupancyVerificationSection({ sc }: Props) {
                 </div>
                 <div className="form-field">
                   <label className="form-label">Failed Date</label>
-                  <input
+                  <DateInput
                     className="form-input"
-                    type="date"
                     value={failForm.failedDate}
-                    onChange={e => setFailForm(f => ({ ...f, failedDate: e.target.value }))}
+                    onChange={v => setFailForm(f => ({ ...f, failedDate: v }))}
                     required
                   />
                 </div>
@@ -346,7 +342,7 @@ export default function OccupancyVerificationSection({ sc }: Props) {
             color: 'var(--success)',
           }}
         >
-          Verified {fmtD(current.decisionDate)} — occupancy confirmed for {year}.
+          Verified {current.decisionDate} — occupancy confirmed for {year}.
         </div>
       )}
 
@@ -361,7 +357,7 @@ export default function OccupancyVerificationSection({ sc }: Props) {
           }}
         >
           <StatusBadge status={current.status} />
-          <span style={{ fontSize: 12, marginLeft: 8 }}>{fmtD(current.decisionDate)}</span>
+          <span style={{ fontSize: 12, marginLeft: 8 }}>{current.decisionDate}</span>
           {current.reason && <div style={{ fontSize: 12, marginTop: 4 }}>{current.reason}</div>}
         </div>
       )}
@@ -403,7 +399,7 @@ function VerificationHistoryRow({ v }: { v: OccupancyVerificationResponse }) {
         {v.periodYear} · <StatusBadge status={v.status ?? ''} />
       </div>
       {v.decisionDate && (
-        <div style={{ color: 'var(--text-dim)', marginTop: 2 }}>{fmtD(v.decisionDate)}</div>
+        <div style={{ color: 'var(--text-dim)', marginTop: 2 }}>{v.decisionDate}</div>
       )}
       {v.reason && <div style={{ color: 'var(--text-dim)', marginTop: 2 }}>{v.reason}</div>}
     </div>

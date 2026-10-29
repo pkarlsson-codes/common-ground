@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Forbearance request entry within a foreclosure prevention case.
  * @export
@@ -34,10 +42,10 @@ export interface ForbearanceRequestResponse {
     lenderName?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof ForbearanceRequestResponse
      */
-    requestedDate?: Date;
+    requestedDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -46,10 +54,10 @@ export interface ForbearanceRequestResponse {
     outcome?: string | null;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof ForbearanceRequestResponse
      */
-    outcomeDate?: Date | null;
+    outcomeDate?: CalendarDate | null;
     /**
      * 
      * @type {string}
@@ -77,9 +85,9 @@ export function ForbearanceRequestResponseFromJSONTyped(json: any, ignoreDiscrim
         
         'id': json['id'] == null ? undefined : json['id'],
         'lenderName': json['lenderName'] == null ? undefined : json['lenderName'],
-        'requestedDate': json['requestedDate'] == null ? undefined : (new Date(json['requestedDate'])),
+        'requestedDate': json['requestedDate'] == null ? undefined : CalendarDateFromJSON(json['requestedDate']),
         'outcome': json['outcome'] == null ? undefined : json['outcome'],
-        'outcomeDate': json['outcomeDate'] == null ? undefined : (new Date(json['outcomeDate'])),
+        'outcomeDate': json['outcomeDate'] == null ? undefined : CalendarDateFromJSON(json['outcomeDate']),
         'notes': json['notes'] == null ? undefined : json['notes'],
     };
 }
@@ -97,9 +105,9 @@ export function ForbearanceRequestResponseToJSONTyped(value?: ForbearanceRequest
         
         'id': value['id'],
         'lenderName': value['lenderName'],
-        'requestedDate': value['requestedDate'] == null ? undefined : ((value['requestedDate']).toISOString().substring(0,10)),
+        'requestedDate': CalendarDateToJSON(value['requestedDate']),
         'outcome': value['outcome'],
-        'outcomeDate': value['outcomeDate'] === null ? null : ((value['outcomeDate'] as any)?.toISOString().substring(0,10)),
+        'outcomeDate': CalendarDateToJSON(value['outcomeDate']),
         'notes': value['notes'],
     };
 }

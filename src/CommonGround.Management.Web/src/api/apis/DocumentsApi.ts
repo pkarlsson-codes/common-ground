@@ -18,6 +18,7 @@ import * as runtime from '../runtime';
 import type {
   AddDocumentVersionResponse,
   AttachDocumentRequest,
+  CalendarDate,
   DocumentResponse,
   PaginatedResponseOfDocumentLibraryItemResponse,
   PaginatedResponseOfEntityDocumentItemResponse,
@@ -32,6 +33,8 @@ import {
     AddDocumentVersionResponseToJSON,
     AttachDocumentRequestFromJSON,
     AttachDocumentRequestToJSON,
+    CalendarDateFromJSON,
+    CalendarDateToJSON,
     DocumentResponseFromJSON,
     DocumentResponseToJSON,
     PaginatedResponseOfDocumentLibraryItemResponseFromJSON,
@@ -82,7 +85,7 @@ export interface ListDocumentsRequest {
     includeDeleted?: boolean;
     contentType?: string | null;
     tag?: string | null;
-    expiringBefore?: Date | null;
+    expiringBefore?: CalendarDate | null;
     search?: string | null;
 }
 
@@ -191,7 +194,7 @@ export interface DocumentsApiInterface {
      * @param {boolean} [includeDeleted] 
      * @param {string} [contentType] 
      * @param {string} [tag] 
-     * @param {Date} [expiringBefore] 
+     * @param {CalendarDate} [expiringBefore] 
      * @param {string} [search] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -520,7 +523,7 @@ export class DocumentsApi extends runtime.BaseAPI implements DocumentsApiInterfa
         }
 
         if (requestParameters['expiringBefore'] != null) {
-            queryParameters['expiringBefore'] = (requestParameters['expiringBefore'] as any).toISOString().substring(0,10);
+            queryParameters['expiringBefore'] = requestParameters['expiringBefore'];
         }
 
         if (requestParameters['search'] != null) {

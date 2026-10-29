@@ -4,16 +4,17 @@ import SlideOver from '../../components/SlideOver'
 import { useDenyApplication } from '../../hooks/applications'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
-import { localToday } from '../../lib/dates'
+import { trustToday, type CalendarDate } from '../../lib/calendarDate'
+import { DateInput } from '../../components/DateInput'
 
 type FormState = {
   reason: string
-  deniedDate: string
+  deniedDate: CalendarDate
 }
 
 const emptyForm = (): FormState => ({
   reason: '',
-  deniedDate: localToday(),
+  deniedDate: trustToday(),
 })
 
 type Props = {
@@ -78,11 +79,10 @@ export default function DenyApplicationPanel({ applicationId, onClose }: Props) 
           </div>
           <div className="form-field">
             <label className="form-label">Denied Date</label>
-            <input
+            <DateInput
               className="form-input"
-              type="date"
               value={form.deniedDate}
-              onChange={e => setForm(f => ({ ...f, deniedDate: e.target.value }))}
+              onChange={v => setForm(f => ({ ...f, deniedDate: v }))}
               required
             />
           </div>

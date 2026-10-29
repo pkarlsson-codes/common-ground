@@ -1,6 +1,8 @@
+import type { CalendarDate } from '../lib/calendarDate'
+
 export interface RecordHomeAssessmentRequest {
   assessedValue: number
-  assessmentDate: string
+  assessmentDate: CalendarDate
   appraiserName?: string
   conditionNotes?: string
 }
@@ -9,7 +11,7 @@ export interface RegisterLandParcelRequest {
   legalParcelNumber: string
   address: string
   areaAcres: number
-  acquisitionDate: string
+  acquisitionDate: CalendarDate
   acquisitionMethod: string
   covenantTerms?: string
 }
@@ -55,7 +57,7 @@ export const WORKFLOW_PHASES = [
 export interface CreateGroundLeaseForm {
   landParcelId: string
   homeId: string
-  leaseStartDate: string
+  leaseStartDate: CalendarDate
   termYears: number
   covenantTerms: string
   formulaKind: string
@@ -74,7 +76,7 @@ export interface OnboardHomeownerForm {
 }
 
 export interface RecordCheckInForm {
-  checkInDate: string
+  checkInDate: CalendarDate
   notes: string
 }
 
@@ -98,37 +100,37 @@ export interface InitiateWorkflowForm {
 }
 
 export interface RecordEligibilityForm {
-  verifiedDate: string
+  verifiedDate: CalendarDate
   notes: string
 }
 
 export interface RecordFinancingForm {
   lenderName: string
   committedAmount: number
-  preapprovalLetterDate: string
+  preapprovalLetterDate: CalendarDate
 }
 
 export interface RecordInspectionForm {
-  inspectionDate: string
+  inspectionDate: CalendarDate
   inspectorName: string
   notes: string
 }
 
 export interface RecordTitleForm {
-  clearedDate: string
+  clearedDate: CalendarDate
   titleCompanyName: string
 }
 
 export interface RecordLeaseExecutedForm {
-  signedDate: string
+  signedDate: CalendarDate
 }
 
 export interface ScheduleClosingForm {
-  scheduledDate: string
+  scheduledDate: CalendarDate
 }
 
 export interface RecordClosedForm {
-  actualClosingDate: string
+  actualClosingDate: CalendarDate
   closingNotes: string
 }
 
@@ -142,7 +144,7 @@ export interface WithdrawWorkflowForm {
 
 export interface StallWorkflowForm {
   reason: string
-  resolutionTargetDate: string
+  resolutionTargetDate: CalendarDate
 }
 
 export interface CreateGroundLeaseTemplateForm {

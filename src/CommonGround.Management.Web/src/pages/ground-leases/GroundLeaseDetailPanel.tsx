@@ -8,7 +8,8 @@ import StatusBadge from '../../components/StatusBadge'
 import { getErrorMessage } from '../../lib/getErrorMessage'
 import { formatPhoneDisplay } from '../../lib/phone'
 import { useToast } from '../../hooks/useToast'
-import { localToday } from '../../lib/dates'
+import { trustToday } from '../../lib/calendarDate'
+import { DateInput } from '../../components/DateInput'
 
 function SkeletonRows() {
   return (
@@ -24,7 +25,7 @@ const fmtCurrency = (n: number) =>
 const fmtPct = (n: number) => `${(n * 100).toFixed(1)}%`
 
 const emptyCheckIn = (): RecordCheckInForm => ({
-  checkInDate: localToday(),
+  checkInDate: trustToday(),
   notes: '',
 })
 
@@ -178,11 +179,10 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
               <div className="form-grid" style={{ marginBottom: 12 }}>
                 <div className="form-field">
                   <label className="form-label">Check-In Date</label>
-                  <input
+                  <DateInput
                     className="form-input"
-                    type="date"
                     value={checkInForm.checkInDate}
-                    onChange={e => setCheckInForm(f => ({ ...f, checkInDate: e.target.value }))}
+                    onChange={v => setCheckInForm(f => ({ ...f, checkInDate: v }))}
                     required
                   />
                 </div>

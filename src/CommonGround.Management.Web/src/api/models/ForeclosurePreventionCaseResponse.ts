@@ -14,6 +14,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
 import type { CurePeriodActivationResponse } from './CurePeriodActivationResponse';
 import {
     CurePeriodActivationResponseFromJSON,
@@ -81,16 +88,16 @@ export interface ForeclosurePreventionCaseResponse {
     outcome?: string | null;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof ForeclosurePreventionCaseResponse
      */
-    openedDate?: Date;
+    openedDate?: CalendarDate;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof ForeclosurePreventionCaseResponse
      */
-    resolvedDate?: Date | null;
+    resolvedDate?: CalendarDate | null;
     /**
      * 
      * @type {Array<ServicerDelinquencyResponse>}
@@ -139,8 +146,8 @@ export function ForeclosurePreventionCaseResponseFromJSONTyped(json: any, ignore
         'trigger': json['trigger'] == null ? undefined : json['trigger'],
         'status': json['status'] == null ? undefined : json['status'],
         'outcome': json['outcome'] == null ? undefined : json['outcome'],
-        'openedDate': json['openedDate'] == null ? undefined : (new Date(json['openedDate'])),
-        'resolvedDate': json['resolvedDate'] == null ? undefined : (new Date(json['resolvedDate'])),
+        'openedDate': json['openedDate'] == null ? undefined : CalendarDateFromJSON(json['openedDate']),
+        'resolvedDate': json['resolvedDate'] == null ? undefined : CalendarDateFromJSON(json['resolvedDate']),
         'servicerDelinquencies': json['servicerDelinquencies'] == null ? undefined : ((json['servicerDelinquencies'] as Array<any>).map(ServicerDelinquencyResponseFromJSON)),
         'counselingReferrals': json['counselingReferrals'] == null ? undefined : ((json['counselingReferrals'] as Array<any>).map(CounselingReferralResponseFromJSON)),
         'forbearanceRequests': json['forbearanceRequests'] == null ? undefined : ((json['forbearanceRequests'] as Array<any>).map(ForbearanceRequestResponseFromJSON)),
@@ -164,8 +171,8 @@ export function ForeclosurePreventionCaseResponseToJSONTyped(value?: Foreclosure
         'trigger': value['trigger'],
         'status': value['status'],
         'outcome': value['outcome'],
-        'openedDate': value['openedDate'] == null ? undefined : ((value['openedDate']).toISOString().substring(0,10)),
-        'resolvedDate': value['resolvedDate'] === null ? null : ((value['resolvedDate'] as any)?.toISOString().substring(0,10)),
+        'openedDate': CalendarDateToJSON(value['openedDate']),
+        'resolvedDate': CalendarDateToJSON(value['resolvedDate']),
         'servicerDelinquencies': value['servicerDelinquencies'] == null ? undefined : ((value['servicerDelinquencies'] as Array<any>).map(ServicerDelinquencyResponseToJSON)),
         'counselingReferrals': value['counselingReferrals'] == null ? undefined : ((value['counselingReferrals'] as Array<any>).map(CounselingReferralResponseToJSON)),
         'forbearanceRequests': value['forbearanceRequests'] == null ? undefined : ((value['forbearanceRequests'] as Array<any>).map(ForbearanceRequestResponseToJSON)),

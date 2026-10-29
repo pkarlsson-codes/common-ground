@@ -5,9 +5,6 @@ import type { RegisterLandParcelRequest } from './types'
 
 const api = new LandParcelsApi(apiConfig)
 
-const dateStr = (d: Date | null | undefined) =>
-  d instanceof Date ? d.toISOString().substring(0, 10) : undefined
-
 export function useLandParcels(pageNumber: number, includeDecommissioned: boolean, search?: string) {
   return useQuery({
     queryKey: ['land-parcels', pageNumber, includeDecommissioned, search],
@@ -31,7 +28,6 @@ export function useLandParcel(id: string | null) {
       const p = await api.getLandParcel({ landParcelId: id! })
       return {
         ...p,
-        acquisitionDate: dateStr(p.acquisitionDate) ?? '',
         registeredAt: p.registeredAt?.toISOString() ?? '',
       }
     },
@@ -44,10 +40,7 @@ export function useRegisterLandParcel() {
   return useMutation({
     mutationFn: (req: RegisterLandParcelRequest) =>
       api.registerLandParcel({
-        registerLandParcelRequest: {
-          ...req,
-          acquisitionDate: new Date(req.acquisitionDate),
-        },
+        registerLandParcelRequest: req,
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['land-parcels'] }),
   })

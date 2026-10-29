@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Response DTO for a home detail view.
  * @export
@@ -70,10 +78,10 @@ export interface HomeResponse {
     assessedValue?: number;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof HomeResponse
      */
-    lastAssessedDate?: Date | null;
+    lastAssessedDate?: CalendarDate | null;
     /**
      * 
      * @type {string}
@@ -119,7 +127,7 @@ export function HomeResponseFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'squareFootage': json['squareFootage'] == null ? undefined : json['squareFootage'],
         'yearBuilt': json['yearBuilt'] == null ? undefined : json['yearBuilt'],
         'assessedValue': json['assessedValue'] == null ? undefined : json['assessedValue'],
-        'lastAssessedDate': json['lastAssessedDate'] == null ? undefined : (new Date(json['lastAssessedDate'])),
+        'lastAssessedDate': json['lastAssessedDate'] == null ? undefined : CalendarDateFromJSON(json['lastAssessedDate']),
         'conditionNotes': json['conditionNotes'] == null ? undefined : json['conditionNotes'],
         'status': json['status'] == null ? undefined : json['status'],
         'registeredAt': json['registeredAt'] == null ? undefined : (new Date(json['registeredAt'])),
@@ -145,7 +153,7 @@ export function HomeResponseToJSONTyped(value?: HomeResponse | null, ignoreDiscr
         'squareFootage': value['squareFootage'],
         'yearBuilt': value['yearBuilt'],
         'assessedValue': value['assessedValue'],
-        'lastAssessedDate': value['lastAssessedDate'] === null ? null : ((value['lastAssessedDate'] as any)?.toISOString().substring(0,10)),
+        'lastAssessedDate': CalendarDateToJSON(value['lastAssessedDate']),
         'conditionNotes': value['conditionNotes'],
         'status': value['status'],
         'registeredAt': value['registeredAt'] == null ? undefined : ((value['registeredAt']).toISOString()),

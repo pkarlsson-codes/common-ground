@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request body for editing a document's metadata. Null fields leave existing values untouched.
  * @export
@@ -34,10 +42,10 @@ export interface UpdateDocumentMetadataRequest {
     sensitivity?: string | null;
     /**
      * New expiry date, or null to leave unchanged (combined with ClearExpiresOn).
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof UpdateDocumentMetadataRequest
      */
-    expiresOn?: Date | null;
+    expiresOn?: CalendarDate | null;
     /**
      * When true, explicitly clears the expiry instead of leaving it.
      * @type {boolean}
@@ -65,7 +73,7 @@ export function UpdateDocumentMetadataRequestFromJSONTyped(json: any, ignoreDisc
         
         'title': json['title'] == null ? undefined : json['title'],
         'sensitivity': json['sensitivity'] == null ? undefined : json['sensitivity'],
-        'expiresOn': json['expiresOn'] == null ? undefined : (new Date(json['expiresOn'])),
+        'expiresOn': json['expiresOn'] == null ? undefined : CalendarDateFromJSON(json['expiresOn']),
         'clearExpiresOn': json['clearExpiresOn'] == null ? undefined : json['clearExpiresOn'],
     };
 }
@@ -83,7 +91,7 @@ export function UpdateDocumentMetadataRequestToJSONTyped(value?: UpdateDocumentM
         
         'title': value['title'],
         'sensitivity': value['sensitivity'],
-        'expiresOn': value['expiresOn'] === null ? null : ((value['expiresOn'] as any)?.toISOString().substring(0,10)),
+        'expiresOn': CalendarDateToJSON(value['expiresOn']),
         'clearExpiresOn': value['clearExpiresOn'],
     };
 }

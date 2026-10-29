@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to schedule a property inspection on a stewardship case.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface SchedulePropertyInspectionRequest {
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof SchedulePropertyInspectionRequest
      */
-    scheduledDate?: Date;
+    scheduledDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -51,7 +59,7 @@ export function SchedulePropertyInspectionRequestFromJSONTyped(json: any, ignore
     }
     return {
         
-        'scheduledDate': json['scheduledDate'] == null ? undefined : (new Date(json['scheduledDate'])),
+        'scheduledDate': json['scheduledDate'] == null ? undefined : CalendarDateFromJSON(json['scheduledDate']),
         'inspectorName': json['inspectorName'] == null ? undefined : json['inspectorName'],
     };
 }
@@ -67,7 +75,7 @@ export function SchedulePropertyInspectionRequestToJSONTyped(value?: SchedulePro
 
     return {
         
-        'scheduledDate': value['scheduledDate'] == null ? undefined : ((value['scheduledDate']).toISOString().substring(0,10)),
+        'scheduledDate': CalendarDateToJSON(value['scheduledDate']),
         'inspectorName': value['inspectorName'],
     };
 }

@@ -6,7 +6,8 @@ import { useToast } from '../../hooks/useToast'
 import { GroundLeasesApi } from '../../api'
 import { apiConfig } from '../../lib/apiConfig'
 import { getErrorMessage } from '../../lib/getErrorMessage'
-import { localToday } from '../../lib/dates'
+import { trustToday, type CalendarDate } from '../../lib/calendarDate'
+import { DateInput } from '../DateInput'
 
 const groundLeasesApi = new GroundLeasesApi(apiConfig)
 
@@ -14,7 +15,7 @@ interface OpenFpcForm {
   groundLeaseId: string
   servicerName: string
   delinquentMonths: number | ''
-  recordedDate: string
+  recordedDate: CalendarDate
 }
 
 interface Props {
@@ -30,7 +31,7 @@ export default function FpcOpenCasePanel({ onClose }: Props) {
     groundLeaseId: '',
     servicerName: '',
     delinquentMonths: '',
-    recordedDate: localToday(),
+    recordedDate: trustToday(),
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -121,11 +122,10 @@ export default function FpcOpenCasePanel({ onClose }: Props) {
           </div>
           <div className="form-field">
             <label className="form-label">Recorded Date</label>
-            <input
+            <DateInput
               className="form-input"
-              type="date"
               value={form.recordedDate}
-              onChange={e => setForm(f => ({ ...f, recordedDate: e.target.value }))}
+              onChange={v => setForm(f => ({ ...f, recordedDate: v }))}
               required
             />
           </div>

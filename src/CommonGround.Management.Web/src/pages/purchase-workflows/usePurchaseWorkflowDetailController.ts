@@ -23,11 +23,11 @@ import type {
   WithdrawWorkflowForm,
 } from '../../hooks/types'
 import { usePurchaseWorkflowActions } from './usePurchaseWorkflowActions'
-import { localToday } from '../../lib/dates'
+import { trustToday } from '../../lib/calendarDate'
 
 export type TrackKey = 'eligibility' | 'financing' | 'inspection' | 'title' | 'leaseExecution' | 'closing'
 
-const today = () => localToday()
+const today = () => trustToday()
 
 const emptyEligibility = (): RecordEligibilityForm => ({ verifiedDate: today(), notes: '' })
 const emptyFinancing = (): RecordFinancingForm => ({ lenderName: '', committedAmount: 0, preapprovalLetterDate: today() })

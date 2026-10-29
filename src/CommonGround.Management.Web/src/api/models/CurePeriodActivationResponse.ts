@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Cure period activation entry within a foreclosure prevention case.
  * @export
@@ -34,10 +42,10 @@ export interface CurePeriodActivationResponse {
     lraId?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof CurePeriodActivationResponse
      */
-    activationDate?: Date;
+    activationDate?: CalendarDate;
     /**
      * 
      * @type {number}
@@ -46,10 +54,10 @@ export interface CurePeriodActivationResponse {
     curePeriodDays?: number;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof CurePeriodActivationResponse
      */
-    cureDeadline?: Date;
+    cureDeadline?: CalendarDate;
 }
 
 /**
@@ -71,9 +79,9 @@ export function CurePeriodActivationResponseFromJSONTyped(json: any, ignoreDiscr
         
         'id': json['id'] == null ? undefined : json['id'],
         'lraId': json['lraId'] == null ? undefined : json['lraId'],
-        'activationDate': json['activationDate'] == null ? undefined : (new Date(json['activationDate'])),
+        'activationDate': json['activationDate'] == null ? undefined : CalendarDateFromJSON(json['activationDate']),
         'curePeriodDays': json['curePeriodDays'] == null ? undefined : json['curePeriodDays'],
-        'cureDeadline': json['cureDeadline'] == null ? undefined : (new Date(json['cureDeadline'])),
+        'cureDeadline': json['cureDeadline'] == null ? undefined : CalendarDateFromJSON(json['cureDeadline']),
     };
 }
 
@@ -90,9 +98,9 @@ export function CurePeriodActivationResponseToJSONTyped(value?: CurePeriodActiva
         
         'id': value['id'],
         'lraId': value['lraId'],
-        'activationDate': value['activationDate'] == null ? undefined : ((value['activationDate']).toISOString().substring(0,10)),
+        'activationDate': CalendarDateToJSON(value['activationDate']),
         'curePeriodDays': value['curePeriodDays'],
-        'cureDeadline': value['cureDeadline'] == null ? undefined : ((value['cureDeadline']).toISOString().substring(0,10)),
+        'cureDeadline': CalendarDateToJSON(value['cureDeadline']),
     };
 }
 

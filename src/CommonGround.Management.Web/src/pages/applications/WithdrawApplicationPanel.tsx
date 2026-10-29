@@ -4,15 +4,16 @@ import SlideOver from '../../components/SlideOver'
 import { useWithdrawApplication } from '../../hooks/applications'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
-import { localToday } from '../../lib/dates'
+import { trustToday, type CalendarDate } from '../../lib/calendarDate'
+import { DateInput } from '../../components/DateInput'
 
 type FormState = {
-  withdrawnDate: string
+  withdrawnDate: CalendarDate
   reason: string
 }
 
 const emptyForm = (): FormState => ({
-  withdrawnDate: localToday(),
+  withdrawnDate: trustToday(),
   reason: '',
 })
 
@@ -69,11 +70,10 @@ export default function WithdrawApplicationPanel({ applicationId, onClose }: Pro
         <div className="form-grid">
           <div className="form-field">
             <label className="form-label">Withdrawn Date</label>
-            <input
+            <DateInput
               className="form-input"
-              type="date"
               value={form.withdrawnDate}
-              onChange={e => setForm(f => ({ ...f, withdrawnDate: e.target.value }))}
+              onChange={v => setForm(f => ({ ...f, withdrawnDate: v }))}
               required
             />
           </div>

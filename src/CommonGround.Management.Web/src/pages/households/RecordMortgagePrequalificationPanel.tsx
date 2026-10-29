@@ -4,17 +4,19 @@ import SlideOver from '../../components/SlideOver'
 import { useRecordMortgagePrequalification } from '../../hooks/households'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
+import type { CalendarDate } from '../../lib/calendarDate'
+import { DateInput } from '../../components/DateInput'
 
 type FormState = {
   lenderName: string
   approvedAmount: number
-  expiryDate: string
+  expiryDate: CalendarDate | null
 }
 
 const emptyForm = (): FormState => ({
   lenderName: '',
   approvedAmount: 0,
-  expiryDate: '',
+  expiryDate: null,
 })
 
 type Props = {
@@ -36,7 +38,7 @@ export default function RecordMortgagePrequalificationPanel({ householdId, onClo
       await mutation.mutateAsync({
         lenderName: form.lenderName,
         approvedAmount: Number(form.approvedAmount),
-        expiryDate: form.expiryDate,
+        expiryDate: form.expiryDate ?? undefined,
       })
       success('Mortgage prequalification recorded')
       onClose()
@@ -90,11 +92,10 @@ export default function RecordMortgagePrequalificationPanel({ householdId, onClo
           </div>
           <div className="form-field">
             <label className="form-label">Expiry Date</label>
-            <input
+            <DateInput
               className="form-input"
-              type="date"
               value={form.expiryDate}
-              onChange={e => setForm(f => ({ ...f, expiryDate: e.target.value }))}
+              onChange={v => setForm(f => ({ ...f, expiryDate: v }))}
               required
             />
           </div>

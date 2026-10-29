@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to issue a formal notice for a lease violation.
  * @export
@@ -22,16 +30,16 @@ import { mapValues } from '../runtime';
 export interface IssueViolationNoticeRequest {
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof IssueViolationNoticeRequest
      */
-    noticeDate?: Date;
+    noticeDate?: CalendarDate;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof IssueViolationNoticeRequest
      */
-    cureDeadline?: Date;
+    cureDeadline?: CalendarDate;
 }
 
 /**
@@ -51,8 +59,8 @@ export function IssueViolationNoticeRequestFromJSONTyped(json: any, ignoreDiscri
     }
     return {
         
-        'noticeDate': json['noticeDate'] == null ? undefined : (new Date(json['noticeDate'])),
-        'cureDeadline': json['cureDeadline'] == null ? undefined : (new Date(json['cureDeadline'])),
+        'noticeDate': json['noticeDate'] == null ? undefined : CalendarDateFromJSON(json['noticeDate']),
+        'cureDeadline': json['cureDeadline'] == null ? undefined : CalendarDateFromJSON(json['cureDeadline']),
     };
 }
 
@@ -67,8 +75,8 @@ export function IssueViolationNoticeRequestToJSONTyped(value?: IssueViolationNot
 
     return {
         
-        'noticeDate': value['noticeDate'] == null ? undefined : ((value['noticeDate']).toISOString().substring(0,10)),
-        'cureDeadline': value['cureDeadline'] == null ? undefined : ((value['cureDeadline']).toISOString().substring(0,10)),
+        'noticeDate': CalendarDateToJSON(value['noticeDate']),
+        'cureDeadline': CalendarDateToJSON(value['cureDeadline']),
     };
 }
 

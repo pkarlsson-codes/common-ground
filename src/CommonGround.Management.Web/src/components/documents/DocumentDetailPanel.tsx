@@ -13,7 +13,8 @@ import {
 } from '../../hooks/documents'
 import { useToast } from '../../hooks/useToast'
 import { getErrorMessage } from '../../lib/getErrorMessage'
-import { expiryIso, fmtDate, fmtExpiry, fmtSize, isExpired, isExpiringSoon } from './format'
+import { fmtDate, fmtExpiry, fmtSize, isExpired, isExpiringSoon } from './format'
+import { DateInput } from '../DateInput'
 
 const SENSITIVITY_OPTIONS = ['Public', 'Internal', 'Confidential', 'Restricted']
 
@@ -50,7 +51,7 @@ export default function DocumentDetailPanel({ documentId, onClose }: Props) {
             </button>
           </div>
           {/* Keyed so the forms reset to the saved values when the document changes. */}
-          <DetailsSection key={`${doc.title}|${doc.sensitivity}|${doc.expiresOn?.toISOString() ?? ''}`} doc={doc} />
+          <DetailsSection key={`${doc.title}|${doc.sensitivity}|${doc.expiresOn ?? ''}`} doc={doc} />
           <TagsSection doc={doc} />
           <VersionsSection doc={doc} />
           <AttachmentsSection doc={doc} />
@@ -66,10 +67,10 @@ function DetailsSection({ doc }: { doc: DocumentResponse }) {
   const [form, setForm] = useState({
     title: doc.title ?? '',
     sensitivity: doc.sensitivity ?? 'Internal',
-    expiresOn: doc.expiresOn ? expiryIso(doc.expiresOn) : '',
+    expiresOn: doc.expiresOn ?? null,
   })
 
-  const savedExpiresOn = doc.expiresOn ? expiryIso(doc.expiresOn) : ''
+  const savedExpiresOn = doc.expiresOn ?? null
   const dirty = form.title.trim() !== doc.title
     || form.sensitivity !== doc.sensitivity
     || form.expiresOn !== savedExpiresOn
@@ -82,7 +83,7 @@ function DetailsSection({ doc }: { doc: DocumentResponse }) {
         req: {
           title: form.title.trim(),
           sensitivity: form.sensitivity,
-          expiresOn: form.expiresOn ? new Date(form.expiresOn) : null,
+          expiresOn: form.expiresOn,
           clearExpiresOn: !form.expiresOn,
         },
       })
@@ -126,11 +127,10 @@ function DetailsSection({ doc }: { doc: DocumentResponse }) {
           </div>
           <div className="form-field">
             <label className="form-label">Expires On</label>
-            <input
+            <DateInput
               className="form-input"
-              type="date"
               value={form.expiresOn}
-              onChange={e => setForm(f => ({ ...f, expiresOn: e.target.value }))}
+              onChange={v => setForm(f => ({ ...f, expiresOn: v }))}
             />
           </div>
         </div>

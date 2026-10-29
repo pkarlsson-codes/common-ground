@@ -17,7 +17,8 @@ import {
   FORECLOSURE_PREVENTION_OUTCOME_LABELS,
   statusLabel,
 } from '../../hooks/types'
-import { fmtD, today } from './format'
+import { trustToday } from '../../lib/calendarDate'
+import { DateInput } from '../DateInput'
 
 interface Props {
   fpc: ForeclosurePreventionCaseResponse
@@ -53,22 +54,22 @@ export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
   const [delinquencyForm, setDelinquencyForm] = useState({
     servicerName: latestDelinquency?.servicerName ?? '',
     delinquentMonths: (latestDelinquency?.delinquentMonths ?? 0) + 1,
-    recordedDate: today(),
+    recordedDate: trustToday(),
   })
 
-  const [referralForm, setReferralForm] = useState({ agencyName: '', referralDate: today() })
+  const [referralForm, setReferralForm] = useState({ agencyName: '', referralDate: trustToday() })
   const [forbearanceForm, setForbearanceForm] = useState({
     lenderName: '',
-    requestedDate: today(),
+    requestedDate: trustToday(),
   })
   const [cureForm, setCureForm] = useState({
     lraId: '',
-    activationDate: today(),
+    activationDate: trustToday(),
     curePeriodDays: 90,
   })
   const [resolveForm, setResolveForm] = useState({
     outcome: 'InterventionSuccessful',
-    resolvedDate: today(),
+    resolvedDate: trustToday(),
   })
 
   // Interventions can be recorded until the case is resolved; resolving needs at least one (Active).
@@ -90,7 +91,7 @@ export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
     try {
       await referralMutation.mutateAsync({ caseId, ...referralForm })
       success('Referral made')
-      setReferralForm({ agencyName: '', referralDate: today() })
+      setReferralForm({ agencyName: '', referralDate: trustToday() })
     } catch (err) {
       await fail(err, 'Failed to make referral')
     }
@@ -101,7 +102,7 @@ export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
     try {
       await forbearanceMutation.mutateAsync({ caseId, ...forbearanceForm })
       success('Forbearance requested')
-      setForbearanceForm({ lenderName: '', requestedDate: today() })
+      setForbearanceForm({ lenderName: '', requestedDate: trustToday() })
     } catch (err) {
       await fail(err, 'Failed to request forbearance')
     }
@@ -112,7 +113,7 @@ export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
     try {
       await cureMutation.mutateAsync({ caseId, ...cureForm })
       success('Cure period activated')
-      setCureForm({ lraId: '', activationDate: today(), curePeriodDays: 90 })
+      setCureForm({ lraId: '', activationDate: trustToday(), curePeriodDays: 90 })
     } catch (err) {
       await fail(err, 'Failed to activate cure period')
     }
@@ -131,8 +132,8 @@ export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
   return (
     <div className="detail-section">
       <div style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 12 }}>
-        {statusLabel(fpc.trigger ?? '')} · Opened {fmtD(fpc.openedDate)}
-        {fpc.resolvedDate && ` · Resolved ${fmtD(fpc.resolvedDate)}`}
+        {statusLabel(fpc.trigger ?? '')} · Opened {fpc.openedDate}
+        {fpc.resolvedDate && ` · Resolved ${fpc.resolvedDate}`}
         {fpc.outcome && ` · ${FORECLOSURE_PREVENTION_OUTCOME_LABELS[fpc.outcome] ?? fpc.outcome}`}
       </div>
 
@@ -144,7 +145,7 @@ export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
             <div style={{ fontFamily: 'var(--font-mono)', marginBottom: 2 }}>
               {d.servicerName} · {d.delinquentMonths} mo
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>Recorded {fmtD(d.recordedDate)}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>Recorded {d.recordedDate}</div>
           </div>
         ))}
         {isOpen && (
@@ -177,12 +178,11 @@ export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
               </div>
               <div className="form-field">
                 <label className="form-label">Recorded Date</label>
-                <input
+                <DateInput
                   className="form-input"
-                  type="date"
                   value={delinquencyForm.recordedDate}
-                  onChange={e =>
-                    setDelinquencyForm(f => ({ ...f, recordedDate: e.target.value }))
+                  onChange={v =>
+                    setDelinquencyForm(f => ({ ...f, recordedDate: v }))
                   }
                   required
                 />
@@ -208,12 +208,12 @@ export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
               {r.agencyName}
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-dim)', marginBottom: 4 }}>
-              Referred {fmtD(r.referralDate)}
+              Referred {r.referralDate}
             </div>
             {r.outcome ? (
               <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>
                 Outcome: {COUNSELING_OUTCOME_LABELS[r.outcome] ?? r.outcome}
-                {r.outcomeDate && ` (${fmtD(r.outcomeDate)})`}
+                {r.outcomeDate && ` (${r.outcomeDate})`}
               </div>
             ) : isActive && (
               <ReferralOutcomeForm
@@ -240,11 +240,10 @@ export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
               </div>
               <div className="form-field">
                 <label className="form-label">Referral Date</label>
-                <input
+                <DateInput
                   className="form-input"
-                  type="date"
                   value={referralForm.referralDate}
-                  onChange={e => setReferralForm(f => ({ ...f, referralDate: e.target.value }))}
+                  onChange={v => setReferralForm(f => ({ ...f, referralDate: v }))}
                   required
                 />
               </div>
@@ -269,12 +268,12 @@ export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
               {req.lenderName}
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-dim)', marginBottom: 4 }}>
-              Requested {fmtD(req.requestedDate)}
+              Requested {req.requestedDate}
             </div>
             {req.outcome ? (
               <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>
                 Outcome: {req.outcome}
-                {req.outcomeDate && ` (${fmtD(req.outcomeDate)})`}
+                {req.outcomeDate && ` (${req.outcomeDate})`}
                 {req.notes && ` — ${req.notes}`}
               </div>
             ) : isActive && (
@@ -304,12 +303,11 @@ export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
               </div>
               <div className="form-field">
                 <label className="form-label">Requested Date</label>
-                <input
+                <DateInput
                   className="form-input"
-                  type="date"
                   value={forbearanceForm.requestedDate}
-                  onChange={e =>
-                    setForbearanceForm(f => ({ ...f, requestedDate: e.target.value }))
+                  onChange={v =>
+                    setForbearanceForm(f => ({ ...f, requestedDate: v }))
                   }
                   required
                 />
@@ -335,7 +333,7 @@ export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
               LRA: {cp.lraId}
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>
-              {cp.curePeriodDays} days from {fmtD(cp.activationDate)} to {fmtD(cp.cureDeadline)}
+              {cp.curePeriodDays} days from {cp.activationDate} to {cp.cureDeadline}
             </div>
           </div>
         ))}
@@ -353,12 +351,11 @@ export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
               </div>
               <div className="form-field">
                 <label className="form-label">Activation Date</label>
-                <input
+                <DateInput
                   className="form-input"
-                  type="date"
                   value={cureForm.activationDate}
-                  onChange={e =>
-                    setCureForm(f => ({ ...f, activationDate: e.target.value }))
+                  onChange={v =>
+                    setCureForm(f => ({ ...f, activationDate: v }))
                   }
                   required
                 />
@@ -416,11 +413,10 @@ export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
             </div>
             <div className="form-field">
               <label className="form-label">Resolution Date</label>
-              <input
+              <DateInput
                 className="form-input"
-                type="date"
                 value={resolveForm.resolvedDate}
-                onChange={e => setResolveForm(f => ({ ...f, resolvedDate: e.target.value }))}
+                onChange={v => setResolveForm(f => ({ ...f, resolvedDate: v }))}
                 required
               />
             </div>
@@ -453,7 +449,7 @@ function ReferralOutcomeForm({
   fail: (err: unknown, fallback: string) => Promise<unknown>
   success: (m: string) => void
 }) {
-  const [form, setForm] = useState({ outcome: 'CounselingCompleted', outcomeDate: today() })
+  const [form, setForm] = useState({ outcome: 'CounselingCompleted', outcomeDate: trustToday() })
   const handle = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
@@ -480,12 +476,12 @@ function ReferralOutcomeForm({
         </select>
       </div>
       <div className="form-field" style={{ margin: 0 }}>
-        <input
+        <DateInput
           className="form-input"
-          type="date"
           aria-label="Outcome date"
           value={form.outcomeDate}
-          onChange={e => setForm(f => ({ ...f, outcomeDate: e.target.value }))}
+          required
+          onChange={v => setForm(f => ({ ...f, outcomeDate: v }))}
         />
       </div>
       <button
@@ -514,7 +510,7 @@ function ForbearanceOutcomeForm({
 }) {
   const [form, setForm] = useState({
     outcome: 'Granted',
-    outcomeDate: today(),
+    outcomeDate: trustToday(),
     notes: '',
   })
   const handle = async (e: React.FormEvent) => {
@@ -557,12 +553,12 @@ function ForbearanceOutcomeForm({
         </select>
       </div>
       <div className="form-field" style={{ margin: 0 }}>
-        <input
+        <DateInput
           className="form-input"
-          type="date"
           aria-label="Outcome date"
           value={form.outcomeDate}
-          onChange={e => setForm(f => ({ ...f, outcomeDate: e.target.value }))}
+          required
+          onChange={v => setForm(f => ({ ...f, outcomeDate: v }))}
         />
       </div>
       <div className="form-field" style={{ margin: 0, flex: '1 1 100%' }}>

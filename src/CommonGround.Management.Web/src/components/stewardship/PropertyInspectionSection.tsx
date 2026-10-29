@@ -8,7 +8,8 @@ import {
 import type { PropertyInspectionResponse, StewardshipCaseResponse } from '../../api/models'
 import { useToast } from '../../hooks/useToast'
 import { getErrorMessage } from '../../lib/getErrorMessage'
-import { fmtD, today } from './format'
+import { trustToday } from '../../lib/calendarDate'
+import { DateInput } from '../DateInput'
 
 interface Props {
   sc: StewardshipCaseResponse
@@ -27,28 +28,28 @@ export default function PropertyInspectionSection({ sc }: Props) {
   const scheduled = (sc.propertyInspections ?? []).find(i => i.status === 'Scheduled') ?? null
   const history = (sc.propertyInspections ?? [])
     .filter(i => i.status !== 'Scheduled')
-    .sort((a, b) => new Date(b.scheduledDate ?? 0).getTime() - new Date(a.scheduledDate ?? 0).getTime())
+    .sort((a, b) => (b.scheduledDate ?? '').localeCompare(a.scheduledDate ?? ''))
 
   // ── Forms ─────────────────────────────────────────────────────────────────
   const [scheduleFormOpen, setScheduleFormOpen] = useState(false)
-  const [scheduleForm, setScheduleForm] = useState({ scheduledDate: today(), inspectorName: '' })
+  const [scheduleForm, setScheduleForm] = useState({ scheduledDate: trustToday(), inspectorName: '' })
   const [completeForm, setCompleteForm] = useState({
     occupancyConfirmed: true,
     conditionNotes: '',
-    completedDate: today(),
+    completedDate: trustToday(),
   })
   const [cancelForm, setCancelForm] = useState({ reason: '' })
   const [historyOpen, setHistoryOpen] = useState(false)
 
   const isOverdue =
-    scheduled && (fmtD(scheduled.scheduledDate) ?? '') < today()
+    scheduled && (scheduled.scheduledDate ?? '') < trustToday()
 
   const handleSchedule = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
       await scheduleMutation.mutateAsync({ caseId, ...scheduleForm })
       success('Inspection scheduled')
-      setScheduleForm({ scheduledDate: today(), inspectorName: '' })
+      setScheduleForm({ scheduledDate: trustToday(), inspectorName: '' })
       setScheduleFormOpen(false)
     } catch (err) {
       await fail(err, 'Failed to schedule inspection')
@@ -117,11 +118,10 @@ export default function PropertyInspectionSection({ sc }: Props) {
           <div className="form-grid" style={{ marginBottom: 12 }}>
             <div className="form-field">
               <label className="form-label">Scheduled Date</label>
-              <input
+              <DateInput
                 className="form-input"
-                type="date"
                 value={scheduleForm.scheduledDate}
-                onChange={e => setScheduleForm(f => ({ ...f, scheduledDate: e.target.value }))}
+                onChange={v => setScheduleForm(f => ({ ...f, scheduledDate: v }))}
                 required
               />
             </div>
@@ -159,7 +159,7 @@ export default function PropertyInspectionSection({ sc }: Props) {
             }}
           >
             <div style={{ fontFamily: 'var(--font-mono)' }}>
-              {fmtD(scheduled.scheduledDate)} · {scheduled.inspectorName}
+              {scheduled.scheduledDate} · {scheduled.inspectorName}
               {isOverdue && ' · OVERDUE'}
             </div>
           </div>
@@ -189,12 +189,11 @@ export default function PropertyInspectionSection({ sc }: Props) {
                 </div>
                 <div className="form-field">
                   <label className="form-label">Completed Date</label>
-                  <input
+                  <DateInput
                     className="form-input"
-                    type="date"
                     value={completeForm.completedDate}
-                    onChange={e =>
-                      setCompleteForm(f => ({ ...f, completedDate: e.target.value }))
+                    onChange={v =>
+                      setCompleteForm(f => ({ ...f, completedDate: v }))
                     }
                     required
                   />
@@ -267,7 +266,7 @@ function InspectionHistoryRow({ i }: { i: PropertyInspectionResponse }) {
       }}
     >
       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-secondary)' }}>
-        {fmtD(i.completedDate ?? i.scheduledDate)} · {i.inspectorName} · <StatusBadge status={i.status ?? ''} />
+        {i.completedDate ?? i.scheduledDate} · {i.inspectorName} · <StatusBadge status={i.status ?? ''} />
       </div>
       {i.status === 'Completed' && (
         <div style={{ color: 'var(--text-dim)', marginTop: 2 }}>

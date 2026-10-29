@@ -8,7 +8,8 @@ import DocumentList from '../../components/DocumentList'
 import { useToast } from '../../hooks/useToast'
 import DevelopmentProjectsSection from '../land-parcels/DevelopmentProjectsSection'
 import SelectApplicantPanel from '../applications/SelectApplicantPanel'
-import { localToday } from '../../lib/dates'
+import { trustToday } from '../../lib/calendarDate'
+import { DateInput } from '../../components/DateInput'
 
 type Tab = 'details' | 'documents'
 
@@ -27,7 +28,7 @@ const fmtNumber = (n: number) => new Intl.NumberFormat('en-US').format(n)
 
 const emptyAssessment = (): RecordHomeAssessmentRequest => ({
   assessedValue: 0,
-  assessmentDate: localToday(),
+  assessmentDate: trustToday(),
   appraiserName: '',
   conditionNotes: '',
 })
@@ -48,11 +49,7 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
   const { success } = useToast()
 
   const sortedAssessments = assessments?.items
-    ? [...assessments.items].sort((a, b) => {
-        const aTime = a.assessmentDate ? new Date(a.assessmentDate).getTime() : 0
-        const bTime = b.assessmentDate ? new Date(b.assessmentDate).getTime() : 0
-        return bTime - aTime
-      })
+    ? [...assessments.items].sort((a, b) => (b.assessmentDate ?? '').localeCompare(a.assessmentDate ?? ''))
     : []
 
   const handleAssessment = async (e: React.FormEvent) => {
@@ -213,11 +210,10 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
                         </div>
                         <div className="form-field">
                           <label className="form-label">Assessment Date</label>
-                          <input
+                          <DateInput
                             className="form-input"
-                            type="date"
                             value={assessment.assessmentDate}
-                            onChange={e => setAssessment(a => ({ ...a, assessmentDate: e.target.value }))}
+                            onChange={v => setAssessment(a => ({ ...a, assessmentDate: v }))}
                             required
                           />
                         </div>
@@ -262,7 +258,7 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
                     <div style={{ display: 'grid', gap: 6 }}>
                       {sortedAssessments.map(item => (
                         <div
-                          key={item.id ?? `${item.assessmentDate?.toISOString() ?? ''}-${item.assessedValue ?? 0}`}
+                          key={item.id ?? `${item.assessmentDate ?? ''}-${item.assessedValue ?? 0}`}
                           style={{
                             display: 'grid',
                             gridTemplateColumns: '120px 1fr auto',
@@ -275,7 +271,7 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
                           }}
                         >
                           <span className="detail-field__label" style={{ marginBottom: 0 }}>
-                            {item.assessmentDate?.toISOString().slice(0, 10) ?? '—'}
+                            {item.assessmentDate ?? '—'}
                           </span>
                           <span className="detail-field__value mono" style={{ marginBottom: 0 }}>
                             {fmtCurrency(Number(item.assessedValue ?? 0))}

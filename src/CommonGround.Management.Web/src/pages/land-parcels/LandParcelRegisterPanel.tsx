@@ -3,13 +3,14 @@ import { useRegisterLandParcel } from '../../hooks/landParcels'
 import { ACQUISITION_METHODS, type RegisterLandParcelRequest } from '../../hooks/types'
 import SlideOver from '../../components/SlideOver'
 import { useToast } from '../../hooks/useToast'
-import { localToday } from '../../lib/dates'
+import { trustToday } from '../../lib/calendarDate'
+import { DateInput } from '../../components/DateInput'
 
 const emptyForm = (): RegisterLandParcelRequest => ({
   legalParcelNumber: '',
   address: '',
   areaAcres: 0,
-  acquisitionDate: localToday(),
+  acquisitionDate: trustToday(),
   acquisitionMethod: 'Purchase',
   covenantTerms: '',
 })
@@ -91,11 +92,10 @@ export default function LandParcelRegisterPanel({ onClose }: Props) {
           </div>
           <div className="form-field">
             <label className="form-label">Acquisition Date</label>
-            <input
+            <DateInput
               className="form-input"
-              type="date"
               value={form.acquisitionDate}
-              onChange={e => setForm(f => ({ ...f, acquisitionDate: e.target.value }))}
+              onChange={v => setForm(f => ({ ...f, acquisitionDate: v }))}
               required
             />
           </div>

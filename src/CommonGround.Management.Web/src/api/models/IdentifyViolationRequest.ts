@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to identify a new lease violation on a stewardship case.
  * @export
@@ -34,10 +42,10 @@ export interface IdentifyViolationRequest {
     description?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof IdentifyViolationRequest
      */
-    identifiedDate?: Date;
+    identifiedDate?: CalendarDate;
 }
 
 /**
@@ -59,7 +67,7 @@ export function IdentifyViolationRequestFromJSONTyped(json: any, ignoreDiscrimin
         
         'violationType': json['violationType'] == null ? undefined : json['violationType'],
         'description': json['description'] == null ? undefined : json['description'],
-        'identifiedDate': json['identifiedDate'] == null ? undefined : (new Date(json['identifiedDate'])),
+        'identifiedDate': json['identifiedDate'] == null ? undefined : CalendarDateFromJSON(json['identifiedDate']),
     };
 }
 
@@ -76,7 +84,7 @@ export function IdentifyViolationRequestToJSONTyped(value?: IdentifyViolationReq
         
         'violationType': value['violationType'],
         'description': value['description'],
-        'identifiedDate': value['identifiedDate'] == null ? undefined : ((value['identifiedDate']).toISOString().substring(0,10)),
+        'identifiedDate': CalendarDateToJSON(value['identifiedDate']),
     };
 }
 

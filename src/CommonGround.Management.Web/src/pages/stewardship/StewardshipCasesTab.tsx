@@ -7,7 +7,7 @@ import {
 } from './stewardshipSortUtils'
 import StewardshipCaseDetailPanel from '../../components/stewardship/StewardshipCaseDetailPanel'
 import Pagination from '../../components/Pagination'
-import { fmtD } from '../../components/stewardship/format'
+import { trustToday, yearOf } from '../../lib/calendarDate'
 
 const PAGE_SIZE = 20
 
@@ -64,7 +64,7 @@ function ViolationCell({ count }: { count: number }) {
 // ── Main component ───────────────────────────────────────────────────────────
 
 export default function StewardshipCasesTab() {
-  const currentYear = new Date().getFullYear()
+  const currentYear = yearOf(trustToday())
 
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
@@ -154,10 +154,10 @@ export default function StewardshipCasesTab() {
                   <td><ViolationCell count={row.activeViolationCount} /></td>
                   <td>
                     {row.nextInspectionDate
-                      ? <span className="cell-mono">{fmtD(row.nextInspectionDate)}</span>
+                      ? <span className="cell-mono">{row.nextInspectionDate}</span>
                       : <span style={{ color: 'var(--text-dim)' }}>—</span>}
                   </td>
-                  <td><span className="cell-mono">{fmtD(row.openedDate)}</span></td>
+                  <td><span className="cell-mono">{row.openedDate}</span></td>
                 </tr>
               ))}
             </tbody>

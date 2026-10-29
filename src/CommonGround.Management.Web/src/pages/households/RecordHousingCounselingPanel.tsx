@@ -4,17 +4,18 @@ import SlideOver from '../../components/SlideOver'
 import { useRecordHousingCounseling } from '../../hooks/households'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
-import { localToday } from '../../lib/dates'
+import { trustToday, type CalendarDate } from '../../lib/calendarDate'
+import { DateInput } from '../../components/DateInput'
 
 type FormState = {
   certificationNumber: string
-  completedDate: string
+  completedDate: CalendarDate
   counselorOrganization: string
 }
 
 const emptyForm = (): FormState => ({
   certificationNumber: '',
-  completedDate: localToday(),
+  completedDate: trustToday(),
   counselorOrganization: '',
 })
 
@@ -79,11 +80,10 @@ export default function RecordHousingCounselingPanel({ householdId, onClose }: P
           </div>
           <div className="form-field">
             <label className="form-label">Completed Date</label>
-            <input
+            <DateInput
               className="form-input"
-              type="date"
               value={form.completedDate}
-              onChange={e => setForm(f => ({ ...f, completedDate: e.target.value }))}
+              onChange={v => setForm(f => ({ ...f, completedDate: v }))}
               required
             />
           </div>

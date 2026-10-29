@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to submit a mortgage forbearance request to a lender.
  * @export
@@ -28,10 +36,10 @@ export interface RequestForbearanceRequest {
     lenderName?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof RequestForbearanceRequest
      */
-    requestedDate?: Date;
+    requestedDate?: CalendarDate;
 }
 
 /**
@@ -52,7 +60,7 @@ export function RequestForbearanceRequestFromJSONTyped(json: any, ignoreDiscrimi
     return {
         
         'lenderName': json['lenderName'] == null ? undefined : json['lenderName'],
-        'requestedDate': json['requestedDate'] == null ? undefined : (new Date(json['requestedDate'])),
+        'requestedDate': json['requestedDate'] == null ? undefined : CalendarDateFromJSON(json['requestedDate']),
     };
 }
 
@@ -68,7 +76,7 @@ export function RequestForbearanceRequestToJSONTyped(value?: RequestForbearanceR
     return {
         
         'lenderName': value['lenderName'],
-        'requestedDate': value['requestedDate'] == null ? undefined : ((value['requestedDate']).toISOString().substring(0,10)),
+        'requestedDate': CalendarDateToJSON(value['requestedDate']),
     };
 }
 

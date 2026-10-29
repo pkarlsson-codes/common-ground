@@ -14,7 +14,7 @@
     "test": "vitest run",
     "preview": "vite preview",
     "clean:api": "node -e \"require('fs').rmSync('./src/api',{recursive:true,force:true})\"",
-    "generate-api-from-spec": "npm run clean:api && npx @openapitools/openapi-generator-cli generate -i ./api-spec.json -g typescript-fetch -o ./src/api --additional-properties=supportsES6=true,withInterfaces=true,basePath=,nullSafeTypes=true,stringEnums=true"
+    "generate-api-from-spec": "npm run clean:api && npx @openapitools/openapi-generator-cli generate -i ./api-spec.json -g typescript-fetch -o ./src/api --additional-properties=supportsES6=true,withInterfaces=true,basePath=,nullSafeTypes=true,stringEnums=true --type-mappings=date=CalendarDate"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",

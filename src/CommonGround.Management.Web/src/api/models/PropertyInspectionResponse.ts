@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Property inspection entry within a stewardship case.
  * @export
@@ -28,10 +36,10 @@ export interface PropertyInspectionResponse {
     id?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof PropertyInspectionResponse
      */
-    scheduledDate?: Date;
+    scheduledDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -58,10 +66,10 @@ export interface PropertyInspectionResponse {
     conditionNotes?: string | null;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof PropertyInspectionResponse
      */
-    completedDate?: Date | null;
+    completedDate?: CalendarDate | null;
     /**
      * 
      * @type {string}
@@ -88,12 +96,12 @@ export function PropertyInspectionResponseFromJSONTyped(json: any, ignoreDiscrim
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
-        'scheduledDate': json['scheduledDate'] == null ? undefined : (new Date(json['scheduledDate'])),
+        'scheduledDate': json['scheduledDate'] == null ? undefined : CalendarDateFromJSON(json['scheduledDate']),
         'inspectorName': json['inspectorName'] == null ? undefined : json['inspectorName'],
         'status': json['status'] == null ? undefined : json['status'],
         'occupancyConfirmed': json['occupancyConfirmed'] == null ? undefined : json['occupancyConfirmed'],
         'conditionNotes': json['conditionNotes'] == null ? undefined : json['conditionNotes'],
-        'completedDate': json['completedDate'] == null ? undefined : (new Date(json['completedDate'])),
+        'completedDate': json['completedDate'] == null ? undefined : CalendarDateFromJSON(json['completedDate']),
         'cancellationReason': json['cancellationReason'] == null ? undefined : json['cancellationReason'],
     };
 }
@@ -110,12 +118,12 @@ export function PropertyInspectionResponseToJSONTyped(value?: PropertyInspection
     return {
         
         'id': value['id'],
-        'scheduledDate': value['scheduledDate'] == null ? undefined : ((value['scheduledDate']).toISOString().substring(0,10)),
+        'scheduledDate': CalendarDateToJSON(value['scheduledDate']),
         'inspectorName': value['inspectorName'],
         'status': value['status'],
         'occupancyConfirmed': value['occupancyConfirmed'],
         'conditionNotes': value['conditionNotes'],
-        'completedDate': value['completedDate'] === null ? null : ((value['completedDate'] as any)?.toISOString().substring(0,10)),
+        'completedDate': CalendarDateToJSON(value['completedDate']),
         'cancellationReason': value['cancellationReason'],
     };
 }

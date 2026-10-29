@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to activate an LRA cure period on a foreclosure prevention case.
  * @export
@@ -28,10 +36,10 @@ export interface ActivateCurePeriodRequest {
     lraId?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof ActivateCurePeriodRequest
      */
-    activationDate?: Date;
+    activationDate?: CalendarDate;
     /**
      * 
      * @type {number}
@@ -58,7 +66,7 @@ export function ActivateCurePeriodRequestFromJSONTyped(json: any, ignoreDiscrimi
     return {
         
         'lraId': json['lraId'] == null ? undefined : json['lraId'],
-        'activationDate': json['activationDate'] == null ? undefined : (new Date(json['activationDate'])),
+        'activationDate': json['activationDate'] == null ? undefined : CalendarDateFromJSON(json['activationDate']),
         'curePeriodDays': json['curePeriodDays'] == null ? undefined : json['curePeriodDays'],
     };
 }
@@ -75,7 +83,7 @@ export function ActivateCurePeriodRequestToJSONTyped(value?: ActivateCurePeriodR
     return {
         
         'lraId': value['lraId'],
-        'activationDate': value['activationDate'] == null ? undefined : ((value['activationDate']).toISOString().substring(0,10)),
+        'activationDate': CalendarDateToJSON(value['activationDate']),
         'curePeriodDays': value['curePeriodDays'],
     };
 }

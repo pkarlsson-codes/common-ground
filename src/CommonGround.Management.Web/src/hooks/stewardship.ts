@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { StewardshipApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
+import type { CalendarDate } from '../lib/calendarDate'
 
 const api = new StewardshipApi(apiConfig)
 
@@ -57,13 +58,13 @@ export function useInitiateOccupancyVerification() {
   return useStewardshipMutation(({ caseId, periodYear, surveyDeadline }: {
     caseId: string
     periodYear: number
-    surveyDeadline?: string
+    surveyDeadline?: CalendarDate
   }) =>
     api.initiateOccupancyVerification({
       caseId,
       initiateOccupancyVerificationRequest: {
         periodYear,
-        surveyDeadline: surveyDeadline ? new Date(surveyDeadline) : undefined,
+        surveyDeadline,
       },
     }))
 }
@@ -75,7 +76,7 @@ export function useSubmitOccupancyVerification() {
     isPrimaryResident: boolean
     subletDisclosed: boolean
     majorChanges?: string
-    submittedDate: string
+    submittedDate: CalendarDate
   }) =>
     api.submitOccupancyVerification({
       caseId,
@@ -84,7 +85,7 @@ export function useSubmitOccupancyVerification() {
         isPrimaryResident,
         subletDisclosed,
         majorChanges,
-        submittedDate: new Date(submittedDate),
+        submittedDate: submittedDate,
       },
     }))
 }
@@ -93,12 +94,12 @@ export function useMarkOccupancyVerificationOverdue() {
   return useStewardshipMutation(({ caseId, verificationId, deadline }: {
     caseId: string
     verificationId: string
-    deadline: string
+    deadline: CalendarDate
   }) =>
     api.markOccupancyVerificationOverdue({
       caseId,
       verificationId,
-      markOccupancyVerificationOverdueRequest: { deadline: new Date(deadline) },
+      markOccupancyVerificationOverdueRequest: { deadline: deadline },
     }))
 }
 
@@ -106,12 +107,12 @@ export function useVerifyOccupancy() {
   return useStewardshipMutation(({ caseId, verificationId, verifiedDate }: {
     caseId: string
     verificationId: string
-    verifiedDate: string
+    verifiedDate: CalendarDate
   }) =>
     api.verifyOccupancy({
       caseId,
       verificationId,
-      verifyOccupancyRequest: { verifiedDate: new Date(verifiedDate) },
+      verifyOccupancyRequest: { verifiedDate: verifiedDate },
     }))
 }
 
@@ -120,12 +121,12 @@ export function useFailOccupancy() {
     caseId: string
     verificationId: string
     reason: string
-    failedDate: string
+    failedDate: CalendarDate
   }) =>
     api.failOccupancy({
       caseId,
       verificationId,
-      failOccupancyRequest: { reason, failedDate: new Date(failedDate) },
+      failOccupancyRequest: { reason, failedDate: failedDate },
     }))
 }
 
@@ -134,12 +135,12 @@ export function useFailOccupancy() {
 export function useSchedulePropertyInspection() {
   return useStewardshipMutation(({ caseId, scheduledDate, inspectorName }: {
     caseId: string
-    scheduledDate: string
+    scheduledDate: CalendarDate
     inspectorName: string
   }) =>
     api.schedulePropertyInspection({
       caseId,
-      schedulePropertyInspectionRequest: { scheduledDate: new Date(scheduledDate), inspectorName },
+      schedulePropertyInspectionRequest: { scheduledDate: scheduledDate, inspectorName },
     }))
 }
 
@@ -149,7 +150,7 @@ export function useCompletePropertyInspection() {
     inspectionId: string
     occupancyConfirmed: boolean
     conditionNotes?: string
-    completedDate: string
+    completedDate: CalendarDate
   }) =>
     api.completePropertyInspection({
       caseId,
@@ -157,7 +158,7 @@ export function useCompletePropertyInspection() {
       completePropertyInspectionRequest: {
         occupancyConfirmed,
         conditionNotes,
-        completedDate: new Date(completedDate),
+        completedDate: completedDate,
       },
     }))
 }
@@ -182,11 +183,11 @@ export function useIdentifyViolation() {
     caseId: string
     violationType: string
     description: string
-    identifiedDate: string
+    identifiedDate: CalendarDate
   }) =>
     api.identifyViolation({
       caseId,
-      identifyViolationRequest: { violationType, description, identifiedDate: new Date(identifiedDate) },
+      identifyViolationRequest: { violationType, description, identifiedDate: identifiedDate },
     }))
 }
 
@@ -194,13 +195,13 @@ export function useIssueViolationNotice() {
   return useStewardshipMutation(({ caseId, violationId, noticeDate, cureDeadline }: {
     caseId: string
     violationId: string
-    noticeDate: string
-    cureDeadline: string
+    noticeDate: CalendarDate
+    cureDeadline: CalendarDate
   }) =>
     api.issueViolationNotice({
       caseId,
       violationId,
-      issueViolationNoticeRequest: { noticeDate: new Date(noticeDate), cureDeadline: new Date(cureDeadline) },
+      issueViolationNoticeRequest: { noticeDate: noticeDate, cureDeadline: cureDeadline },
     }))
 }
 
@@ -208,12 +209,12 @@ export function useCureViolation() {
   return useStewardshipMutation(({ caseId, violationId, curedDate }: {
     caseId: string
     violationId: string
-    curedDate: string
+    curedDate: CalendarDate
   }) =>
     api.cureViolation({
       caseId,
       violationId,
-      cureViolationRequest: { curedDate: new Date(curedDate) },
+      cureViolationRequest: { curedDate: curedDate },
     }))
 }
 
@@ -222,12 +223,12 @@ export function useEscalateViolation() {
     caseId: string
     violationId: string
     reason: string
-    escalatedDate: string
+    escalatedDate: CalendarDate
   }) =>
     api.escalateViolation({
       caseId,
       violationId,
-      escalateViolationRequest: { reason, escalatedDate: new Date(escalatedDate) },
+      escalateViolationRequest: { reason, escalatedDate: escalatedDate },
     }))
 }
 
@@ -238,10 +239,10 @@ export function useOpenForeclosurePreventionCase() {
     groundLeaseId: string
     servicerName: string
     delinquentMonths: number
-    recordedDate: string
+    recordedDate: CalendarDate
   }) =>
     api.openForeclosurePreventionCase({
-      openForeclosurePreventionCaseRequest: { ...body, recordedDate: new Date(body.recordedDate) },
+      openForeclosurePreventionCaseRequest: { ...body, recordedDate: body.recordedDate },
     }))
 }
 
@@ -250,11 +251,11 @@ export function useRecordServicerDelinquency() {
     caseId: string
     servicerName: string
     delinquentMonths: number
-    recordedDate: string
+    recordedDate: CalendarDate
   }) =>
     api.recordServicerDelinquency({
       caseId,
-      recordServicerDelinquencyRequest: { ...body, recordedDate: new Date(body.recordedDate) },
+      recordServicerDelinquencyRequest: { ...body, recordedDate: body.recordedDate },
     }))
 }
 
@@ -262,11 +263,11 @@ export function useMakeCounselingReferral() {
   return useStewardshipMutation(({ caseId, agencyName, referralDate }: {
     caseId: string
     agencyName: string
-    referralDate: string
+    referralDate: CalendarDate
   }) =>
     api.makeCounselingReferral({
       caseId,
-      makeCounselingReferralRequest: { agencyName, referralDate: new Date(referralDate) },
+      makeCounselingReferralRequest: { agencyName, referralDate: referralDate },
     }))
 }
 
@@ -275,12 +276,12 @@ export function useRecordCounselingOutcome() {
     caseId: string
     referralId: string
     outcome: string
-    outcomeDate: string
+    outcomeDate: CalendarDate
   }) =>
     api.recordCounselingOutcome({
       caseId,
       referralId,
-      recordCounselingOutcomeRequest: { outcome, outcomeDate: new Date(outcomeDate) },
+      recordCounselingOutcomeRequest: { outcome, outcomeDate: outcomeDate },
     }))
 }
 
@@ -288,11 +289,11 @@ export function useRequestForbearance() {
   return useStewardshipMutation(({ caseId, lenderName, requestedDate }: {
     caseId: string
     lenderName: string
-    requestedDate: string
+    requestedDate: CalendarDate
   }) =>
     api.requestForbearance({
       caseId,
-      requestForbearanceRequest: { lenderName, requestedDate: new Date(requestedDate) },
+      requestForbearanceRequest: { lenderName, requestedDate: requestedDate },
     }))
 }
 
@@ -301,13 +302,13 @@ export function useRecordForbearanceOutcome() {
     caseId: string
     requestId: string
     outcome: string
-    outcomeDate: string
+    outcomeDate: CalendarDate
     notes?: string
   }) =>
     api.recordForbearanceOutcome({
       caseId,
       requestId,
-      recordForbearanceOutcomeRequest: { outcome, outcomeDate: new Date(outcomeDate), notes },
+      recordForbearanceOutcomeRequest: { outcome, outcomeDate: outcomeDate, notes },
     }))
 }
 
@@ -315,12 +316,12 @@ export function useActivateCurePeriod() {
   return useStewardshipMutation(({ caseId, lraId, activationDate, curePeriodDays }: {
     caseId: string
     lraId: string
-    activationDate: string
+    activationDate: CalendarDate
     curePeriodDays: number
   }) =>
     api.activateCurePeriod({
       caseId,
-      activateCurePeriodRequest: { lraId, activationDate: new Date(activationDate), curePeriodDays },
+      activateCurePeriodRequest: { lraId, activationDate: activationDate, curePeriodDays },
     }))
 }
 
@@ -328,10 +329,10 @@ export function useResolveForeclosurePreventionCase() {
   return useStewardshipMutation(({ caseId, outcome, resolvedDate }: {
     caseId: string
     outcome: string
-    resolvedDate: string
+    resolvedDate: CalendarDate
   }) =>
     api.resolveForeclosurePreventionCase({
       caseId,
-      resolveForeclosurePreventionCaseRequest: { outcome, resolvedDate: new Date(resolvedDate) },
+      resolveForeclosurePreventionCaseRequest: { outcome, resolvedDate: resolvedDate },
     }))
 }

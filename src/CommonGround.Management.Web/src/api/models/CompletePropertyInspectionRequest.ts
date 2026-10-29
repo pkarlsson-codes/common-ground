@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record the completion of a property inspection.
  * @export
@@ -34,10 +42,10 @@ export interface CompletePropertyInspectionRequest {
     conditionNotes?: string | null;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof CompletePropertyInspectionRequest
      */
-    completedDate?: Date;
+    completedDate?: CalendarDate;
 }
 
 /**
@@ -59,7 +67,7 @@ export function CompletePropertyInspectionRequestFromJSONTyped(json: any, ignore
         
         'occupancyConfirmed': json['occupancyConfirmed'] == null ? undefined : json['occupancyConfirmed'],
         'conditionNotes': json['conditionNotes'] == null ? undefined : json['conditionNotes'],
-        'completedDate': json['completedDate'] == null ? undefined : (new Date(json['completedDate'])),
+        'completedDate': json['completedDate'] == null ? undefined : CalendarDateFromJSON(json['completedDate']),
     };
 }
 
@@ -76,7 +84,7 @@ export function CompletePropertyInspectionRequestToJSONTyped(value?: CompletePro
         
         'occupancyConfirmed': value['occupancyConfirmed'],
         'conditionNotes': value['conditionNotes'],
-        'completedDate': value['completedDate'] == null ? undefined : ((value['completedDate']).toISOString().substring(0,10)),
+        'completedDate': CalendarDateToJSON(value['completedDate']),
     };
 }
 

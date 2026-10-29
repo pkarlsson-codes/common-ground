@@ -14,6 +14,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
 import type { DocumentAttachmentResponse } from './DocumentAttachmentResponse';
 import {
     DocumentAttachmentResponseFromJSON,
@@ -103,10 +110,10 @@ export interface DocumentResponse {
     isDeleted?: boolean;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof DocumentResponse
      */
-    expiresOn?: Date | null;
+    expiresOn?: CalendarDate | null;
     /**
      * 
      * @type {Array<string>}
@@ -155,7 +162,7 @@ export function DocumentResponseFromJSONTyped(json: any, ignoreDiscriminator: bo
         'uploadedBy': json['uploadedBy'] == null ? undefined : json['uploadedBy'],
         'uploadedAt': json['uploadedAt'] == null ? undefined : (new Date(json['uploadedAt'])),
         'isDeleted': json['isDeleted'] == null ? undefined : json['isDeleted'],
-        'expiresOn': json['expiresOn'] == null ? undefined : (new Date(json['expiresOn'])),
+        'expiresOn': json['expiresOn'] == null ? undefined : CalendarDateFromJSON(json['expiresOn']),
         'tags': json['tags'] == null ? undefined : json['tags'],
         'versions': json['versions'] == null ? undefined : ((json['versions'] as Array<any>).map(DocumentVersionResponseFromJSON)),
         'attachments': json['attachments'] == null ? undefined : ((json['attachments'] as Array<any>).map(DocumentAttachmentResponseFromJSON)),
@@ -184,7 +191,7 @@ export function DocumentResponseToJSONTyped(value?: DocumentResponse | null, ign
         'uploadedBy': value['uploadedBy'],
         'uploadedAt': value['uploadedAt'] == null ? undefined : ((value['uploadedAt']).toISOString()),
         'isDeleted': value['isDeleted'],
-        'expiresOn': value['expiresOn'] === null ? null : ((value['expiresOn'] as any)?.toISOString().substring(0,10)),
+        'expiresOn': CalendarDateToJSON(value['expiresOn']),
         'tags': value['tags'],
         'versions': value['versions'] == null ? undefined : ((value['versions'] as Array<any>).map(DocumentVersionResponseToJSON)),
         'attachments': value['attachments'] == null ? undefined : ((value['attachments'] as Array<any>).map(DocumentAttachmentResponseToJSON)),

@@ -14,6 +14,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
 import type { PropertyInspectionResponse } from './PropertyInspectionResponse';
 import {
     PropertyInspectionResponseFromJSON,
@@ -62,16 +69,16 @@ export interface StewardshipCaseResponse {
     status?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof StewardshipCaseResponse
      */
-    openedDate?: Date;
+    openedDate?: CalendarDate;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof StewardshipCaseResponse
      */
-    closedDate?: Date | null;
+    closedDate?: CalendarDate | null;
     /**
      * 
      * @type {Array<OccupancyVerificationResponse>}
@@ -112,8 +119,8 @@ export function StewardshipCaseResponseFromJSONTyped(json: any, ignoreDiscrimina
         'id': json['id'] == null ? undefined : json['id'],
         'groundLeaseId': json['groundLeaseId'] == null ? undefined : json['groundLeaseId'],
         'status': json['status'] == null ? undefined : json['status'],
-        'openedDate': json['openedDate'] == null ? undefined : (new Date(json['openedDate'])),
-        'closedDate': json['closedDate'] == null ? undefined : (new Date(json['closedDate'])),
+        'openedDate': json['openedDate'] == null ? undefined : CalendarDateFromJSON(json['openedDate']),
+        'closedDate': json['closedDate'] == null ? undefined : CalendarDateFromJSON(json['closedDate']),
         'occupancyVerifications': json['occupancyVerifications'] == null ? undefined : ((json['occupancyVerifications'] as Array<any>).map(OccupancyVerificationResponseFromJSON)),
         'propertyInspections': json['propertyInspections'] == null ? undefined : ((json['propertyInspections'] as Array<any>).map(PropertyInspectionResponseFromJSON)),
         'leaseViolations': json['leaseViolations'] == null ? undefined : ((json['leaseViolations'] as Array<any>).map(LeaseViolationResponseFromJSON)),
@@ -134,8 +141,8 @@ export function StewardshipCaseResponseToJSONTyped(value?: StewardshipCaseRespon
         'id': value['id'],
         'groundLeaseId': value['groundLeaseId'],
         'status': value['status'],
-        'openedDate': value['openedDate'] == null ? undefined : ((value['openedDate']).toISOString().substring(0,10)),
-        'closedDate': value['closedDate'] === null ? null : ((value['closedDate'] as any)?.toISOString().substring(0,10)),
+        'openedDate': CalendarDateToJSON(value['openedDate']),
+        'closedDate': CalendarDateToJSON(value['closedDate']),
         'occupancyVerifications': value['occupancyVerifications'] == null ? undefined : ((value['occupancyVerifications'] as Array<any>).map(OccupancyVerificationResponseToJSON)),
         'propertyInspections': value['propertyInspections'] == null ? undefined : ((value['propertyInspections'] as Array<any>).map(PropertyInspectionResponseToJSON)),
         'leaseViolations': value['leaseViolations'] == null ? undefined : ((value['leaseViolations'] as Array<any>).map(LeaseViolationResponseToJSON)),

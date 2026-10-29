@@ -9,9 +9,9 @@ import {
 import type { LeaseViolationResponse, StewardshipCaseResponse } from '../../api/models'
 import { useToast } from '../../hooks/useToast'
 import { getErrorMessage } from '../../lib/getErrorMessage'
-import { localToday } from '../../lib/dates'
+import { trustToday } from '../../lib/calendarDate'
 import { LEASE_VIOLATION_TYPE_LABELS } from '../../hooks/types'
-import { fmtD, today } from './format'
+import { DateInput } from '../DateInput'
 
 interface Props {
   sc: StewardshipCaseResponse
@@ -35,13 +35,13 @@ export default function LeaseViolationSection({ sc }: Props) {
   const active = violations.filter(v => ACTIVE_STATUSES.has(v.status ?? ''))
   const history = violations
     .filter(v => TERMINAL_STATUSES.has(v.status ?? ''))
-    .sort((a, b) => ((b.identifiedDate?.getTime() ?? 0) - (a.identifiedDate?.getTime() ?? 0)))
+    .sort((a, b) => (b.identifiedDate ?? '').localeCompare(a.identifiedDate ?? ''))
 
   const [identifyOpen, setIdentifyOpen] = useState(false)
   const [identifyForm, setIdentifyForm] = useState({
     violationType: 'Occupancy',
     description: '',
-    identifiedDate: today(),
+    identifiedDate: trustToday(),
   })
   const [historyOpen, setHistoryOpen] = useState(false)
 
@@ -50,7 +50,7 @@ export default function LeaseViolationSection({ sc }: Props) {
     try {
       await identifyMutation.mutateAsync({ caseId, ...identifyForm })
       success('Violation identified')
-      setIdentifyForm({ violationType: 'Occupancy', description: '', identifiedDate: today() })
+      setIdentifyForm({ violationType: 'Occupancy', description: '', identifiedDate: trustToday() })
       setIdentifyOpen(false)
     } catch (err) {
       showError(await getErrorMessage(err, 'Failed to identify violation'))
@@ -107,12 +107,11 @@ export default function LeaseViolationSection({ sc }: Props) {
             </div>
             <div className="form-field">
               <label className="form-label">Identified Date</label>
-              <input
+              <DateInput
                 className="form-input"
-                type="date"
                 value={identifyForm.identifiedDate}
-                onChange={e =>
-                  setIdentifyForm(f => ({ ...f, identifiedDate: e.target.value }))
+                onChange={v =>
+                  setIdentifyForm(f => ({ ...f, identifiedDate: v }))
                 }
                 required
               />
@@ -180,7 +179,7 @@ interface ViolationCardProps {
 }
 
 /** Default cure deadline: 30 days after the notice. */
-const plus30Days = () => localToday(30)
+const plus30Days = () => trustToday(30)
 
 function ViolationCard({
   v,
@@ -192,13 +191,13 @@ function ViolationCard({
   success,
 }: ViolationCardProps) {
   const isCureOverdue =
-    v.status === 'NoticeIssued' && (fmtD(v.cureDeadline) ?? '9999') < today()
+    v.status === 'NoticeIssued' && (v.cureDeadline ?? '9999') < trustToday()
 
-  const [noticeForm, setNoticeForm] = useState({ noticeDate: today(), cureDeadline: plus30Days() })
-  const [cureForm, setCureForm] = useState({ curedDate: today() })
+  const [noticeForm, setNoticeForm] = useState({ noticeDate: trustToday(), cureDeadline: plus30Days() })
+  const [cureForm, setCureForm] = useState({ curedDate: trustToday() })
   const [escalateForm, setEscalateForm] = useState({
     reason: '',
-    escalatedDate: today(),
+    escalatedDate: trustToday(),
   })
 
   const handleNotice = async (e: React.FormEvent) => {
@@ -246,9 +245,9 @@ function ViolationCard({
       </div>
       <div style={{ fontSize: 13, marginBottom: 6 }}>{v.description}</div>
       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-dim)', marginBottom: 10 }}>
-        Identified {fmtD(v.identifiedDate)}
-        {v.noticeIssuedDate && ` · Notice ${fmtD(v.noticeIssuedDate)}`}
-        {v.cureDeadline && ` · Cure by ${fmtD(v.cureDeadline)}`}
+        Identified {v.identifiedDate}
+        {v.noticeIssuedDate && ` · Notice ${v.noticeIssuedDate}`}
+        {v.cureDeadline && ` · Cure by ${v.cureDeadline}`}
         {isCureOverdue && ' · OVERDUE'}
       </div>
 
@@ -258,21 +257,19 @@ function ViolationCard({
           <div className="form-grid" style={{ marginBottom: 12 }}>
             <div className="form-field">
               <label className="form-label">Notice Date</label>
-              <input
+              <DateInput
                 className="form-input"
-                type="date"
                 value={noticeForm.noticeDate}
-                onChange={e => setNoticeForm(f => ({ ...f, noticeDate: e.target.value }))}
+                onChange={v => setNoticeForm(f => ({ ...f, noticeDate: v }))}
                 required
               />
             </div>
             <div className="form-field">
               <label className="form-label">Cure Deadline</label>
-              <input
+              <DateInput
                 className="form-input"
-                type="date"
                 value={noticeForm.cureDeadline}
-                onChange={e => setNoticeForm(f => ({ ...f, cureDeadline: e.target.value }))}
+                onChange={v => setNoticeForm(f => ({ ...f, cureDeadline: v }))}
                 required
               />
             </div>
@@ -294,11 +291,10 @@ function ViolationCard({
             <div className="form-grid" style={{ marginBottom: 12 }}>
               <div className="form-field">
                 <label className="form-label">Cured Date</label>
-                <input
+                <DateInput
                   className="form-input"
-                  type="date"
                   value={cureForm.curedDate}
-                  onChange={e => setCureForm(f => ({ ...f, curedDate: e.target.value }))}
+                  onChange={v => setCureForm(f => ({ ...f, curedDate: v }))}
                   required
                 />
               </div>
@@ -325,11 +321,10 @@ function ViolationCard({
               </div>
               <div className="form-field">
                 <label className="form-label">Escalation Date</label>
-                <input
+                <DateInput
                   className="form-input"
-                  type="date"
                   value={escalateForm.escalatedDate}
-                  onChange={e => setEscalateForm(f => ({ ...f, escalatedDate: e.target.value }))}
+                  onChange={v => setEscalateForm(f => ({ ...f, escalatedDate: v }))}
                   required
                 />
               </div>
@@ -359,8 +354,8 @@ function ViolationHistoryRow({ v }: { v: LeaseViolationResponse }) {
       }}
     >
       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-secondary)' }}>
-        {violationTypeLabel(v.violationType)} · {fmtD(v.identifiedDate)} · <StatusBadge status={v.status ?? ''} />
-        {v.resolutionDate && ` · ${fmtD(v.resolutionDate)}`}
+        {violationTypeLabel(v.violationType)} · {v.identifiedDate} · <StatusBadge status={v.status ?? ''} />
+        {v.resolutionDate && ` · ${v.resolutionDate}`}
       </div>
       <div style={{ color: 'var(--text-dim)', marginTop: 2 }}>{v.description}</div>
       {v.resolutionNotes && (

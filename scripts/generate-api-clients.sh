@@ -48,6 +48,31 @@ fi
 echo "Generating TypeScript API clients..."
 npm --prefix "$FRONTEND_PATH" run generate-api-from-spec
 
+# format: date is mapped to CalendarDate, which the generator imports from ./CalendarDate as if it
+# were a model. This shim points it at the hand-written type and checks values coming off the wire.
+cat > "$FRONTEND_PATH/src/api/models/CalendarDate.ts" <<'TS'
+import { parseCalendarDate, type CalendarDate } from '../../lib/calendarDate'
+
+export type { CalendarDate }
+
+export function CalendarDateFromJSON(json: any): CalendarDate {
+    return parseCalendarDate(json)
+}
+
+export function CalendarDateFromJSONTyped(json: any, _ignoreDiscriminator: boolean): CalendarDate {
+    return parseCalendarDate(json)
+}
+
+export function CalendarDateToJSON(value?: CalendarDate | null): any {
+    return value
+}
+
+export function CalendarDateToJSONTyped(value?: CalendarDate | null, _ignoreDiscriminator: boolean = false): any {
+    return value
+}
+TS
+echo "export * from './CalendarDate';" >> "$FRONTEND_PATH/src/api/models/index.ts"
+
 echo "OpenAPI specification and API clients generation completed successfully!"
 echo "Adding // @ts-nocheck to all generated API files..."
 find "$FRONTEND_PATH/src/api" -type f -name "*.ts" -exec \

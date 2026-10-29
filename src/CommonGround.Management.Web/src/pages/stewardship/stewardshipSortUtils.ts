@@ -1,6 +1,7 @@
 import type { StewardshipCaseResponse } from '../../api/models/StewardshipCaseResponse'
 import type { OccupancyVerificationResponse } from '../../api/models/OccupancyVerificationResponse'
 import type { StewardshipQueueItemResponse } from '../../api/models/StewardshipQueueItemResponse'
+import { addDays, trustToday, yearOf, type CalendarDate } from '../../lib/calendarDate'
 
 export type UrgencyLevel = 'red' | 'orange' | 'yellow' | 'neutral'
 
@@ -18,9 +19,9 @@ export type UrgencyLevel = 'red' | 'orange' | 'yellow' | 'neutral'
  */
 export function classifyUrgency(
   sc: StewardshipCaseResponse,
-  today: Date = new Date(),
+  today: CalendarDate = trustToday(),
 ): UrgencyLevel {
-  const currentYear = today.getFullYear()
+  const currentYear = yearOf(today)
 
   const currentVerification = (sc.occupancyVerifications ?? []).find(
     v => v.periodYear === currentYear,
@@ -39,7 +40,7 @@ export function classifyUrgency(
   const hasOverdueCure = (sc.leaseViolations ?? []).some(v => {
     if (v.status !== 'NoticeIssued') return false
     if (!v.cureDeadline) return false
-    return new Date(v.cureDeadline) < today
+    return v.cureDeadline < today
   })
   if (hasOverdueCure) return 'red'
 
@@ -49,12 +50,8 @@ export function classifyUrgency(
 
   // Rule 4: Pending verification within 30 days
   if (currentVerification && currentVerification.status === 'Pending') {
-    if (currentVerification.surveyDeadline) {
-      const deadline = new Date(currentVerification.surveyDeadline)
-      const msIn30Days = 30 * 24 * 60 * 60 * 1000
-      if (deadline.getTime() - today.getTime() <= msIn30Days) {
-        return 'yellow'
-      }
+    if (currentVerification.surveyDeadline && currentVerification.surveyDeadline <= addDays(today, 30)) {
+      return 'yellow'
     }
   }
 
@@ -86,8 +83,8 @@ export interface StewardshipQueueRow {
   address: string
   currentVerification: OccupancyVerificationResponse | null
   activeViolationCount: number
-  nextInspectionDate: Date | null
-  openedDate: Date
+  nextInspectionDate: CalendarDate | null
+  openedDate: CalendarDate
   urgency: UrgencyLevel
 }
 
@@ -96,9 +93,9 @@ export interface StewardshipQueueRow {
  */
 export function buildStewardshipQueue(
   items: StewardshipQueueItemResponse[],
-  today: Date = new Date(),
+  today: CalendarDate = trustToday(),
 ): StewardshipQueueRow[] {
-  const currentYear = today.getFullYear()
+  const currentYear = yearOf(today)
 
   const rows: StewardshipQueueRow[] = items.map(({ stewardshipCase: sc, homeownerFullName, address }) => {
     const currentVerification =
@@ -111,8 +108,8 @@ export function buildStewardshipQueue(
     // Next inspection = earliest Scheduled inspection date
     const scheduledDates = (sc.propertyInspections ?? [])
       .filter(i => i.status === 'Scheduled' && i.scheduledDate)
-      .map(i => new Date(i.scheduledDate!))
-      .sort((a, b) => a.getTime() - b.getTime())
+      .map(i => i.scheduledDate!)
+      .sort()
     const nextInspectionDate = scheduledDates[0] ?? null
 
     return {
@@ -132,7 +129,7 @@ export function buildStewardshipQueue(
   rows.sort((a, b) => {
     const w = URGENCY_WEIGHT[a.urgency] - URGENCY_WEIGHT[b.urgency]
     if (w !== 0) return w
-    return a.openedDate.getTime() - b.openedDate.getTime()
+    return a.openedDate.localeCompare(b.openedDate)
   })
 
   return rows

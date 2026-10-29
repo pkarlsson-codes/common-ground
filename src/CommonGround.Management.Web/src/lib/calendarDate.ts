@@ -42,6 +42,8 @@ export const addDays = (date: CalendarDate, days: number): CalendarDate => {
   return fromUtcDate(d)
 }
 
+export const yearOf = (date: CalendarDate) => Number(date.slice(0, 4))
+
 /** Today in the given IANA time zone. */
 export const todayIn = (timeZone: string, now = new Date()): CalendarDate =>
   // en-CA formats as YYYY-MM-DD.

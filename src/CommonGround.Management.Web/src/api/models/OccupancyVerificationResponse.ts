@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Occupancy verification entry within a stewardship case.
  * @export
@@ -34,10 +42,10 @@ export interface OccupancyVerificationResponse {
     periodYear?: number;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof OccupancyVerificationResponse
      */
-    surveyDeadline?: Date | null;
+    surveyDeadline?: CalendarDate | null;
     /**
      * 
      * @type {string}
@@ -64,16 +72,16 @@ export interface OccupancyVerificationResponse {
     majorChanges?: string | null;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof OccupancyVerificationResponse
      */
-    submittedDate?: Date | null;
+    submittedDate?: CalendarDate | null;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof OccupancyVerificationResponse
      */
-    decisionDate?: Date | null;
+    decisionDate?: CalendarDate | null;
     /**
      * 
      * @type {string}
@@ -101,13 +109,13 @@ export function OccupancyVerificationResponseFromJSONTyped(json: any, ignoreDisc
         
         'id': json['id'] == null ? undefined : json['id'],
         'periodYear': json['periodYear'] == null ? undefined : json['periodYear'],
-        'surveyDeadline': json['surveyDeadline'] == null ? undefined : (new Date(json['surveyDeadline'])),
+        'surveyDeadline': json['surveyDeadline'] == null ? undefined : CalendarDateFromJSON(json['surveyDeadline']),
         'status': json['status'] == null ? undefined : json['status'],
         'isPrimaryResident': json['isPrimaryResident'] == null ? undefined : json['isPrimaryResident'],
         'subletDisclosed': json['subletDisclosed'] == null ? undefined : json['subletDisclosed'],
         'majorChanges': json['majorChanges'] == null ? undefined : json['majorChanges'],
-        'submittedDate': json['submittedDate'] == null ? undefined : (new Date(json['submittedDate'])),
-        'decisionDate': json['decisionDate'] == null ? undefined : (new Date(json['decisionDate'])),
+        'submittedDate': json['submittedDate'] == null ? undefined : CalendarDateFromJSON(json['submittedDate']),
+        'decisionDate': json['decisionDate'] == null ? undefined : CalendarDateFromJSON(json['decisionDate']),
         'reason': json['reason'] == null ? undefined : json['reason'],
     };
 }
@@ -125,13 +133,13 @@ export function OccupancyVerificationResponseToJSONTyped(value?: OccupancyVerifi
         
         'id': value['id'],
         'periodYear': value['periodYear'],
-        'surveyDeadline': value['surveyDeadline'] === null ? null : ((value['surveyDeadline'] as any)?.toISOString().substring(0,10)),
+        'surveyDeadline': CalendarDateToJSON(value['surveyDeadline']),
         'status': value['status'],
         'isPrimaryResident': value['isPrimaryResident'],
         'subletDisclosed': value['subletDisclosed'],
         'majorChanges': value['majorChanges'],
-        'submittedDate': value['submittedDate'] === null ? null : ((value['submittedDate'] as any)?.toISOString().substring(0,10)),
-        'decisionDate': value['decisionDate'] === null ? null : ((value['decisionDate'] as any)?.toISOString().substring(0,10)),
+        'submittedDate': CalendarDateToJSON(value['submittedDate']),
+        'decisionDate': CalendarDateToJSON(value['decisionDate']),
         'reason': value['reason'],
     };
 }

@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to submit homeowner responses to an occupancy verification.
  * @export
@@ -40,10 +48,10 @@ export interface SubmitOccupancyVerificationRequest {
     majorChanges?: string | null;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof SubmitOccupancyVerificationRequest
      */
-    submittedDate?: Date;
+    submittedDate?: CalendarDate;
 }
 
 /**
@@ -66,7 +74,7 @@ export function SubmitOccupancyVerificationRequestFromJSONTyped(json: any, ignor
         'isPrimaryResident': json['isPrimaryResident'] == null ? undefined : json['isPrimaryResident'],
         'subletDisclosed': json['subletDisclosed'] == null ? undefined : json['subletDisclosed'],
         'majorChanges': json['majorChanges'] == null ? undefined : json['majorChanges'],
-        'submittedDate': json['submittedDate'] == null ? undefined : (new Date(json['submittedDate'])),
+        'submittedDate': json['submittedDate'] == null ? undefined : CalendarDateFromJSON(json['submittedDate']),
     };
 }
 
@@ -84,7 +92,7 @@ export function SubmitOccupancyVerificationRequestToJSONTyped(value?: SubmitOccu
         'isPrimaryResident': value['isPrimaryResident'],
         'subletDisclosed': value['subletDisclosed'],
         'majorChanges': value['majorChanges'],
-        'submittedDate': value['submittedDate'] == null ? undefined : ((value['submittedDate']).toISOString().substring(0,10)),
+        'submittedDate': CalendarDateToJSON(value['submittedDate']),
     };
 }
 

@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to make a housing counseling referral on a foreclosure prevention case.
  * @export
@@ -28,10 +36,10 @@ export interface MakeCounselingReferralRequest {
     agencyName?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof MakeCounselingReferralRequest
      */
-    referralDate?: Date;
+    referralDate?: CalendarDate;
 }
 
 /**
@@ -52,7 +60,7 @@ export function MakeCounselingReferralRequestFromJSONTyped(json: any, ignoreDisc
     return {
         
         'agencyName': json['agencyName'] == null ? undefined : json['agencyName'],
-        'referralDate': json['referralDate'] == null ? undefined : (new Date(json['referralDate'])),
+        'referralDate': json['referralDate'] == null ? undefined : CalendarDateFromJSON(json['referralDate']),
     };
 }
 
@@ -68,7 +76,7 @@ export function MakeCounselingReferralRequestToJSONTyped(value?: MakeCounselingR
     return {
         
         'agencyName': value['agencyName'],
-        'referralDate': value['referralDate'] == null ? undefined : ((value['referralDate']).toISOString().substring(0,10)),
+        'referralDate': CalendarDateToJSON(value['referralDate']),
     };
 }
 

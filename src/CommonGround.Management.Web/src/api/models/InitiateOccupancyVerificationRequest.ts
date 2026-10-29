@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to initiate an annual occupancy verification.
  * @export
@@ -28,10 +36,10 @@ export interface InitiateOccupancyVerificationRequest {
     periodYear?: number;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof InitiateOccupancyVerificationRequest
      */
-    surveyDeadline?: Date | null;
+    surveyDeadline?: CalendarDate | null;
 }
 
 /**
@@ -52,7 +60,7 @@ export function InitiateOccupancyVerificationRequestFromJSONTyped(json: any, ign
     return {
         
         'periodYear': json['periodYear'] == null ? undefined : json['periodYear'],
-        'surveyDeadline': json['surveyDeadline'] == null ? undefined : (new Date(json['surveyDeadline'])),
+        'surveyDeadline': json['surveyDeadline'] == null ? undefined : CalendarDateFromJSON(json['surveyDeadline']),
     };
 }
 
@@ -68,7 +76,7 @@ export function InitiateOccupancyVerificationRequestToJSONTyped(value?: Initiate
     return {
         
         'periodYear': value['periodYear'],
-        'surveyDeadline': value['surveyDeadline'] === null ? null : ((value['surveyDeadline'] as any)?.toISOString().substring(0,10)),
+        'surveyDeadline': CalendarDateToJSON(value['surveyDeadline']),
     };
 }
 

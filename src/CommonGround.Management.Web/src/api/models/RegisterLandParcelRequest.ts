@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to register a new land parcel.
  * @export
@@ -40,10 +48,10 @@ export interface RegisterLandParcelRequest {
     areaAcres?: number;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof RegisterLandParcelRequest
      */
-    acquisitionDate?: Date;
+    acquisitionDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -78,7 +86,7 @@ export function RegisterLandParcelRequestFromJSONTyped(json: any, ignoreDiscrimi
         'legalParcelNumber': json['legalParcelNumber'] == null ? undefined : json['legalParcelNumber'],
         'address': json['address'] == null ? undefined : json['address'],
         'areaAcres': json['areaAcres'] == null ? undefined : json['areaAcres'],
-        'acquisitionDate': json['acquisitionDate'] == null ? undefined : (new Date(json['acquisitionDate'])),
+        'acquisitionDate': json['acquisitionDate'] == null ? undefined : CalendarDateFromJSON(json['acquisitionDate']),
         'acquisitionMethod': json['acquisitionMethod'] == null ? undefined : json['acquisitionMethod'],
         'covenantTerms': json['covenantTerms'] == null ? undefined : json['covenantTerms'],
     };
@@ -98,7 +106,7 @@ export function RegisterLandParcelRequestToJSONTyped(value?: RegisterLandParcelR
         'legalParcelNumber': value['legalParcelNumber'],
         'address': value['address'],
         'areaAcres': value['areaAcres'],
-        'acquisitionDate': value['acquisitionDate'] == null ? undefined : ((value['acquisitionDate']).toISOString().substring(0,10)),
+        'acquisitionDate': CalendarDateToJSON(value['acquisitionDate']),
         'acquisitionMethod': value['acquisitionMethod'],
         'covenantTerms': value['covenantTerms'],
     };

@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to register a new building on a land parcel.
  * @export
@@ -64,10 +72,10 @@ export interface RegisterHomeRequest {
     appraiserName?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof RegisterHomeRequest
      */
-    initialAssessedDate?: Date;
+    initialAssessedDate?: CalendarDate;
     /**
      * 
      * @type {number}
@@ -100,7 +108,7 @@ export function RegisterHomeRequestFromJSONTyped(json: any, ignoreDiscriminator:
         'squareFootage': json['squareFootage'] == null ? undefined : json['squareFootage'],
         'yearBuilt': json['yearBuilt'] == null ? undefined : json['yearBuilt'],
         'appraiserName': json['appraiserName'] == null ? undefined : json['appraiserName'],
-        'initialAssessedDate': json['initialAssessedDate'] == null ? undefined : (new Date(json['initialAssessedDate'])),
+        'initialAssessedDate': json['initialAssessedDate'] == null ? undefined : CalendarDateFromJSON(json['initialAssessedDate']),
         'initialAssessedValue': json['initialAssessedValue'] == null ? undefined : json['initialAssessedValue'],
     };
 }
@@ -123,7 +131,7 @@ export function RegisterHomeRequestToJSONTyped(value?: RegisterHomeRequest | nul
         'squareFootage': value['squareFootage'],
         'yearBuilt': value['yearBuilt'],
         'appraiserName': value['appraiserName'],
-        'initialAssessedDate': value['initialAssessedDate'] == null ? undefined : ((value['initialAssessedDate']).toISOString().substring(0,10)),
+        'initialAssessedDate': CalendarDateToJSON(value['initialAssessedDate']),
         'initialAssessedValue': value['initialAssessedValue'],
     };
 }

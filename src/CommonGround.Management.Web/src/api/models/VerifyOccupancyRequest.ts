@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record staff approval of an occupancy verification submission.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface VerifyOccupancyRequest {
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof VerifyOccupancyRequest
      */
-    verifiedDate?: Date;
+    verifiedDate?: CalendarDate;
 }
 
 /**
@@ -45,7 +53,7 @@ export function VerifyOccupancyRequestFromJSONTyped(json: any, ignoreDiscriminat
     }
     return {
         
-        'verifiedDate': json['verifiedDate'] == null ? undefined : (new Date(json['verifiedDate'])),
+        'verifiedDate': json['verifiedDate'] == null ? undefined : CalendarDateFromJSON(json['verifiedDate']),
     };
 }
 
@@ -60,7 +68,7 @@ export function VerifyOccupancyRequestToJSONTyped(value?: VerifyOccupancyRequest
 
     return {
         
-        'verifiedDate': value['verifiedDate'] == null ? undefined : ((value['verifiedDate']).toISOString().substring(0,10)),
+        'verifiedDate': CalendarDateToJSON(value['verifiedDate']),
     };
 }
 

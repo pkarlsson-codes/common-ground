@@ -1,7 +1,7 @@
 import type { HouseholdListItemResponse } from '../../api'
 import Pagination from '../../components/Pagination'
 import { getResponseStatus } from '../../lib/getErrorMessage'
-import { localToday } from '../../lib/dates'
+import { trustToday } from '../../lib/calendarDate'
 
 type Props = {
   households: HouseholdListItemResponse[]
@@ -19,7 +19,7 @@ type Props = {
   onRetry: () => void
 }
 
-const today = () => localToday()
+const today = () => trustToday()
 
 /** Mirrors the selection readiness rule: counseling, orientation and a prequalification valid today. */
 const isReady = (household: HouseholdListItemResponse) =>

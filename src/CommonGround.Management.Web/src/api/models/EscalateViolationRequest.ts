@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to escalate an unresolved lease violation.
  * @export
@@ -28,10 +36,10 @@ export interface EscalateViolationRequest {
     reason?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof EscalateViolationRequest
      */
-    escalatedDate?: Date;
+    escalatedDate?: CalendarDate;
 }
 
 /**
@@ -52,7 +60,7 @@ export function EscalateViolationRequestFromJSONTyped(json: any, ignoreDiscrimin
     return {
         
         'reason': json['reason'] == null ? undefined : json['reason'],
-        'escalatedDate': json['escalatedDate'] == null ? undefined : (new Date(json['escalatedDate'])),
+        'escalatedDate': json['escalatedDate'] == null ? undefined : CalendarDateFromJSON(json['escalatedDate']),
     };
 }
 
@@ -68,7 +76,7 @@ export function EscalateViolationRequestToJSONTyped(value?: EscalateViolationReq
     return {
         
         'reason': value['reason'],
-        'escalatedDate': value['escalatedDate'] == null ? undefined : ((value['escalatedDate']).toISOString().substring(0,10)),
+        'escalatedDate': CalendarDateToJSON(value['escalatedDate']),
     };
 }
 

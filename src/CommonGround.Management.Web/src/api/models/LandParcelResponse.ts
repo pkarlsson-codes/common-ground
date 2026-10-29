@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Response DTO for a land parcel detail view.
  * @export
@@ -46,10 +54,10 @@ export interface LandParcelResponse {
     areaAcres?: number;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof LandParcelResponse
      */
-    acquisitionDate?: Date;
+    acquisitionDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -103,7 +111,7 @@ export function LandParcelResponseFromJSONTyped(json: any, ignoreDiscriminator: 
         'legalParcelNumber': json['legalParcelNumber'] == null ? undefined : json['legalParcelNumber'],
         'address': json['address'] == null ? undefined : json['address'],
         'areaAcres': json['areaAcres'] == null ? undefined : json['areaAcres'],
-        'acquisitionDate': json['acquisitionDate'] == null ? undefined : (new Date(json['acquisitionDate'])),
+        'acquisitionDate': json['acquisitionDate'] == null ? undefined : CalendarDateFromJSON(json['acquisitionDate']),
         'acquisitionMethod': json['acquisitionMethod'] == null ? undefined : json['acquisitionMethod'],
         'covenantTerms': json['covenantTerms'] == null ? undefined : json['covenantTerms'],
         'isDecommissioned': json['isDecommissioned'] == null ? undefined : json['isDecommissioned'],
@@ -127,7 +135,7 @@ export function LandParcelResponseToJSONTyped(value?: LandParcelResponse | null,
         'legalParcelNumber': value['legalParcelNumber'],
         'address': value['address'],
         'areaAcres': value['areaAcres'],
-        'acquisitionDate': value['acquisitionDate'] == null ? undefined : ((value['acquisitionDate']).toISOString().substring(0,10)),
+        'acquisitionDate': CalendarDateToJSON(value['acquisitionDate']),
         'acquisitionMethod': value['acquisitionMethod'],
         'covenantTerms': value['covenantTerms'],
         'isDecommissioned': value['isDecommissioned'],

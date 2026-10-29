@@ -135,3 +135,4 @@ export * from './VerifyOccupancyRequest';
 export * from './WaitingListEntryResponse';
 export * from './WithdrawApplicationRequest';
 export * from './WithdrawPurchaseRequest';
+export * from './CalendarDate';

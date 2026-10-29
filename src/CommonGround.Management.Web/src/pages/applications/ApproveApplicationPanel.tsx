@@ -4,15 +4,16 @@ import SlideOver from '../../components/SlideOver'
 import { useApproveApplication } from '../../hooks/applications'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
-import { localToday } from '../../lib/dates'
+import { trustToday, type CalendarDate } from '../../lib/calendarDate'
+import { DateInput } from '../../components/DateInput'
 
 type FormState = {
-  approvedDate: string
+  approvedDate: CalendarDate
   notes: string
 }
 
 const emptyForm = (): FormState => ({
-  approvedDate: localToday(),
+  approvedDate: trustToday(),
   notes: '',
 })
 
@@ -69,11 +70,10 @@ export default function ApproveApplicationPanel({ applicationId, onClose }: Prop
         <div className="form-grid">
           <div className="form-field">
             <label className="form-label">Approved Date</label>
-            <input
+            <DateInput
               className="form-input"
-              type="date"
               value={form.approvedDate}
-              onChange={e => setForm(f => ({ ...f, approvedDate: e.target.value }))}
+              onChange={v => setForm(f => ({ ...f, approvedDate: v }))}
               required
             />
           </div>

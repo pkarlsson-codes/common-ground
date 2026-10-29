@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Response DTO for a home assessment list item.
  * @export
@@ -40,10 +48,10 @@ export interface HomeAssessmentItemResponse {
     assessedValue?: number;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof HomeAssessmentItemResponse
      */
-    assessmentDate?: Date;
+    assessmentDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -90,7 +98,7 @@ export function HomeAssessmentItemResponseFromJSONTyped(json: any, ignoreDiscrim
         'id': json['id'] == null ? undefined : json['id'],
         'homeId': json['homeId'] == null ? undefined : json['homeId'],
         'assessedValue': json['assessedValue'] == null ? undefined : json['assessedValue'],
-        'assessmentDate': json['assessmentDate'] == null ? undefined : (new Date(json['assessmentDate'])),
+        'assessmentDate': json['assessmentDate'] == null ? undefined : CalendarDateFromJSON(json['assessmentDate']),
         'conditionNotes': json['conditionNotes'] == null ? undefined : json['conditionNotes'],
         'appraiserName': json['appraiserName'] == null ? undefined : json['appraiserName'],
         'recordedBy': json['recordedBy'] == null ? undefined : json['recordedBy'],
@@ -112,7 +120,7 @@ export function HomeAssessmentItemResponseToJSONTyped(value?: HomeAssessmentItem
         'id': value['id'],
         'homeId': value['homeId'],
         'assessedValue': value['assessedValue'],
-        'assessmentDate': value['assessmentDate'] == null ? undefined : ((value['assessmentDate']).toISOString().substring(0,10)),
+        'assessmentDate': CalendarDateToJSON(value['assessmentDate']),
         'conditionNotes': value['conditionNotes'],
         'appraiserName': value['appraiserName'],
         'recordedBy': value['recordedBy'],

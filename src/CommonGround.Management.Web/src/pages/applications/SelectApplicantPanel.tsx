@@ -7,7 +7,8 @@ import { useSelectApplicant } from '../../hooks/applications'
 import { useToast } from '../../hooks/useToast'
 import { apiConfig } from '../../lib/apiConfig'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
-import { localToday } from '../../lib/dates'
+import { trustToday, type CalendarDate } from '../../lib/calendarDate'
+import { DateInput } from '../../components/DateInput'
 
 const homeownerApplicationsApi = new HomeownerApplicationsApi(apiConfig)
 const groundLeaseTemplatesApi = new GroundLeaseTemplatesApi(apiConfig)
@@ -16,14 +17,14 @@ type FormState = {
   applicationId: string
   groundLeaseTemplateId: string
   purchasePrice: number
-  selectedDate: string
+  selectedDate: CalendarDate
 }
 
 const emptyForm = (): FormState => ({
   applicationId: '',
   groundLeaseTemplateId: '',
   purchasePrice: 0,
-  selectedDate: localToday(),
+  selectedDate: trustToday(),
 })
 
 type Props = {
@@ -135,11 +136,10 @@ export default function SelectApplicantPanel({ homeId, onClose }: Props) {
           </div>
           <div className="form-field">
             <label className="form-label">Selected Date</label>
-            <input
+            <DateInput
               className="form-input"
-              type="date"
               value={form.selectedDate}
-              onChange={e => setForm(f => ({ ...f, selectedDate: e.target.value }))}
+              onChange={v => setForm(f => ({ ...f, selectedDate: v }))}
               required
             />
           </div>

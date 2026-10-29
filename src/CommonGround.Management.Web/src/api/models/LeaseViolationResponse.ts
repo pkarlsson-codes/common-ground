@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Lease violation entry within a stewardship case.
  * @export
@@ -40,10 +48,10 @@ export interface LeaseViolationResponse {
     description?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof LeaseViolationResponse
      */
-    identifiedDate?: Date;
+    identifiedDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -52,22 +60,22 @@ export interface LeaseViolationResponse {
     status?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof LeaseViolationResponse
      */
-    noticeIssuedDate?: Date | null;
+    noticeIssuedDate?: CalendarDate | null;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof LeaseViolationResponse
      */
-    cureDeadline?: Date | null;
+    cureDeadline?: CalendarDate | null;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof LeaseViolationResponse
      */
-    resolutionDate?: Date | null;
+    resolutionDate?: CalendarDate | null;
     /**
      * 
      * @type {string}
@@ -96,11 +104,11 @@ export function LeaseViolationResponseFromJSONTyped(json: any, ignoreDiscriminat
         'id': json['id'] == null ? undefined : json['id'],
         'violationType': json['violationType'] == null ? undefined : json['violationType'],
         'description': json['description'] == null ? undefined : json['description'],
-        'identifiedDate': json['identifiedDate'] == null ? undefined : (new Date(json['identifiedDate'])),
+        'identifiedDate': json['identifiedDate'] == null ? undefined : CalendarDateFromJSON(json['identifiedDate']),
         'status': json['status'] == null ? undefined : json['status'],
-        'noticeIssuedDate': json['noticeIssuedDate'] == null ? undefined : (new Date(json['noticeIssuedDate'])),
-        'cureDeadline': json['cureDeadline'] == null ? undefined : (new Date(json['cureDeadline'])),
-        'resolutionDate': json['resolutionDate'] == null ? undefined : (new Date(json['resolutionDate'])),
+        'noticeIssuedDate': json['noticeIssuedDate'] == null ? undefined : CalendarDateFromJSON(json['noticeIssuedDate']),
+        'cureDeadline': json['cureDeadline'] == null ? undefined : CalendarDateFromJSON(json['cureDeadline']),
+        'resolutionDate': json['resolutionDate'] == null ? undefined : CalendarDateFromJSON(json['resolutionDate']),
         'resolutionNotes': json['resolutionNotes'] == null ? undefined : json['resolutionNotes'],
     };
 }
@@ -119,11 +127,11 @@ export function LeaseViolationResponseToJSONTyped(value?: LeaseViolationResponse
         'id': value['id'],
         'violationType': value['violationType'],
         'description': value['description'],
-        'identifiedDate': value['identifiedDate'] == null ? undefined : ((value['identifiedDate']).toISOString().substring(0,10)),
+        'identifiedDate': CalendarDateToJSON(value['identifiedDate']),
         'status': value['status'],
-        'noticeIssuedDate': value['noticeIssuedDate'] === null ? null : ((value['noticeIssuedDate'] as any)?.toISOString().substring(0,10)),
-        'cureDeadline': value['cureDeadline'] === null ? null : ((value['cureDeadline'] as any)?.toISOString().substring(0,10)),
-        'resolutionDate': value['resolutionDate'] === null ? null : ((value['resolutionDate'] as any)?.toISOString().substring(0,10)),
+        'noticeIssuedDate': CalendarDateToJSON(value['noticeIssuedDate']),
+        'cureDeadline': CalendarDateToJSON(value['cureDeadline']),
+        'resolutionDate': CalendarDateToJSON(value['resolutionDate']),
         'resolutionNotes': value['resolutionNotes'],
     };
 }

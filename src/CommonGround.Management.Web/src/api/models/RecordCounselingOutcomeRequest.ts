@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record the outcome of a counseling referral.
  * @export
@@ -28,10 +36,10 @@ export interface RecordCounselingOutcomeRequest {
     outcome?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof RecordCounselingOutcomeRequest
      */
-    outcomeDate?: Date;
+    outcomeDate?: CalendarDate;
 }
 
 /**
@@ -52,7 +60,7 @@ export function RecordCounselingOutcomeRequestFromJSONTyped(json: any, ignoreDis
     return {
         
         'outcome': json['outcome'] == null ? undefined : json['outcome'],
-        'outcomeDate': json['outcomeDate'] == null ? undefined : (new Date(json['outcomeDate'])),
+        'outcomeDate': json['outcomeDate'] == null ? undefined : CalendarDateFromJSON(json['outcomeDate']),
     };
 }
 
@@ -68,7 +76,7 @@ export function RecordCounselingOutcomeRequestToJSONTyped(value?: RecordCounseli
     return {
         
         'outcome': value['outcome'],
-        'outcomeDate': value['outcomeDate'] == null ? undefined : ((value['outcomeDate']).toISOString().substring(0,10)),
+        'outcomeDate': CalendarDateToJSON(value['outcomeDate']),
     };
 }
 

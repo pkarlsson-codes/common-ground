@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Servicer delinquency entry within a foreclosure prevention case.
  * @export
@@ -34,10 +42,10 @@ export interface ServicerDelinquencyResponse {
     delinquentMonths?: number;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof ServicerDelinquencyResponse
      */
-    recordedDate?: Date;
+    recordedDate?: CalendarDate;
 }
 
 /**
@@ -59,7 +67,7 @@ export function ServicerDelinquencyResponseFromJSONTyped(json: any, ignoreDiscri
         
         'servicerName': json['servicerName'] == null ? undefined : json['servicerName'],
         'delinquentMonths': json['delinquentMonths'] == null ? undefined : json['delinquentMonths'],
-        'recordedDate': json['recordedDate'] == null ? undefined : (new Date(json['recordedDate'])),
+        'recordedDate': json['recordedDate'] == null ? undefined : CalendarDateFromJSON(json['recordedDate']),
     };
 }
 
@@ -76,7 +84,7 @@ export function ServicerDelinquencyResponseToJSONTyped(value?: ServicerDelinquen
         
         'servicerName': value['servicerName'],
         'delinquentMonths': value['delinquentMonths'],
-        'recordedDate': value['recordedDate'] == null ? undefined : ((value['recordedDate']).toISOString().substring(0,10)),
+        'recordedDate': CalendarDateToJSON(value['recordedDate']),
     };
 }
 

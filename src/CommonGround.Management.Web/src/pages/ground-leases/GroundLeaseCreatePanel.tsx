@@ -12,7 +12,8 @@ import {
 import { useToast } from '../../hooks/useToast'
 import { apiConfig } from '../../lib/apiConfig'
 import { getErrorMessage } from '../../lib/getErrorMessage'
-import { localToday } from '../../lib/dates'
+import { trustToday } from '../../lib/calendarDate'
+import { DateInput } from '../../components/DateInput'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
 const homesApi = new HomesApi(apiConfig)
@@ -20,7 +21,7 @@ const homesApi = new HomesApi(apiConfig)
 const emptyCreate = (): CreateGroundLeaseForm => ({
   landParcelId: '',
   homeId: '',
-  leaseStartDate: localToday(),
+  leaseStartDate: trustToday(),
   termYears: 99,
   covenantTerms: '',
   formulaKind: 'AppraisalBased',
@@ -113,11 +114,10 @@ export default function GroundLeaseCreatePanel({ onClose }: Props) {
           </div>
           <div className="form-field">
             <label className="form-label">Lease Start Date</label>
-            <input
+            <DateInput
               className="form-input"
-              type="date"
               value={createForm.leaseStartDate}
-              onChange={e => setCreateForm(f => ({ ...f, leaseStartDate: e.target.value }))}
+              onChange={v => setCreateForm(f => ({ ...f, leaseStartDate: v }))}
               required
             />
           </div>

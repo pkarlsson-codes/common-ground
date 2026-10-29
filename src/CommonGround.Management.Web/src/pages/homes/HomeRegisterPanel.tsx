@@ -8,6 +8,8 @@ import { LandParcelsApi } from '../../api'
 import { apiConfig } from '../../lib/apiConfig'
 import { useToast } from '../../hooks/useToast'
 import { getErrorMessage } from '../../lib/getErrorMessage'
+import type { CalendarDate } from '../../lib/calendarDate'
+import { DateInput } from '../../components/DateInput'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
 
@@ -19,7 +21,7 @@ interface FormState {
   squareFootage: number
   yearBuilt: number
   initialAssessedValue: number
-  initialAssessedDate: string
+  initialAssessedDate: CalendarDate | null
   appraiserName: string
 }
 
@@ -31,7 +33,7 @@ const emptyForm = (parcelId = ''): FormState => ({
   squareFootage: 0,
   yearBuilt: 0,
   initialAssessedValue: 0,
-  initialAssessedDate: '',
+  initialAssessedDate: null,
   appraiserName: '',
 })
 
@@ -72,7 +74,7 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
         squareFootage:        Number(form.squareFootage),
         yearBuilt:            Number(form.yearBuilt),
         initialAssessedValue: Number(form.initialAssessedValue),
-        initialAssessedDate:  new Date(form.initialAssessedDate),
+        initialAssessedDate:  form.initialAssessedDate ?? undefined,
         appraiserName:        form.appraiserName || undefined,
       })
       success('Home registered successfully')
@@ -197,11 +199,10 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
           </div>
           <div className="form-field">
             <label className="form-label">Assessment Date</label>
-            <input
+            <DateInput
               className="form-input"
-              type="date"
               value={form.initialAssessedDate}
-              onChange={e => setForm(f => ({ ...f, initialAssessedDate: e.target.value }))}
+              onChange={v => setForm(f => ({ ...f, initialAssessedDate: v }))}
               required
             />
           </div>

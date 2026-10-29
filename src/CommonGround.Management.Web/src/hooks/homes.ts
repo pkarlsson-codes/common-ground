@@ -6,9 +6,6 @@ import type { PaginatedResponseOfHomeAssessmentItemResponse } from '../api'
 
 const api = new HomesApi(apiConfig)
 
-const dateStr = (d: Date | null | undefined) =>
-  d instanceof Date ? d.toISOString().substring(0, 10) : undefined
-
 export function useHomes(params: { pageNumber: number; pageSize?: number; landParcelId?: string; status?: string; enabled?: boolean }) {
   return useQuery({
     queryKey: ['homes', params.pageNumber, params.pageSize, params.landParcelId, params.status],
@@ -29,7 +26,6 @@ export function useHome(id: string | null) {
       const b = await api.getHome({ homeId: id! })
       return {
         ...b,
-        lastAssessedDate: dateStr(b.lastAssessedDate),
         registeredAt: b.registeredAt?.toISOString() ?? '',
       }
     },
@@ -66,7 +62,7 @@ export function useRecordHomeAssessment() {
         homeId,
         recordHomeAssessmentRequest: {
           assessedValue: req.assessedValue,
-          assessmentDate: new Date(req.assessmentDate),
+          assessmentDate: req.assessmentDate,
           appraiserName: req.appraiserName,
           conditionNotes: req.conditionNotes,
         },

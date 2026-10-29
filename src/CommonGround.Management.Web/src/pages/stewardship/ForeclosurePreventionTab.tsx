@@ -6,7 +6,6 @@ import StatusBadge from '../../components/StatusBadge'
 import Pagination from '../../components/Pagination'
 import StewardshipFpcDetailPanel from '../../components/stewardship/StewardshipFpcDetailPanel'
 import FpcOpenCasePanel from '../../components/stewardship/FpcOpenCasePanel'
-import { fmtD } from '../../components/stewardship/format'
 
 const PAGE_SIZE = 20
 
@@ -154,7 +153,7 @@ export default function ForeclosurePreventionTab() {
                         : <span style={{ color: 'var(--text-dim)' }}>—</span>}
                     </td>
                     <td>
-                      <span className="cell-mono">{fmtD(fpc.openedDate) ?? '—'}</span>
+                      <span className="cell-mono">{fpc.openedDate ?? '—'}</span>
                     </td>
                   </tr>
                 )

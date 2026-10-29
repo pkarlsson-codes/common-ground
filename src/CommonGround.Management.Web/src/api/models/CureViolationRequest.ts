@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record that a lease violation has been cured.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface CureViolationRequest {
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof CureViolationRequest
      */
-    curedDate?: Date;
+    curedDate?: CalendarDate;
 }
 
 /**
@@ -45,7 +53,7 @@ export function CureViolationRequestFromJSONTyped(json: any, ignoreDiscriminator
     }
     return {
         
-        'curedDate': json['curedDate'] == null ? undefined : (new Date(json['curedDate'])),
+        'curedDate': json['curedDate'] == null ? undefined : CalendarDateFromJSON(json['curedDate']),
     };
 }
 
@@ -60,7 +68,7 @@ export function CureViolationRequestToJSONTyped(value?: CureViolationRequest | n
 
     return {
         
-        'curedDate': value['curedDate'] == null ? undefined : ((value['curedDate']).toISOString().substring(0,10)),
+        'curedDate': CalendarDateToJSON(value['curedDate']),
     };
 }
 

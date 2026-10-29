@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record a new home assessment.
  * @export
@@ -34,10 +42,10 @@ export interface RecordHomeAssessmentRequest {
     appraiserName?: string | null;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof RecordHomeAssessmentRequest
      */
-    assessmentDate?: Date;
+    assessmentDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -65,7 +73,7 @@ export function RecordHomeAssessmentRequestFromJSONTyped(json: any, ignoreDiscri
         
         'assessedValue': json['assessedValue'] == null ? undefined : json['assessedValue'],
         'appraiserName': json['appraiserName'] == null ? undefined : json['appraiserName'],
-        'assessmentDate': json['assessmentDate'] == null ? undefined : (new Date(json['assessmentDate'])),
+        'assessmentDate': json['assessmentDate'] == null ? undefined : CalendarDateFromJSON(json['assessmentDate']),
         'conditionNotes': json['conditionNotes'] == null ? undefined : json['conditionNotes'],
     };
 }
@@ -83,7 +91,7 @@ export function RecordHomeAssessmentRequestToJSONTyped(value?: RecordHomeAssessm
         
         'assessedValue': value['assessedValue'],
         'appraiserName': value['appraiserName'],
-        'assessmentDate': value['assessmentDate'] == null ? undefined : ((value['assessmentDate']).toISOString().substring(0,10)),
+        'assessmentDate': CalendarDateToJSON(value['assessmentDate']),
         'conditionNotes': value['conditionNotes'],
     };
 }

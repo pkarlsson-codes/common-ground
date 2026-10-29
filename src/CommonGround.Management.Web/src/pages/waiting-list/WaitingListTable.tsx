@@ -1,6 +1,6 @@
 import type { WaitingListEntryResponse } from '../../api'
 import Pagination from '../../components/Pagination'
-import { localToday } from '../../lib/dates'
+import { trustToday } from '../../lib/calendarDate'
 import { getResponseStatus } from '../../lib/getErrorMessage'
 
 type Props = {
@@ -33,7 +33,7 @@ const daysSince = (value?: string | null) => {
     const [year, month, day] = iso.split('-').map(Number)
     return Date.UTC(year, month - 1, day) / 86_400_000
   }
-  return toUtcDay(localToday()) - toUtcDay(value)
+  return toUtcDay(trustToday()) - toUtcDay(value)
 }
 
 function ReadinessBadge({ entry }: { entry: WaitingListEntryResponse }) {

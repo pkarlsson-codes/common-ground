@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to resolve a foreclosure prevention case with a final outcome.
  * @export
@@ -28,10 +36,10 @@ export interface ResolveForeclosurePreventionCaseRequest {
     outcome?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof ResolveForeclosurePreventionCaseRequest
      */
-    resolvedDate?: Date;
+    resolvedDate?: CalendarDate;
 }
 
 /**
@@ -52,7 +60,7 @@ export function ResolveForeclosurePreventionCaseRequestFromJSONTyped(json: any, 
     return {
         
         'outcome': json['outcome'] == null ? undefined : json['outcome'],
-        'resolvedDate': json['resolvedDate'] == null ? undefined : (new Date(json['resolvedDate'])),
+        'resolvedDate': json['resolvedDate'] == null ? undefined : CalendarDateFromJSON(json['resolvedDate']),
     };
 }
 
@@ -68,7 +76,7 @@ export function ResolveForeclosurePreventionCaseRequestToJSONTyped(value?: Resol
     return {
         
         'outcome': value['outcome'],
-        'resolvedDate': value['resolvedDate'] == null ? undefined : ((value['resolvedDate']).toISOString().substring(0,10)),
+        'resolvedDate': CalendarDateToJSON(value['resolvedDate']),
     };
 }
 

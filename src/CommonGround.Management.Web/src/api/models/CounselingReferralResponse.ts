@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Counseling referral entry within a foreclosure prevention case.
  * @export
@@ -34,10 +42,10 @@ export interface CounselingReferralResponse {
     agencyName?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof CounselingReferralResponse
      */
-    referralDate?: Date;
+    referralDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -46,10 +54,10 @@ export interface CounselingReferralResponse {
     outcome?: string | null;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof CounselingReferralResponse
      */
-    outcomeDate?: Date | null;
+    outcomeDate?: CalendarDate | null;
 }
 
 /**
@@ -71,9 +79,9 @@ export function CounselingReferralResponseFromJSONTyped(json: any, ignoreDiscrim
         
         'id': json['id'] == null ? undefined : json['id'],
         'agencyName': json['agencyName'] == null ? undefined : json['agencyName'],
-        'referralDate': json['referralDate'] == null ? undefined : (new Date(json['referralDate'])),
+        'referralDate': json['referralDate'] == null ? undefined : CalendarDateFromJSON(json['referralDate']),
         'outcome': json['outcome'] == null ? undefined : json['outcome'],
-        'outcomeDate': json['outcomeDate'] == null ? undefined : (new Date(json['outcomeDate'])),
+        'outcomeDate': json['outcomeDate'] == null ? undefined : CalendarDateFromJSON(json['outcomeDate']),
     };
 }
 
@@ -90,9 +98,9 @@ export function CounselingReferralResponseToJSONTyped(value?: CounselingReferral
         
         'id': value['id'],
         'agencyName': value['agencyName'],
-        'referralDate': value['referralDate'] == null ? undefined : ((value['referralDate']).toISOString().substring(0,10)),
+        'referralDate': CalendarDateToJSON(value['referralDate']),
         'outcome': value['outcome'],
-        'outcomeDate': value['outcomeDate'] === null ? null : ((value['outcomeDate'] as any)?.toISOString().substring(0,10)),
+        'outcomeDate': CalendarDateToJSON(value['outcomeDate']),
     };
 }
 

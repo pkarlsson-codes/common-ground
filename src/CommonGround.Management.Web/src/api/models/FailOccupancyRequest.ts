@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to fail an occupancy verification.
  * @export
@@ -28,10 +36,10 @@ export interface FailOccupancyRequest {
     reason?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof FailOccupancyRequest
      */
-    failedDate?: Date;
+    failedDate?: CalendarDate;
 }
 
 /**
@@ -52,7 +60,7 @@ export function FailOccupancyRequestFromJSONTyped(json: any, ignoreDiscriminator
     return {
         
         'reason': json['reason'] == null ? undefined : json['reason'],
-        'failedDate': json['failedDate'] == null ? undefined : (new Date(json['failedDate'])),
+        'failedDate': json['failedDate'] == null ? undefined : CalendarDateFromJSON(json['failedDate']),
     };
 }
 
@@ -68,7 +76,7 @@ export function FailOccupancyRequestToJSONTyped(value?: FailOccupancyRequest | n
     return {
         
         'reason': value['reason'],
-        'failedDate': value['failedDate'] == null ? undefined : ((value['failedDate']).toISOString().substring(0,10)),
+        'failedDate': CalendarDateToJSON(value['failedDate']),
     };
 }
 

@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to record the outcome of a forbearance request.
  * @export
@@ -28,10 +36,10 @@ export interface RecordForbearanceOutcomeRequest {
     outcome?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof RecordForbearanceOutcomeRequest
      */
-    outcomeDate?: Date;
+    outcomeDate?: CalendarDate;
     /**
      * 
      * @type {string}
@@ -58,7 +66,7 @@ export function RecordForbearanceOutcomeRequestFromJSONTyped(json: any, ignoreDi
     return {
         
         'outcome': json['outcome'] == null ? undefined : json['outcome'],
-        'outcomeDate': json['outcomeDate'] == null ? undefined : (new Date(json['outcomeDate'])),
+        'outcomeDate': json['outcomeDate'] == null ? undefined : CalendarDateFromJSON(json['outcomeDate']),
         'notes': json['notes'] == null ? undefined : json['notes'],
     };
 }
@@ -75,7 +83,7 @@ export function RecordForbearanceOutcomeRequestToJSONTyped(value?: RecordForbear
     return {
         
         'outcome': value['outcome'],
-        'outcomeDate': value['outcomeDate'] == null ? undefined : ((value['outcomeDate']).toISOString().substring(0,10)),
+        'outcomeDate': CalendarDateToJSON(value['outcomeDate']),
         'notes': value['notes'],
     };
 }

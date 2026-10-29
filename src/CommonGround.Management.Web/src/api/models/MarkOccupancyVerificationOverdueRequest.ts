@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to mark an occupancy verification as overdue.
  * @export
@@ -22,10 +30,10 @@ import { mapValues } from '../runtime';
 export interface MarkOccupancyVerificationOverdueRequest {
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof MarkOccupancyVerificationOverdueRequest
      */
-    deadline?: Date;
+    deadline?: CalendarDate;
 }
 
 /**
@@ -45,7 +53,7 @@ export function MarkOccupancyVerificationOverdueRequestFromJSONTyped(json: any, 
     }
     return {
         
-        'deadline': json['deadline'] == null ? undefined : (new Date(json['deadline'])),
+        'deadline': json['deadline'] == null ? undefined : CalendarDateFromJSON(json['deadline']),
     };
 }
 
@@ -60,7 +68,7 @@ export function MarkOccupancyVerificationOverdueRequestToJSONTyped(value?: MarkO
 
     return {
         
-        'deadline': value['deadline'] == null ? undefined : ((value['deadline']).toISOString().substring(0,10)),
+        'deadline': CalendarDateToJSON(value['deadline']),
     };
 }
 

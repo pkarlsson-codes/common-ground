@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { DocumentsApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
-import { localToday } from '../lib/dates'
+import { trustToday, type CalendarDate } from '../lib/calendarDate'
 import { getCsrfToken } from '../lib/csrf'
 import type {
   AttachDocumentRequest,
@@ -47,8 +47,8 @@ export function useDocuments(params: {
   contentType?: string
   tag?: string
   search?: string
-  /** ISO date (YYYY-MM-DD); only documents expiring before this date are returned, soonest first. */
-  expiringBefore?: string
+  /** Only documents expiring before this date are returned, soonest first. */
+  expiringBefore?: CalendarDate
 } = {}) {
   const { page = 1, pageSize = 20, includeDeleted, contentType, tag, search, expiringBefore } = params
   return useQuery({
@@ -60,7 +60,7 @@ export function useDocuments(params: {
       contentType,
       tag,
       search,
-      expiringBefore: expiringBefore ? new Date(expiringBefore) : undefined,
+      expiringBefore,
     }),
   })
 }
@@ -70,7 +70,7 @@ export function useDocuments(params: {
  * The cutoff is a whole date so the query key stays stable across renders.
  */
 export function useExpiringDocuments(daysAhead: number, page = 1) {
-  return useDocuments({ expiringBefore: localToday(daysAhead + 1), page })
+  return useDocuments({ expiringBefore: trustToday(daysAhead + 1), page })
 }
 
 // ── Mutations ────────────────────────────────────────

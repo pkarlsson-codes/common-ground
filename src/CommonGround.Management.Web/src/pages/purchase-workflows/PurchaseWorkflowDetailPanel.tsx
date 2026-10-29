@@ -5,6 +5,7 @@ import PurchaseTrackSection from './PurchaseTrackSection'
 import PurchaseWorkflowSnapshotSection from './PurchaseWorkflowSnapshotSection'
 import PurchaseExceptionActionsSection from './PurchaseExceptionActionsSection'
 import { usePurchaseWorkflowDetailController } from './usePurchaseWorkflowDetailController'
+import { DateInput } from '../../components/DateInput'
 
 const fmtCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
@@ -70,11 +71,10 @@ export default function PurchaseWorkflowDetailPanel({
                   <div className="form-grid" style={{ marginBottom: 10 }}>
                     <div className="form-field">
                       <label className="form-label">Verified Date</label>
-                      <input
+                      <DateInput
                         className="form-input"
-                        type="date"
                         value={s.eligForm.verifiedDate}
-                        onChange={e => s.setEligForm(f => ({ ...f, verifiedDate: e.target.value }))}
+                        onChange={v => s.setEligForm(f => ({ ...f, verifiedDate: v }))}
                         required
                       />
                     </div>
@@ -130,11 +130,10 @@ export default function PurchaseWorkflowDetailPanel({
                     </div>
                     <div className="form-field">
                       <label className="form-label">Pre-Approval Letter Date</label>
-                      <input
+                      <DateInput
                         className="form-input"
-                        type="date"
                         value={s.finForm.preapprovalLetterDate}
-                        onChange={e => s.setFinForm(f => ({ ...f, preapprovalLetterDate: e.target.value }))}
+                        onChange={v => s.setFinForm(f => ({ ...f, preapprovalLetterDate: v }))}
                         required
                       />
                     </div>
@@ -161,11 +160,10 @@ export default function PurchaseWorkflowDetailPanel({
                   <div className="form-grid" style={{ marginBottom: 10 }}>
                     <div className="form-field">
                       <label className="form-label">Inspection Date</label>
-                      <input
+                      <DateInput
                         className="form-input"
-                        type="date"
                         value={s.inspForm.inspectionDate}
-                        onChange={e => s.setInspForm(f => ({ ...f, inspectionDate: e.target.value }))}
+                        onChange={v => s.setInspForm(f => ({ ...f, inspectionDate: v }))}
                         required
                       />
                     </div>
@@ -209,11 +207,10 @@ export default function PurchaseWorkflowDetailPanel({
                   <div className="form-grid" style={{ marginBottom: 10 }}>
                     <div className="form-field">
                       <label className="form-label">Cleared Date</label>
-                      <input
+                      <DateInput
                         className="form-input"
-                        type="date"
                         value={s.titleForm.clearedDate}
-                        onChange={e => s.setTitleForm(f => ({ ...f, clearedDate: e.target.value }))}
+                        onChange={v => s.setTitleForm(f => ({ ...f, clearedDate: v }))}
                         required
                       />
                     </div>
@@ -248,11 +245,10 @@ export default function PurchaseWorkflowDetailPanel({
                   <div className="form-grid" style={{ marginBottom: 10 }}>
                     <div className="form-field">
                       <label className="form-label">Signed Date</label>
-                      <input
+                      <DateInput
                         className="form-input"
-                        type="date"
                         value={s.leaseExecForm.signedDate}
-                        onChange={e => s.setLeaseExecForm(f => ({ ...f, signedDate: e.target.value }))}
+                        onChange={v => s.setLeaseExecForm(f => ({ ...f, signedDate: v }))}
                         required
                       />
                     </div>
@@ -285,11 +281,10 @@ export default function PurchaseWorkflowDetailPanel({
                         <div className="form-grid" style={{ marginBottom: 12 }}>
                           <div className="form-field">
                             <label className="form-label">Actual Closing Date</label>
-                            <input
+                            <DateInput
                               className="form-input"
-                              type="date"
                               value={s.closeForm.actualClosingDate}
-                              onChange={e => s.setCloseForm(f => ({ ...f, actualClosingDate: e.target.value }))}
+                              onChange={v => s.setCloseForm(f => ({ ...f, actualClosingDate: v }))}
                               required
                             />
                           </div>
@@ -312,11 +307,10 @@ export default function PurchaseWorkflowDetailPanel({
                         <div className="form-grid" style={{ marginBottom: 12 }}>
                           <div className="form-field">
                             <label className="form-label">Scheduled Date</label>
-                            <input
+                            <DateInput
                               className="form-input"
-                              type="date"
                               value={s.scheduleForm.scheduledDate}
-                              onChange={e => s.setScheduleForm(f => ({ ...f, scheduledDate: e.target.value }))}
+                              onChange={v => s.setScheduleForm(f => ({ ...f, scheduledDate: v }))}
                               required
                             />
                           </div>

@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * One row in the document library listing response.
  * @export
@@ -94,10 +102,10 @@ export interface DocumentLibraryItemResponse {
     isDeleted?: boolean;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof DocumentLibraryItemResponse
      */
-    expiresOn?: Date | null;
+    expiresOn?: CalendarDate | null;
     /**
      * 
      * @type {Array<string>}
@@ -135,7 +143,7 @@ export function DocumentLibraryItemResponseFromJSONTyped(json: any, ignoreDiscri
         'uploadedAt': json['uploadedAt'] == null ? undefined : (new Date(json['uploadedAt'])),
         'lastModifiedAt': json['lastModifiedAt'] == null ? undefined : (new Date(json['lastModifiedAt'])),
         'isDeleted': json['isDeleted'] == null ? undefined : json['isDeleted'],
-        'expiresOn': json['expiresOn'] == null ? undefined : (new Date(json['expiresOn'])),
+        'expiresOn': json['expiresOn'] == null ? undefined : CalendarDateFromJSON(json['expiresOn']),
         'tags': json['tags'] == null ? undefined : json['tags'],
     };
 }
@@ -163,7 +171,7 @@ export function DocumentLibraryItemResponseToJSONTyped(value?: DocumentLibraryIt
         'uploadedAt': value['uploadedAt'] == null ? undefined : ((value['uploadedAt']).toISOString()),
         'lastModifiedAt': value['lastModifiedAt'] == null ? undefined : ((value['lastModifiedAt']).toISOString()),
         'isDeleted': value['isDeleted'],
-        'expiresOn': value['expiresOn'] === null ? null : ((value['expiresOn'] as any)?.toISOString().substring(0,10)),
+        'expiresOn': CalendarDateToJSON(value['expiresOn']),
         'tags': value['tags'],
     };
 }

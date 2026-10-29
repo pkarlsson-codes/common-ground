@@ -5,7 +5,6 @@ import PropertyInspectionSection from './PropertyInspectionSection'
 import LeaseViolationSection from './LeaseViolationSection'
 import { useStewardshipCase } from '../../hooks/stewardship'
 import { URGENCY_LABEL, type StewardshipQueueRow } from '../../pages/stewardship/stewardshipSortUtils'
-import { fmtD } from './format'
 
 interface Props {
   row: StewardshipQueueRow
@@ -22,7 +21,7 @@ export default function StewardshipCaseDetailPanel({ row, onClose }: Props) {
   const subtitle = [
     row.address !== '—' ? row.address : null,
     URGENCY_LABEL[row.urgency],
-    `Opened ${fmtD(row.openedDate)}`,
+    `Opened ${row.openedDate}`,
   ].filter(Boolean).join(' · ')
 
   return (

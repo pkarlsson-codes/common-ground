@@ -3,7 +3,8 @@ import SlideOver from '../../components/SlideOver'
 import { FORMULA_KIND_LABELS } from '../../hooks/types'
 import { formatPhoneInput } from '../../lib/phone'
 import { NO_TEMPLATE_MESSAGE, useResaleFlowController } from './useResaleFlowController'
-import { localToday } from '../../lib/dates'
+import { trustToday, type CalendarDate } from '../../lib/calendarDate'
+import { DateInput } from '../../components/DateInput'
 
 const fmtCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
@@ -19,7 +20,7 @@ const STEP_TITLES = ['Intent', 'Estimate', 'Initiate']
 export default function ResaleSlideOver({ groundLeaseId, onClose, onSuccess }: Props) {
   const ctrl = useResaleFlowController({ groundLeaseId, onSuccess })
   const lease = ctrl.lease
-  const [noticeDate, setNoticeDate] = useState(localToday())
+  const [noticeDate, setNoticeDate] = useState<CalendarDate | null>(trustToday())
 
   const title = `Resale — ${lease?.homeownerFullName ?? groundLeaseId.slice(0, 8) + '…'}`
   const subtitle = `Step ${ctrl.step + 1} of 3: ${STEP_TITLES[ctrl.step]}`
@@ -57,11 +58,10 @@ export default function ResaleSlideOver({ groundLeaseId, onClose, onSuccess }: P
           <div className="form-grid" style={{ marginBottom: 20 }}>
             <div className="form-field full">
               <label className="form-label">Homeowner Notice Date</label>
-              <input
+              <DateInput
                 className="form-input"
-                type="date"
                 value={noticeDate}
-                onChange={e => setNoticeDate(e.target.value)}
+                onChange={v => setNoticeDate(v)}
               />
             </div>
           </div>

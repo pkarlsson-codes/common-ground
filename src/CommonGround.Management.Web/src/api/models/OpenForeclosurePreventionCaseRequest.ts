@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to open a new foreclosure prevention case for servicer delinquency.
  * @export
@@ -40,10 +48,10 @@ export interface OpenForeclosurePreventionCaseRequest {
     delinquentMonths?: number;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof OpenForeclosurePreventionCaseRequest
      */
-    recordedDate?: Date;
+    recordedDate?: CalendarDate;
 }
 
 /**
@@ -66,7 +74,7 @@ export function OpenForeclosurePreventionCaseRequestFromJSONTyped(json: any, ign
         'groundLeaseId': json['groundLeaseId'] == null ? undefined : json['groundLeaseId'],
         'servicerName': json['servicerName'] == null ? undefined : json['servicerName'],
         'delinquentMonths': json['delinquentMonths'] == null ? undefined : json['delinquentMonths'],
-        'recordedDate': json['recordedDate'] == null ? undefined : (new Date(json['recordedDate'])),
+        'recordedDate': json['recordedDate'] == null ? undefined : CalendarDateFromJSON(json['recordedDate']),
     };
 }
 
@@ -84,7 +92,7 @@ export function OpenForeclosurePreventionCaseRequestToJSONTyped(value?: OpenFore
         'groundLeaseId': value['groundLeaseId'],
         'servicerName': value['servicerName'],
         'delinquentMonths': value['delinquentMonths'],
-        'recordedDate': value['recordedDate'] == null ? undefined : ((value['recordedDate']).toISOString().substring(0,10)),
+        'recordedDate': CalendarDateToJSON(value['recordedDate']),
     };
 }
 

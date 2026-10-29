@@ -4,7 +4,8 @@ import SlideOver from '../../components/SlideOver'
 import { useRecordCltOrientation } from '../../hooks/households'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
-import { localToday } from '../../lib/dates'
+import { trustToday } from '../../lib/calendarDate'
+import { DateInput } from '../../components/DateInput'
 
 type Props = {
   householdId: string
@@ -12,7 +13,7 @@ type Props = {
 }
 
 export default function RecordCltOrientationPanel({ householdId, onClose }: Props) {
-  const [completedDate, setCompletedDate] = useState(localToday())
+  const [completedDate, setCompletedDate] = useState(trustToday())
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   const mutation = useRecordCltOrientation(householdId)
   const { success } = useToast()
@@ -53,11 +54,10 @@ export default function RecordCltOrientationPanel({ householdId, onClose }: Prop
         <div className="form-grid">
           <div className="form-field">
             <label className="form-label">Completed Date</label>
-            <input
+            <DateInput
               className="form-input"
-              type="date"
               value={completedDate}
-              onChange={e => setCompletedDate(e.target.value)}
+              onChange={v => setCompletedDate(v)}
               required
             />
           </div>

@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Request to close a stewardship case.
  * @export
@@ -28,10 +36,10 @@ export interface CloseStewardshipCaseRequest {
     reason?: string;
     /**
      * 
-     * @type {Date}
+     * @type {CalendarDate}
      * @memberof CloseStewardshipCaseRequest
      */
-    closedDate?: Date;
+    closedDate?: CalendarDate;
 }
 
 /**
@@ -52,7 +60,7 @@ export function CloseStewardshipCaseRequestFromJSONTyped(json: any, ignoreDiscri
     return {
         
         'reason': json['reason'] == null ? undefined : json['reason'],
-        'closedDate': json['closedDate'] == null ? undefined : (new Date(json['closedDate'])),
+        'closedDate': json['closedDate'] == null ? undefined : CalendarDateFromJSON(json['closedDate']),
     };
 }
 
@@ -68,7 +76,7 @@ export function CloseStewardshipCaseRequestToJSONTyped(value?: CloseStewardshipC
     return {
         
         'reason': value['reason'],
-        'closedDate': value['closedDate'] == null ? undefined : ((value['closedDate']).toISOString().substring(0,10)),
+        'closedDate': CalendarDateToJSON(value['closedDate']),
     };
 }
 
