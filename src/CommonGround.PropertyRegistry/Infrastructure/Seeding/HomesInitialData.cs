@@ -97,6 +97,7 @@ public sealed class HomesInitialData : IInitialData
                 HomeType.FromDisplayName(entry.Type),
                 entry.Bedrooms,
                 entry.Bathrooms,
+                entry.IsAccessible,
                 entry.SquareFootage,
                 entry.YearBuilt,
                 initialAssessment,
@@ -164,6 +165,8 @@ public sealed class HomesInitialData : IInitialData
         public int Bedrooms { get; set; }
 
         public decimal Bathrooms { get; set; }
+
+        public bool IsAccessible { get; set; }
 
         public decimal SquareFootage { get; set; }
 

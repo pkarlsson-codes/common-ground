@@ -41,6 +41,7 @@ public static class HomesEndpoints
             homeType,
             request.Bedrooms,
             request.Bathrooms,
+            request.IsAccessible,
             request.SquareFootage,
             request.YearBuilt,
             request.InitialAssessedValue,
@@ -67,7 +68,7 @@ public static class HomesEndpoints
             cancellationToken);
 
         var response = new HomeResponse(view.Id, view.LandParcelId,
-            view.UnitType, view.Bedrooms, view.Bathrooms, view.SquareFootage,
+            view.UnitType, view.Bedrooms, view.Bathrooms, view.IsAccessible, view.SquareFootage,
             view.YearBuilt, view.AssessedValue, view.LastAssessedDate,
             view.ConditionNotes, view.Status, view.RegisteredAt);
 

@@ -28,6 +28,7 @@
     "type": "SingleFamily",
     "bedrooms": 2,
     "bathrooms": 1.5,
+    "isAccessible": true,
     "squareFootage": 1180,
     "yearBuilt": 2022,
     "initialAssessedValue": 287000

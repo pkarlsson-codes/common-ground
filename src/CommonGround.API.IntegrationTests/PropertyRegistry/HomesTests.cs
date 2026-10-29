@@ -23,6 +23,7 @@ public class HomesTests(ApiFactory factory)
                 "SingleFamily",
                 3,
                 2m,
+                false,
                 1200m,
                 1990,
                 "Test Appraiser",
@@ -80,6 +81,7 @@ public class HomesTests(ApiFactory factory)
                 "SingleFamily",
                 3,
                 2m,
+                false,
                 1200m,
                 1990,
                 "Test Appraiser",
@@ -103,6 +105,7 @@ public class HomesTests(ApiFactory factory)
                 string.Empty,
                 3,
                 2m,
+                false,
                 1200m,
                 1990,
                 "Test Appraiser",
@@ -124,6 +127,7 @@ public class HomesTests(ApiFactory factory)
                 "Duplex",
                 4,
                 2m,
+                true,
                 1800m,
                 2005,
                 "Test Appraiser",
@@ -139,6 +143,7 @@ public class HomesTests(ApiFactory factory)
         var home = await getResponse.Content.ReadFromJsonAsync<HomeResponse>();
         home!.Id.Should().Be(homeId);
         home.LandParcelId.Should().Be(parcelId);
+        home.IsAccessible.Should().BeTrue();
         home.AssessedValue.Should().Be(420000m);
         home.LastAssessedDate.Should().Be(new DateOnly(2024, 1, 1));
     }
@@ -164,6 +169,7 @@ public class HomesTests(ApiFactory factory)
                 "SingleFamily",
                 3,
                 2m,
+                false,
                 1200m,
                 1990,
                 "Test Appraiser",

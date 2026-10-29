@@ -60,6 +60,12 @@ export interface HomeResponse {
     bathrooms?: number;
     /**
      * 
+     * @type {boolean}
+     * @memberof HomeResponse
+     */
+    isAccessible?: boolean;
+    /**
+     * 
      * @type {number}
      * @memberof HomeResponse
      */
@@ -124,6 +130,7 @@ export function HomeResponseFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'homeType': json['homeType'] == null ? undefined : json['homeType'],
         'bedrooms': json['bedrooms'] == null ? undefined : json['bedrooms'],
         'bathrooms': json['bathrooms'] == null ? undefined : json['bathrooms'],
+        'isAccessible': json['isAccessible'] == null ? undefined : json['isAccessible'],
         'squareFootage': json['squareFootage'] == null ? undefined : json['squareFootage'],
         'yearBuilt': json['yearBuilt'] == null ? undefined : json['yearBuilt'],
         'assessedValue': json['assessedValue'] == null ? undefined : json['assessedValue'],
@@ -150,6 +157,7 @@ export function HomeResponseToJSONTyped(value?: HomeResponse | null, ignoreDiscr
         'homeType': value['homeType'],
         'bedrooms': value['bedrooms'],
         'bathrooms': value['bathrooms'],
+        'isAccessible': value['isAccessible'],
         'squareFootage': value['squareFootage'],
         'yearBuilt': value['yearBuilt'],
         'assessedValue': value['assessedValue'],

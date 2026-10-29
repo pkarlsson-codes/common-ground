@@ -18,7 +18,7 @@ public class HomeTests
         Home.Register(
             ParcelId,
             HomeType.SingleFamily,
-            3, 2m, 1200m, 1985,
+            3, 2m, isAccessible: true, 1200m, 1985,
             _initialAssessment,
             StaffUser);
 
@@ -31,6 +31,7 @@ public class HomeTests
         unit.UnitType.Should().Be(HomeType.SingleFamily);
         unit.Bedrooms.Should().Be(3);
         unit.Bathrooms.Should().Be(2m);
+        unit.IsAccessible.Should().BeTrue();
         unit.SquareFootage.Should().Be(1200m);
         unit.YearBuilt.Should().Be(1985);
         unit.Status.Should().Be(HomeStatus.Available);

@@ -66,6 +66,7 @@ test('registering a home adds it to the registry with its details and initial as
   await field(register, 'Home Type').selectOption('Duplex')
   await field(register, 'Bedrooms').fill('4')
   await field(register, 'Bathrooms').fill('2.5')
+  await register.getByRole('checkbox', { name: 'Accessible home' }).check()
   await field(register, 'Square Footage').fill('1500')
   await field(register, 'Year Built').fill('1978')
   await field(register, 'Initial Assessed Value ($)').fill('310000')
@@ -94,6 +95,7 @@ test('registering a home adds it to the registry with its details and initial as
   await expect(detail).toContainText('4 bd · 2.5 ba · 1,500 sq ft')
   await expect(detailValue(detail, 'Status')).toHaveText('Available')
   await expect(detail.getByRole('button', { name: 'Select Applicant' })).toBeVisible()
+  await expect(detailValue(detail, 'Accessible')).toHaveText('Yes')
   await expect(detailValue(detail, 'Year Built')).toHaveText('1978')
   await expect(detailValue(detail, 'Assessed Value')).toHaveText('$310,000')
   await expect(detailValue(detail, 'Last Assessed')).toHaveText('2024-05-20')
@@ -110,6 +112,7 @@ test('registering a home adds it to the registry with its details and initial as
 
 test('recording an assessment lists it first and updates the home details', async ({ page }) => {
   const { detail } = await openSeededHome(page)
+  await expect(detailValue(detail, 'Accessible')).toHaveText('No')
   await expectAssessments(detail, [['2024-01-01', '$280,000', 'E2E Appraiser']])
 
   await detail.getByRole('button', { name: 'Add New Assessment' }).click()

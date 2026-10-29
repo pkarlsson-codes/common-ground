@@ -12,6 +12,7 @@ namespace CommonGround.PropertyRegistry.Application.Commands;
 /// <param name="UnitType">The physical type of the home.</param>
 /// <param name="Bedrooms">Number of bedrooms.</param>
 /// <param name="Bathrooms">Number of bathrooms (supports 1.5 etc.).</param>
+/// <param name="IsAccessible">Whether the home is accessible to people with disabilities.</param>
 /// <param name="SquareFootage">Total square footage.</param>
 /// <param name="YearBuilt">Year the home was built.</param>
 /// <param name="InitialAssessedValue">Initial assessed value in dollars.</param>
@@ -23,6 +24,7 @@ public sealed record RegisterHome(
     HomeType UnitType,
     int Bedrooms,
     decimal Bathrooms,
+    bool IsAccessible,
     decimal SquareFootage,
     int YearBuilt,
     decimal InitialAssessedValue,
@@ -59,6 +61,7 @@ public static class RegisterHomeHandler
             command.UnitType,
             command.Bedrooms,
             command.Bathrooms,
+            command.IsAccessible,
             command.SquareFootage,
             command.YearBuilt,
             initialAssessment,

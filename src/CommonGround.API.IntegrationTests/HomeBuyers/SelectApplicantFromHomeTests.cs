@@ -163,6 +163,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
                 "SingleFamily",
                 3,
                 2m,
+                false,
                 1200m,
                 1990,
                 "Test Appraiser",

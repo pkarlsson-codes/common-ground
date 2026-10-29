@@ -6,6 +6,7 @@ public sealed record RegisterHomeRequest(
     string HomeType,
     int Bedrooms,
     decimal Bathrooms,
+    bool IsAccessible,
     decimal SquareFootage,
     int YearBuilt,
     string AppraiserName,

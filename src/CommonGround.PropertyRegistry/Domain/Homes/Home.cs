@@ -40,6 +40,9 @@ public sealed class Home : AggregateRoot<HomeId>
     /// <summary>Gets the number of bathrooms (supports half baths, e.g. 1.5).</summary>
     public decimal Bathrooms { get; private set; }
 
+    /// <summary>Gets a value indicating whether the home is accessible to people with disabilities.</summary>
+    public bool IsAccessible { get; private set; }
+
     /// <summary>Gets the current occupancy status of this home.</summary>
     public HomeStatus Status { get; private set; }
 
@@ -52,6 +55,7 @@ public sealed class Home : AggregateRoot<HomeId>
         HomeType unitType,
         int bedrooms,
         decimal bathrooms,
+        bool isAccessible,
         decimal squareFootage,
         int yearBuilt,
         UnitAssessment initialAssessment,
@@ -85,6 +89,7 @@ public sealed class Home : AggregateRoot<HomeId>
             unitType.DisplayName,
             bedrooms,
             bathrooms,
+            isAccessible,
             squareFootage,
             yearBuilt,
             initialAssessment.AssessedValue,
@@ -136,6 +141,7 @@ public sealed class Home : AggregateRoot<HomeId>
         UnitType = HomeType.FromDisplayName(e.UnitType);
         Bedrooms = e.Bedrooms;
         Bathrooms = e.Bathrooms;
+        IsAccessible = e.IsAccessible;
         SquareFootage = e.SquareFootage;
         YearBuilt = e.YearBuilt;
         Status = HomeStatus.Available;

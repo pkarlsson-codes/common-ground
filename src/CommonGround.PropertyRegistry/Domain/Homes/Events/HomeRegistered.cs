@@ -9,6 +9,7 @@ public sealed record HomeRegistered(
     string UnitType,
     int Bedrooms,
     decimal Bathrooms,
+    bool IsAccessible,
     decimal SquareFootage,
     int YearBuilt,
     decimal InitialAssessedValue,

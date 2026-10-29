@@ -7,6 +7,7 @@ public sealed record HomeResponse(
     string HomeType,
     int Bedrooms,
     decimal Bathrooms,
+    bool IsAccessible,
     decimal SquareFootage,
     int YearBuilt,
     decimal AssessedValue,

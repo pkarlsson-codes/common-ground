@@ -54,6 +54,12 @@ export interface RegisterHomeRequest {
     bathrooms?: number;
     /**
      * 
+     * @type {boolean}
+     * @memberof RegisterHomeRequest
+     */
+    isAccessible?: boolean;
+    /**
+     * 
      * @type {number}
      * @memberof RegisterHomeRequest
      */
@@ -105,6 +111,7 @@ export function RegisterHomeRequestFromJSONTyped(json: any, ignoreDiscriminator:
         'homeType': json['homeType'] == null ? undefined : json['homeType'],
         'bedrooms': json['bedrooms'] == null ? undefined : json['bedrooms'],
         'bathrooms': json['bathrooms'] == null ? undefined : json['bathrooms'],
+        'isAccessible': json['isAccessible'] == null ? undefined : json['isAccessible'],
         'squareFootage': json['squareFootage'] == null ? undefined : json['squareFootage'],
         'yearBuilt': json['yearBuilt'] == null ? undefined : json['yearBuilt'],
         'appraiserName': json['appraiserName'] == null ? undefined : json['appraiserName'],
@@ -128,6 +135,7 @@ export function RegisterHomeRequestToJSONTyped(value?: RegisterHomeRequest | nul
         'homeType': value['homeType'],
         'bedrooms': value['bedrooms'],
         'bathrooms': value['bathrooms'],
+        'isAccessible': value['isAccessible'],
         'squareFootage': value['squareFootage'],
         'yearBuilt': value['yearBuilt'],
         'appraiserName': value['appraiserName'],

@@ -7766,6 +7766,9 @@
             "type": "number",
             "format": "decimal"
           },
+          "isAccessible": {
+            "type": "boolean"
+          },
           "squareFootage": {
             "type": "number",
             "format": "decimal"
@@ -7808,6 +7811,9 @@
           "bathrooms": {
             "type": "number",
             "format": "decimal"
+          },
+          "isAccessible": {
+            "type": "boolean"
           },
           "squareFootage": {
             "type": "number",

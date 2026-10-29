@@ -128,6 +128,10 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
                   </div>
                 )}
                 <div className="detail-field">
+                  <div className="detail-field__label">Accessible</div>
+                  <div className="detail-field__value">{detail.isAccessible ? 'Yes' : 'No'}</div>
+                </div>
+                <div className="detail-field">
                   <div className="detail-field__label">Year Built</div>
                   <div className="detail-field__value mono">{detail.yearBuilt}</div>
                 </div>

@@ -18,6 +18,9 @@ public class HomeView
     /// <summary>Gets or sets the number of bathrooms.</summary>
     public decimal Bathrooms { get; set; }
 
+    /// <summary>Gets or sets a value indicating whether the home is accessible to people with disabilities.</summary>
+    public bool IsAccessible { get; set; }
+
     /// <summary>Gets or sets the total square footage.</summary>
     public decimal SquareFootage { get; set; }
 

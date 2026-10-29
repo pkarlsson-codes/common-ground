@@ -18,6 +18,7 @@ interface FormState {
   homeType: string
   bedrooms: number
   bathrooms: number
+  isAccessible: boolean
   squareFootage: number
   yearBuilt: number
   initialAssessedValue: number
@@ -30,6 +31,7 @@ const emptyForm = (parcelId = ''): FormState => ({
   homeType: 'SingleFamily',
   bedrooms: 0,
   bathrooms: 0,
+  isAccessible: false,
   squareFootage: 0,
   yearBuilt: 0,
   initialAssessedValue: 0,
@@ -161,6 +163,16 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
               onChange={e => setForm(f => ({ ...f, bathrooms: parseFloat(e.target.value) || 0 }))}
               required
             />
+          </div>
+          <div className="form-field full">
+            <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input
+                type="checkbox"
+                checked={form.isAccessible}
+                onChange={e => setForm(f => ({ ...f, isAccessible: e.target.checked }))}
+              />
+              Accessible home
+            </label>
           </div>
           <div className="form-field">
             <label className="form-label">Square Footage</label>
