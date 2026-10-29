@@ -26,5 +26,5 @@ public sealed record GroundLeaseTemplateResponse(
     decimal? BaselineIndexValue,
     decimal? AnnualPercentage,
     decimal? ImprovementsCap,
-    string CreatedAt,
+    DateTimeOffset CreatedAt,
     string CreatedBy);

@@ -12,7 +12,7 @@ public sealed record HomeownerApplicationResponse(
     decimal AnnualIncome,
     bool AccessibilityRequired,
     string Phase,
-    string SubmittedAt,
+    DateTimeOffset SubmittedAt,
     string SubmittedBy,
     DateOnly? ApprovedDate,
     string? DenialReason,

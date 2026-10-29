@@ -84,10 +84,10 @@ export interface GroundLeaseListItemResponse {
     homeownerEmail?: string | null;
     /**
      * 
-     * @type {string}
+     * @type {Date}
      * @memberof GroundLeaseListItemResponse
      */
-    createdAt?: string;
+    createdAt?: Date;
 }
 
 /**
@@ -116,7 +116,7 @@ export function GroundLeaseListItemResponseFromJSONTyped(json: any, ignoreDiscri
         'formulaKind': json['formulaKind'] == null ? undefined : json['formulaKind'],
         'homeownerFullName': json['homeownerFullName'] == null ? undefined : json['homeownerFullName'],
         'homeownerEmail': json['homeownerEmail'] == null ? undefined : json['homeownerEmail'],
-        'createdAt': json['createdAt'] == null ? undefined : json['createdAt'],
+        'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
     };
 }
 
@@ -140,7 +140,7 @@ export function GroundLeaseListItemResponseToJSONTyped(value?: GroundLeaseListIt
         'formulaKind': value['formulaKind'],
         'homeownerFullName': value['homeownerFullName'],
         'homeownerEmail': value['homeownerEmail'],
-        'createdAt': value['createdAt'],
+        'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
     };
 }
 

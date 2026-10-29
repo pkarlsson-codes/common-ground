@@ -66,10 +66,10 @@ export interface HomeownerApplicationListItemResponse {
     phase?: string;
     /**
      * 
-     * @type {string}
+     * @type {Date}
      * @memberof HomeownerApplicationListItemResponse
      */
-    submittedAt?: string;
+    submittedAt?: Date;
 }
 
 /**
@@ -95,7 +95,7 @@ export function HomeownerApplicationListItemResponseFromJSONTyped(json: any, ign
         'householdSize': json['householdSize'] == null ? undefined : json['householdSize'],
         'accessibilityRequired': json['accessibilityRequired'] == null ? undefined : json['accessibilityRequired'],
         'phase': json['phase'] == null ? undefined : json['phase'],
-        'submittedAt': json['submittedAt'] == null ? undefined : json['submittedAt'],
+        'submittedAt': json['submittedAt'] == null ? undefined : (new Date(json['submittedAt'])),
     };
 }
 
@@ -116,7 +116,7 @@ export function HomeownerApplicationListItemResponseToJSONTyped(value?: Homeowne
         'householdSize': value['householdSize'],
         'accessibilityRequired': value['accessibilityRequired'],
         'phase': value['phase'],
-        'submittedAt': value['submittedAt'],
+        'submittedAt': value['submittedAt'] == null ? undefined : ((value['submittedAt']).toISOString()),
     };
 }
 

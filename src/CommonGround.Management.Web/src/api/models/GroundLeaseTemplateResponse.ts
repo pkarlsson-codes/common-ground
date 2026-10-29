@@ -88,10 +88,10 @@ export interface GroundLeaseTemplateResponse {
     improvementsCap?: number | null;
     /**
      * ISO-8601 creation timestamp.
-     * @type {string}
+     * @type {Date}
      * @memberof GroundLeaseTemplateResponse
      */
-    createdAt?: string;
+    createdAt?: Date;
     /**
      * User ID of the creator.
      * @type {string}
@@ -128,7 +128,7 @@ export function GroundLeaseTemplateResponseFromJSONTyped(json: any, ignoreDiscri
         'baselineIndexValue': json['baselineIndexValue'] == null ? undefined : json['baselineIndexValue'],
         'annualPercentage': json['annualPercentage'] == null ? undefined : json['annualPercentage'],
         'improvementsCap': json['improvementsCap'] == null ? undefined : json['improvementsCap'],
-        'createdAt': json['createdAt'] == null ? undefined : json['createdAt'],
+        'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
         'createdBy': json['createdBy'] == null ? undefined : json['createdBy'],
     };
 }
@@ -155,7 +155,7 @@ export function GroundLeaseTemplateResponseToJSONTyped(value?: GroundLeaseTempla
         'baselineIndexValue': value['baselineIndexValue'],
         'annualPercentage': value['annualPercentage'],
         'improvementsCap': value['improvementsCap'],
-        'createdAt': value['createdAt'],
+        'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
         'createdBy': value['createdBy'],
     };
 }

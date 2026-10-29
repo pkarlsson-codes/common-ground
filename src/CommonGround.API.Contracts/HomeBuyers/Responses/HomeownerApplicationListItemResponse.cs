@@ -8,4 +8,4 @@ public sealed record HomeownerApplicationListItemResponse(
     int HouseholdSize,
     bool AccessibilityRequired,
     string Phase,
-    string SubmittedAt);
+    DateTimeOffset SubmittedAt);

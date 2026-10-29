@@ -1,4 +1,3 @@
-using System.Globalization;
 using CommonGround.API.Contracts.HomeBuyers.Requests;
 using CommonGround.API.Contracts.HomeBuyers.Responses;
 using CommonGround.API.Infrastructure.Auth;
@@ -55,7 +54,7 @@ public static class HouseholdEndpoints
             h.IsHousingCounselingCompleted,
             h.IsCltOrientationCompleted,
             h.MortgagePrequalificationExpiryDate,
-            h.RegisteredAt.ToString("O", CultureInfo.InvariantCulture)));
+            h.RegisteredAt));
 
         return Results.Ok(response);
     }
@@ -252,7 +251,7 @@ public static class HouseholdEndpoints
     {
         var view = details.Household;
         var applications = details.Applications
-            .Select(a => new HouseholdApplicationDto(a.Id, a.Phase, a.SubmittedAt.ToString("O", CultureInfo.InvariantCulture)))
+            .Select(a => new HouseholdApplicationDto(a.Id, a.Phase, a.SubmittedAt))
             .ToList();
 
         var mortgagePrequalification = view.MortgagePrequalification is null ? null
@@ -274,7 +273,7 @@ public static class HouseholdEndpoints
             view.IsCltOrientationCompleted,
             view.CltOrientationCompletedDate,
             mortgagePrequalification,
-            view.RegisteredAt.ToString("O", CultureInfo.InvariantCulture),
+            view.RegisteredAt,
             view.RegisteredBy,
             applications);
     }

@@ -14,7 +14,7 @@ public sealed record HouseholdResponse(
     bool IsCltOrientationCompleted,
     DateOnly? CltOrientationCompletedDate,
     MortgagePrequalificationDto? MortgagePrequalification,
-    string RegisteredAt,
+    DateTimeOffset RegisteredAt,
     string RegisteredBy,
     IReadOnlyList<HouseholdApplicationDto> Applications);
 
@@ -42,4 +42,4 @@ public sealed record MortgagePrequalificationDto(
 public sealed record HouseholdApplicationDto(
     string Id,
     string Phase,
-    string SubmittedAt);
+    DateTimeOffset SubmittedAt);

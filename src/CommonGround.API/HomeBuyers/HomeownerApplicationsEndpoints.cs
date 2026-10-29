@@ -1,4 +1,3 @@
-using System.Globalization;
 using CommonGround.API.Contracts.HomeBuyers.Requests;
 using CommonGround.API.Contracts.HomeBuyers.Responses;
 using CommonGround.API.Infrastructure.Auth;
@@ -52,7 +51,7 @@ public static class HomeownerApplicationsEndpoints
             s.Application.HouseholdSize,
             s.Application.AccessibilityRequired,
             s.Application.Phase,
-            s.Application.SubmittedAt.ToString("O", CultureInfo.InvariantCulture)));
+            s.Application.SubmittedAt));
 
         return Results.Ok(response);
     }
@@ -228,7 +227,7 @@ public static class HomeownerApplicationsEndpoints
             view.AnnualIncome,
             view.AccessibilityRequired,
             view.Phase,
-            view.SubmittedAt.ToString("O", CultureInfo.InvariantCulture),
+            view.SubmittedAt,
             view.SubmittedBy,
             view.ApprovedDate,
             view.DenialReason,

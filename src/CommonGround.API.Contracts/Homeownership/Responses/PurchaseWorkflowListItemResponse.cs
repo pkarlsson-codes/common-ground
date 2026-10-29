@@ -7,4 +7,4 @@ public sealed record PurchaseWorkflowListItemResponse(
     string BuyerFullName,
     decimal PurchasePrice,
     string Phase,
-    string CreatedAt);
+    DateTimeOffset CreatedAt);

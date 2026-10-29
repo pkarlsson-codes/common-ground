@@ -9,4 +9,4 @@ public sealed record HouseholdListItemResponse(
     bool IsHousingCounselingCompleted,
     bool IsCltOrientationCompleted,
     DateOnly? MortgagePrequalificationExpiryDate,
-    string RegisteredAt);
+    DateTimeOffset RegisteredAt);

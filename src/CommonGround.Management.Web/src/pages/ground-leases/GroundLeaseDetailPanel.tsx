@@ -44,7 +44,7 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
 
   // Most recent visit first; same-day check-ins in the order they were recorded, newest first.
   const checkIns = [...(detail?.stewardshipCheckIns ?? [])].sort((a, b) =>
-    (b.checkInDate ?? '').localeCompare(a.checkInDate ?? '') || (b.occurredAt ?? '').localeCompare(a.occurredAt ?? ''))
+    (b.checkInDate ?? '').localeCompare(a.checkInDate ?? '') || (b.occurredAt?.getTime() ?? 0) - (a.occurredAt?.getTime() ?? 0))
 
   const handleCheckIn = async (e: React.FormEvent) => {
     e.preventDefault()

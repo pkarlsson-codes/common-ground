@@ -151,10 +151,10 @@ export interface GroundLeaseResponse {
     stewardshipCheckIns?: Array<StewardshipCheckInDto>;
     /**
      * 
-     * @type {string}
+     * @type {Date}
      * @memberof GroundLeaseResponse
      */
-    createdAt?: string;
+    createdAt?: Date;
     /**
      * 
      * @type {string}
@@ -199,7 +199,7 @@ export function GroundLeaseResponseFromJSONTyped(json: any, ignoreDiscriminator:
         'homeownerEmail': json['homeownerEmail'] == null ? undefined : json['homeownerEmail'],
         'homeownerPhone': json['homeownerPhone'] == null ? undefined : json['homeownerPhone'],
         'stewardshipCheckIns': json['stewardshipCheckIns'] == null ? undefined : ((json['stewardshipCheckIns'] as Array<any>).map(StewardshipCheckInDtoFromJSON)),
-        'createdAt': json['createdAt'] == null ? undefined : json['createdAt'],
+        'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
         'createdBy': json['createdBy'] == null ? undefined : json['createdBy'],
     };
 }
@@ -234,7 +234,7 @@ export function GroundLeaseResponseToJSONTyped(value?: GroundLeaseResponse | nul
         'homeownerEmail': value['homeownerEmail'],
         'homeownerPhone': value['homeownerPhone'],
         'stewardshipCheckIns': value['stewardshipCheckIns'] == null ? undefined : ((value['stewardshipCheckIns'] as Array<any>).map(StewardshipCheckInDtoToJSON)),
-        'createdAt': value['createdAt'],
+        'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
         'createdBy': value['createdBy'],
     };
 }

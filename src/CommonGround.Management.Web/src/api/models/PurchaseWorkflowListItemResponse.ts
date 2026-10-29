@@ -52,10 +52,10 @@ export interface PurchaseWorkflowListItemResponse {
     phase?: string;
     /**
      * 
-     * @type {string}
+     * @type {Date}
      * @memberof PurchaseWorkflowListItemResponse
      */
-    createdAt?: string;
+    createdAt?: Date;
 }
 
 /**
@@ -80,7 +80,7 @@ export function PurchaseWorkflowListItemResponseFromJSONTyped(json: any, ignoreD
         'buyerFullName': json['buyerFullName'] == null ? undefined : json['buyerFullName'],
         'purchasePrice': json['purchasePrice'] == null ? undefined : json['purchasePrice'],
         'phase': json['phase'] == null ? undefined : json['phase'],
-        'createdAt': json['createdAt'] == null ? undefined : json['createdAt'],
+        'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
     };
 }
 
@@ -100,7 +100,7 @@ export function PurchaseWorkflowListItemResponseToJSONTyped(value?: PurchaseWork
         'buyerFullName': value['buyerFullName'],
         'purchasePrice': value['purchasePrice'],
         'phase': value['phase'],
-        'createdAt': value['createdAt'],
+        'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
     };
 }
 

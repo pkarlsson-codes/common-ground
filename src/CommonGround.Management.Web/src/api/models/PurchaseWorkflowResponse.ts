@@ -137,10 +137,10 @@ export interface PurchaseWorkflowResponse {
     purchasePrice?: number;
     /**
      * 
-     * @type {string}
+     * @type {Date}
      * @memberof PurchaseWorkflowResponse
      */
-    createdAt?: string;
+    createdAt?: Date;
     /**
      * 
      * @type {EligibilityDetailsDto}
@@ -250,7 +250,7 @@ export function PurchaseWorkflowResponseFromJSONTyped(json: any, ignoreDiscrimin
         'buyerEmail': json['buyerEmail'] == null ? undefined : json['buyerEmail'],
         'buyerPhone': json['buyerPhone'] == null ? undefined : json['buyerPhone'],
         'purchasePrice': json['purchasePrice'] == null ? undefined : json['purchasePrice'],
-        'createdAt': json['createdAt'] == null ? undefined : json['createdAt'],
+        'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
         'eligibilityDetails': json['eligibilityDetails'] == null ? undefined : EligibilityDetailsDtoFromJSON(json['eligibilityDetails']),
         'financingDetails': json['financingDetails'] == null ? undefined : FinancingDetailsDtoFromJSON(json['financingDetails']),
         'inspectionResult': json['inspectionResult'] == null ? undefined : InspectionResultDtoFromJSON(json['inspectionResult']),
@@ -290,7 +290,7 @@ export function PurchaseWorkflowResponseToJSONTyped(value?: PurchaseWorkflowResp
         'buyerEmail': value['buyerEmail'],
         'buyerPhone': value['buyerPhone'],
         'purchasePrice': value['purchasePrice'],
-        'createdAt': value['createdAt'],
+        'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
         'eligibilityDetails': EligibilityDetailsDtoToJSON(value['eligibilityDetails']),
         'financingDetails': FinancingDetailsDtoToJSON(value['financingDetails']),
         'inspectionResult': InspectionResultDtoToJSON(value['inspectionResult']),

@@ -1,4 +1,3 @@
-using System.Globalization;
 using CommonGround.API.Contracts.Homeownership.Requests;
 using CommonGround.API.Contracts.Homeownership.Responses;
 using CommonGround.API.Infrastructure.Auth;
@@ -61,7 +60,7 @@ public static class PurchaseWorkflowsEndpoints
             v.BuyerFullName,
             v.PurchasePrice,
             v.Phase,
-            v.CreatedAt.ToString("O", CultureInfo.InvariantCulture)));
+            v.CreatedAt));
 
         return Results.Ok(response);
     }
@@ -348,7 +347,7 @@ public static class PurchaseWorkflowsEndpoints
             view.BuyerEmail,
             view.BuyerPhone,
             view.PurchasePrice,
-            view.CreatedAt.ToString("O", CultureInfo.InvariantCulture),
+            view.CreatedAt,
             eligibility,
             financing,
             inspection,

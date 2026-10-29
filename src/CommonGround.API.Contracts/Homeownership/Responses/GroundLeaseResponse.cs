@@ -21,7 +21,7 @@ public sealed record GroundLeaseResponse(
     string? HomeownerEmail,
     string? HomeownerPhone,
     IReadOnlyList<StewardshipCheckInDto> StewardshipCheckIns,
-    string CreatedAt,
+    DateTimeOffset CreatedAt,
     string CreatedBy);
 
 /// <summary>DTO for a stewardship check-in entry.</summary>
@@ -29,4 +29,4 @@ public sealed record StewardshipCheckInDto(
     DateOnly CheckInDate,
     string Notes,
     string RecordedBy,
-    string OccurredAt);
+    DateTimeOffset OccurredAt);

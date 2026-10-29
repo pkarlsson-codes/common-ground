@@ -18,12 +18,7 @@ type Props = {
 const fmtCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 
-const fmtDateTime = (value?: string | null) => {
-  if (!value) return '—'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleString()
-}
+const fmtDateTime = (value?: Date | null) => (value ? value.toLocaleString() : '—')
 
 const fmtDate = (value?: CalendarDate | null) => (value ? formatCalendarDate(value, numericDate) : '—')
 

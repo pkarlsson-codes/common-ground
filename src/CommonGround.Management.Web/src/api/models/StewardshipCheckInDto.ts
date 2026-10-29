@@ -48,10 +48,10 @@ export interface StewardshipCheckInDto {
     recordedBy?: string;
     /**
      * 
-     * @type {string}
+     * @type {Date}
      * @memberof StewardshipCheckInDto
      */
-    occurredAt?: string;
+    occurredAt?: Date;
 }
 
 /**
@@ -74,7 +74,7 @@ export function StewardshipCheckInDtoFromJSONTyped(json: any, ignoreDiscriminato
         'checkInDate': json['checkInDate'] == null ? undefined : CalendarDateFromJSON(json['checkInDate']),
         'notes': json['notes'] == null ? undefined : json['notes'],
         'recordedBy': json['recordedBy'] == null ? undefined : json['recordedBy'],
-        'occurredAt': json['occurredAt'] == null ? undefined : json['occurredAt'],
+        'occurredAt': json['occurredAt'] == null ? undefined : (new Date(json['occurredAt'])),
     };
 }
 
@@ -92,7 +92,7 @@ export function StewardshipCheckInDtoToJSONTyped(value?: StewardshipCheckInDto |
         'checkInDate': CalendarDateToJSON(value['checkInDate']),
         'notes': value['notes'],
         'recordedBy': value['recordedBy'],
-        'occurredAt': value['occurredAt'],
+        'occurredAt': value['occurredAt'] == null ? undefined : ((value['occurredAt']).toISOString()),
     };
 }
 

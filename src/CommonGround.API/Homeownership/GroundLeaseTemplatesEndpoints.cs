@@ -80,7 +80,7 @@ public static class GroundLeaseTemplatesEndpoints
             view.Id, view.TemplateName, view.TermYears, view.CovenantTerms, view.Status,
             view.FormulaKind, view.AppreciationShare, view.IndexType, view.BaselineIndexValue,
             view.AnnualPercentage, view.ImprovementsCap,
-            view.CreatedAt.ToString("O"), view.CreatedBy));
+            view.CreatedAt, view.CreatedBy));
     }
 
     [WolverinePost("/api/ground-lease-templates/{id}/archive")]

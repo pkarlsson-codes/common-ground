@@ -14,7 +14,7 @@ public sealed record PurchaseWorkflowResponse(
     string BuyerEmail,
     string? BuyerPhone,
     decimal PurchasePrice,
-    string CreatedAt,
+    DateTimeOffset CreatedAt,
     EligibilityDetailsDto? EligibilityDetails,
     FinancingDetailsDto? FinancingDetails,
     InspectionResultDto? InspectionResult,

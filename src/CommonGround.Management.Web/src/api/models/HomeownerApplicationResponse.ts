@@ -80,10 +80,10 @@ export interface HomeownerApplicationResponse {
     phase?: string;
     /**
      * 
-     * @type {string}
+     * @type {Date}
      * @memberof HomeownerApplicationResponse
      */
-    submittedAt?: string;
+    submittedAt?: Date;
     /**
      * 
      * @type {string}
@@ -158,7 +158,7 @@ export function HomeownerApplicationResponseFromJSONTyped(json: any, ignoreDiscr
         'annualIncome': json['annualIncome'] == null ? undefined : json['annualIncome'],
         'accessibilityRequired': json['accessibilityRequired'] == null ? undefined : json['accessibilityRequired'],
         'phase': json['phase'] == null ? undefined : json['phase'],
-        'submittedAt': json['submittedAt'] == null ? undefined : json['submittedAt'],
+        'submittedAt': json['submittedAt'] == null ? undefined : (new Date(json['submittedAt'])),
         'submittedBy': json['submittedBy'] == null ? undefined : json['submittedBy'],
         'approvedDate': json['approvedDate'] == null ? undefined : CalendarDateFromJSON(json['approvedDate']),
         'denialReason': json['denialReason'] == null ? undefined : json['denialReason'],
@@ -188,7 +188,7 @@ export function HomeownerApplicationResponseToJSONTyped(value?: HomeownerApplica
         'annualIncome': value['annualIncome'],
         'accessibilityRequired': value['accessibilityRequired'],
         'phase': value['phase'],
-        'submittedAt': value['submittedAt'],
+        'submittedAt': value['submittedAt'] == null ? undefined : ((value['submittedAt']).toISOString()),
         'submittedBy': value['submittedBy'],
         'approvedDate': CalendarDateToJSON(value['approvedDate']),
         'denialReason': value['denialReason'],

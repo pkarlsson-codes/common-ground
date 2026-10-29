@@ -79,10 +79,10 @@ export interface HouseholdListItemResponse {
     mortgagePrequalificationExpiryDate?: CalendarDate | null;
     /**
      * 
-     * @type {string}
+     * @type {Date}
      * @memberof HouseholdListItemResponse
      */
-    registeredAt?: string;
+    registeredAt?: Date;
 }
 
 /**
@@ -109,7 +109,7 @@ export function HouseholdListItemResponseFromJSONTyped(json: any, ignoreDiscrimi
         'isHousingCounselingCompleted': json['isHousingCounselingCompleted'] == null ? undefined : json['isHousingCounselingCompleted'],
         'isCltOrientationCompleted': json['isCltOrientationCompleted'] == null ? undefined : json['isCltOrientationCompleted'],
         'mortgagePrequalificationExpiryDate': json['mortgagePrequalificationExpiryDate'] == null ? undefined : CalendarDateFromJSON(json['mortgagePrequalificationExpiryDate']),
-        'registeredAt': json['registeredAt'] == null ? undefined : json['registeredAt'],
+        'registeredAt': json['registeredAt'] == null ? undefined : (new Date(json['registeredAt'])),
     };
 }
 
@@ -131,7 +131,7 @@ export function HouseholdListItemResponseToJSONTyped(value?: HouseholdListItemRe
         'isHousingCounselingCompleted': value['isHousingCounselingCompleted'],
         'isCltOrientationCompleted': value['isCltOrientationCompleted'],
         'mortgagePrequalificationExpiryDate': CalendarDateToJSON(value['mortgagePrequalificationExpiryDate']),
-        'registeredAt': value['registeredAt'],
+        'registeredAt': value['registeredAt'] == null ? undefined : ((value['registeredAt']).toISOString()),
     };
 }
 

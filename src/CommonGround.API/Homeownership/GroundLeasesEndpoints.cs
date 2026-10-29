@@ -1,4 +1,3 @@
-using System.Globalization;
 using CommonGround.API.Contracts.Homeownership.Requests;
 using CommonGround.API.Contracts.Homeownership.Responses;
 using CommonGround.API.Infrastructure.Auth;
@@ -72,7 +71,7 @@ public static class GroundLeasesEndpoints
             v.FormulaKind,
             v.HomeownerFullName,
             v.HomeownerEmail,
-            v.CreatedAt.ToString("O", CultureInfo.InvariantCulture)));
+            v.CreatedAt));
 
         return Results.Ok(response);
     }
@@ -112,8 +111,8 @@ public static class GroundLeasesEndpoints
                 c.CheckInDate,
                 c.Notes,
                 c.RecordedBy,
-                c.OccurredAt.ToString("O", CultureInfo.InvariantCulture))).ToList().AsReadOnly(),
-            view.CreatedAt.ToString("O", CultureInfo.InvariantCulture),
+                c.OccurredAt)).ToList().AsReadOnly(),
+            view.CreatedAt,
             view.CreatedBy);
 
         return Results.Ok(response);

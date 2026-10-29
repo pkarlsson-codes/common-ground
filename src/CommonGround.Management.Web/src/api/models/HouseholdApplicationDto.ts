@@ -34,10 +34,10 @@ export interface HouseholdApplicationDto {
     phase?: string;
     /**
      * When the application was submitted.
-     * @type {string}
+     * @type {Date}
      * @memberof HouseholdApplicationDto
      */
-    submittedAt?: string;
+    submittedAt?: Date;
 }
 
 /**
@@ -59,7 +59,7 @@ export function HouseholdApplicationDtoFromJSONTyped(json: any, ignoreDiscrimina
         
         'id': json['id'] == null ? undefined : json['id'],
         'phase': json['phase'] == null ? undefined : json['phase'],
-        'submittedAt': json['submittedAt'] == null ? undefined : json['submittedAt'],
+        'submittedAt': json['submittedAt'] == null ? undefined : (new Date(json['submittedAt'])),
     };
 }
 
@@ -76,7 +76,7 @@ export function HouseholdApplicationDtoToJSONTyped(value?: HouseholdApplicationD
         
         'id': value['id'],
         'phase': value['phase'],
-        'submittedAt': value['submittedAt'],
+        'submittedAt': value['submittedAt'] == null ? undefined : ((value['submittedAt']).toISOString()),
     };
 }
 

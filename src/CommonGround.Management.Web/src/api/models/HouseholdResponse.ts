@@ -123,10 +123,10 @@ export interface HouseholdResponse {
     mortgagePrequalification?: MortgagePrequalificationDto | null;
     /**
      * 
-     * @type {string}
+     * @type {Date}
      * @memberof HouseholdResponse
      */
-    registeredAt?: string;
+    registeredAt?: Date;
     /**
      * 
      * @type {string}
@@ -170,7 +170,7 @@ export function HouseholdResponseFromJSONTyped(json: any, ignoreDiscriminator: b
         'isCltOrientationCompleted': json['isCltOrientationCompleted'] == null ? undefined : json['isCltOrientationCompleted'],
         'cltOrientationCompletedDate': json['cltOrientationCompletedDate'] == null ? undefined : CalendarDateFromJSON(json['cltOrientationCompletedDate']),
         'mortgagePrequalification': json['mortgagePrequalification'] == null ? undefined : MortgagePrequalificationDtoFromJSON(json['mortgagePrequalification']),
-        'registeredAt': json['registeredAt'] == null ? undefined : json['registeredAt'],
+        'registeredAt': json['registeredAt'] == null ? undefined : (new Date(json['registeredAt'])),
         'registeredBy': json['registeredBy'] == null ? undefined : json['registeredBy'],
         'applications': json['applications'] == null ? undefined : ((json['applications'] as Array<any>).map(HouseholdApplicationDtoFromJSON)),
     };
@@ -199,7 +199,7 @@ export function HouseholdResponseToJSONTyped(value?: HouseholdResponse | null, i
         'isCltOrientationCompleted': value['isCltOrientationCompleted'],
         'cltOrientationCompletedDate': CalendarDateToJSON(value['cltOrientationCompletedDate']),
         'mortgagePrequalification': MortgagePrequalificationDtoToJSON(value['mortgagePrequalification']),
-        'registeredAt': value['registeredAt'],
+        'registeredAt': value['registeredAt'] == null ? undefined : ((value['registeredAt']).toISOString()),
         'registeredBy': value['registeredBy'],
         'applications': value['applications'] == null ? undefined : ((value['applications'] as Array<any>).map(HouseholdApplicationDtoToJSON)),
     };
