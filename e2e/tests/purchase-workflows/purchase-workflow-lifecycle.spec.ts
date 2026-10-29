@@ -52,6 +52,7 @@ test('recording every track, scheduling, and closing a purchase creates the grou
   await expect(detail.getByRole('button', { name: 'Open Home' })).toBeVisible()
   // Initiated directly rather than from an application, so there's nothing to link back to.
   await expect(detail.getByRole('button', { name: 'Open Application' })).toHaveCount(0)
+  await expect(detail.getByRole('button', { name: 'Open Household' })).toHaveCount(0)
   for (const label of ['Eligibility', 'Financing', 'Inspection', 'Title', 'Lease Execution']) {
     await expect(track(detail, label)).toContainText('Pending')
   }
@@ -165,7 +166,7 @@ test('withdrawing a purchase asks for confirmation and ends the workflow', async
   await expect(detail.getByText('Exception Actions')).toHaveCount(0)
 })
 
-test('a workflow started by selecting an applicant links back to the application', async ({ page }) => {
+test('a workflow started by selecting an applicant links back to the application and the household', async ({ page }) => {
   await page.goto('/purchase-workflows')
   const buyer = `Selected ${uniqueId()}`
   const { templateName } = await createPurchaseWorkflow(page, buyer, { fromApplication: true })
@@ -175,4 +176,11 @@ test('a workflow started by selecting an applicant links back to the application
 
   await expect(page).toHaveURL(/\/applications$/)
   await expect(detailValue(panel(page, buyer), 'Phase')).toHaveText('Selected')
+
+  await page.goto('/purchase-workflows')
+  const reopened = await openWorkflow(page, templateName, buyer)
+  await reopened.getByRole('button', { name: 'Open Household' }).click()
+
+  await expect(page).toHaveURL(/\/households$/)
+  await expect(panel(page, buyer)).toContainText('Primary Contact')
 })
