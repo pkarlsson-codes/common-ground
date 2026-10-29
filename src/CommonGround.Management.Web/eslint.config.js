@@ -220,10 +220,22 @@ export default defineConfig([
     ],
     rules: {
       'tokenized-colors/no-raw-inline-colors': 'error',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "TSAsExpression > TSTypeReference > Identifier[name='CalendarDate']",
+          message: 'Make a CalendarDate with parseCalendarDate() or the helpers in lib/calendarDate.ts, not a cast.',
+        },
+      ],
     },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+  },
+  {
+    // The only place a string becomes a CalendarDate.
+    files: ['src/lib/calendarDate.ts'],
+    rules: { 'no-restricted-syntax': 'off' },
   },
 ])
