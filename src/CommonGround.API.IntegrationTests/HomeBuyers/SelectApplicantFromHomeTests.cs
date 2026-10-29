@@ -112,7 +112,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
 
         await bus.InvokeForTenantAsync(
             ApiFactory.TestTrustId,
-            new CommonGround.PropertyRegistry.Contracts.Events.HomeRegistered(homeId, landParcelId));
+            new CommonGround.PropertyRegistry.Contracts.Events.HomeRegistered(homeId, landParcelId, Bedrooms: 3, IsAccessible: false));
     }
 
     private async Task InvokeApplicationSelectedForwardingAsync(

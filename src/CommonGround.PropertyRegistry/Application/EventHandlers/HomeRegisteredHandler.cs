@@ -12,6 +12,8 @@ public sealed class HomeRegisteredHandler(IMessageBus bus)
     {
         await bus.PublishAsync(new IntegrationHomeRegistered(
             @event.AggregateId,
-            @event.LandParcelId)).ConfigureAwait(false);
+            @event.LandParcelId,
+            @event.Bedrooms,
+            @event.IsAccessible)).ConfigureAwait(false);
     }
 }
