@@ -5,7 +5,8 @@ import { uniqueId } from '../support/ui'
 //   create-a-trust — a brand-new user is sent to Onboarding, creates a trust, and lands in the app
 
 // A fresh, signed-out browser: the user registers a new Keycloak account, so it belongs to no trust.
-test.use({ storageState: { cookies: [], origins: [] } })
+// The browser's time zone prefills the trust's Time Zone.
+test.use({ storageState: { cookies: [], origins: [] }, timezoneId: 'America/Denver' })
 
 test('a new user without a trust creates one and is taken into the app', async ({ page }) => {
   const username = `e2e-${uniqueId()}`
@@ -34,6 +35,10 @@ test('a new user without a trust creates one and is taken into the app', async (
   await page.getByRole('textbox', { name: 'Trust Name' }).fill('   ')
   await submit.click()
   await expect(page.getByText('Please enter a community land trust name.')).toBeVisible()
+
+  const timeZone = page.getByRole('combobox', { name: 'Time Zone' })
+  await expect(timeZone).toHaveValue('America/Denver')
+  await timeZone.selectOption('America/Chicago')
 
   await page.getByRole('textbox', { name: 'Trust Name' }).fill(`Founders CLT ${uniqueId()}`)
   await submit.click()

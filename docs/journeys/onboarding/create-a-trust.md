@@ -5,7 +5,7 @@
 3. Page explains: access requires either an invite from a trust admin (opening the invite link from email while signed in adds the user automatically) or creating a new trust
 4. User clicks "Create a trust"
 5. User is taken to the Create Trust page
-6. User enters Trust Name
+6. User enters Trust Name and picks a Time Zone (required; prefilled from the browser's time zone). The trust's time zone decides what "today" is and how dates derived from timestamps are shown
 7. User clicks "Create trust and continue"
 8. If Trust Name is blank, error shown: "Please enter a community land trust name."
 9. If the user already belongs to a trust (409 response), error shown: "You already belong to a trust."

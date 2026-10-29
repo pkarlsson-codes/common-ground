@@ -9,8 +9,25 @@ import { getErrorMessage } from '../lib/getErrorMessage'
 
 const trustsApi = new TrustsApi(apiConfig)
 
+const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+const timeZones = Array.from(new Set([...Intl.supportedValuesOf('timeZone'), browserTimeZone])).sort()
+
+const fieldStyle = {
+  width: '100%',
+  padding: '12px 14px',
+  borderRadius: '8px',
+  border: '1px solid var(--border)',
+  background: 'transparent',
+  color: 'var(--text-bright)',
+  fontSize: '14px',
+  fontFamily: 'var(--font-body)',
+}
+
+const labelStyle = { fontSize: '12px', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--text-dim)' } as const
+
 export default function SignupPage() {
   const [name, setName] = useState('')
+  const [timeZone, setTimeZone] = useState(browserTimeZone)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { refresh } = useAuth()
@@ -29,7 +46,7 @@ export default function SignupPage() {
     setError(null)
 
     try {
-      await trustsApi.createTrust({ createTrustRequest: { name: trimmed } })
+      await trustsApi.createTrust({ createTrustRequest: { name: trimmed, timeZone } })
 
       await refresh()
       navigate('/', { replace: true })
@@ -95,12 +112,13 @@ export default function SignupPage() {
             color: 'var(--text-dim)',
             lineHeight: 1.5,
           }}>
-            Start with your organization name. You will be brought into the app once your trust is created.
+            Start with your organization name and time zone. You will be brought into the app once your trust is
+            created.
           </p>
         </div>
 
         <label style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <span style={{ fontSize: '12px', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>
+          <span style={labelStyle}>
             Trust Name
           </span>
           <input
@@ -109,17 +127,29 @@ export default function SignupPage() {
             placeholder='Example Community Land Trust'
             autoFocus
             disabled={isSubmitting}
-            style={{
-              width: '100%',
-              padding: '12px 14px',
-              borderRadius: '8px',
-              border: '1px solid var(--border)',
-              background: 'transparent',
-              color: 'var(--text-bright)',
-              fontSize: '14px',
-              fontFamily: 'var(--font-body)',
-            }}
+            style={fieldStyle}
           />
+        </label>
+
+        <label style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <span style={labelStyle}>
+            Time Zone
+          </span>
+          <select
+            value={timeZone}
+            onChange={(e) => setTimeZone(e.target.value)}
+            disabled={isSubmitting}
+            style={fieldStyle}
+          >
+            {timeZones.map((tz) => (
+              <option key={tz} value={tz} style={{ background: 'var(--surface)' }}>
+                {tz.replaceAll('_', ' ')}
+              </option>
+            ))}
+          </select>
+          <span style={{ fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.5 }}>
+            Dates such as "today" and due dates follow this time zone. Prefilled from your browser.
+          </span>
         </label>
 
         {error && (

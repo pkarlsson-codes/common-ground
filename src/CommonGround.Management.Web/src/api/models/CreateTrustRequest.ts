@@ -21,11 +21,17 @@ import { mapValues } from '../runtime';
  */
 export interface CreateTrustRequest {
     /**
-     * 
+     * The name of the trust.
      * @type {string}
      * @memberof CreateTrustRequest
      */
     name?: string;
+    /**
+     * The IANA time zone id the trust operates in, e.g. "America/Denver".
+     * @type {string}
+     * @memberof CreateTrustRequest
+     */
+    timeZone?: string;
 }
 
 /**
@@ -46,6 +52,7 @@ export function CreateTrustRequestFromJSONTyped(json: any, ignoreDiscriminator: 
     return {
         
         'name': json['name'] == null ? undefined : json['name'],
+        'timeZone': json['timeZone'] == null ? undefined : json['timeZone'],
     };
 }
 
@@ -61,6 +68,7 @@ export function CreateTrustRequestToJSONTyped(value?: CreateTrustRequest | null,
     return {
         
         'name': value['name'],
+        'timeZone': value['timeZone'],
     };
 }
 

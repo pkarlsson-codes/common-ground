@@ -9745,7 +9745,12 @@
         "additionalProperties": false,
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "The name of the trust."
+          },
+          "timeZone": {
+            "type": "string",
+            "description": "The IANA time zone id the trust operates in, e.g. \"America/Denver\"."
           }
         }
       },
