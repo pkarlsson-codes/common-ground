@@ -7,6 +7,6 @@
 5. Toast: "Purchase closed"
 6. The workflow moves to the Closed phase; Closing Notes (if entered) are shown, and Purchase Tracks and Exception Actions are no longer shown
 7. In the background, a new ground lease is created from the workflow's lease template, with the buyer as homeowner and the lease start date equal to the actual closing date; it appears in the Ground Leases table (lease creation is rejected if the template has been archived in the meantime)
-8. If the workflow was initiated by selecting an applicant for a home, the "Open Application" link remains available in the detail panel after closing
+8. If the workflow was initiated by selecting an applicant for a home, the "Open Application" and "Open Household" links remain available in the detail panel after closing
 
 Continues in: [View Ground Lease Detail](../ground-leases/view-ground-lease-detail.md)

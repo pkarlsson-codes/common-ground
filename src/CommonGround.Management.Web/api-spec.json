@@ -8381,6 +8381,10 @@
             "type": "string",
             "nullable": true
           },
+          "householdId": {
+            "type": "string",
+            "nullable": true
+          },
           "phase": {
             "type": "string"
           },

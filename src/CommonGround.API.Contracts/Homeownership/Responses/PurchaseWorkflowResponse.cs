@@ -7,6 +7,7 @@ public sealed record PurchaseWorkflowResponse(
     string LandParcelId,
     string HomeId,
     string? ApplicationId,
+    string? HouseholdId,
     string Phase,
     string InitiatedBy,
     string BuyerFullName,

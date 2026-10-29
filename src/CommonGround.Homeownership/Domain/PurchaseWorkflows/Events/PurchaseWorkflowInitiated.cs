@@ -13,4 +13,5 @@ public sealed record PurchaseWorkflowInitiated(
     string? BuyerPhone,
     decimal PurchasePrice,
     string InitiatedBy,
-    string? ApplicationId) : DomainEvent(AggregateId);
+    string? ApplicationId,
+    string? HouseholdId) : DomainEvent(AggregateId);

@@ -28,14 +28,14 @@ namespace CommonGround.API.IntegrationTests.HomeBuyers;
 /// domain-event-to-integration-event translation step (which is not part of what this test
 /// covers) while still exercising the real local handlers that react to those integration events:
 /// - PropertyRegistry.Contracts.Events.HomeRegistered → seeds HomeBuyers's HomeLandParcelView.
-/// - HomeBuyers.Contracts.Events.ApplicantSelected → fans out to PropertyRegistry's
+/// - HomeBuyers.Contracts.Events.ApplicationSelected → fans out to PropertyRegistry's
 ///   (marks the Home UnderContract) and Homeownership's (creates the PurchaseWorkflow) handlers.
 /// </summary>
 [Collection(IntegrationCollection.Name)]
 public class SelectApplicantFromHomeTests(ApiFactory factory)
 {
     [Fact]
-    public async Task SelectApplicant_HappyPath_MarksHomeUnderContractAndCreatesWorkflowWithApplicationId()
+    public async Task SelectApplicant_HappyPath_MarksHomeUnderContractAndCreatesWorkflowLinkedToApplicationAndHousehold()
     {
         var client = factory.CreateClient().WithAuthToken();
 
@@ -56,7 +56,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
             .Content.ReadFromJsonAsync<HomeownerApplicationResponse>();
         application!.Phase.Should().Be("Selected");
 
-        await InvokeApplicantSelectedForwardingAsync(
+        await InvokeApplicationSelectedForwardingAsync(
             applicant.ApplicationId, applicant.HouseholdId, applicant.FullName, applicant.Email,
             homeId, landParcelId, templateId, 200000m, selectedDate);
 
@@ -70,6 +70,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
         var workflowDetail = await (await client.GetAsync($"/api/purchase-workflows/{workflow!.Id}"))
             .Content.ReadFromJsonAsync<PurchaseWorkflowResponse>();
         workflowDetail!.ApplicationId.Should().Be(applicant.ApplicationId);
+        workflowDetail.HouseholdId.Should().Be(applicant.HouseholdId);
         workflowDetail.HomeId.Should().Be(homeId);
         workflowDetail.LandParcelId.Should().Be(landParcelId);
     }
@@ -115,7 +116,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
             new CommonGround.PropertyRegistry.Contracts.Events.HomeRegistered(homeId, landParcelId));
     }
 
-    private async Task InvokeApplicantSelectedForwardingAsync(
+    private async Task InvokeApplicationSelectedForwardingAsync(
         string applicationId, string householdId, string applicantFullName, string applicantEmail,
         string homeId, string landParcelId, string groundLeaseTemplateId,
         decimal purchasePrice, string selectedDate)

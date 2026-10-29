@@ -4,8 +4,8 @@ using Wolverine;
 
 namespace CommonGround.HomeBuyers.Application.EventHandlers;
 
-/// <summary>Publishes the ApplicantSelected integration event when an applicant is selected for a home.</summary>
-public sealed class ApplicantSelectedForHomeHandler(IMessageBus bus)
+/// <summary>Publishes the ApplicationSelected integration event when an applicant is selected for a home.</summary>
+public sealed class ApplicationSelectedForHomeHandler(IMessageBus bus)
 {
     /// <summary>Maps domain event to integration event and publishes it.</summary>
     public async Task Handle(ApplicationSelectedForHome @event, CancellationToken cancellationToken)

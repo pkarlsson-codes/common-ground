@@ -341,6 +341,7 @@ public static class PurchaseWorkflowsEndpoints
             view.LandParcelId,
             view.HomeId,
             view.ApplicationId,
+            view.HouseholdId,
             view.Phase,
             view.InitiatedBy,
             view.BuyerFullName,

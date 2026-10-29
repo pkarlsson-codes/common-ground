@@ -63,6 +63,7 @@ export default function PurchaseWorkflowSnapshotSection({ detail }: PurchaseWork
             <NavIdLink id={detail.landParcelId} to="/land-parcels" label="Open Land Parcel" />
             <NavIdLink id={detail.homeId} to="/homes" label="Open Home" />
             <NavIdLink id={detail.applicationId} to="/applications" label="Open Application" />
+            <NavIdLink id={detail.householdId} to="/households" label="Open Household" />
           </div>
         </div>
         {detail.failureReason && (

@@ -16,6 +16,7 @@ internal sealed class PurchaseWorkflowViewProjection : SingleStreamProjection<Pu
             LandParcelId = e.Data.LandParcelId,
             HomeId = e.Data.HomeId,
             ApplicationId = e.Data.ApplicationId,
+            HouseholdId = e.Data.HouseholdId,
             Phase = "Initiated",
             InitiatedBy = e.Data.InitiatedBy,
             BuyerFullName = e.Data.BuyerFullName,

@@ -10,7 +10,7 @@ using Marten;
 namespace CommonGround.Homeownership.Application.EventHandlers;
 
 /// <summary>Reacts to applicant selection by initiating a purchase workflow.</summary>
-public static class ApplicantSelectedHandler
+public static class ApplicationSelectedHandler
 {
     private static readonly string[] TerminalPhaseNames =
     [
@@ -41,7 +41,8 @@ public static class ApplicantSelectedHandler
             new Homeowner(@event.ApplicantFullName, @event.ApplicantEmail, @event.ApplicantPhone),
             @event.PurchasePrice,
             UserId.Create(@event.SelectedBy),
-            @event.ApplicationId);
+            @event.ApplicationId,
+            @event.HouseholdId);
 
         session.CreateAggregate<PurchaseWorkflow, PurchaseWorkflowId>(workflow);
     }

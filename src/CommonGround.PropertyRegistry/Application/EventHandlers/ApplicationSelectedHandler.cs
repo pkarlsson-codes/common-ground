@@ -7,7 +7,7 @@ using Marten;
 namespace CommonGround.PropertyRegistry.Application.EventHandlers;
 
 /// <summary>Reacts to applicant selection by marking a home under contract.</summary>
-public static class ApplicantSelectedHandler
+public static class ApplicationSelectedHandler
 {
     /// <summary>Creates a purchase workflow when an applicant is selected for a home.</summary>
     public static async Task Handle(

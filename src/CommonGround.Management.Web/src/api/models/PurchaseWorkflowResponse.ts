@@ -91,6 +91,12 @@ export interface PurchaseWorkflowResponse {
      * @type {string}
      * @memberof PurchaseWorkflowResponse
      */
+    householdId?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseWorkflowResponse
+     */
     phase?: string;
     /**
      * 
@@ -230,6 +236,7 @@ export function PurchaseWorkflowResponseFromJSONTyped(json: any, ignoreDiscrimin
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
         'homeId': json['homeId'] == null ? undefined : json['homeId'],
         'applicationId': json['applicationId'] == null ? undefined : json['applicationId'],
+        'householdId': json['householdId'] == null ? undefined : json['householdId'],
         'phase': json['phase'] == null ? undefined : json['phase'],
         'initiatedBy': json['initiatedBy'] == null ? undefined : json['initiatedBy'],
         'buyerFullName': json['buyerFullName'] == null ? undefined : json['buyerFullName'],
@@ -269,6 +276,7 @@ export function PurchaseWorkflowResponseToJSONTyped(value?: PurchaseWorkflowResp
         'landParcelId': value['landParcelId'],
         'homeId': value['homeId'],
         'applicationId': value['applicationId'],
+        'householdId': value['householdId'],
         'phase': value['phase'],
         'initiatedBy': value['initiatedBy'],
         'buyerFullName': value['buyerFullName'],
