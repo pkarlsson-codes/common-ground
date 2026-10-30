@@ -116,7 +116,8 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     public void DenyApplication(string reason, DateOnly deniedDate, UserId recordedBy)
     {
         ArgumentNullException.ThrowIfNull(recordedBy);
-        ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+        if (string.IsNullOrWhiteSpace(reason))
+            throw BusinessRuleViolation.HomeownerApplication.Deny.ReasonRequired();
         GuardNotTerminal();
 
         ApplyChange(new ApplicationDenied(Id.Value, reason, deniedDate, recordedBy.Value));

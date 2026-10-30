@@ -31,6 +31,10 @@ public static class BusinessRuleViolation
                         ["phase"] = phase.DisplayName,
                         ["requiredPhase"] = ApplicationPhase.Submitted.DisplayName,
                     });
+
+            public static BusinessRuleViolationException ReasonRequired()
+                => new(
+                    "home_buyers.homeowner_application.deny.reason_required");
         }
 
         public static class SelectApplicant
