@@ -18,7 +18,6 @@ import * as runtime from '../runtime';
 import type {
   ApproveApplicationRequest,
   DenyApplicationRequest,
-  HomeCandidateResponse,
   HomeownerApplicationResponse,
   PaginatedResponseOfHomeownerApplicationListItemResponse,
   PaginatedResponseOfWaitingListEntryResponse,
@@ -32,8 +31,6 @@ import {
     ApproveApplicationRequestToJSON,
     DenyApplicationRequestFromJSON,
     DenyApplicationRequestToJSON,
-    HomeCandidateResponseFromJSON,
-    HomeCandidateResponseToJSON,
     HomeownerApplicationResponseFromJSON,
     HomeownerApplicationResponseToJSON,
     PaginatedResponseOfHomeownerApplicationListItemResponseFromJSON,
@@ -58,10 +55,6 @@ export interface ApproveApplicationOperationRequest {
 export interface DenyApplicationOperationRequest {
     applicationId: string;
     denyApplicationRequest: DenyApplicationRequest;
-}
-
-export interface GetHomeCandidatesRequest {
-    homeId: string;
 }
 
 export interface GetHomeownerApplicationRequest {
@@ -123,19 +116,6 @@ export interface HomeownerApplicationsApiInterface {
     /**
      */
     denyApplication(requestParameters: DenyApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
-
-    /**
-     * 
-     * @param {string} homeId 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof HomeownerApplicationsApiInterface
-     */
-    getHomeCandidatesRaw(requestParameters: GetHomeCandidatesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<HomeCandidateResponse>>>;
-
-    /**
-     */
-    getHomeCandidates(requestParameters: GetHomeCandidatesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<HomeCandidateResponse>>;
 
     /**
      * 
@@ -316,41 +296,6 @@ export class HomeownerApplicationsApi extends runtime.BaseAPI implements Homeown
             default:
                 return await response.value();
         }
-    }
-
-    /**
-     */
-    async getHomeCandidatesRaw(requestParameters: GetHomeCandidatesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<HomeCandidateResponse>>> {
-        if (requestParameters['homeId'] == null) {
-            throw new runtime.RequiredError(
-                'homeId',
-                'Required parameter "homeId" was null or undefined when calling getHomeCandidates().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-
-        let urlPath = `/api/v1/homes/{homeId}/applicant-candidates`;
-        urlPath = urlPath.replace(`{${"homeId"}}`, encodeURIComponent(String(requestParameters['homeId'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(HomeCandidateResponseFromJSON));
-    }
-
-    /**
-     */
-    async getHomeCandidates(requestParameters: GetHomeCandidatesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<HomeCandidateResponse>> {
-        const response = await this.getHomeCandidatesRaw(requestParameters, initOverrides);
-        return await response.value();
     }
 
     /**

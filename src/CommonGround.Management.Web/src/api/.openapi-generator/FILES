@@ -4,6 +4,7 @@ apis/DevelopmentProjectsApi.ts
 apis/DocumentsApi.ts
 apis/GroundLeaseTemplatesApi.ts
 apis/GroundLeasesApi.ts
+apis/HomeSelectionsApi.ts
 apis/HomeownerApplicationsApi.ts
 apis/HomesApi.ts
 apis/HouseholdApi.ts
@@ -21,6 +22,7 @@ models/AddHouseholdMemberResponse.ts
 models/ApproveApplicationRequest.ts
 models/AttachDocumentRequest.ts
 models/CalculateResaleEstimateRequest.ts
+models/CancelHomeSelectionRequest.ts
 models/CancelPropertyInspectionRequest.ts
 models/CloseStewardshipCaseRequest.ts
 models/CompletePropertyInspectionRequest.ts
@@ -41,6 +43,7 @@ models/DocumentAttachmentResponse.ts
 models/DocumentLibraryItemResponse.ts
 models/DocumentResponse.ts
 models/DocumentVersionResponse.ts
+models/DrawSelectionLotteryRequest.ts
 models/EligibilityDetailsDto.ts
 models/EntityDocumentItemResponse.ts
 models/EscalateViolationRequest.ts
@@ -55,9 +58,11 @@ models/GroundLeaseResponse.ts
 models/GroundLeaseTemplateListItemResponse.ts
 models/GroundLeaseTemplateResponse.ts
 models/HomeAssessmentItemResponse.ts
-models/HomeCandidateResponse.ts
 models/HomeListItemResponse.ts
 models/HomeResponse.ts
+models/HomeSelectionCandidateDto.ts
+models/HomeSelectionResponse.ts
+models/HomeSelectionSummaryResponse.ts
 models/HomeownerApplicationListItemResponse.ts
 models/HomeownerApplicationResponse.ts
 models/HouseholdApplicationDto.ts
@@ -128,9 +133,11 @@ models/ResaleEstimateResponse.ts
 models/ResolveForeclosurePreventionCaseRequest.ts
 models/ScheduleClosingRequest.ts
 models/SchedulePropertyInspectionRequest.ts
+models/SelectHouseholdByPriorityRequest.ts
 models/ServicerDelinquencyResponse.ts
 models/SoftDeleteDocumentRequest.ts
 models/StallWorkflowRequest.ts
+models/StartHomeSelectionResponse.ts
 models/StewardshipCaseResponse.ts
 models/StewardshipCheckInDto.ts
 models/StewardshipQueueItemResponse.ts

@@ -6,6 +6,7 @@ export * from './DevelopmentProjectsApi';
 export * from './DocumentsApi';
 export * from './GroundLeaseTemplatesApi';
 export * from './GroundLeasesApi';
+export * from './HomeSelectionsApi';
 export * from './HomeownerApplicationsApi';
 export * from './HomesApi';
 export * from './HouseholdApi';

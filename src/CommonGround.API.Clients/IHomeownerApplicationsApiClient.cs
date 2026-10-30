@@ -24,9 +24,6 @@ public interface IHomeownerApplicationsApiClient
     /// <summary>Approves a homeowner application.</summary>
     Task ApproveApplicationAsync(string applicationId, ApproveApplicationRequest request, CancellationToken cancellationToken);
 
-    /// <summary>Gets applications eligible to be selected for a given home.</summary>
-    Task<IReadOnlyList<HomeCandidateResponse>> GetHomeCandidatesAsync(string homeId, CancellationToken cancellationToken);
-
     /// <summary>Gets the waiting list of approved applications, longest waiting first.</summary>
     Task<PaginatedResponse<WaitingListEntryResponse>> GetWaitingListAsync(GetWaitingListQuerySpec querySpec, CancellationToken cancellationToken);
 

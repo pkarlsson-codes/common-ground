@@ -43,13 +43,6 @@ public sealed class HomeownerApplicationsApiClient(
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<HomeCandidateResponse>> GetHomeCandidatesAsync(string homeId, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
-        return await GetAsync<IReadOnlyList<HomeCandidateResponse>>($"api/homes/{homeId}/applicant-candidates", cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
     public async Task<PaginatedResponse<WaitingListEntryResponse>> GetWaitingListAsync(
         GetWaitingListQuerySpec querySpec,
         CancellationToken cancellationToken)

@@ -58,18 +58,6 @@ public static class HomeownerApplicationsEndpoints
         return Results.NoContent();
     }
 
-    [WolverineGet("/api/v1/homes/{homeId}/applicant-candidates")]
-    [ProducesResponseType<IReadOnlyList<HomeCandidateResponse>>(StatusCodes.Status200OK)]
-    public static async Task<IResult> GetHomeCandidates(
-        string homeId,
-        IHomeownerApplicationsApiClient client,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
-        var result = await client.GetHomeCandidatesAsync(homeId, cancellationToken).ConfigureAwait(false);
-        return Results.Ok(result);
-    }
-
     [WolverineGet("/api/v1/waiting-list")]
     [ProducesResponseType<PaginatedResponse<WaitingListEntryResponse>>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetWaitingList(

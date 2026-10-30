@@ -1789,58 +1789,6 @@
         }
       }
     },
-    "/api/v1/homes/{homeId}/applicant-candidates": {
-      "get": {
-        "tags": [
-          "HomeownerApplications"
-        ],
-        "operationId": "GetHomeCandidates",
-        "parameters": [
-          {
-            "name": "homeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/HomeCandidateResponse"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": ""
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/waiting-list": {
       "get": {
         "tags": [
@@ -1997,6 +1945,359 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/WithdrawApplicationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homes/{homeId}/home-selections": {
+      "post": {
+        "tags": [
+          "HomeSelections"
+        ],
+        "operationId": "StartHomeSelection",
+        "parameters": [
+          {
+            "name": "homeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartHomeSelectionResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "HomeSelections"
+        ],
+        "operationId": "GetHomeSelectionsForHome",
+        "parameters": [
+          {
+            "name": "homeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HomeSelectionSummaryResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/home-selections/{selectionId}": {
+      "get": {
+        "tags": [
+          "HomeSelections"
+        ],
+        "operationId": "GetHomeSelection",
+        "parameters": [
+          {
+            "name": "selectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HomeSelectionResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/home-selections/{selectionId}/select-by-priority": {
+      "post": {
+        "tags": [
+          "HomeSelections"
+        ],
+        "operationId": "SelectHouseholdByPriority",
+        "parameters": [
+          {
+            "name": "selectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "SelectHouseholdByPriorityRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectHouseholdByPriorityRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/home-selections/{selectionId}/draw-lottery": {
+      "post": {
+        "tags": [
+          "HomeSelections"
+        ],
+        "operationId": "DrawSelectionLottery",
+        "parameters": [
+          {
+            "name": "selectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "DrawSelectionLotteryRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DrawSelectionLotteryRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/home-selections/{selectionId}/cancel": {
+      "post": {
+        "tags": [
+          "HomeSelections"
+        ],
+        "operationId": "CancelHomeSelection",
+        "parameters": [
+          {
+            "name": "selectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "CancelHomeSelectionRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelHomeSelectionRequest"
               }
             }
           },
@@ -7537,27 +7838,6 @@
           }
         }
       },
-      "HomeCandidateResponse": {
-        "type": "object",
-        "description": "Summary item for a homeowner application candidate for a home.",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "householdId": {
-            "type": "string"
-          },
-          "primaryContact": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/HouseholdContactDto"
-              }
-            ]
-          }
-        }
-      },
       "PaginatedResponseOfWaitingListEntryResponse": {
         "type": "object",
         "description": "Generic paginated response wrapper for API endpoints.",
@@ -7682,6 +7962,249 @@
           "reason": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "StartHomeSelectionResponse": {
+        "type": "object",
+        "description": "Response after starting a home selection.",
+        "additionalProperties": false,
+        "properties": {
+          "selectionId": {
+            "type": "string"
+          }
+        }
+      },
+      "HomeSelectionSummaryResponse": {
+        "type": "object",
+        "description": "A selection started for a home. Status is \"Open\", \"Completed\" or \"Cancelled\";\nSelectionMethod is \"Priority\" or \"Lottery\" once completed.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "homeId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "startedBy": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "selectedApplicationId": {
+            "type": "string",
+            "nullable": true
+          },
+          "selectionMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "HomeSelectionResponse": {
+        "type": "object",
+        "description": "A home selection with the home's facts and each candidate's priority facts side by side, in\nwaiting-list order. Status is \"Open\", \"Completed\" or \"Cancelled\";\nSelectionMethod is \"Priority\" or \"Lottery\" once completed.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "homeId": {
+            "type": "string"
+          },
+          "homeBedrooms": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "homeIsAccessible": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "startedBy": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HomeSelectionCandidateDto"
+            }
+          },
+          "selectedApplicationId": {
+            "type": "string",
+            "nullable": true
+          },
+          "selectionMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "priorities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "selectionReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "lotterySeed": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "lotteryPoolApplicationIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lotteryIneligibleApplicationIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cancellationReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "closedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "HomeSelectionCandidateDto": {
+        "type": "object",
+        "description": "A candidate's priority facts as they stood when the selection started, with its household's\ncurrent primary contact and whether its application can still be selected today.",
+        "additionalProperties": false,
+        "properties": {
+          "applicationId": {
+            "type": "string"
+          },
+          "householdId": {
+            "type": "string"
+          },
+          "primaryContact": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/HouseholdContactDto"
+              }
+            ]
+          },
+          "annualIncome": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "householdSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requiresAccessibility": {
+            "type": "boolean"
+          },
+          "waitingSince": {
+            "type": "string",
+            "format": "date"
+          },
+          "applicationPhase": {
+            "type": "string"
+          },
+          "canBeSelected": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SelectHouseholdByPriorityRequest": {
+        "type": "object",
+        "description": "Request to choose a candidate in a home selection by priority. Priorities are\nthe priority names staff cite, such as \"LowerIncome\" or \"WaitingListTenure\".",
+        "additionalProperties": false,
+        "properties": {
+          "applicationId": {
+            "type": "string"
+          },
+          "priorities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reason": {
+            "type": "string"
+          },
+          "groundLeaseTemplateId": {
+            "type": "string"
+          },
+          "purchasePrice": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "selectedDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "DrawSelectionLotteryRequest": {
+        "type": "object",
+        "description": "Request to choose a candidate in a home selection by lottery. The draw is among\nTiedApplicationIds when given, otherwise among every candidate.",
+        "additionalProperties": false,
+        "properties": {
+          "tiedApplicationIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "groundLeaseTemplateId": {
+            "type": "string"
+          },
+          "purchasePrice": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "selectedDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "CancelHomeSelectionRequest": {
+        "type": "object",
+        "description": "Request to cancel an open home selection without choosing anyone.",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string"
           }
         }
       },

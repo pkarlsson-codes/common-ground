@@ -60,6 +60,7 @@ internal static class CommonGroundServiceCollectionExtensions
         services.AddExceptionHandler<AggregateNotFoundExceptionHandler>();
         services.AddExceptionHandler<ForbiddenExceptionHandler>();
         services.AddExceptionHandler<DomainExceptionHandler>();
+        services.AddExceptionHandler<WriteConflictExceptionHandler>();
         services.AddExceptionHandler<UnhandledExceptionHandler>();
         return services;
     }
