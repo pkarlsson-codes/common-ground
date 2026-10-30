@@ -190,17 +190,6 @@ public static class BusinessRuleViolation
         }
     }
 
-    public static class HomeAvailabilityClaim
-    {
-        public static BusinessRuleViolationException AlreadyClaimed(string homeId)
-            => new(
-                "home_buyers.home_availability_claim.already_claimed",
-                new Dictionary<string, object?>
-                {
-                    ["homeId"] = homeId,
-                });
-    }
-
     public static class Household
     {
         public static class Register

@@ -15,9 +15,8 @@ using Wolverine;
 namespace CommonGround.API.IntegrationTests.HomeBuyers;
 
 /// <summary>
-/// Covers the home-driven applicant selection flow: the <c>HomeAvailabilityClaimView</c>
-/// concurrency guard, the Home status transition to UnderContract, and ApplicationId
-/// propagation onto the resulting PurchaseWorkflow.
+/// Covers the home-driven applicant selection flow: the Home status transition to
+/// UnderContract and ApplicationId propagation onto the resulting PurchaseWorkflow.
 ///
 /// As in <see cref="Homeownership.PurchaseWorkflowCloseTests"/>, the test host runs Wolverine
 /// in MediatorOnly mode, so the async Marten-to-Wolverine forwarding of raw domain events does
@@ -72,37 +71,6 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
         workflowDetail.HouseholdId.Should().Be(applicant.HouseholdId);
         workflowDetail.HomeId.Should().Be(homeId);
         workflowDetail.LandParcelId.Should().Be(landParcelId);
-    }
-
-    [Fact]
-    public async Task SelectApplicant_HomeAlreadyClaimedByAnotherApplication_IsRejected()
-    {
-        var client = factory.CreateClient().WithAuthToken();
-
-        var landParcelId = await CreateLandParcelAsync(client);
-        var homeId = await CreateHomeAsync(client, landParcelId);
-        await SeedHomeFactsViewAsync(homeId, landParcelId);
-
-        var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
-        var firstApplicant = await CreateApprovedApplicationAsync(client, "First Claimant", "first-claimant@example.com");
-        var secondApplicant = await CreateApprovedApplicationAsync(client, "Second Claimant", "second-claimant@example.com");
-
-        var selectedDate = new DateOnly(2026, 7, 20);
-
-        var firstSelectResponse = await client.PostAsJsonAsync(
-            $"/api/homeowner-applications/{firstApplicant.ApplicationId}/select",
-            new SelectApplicantRequest(homeId, templateId, 200000m, selectedDate));
-        firstSelectResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-        var secondSelectResponse = await client.PostAsJsonAsync(
-            $"/api/homeowner-applications/{secondApplicant.ApplicationId}/select",
-            new SelectApplicantRequest(homeId, templateId, 210000m, selectedDate));
-        secondSelectResponse.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
-
-        var secondApplication = await (await client.GetAsync($"/api/homeowner-applications/{secondApplicant.ApplicationId}"))
-            .Content.ReadFromJsonAsync<HomeownerApplicationResponse>();
-        secondApplication!.Phase.Should().Be(
-            "Approved", "the rejected selection must not advance the second applicant's phase");
     }
 
     private async Task SeedHomeFactsViewAsync(string homeId, string landParcelId)

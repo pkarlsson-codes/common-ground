@@ -1,7 +1,9 @@
 using CommonGround.HomeBuyers.Application.ReadModels;
+using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.HomeBuyers.Infrastructure.Persistence.Projections;
 using JasperFx.Events.Projections;
 using Marten;
+using Marten.Schema.Indexing.Unique;
 
 namespace CommonGround.HomeBuyers.Infrastructure.Persistence;
 
@@ -26,11 +28,17 @@ public static class HomeBuyersMartenConfiguration
             .DatabaseSchemaName(SchemaName)
             .Index(x => x.HouseholdId)
             .Index(x => x.Phase);
-        options.Schema.For<HomeAvailabilityClaimView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<HomeFactsView>().DatabaseSchemaName(SchemaName);
+        // One open or completed selection per home. HomeSelection.Start checks this from the
+        // view; the partial unique index catches two starts racing past that check.
         options.Schema.For<HomeSelectionView>()
             .DatabaseSchemaName(SchemaName)
-            .Index(x => x.HomeId);
+            .Index(x => x.HomeId, index =>
+            {
+                index.IsUnique = true;
+                index.TenancyScope = TenancyScope.PerTenant;
+                index.Predicate = $"data ->> 'Status' <> '{HomeSelectionStatus.Cancelled.DisplayName}'";
+            });
         options.Schema.For<HouseholdView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<HouseholdListItemView>().DatabaseSchemaName(SchemaName);
     }
@@ -39,7 +47,6 @@ public static class HomeBuyersMartenConfiguration
     {
         options.Projections.Add<HomeownerApplicationViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HomeownerApplicationListItemViewProjection>(ProjectionLifecycle.Inline);
-        options.Projections.Add<HomeAvailabilityClaimViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HomeSelectionViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HouseholdViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HouseholdListItemViewProjection>(ProjectionLifecycle.Inline);
