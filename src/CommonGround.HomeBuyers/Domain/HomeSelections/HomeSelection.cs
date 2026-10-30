@@ -75,10 +75,11 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
     {
         ArgumentNullException.ThrowIfNull(applicationId);
         ArgumentNullException.ThrowIfNull(priorities);
-        ArgumentException.ThrowIfNullOrWhiteSpace(reason);
         ArgumentNullException.ThrowIfNull(selectedBy);
         if (priorities.Count == 0)
-            throw new ArgumentException("At least one priority must be cited.", nameof(priorities));
+            throw BusinessRuleViolation.HomeSelection.SelectByPriority.PrioritiesRequired();
+        if (string.IsNullOrWhiteSpace(reason))
+            throw BusinessRuleViolation.HomeSelection.SelectByPriority.ReasonRequired();
 
         EnsureOpen();
         EnsureCandidate(applicationId);
@@ -132,8 +133,9 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
     /// <summary>Cancels the selection without choosing anyone, freeing the home for a new selection.</summary>
     public void Cancel(string reason, UserId cancelledBy)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(reason);
         ArgumentNullException.ThrowIfNull(cancelledBy);
+        if (string.IsNullOrWhiteSpace(reason))
+            throw BusinessRuleViolation.HomeSelection.Cancel.ReasonRequired();
 
         EnsureOpen();
 

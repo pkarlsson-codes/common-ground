@@ -115,6 +115,17 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class SelectByPriority
+        {
+            public static BusinessRuleViolationException PrioritiesRequired()
+                => new(
+                    "home_buyers.home_selection.select_by_priority.priorities_required");
+
+            public static BusinessRuleViolationException ReasonRequired()
+                => new(
+                    "home_buyers.home_selection.select_by_priority.reason_required");
+        }
+
         public static class DrawLottery
         {
             public static BusinessRuleViolationException TiedPoolTooSmall(int poolSize)
@@ -125,6 +136,13 @@ public static class BusinessRuleViolation
                         ["poolSize"] = poolSize,
                         ["minimumPoolSize"] = 2,
                     });
+        }
+
+        public static class Cancel
+        {
+            public static BusinessRuleViolationException ReasonRequired()
+                => new(
+                    "home_buyers.home_selection.cancel.reason_required");
         }
 
         public static class Modify
