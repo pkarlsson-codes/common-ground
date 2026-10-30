@@ -1,5 +1,6 @@
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications.Events;
+using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
@@ -88,6 +89,24 @@ public class HomeownerApplicationTests
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.homeowner_application.approve.phase_not_submitted");
+        }
+    }
+
+    public class TheDenyApplicationMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void GivenBlankReason_WhenDenied_ThenThrowsReasonRequired(string reason)
+        {
+            var sut = _testBed.Submit();
+
+            var act = () => sut.DenyApplication(reason, new DateOnly(2026, 6, 1), _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.deny.reason_required");
         }
     }
 
@@ -184,6 +203,85 @@ public class HomeownerApplicationTests
             sut.Phase.Should().Be(ApplicationPhase.Selected);
             sut.UncommittedEvents.OfType<ApplicationSelectedForHome>().Should().ContainSingle()
                 .Which.Should().BeEquivalentTo(new { ApplicantFullName = "Alice Johnson", ApplicantEmail = "alice@example.com" });
+        }
+    }
+
+    public class TheCanBeSelectedMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenApprovedApplicationWithReadyHousehold_WhenChecked_ThenIsTrue()
+        {
+            _testBed.WithReadiness();
+            var sut = _testBed.SubmitApproved();
+
+            sut.CanBeSelected(_testBed.Household, _testBed.SelectedDate).Should().BeTrue();
+        }
+
+        [Fact]
+        public void GivenSubmittedApplication_WhenChecked_ThenIsFalse()
+        {
+            _testBed.WithReadiness();
+            var sut = _testBed.Submit();
+
+            sut.CanBeSelected(_testBed.Household, _testBed.SelectedDate).Should().BeFalse();
+        }
+
+        [Fact]
+        public void GivenIncompleteReadiness_WhenChecked_ThenIsFalse()
+        {
+            _testBed.WithReadiness(counseling: false);
+            var sut = _testBed.SubmitApproved();
+
+            sut.CanBeSelected(_testBed.Household, _testBed.SelectedDate).Should().BeFalse();
+        }
+
+        [Fact]
+        public void GivenPrequalificationExpiredBeforeSelectedDate_WhenChecked_ThenIsFalse()
+        {
+            _testBed.WithReadiness(prequalificationExpiry: _testBed.SelectedDate.AddDays(-1));
+            var sut = _testBed.SubmitApproved();
+
+            sut.CanBeSelected(_testBed.Household, _testBed.SelectedDate).Should().BeFalse();
+        }
+
+        [Fact]
+        public void GivenAnotherHousehold_WhenChecked_ThenIsFalse()
+        {
+            _testBed.WithReadiness();
+            var sut = _testBed.SubmitApproved();
+            var otherHousehold = new TestBed().WithReadiness().Household;
+
+            sut.CanBeSelected(otherHousehold, _testBed.SelectedDate).Should().BeFalse();
+        }
+    }
+
+    public class ThePassOverMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenSubmittedApplication_WhenPassedOver_ThenThrowsPhaseNotApproved()
+        {
+            var sut = _testBed.Submit();
+
+            var act = () => sut.PassOver(HomeSelectionId.Generate(), "home-1");
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.pass_over.phase_not_approved");
+        }
+
+        [Fact]
+        public void GivenApprovedApplication_WhenPassedOver_ThenStaysApprovedAndRecordsTheHousehold()
+        {
+            var sut = _testBed.SubmitApproved();
+
+            sut.PassOver(HomeSelectionId.Generate(), "home-1");
+
+            sut.Phase.Should().Be(ApplicationPhase.Approved);
+            sut.UncommittedEvents.OfType<ApplicationPassedOver>().Should().ContainSingle()
+                .Which.HouseholdId.Should().Be(_testBed.Household.Id.Value);
         }
     }
 }
