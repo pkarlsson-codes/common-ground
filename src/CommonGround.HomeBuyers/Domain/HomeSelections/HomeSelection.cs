@@ -93,32 +93,40 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
     }
 
     /// <summary>
-    /// Chooses a candidate by lottery. The pool is <paramref name="tiedApplicationIds"/> when staff
-    /// found some candidates tied, otherwise every candidate. <paramref name="seed"/> is recorded so
-    /// the draw can be re-run and checked.
+    /// Chooses a candidate by lottery. The draw is over <paramref name="tiedApplicationIds"/> when
+    /// staff found some candidates tied, otherwise every candidate, leaving out anyone not in
+    /// <paramref name="eligibleApplicationIds"/> so the winner can always be selected.
+    /// <paramref name="seed"/> is recorded so the draw can be re-run and checked.
     /// </summary>
     public void DrawLottery(
         IReadOnlyCollection<HomeownerApplicationId>? tiedApplicationIds,
+        IReadOnlySet<HomeownerApplicationId> eligibleApplicationIds,
         int seed,
         UserId drawnBy)
     {
+        ArgumentNullException.ThrowIfNull(eligibleApplicationIds);
         ArgumentNullException.ThrowIfNull(drawnBy);
 
         EnsureOpen();
 
-        IReadOnlyCollection<HomeownerApplicationId> pool;
+        IReadOnlyCollection<HomeownerApplicationId> requested;
         if (tiedApplicationIds is null)
         {
-            pool = [.. Candidates.Select(c => c.ApplicationId)];
+            requested = [.. Candidates.Select(c => c.ApplicationId)];
         }
         else
         {
-            pool = [.. tiedApplicationIds.Distinct()];
-            if (pool.Count < 2)
-                throw BusinessRuleViolation.HomeSelection.DrawLottery.TiedPoolTooSmall(pool.Count);
-            foreach (var applicationId in pool)
+            requested = [.. tiedApplicationIds.Distinct()];
+            if (requested.Count < 2)
+                throw BusinessRuleViolation.HomeSelection.DrawLottery.TiedPoolTooSmall(requested.Count);
+            foreach (var applicationId in requested)
                 EnsureCandidate(applicationId);
         }
+
+        var pool = requested.Where(eligibleApplicationIds.Contains).ToList();
+        var ineligible = requested.Where(id => !eligibleApplicationIds.Contains(id)).ToList();
+        if (pool.Count == 0)
+            throw BusinessRuleViolation.HomeSelection.DrawLottery.NoEligibleCandidates(requested.Count);
 
         var winner = SelectionLottery.Draw(pool, seed);
 
@@ -126,6 +134,7 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
             Id.Value,
             winner.Value,
             [.. pool.Select(id => id.Value).Order(StringComparer.Ordinal)],
+            [.. ineligible.Select(id => id.Value).Order(StringComparer.Ordinal)],
             seed,
             drawnBy.Value));
     }

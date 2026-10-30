@@ -1,5 +1,6 @@
 using CommonGround.HomeBuyers.Application.Errors;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications.Events;
+using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
@@ -68,6 +69,21 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     }
 
     /// <summary>
+    /// Whether <see cref="SelectForHome"/> would accept this application with
+    /// <paramref name="household"/> on <paramref name="selectedDate"/>.
+    /// </summary>
+    public bool CanBeSelected(Household household, DateOnly selectedDate)
+    {
+        ArgumentNullException.ThrowIfNull(household);
+
+        return household.Id == HouseholdId
+            && Phase == ApplicationPhase.Approved
+            && household.PrimaryMember is not null
+            && household.IsReadinessComplete
+            && household.IsPrequalificationValidOn(selectedDate);
+    }
+
+    /// <summary>
     /// Selects the application for a home. The household must be this application's household,
     /// have completed readiness, and hold a prequalification still valid on <paramref name="selectedDate"/>.
     /// </summary>
@@ -113,6 +129,18 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
             selectedBy.Value));
     }
 
+    /// <summary>Records that another household was chosen for <paramref name="homeId"/> in <paramref name="selectionId"/>.</summary>
+    public void PassOver(HomeSelectionId selectionId, string homeId)
+    {
+        ArgumentNullException.ThrowIfNull(selectionId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+
+        if (Phase != ApplicationPhase.Approved)
+            throw BusinessRuleViolation.HomeownerApplication.PassOver.PhaseNotApproved(Phase);
+
+        ApplyChange(new ApplicationPassedOver(Id.Value, selectionId.Value, homeId));
+    }
+
     public void DenyApplication(string reason, DateOnly deniedDate, UserId recordedBy)
     {
         ArgumentNullException.ThrowIfNull(recordedBy);
@@ -136,6 +164,7 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
             case ApplicationSubmitted e: Apply(e); break;
             case ApplicationApproved e: Apply(e); break;
             case ApplicationSelectedForHome e: Apply(e); break;
+            case ApplicationPassedOver: break;
             case ApplicationDenied e: Apply(e); break;
             case ApplicationWithdrawn e: Apply(e); break;
             default: throw new InvalidOperationException(

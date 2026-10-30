@@ -74,6 +74,18 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class PassOver
+        {
+            public static BusinessRuleViolationException PhaseNotApproved(ApplicationPhase phase)
+                => new(
+                    "home_buyers.homeowner_application.pass_over.phase_not_approved",
+                    new Dictionary<string, object?>
+                    {
+                        ["phase"] = phase.DisplayName,
+                        ["requiredPhase"] = ApplicationPhase.Approved.DisplayName,
+                    });
+        }
+
         public static class Submit
         {
             public static BusinessRuleViolationException HouseholdHasOpenApplication(HomeownerApplicationId openApplicationId)
@@ -139,6 +151,14 @@ public static class BusinessRuleViolation
                     {
                         ["poolSize"] = poolSize,
                         ["minimumPoolSize"] = 2,
+                    });
+
+            public static BusinessRuleViolationException NoEligibleCandidates(int poolSize)
+                => new(
+                    "home_buyers.home_selection.draw_lottery.no_eligible_candidates",
+                    new Dictionary<string, object?>
+                    {
+                        ["poolSize"] = poolSize,
                     });
         }
 
