@@ -6,6 +6,7 @@ import DocumentsPage from './pages/documents/DocumentsPage'
 import GroundLeasesPage from './pages/GroundLeasesPage'
 import GroundLeaseTemplatesPage from './pages/GroundLeaseTemplatesPage'
 import HomesPage from './pages/HomesPage'
+import HomeSelectionPage from './pages/home-selections/HomeSelectionPage'
 import ApplicationsPage from './pages/ApplicationsPage'
 import HouseholdsPage from './pages/HouseholdsPage'
 import WaitingListPage from './pages/WaitingListPage'
@@ -85,6 +86,7 @@ export default function App() {
                 <Route index element={<Navigate to="/land-parcels" replace />} />
                 <Route path="/land-parcels"        element={<LandParcelsPage />} />
                 <Route path="/homes"               element={<HomesPage />} />
+                <Route path="/homes/selections/:selectionId" element={<HomeSelectionPage />} />
                 <Route path="/development"         element={<DevelopmentProjectsPage />} />
                 <Route path="/ground-leases"          element={<GroundLeasesPage />} />
                 <Route path="/ground-lease-templates" element={<GroundLeaseTemplatesPage />} />

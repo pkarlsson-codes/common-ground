@@ -34,6 +34,8 @@ const CSS_CLASS: Record<string, string> = {
   Submitted:        'badge-inprogress',
   Verified:         'badge-closed',
   Overdue:          'badge-stalled',
+  // Home Selection
+  Open:             'badge-inprogress',
   // Property Inspection
   Scheduled:        'badge-initiated',
   Completed:        'badge-closed',

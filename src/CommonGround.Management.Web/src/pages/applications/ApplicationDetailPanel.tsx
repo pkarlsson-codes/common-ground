@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { formatCalendarDate, numericDate, type CalendarDate } from '../../lib/calendarDate'
 import SlideOver from '../../components/SlideOver'
 import NavIdLink from '../../components/NavIdLink'
 import { useHomeownerApplication } from '../../hooks/applications'
+import { homeSelectionPath } from '../../hooks/homeSelections'
 import ApproveApplicationPanel from './ApproveApplicationPanel'
 import DenyApplicationPanel from './DenyApplicationPanel'
 import ApplicationPhaseBadge from './ApplicationPhaseBadge'
@@ -167,7 +169,9 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
                       <td><span className="cell-mono">{fmtDateTime(passOver.passedOverAt)}</span></td>
                       <td>{passOver.selectionMethod ?? '—'}</td>
                       <td style={{ textAlign: 'right' }}>
-                        <NavIdLink id={passOver.homeId} to="/homes" label="Open Home" />
+                        <Link className="btn btn-secondary btn-sm" to={homeSelectionPath(passOver.selectionId!)}>
+                          Open Selection
+                        </Link>
                       </td>
                     </tr>
                   ))}

@@ -1,0 +1,59 @@
+import { GroundLeaseTemplatesApi } from '../../api'
+import EntityCombobox from '../../components/EntityCombobox'
+import { DateInput } from '../../components/DateInput'
+import { apiConfig } from '../../lib/apiConfig'
+import type { PurchaseTerms } from './purchaseTerms'
+
+const groundLeaseTemplatesApi = new GroundLeaseTemplatesApi(apiConfig)
+
+type Props = {
+  value: PurchaseTerms
+  onChange: (update: (terms: PurchaseTerms) => PurchaseTerms) => void
+}
+
+export default function PurchaseTermsFields({ value, onChange }: Props) {
+  return (
+    <>
+      <div className="form-field full">
+        <label className="form-label">Ground Lease Template</label>
+        <EntityCombobox
+          value={value.groundLeaseTemplateId || null}
+          onChange={id => onChange(t => ({ ...t, groundLeaseTemplateId: id ?? '' }))}
+          fetchOptions={async q => {
+            const result = await groundLeaseTemplatesApi.getGroundLeaseTemplates({
+              search: q,
+              status: 'Active',
+              pageSize: 10,
+            })
+            return (result.items ?? []).map(t => ({
+              id: t.id!,
+              label: t.templateName ?? t.id!,
+            }))
+          }}
+          placeholder="Search templates…"
+        />
+      </div>
+      <div className="form-field">
+        <label className="form-label">Purchase Price ($)</label>
+        <input
+          className="form-input"
+          type="number"
+          min="1"
+          step="1"
+          value={value.purchasePrice || ''}
+          onChange={e => onChange(t => ({ ...t, purchasePrice: parseFloat(e.target.value) || 0 }))}
+          required
+        />
+      </div>
+      <div className="form-field">
+        <label className="form-label">Selected Date</label>
+        <DateInput
+          className="form-input"
+          value={value.selectedDate}
+          onChange={v => onChange(t => ({ ...t, selectedDate: v }))}
+          required
+        />
+      </div>
+    </>
+  )
+}

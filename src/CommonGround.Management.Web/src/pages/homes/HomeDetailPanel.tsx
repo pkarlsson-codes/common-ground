@@ -7,6 +7,7 @@ import NavIdLink from '../../components/NavIdLink'
 import DocumentList from '../../components/DocumentList'
 import { useToast } from '../../hooks/useToast'
 import DevelopmentProjectsSection from '../land-parcels/DevelopmentProjectsSection'
+import HomeSelectionSection from '../home-selections/HomeSelectionSection'
 import { trustToday } from '../../lib/calendarDate'
 import { DateInput } from '../../components/DateInput'
 
@@ -150,6 +151,8 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
                   </div>
                 </div>
               </div>
+
+              <HomeSelectionSection homeId={homeId} homeStatus={detail.status ?? ''} />
 
               {detail.landParcelId && (
                 <DevelopmentProjectsSection
