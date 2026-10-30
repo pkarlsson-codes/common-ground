@@ -85,6 +85,7 @@ export * from './PaginatedResponseOfLandParcelListItemResponse';
 export * from './PaginatedResponseOfPurchaseWorkflowListItemResponse';
 export * from './PaginatedResponseOfStewardshipCaseResponse';
 export * from './PaginatedResponseOfWaitingListEntryResponse';
+export * from './PassOverDto';
 export * from './ProblemDetails';
 export * from './PropertyInspectionResponse';
 export * from './PurchaseWorkflowListItemResponse';

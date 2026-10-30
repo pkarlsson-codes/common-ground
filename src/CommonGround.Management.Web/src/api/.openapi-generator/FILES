@@ -98,6 +98,7 @@ models/PaginatedResponseOfLandParcelListItemResponse.ts
 models/PaginatedResponseOfPurchaseWorkflowListItemResponse.ts
 models/PaginatedResponseOfStewardshipCaseResponse.ts
 models/PaginatedResponseOfWaitingListEntryResponse.ts
+models/PassOverDto.ts
 models/ProblemDetails.ts
 models/PropertyInspectionResponse.ts
 models/PurchaseWorkflowListItemResponse.ts

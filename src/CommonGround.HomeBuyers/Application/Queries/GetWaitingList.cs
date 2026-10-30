@@ -23,6 +23,7 @@ public static class GetWaitingListHandler
     /// <summary>
     /// Queries approved applications and joins each with its household's readiness as of today.
     /// A household needs re-verification once a prequalification it held is no longer valid.
+    /// Each entry also counts the household's pass-overs.
     /// </summary>
     public static async Task<PaginatedResponse<WaitingListEntry>> Handle(
         GetWaitingList request,
@@ -54,10 +55,15 @@ public static class GetWaitingListHandler
             .ToPagedListAsync(request.Page.Number, request.Page.Size, cancellationToken)
             .ConfigureAwait(false);
 
+        var householdIds = page.Select(a => a.HouseholdId).Distinct().ToList();
         var households = await session
-            .LoadManyAsync<HouseholdListItemView>(cancellationToken, page.Select(a => a.HouseholdId).Distinct())
+            .LoadManyAsync<HouseholdListItemView>(cancellationToken, householdIds)
             .ConfigureAwait(false);
         var householdsById = households.ToDictionary(h => h.Id);
+        var passOvers = await session
+            .LoadManyAsync<HouseholdPassOversView>(cancellationToken, householdIds)
+            .ConfigureAwait(false);
+        var passOverCounts = passOvers.ToDictionary(p => p.Id, p => p.PassOvers.Count);
         var today = await trustClock.TodayAsync(session.TenantId, cancellationToken).ConfigureAwait(false);
 
         return new PaginatedResponse<WaitingListEntry>
@@ -69,7 +75,8 @@ public static class GetWaitingListHandler
                     a,
                     household,
                     household?.IsReadyForSelectionOn(today) ?? false,
-                    household?.NeedsReverificationOn(today) ?? false);
+                    household?.NeedsReverificationOn(today) ?? false,
+                    passOverCounts.GetValueOrDefault(a.HouseholdId));
             })],
             TotalCount = (int)page.TotalItemCount,
             PageSize = (int)page.PageSize,

@@ -38,7 +38,8 @@ internal static class HomeSelectionCompletion
 
     /// <summary>
     /// Selects the chosen candidate's application for the home and passes over every other
-    /// candidate whose application is still approved.
+    /// candidate who could still have been selected on <paramref name="selectedDate"/>. Candidates
+    /// who withdrew or whose readiness lapsed were never really in the running, so they are not passed over.
     /// </summary>
     public static async Task CompleteAsync(
         IDocumentSession session,
@@ -71,7 +72,7 @@ internal static class HomeSelectionCompletion
                     selectedDate,
                     selectedBy);
             }
-            else if (application.Phase == ApplicationPhase.Approved)
+            else if (application.CanBeSelected(household, selectedDate))
             {
                 application.PassOver(selection.Id, selection.HomeId);
             }

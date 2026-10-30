@@ -28,10 +28,18 @@ import {
     CalendarDateToJSON,
     CalendarDateToJSONTyped,
 } from './CalendarDate';
+import type { PassOverDto } from './PassOverDto';
+import {
+    PassOverDtoFromJSON,
+    PassOverDtoFromJSONTyped,
+    PassOverDtoToJSON,
+    PassOverDtoToJSONTyped,
+} from './PassOverDto';
 
 /**
  * Detail response for a homeowner application. Household size, income and accessibility are the
  * snapshot taken at submission; current household state is served by HouseholdResponse.
+ * PassOvers covers all of the household's applications, oldest first.
  * @export
  * @interface HomeownerApplicationResponse
  */
@@ -132,6 +140,12 @@ export interface HomeownerApplicationResponse {
      * @memberof HomeownerApplicationResponse
      */
     selectedBy?: string | null;
+    /**
+     * 
+     * @type {Array<PassOverDto>}
+     * @memberof HomeownerApplicationResponse
+     */
+    passOvers?: Array<PassOverDto>;
 }
 
 /**
@@ -167,6 +181,7 @@ export function HomeownerApplicationResponseFromJSONTyped(json: any, ignoreDiscr
         'selectedHomeId': json['selectedHomeId'] == null ? undefined : json['selectedHomeId'],
         'selectedLandParcelId': json['selectedLandParcelId'] == null ? undefined : json['selectedLandParcelId'],
         'selectedBy': json['selectedBy'] == null ? undefined : json['selectedBy'],
+        'passOvers': json['passOvers'] == null ? undefined : ((json['passOvers'] as Array<any>).map(PassOverDtoFromJSON)),
     };
 }
 
@@ -197,6 +212,7 @@ export function HomeownerApplicationResponseToJSONTyped(value?: HomeownerApplica
         'selectedHomeId': value['selectedHomeId'],
         'selectedLandParcelId': value['selectedLandParcelId'],
         'selectedBy': value['selectedBy'],
+        'passOvers': value['passOvers'] == null ? undefined : ((value['passOvers'] as Array<any>).map(PassOverDtoToJSON)),
     };
 }
 

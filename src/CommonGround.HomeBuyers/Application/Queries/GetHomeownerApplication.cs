@@ -11,7 +11,10 @@ public sealed record GetHomeownerApplication(HomeownerApplicationId ApplicationI
 /// <summary>Handles <see cref="GetHomeownerApplication"/>.</summary>
 public static class GetHomeownerApplicationHandler
 {
-    /// <summary>Loads the application view by ID with its household's primary contact, throwing if not found.</summary>
+    /// <summary>
+    /// Loads the application view by ID with its household's primary contact and pass-over history,
+    /// throwing if not found.
+    /// </summary>
     public static async Task<HomeownerApplicationDetails> Handle(
         GetHomeownerApplication request,
         IQuerySession session,
@@ -24,6 +27,17 @@ public static class GetHomeownerApplicationHandler
 
         var household = await session.LoadAsync<HouseholdListItemView>(view.HouseholdId, cancellationToken).ConfigureAwait(false);
 
-        return new HomeownerApplicationDetails(view, household is null ? null : HouseholdContact.From(household));
+        var passOvers = await session.LoadAsync<HouseholdPassOversView>(view.HouseholdId, cancellationToken).ConfigureAwait(false);
+        var entries = passOvers?.PassOvers ?? [];
+
+        var selections = await session
+            .LoadManyAsync<HomeSelectionView>(cancellationToken, entries.Select(p => p.SelectionId).Distinct())
+            .ConfigureAwait(false);
+        var selectionsById = selections.ToDictionary(s => s.Id);
+
+        return new HomeownerApplicationDetails(
+            view,
+            household is null ? null : HouseholdContact.From(household),
+            [.. entries.Select(p => new HouseholdPassOver(p, selectionsById.GetValueOrDefault(p.SelectionId)?.SelectionMethod))]);
     }
 }

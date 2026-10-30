@@ -148,6 +148,35 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
           </div>
 
           <div className="detail-section" style={{ marginTop: 16 }}>
+            <div className="detail-section__title">Passed Over</div>
+            {(detail.passOvers ?? []).length === 0 && (
+              <div className="detail-field__value">This household has not been passed over for a home.</div>
+            )}
+            {(detail.passOvers ?? []).length > 0 && (
+              <table className="registry-table" style={{ marginTop: 10 }}>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Selection Method</th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {detail.passOvers!.map(passOver => (
+                    <tr key={passOver.selectionId}>
+                      <td><span className="cell-mono">{fmtDateTime(passOver.passedOverAt)}</span></td>
+                      <td>{passOver.selectionMethod ?? '—'}</td>
+                      <td style={{ textAlign: 'right' }}>
+                        <NavIdLink id={passOver.homeId} to="/homes" label="Open Home" />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          <div className="detail-section" style={{ marginTop: 16 }}>
             <div className="detail-section__title">Workflow Actions</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {isSubmittedPhase && (

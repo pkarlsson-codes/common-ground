@@ -138,7 +138,7 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
         if (Phase != ApplicationPhase.Approved)
             throw BusinessRuleViolation.HomeownerApplication.PassOver.PhaseNotApproved(Phase);
 
-        ApplyChange(new ApplicationPassedOver(Id.Value, selectionId.Value, homeId));
+        ApplyChange(new ApplicationPassedOver(Id.Value, HouseholdId.Value, selectionId.Value, homeId));
     }
 
     public void DenyApplication(string reason, DateOnly deniedDate, UserId recordedBy)

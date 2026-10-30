@@ -94,6 +94,7 @@ export default function WaitingListTable({
                 <th>Approved</th>
                 <th>Days Waiting</th>
                 <th>Prequalification Expires</th>
+                <th>Passed Over</th>
                 <th>Readiness</th>
               </tr>
             </thead>
@@ -109,6 +110,7 @@ export default function WaitingListTable({
                   <td><span className="cell-mono">{fmtDate(entry.approvedDate)}</span></td>
                   <td><span className="cell-mono">{daysSince(entry.approvedDate)}</span></td>
                   <td><span className="cell-mono">{fmtDate(entry.mortgagePrequalificationExpiryDate)}</span></td>
+                  <td><span className="cell-mono">{entry.passOverCount ?? 0}</span></td>
                   <td><ReadinessBadge entry={entry} /></td>
                 </tr>
               ))}

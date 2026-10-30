@@ -41,6 +41,7 @@ public static class HomeBuyersMartenConfiguration
             });
         options.Schema.For<HouseholdView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<HouseholdListItemView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<HouseholdPassOversView>().DatabaseSchemaName(SchemaName);
     }
 
     private static void ConfigureProjections(StoreOptions options)
@@ -50,5 +51,6 @@ public static class HomeBuyersMartenConfiguration
         options.Projections.Add<HomeSelectionViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HouseholdViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HouseholdListItemViewProjection>(ProjectionLifecycle.Inline);
+        options.Projections.Add<HouseholdPassOversViewProjection>(ProjectionLifecycle.Inline);
     }
 }

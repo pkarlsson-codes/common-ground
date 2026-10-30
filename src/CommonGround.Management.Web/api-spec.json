@@ -7422,7 +7422,7 @@
       },
       "HomeownerApplicationResponse": {
         "type": "object",
-        "description": "Detail response for a homeowner application. Household size, income and accessibility are the\nsnapshot taken at submission; current household state is served by HouseholdResponse.",
+        "description": "Detail response for a homeowner application. Household size, income and accessibility are the\nsnapshot taken at submission; current household state is served by HouseholdResponse.\nPassOvers covers all of the household's applications, oldest first.",
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -7487,6 +7487,36 @@
             "nullable": true
           },
           "selectedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "passOvers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PassOverDto"
+            }
+          }
+        }
+      },
+      "PassOverDto": {
+        "type": "object",
+        "description": "A home selection the household was passed over in. SelectionMethod is how the\nchosen household was picked: \"Priority\" or \"Lottery\".",
+        "additionalProperties": false,
+        "properties": {
+          "applicationId": {
+            "type": "string"
+          },
+          "selectionId": {
+            "type": "string"
+          },
+          "homeId": {
+            "type": "string"
+          },
+          "passedOverAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "selectionMethod": {
             "type": "string",
             "nullable": true
           }
@@ -7574,7 +7604,7 @@
       },
       "WaitingListEntryResponse": {
         "type": "object",
-        "description": "An approved application on the waiting list, with its household's readiness as of today.",
+        "description": "An approved application on the waiting list, with its household's readiness as of today and the\nnumber of home selections the household was passed over in.",
         "additionalProperties": false,
         "properties": {
           "applicationId": {
@@ -7619,6 +7649,10 @@
           },
           "needsReverification": {
             "type": "boolean"
+          },
+          "passOverCount": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

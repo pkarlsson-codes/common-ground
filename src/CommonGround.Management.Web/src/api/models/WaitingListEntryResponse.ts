@@ -30,7 +30,8 @@ import {
 } from './CalendarDate';
 
 /**
- * An approved application on the waiting list, with its household's readiness as of today.
+ * An approved application on the waiting list, with its household's readiness as of today and the
+ * number of home selections the household was passed over in.
  * @export
  * @interface WaitingListEntryResponse
  */
@@ -101,6 +102,12 @@ export interface WaitingListEntryResponse {
      * @memberof WaitingListEntryResponse
      */
     needsReverification?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof WaitingListEntryResponse
+     */
+    passOverCount?: number;
 }
 
 /**
@@ -131,6 +138,7 @@ export function WaitingListEntryResponseFromJSONTyped(json: any, ignoreDiscrimin
         'mortgagePrequalificationExpiryDate': json['mortgagePrequalificationExpiryDate'] == null ? undefined : CalendarDateFromJSON(json['mortgagePrequalificationExpiryDate']),
         'isReadyForSelection': json['isReadyForSelection'] == null ? undefined : json['isReadyForSelection'],
         'needsReverification': json['needsReverification'] == null ? undefined : json['needsReverification'],
+        'passOverCount': json['passOverCount'] == null ? undefined : json['passOverCount'],
     };
 }
 
@@ -156,6 +164,7 @@ export function WaitingListEntryResponseToJSONTyped(value?: WaitingListEntryResp
         'mortgagePrequalificationExpiryDate': CalendarDateToJSON(value['mortgagePrequalificationExpiryDate']),
         'isReadyForSelection': value['isReadyForSelection'],
         'needsReverification': value['needsReverification'],
+        'passOverCount': value['passOverCount'],
     };
 }
 

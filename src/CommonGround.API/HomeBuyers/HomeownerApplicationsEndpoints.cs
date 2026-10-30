@@ -136,7 +136,8 @@ public static class HomeownerApplicationsEndpoints
             e.Household?.IsCltOrientationCompleted ?? false,
             e.Household?.MortgagePrequalificationExpiryDate,
             e.IsReadyForSelection,
-            e.NeedsReverification));
+            e.NeedsReverification,
+            e.PassOverCount));
 
         return Results.Ok(response);
     }
@@ -209,8 +210,17 @@ public static class HomeownerApplicationsEndpoints
             view.SelectedDate,
             view.SelectedHomeId,
             view.SelectedLandParcelId,
-            view.SelectedBy);
+            view.SelectedBy,
+            [.. details.PassOvers.Select(MapPassOver)]);
     }
+
+    private static PassOverDto MapPassOver(HouseholdPassOver passOver) =>
+        new(
+            passOver.Entry.ApplicationId,
+            passOver.Entry.SelectionId,
+            passOver.Entry.HomeId,
+            passOver.Entry.PassedOverAt,
+            passOver.SelectionMethod);
 
     private static HouseholdContactDto? MapContact(HouseholdContact? contact) =>
         contact is null ? null : new HouseholdContactDto(contact.Name, contact.Email, contact.Phone);
