@@ -94,7 +94,6 @@ test('registering a home adds it to the registry with its details and initial as
   const detail = panel(page, 'Duplex')
   await expect(detail).toContainText('4 bd · 2.5 ba · 1,500 sq ft')
   await expect(detailValue(detail, 'Status')).toHaveText('Available')
-  await expect(detail.getByRole('button', { name: 'Select Applicant' })).toBeVisible()
   await expect(detailValue(detail, 'Accessible')).toHaveText('Yes')
   await expect(detailValue(detail, 'Year Built')).toHaveText('1978')
   await expect(detailValue(detail, 'Assessed Value')).toHaveText('$310,000')

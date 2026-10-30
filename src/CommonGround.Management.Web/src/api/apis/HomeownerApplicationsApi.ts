@@ -23,7 +23,6 @@ import type {
   PaginatedResponseOfHomeownerApplicationListItemResponse,
   PaginatedResponseOfWaitingListEntryResponse,
   ProblemDetails,
-  SelectApplicantRequest,
   SubmitApplicationRequest,
   SubmitApplicationResponse,
   WithdrawApplicationRequest,
@@ -43,8 +42,6 @@ import {
     PaginatedResponseOfWaitingListEntryResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
-    SelectApplicantRequestFromJSON,
-    SelectApplicantRequestToJSON,
     SubmitApplicationRequestFromJSON,
     SubmitApplicationRequestToJSON,
     SubmitApplicationResponseFromJSON,
@@ -81,11 +78,6 @@ export interface GetWaitingListRequest {
     pageNumber?: number;
     pageSize?: number;
     search?: string | null;
-}
-
-export interface SelectApplicantOperationRequest {
-    applicationId: string;
-    selectApplicantRequest: SelectApplicantRequest;
 }
 
 export interface SubmitApplicationOperationRequest {
@@ -187,20 +179,6 @@ export interface HomeownerApplicationsApiInterface {
     /**
      */
     getWaitingList(requestParameters: GetWaitingListRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfWaitingListEntryResponse>;
-
-    /**
-     * 
-     * @param {string} applicationId 
-     * @param {SelectApplicantRequest} selectApplicantRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof HomeownerApplicationsApiInterface
-     */
-    selectApplicantRaw(requestParameters: SelectApplicantOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
-
-    /**
-     */
-    selectApplicant(requestParameters: SelectApplicantOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -486,58 +464,6 @@ export class HomeownerApplicationsApi extends runtime.BaseAPI implements Homeown
     async getWaitingList(requestParameters: GetWaitingListRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfWaitingListEntryResponse> {
         const response = await this.getWaitingListRaw(requestParameters, initOverrides);
         return await response.value();
-    }
-
-    /**
-     */
-    async selectApplicantRaw(requestParameters: SelectApplicantOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters['applicationId'] == null) {
-            throw new runtime.RequiredError(
-                'applicationId',
-                'Required parameter "applicationId" was null or undefined when calling selectApplicant().'
-            );
-        }
-
-        if (requestParameters['selectApplicantRequest'] == null) {
-            throw new runtime.RequiredError(
-                'selectApplicantRequest',
-                'Required parameter "selectApplicantRequest" was null or undefined when calling selectApplicant().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-
-        let urlPath = `/api/v1/homeowner-applications/{applicationId}/select`;
-        urlPath = urlPath.replace(`{${"applicationId"}}`, encodeURIComponent(String(requestParameters['applicationId'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: SelectApplicantRequestToJSON(requestParameters['selectApplicantRequest']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse<any>(response);
-    }
-
-    /**
-     */
-    async selectApplicant(requestParameters: SelectApplicantOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
-        const response = await this.selectApplicantRaw(requestParameters, initOverrides);
-        switch (response.raw.status) {
-            case 204:
-                return null;
-            case 200:
-                return await response.value();
-            default:
-                return await response.value();
-        }
     }
 
     /**

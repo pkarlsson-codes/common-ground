@@ -1908,71 +1908,6 @@
         }
       }
     },
-    "/api/v1/homeowner-applications/{applicationId}/select": {
-      "post": {
-        "tags": [
-          "HomeownerApplications"
-        ],
-        "operationId": "SelectApplicant",
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "SelectApplicantRequest",
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SelectApplicantRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": ""
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/homeowner-applications/{applicationId}/deny": {
       "post": {
         "tags": [
@@ -7684,27 +7619,6 @@
           },
           "needsReverification": {
             "type": "boolean"
-          }
-        }
-      },
-      "SelectApplicantRequest": {
-        "type": "object",
-        "description": "Request to select an applicant for a home. LandParcelId is resolved server-side from the home.",
-        "additionalProperties": false,
-        "properties": {
-          "homeId": {
-            "type": "string"
-          },
-          "groundLeaseTemplateId": {
-            "type": "string"
-          },
-          "purchasePrice": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "selectedDate": {
-            "type": "string",
-            "format": "date"
           }
         }
       },

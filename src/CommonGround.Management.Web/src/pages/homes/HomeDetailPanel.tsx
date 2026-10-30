@@ -7,7 +7,6 @@ import NavIdLink from '../../components/NavIdLink'
 import DocumentList from '../../components/DocumentList'
 import { useToast } from '../../hooks/useToast'
 import DevelopmentProjectsSection from '../land-parcels/DevelopmentProjectsSection'
-import SelectApplicantPanel from '../applications/SelectApplicantPanel'
 import { trustToday } from '../../lib/calendarDate'
 import { DateInput } from '../../components/DateInput'
 
@@ -45,7 +44,6 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
   const [assessment, setAssessment] = useState<RecordHomeAssessmentRequest>(emptyAssessment)
   const [showAssessmentForm, setShowAssessmentForm] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('details')
-  const [showSelectApplicant, setShowSelectApplicant] = useState(false)
   const { success } = useToast()
 
   const sortedAssessments = assessments?.items
@@ -118,15 +116,6 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
                   <div className="detail-field__label">Status</div>
                   <div className="detail-field__value"><StatusBadge status={detail.status ?? ''} /></div>
                 </div>
-                {detail.status === 'Available' && (
-                  <div className="detail-field">
-                    <div className="detail-field__value">
-                      <button className="btn btn-primary btn-sm" onClick={() => setShowSelectApplicant(true)}>
-                        Select Applicant
-                      </button>
-                    </div>
-                  </div>
-                )}
                 <div className="detail-field">
                   <div className="detail-field__label">Accessible</div>
                   <div className="detail-field__value">{detail.isAccessible ? 'Yes' : 'No'}</div>
@@ -292,10 +281,6 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
             </>
           )}
         </>
-      )}
-
-      {showSelectApplicant && (
-        <SelectApplicantPanel homeId={homeId} onClose={() => setShowSelectApplicant(false)} />
       )}
     </SlideOver>
   )

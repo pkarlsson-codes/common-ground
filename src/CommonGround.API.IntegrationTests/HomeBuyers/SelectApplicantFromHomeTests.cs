@@ -6,7 +6,11 @@ using CommonGround.API.Contracts.Homeownership.Requests;
 using CommonGround.API.Contracts.Homeownership.Responses;
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
+using CommonGround.HomeBuyers.Application.Commands;
 using CommonGround.HomeBuyers.Contracts.Events;
+using CommonGround.HomeBuyers.Domain.HomeownerApplications;
+using CommonGround.HomeBuyers.Domain.HomeSelections;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Infrastructure.API;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,8 +19,9 @@ using Wolverine;
 namespace CommonGround.API.IntegrationTests.HomeBuyers;
 
 /// <summary>
-/// Covers the home-driven applicant selection flow: the Home status transition to
+/// Covers the hand-off from a completed home selection: the Home status transition to
 /// UnderContract and ApplicationId propagation onto the resulting PurchaseWorkflow.
+/// The selection commands have no API endpoints yet, so they are invoked on the bus.
 ///
 /// As in <see cref="Homeownership.PurchaseWorkflowCloseTests"/>, the test host runs Wolverine
 /// in MediatorOnly mode, so the async Marten-to-Wolverine forwarding of raw domain events does
@@ -33,7 +38,7 @@ namespace CommonGround.API.IntegrationTests.HomeBuyers;
 public class SelectApplicantFromHomeTests(ApiFactory factory)
 {
     [Fact]
-    public async Task SelectApplicant_HappyPath_MarksHomeUnderContractAndCreatesWorkflowLinkedToApplicationAndHousehold()
+    public async Task SelectByPriority_HappyPath_MarksHomeUnderContractAndCreatesWorkflowLinkedToApplicationAndHousehold()
     {
         var client = factory.CreateClient().WithAuthToken();
 
@@ -45,10 +50,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
         var applicant = await CreateApprovedApplicationAsync(client, "Happy Path Applicant", "happy-path@example.com");
 
         var selectedDate = new DateOnly(2026, 7, 20);
-        var selectResponse = await client.PostAsJsonAsync(
-            $"/api/homeowner-applications/{applicant.ApplicationId}/select",
-            new SelectApplicantRequest(homeId, templateId, 200000m, selectedDate));
-        selectResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        await SelectByPriorityAsync(applicant.ApplicationId, homeId, templateId, 200000m, selectedDate);
 
         var application = await (await client.GetAsync($"/api/homeowner-applications/{applicant.ApplicationId}"))
             .Content.ReadFromJsonAsync<HomeownerApplicationResponse>();
@@ -63,7 +65,7 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
         home!.Status.Should().Be("UnderContract");
 
         var workflow = await FindPurchaseWorkflowAsync(client, templateId);
-        workflow.Should().NotBeNull("selecting an applicant should automatically initiate a purchase workflow");
+        workflow.Should().NotBeNull("completing a selection should automatically initiate a purchase workflow");
 
         var workflowDetail = await (await client.GetAsync($"/api/purchase-workflows/{workflow!.Id}"))
             .Content.ReadFromJsonAsync<PurchaseWorkflowResponse>();
@@ -81,6 +83,31 @@ public class SelectApplicantFromHomeTests(ApiFactory factory)
         await bus.InvokeForTenantAsync(
             ApiFactory.TestTrustId,
             new CommonGround.PropertyRegistry.Contracts.Events.HomeRegistered(homeId, landParcelId, Bedrooms: 3, IsAccessible: false));
+    }
+
+    private async Task SelectByPriorityAsync(
+        string applicationId, string homeId, string groundLeaseTemplateId,
+        decimal purchasePrice, DateOnly selectedDate)
+    {
+        using var scope = factory.Services.CreateScope();
+        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
+        var userId = UserId.Generate();
+
+        var selectionId = await bus.InvokeForTenantAsync<HomeSelectionId>(
+            ApiFactory.TestTrustId,
+            new StartHomeSelection(homeId, userId));
+
+        await bus.InvokeForTenantAsync(
+            ApiFactory.TestTrustId,
+            new SelectHouseholdByPriority(
+                selectionId,
+                HomeownerApplicationId.Create(applicationId),
+                [SelectionPriority.WaitingListTenure],
+                "Longest on the waiting list",
+                groundLeaseTemplateId,
+                purchasePrice,
+                selectedDate,
+                userId));
     }
 
     private async Task InvokeApplicationSelectedForwardingAsync(

@@ -7,4 +7,4 @@
 5. User optionally adjusts Approved Date and enters optional Notes
 6. User clicks "Approve" (disabled until Approved Date is set)
 7. Toast: "Application approved"
-8. Panel closes, application detail refreshes and the application moves to the Approved phase (shown as "Approved · on waiting list"). The household now appears on the [Waiting List](../waiting-list/view-waiting-list.md) and becomes a candidate in [Select Applicant From Home](select-applicant.md)
+8. Panel closes, application detail refreshes and the application moves to the Approved phase (shown as "Approved · on waiting list"). The household now appears on the [Waiting List](../waiting-list/view-waiting-list.md) and becomes a candidate when a home selection is started

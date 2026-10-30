@@ -7,7 +7,6 @@ import {
   type HomeownerApplicationResponse,
   type PaginatedResponseOfHomeownerApplicationListItemResponse,
   type PaginatedResponseOfWaitingListEntryResponse,
-  type SelectApplicantRequest,
   type RegisterHouseholdRequest,
   type RegisterHouseholdResponse,
   type SubmitApplicationResponse,
@@ -103,17 +102,6 @@ export function useApproveApplication() {
   return useMutation({
     mutationFn: ({ applicationId, request }: { applicationId: string; request: ApproveApplicationRequest }) =>
       api.approveApplication({ applicationId, approveApplicationRequest: request }),
-    onSuccess: (_data, variables) => {
-      invalidateApplication(qc, variables.applicationId)
-    },
-  })
-}
-
-export function useSelectApplicant() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ applicationId, request }: { applicationId: string; request: SelectApplicantRequest }) =>
-      api.selectApplicant({ applicationId, selectApplicantRequest: request }),
     onSuccess: (_data, variables) => {
       invalidateApplication(qc, variables.applicationId)
     },

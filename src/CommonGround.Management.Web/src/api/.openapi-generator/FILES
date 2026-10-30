@@ -127,7 +127,6 @@ models/ResaleEstimateResponse.ts
 models/ResolveForeclosurePreventionCaseRequest.ts
 models/ScheduleClosingRequest.ts
 models/SchedulePropertyInspectionRequest.ts
-models/SelectApplicantRequest.ts
 models/ServicerDelinquencyResponse.ts
 models/SoftDeleteDocumentRequest.ts
 models/StallWorkflowRequest.ts

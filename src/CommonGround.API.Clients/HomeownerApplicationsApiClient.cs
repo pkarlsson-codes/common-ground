@@ -60,14 +60,6 @@ public sealed class HomeownerApplicationsApiClient(
     }
 
     /// <inheritdoc/>
-    public async Task SelectApplicantAsync(string applicationId, SelectApplicantRequest request, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
-        ArgumentNullException.ThrowIfNull(request);
-        await PostAsync($"api/homeowner-applications/{applicationId}/select", request, cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
     public async Task DenyApplicationAsync(string applicationId, DenyApplicationRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);

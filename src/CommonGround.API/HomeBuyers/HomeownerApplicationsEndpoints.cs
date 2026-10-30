@@ -141,32 +141,6 @@ public static class HomeownerApplicationsEndpoints
         return Results.Ok(response);
     }
 
-    [WolverinePost("/api/homeowner-applications/{applicationId}/select")]
-    public static async Task<IResult> SelectApplicant(
-        string applicationId,
-        SelectApplicantRequest request,
-        HttpContext httpContext,
-        IMessageBus bus,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
-        ArgumentNullException.ThrowIfNull(request);
-
-        var userId = httpContext.GetUserId();
-
-        await bus.InvokeForTenantAsync(bus.TenantId!,
-            new SelectApplicant(
-                HomeownerApplicationId.Create(applicationId),
-                request.HomeId,
-                request.GroundLeaseTemplateId,
-                request.PurchasePrice,
-                request.SelectedDate,
-                userId),
-            cancellationToken);
-
-        return Results.NoContent();
-    }
-
     [WolverinePost("/api/homeowner-applications/{applicationId}/deny")]
     public static async Task<IResult> DenyApplication(
         string applicationId,

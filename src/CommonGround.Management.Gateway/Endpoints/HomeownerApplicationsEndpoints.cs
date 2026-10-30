@@ -81,20 +81,6 @@ public static class HomeownerApplicationsEndpoints
         return Results.Ok(result);
     }
 
-    [WolverinePost("/api/v1/homeowner-applications/{applicationId}/select")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public static async Task<IResult> SelectApplicant(
-        string applicationId,
-        SelectApplicantRequest request,
-        IHomeownerApplicationsApiClient client,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
-        ArgumentNullException.ThrowIfNull(request);
-        await client.SelectApplicantAsync(applicationId, request, cancellationToken).ConfigureAwait(false);
-        return Results.NoContent();
-    }
-
     [WolverinePost("/api/v1/homeowner-applications/{applicationId}/deny")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> DenyApplication(
