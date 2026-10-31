@@ -14,13 +14,17 @@ psql_exec() {
 }
 
 SCHEMAS=(
+    applicant_selection
     commonground_events
     documents
+    home_buyers
+    home_buyers_seed
     homeownership
     identity
     property_registry
     property_registry_seed
     stewardship
+    trust_management_seed
 )
 
 echo "[db-reset-marten] Dropping Marten schemas..."
