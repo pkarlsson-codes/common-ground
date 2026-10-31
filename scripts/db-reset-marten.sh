@@ -20,6 +20,7 @@ SCHEMAS=(
     home_buyers
     home_buyers_seed
     homeownership
+    homeownership_seed
     identity
     property_registry
     property_registry_seed

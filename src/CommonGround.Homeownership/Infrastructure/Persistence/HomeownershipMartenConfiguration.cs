@@ -1,5 +1,6 @@
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Infrastructure.Persistence.Projections;
+using CommonGround.Homeownership.Infrastructure.Seeding;
 using JasperFx.Events.Projections;
 using Marten;
 
@@ -9,6 +10,7 @@ namespace CommonGround.Homeownership.Infrastructure.Persistence;
 public static class HomeownershipMartenConfiguration
 {
     private const string SchemaName = "homeownership";
+    private const string SeedSchemaName = "homeownership_seed";
 
     /// <summary>Configures Marten for Homeownership.</summary>
     public static void Configure(StoreOptions options)
@@ -34,6 +36,9 @@ public static class HomeownershipMartenConfiguration
             .DatabaseSchemaName(SchemaName)
             .Index(x => x.TemplateName);
         options.Schema.For<GroundLeaseTemplateDetailView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<GroundLeaseTemplateSeedLookup>()
+            .DatabaseSchemaName(SeedSchemaName)
+            .Index(x => x.SeedKey);
     }
 
     private static void ConfigureProjections(StoreOptions options)
