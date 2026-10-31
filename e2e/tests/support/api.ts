@@ -105,7 +105,7 @@ export async function createApplication(page: Page, name: string, { approve = tr
 
 /**
  * Starts a purchase workflow on a fresh parcel, home, and lease template. By default it's initiated directly; with
- * `fromApplication` it's started the way the app does it, by selecting an approved applicant for the home.
+ * `fromApplication` it's started the way the app does it: a home selection picks the approved applicant by priority.
  */
 export async function createPurchaseWorkflow(page: Page, buyerName: string, { fromApplication = false } = {}) {
   const { parcelId, apn } = await createLandParcel(page)
@@ -118,9 +118,18 @@ export async function createPurchaseWorkflow(page: Page, buyerName: string, { fr
   if (fromApplication) {
     applicationId = (await createApplication(page, buyerName)).applicationId
     // HomeBuyers learns about the new home from an integration event, so retry until it has.
-    await expect(() => post(page, `/api/v1/homeowner-applications/${applicationId}/select`, {
-      homeId, groundLeaseTemplateId, purchasePrice, selectedDate: isoDate(),
-    })).toPass()
+    let selectionId = ''
+    await expect(async () => {
+      ;({ selectionId } = await post<{ selectionId: string }>(page, `/api/v1/homes/${homeId}/home-selections`, {}))
+    }).toPass()
+    await post(page, `/api/v1/home-selections/${selectionId}/select-by-priority`, {
+      applicationId,
+      priorities: ['WaitingListTenure'],
+      reason: 'E2E selection',
+      groundLeaseTemplateId,
+      purchasePrice,
+      selectedDate: isoDate(),
+    })
     // The workflow is started by an integration event, so poll for it.
     await expect.poll(async () => {
       const workflows = await get<{ items: unknown[] }>(
