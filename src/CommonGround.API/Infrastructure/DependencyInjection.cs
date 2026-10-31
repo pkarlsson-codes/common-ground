@@ -94,6 +94,7 @@ internal static class CommonGroundServiceCollectionExtensions
             marten.InitializeWith<LandParcelsInitialData>();
             marten.InitializeWith<HomesInitialData>();
             marten.InitializeWith<UsersInitialData>();
+            marten.InitializeWith<HouseholdsInitialData>();
         });
 
         return services;

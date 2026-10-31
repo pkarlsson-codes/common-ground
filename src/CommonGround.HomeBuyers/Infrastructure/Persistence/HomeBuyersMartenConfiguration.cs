@@ -1,6 +1,7 @@
 using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.HomeBuyers.Infrastructure.Persistence.Projections;
+using CommonGround.HomeBuyers.Infrastructure.Seeding;
 using JasperFx.Events.Projections;
 using Marten;
 using Marten.Schema.Indexing.Unique;
@@ -11,6 +12,7 @@ namespace CommonGround.HomeBuyers.Infrastructure.Persistence;
 public static class HomeBuyersMartenConfiguration
 {
     private const string SchemaName = "home_buyers";
+    private const string SeedSchemaName = "home_buyers_seed";
 
     /// <summary>Configures Marten for HomeBuyers.</summary>
     public static void Configure(StoreOptions options)
@@ -42,6 +44,9 @@ public static class HomeBuyersMartenConfiguration
         options.Schema.For<HouseholdView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<HouseholdListItemView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<HouseholdPassOversView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<HouseholdSeedLookup>()
+            .DatabaseSchemaName(SeedSchemaName)
+            .Index(x => x.SeedKey);
     }
 
     private static void ConfigureProjections(StoreOptions options)
