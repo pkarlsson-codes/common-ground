@@ -16,12 +16,11 @@ public class HouseholdTests
         public HouseholdMember Primary { get; } = HouseholdMember.Create("Alice Johnson", "alice@example.com", "555-0100", true);
         public HouseholdMember Partner { get; } = HouseholdMember.Create("Bob Johnson", "bob@example.com", "555-0101", false);
 
-        public Household Register(params HouseholdMember[] members) =>
-            Household.Register(members.Length == 0 ? [Primary, Partner] : [.. members], Circumstances, StaffUser);
+        public Household RegisteredHousehold() => Household.Register([Primary, Partner], Circumstances, StaffUser);
 
-        public Household RegisterReady(DateOnly prequalificationExpiry)
+        public Household ReadyHousehold(DateOnly prequalificationExpiry)
         {
-            var household = Register();
+            var household = RegisteredHousehold();
             household.RecordHousingCounseling("CERT-001", new DateOnly(2026, 6, 2), "Counseling Org", StaffUser);
             household.RecordCltOrientation(new DateOnly(2026, 6, 3), StaffUser);
             household.RecordMortgagePrequalification("Lender", 210000m, prequalificationExpiry, StaffUser);
@@ -36,7 +35,7 @@ public class HouseholdTests
         [Fact]
         public void GivenNoPrimaryMember_WhenRegistered_ThenThrowsMustHaveExactlyOnePrimaryMember()
         {
-            var act = () => _testBed.Register(_testBed.Partner);
+            var act = () => Household.Register([_testBed.Partner], _testBed.Circumstances, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.household.register.must_have_exactly_one_primary_member");
@@ -47,7 +46,7 @@ public class HouseholdTests
         {
             var secondPrimary = HouseholdMember.Create("Carol Smith", "carol@example.com", "555-0102", true);
 
-            var act = () => _testBed.Register(_testBed.Primary, secondPrimary);
+            var act = () => Household.Register([_testBed.Primary, secondPrimary], _testBed.Circumstances, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.household.register.must_have_exactly_one_primary_member");
@@ -56,7 +55,7 @@ public class HouseholdTests
         [Fact]
         public void GivenValidMembers_WhenRegistered_ThenKeepsEachMembersId()
         {
-            var sut = _testBed.Register();
+            var sut = Household.Register([_testBed.Primary, _testBed.Partner], _testBed.Circumstances, _testBed.StaffUser);
 
             sut.Members.Select(m => m.Id).Should().Equal(_testBed.Primary.Id, _testBed.Partner.Id);
             sut.UncommittedEvents.OfType<HouseholdRegistered>().Single().Members
@@ -71,7 +70,7 @@ public class HouseholdTests
         [Fact]
         public void GivenRegisteredHousehold_WhenMemberAdded_ThenMemberIsNonPrimaryAndCountsTowardsSize()
         {
-            var sut = _testBed.Register();
+            var sut = _testBed.RegisteredHousehold();
 
             var memberId = sut.AddMember("Carol Johnson", "carol@example.com", "555-0102", _testBed.StaffUser);
 
@@ -88,7 +87,7 @@ public class HouseholdTests
         [Fact]
         public void GivenUnknownMember_WhenUpdated_ThenThrowsMemberNotFound()
         {
-            var sut = _testBed.Register();
+            var sut = _testBed.RegisteredHousehold();
 
             var act = () => sut.UpdateMember(HouseholdMemberId.Generate(), "Name", "e@example.com", "555", _testBed.StaffUser);
 
@@ -99,7 +98,7 @@ public class HouseholdTests
         [Fact]
         public void GivenExistingMember_WhenUpdated_ThenReplacesContactDetails()
         {
-            var sut = _testBed.Register();
+            var sut = _testBed.RegisteredHousehold();
 
             sut.UpdateMember(_testBed.Partner.Id, "Robert Johnson", "robert@example.com", "555-0199", _testBed.StaffUser);
 
@@ -110,7 +109,7 @@ public class HouseholdTests
         [Fact]
         public void GivenUnchangedDetails_WhenUpdated_ThenEmitsNothing()
         {
-            var sut = _testBed.Register();
+            var sut = _testBed.RegisteredHousehold();
 
             sut.UpdateMember(_testBed.Partner.Id, "Bob Johnson", "bob@example.com", "555-0101", _testBed.StaffUser);
 
@@ -125,7 +124,7 @@ public class HouseholdTests
         [Fact]
         public void GivenUnknownMember_WhenRemoved_ThenThrowsMemberNotFound()
         {
-            var sut = _testBed.Register();
+            var sut = _testBed.RegisteredHousehold();
 
             var act = () => sut.RemoveMember(HouseholdMemberId.Generate(), _testBed.StaffUser);
 
@@ -136,7 +135,7 @@ public class HouseholdTests
         [Fact]
         public void GivenPrimaryMember_WhenRemoved_ThenThrowsCannotRemovePrimaryMember()
         {
-            var sut = _testBed.Register();
+            var sut = _testBed.RegisteredHousehold();
 
             var act = () => sut.RemoveMember(_testBed.Primary.Id, _testBed.StaffUser);
 
@@ -147,7 +146,7 @@ public class HouseholdTests
         [Fact]
         public void GivenNonPrimaryMember_WhenRemoved_ThenMemberIsGone()
         {
-            var sut = _testBed.Register();
+            var sut = _testBed.RegisteredHousehold();
 
             sut.RemoveMember(_testBed.Partner.Id, _testBed.StaffUser);
 
@@ -162,7 +161,7 @@ public class HouseholdTests
         [Fact]
         public void GivenNewCircumstances_WhenUpdated_ThenDeclarationReflectsThem()
         {
-            var sut = _testBed.Register();
+            var sut = _testBed.RegisteredHousehold();
             var updated = HouseholdCircumstances.Create(true, 72000m);
 
             sut.UpdateCircumstances(updated, _testBed.StaffUser);
@@ -173,7 +172,7 @@ public class HouseholdTests
         [Fact]
         public void GivenSameCircumstances_WhenUpdated_ThenEmitsNothing()
         {
-            var sut = _testBed.Register();
+            var sut = _testBed.RegisteredHousehold();
 
             sut.UpdateCircumstances(HouseholdCircumstances.Create(false, 65000m), _testBed.StaffUser);
 
@@ -188,7 +187,7 @@ public class HouseholdTests
         [Fact]
         public void GivenNothingRecorded_WhenRead_ThenListsEveryItem()
         {
-            var sut = _testBed.Register();
+            var sut = _testBed.RegisteredHousehold();
 
             sut.OutstandingReadinessItems.Should().Equal("HousingCounseling", "CltOrientation", "MortgagePrequalification");
         }
@@ -197,7 +196,7 @@ public class HouseholdTests
         public void GivenPrequalificationExpired_WhenRead_ThenListsMortgagePrequalification()
         {
             var expiry = new DateOnly(2026, 12, 31);
-            var sut = _testBed.RegisterReady(expiry);
+            var sut = _testBed.ReadyHousehold(expiry);
 
             sut.ExpirePrequalification(expiry);
 
@@ -207,7 +206,7 @@ public class HouseholdTests
         [Fact]
         public void GivenEverythingRecorded_WhenRead_ThenIsEmpty()
         {
-            var sut = _testBed.RegisterReady(new DateOnly(2026, 12, 31));
+            var sut = _testBed.ReadyHousehold(new DateOnly(2026, 12, 31));
 
             sut.OutstandingReadinessItems.Should().BeEmpty();
         }
@@ -223,7 +222,7 @@ public class HouseholdTests
         [InlineData("2027-01-01", false)]
         public void GivenPrequalificationExpiringEndOfYear_WhenCheckedOnDate_ThenValidThroughExpiryDate(string date, bool expected)
         {
-            var sut = _testBed.RegisterReady(new DateOnly(2026, 12, 31));
+            var sut = _testBed.ReadyHousehold(new DateOnly(2026, 12, 31));
 
             sut.IsPrequalificationValidOn(DateOnly.Parse(date, System.Globalization.CultureInfo.InvariantCulture))
                 .Should().Be(expected);

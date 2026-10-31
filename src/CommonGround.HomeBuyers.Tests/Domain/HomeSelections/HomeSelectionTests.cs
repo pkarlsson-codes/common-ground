@@ -25,19 +25,20 @@ public class HomeSelectionTests
         public HomeownerApplicationId B => Candidates[1].ApplicationId;
         public HomeownerApplicationId C => Candidates[2].ApplicationId;
 
-        public HomeSelection Start(HomeSelectionId? activeSelectionId = null, IReadOnlyList<SelectionCandidate>? candidates = null) =>
-            HomeSelection.Start("home-1", candidates ?? Candidates, activeSelectionId, StaffUser);
+        public string HomeId { get; } = "home-1";
 
-        public HomeSelection StartCompleted()
+        public HomeSelection OpenSelection() => HomeSelection.Start(HomeId, Candidates, null, StaffUser);
+
+        public HomeSelection CompletedSelection()
         {
-            var selection = Start();
+            var selection = OpenSelection();
             selection.SelectByPriority(A, [SelectionPriority.LowerIncome], "Lowest income", StaffUser);
             return selection;
         }
 
-        public HomeSelection StartCancelled()
+        public HomeSelection CancelledSelection()
         {
-            var selection = Start();
+            var selection = OpenSelection();
             selection.Cancel("Home withdrawn from sale", StaffUser);
             return selection;
         }
@@ -64,7 +65,8 @@ public class HomeSelectionTests
         [Fact]
         public void GivenHomeHasActiveSelection_WhenStarted_ThenThrowsHomeHasActiveSelection()
         {
-            var act = () => _testBed.Start(activeSelectionId: HomeSelectionId.Generate());
+            var act = () => HomeSelection.Start(
+                _testBed.HomeId, _testBed.Candidates, activeSelectionId: HomeSelectionId.Generate(), _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.home_selection.start.home_has_active_selection");
@@ -73,7 +75,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenNobodyWaiting_WhenStarted_ThenThrowsWaitingListEmpty()
         {
-            var act = () => _testBed.Start(candidates: []);
+            var act = () => HomeSelection.Start(_testBed.HomeId, candidates: [], null, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.home_selection.start.waiting_list_empty");
@@ -82,7 +84,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenWaitingCandidates_WhenStarted_ThenIsOpenWithTheCandidatesSnapshotted()
         {
-            var sut = _testBed.Start();
+            var sut = HomeSelection.Start(_testBed.HomeId, _testBed.Candidates, null, _testBed.StaffUser);
 
             sut.Status.Should().Be(HomeSelectionStatus.Open);
             sut.Candidates.Should().Equal(_testBed.Candidates);
@@ -96,7 +98,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenNoPriorities_WhenSelected_ThenThrowsPrioritiesRequired()
         {
-            var sut = _testBed.Start();
+            var sut = _testBed.OpenSelection();
 
             var act = () => sut.SelectByPriority(_testBed.A, [], "Lowest income", _testBed.StaffUser);
 
@@ -109,7 +111,7 @@ public class HomeSelectionTests
         [InlineData("   ")]
         public void GivenBlankReason_WhenSelected_ThenThrowsReasonRequired(string reason)
         {
-            var sut = _testBed.Start();
+            var sut = _testBed.OpenSelection();
 
             var act = () => sut.SelectByPriority(_testBed.A, [SelectionPriority.LowerIncome], reason, _testBed.StaffUser);
 
@@ -120,7 +122,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenApplicationNotACandidate_WhenSelected_ThenThrowsNotACandidate()
         {
-            var sut = _testBed.Start();
+            var sut = _testBed.OpenSelection();
 
             var act = () => sut.SelectByPriority(
                 HomeownerApplicationId.Generate(), [SelectionPriority.LowerIncome], "Lowest income", _testBed.StaffUser);
@@ -132,7 +134,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenCompletedSelection_WhenSelected_ThenThrowsNotOpen()
         {
-            var sut = _testBed.StartCompleted();
+            var sut = _testBed.CompletedSelection();
 
             var act = () => sut.SelectByPriority(_testBed.B, [SelectionPriority.LowerIncome], "Lowest income", _testBed.StaffUser);
 
@@ -143,7 +145,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenRepeatedPriority_WhenSelected_ThenCompletesCitingEachPriorityOnce()
         {
-            var sut = _testBed.Start();
+            var sut = _testBed.OpenSelection();
 
             sut.SelectByPriority(
                 _testBed.B,
@@ -165,7 +167,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenOneTiedCandidate_WhenDrawn_ThenThrowsTiedPoolTooSmall()
         {
-            var sut = _testBed.Start();
+            var sut = _testBed.OpenSelection();
 
             var act = () => sut.DrawLottery([_testBed.A], _testBed.AllEligible(), 42, _testBed.StaffUser);
 
@@ -176,7 +178,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenSameCandidateMarkedTiedTwice_WhenDrawn_ThenCountsItOnceAndThrowsTiedPoolTooSmall()
         {
-            var sut = _testBed.Start();
+            var sut = _testBed.OpenSelection();
 
             var act = () => sut.DrawLottery([_testBed.A, _testBed.A], _testBed.AllEligible(), 42, _testBed.StaffUser);
 
@@ -187,7 +189,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenTiedApplicationNotACandidate_WhenDrawn_ThenThrowsNotACandidate()
         {
-            var sut = _testBed.Start();
+            var sut = _testBed.OpenSelection();
 
             var act = () => sut.DrawLottery(
                 [_testBed.A, HomeownerApplicationId.Generate()], _testBed.AllEligible(), 42, _testBed.StaffUser);
@@ -199,7 +201,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenNoEligibleCandidates_WhenDrawn_ThenThrowsNoEligibleCandidates()
         {
-            var sut = _testBed.Start();
+            var sut = _testBed.OpenSelection();
 
             var act = () => sut.DrawLottery(null, TestBed.Eligible(), 42, _testBed.StaffUser);
 
@@ -210,7 +212,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenCancelledSelection_WhenDrawn_ThenThrowsNotOpen()
         {
-            var sut = _testBed.StartCancelled();
+            var sut = _testBed.CancelledSelection();
 
             var act = () => sut.DrawLottery(null, _testBed.AllEligible(), 42, _testBed.StaffUser);
 
@@ -221,7 +223,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenNoTies_WhenDrawn_ThenDrawsFromEveryCandidateAndCompletes()
         {
-            var sut = _testBed.Start();
+            var sut = _testBed.OpenSelection();
 
             sut.DrawLottery(null, _testBed.AllEligible(), 42, _testBed.StaffUser);
 
@@ -235,7 +237,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenTiedCandidates_WhenDrawn_ThenDrawsOnlyBetweenThem()
         {
-            var sut = _testBed.Start();
+            var sut = _testBed.OpenSelection();
 
             sut.DrawLottery([_testBed.C, _testBed.A], _testBed.AllEligible(), 42, _testBed.StaffUser);
 
@@ -246,7 +248,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenIneligibleCandidates_WhenDrawn_ThenLeavesThemOutOfThePoolAndRecordsThem()
         {
-            var sut = _testBed.Start();
+            var sut = _testBed.OpenSelection();
 
             sut.DrawLottery(null, TestBed.Eligible(_testBed.B), 42, _testBed.StaffUser);
 
@@ -269,7 +271,7 @@ public class HomeSelectionTests
         [InlineData("   ")]
         public void GivenBlankReason_WhenCancelled_ThenThrowsReasonRequired(string reason)
         {
-            var sut = _testBed.Start();
+            var sut = _testBed.OpenSelection();
 
             var act = () => sut.Cancel(reason, _testBed.StaffUser);
 
@@ -280,7 +282,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenCompletedSelection_WhenCancelled_ThenThrowsNotOpen()
         {
-            var sut = _testBed.StartCompleted();
+            var sut = _testBed.CompletedSelection();
 
             var act = () => sut.Cancel("Changed our minds", _testBed.StaffUser);
 
@@ -291,7 +293,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenOpenSelection_WhenCancelled_ThenIsCancelledWithNobodySelected()
         {
-            var sut = _testBed.Start();
+            var sut = _testBed.OpenSelection();
 
             sut.Cancel("Home withdrawn from sale", _testBed.StaffUser);
 

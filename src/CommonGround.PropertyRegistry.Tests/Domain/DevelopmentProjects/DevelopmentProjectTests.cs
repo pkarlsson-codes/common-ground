@@ -15,13 +15,6 @@ public class DevelopmentProjectTests
         public UserId StaffUser { get; } = UserId.Generate();
         public LandParcelId ParcelId { get; } = LandParcelId.Generate();
         public HomeId HomeId { get; } = HomeId.Generate();
-
-        public DevelopmentProject InitiateNewConstruction(string name = "Infill", string? description = "Two duplexes") =>
-            DevelopmentProject.InitiateNewConstruction(ParcelId, name, description, StaffUser);
-
-        public DevelopmentProject InitiateRehabilitation(
-            string name = "Roof Rehab", string? description = "Replace roofs", IReadOnlyCollection<HomeId>? homeIds = null) =>
-            DevelopmentProject.InitiateRehabilitation(ParcelId, name, description, homeIds ?? [HomeId], StaffUser);
     }
 
     public class TheInitiateNewConstructionMethod
@@ -31,7 +24,7 @@ public class DevelopmentProjectTests
         [Fact]
         public void GivenValidInputs_WhenInitiated_ThenIsInitiatedNewConstructionWithoutHomes()
         {
-            var sut = _testBed.InitiateNewConstruction();
+            var sut = DevelopmentProject.InitiateNewConstruction(_testBed.ParcelId, "Infill", "Two duplexes", _testBed.StaffUser);
 
             sut.ProjectType.Should().Be(ProjectType.NewConstruction);
             sut.ProjectStatus.Should().Be(ProjectStatus.Initiated);
@@ -43,7 +36,7 @@ public class DevelopmentProjectTests
         [InlineData("  ")]
         public void GivenBlankName_WhenInitiated_ThenThrowsBusinessRuleViolation(string name)
         {
-            var act = () => _testBed.InitiateNewConstruction(name: name);
+            var act = () => DevelopmentProject.InitiateNewConstruction(_testBed.ParcelId, name: name, "Two duplexes", _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("property_registry.development_project.initiate.name_required");
@@ -52,7 +45,7 @@ public class DevelopmentProjectTests
         [Fact]
         public void GivenBlankDescription_WhenInitiated_ThenThrowsBusinessRuleViolation()
         {
-            var act = () => _testBed.InitiateNewConstruction(description: " ");
+            var act = () => DevelopmentProject.InitiateNewConstruction(_testBed.ParcelId, "Infill", description: " ", _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("property_registry.development_project.initiate.description_required");
@@ -66,7 +59,8 @@ public class DevelopmentProjectTests
         [Fact]
         public void GivenValidInputs_WhenInitiated_ThenIsInitiatedRehabilitationWithHomes()
         {
-            var sut = _testBed.InitiateRehabilitation();
+            var sut = DevelopmentProject.InitiateRehabilitation(
+                _testBed.ParcelId, "Roof Rehab", "Replace roofs", [_testBed.HomeId], _testBed.StaffUser);
 
             sut.ProjectType.Should().Be(ProjectType.Rehabilitation);
             sut.HomeIds.Should().Equal(_testBed.HomeId);
@@ -75,7 +69,8 @@ public class DevelopmentProjectTests
         [Fact]
         public void GivenBlankName_WhenInitiated_ThenThrowsBusinessRuleViolation()
         {
-            var act = () => _testBed.InitiateRehabilitation(name: "");
+            var act = () => DevelopmentProject.InitiateRehabilitation(
+                _testBed.ParcelId, name: "", "Replace roofs", [_testBed.HomeId], _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("property_registry.development_project.initiate.name_required");
@@ -84,7 +79,8 @@ public class DevelopmentProjectTests
         [Fact]
         public void GivenNoHomes_WhenInitiated_ThenThrowsBusinessRuleViolation()
         {
-            var act = () => _testBed.InitiateRehabilitation(homeIds: []);
+            var act = () => DevelopmentProject.InitiateRehabilitation(
+                _testBed.ParcelId, "Roof Rehab", "Replace roofs", homeIds: [], _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("property_registry.development_project.initiate_rehabilitation.home_ids_required");

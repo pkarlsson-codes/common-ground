@@ -7,26 +7,13 @@ namespace CommonGround.HomeBuyers.Tests.Domain.HomeSelections;
 
 public class SelectionCandidateTests
 {
-    public class TestBed
-    {
-        public SelectionCandidate Create(decimal annualIncome = 55000m, int householdSize = 2) =>
-            SelectionCandidate.Create(
-                HomeownerApplicationId.Generate(),
-                HouseholdId.Generate(),
-                annualIncome,
-                householdSize,
-                false,
-                new DateOnly(2026, 6, 1));
-    }
-
     public class TheCreateMethod
     {
-        private readonly TestBed _testBed = new();
-
         [Fact]
         public void GivenNegativeIncome_WhenCreated_ThenThrowsArgumentOutOfRange()
         {
-            var act = () => _testBed.Create(annualIncome: -1m);
+            var act = () => SelectionCandidate.Create(
+                HomeownerApplicationId.Generate(), HouseholdId.Generate(), annualIncome: -1m, 2, false, new DateOnly(2026, 6, 1));
 
             act.Should().Throw<ArgumentOutOfRangeException>();
         }
@@ -34,7 +21,8 @@ public class SelectionCandidateTests
         [Fact]
         public void GivenEmptyHousehold_WhenCreated_ThenThrowsArgumentOutOfRange()
         {
-            var act = () => _testBed.Create(householdSize: 0);
+            var act = () => SelectionCandidate.Create(
+                HomeownerApplicationId.Generate(), HouseholdId.Generate(), 55000m, householdSize: 0, false, new DateOnly(2026, 6, 1));
 
             act.Should().Throw<ArgumentOutOfRangeException>();
         }
