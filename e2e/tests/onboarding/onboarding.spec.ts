@@ -42,11 +42,11 @@ test('a new user without a trust creates one and is taken into the app', async (
 
   await page.getByRole('textbox', { name: 'Trust Name' }).fill(`Founders CLT ${uniqueId()}`)
   await submit.click()
-  await expect(page).toHaveURL(/\/land-parcels$/)
+  await expect(page).toHaveURL(/\/households$/)
 
   // Now in a trust, Onboarding and Create Trust send the user into the app.
   await page.goto('/onboarding')
-  await expect(page).toHaveURL(/\/land-parcels$/)
+  await expect(page).toHaveURL(/\/households$/)
   await page.goto('/signup')
-  await expect(page).toHaveURL(/\/land-parcels$/)
+  await expect(page).toHaveURL(/\/households$/)
 })

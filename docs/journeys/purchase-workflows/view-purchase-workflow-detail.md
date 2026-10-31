@@ -1,8 +1,8 @@
 # View Purchase Workflow Detail
 
-1. User navigates to Purchase Workflows
+1. User navigates to Purchases
 2. User optionally filters the table by phase (All Phases, Initiated, In Progress, Closing Scheduled, Closed, Failed, Withdrawn, Stalled) or by lease template
-3. User clicks a row in the Purchase Workflows table
+3. User clicks a row in the Purchases table
 4. Detail panel opens titled with the buyer's full name, showing purchase price and phase in the subtitle
 5. If the workflow is Stalled, a Stalled banner shows the stalled reason and resolution target date (if set)
 6. Panel shows Phase, Purchase Price, buyer Email and Phone (if present), "Open Lease Template", "Open Land Parcel", and "Open Home" links, Failure Reason (if failed), Withdrawal Reason (if withdrawn), Closing Notes (if closed), and Created (date/time)

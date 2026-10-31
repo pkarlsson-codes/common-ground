@@ -19,6 +19,8 @@ import StewardshipPage from './pages/stewardship/StewardshipPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useCurrentTrust } from './hooks/trusts'
 import { setTrustTimeZone } from './lib/calendarDate'
+import { landingPath } from './lib/navigation'
+import { readFocus } from './hooks/useNavPreferences'
 
 function Loading() {
   return (
@@ -73,6 +75,11 @@ function TrustRoute() {
   return <Outlet />
 }
 
+/** The root lands on the first page under the staff member's My work. */
+function LandingRedirect() {
+  return <Navigate to={landingPath(readFocus())} replace />
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -83,7 +90,7 @@ export default function App() {
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route element={<TrustRoute />}>
               <Route element={<Layout />}>
-                <Route index element={<Navigate to="/land-parcels" replace />} />
+                <Route index element={<LandingRedirect />} />
                 <Route path="/land-parcels"        element={<LandParcelsPage />} />
                 <Route path="/homes"               element={<HomesPage />} />
                 <Route path="/homes/selections/:selectionId" element={<HomeSelectionPage />} />

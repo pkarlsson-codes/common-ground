@@ -61,7 +61,7 @@ export default function ResaleWorkflowsPage() {
       <div className="page-header">
         <div>
           <div className="page-header__eyebrow">Homeownership</div>
-          <h1 className="page-header__title">Resale Workflows</h1>
+          <h1 className="page-header__title">Resales</h1>
           {data && (
             <div className="page-header__count">
               {data.totalCount?.toLocaleString()} active lease{data.totalCount !== 1 ? 's' : ''}

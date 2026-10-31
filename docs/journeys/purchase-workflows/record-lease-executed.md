@@ -1,6 +1,6 @@
 # Record Lease Executed
 
-1. User navigates to Purchase Workflows
+1. User navigates to Purchases
 2. User clicks a row for a non-terminal workflow to open the detail panel
 3. In Purchase Tracks, user expands the Lease Execution track (only expandable while pending)
 4. User enters Signed Date (required)

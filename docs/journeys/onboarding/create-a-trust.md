@@ -10,5 +10,5 @@
 8. If Trust Name is blank, error shown: "Please enter a community land trust name."
 9. If the user already belongs to a trust (409 response), error shown: "You already belong to a trust."
 10. On any other failure, a generic error message is shown ("Could not create trust. Please try again." or the server-provided message)
-11. On success, user's session is refreshed and they are taken into the app (redirected to Land Parcels)
+11. On success, user's session is refreshed and they are taken into the app (landing on the first page under My work — Households unless a focus is chosen; see [Choose a Focus](../navigation/choose-a-focus.md))
 12. A user who already belongs to a trust and opens Onboarding or Create Trust is redirected into the app

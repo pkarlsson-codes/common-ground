@@ -52,7 +52,7 @@ test('the library searches by title, filters by tag and file type, and downloads
   await tagDocument(page, deedId, `Recorded-${id}`)
   await page.reload()
 
-  await expect(page.getByRole('heading', { name: 'Document Library' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Documents', level: 1 })).toBeVisible()
 
   // Search is a case-insensitive title match.
   const search = page.getByRole('searchbox', { name: 'Search documents' })

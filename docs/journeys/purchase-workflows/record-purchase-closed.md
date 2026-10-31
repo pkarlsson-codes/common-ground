@@ -1,6 +1,6 @@
 # Record Purchase Closed
 
-1. User navigates to Purchase Workflows
+1. User navigates to Purchases
 2. User clicks a row for a workflow in the Closing Scheduled phase to open the detail panel
 3. In the Closing track, user enters Actual Closing Date (defaulted to today, required) and optional Closing Notes
 4. User clicks "Record Purchase Closed"

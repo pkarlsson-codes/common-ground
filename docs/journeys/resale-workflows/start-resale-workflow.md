@@ -1,6 +1,6 @@
 # Start Resale Workflow
 
-1. User navigates to Resale Workflows, showing active ground leases newest first (Homeowner, Start Date, Formula, Status), and optionally searches by homeowner name or email
+1. User navigates to Resales, showing active ground leases newest first (Homeowner, Start Date, Formula, Status), and optionally searches by homeowner name or email
 2. User clicks "Start Resale" on a lease row
 3. "Resale" panel opens (titled with the homeowner's name), Step 1 of 3: Intent
 4. Panel shows Homeowner, Lease Start Date, Formula, and Ground Lease ID; user enters Homeowner Notice Date (defaults to today)
@@ -13,7 +13,7 @@
 11. User enters Buyer Full Name and Buyer Email (required), and optionally Buyer Phone (formatted as-you-type, e.g. (202) 555-1234)
 12. User clicks "Initiate Workflow"
 13. Toast: "Purchase workflow initiated"
-14. Panel closes, user is navigated to Purchase Workflows with the new workflow's detail panel open
+14. Panel closes, user is navigated to Purchases with the new workflow's detail panel open
 
 The new workflow reuses the lease template, land parcel, and home of the ground lease being resold. If the lease was created directly (without a lease template), Step 3 shows an error explaining that a purchase workflow cannot be started from it, and "Initiate Workflow" is disabled.
 

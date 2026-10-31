@@ -1,6 +1,6 @@
 # Fail Purchase Workflow
 
-1. User navigates to Purchase Workflows
+1. User navigates to Purchases
 2. User clicks a row for a non-terminal workflow to open the detail panel
 3. In Exception Actions, user enters a required Fail Reason
 4. User clicks "Mark as Failed"

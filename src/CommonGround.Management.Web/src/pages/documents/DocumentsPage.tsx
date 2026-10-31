@@ -55,7 +55,7 @@ export default function DocumentsPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <h1 className="page-title">Document Library</h1>
+          <h1 className="page-title">Documents</h1>
           <p className="page-subtitle">All documents across the CLT portfolio</p>
         </div>
       </div>

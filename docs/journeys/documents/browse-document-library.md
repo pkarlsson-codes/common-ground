@@ -1,6 +1,6 @@
-# Browse Document Library
+# Browse Documents
 
-1. User navigates to Documents, showing "Document Library" with all documents across the CLT portfolio, most recently modified first
+1. User navigates to Documents, showing "Documents" with all documents across the CLT portfolio, most recently modified first
 2. User optionally narrows the list:
    - Types into "Search by title" (case-insensitive match on the title)
    - Filters by tag: types into "Filter by tag…" and clicks "Apply" (or presses Enter), or clicks a tag chip on any document row

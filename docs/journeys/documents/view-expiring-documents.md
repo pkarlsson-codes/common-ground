@@ -6,4 +6,4 @@
 4. Each row shows title, "Expires {date}" (or "Expired {date}" once past), and file name; rows that are expired or expire within 30 days are highlighted amber
 5. User clicks "Download" on a row to download its current version in a new tab, or clicks the row to open its detail panel ([Edit document details](edit-document-details.md))
 6. User pages through with "Prev"/"Next" when there are more than 20
-7. User clicks "Show all" to return to the filterable Document Library view
+7. User clicks "Show all" to return to the filterable Documents view

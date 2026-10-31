@@ -83,7 +83,7 @@ export default function PurchaseWorkflowsPage() {
       <div className="page-header">
         <div>
           <div className="page-header__eyebrow">Homeownership</div>
-          <h1 className="page-header__title">Purchase Workflows</h1>
+          <h1 className="page-header__title">Purchases</h1>
           {data && (
             <div className="page-header__count">
               {data.totalCount?.toLocaleString()} workflow{data.totalCount !== 1 ? 's' : ''}
