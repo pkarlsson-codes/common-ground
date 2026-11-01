@@ -1,6 +1,7 @@
 using CommonGround.API.Contracts.TrustManagement.Requests;
 using CommonGround.API.Contracts.TrustManagement.Responses;
 using CommonGround.API.Infrastructure.Auth;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.TrustManagement.Application.Commands;
 using CommonGround.TrustManagement.Application.Queries;
@@ -47,10 +48,11 @@ public static class TrustsEndpoints
         var userId = httpContext.GetUserId();
         var correlationId = httpContext.GetCorrelationId() ?? httpContext.TraceIdentifier;
 
-        var result = await bus.InvokeAsync<CreateTrustResult>(
-            new CreateTrust(request.Name, request.TimeZone, userId, correlationId),
+        var trustId = TrustId.Generate();
+        await bus.InvokeAsync(
+            new CreateTrust(trustId, request.Name, request.TimeZone, userId, correlationId),
             cancellationToken).ConfigureAwait(false);
 
-        return Results.Ok(new CreateTrustResponse(result.TrustId));
+        return Results.Ok(new CreateTrustResponse(trustId.Value));
     }
 }

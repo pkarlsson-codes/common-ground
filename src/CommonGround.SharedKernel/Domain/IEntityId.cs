@@ -11,15 +11,13 @@ public interface IEntityId
 /// A strongly-typed identifier: an immutable struct wrapping a prefixed string such as
 /// <c>household-01jq...</c>. Marten recognizes this shape (a single public <c>Value</c> and a static
 /// builder) as a strong-typed id, so aggregates can use it as their <c>Id</c> while event streams stay
-/// keyed by the plain string.
+/// keyed by the plain string. Implementations must not add a public static property: Marten and
+/// Wolverine then stop treating the type as a strong-typed id.
 /// </summary>
 /// <typeparam name="TSelf">The implementing identifier type.</typeparam>
 public interface IEntityId<TSelf> : IEntityId
     where TSelf : struct, IEntityId<TSelf>
 {
-    /// <summary>Gets the prefix every value of this identifier starts with, before a hyphen.</summary>
-    static abstract string Prefix { get; }
-
     /// <summary>Wraps an existing value, rejecting one without this identifier's prefix.</summary>
     /// <param name="value">The value to wrap.</param>
     /// <returns>The identifier.</returns>

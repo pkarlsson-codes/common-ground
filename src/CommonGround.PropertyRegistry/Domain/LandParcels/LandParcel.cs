@@ -12,7 +12,8 @@ namespace CommonGround.PropertyRegistry.Domain.LandParcels;
 public sealed class LandParcel : AggregateRoot<LandParcelId>
 {
 #pragma warning disable CS8618
-    private LandParcel() { }
+    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
+    public LandParcel() { }
 #pragma warning restore CS8618
 
     /// <summary>Gets the legal parcel number (APN or legal description).</summary>
@@ -129,7 +130,9 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         }
     }
 
-    private void Apply(LandParcelRegistered e)
+    /// <summary>Applies <see cref="LandParcelRegistered"/>.</summary>
+
+    public void Apply(LandParcelRegistered e)
     {
         Id = LandParcelId.Create(e.AggregateId);
         LegalParcelNumber = e.LegalParcelNumber;
@@ -141,12 +144,16 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         RegisteredBy = UserId.Create(e.RegisteredBy);
     }
 
-    private void Apply(ParcelDecommissioned _)
+    /// <summary>Applies <see cref="ParcelDecommissioned"/>.</summary>
+
+    public void Apply(ParcelDecommissioned _)
     {
         IsDecommissioned = true;
     }
 
-    private void Apply(ParcelRecommissioned _)
+    /// <summary>Applies <see cref="ParcelRecommissioned"/>.</summary>
+
+    public void Apply(ParcelRecommissioned _)
     {
         IsDecommissioned = false;
     }

@@ -15,7 +15,8 @@ public sealed class Document : AggregateRoot<DocumentId>
     private readonly SortedSet<string> _tags = new(StringComparer.Ordinal);
 
 #pragma warning disable CS8618
-    private Document() { }
+    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
+    public Document() { }
 #pragma warning restore CS8618
 
     /// <summary>Gets the human-readable title of this document.</summary>
@@ -288,7 +289,9 @@ public sealed class Document : AggregateRoot<DocumentId>
         }
     }
 
-    private void Apply(DocumentUploaded e)
+    /// <summary>Applies <see cref="DocumentUploaded"/>.</summary>
+
+    public void Apply(DocumentUploaded e)
     {
         Id = DocumentId.Create(e.AggregateId);
         Title = e.Title;
@@ -308,7 +311,9 @@ public sealed class Document : AggregateRoot<DocumentId>
         CurrentVersionId = version.VersionId;
     }
 
-    private void Apply(DocumentVersionAdded e)
+    /// <summary>Applies <see cref="DocumentVersionAdded"/>.</summary>
+
+    public void Apply(DocumentVersionAdded e)
     {
         var version = new DocumentVersion(
             DocumentVersionId.Create(e.VersionId),
@@ -320,37 +325,49 @@ public sealed class Document : AggregateRoot<DocumentId>
         CurrentVersionId = version.VersionId;
     }
 
-    private void Apply(DocumentAttached e)
+    /// <summary>Applies <see cref="DocumentAttached"/>.</summary>
+
+    public void Apply(DocumentAttached e)
     {
         _attachments.Add(new DocumentAttachment(
             e.EntityType, e.EntityId, e.Role,
             UserId.Create(e.AttachedBy), e.OccurredAt));
     }
 
-    private void Apply(DocumentDetached e)
+    /// <summary>Applies <see cref="DocumentDetached"/>.</summary>
+
+    public void Apply(DocumentDetached e)
     {
         _attachments.RemoveAll(x =>
             x.EntityType == e.EntityType && x.EntityId == e.EntityId && x.Role == e.Role);
     }
 
-    private void Apply(DocumentSoftDeleted _)
+    /// <summary>Applies <see cref="DocumentSoftDeleted"/>.</summary>
+
+    public void Apply(DocumentSoftDeleted _)
     {
         IsDeleted = true;
     }
 
-    private void Apply(DocumentMetadataUpdated e)
+    /// <summary>Applies <see cref="DocumentMetadataUpdated"/>.</summary>
+
+    public void Apply(DocumentMetadataUpdated e)
     {
         Title = e.Title;
         Sensitivity = SensitivityLevel.FromDisplayName(e.Sensitivity);
         ExpiresOn = e.ClearExpiresOn ? null : e.ExpiresOn;
     }
 
-    private void Apply(DocumentTagged e)
+    /// <summary>Applies <see cref="DocumentTagged"/>.</summary>
+
+    public void Apply(DocumentTagged e)
     {
         _tags.Add(e.Tag);
     }
 
-    private void Apply(DocumentUntagged e)
+    /// <summary>Applies <see cref="DocumentUntagged"/>.</summary>
+
+    public void Apply(DocumentUntagged e)
     {
         _tags.Remove(e.Tag);
     }

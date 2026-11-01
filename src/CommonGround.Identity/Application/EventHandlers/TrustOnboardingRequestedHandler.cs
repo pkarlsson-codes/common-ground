@@ -1,19 +1,17 @@
 using CommonGround.Identity.Application.Commands;
-using Wolverine;
+using CommonGround.SharedKernel.Domain;
 using TrustOnboardingRequestedIntegration = CommonGround.TrustManagement.Contracts.Events.TrustOnboardingRequested;
 
 namespace CommonGround.Identity.Application.EventHandlers;
 
 /// <summary>Handles trust onboarding events from TrustManagement BC and assigns user to the trust.</summary>
-public sealed class TrustOnboardingRequestedHandler(IMessageBus bus)
+public static class TrustOnboardingRequestedHandler
 {
-    /// <summary>Receives integration event and dispatches command to assign user to trust.</summary>
-    public async Task Handle(TrustOnboardingRequestedIntegration e, CancellationToken cancellationToken)
+    /// <summary>Turns the integration event into the command that assigns the creator to the trust.</summary>
+    public static AssignUserToTrustIfNone Handle(TrustOnboardingRequestedIntegration e)
     {
         ArgumentNullException.ThrowIfNull(e);
 
-        await bus.SendAsync(
-            new AssignUserToTrustIfNone(e.CreatorUserId, e.TrustId))
-            .ConfigureAwait(false);
+        return new AssignUserToTrustIfNone(UserId.Create(e.CreatorUserId), TrustId.Create(e.TrustId));
     }
 }

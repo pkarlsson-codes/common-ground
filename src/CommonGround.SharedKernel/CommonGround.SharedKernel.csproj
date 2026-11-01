@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="CSharpFunctionalExtensions" Version="3.7.0" />
     <PackageReference Include="libphonenumber-csharp" Version="9.0.34" />
-    <PackageReference Include="Marten" Version="8.37.1" />
+    <PackageReference Include="Marten" Version="9.56.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.3" />
     <PackageReference Include="NUlid" Version="1.7.3" />
@@ -15,7 +15,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="WolverineFx.Marten" Version="5.39.3" />
+    <PackageReference Include="WolverineFx.Marten" Version="6.60.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,19 +1,20 @@
 using CommonGround.TrustManagement.Domain.Trusts.Events;
-using Wolverine;
 using TrustOnboardingRequestedIntegration = CommonGround.TrustManagement.Contracts.Events.TrustOnboardingRequested;
 
 namespace CommonGround.TrustManagement.Application.EventHandlers;
 
 /// <summary>Publishes trust onboarding integration events for downstream Identity processing.</summary>
-public sealed class TrustOnboardingRequestedHandler(IMessageBus bus)
+public static class TrustOnboardingRequestedHandler
 {
-    /// <summary>Maps trust onboarding domain event to integration event and publishes it.</summary>
-    public async Task Handle(TrustOnboardingRequested @event, CancellationToken ct)
+    /// <summary>Maps the trust onboarding domain event to the integration event Wolverine publishes.</summary>
+    public static TrustOnboardingRequestedIntegration Handle(TrustOnboardingRequested @event)
     {
-        await bus.PublishAsync(new TrustOnboardingRequestedIntegration(
+        ArgumentNullException.ThrowIfNull(@event);
+
+        return new TrustOnboardingRequestedIntegration(
             @event.AggregateId,
             @event.TrustName,
             @event.CreatorUserId,
-            @event.CorrelationId)).ConfigureAwait(false);
+            @event.CorrelationId);
     }
 }

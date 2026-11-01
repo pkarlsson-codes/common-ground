@@ -12,7 +12,8 @@ namespace CommonGround.Stewardship.Domain.StewardshipCases;
 public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
 {
 #pragma warning disable CS8618
-    private StewardshipCase() { }
+    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
+    public StewardshipCase() { }
 #pragma warning restore CS8618
 
     private readonly List<OccupancyVerification> _occupancyVerifications = [];
@@ -279,7 +280,9 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         }
     }
 
-    private void Apply(StewardshipCaseOpened e)
+    /// <summary>Applies <see cref="StewardshipCaseOpened"/>.</summary>
+
+    public void Apply(StewardshipCaseOpened e)
     {
         Id = StewardshipCaseId.Create(e.AggregateId);
         GroundLeaseId = e.GroundLeaseId;
@@ -287,7 +290,9 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         Status = StewardshipCaseStatus.Active;
     }
 
-    private void Apply(OccupancyVerificationInitiated e)
+    /// <summary>Applies <see cref="OccupancyVerificationInitiated"/>.</summary>
+
+    public void Apply(OccupancyVerificationInitiated e)
     {
         _occupancyVerifications.Add(new OccupancyVerification
         {
@@ -298,7 +303,9 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         });
     }
 
-    private void Apply(OccupancyVerificationSubmitted e)
+    /// <summary>Applies <see cref="OccupancyVerificationSubmitted"/>.</summary>
+
+    public void Apply(OccupancyVerificationSubmitted e)
     {
         var v = _occupancyVerifications.First(x => x.Id == e.VerificationId);
         v.IsPrimaryResident = e.IsPrimaryResident;
@@ -308,27 +315,35 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         v.Status = OccupancyVerificationStatus.Submitted;
     }
 
-    private void Apply(OccupancyVerified e)
+    /// <summary>Applies <see cref="OccupancyVerified"/>.</summary>
+
+    public void Apply(OccupancyVerified e)
     {
         var v = _occupancyVerifications.First(x => x.Id == e.VerificationId);
         v.DecisionDate = e.VerifiedDate;
         v.Status = OccupancyVerificationStatus.Verified;
     }
 
-    private void Apply(OccupancyVerificationFailed e)
+    /// <summary>Applies <see cref="OccupancyVerificationFailed"/>.</summary>
+
+    public void Apply(OccupancyVerificationFailed e)
     {
         var v = _occupancyVerifications.First(x => x.Id == e.VerificationId);
         v.DecisionDate = e.FailedDate;
         v.Status = OccupancyVerificationStatus.Failed;
     }
 
-    private void Apply(OccupancyVerificationOverdue e)
+    /// <summary>Applies <see cref="OccupancyVerificationOverdue"/>.</summary>
+
+    public void Apply(OccupancyVerificationOverdue e)
     {
         var v = _occupancyVerifications.First(x => x.Id == e.VerificationId);
         v.Status = OccupancyVerificationStatus.Overdue;
     }
 
-    private void Apply(PropertyInspectionScheduled e)
+    /// <summary>Applies <see cref="PropertyInspectionScheduled"/>.</summary>
+
+    public void Apply(PropertyInspectionScheduled e)
     {
         _propertyInspections.Add(new PropertyInspection
         {
@@ -339,7 +354,9 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         });
     }
 
-    private void Apply(PropertyInspectionCompleted e)
+    /// <summary>Applies <see cref="PropertyInspectionCompleted"/>.</summary>
+
+    public void Apply(PropertyInspectionCompleted e)
     {
         var insp = _propertyInspections.First(x => x.Id == e.InspectionId);
         insp.OccupancyConfirmed = e.OccupancyConfirmed;
@@ -348,13 +365,17 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         insp.Status = PropertyInspectionStatus.Completed;
     }
 
-    private void Apply(PropertyInspectionCancelled e)
+    /// <summary>Applies <see cref="PropertyInspectionCancelled"/>.</summary>
+
+    public void Apply(PropertyInspectionCancelled e)
     {
         var insp = _propertyInspections.First(x => x.Id == e.InspectionId);
         insp.Status = PropertyInspectionStatus.Cancelled;
     }
 
-    private void Apply(LeaseViolationIdentified e)
+    /// <summary>Applies <see cref="LeaseViolationIdentified"/>.</summary>
+
+    public void Apply(LeaseViolationIdentified e)
     {
         _leaseViolations.Add(new LeaseViolation
         {
@@ -366,7 +387,9 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         });
     }
 
-    private void Apply(ViolationNoticeIssued e)
+    /// <summary>Applies <see cref="ViolationNoticeIssued"/>.</summary>
+
+    public void Apply(ViolationNoticeIssued e)
     {
         var v = _leaseViolations.First(x => x.Id == e.ViolationId);
         v.NoticeIssuedDate = e.NoticeDate;
@@ -374,14 +397,18 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         v.Status = LeaseViolationStatus.NoticeIssued;
     }
 
-    private void Apply(LeaseViolationCured e)
+    /// <summary>Applies <see cref="LeaseViolationCured"/>.</summary>
+
+    public void Apply(LeaseViolationCured e)
     {
         var v = _leaseViolations.First(x => x.Id == e.ViolationId);
         v.ResolutionDate = e.CuredDate;
         v.Status = LeaseViolationStatus.Cured;
     }
 
-    private void Apply(LeaseViolationEscalated e)
+    /// <summary>Applies <see cref="LeaseViolationEscalated"/>.</summary>
+
+    public void Apply(LeaseViolationEscalated e)
     {
         var v = _leaseViolations.First(x => x.Id == e.ViolationId);
         v.ResolutionNotes = e.Reason;
@@ -389,7 +416,9 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         v.Status = LeaseViolationStatus.Escalated;
     }
 
-    private void Apply(StewardshipCaseClosed e)
+    /// <summary>Applies <see cref="StewardshipCaseClosed"/>.</summary>
+
+    public void Apply(StewardshipCaseClosed e)
     {
         ClosedDate = e.ClosedDate;
         Status = StewardshipCaseStatus.Closed;

@@ -4,8 +4,12 @@ using CommonGround.API.Contracts.Identity.Requests;
 using CommonGround.API.Contracts.Identity.Responses;
 using CommonGround.API.Contracts.TrustManagement.Requests;
 using CommonGround.API.Contracts.TrustManagement.Responses;
+using CommonGround.Identity.Application.Commands;
+using CommonGround.SharedKernel.Domain;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Wolverine;
 
 namespace CommonGround.API.IntegrationTests.TrustManagement;
 
@@ -50,6 +54,29 @@ public class TrustsCreateTests(ApiFactory factory)
         var payload = await response.Content.ReadFromJsonAsync<CreateTrustResponse>();
         payload.Should().NotBeNull();
         payload!.TrustId.Should().StartWith("trust-");
+    }
+
+    [Theory]
+    [InlineData(null, ApiFactory.TestTrustId)]
+    [InlineData("trust-alreadyassigned000000000", "trust-alreadyassigned000000000")]
+    public async Task AssignUserToTrustIfNone_ForUserWithTrust_AssignsOnlyATrustlessUser(string? existingTrustId, string expectedTrustId)
+    {
+        var request = new EnsureUserRequest($"onboarding-{Guid.NewGuid():N}", "onboarding@example.com", "Onboarding", TrustId: null);
+        var client = factory.CreateClient().WithAuthToken(trustId: string.Empty);
+        var ensured = await (await client.PostAsJsonAsync("/api/users/ensure", request))
+            .Content.ReadFromJsonAsync<EnsureUserResponse>();
+        var bus = factory.Services.GetRequiredService<IMessageBus>();
+        var userId = UserId.Create(ensured!.UserId);
+        if (existingTrustId is not null)
+        {
+            await bus.InvokeAsync(new AssignUserToTrustIfNone(userId, TrustId.Create(existingTrustId)));
+        }
+
+        await bus.InvokeAsync(new AssignUserToTrustIfNone(userId, TrustId.Create(ApiFactory.TestTrustId)));
+
+        var current = await (await client.PostAsJsonAsync("/api/users/ensure", request))
+            .Content.ReadFromJsonAsync<EnsureUserResponse>();
+        current!.TrustId.Should().Be(expectedTrustId);
     }
 
     [Theory]

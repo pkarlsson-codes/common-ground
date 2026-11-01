@@ -7,9 +7,9 @@ namespace CommonGround.PropertyRegistry.Infrastructure.Persistence.Projections;
 /// <summary>
 /// Projection for <see cref="DevelopmentProjectListItemView"/>
 /// </summary>
-public class DevelopmentProjectListItemViewProjection : SingleStreamProjection<DevelopmentProjectListItemView, string>
+internal sealed class DevelopmentProjectListItemViewProjection : SingleStreamProjection<DevelopmentProjectListItemView, string>
 {
-    private static DevelopmentProjectListItemView Create(DevelopmentProjectInitiated @event)
+    public static DevelopmentProjectListItemView Create(DevelopmentProjectInitiated @event)
     {
         return new DevelopmentProjectListItemView
         {

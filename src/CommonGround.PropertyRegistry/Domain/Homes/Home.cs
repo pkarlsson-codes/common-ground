@@ -16,7 +16,8 @@ public sealed class Home : AggregateRoot<HomeId>
     private readonly List<UnitAssessment> _assessments = [];
 
 #pragma warning disable CS8618
-    private Home() { }
+    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
+    public Home() { }
 #pragma warning restore CS8618
 
     /// <summary>Gets the ID of the land parcel this unit sits on.</summary>
@@ -188,7 +189,9 @@ public sealed class Home : AggregateRoot<HomeId>
         }
     }
 
-    private void Apply(HomeRegistered e)
+    /// <summary>Applies <see cref="HomeRegistered"/>.</summary>
+
+    public void Apply(HomeRegistered e)
     {
         Id = HomeId.Create(e.AggregateId);
         LandParcelId = LandParcels.LandParcelId.Create(e.LandParcelId);
@@ -210,18 +213,30 @@ public sealed class Home : AggregateRoot<HomeId>
             e.OccurredAt));
     }
 
-    private void Apply(HomeAssessed e)
+    /// <summary>Applies <see cref="HomeAssessed"/>.</summary>
+
+    public void Apply(HomeAssessed e)
     {
         _assessments.Add(UnitAssessment.Reconstitute(e.AssessedValue, e.AssessmentDate, e.AppraiserName, e.ConditionNotes, UserId.Create(e.RecordedById), e.OccurredAt));
     }
 
-    private void Apply(HomeSelectionOpened _) => Status = HomeStatus.InSelection;
+    /// <summary>Applies <see cref="HomeSelectionOpened"/>.</summary>
 
-    private void Apply(HomeSelectionClosedWithoutSale _) => Status = HomeStatus.Available;
+    public void Apply(HomeSelectionOpened _) => Status = HomeStatus.InSelection;
 
-    private void Apply(HomeUnderContract _) => Status = HomeStatus.UnderContract;
+    /// <summary>Applies <see cref="HomeSelectionClosedWithoutSale"/>.</summary>
 
-    private void Apply(HomeContractReleased _) => Status = HomeStatus.Available;
+    public void Apply(HomeSelectionClosedWithoutSale _) => Status = HomeStatus.Available;
 
-    private void Apply(HomeLeased _) => Status = HomeStatus.Leased;
+    /// <summary>Applies <see cref="HomeUnderContract"/>.</summary>
+
+    public void Apply(HomeUnderContract _) => Status = HomeStatus.UnderContract;
+
+    /// <summary>Applies <see cref="HomeContractReleased"/>.</summary>
+
+    public void Apply(HomeContractReleased _) => Status = HomeStatus.Available;
+
+    /// <summary>Applies <see cref="HomeLeased"/>.</summary>
+
+    public void Apply(HomeLeased _) => Status = HomeStatus.Leased;
 }

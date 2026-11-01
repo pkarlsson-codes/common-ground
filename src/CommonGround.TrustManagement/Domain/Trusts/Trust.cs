@@ -1,5 +1,4 @@
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Events;
 using CommonGround.TrustManagement.Application.Errors;
 using CommonGround.TrustManagement.Domain.Trusts.Events;
 
@@ -8,18 +7,19 @@ namespace CommonGround.TrustManagement.Domain.Trusts;
 /// <summary>Represents a trust.</summary>
 public sealed class Trust : AggregateRoot<TrustId>
 {
+#pragma warning disable CS8618 // State is set by Create from the stream's first event.
+    private Trust() { }
+#pragma warning restore CS8618
+
     /// <summary>The name of the trust.</summary>
     public string Name { get; private set; }
 
     /// <summary>The time zone the trust operates in; "today" and dates derived from timestamps follow it.</summary>
     public IanaTimeZone TimeZone { get; private set; }
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-    private Trust() { }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-
-    /// <summary>Creates a new trust.</summary>
-    public static Trust Create(string name, IanaTimeZone timeZone)
+    /// <summary>Decides to establish a new trust.</summary>
+    /// <returns>The event that starts the trust's stream.</returns>
+    public static TrustCreated Establish(TrustId id, string name, IanaTimeZone timeZone)
     {
         ArgumentNullException.ThrowIfNull(timeZone);
 
@@ -28,45 +28,40 @@ public sealed class Trust : AggregateRoot<TrustId>
             throw BusinessRuleViolation.Trust.Create.NameRequired();
         }
 
-        var trust = new Trust();
-
-        trust.ApplyChange(new TrustCreated(TrustId.Generate().Value, name, timeZone.Value));
-        return trust;
+        return new TrustCreated(id.Value, name, timeZone.Value);
     }
 
-    /// <summary>Raises an onboarding event that links this trust to an authenticated creator user.</summary>
-    public void RequestOnboarding(UserId creatorUserId, string correlationId)
+    /// <summary>Decides to link this trust to the authenticated user who created it.</summary>
+    public TrustOnboardingRequested RequestOnboarding(UserId creatorUserId, string correlationId)
     {
-
         if (string.IsNullOrWhiteSpace(correlationId))
         {
             throw BusinessRuleViolation.Trust.RequestOnboarding.CorrelationIdRequired();
         }
 
-        ApplyChange(new TrustOnboardingRequested(Id.Value, Name, creatorUserId.Value, correlationId));
+        return new TrustOnboardingRequested(Id.Value, Name, creatorUserId.Value, correlationId);
     }
 
-    /// <inheritdoc/>
-    protected override void ApplyEvent(IDomainEvent domainEvent)
+    /// <summary>Starts a trust from its first event.</summary>
+    public static Trust Create(TrustCreated e)
     {
-        switch (domainEvent)
+        ArgumentNullException.ThrowIfNull(e);
+
+        return new Trust
         {
-            case TrustCreated e: Apply(e); break;
-            case TrustOnboardingRequested e: Apply(e); break;
-            default:
-                throw new InvalidOperationException($"Unhandled event type: {domainEvent.GetType().Name}");
-        }
+            Id = TrustId.Create(e.AggregateId),
+            Name = e.Name,
+            TimeZone = IanaTimeZone.Create(e.TimeZone),
+        };
     }
 
-    private void Apply(TrustCreated e)
+    /// <summary>
+    /// Applies <see cref="TrustOnboardingRequested"/>. Nothing changes on the trust; the event exists for
+    /// integration choreography.
+    /// </summary>
+#pragma warning disable CA1822 // Marten dispatches events to instance Apply methods.
+    public void Apply(TrustOnboardingRequested e)
     {
-        Id = TrustId.Create(e.AggregateId);
-        Name = e.Name;
-        TimeZone = IanaTimeZone.Create(e.TimeZone);
     }
-
-    private static void Apply(TrustOnboardingRequested _)
-    {
-        // No additional state transition on Trust; this event exists for integration choreography.
-    }
+#pragma warning restore CA1822
 }

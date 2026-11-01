@@ -9,8 +9,8 @@ public readonly record struct PurchaseWorkflowId : IEntityId<PurchaseWorkflowId>
 {
     private PurchaseWorkflowId(string value) => Value = value;
 
-    /// <summary>Gets the prefix every value starts with, before a hyphen.</summary>
-    public static string Prefix => "purchase";
+    // A const, not a public static property: one would stop Marten and Wolverine recognizing this as a strong-typed id.
+    private const string Prefix = "purchase";
 
     /// <inheritdoc/>
     public string Value { get; }

@@ -11,8 +11,8 @@ public readonly record struct GroundLeaseId : IEntityId<GroundLeaseId>
 {
     private GroundLeaseId(string value) => Value = value;
 
-    /// <summary>Gets the prefix every value starts with, before a hyphen.</summary>
-    public static string Prefix => "groundlease";
+    // A const, not a public static property: one would stop Marten and Wolverine recognizing this as a strong-typed id.
+    private const string Prefix = "groundlease";
 
     /// <inheritdoc/>
     public string Value { get; }

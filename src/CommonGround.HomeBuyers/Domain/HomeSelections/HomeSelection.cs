@@ -16,7 +16,8 @@ namespace CommonGround.HomeBuyers.Domain.HomeSelections;
 public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
 {
 #pragma warning disable CS8618
-    private HomeSelection() { }
+    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
+    public HomeSelection() { }
 #pragma warning restore CS8618
 
     public string HomeId { get; private set; }
@@ -184,7 +185,9 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
         }
     }
 
-    private void Apply(HomeSelectionStarted e)
+    /// <summary>Applies <see cref="HomeSelectionStarted"/>.</summary>
+
+    public void Apply(HomeSelectionStarted e)
     {
         Id = HomeSelectionId.Create(e.AggregateId);
         HomeId = e.HomeId;
@@ -202,24 +205,32 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
             .ToList();
     }
 
-    private void Apply(HouseholdSelectedByPriority e)
+    /// <summary>Applies <see cref="HouseholdSelectedByPriority"/>.</summary>
+
+    public void Apply(HouseholdSelectedByPriority e)
     {
         SelectedApplicationId = HomeownerApplicationId.Create(e.ApplicationId);
         Status = HomeSelectionStatus.Completed;
     }
 
-    private void Apply(HouseholdSelectedByLottery e)
+    /// <summary>Applies <see cref="HouseholdSelectedByLottery"/>.</summary>
+
+    public void Apply(HouseholdSelectedByLottery e)
     {
         SelectedApplicationId = HomeownerApplicationId.Create(e.ApplicationId);
         Status = HomeSelectionStatus.Completed;
     }
 
-    private void Apply(HomeSelectionPurchaseFellThrough _)
+    /// <summary>Applies <see cref="HomeSelectionPurchaseFellThrough"/>.</summary>
+
+    public void Apply(HomeSelectionPurchaseFellThrough _)
     {
         Status = HomeSelectionStatus.FellThrough;
     }
 
-    private void Apply(HomeSelectionCancelled e)
+    /// <summary>Applies <see cref="HomeSelectionCancelled"/>.</summary>
+
+    public void Apply(HomeSelectionCancelled e)
     {
         CancellationReason = e.Reason;
         Status = HomeSelectionStatus.Cancelled;

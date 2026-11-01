@@ -9,8 +9,8 @@
     <ProjectReference Include="..\CommonGround.Homeownership.Contracts\CommonGround.Homeownership.Contracts.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Marten" Version="8.37.1" />
-    <PackageReference Include="WolverineFx.Marten" Version="5.39.3" />
+    <PackageReference Include="Marten" Version="9.56.0" />
+    <PackageReference Include="WolverineFx.Marten" Version="6.60.0" />
   </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">

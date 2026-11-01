@@ -49,17 +49,17 @@ public sealed class UsersInitialData : IInitialData
                 }
             }
 
-            var user = User.Register(entry.KeycloakSubject, entry.Email, entry.DisplayName);
-            user.AssignTrust(TrustId.Create(trustLookup.TrustId));
+            var userId = UserId.Generate();
+            var registered = User.Register(userId, entry.KeycloakSubject, entry.Email, entry.DisplayName);
+            var assigned = User.Create(registered).AssignTrustIfNone(TrustId.Create(trustLookup.TrustId));
 
-            session.Events.StartStream<User>(user.Id.Value, user.UncommittedEvents.ToArray());
-            user.UncommittedEvents.MarkAsCommitted();
+            session.Events.StartStream<User>(userId.Value, registered, assigned!);
 
             session.Store(new UserSeedLookup
             {
                 Id = lookupId,
                 SeedKey = entry.SeedKey,
-                UserId = user.Id.Value,
+                UserId = userId.Value,
                 SeededAt = DateTimeOffset.UtcNow,
             });
 

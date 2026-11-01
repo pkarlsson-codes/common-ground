@@ -40,15 +40,14 @@ public sealed class TrustsInitialData : IInitialData
                 }
             }
 
-            var trust = Trust.Create(entry.Name, IanaTimeZone.Create(entry.TimeZone));
-            session.Events.StartStream<Trust>(trust.Id.Value, trust.UncommittedEvents.ToArray());
-            trust.UncommittedEvents.MarkAsCommitted();
+            var trustId = TrustId.Generate();
+            session.Events.StartStream<Trust>(trustId.Value, Trust.Establish(trustId, entry.Name, IanaTimeZone.Create(entry.TimeZone)));
 
             session.Store(new TrustSeedLookup
             {
                 Id = lookupId,
                 SeedKey = entry.SeedKey,
-                TrustId = trust.Id.Value,
+                TrustId = trustId.Value,
                 SeededAt = DateTimeOffset.UtcNow,
             });
 

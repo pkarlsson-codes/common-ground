@@ -16,7 +16,8 @@ public sealed class DevelopmentProject : AggregateRoot<DevelopmentProjectId>
     private readonly List<HomeId> _homeIds = [];
 
 #pragma warning disable CS8618
-    private DevelopmentProject() { }
+    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
+    public DevelopmentProject() { }
 #pragma warning restore CS8618
 
     /// <summary>Gets the ID of the land parcel this project is for.</summary>
@@ -116,7 +117,9 @@ public sealed class DevelopmentProject : AggregateRoot<DevelopmentProjectId>
         }
     }
 
-    private void Apply(DevelopmentProjectInitiated e)
+    /// <summary>Applies <see cref="DevelopmentProjectInitiated"/>.</summary>
+
+    public void Apply(DevelopmentProjectInitiated e)
     {
         Id = DevelopmentProjectId.Create(e.AggregateId);
         LandParcelId = LandParcelId.Create(e.LandParcelId);

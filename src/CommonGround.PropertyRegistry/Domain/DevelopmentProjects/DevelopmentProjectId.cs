@@ -10,8 +10,8 @@ public readonly record struct DevelopmentProjectId : IEntityId<DevelopmentProjec
 {
     private DevelopmentProjectId(string value) => Value = value;
 
-    /// <summary>Gets the prefix every value starts with, before a hyphen.</summary>
-    public static string Prefix => "project";
+    // A const, not a public static property: one would stop Marten and Wolverine recognizing this as a strong-typed id.
+    private const string Prefix = "project";
 
     /// <inheritdoc/>
     public string Value { get; }

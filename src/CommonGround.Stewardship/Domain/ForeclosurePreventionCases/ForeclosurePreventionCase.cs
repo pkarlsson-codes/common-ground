@@ -12,7 +12,8 @@ namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
 public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePreventionCaseId>
 {
 #pragma warning disable CS8618
-    private ForeclosurePreventionCase() { }
+    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
+    public ForeclosurePreventionCase() { }
 #pragma warning restore CS8618
 
     private readonly List<CounselingReferral> _counselingReferrals = [];
@@ -180,7 +181,9 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         }
     }
 
-    private void Apply(ForeclosurePreventionCaseOpened e)
+    /// <summary>Applies <see cref="ForeclosurePreventionCaseOpened"/>.</summary>
+
+    public void Apply(ForeclosurePreventionCaseOpened e)
     {
         Id = ForeclosurePreventionCaseId.Create(e.AggregateId);
         GroundLeaseId = e.GroundLeaseId;
@@ -189,7 +192,9 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         Status = ForeclosurePreventionCaseStatus.Opened;
     }
 
-    private void Apply(CounselingReferralMade e)
+    /// <summary>Applies <see cref="CounselingReferralMade"/>.</summary>
+
+    public void Apply(CounselingReferralMade e)
     {
         _counselingReferrals.Add(new CounselingReferral
         {
@@ -201,14 +206,18 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
             Status = ForeclosurePreventionCaseStatus.Active;
     }
 
-    private void Apply(CounselingOutcomeRecorded e)
+    /// <summary>Applies <see cref="CounselingOutcomeRecorded"/>.</summary>
+
+    public void Apply(CounselingOutcomeRecorded e)
     {
         var referral = _counselingReferrals.First(r => r.Id == e.ReferralId);
         referral.Outcome = e.Outcome;
         referral.OutcomeDate = e.OutcomeDate;
     }
 
-    private void Apply(ForbearanceRequested e)
+    /// <summary>Applies <see cref="ForbearanceRequested"/>.</summary>
+
+    public void Apply(ForbearanceRequested e)
     {
         _forbearanceRequests.Add(new ForbearanceRequest
         {
@@ -220,7 +229,9 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
             Status = ForeclosurePreventionCaseStatus.Active;
     }
 
-    private void Apply(ForbearanceOutcomeRecorded e)
+    /// <summary>Applies <see cref="ForbearanceOutcomeRecorded"/>.</summary>
+
+    public void Apply(ForbearanceOutcomeRecorded e)
     {
         var request = _forbearanceRequests.First(r => r.Id == e.RequestId);
         request.Outcome = e.Outcome;
@@ -228,7 +239,9 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         request.Notes = e.Notes;
     }
 
-    private void Apply(CurePeriodActivated e)
+    /// <summary>Applies <see cref="CurePeriodActivated"/>.</summary>
+
+    public void Apply(CurePeriodActivated e)
     {
         _curePeriodActivations.Add(new CurePeriodActivation
         {
@@ -242,7 +255,9 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
             Status = ForeclosurePreventionCaseStatus.Active;
     }
 
-    private void Apply(ForeclosurePreventionCaseResolved e)
+    /// <summary>Applies <see cref="ForeclosurePreventionCaseResolved"/>.</summary>
+
+    public void Apply(ForeclosurePreventionCaseResolved e)
     {
         Outcome = e.Outcome;
         ResolvedDate = e.ResolvedDate;

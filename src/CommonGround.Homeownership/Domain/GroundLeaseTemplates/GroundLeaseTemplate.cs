@@ -12,7 +12,8 @@ namespace CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
 {
 #pragma warning disable CS8618
-    private GroundLeaseTemplate() { }
+    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
+    public GroundLeaseTemplate() { }
 #pragma warning restore CS8618
 
     /// <summary>Gets the template display name.</summary>
@@ -119,7 +120,9 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
         }
     }
 
-    private void Apply(GroundLeaseTemplateCreated e)
+    /// <summary>Applies <see cref="GroundLeaseTemplateCreated"/>.</summary>
+
+    public void Apply(GroundLeaseTemplateCreated e)
     {
         Id = GroundLeaseTemplateId.Create(e.AggregateId);
         TemplateName = e.TemplateName;
@@ -140,12 +143,16 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
         CreatedAt = e.OccurredAt;
     }
 
-    private void Apply(GroundLeaseTemplateArchived _)
+    /// <summary>Applies <see cref="GroundLeaseTemplateArchived"/>.</summary>
+
+    public void Apply(GroundLeaseTemplateArchived _)
     {
         Status = GroundLeaseTemplateStatus.Inactive;
     }
 
-    private void Apply(GroundLeaseTemplateRestored _)
+    /// <summary>Applies <see cref="GroundLeaseTemplateRestored"/>.</summary>
+
+    public void Apply(GroundLeaseTemplateRestored _)
     {
         Status = GroundLeaseTemplateStatus.Active;
     }

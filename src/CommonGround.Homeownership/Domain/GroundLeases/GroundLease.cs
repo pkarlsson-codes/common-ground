@@ -15,7 +15,8 @@ namespace CommonGround.Homeownership.Domain.GroundLeases;
 public sealed class GroundLease : AggregateRoot<GroundLeaseId>
 {
 #pragma warning disable CS8618
-    private GroundLease() { }
+    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
+    public GroundLease() { }
 #pragma warning restore CS8618
 
     /// <summary>Gets the ID of the land parcel this lease is for.</summary>
@@ -188,7 +189,9 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         }
     }
 
-    private void Apply(GroundLeaseCreated e)
+    /// <summary>Applies <see cref="GroundLeaseCreated"/>.</summary>
+
+    public void Apply(GroundLeaseCreated e)
     {
         Id = GroundLeaseId.Create(e.AggregateId);
         LandParcelId = e.LandParcelId;
@@ -212,7 +215,9 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         TemplateId = null;
     }
 
-    private void Apply(GroundLeaseCreatedFromPurchase e)
+    /// <summary>Applies <see cref="GroundLeaseCreatedFromPurchase"/>.</summary>
+
+    public void Apply(GroundLeaseCreatedFromPurchase e)
     {
         Id = GroundLeaseId.Create(e.AggregateId);
         PurchaseWorkflowId = PurchaseWorkflows.PurchaseWorkflowId.Create(e.PurchaseWorkflowId);
@@ -238,7 +243,9 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         CurrentHomeowner = new Homeowner(e.BuyerFullName, e.BuyerEmail, e.BuyerPhone);
     }
 
-    private void Apply(GroundLeaseTerminated _)
+    /// <summary>Applies <see cref="GroundLeaseTerminated"/>.</summary>
+
+    public void Apply(GroundLeaseTerminated _)
     {
         Status = GroundLeaseStatus.Inactive;
     }

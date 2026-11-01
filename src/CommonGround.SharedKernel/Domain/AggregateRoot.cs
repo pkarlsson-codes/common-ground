@@ -70,7 +70,9 @@ public abstract class AggregateRoot<TIdentity> : Entity<TIdentity>
     /// This method must be implemented by derived classes to handle specific event types.
     /// </summary>
     /// <param name="domainEvent">The domain event to apply.</param>
-    protected abstract void ApplyEvent(IDomainEvent domainEvent);
+    protected virtual void ApplyEvent(IDomainEvent domainEvent)
+    {
+    }
 
     /// <summary>
     /// Applies a domain event to this aggregate.

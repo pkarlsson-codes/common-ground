@@ -8,8 +8,8 @@ public readonly record struct TrustId : IEntityId<TrustId>
 {
     private TrustId(string value) => Value = value;
 
-    /// <summary>Gets the prefix every value starts with, before a hyphen.</summary>
-    public static string Prefix => "trust";
+    // A const, not a public static property: one would stop Marten and Wolverine recognizing this as a strong-typed id.
+    private const string Prefix = "trust";
 
     /// <inheritdoc/>
     public string Value { get; }

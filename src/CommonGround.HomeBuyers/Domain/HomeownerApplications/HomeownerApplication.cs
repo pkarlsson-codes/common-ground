@@ -15,7 +15,8 @@ namespace CommonGround.HomeBuyers.Domain.HomeownerApplications;
 public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
 {
 #pragma warning disable CS8618
-    private HomeownerApplication() { }
+    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
+    public HomeownerApplication() { }
 #pragma warning restore CS8618
 
     public HouseholdId HouseholdId { get; private set; }
@@ -194,7 +195,9 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
         }
     }
 
-    private void Apply(ApplicationSubmitted e)
+    /// <summary>Applies <see cref="ApplicationSubmitted"/>.</summary>
+
+    public void Apply(ApplicationSubmitted e)
     {
         Id = HomeownerApplicationId.Create(e.AggregateId);
         HouseholdId = HouseholdId.Create(e.HouseholdId);
@@ -204,33 +207,45 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
         SubmittedBy = UserId.Create(e.SubmittedBy);
     }
 
-    private void Apply(ApplicationSelectedForHome _)
+    /// <summary>Applies <see cref="ApplicationSelectedForHome"/>.</summary>
+
+    public void Apply(ApplicationSelectedForHome _)
     {
         Phase = ApplicationPhase.Selected;
     }
 
-    private void Apply(ApplicationApproved e)
+    /// <summary>Applies <see cref="ApplicationApproved"/>.</summary>
+
+    public void Apply(ApplicationApproved e)
     {
         Phase = ApplicationPhase.Approved;
     }
     
-    private void Apply(ApplicationReturnedToWaitingList _)
+    /// <summary>Applies <see cref="ApplicationReturnedToWaitingList"/>.</summary>
+    
+    public void Apply(ApplicationReturnedToWaitingList _)
     {
         Phase = ApplicationPhase.Approved;
     }
 
-    private void Apply(ApplicationPurchaseClosed _)
+    /// <summary>Applies <see cref="ApplicationPurchaseClosed"/>.</summary>
+
+    public void Apply(ApplicationPurchaseClosed _)
     {
         Phase = ApplicationPhase.Purchased;
     }
 
-    private void Apply(ApplicationDenied e)
+    /// <summary>Applies <see cref="ApplicationDenied"/>.</summary>
+
+    public void Apply(ApplicationDenied e)
     {
         DenialReason = e.Reason;
         Phase = ApplicationPhase.Denied;
     }
 
-    private void Apply(ApplicationWithdrawn e)
+    /// <summary>Applies <see cref="ApplicationWithdrawn"/>.</summary>
+
+    public void Apply(ApplicationWithdrawn e)
     {
         WithdrawalReason = e.Reason;
         Phase = ApplicationPhase.Withdrawn;

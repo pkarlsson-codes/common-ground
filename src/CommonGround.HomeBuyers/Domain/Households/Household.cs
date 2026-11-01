@@ -10,7 +10,8 @@ namespace CommonGround.HomeBuyers.Domain.Households;
 public class Household : AggregateRoot<HouseholdId>
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-    private Household() { }
+    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
+    public Household() { }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
     private readonly List<HouseholdMember> _members = [];
@@ -160,50 +161,68 @@ public class Household : AggregateRoot<HouseholdId>
         }
     }
 
-    private void Apply(HouseholdRegistered e)
+    /// <summary>Applies <see cref="HouseholdRegistered"/>.</summary>
+
+    public void Apply(HouseholdRegistered e)
     {
         Id = HouseholdId.Create(e.AggregateId);
         Circumstances = HouseholdCircumstances.Create(e.RequiresAccessibility, e.AnnualIncome);
         _members.AddRange(e.Members.Select(m => HouseholdMember.Reconstitute(HouseholdMemberId.Create(m.MemberId), m.Name, m.Email, m.Phone, m.IsPrimary)));
     }
     
-    private void Apply(HouseholdMemberAdded e)
+    /// <summary>Applies <see cref="HouseholdMemberAdded"/>.</summary>
+    
+    public void Apply(HouseholdMemberAdded e)
     {
         _members.Add(HouseholdMember.Reconstitute(HouseholdMemberId.Create(e.MemberId), e.Name, e.Email, e.Phone, isPrimary: false));
     }
 
-    private void Apply(HouseholdMemberUpdated e)
+    /// <summary>Applies <see cref="HouseholdMemberUpdated"/>.</summary>
+
+    public void Apply(HouseholdMemberUpdated e)
     {
         FindMember(HouseholdMemberId.Create(e.MemberId)).ChangeContactDetails(e.Name, e.Email, e.Phone);
     }
 
-    private void Apply(HouseholdMemberRemoved e)
+    /// <summary>Applies <see cref="HouseholdMemberRemoved"/>.</summary>
+
+    public void Apply(HouseholdMemberRemoved e)
     {
         _members.RemoveAll(m => m.Id.Value == e.MemberId);
     }
 
-    private void Apply(HouseholdCircumstancesUpdated e)
+    /// <summary>Applies <see cref="HouseholdCircumstancesUpdated"/>.</summary>
+
+    public void Apply(HouseholdCircumstancesUpdated e)
     {
         Circumstances = HouseholdCircumstances.Create(e.RequiresAccessibility, e.AnnualIncome);
     }
 
-    private void Apply(MortgagePrequalificationRecorded e)
+    /// <summary>Applies <see cref="MortgagePrequalificationRecorded"/>.</summary>
+
+    public void Apply(MortgagePrequalificationRecorded e)
     {
         MortgagePrequalification = new MortgagePrequalification(
             e.LenderName, e.ApprovedAmount, e.ExpiryDate);
     }
 
-    private void Apply(MortgagePrequalificationExpired _)
+    /// <summary>Applies <see cref="MortgagePrequalificationExpired"/>.</summary>
+
+    public void Apply(MortgagePrequalificationExpired _)
     {
         MortgagePrequalification = null;
     }
 
-    private void Apply(HousingCounselingRecorded _)
+    /// <summary>Applies <see cref="HousingCounselingRecorded"/>.</summary>
+
+    public void Apply(HousingCounselingRecorded _)
     {
         IsHousingCounselingCompleted = true;
     }
 
-    private void Apply(CltOrientationRecorded _)
+    /// <summary>Applies <see cref="CltOrientationRecorded"/>.</summary>
+
+    public void Apply(CltOrientationRecorded _)
     {
         IsCltOrientationCompleted = true;
     }

@@ -1,5 +1,6 @@
 using JasperFx.Events;
 using JasperFx.Events.Daemon;
+using JasperFx.MultiTenancy;
 using Marten;
 using Marten.Storage;
 using Microsoft.Extensions.DependencyInjection;

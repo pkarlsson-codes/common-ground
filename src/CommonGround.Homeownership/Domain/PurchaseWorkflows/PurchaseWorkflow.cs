@@ -16,7 +16,8 @@ namespace CommonGround.Homeownership.Domain.PurchaseWorkflows;
 public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 {
 #pragma warning disable CS8618
-    private PurchaseWorkflow() { }
+    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
+    public PurchaseWorkflow() { }
 #pragma warning restore CS8618
 
     /// <summary>Gets the ground lease this purchase is for.</summary>
@@ -354,7 +355,9 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         }
     }
 
-    private void Apply(PurchaseWorkflowInitiated e)
+    /// <summary>Applies <see cref="PurchaseWorkflowInitiated"/>.</summary>
+
+    public void Apply(PurchaseWorkflowInitiated e)
     {
         Id = PurchaseWorkflowId.Create(e.AggregateId);
         GroundLeaseTemplateId = GroundLeaseTemplateId.Create(e.GroundLeaseTemplateId);
@@ -369,63 +372,83 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         HouseholdId = e.HouseholdId;
     }
 
-    private void Apply(BuyerEligibilityVerified e)
+    /// <summary>Applies <see cref="BuyerEligibilityVerified"/>.</summary>
+
+    public void Apply(BuyerEligibilityVerified e)
     {
         EligibilityDetails = new EligibilityDetails(e.VerifiedDate, e.EligibilityNotes);
         AdvancePhaseIfNeeded();
     }
 
-    private void Apply(FinancingCommitted e)
+    /// <summary>Applies <see cref="FinancingCommitted"/>.</summary>
+
+    public void Apply(FinancingCommitted e)
     {
         FinancingDetails = new FinancingDetails(
             e.LenderName, e.CommittedAmount, e.PreapprovalLetterDate);
         AdvancePhaseIfNeeded();
     }
 
-    private void Apply(InspectionCompleted e)
+    /// <summary>Applies <see cref="InspectionCompleted"/>.</summary>
+
+    public void Apply(InspectionCompleted e)
     {
         InspectionResult = new InspectionResult(
             e.InspectionDate, e.InspectorName, e.InspectionNotes);
         AdvancePhaseIfNeeded();
     }
 
-    private void Apply(TitleCleared e)
+    /// <summary>Applies <see cref="TitleCleared"/>.</summary>
+
+    public void Apply(TitleCleared e)
     {
         TitleDetails = new TitleDetails(e.ClearedDate, e.TitleCompanyName);
         AdvancePhaseIfNeeded();
     }
 
-    private void Apply(LeaseExecuted e)
+    /// <summary>Applies <see cref="LeaseExecuted"/>.</summary>
+
+    public void Apply(LeaseExecuted e)
     {
         LeaseExecutionDetails = new LeaseExecutionDetails(e.SignedDate);
         AdvancePhaseIfNeeded();
     }
 
-    private void Apply(ClosingScheduled e)
+    /// <summary>Applies <see cref="ClosingScheduled"/>.</summary>
+
+    public void Apply(ClosingScheduled e)
     {
         ScheduledClosingDate = e.ScheduledClosingDate;
         Phase = WorkflowPhase.ClosingScheduled;
     }
 
-    private void Apply(PurchaseClosed e)
+    /// <summary>Applies <see cref="PurchaseClosed"/>.</summary>
+
+    public void Apply(PurchaseClosed e)
     {
         ClosingDetails = new ClosingDetails(e.ActualClosingDate, e.ClosingNotes);
         Phase = WorkflowPhase.Closed;
     }
 
-    private void Apply(PurchaseFailed e)
+    /// <summary>Applies <see cref="PurchaseFailed"/>.</summary>
+
+    public void Apply(PurchaseFailed e)
     {
         FailureReason = e.FailureReason;
         Phase = WorkflowPhase.Failed;
     }
 
-    private void Apply(PurchaseWithdrawn e)
+    /// <summary>Applies <see cref="PurchaseWithdrawn"/>.</summary>
+
+    public void Apply(PurchaseWithdrawn e)
     {
         WithdrawalReason = e.WithdrawalReason;
         Phase = WorkflowPhase.Withdrawn;
     }
 
-    private void Apply(WorkflowStalled e)
+    /// <summary>Applies <see cref="WorkflowStalled"/>.</summary>
+
+    public void Apply(WorkflowStalled e)
     {
         StalledReason = e.StalledReason;
         StalledDate = e.StalledDate;

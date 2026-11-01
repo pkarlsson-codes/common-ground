@@ -16,6 +16,7 @@ using Serilog;
 using Wolverine;
 using Wolverine.ErrorHandling;
 using Wolverine.Http;
+using Wolverine.Persistence;
 using Wolverine.RabbitMQ;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,6 +43,10 @@ try
     builder.Host.UseWolverine(opts =>
     {
         opts.Policies.AutoApplyTransactions();
+
+        // A [WriteAggregate] handler whose stream doesn't exist must fail, not silently skip.
+        // The exception handler turns RequiredDataMissingException into a 404.
+        opts.EntityDefaults.OnMissing = OnMissing.ThrowException;
 
         // Two handlers appending to the same event stream at once (e.g. a home's selection opening and
         // its household being chosen) lose the race with a version conflict. Re-running the handler reloads
@@ -85,9 +90,17 @@ try
     app.ConfigureStandardPipeline();
     app.ConfigureEndpoints();
 
+    // A JasperFx command such as `codegen test`, `describe` or `resources` (WebApplicationFactory and
+    // the plain run pass only `--option` arguments).
+    if (args.Length > 0 && !args[0].StartsWith('-'))
+    {
+        return await app.RunJasperFxCommands(args).ConfigureAwait(false);
+    }
+
     await app.StartAsync().ConfigureAwait(false);
     await DevelopmentSeeder.RunAsync(app).ConfigureAwait(false);
     await app.WaitForShutdownAsync().ConfigureAwait(false);
+    return 0;
 }
 catch (Exception ex) when (ex is not OperationCanceledException)
 {

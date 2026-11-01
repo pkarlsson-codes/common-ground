@@ -1,13 +1,12 @@
 using CommonGround.Identity.Domain.Users.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.Identity.Domain.Users;
 
 /// <summary>Aggregate representing a CommonGround-owned user identity.</summary>
 public sealed class User : AggregateRoot<UserId>
 {
-#pragma warning disable CS8618
+#pragma warning disable CS8618 // State is set by Create from the stream's first event.
     private User() { }
 #pragma warning restore CS8618
 
@@ -26,54 +25,40 @@ public sealed class User : AggregateRoot<UserId>
     /// <summary>Gets the trust this user belongs to, if assigned.</summary>
     public TrustId? TrustId { get; private set; }
 
-    /// <summary>Creates a new owned user record for the given Keycloak subject.</summary>
-    public static User Register(string keycloakSubject, string? email, string? displayName)
+    /// <summary>Decides to register an owned user record for the given Keycloak subject.</summary>
+    /// <returns>The event that starts the user's stream.</returns>
+    public static UserRegistered Register(UserId id, string keycloakSubject, string? email, string? displayName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(keycloakSubject);
 
-        var user = new User();
-        user.ApplyChange(new UserRegistered(
-            UserId.Generate().Value,
-            keycloakSubject,
-            email,
-            displayName));
-        return user;
+        return new UserRegistered(id.Value, keycloakSubject, email, displayName);
     }
 
-    /// <summary>Assigns the user to a trust when no trust is currently assigned.</summary>
-    public void AssignTrust(TrustId trustId)
-    {
+    /// <summary>Decides to assign the user to a trust, unless they already belong to one.</summary>
+    /// <returns>The assignment, or <see langword="null"/> when the user already has a trust.</returns>
+    public UserTrustAssigned? AssignTrustIfNone(TrustId trustId) =>
+        TrustId is null ? new UserTrustAssigned(Id.Value, trustId.Value) : null;
 
-        if (TrustId is not null)
+    /// <summary>Starts a user from its first event.</summary>
+    public static User Create(UserRegistered e)
+    {
+        ArgumentNullException.ThrowIfNull(e);
+
+        return new User
         {
-            throw new InvalidOperationException("User already belongs to a trust.");
-        }
-
-        ApplyChange(new UserTrustAssigned(Id.Value, trustId.Value));
+            Id = UserId.Create(e.AggregateId),
+            KeycloakSubject = e.KeycloakSubject,
+            Email = e.Email,
+            DisplayName = e.DisplayName,
+            CreatedAt = e.OccurredAt,
+        };
     }
 
-    /// <inheritdoc/>
-    protected override void ApplyEvent(IDomainEvent domainEvent)
+    /// <summary>Applies <see cref="UserTrustAssigned"/>.</summary>
+    public void Apply(UserTrustAssigned e)
     {
-        switch (domainEvent)
-        {
-            case UserRegistered e: Apply(e); break;
-            case UserTrustAssigned e: Apply(e); break;
-            default: throw new InvalidOperationException($"Unknown event: {domainEvent?.GetType().Name}");
-        }
-    }
+        ArgumentNullException.ThrowIfNull(e);
 
-    private void Apply(UserRegistered e)
-    {
-        Id = UserId.Create(e.AggregateId);
-        KeycloakSubject = e.KeycloakSubject;
-        Email = e.Email;
-        DisplayName = e.DisplayName;
-        CreatedAt = e.OccurredAt;
-    }
-
-    private void Apply(UserTrustAssigned e)
-    {
         TrustId = global::CommonGround.SharedKernel.Domain.TrustId.Create(e.TrustId);
     }
 }
