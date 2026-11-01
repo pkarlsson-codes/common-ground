@@ -13,7 +13,6 @@ public sealed class DocumentAttachment : ValueObject
     public DocumentAttachment(string entityType, string entityId, string? role, UserId attachedBy, DateTimeOffset attachedAt)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(entityType);
-        ArgumentNullException.ThrowIfNull(attachedBy);
 
         EntityType = entityType;
         EntityId = entityId;

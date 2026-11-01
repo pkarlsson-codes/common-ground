@@ -55,7 +55,6 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     {
         if (string.IsNullOrWhiteSpace(groundLeaseId))
             throw new BusinessRuleViolationException("GroundLeaseId is required.");
-        ArgumentNullException.ThrowIfNull(openedBy);
 
         var fpc = new ForeclosurePreventionCase();
         fpc.ApplyChange(new ForeclosurePreventionCaseOpened(
@@ -70,7 +69,6 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         string servicerName, int delinquentMonths, DateOnly recordedDate, UserId recordedBy)
     {
         GuardNotResolved();
-        ArgumentNullException.ThrowIfNull(recordedBy);
         if (string.IsNullOrWhiteSpace(servicerName))
             throw new BusinessRuleViolationException("Servicer name is required.");
         if (delinquentMonths <= 0)
@@ -86,7 +84,6 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         string agencyName, DateOnly referralDate, UserId referredBy)
     {
         GuardNotResolved();
-        ArgumentNullException.ThrowIfNull(referredBy);
         if (string.IsNullOrWhiteSpace(agencyName))
             throw new BusinessRuleViolationException("Agency name is required.");
 
@@ -100,7 +97,6 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         Guid referralId, string outcome, DateOnly outcomeDate, UserId recordedBy)
     {
         GuardActive();
-        ArgumentNullException.ThrowIfNull(recordedBy);
         if (string.IsNullOrWhiteSpace(outcome))
             throw new BusinessRuleViolationException("Outcome is required.");
         var referral = FindReferral(referralId);
@@ -116,7 +112,6 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         string lenderName, DateOnly requestedDate, UserId requestedBy)
     {
         GuardNotResolved();
-        ArgumentNullException.ThrowIfNull(requestedBy);
         if (string.IsNullOrWhiteSpace(lenderName))
             throw new BusinessRuleViolationException("Lender name is required.");
 
@@ -131,7 +126,6 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         string? notes, UserId recordedBy)
     {
         GuardActive();
-        ArgumentNullException.ThrowIfNull(recordedBy);
         var request = FindForbearanceRequest(requestId);
         _ = request;
 
@@ -145,7 +139,6 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         string lraId, DateOnly activationDate, int curePeriodDays, UserId activatedBy)
     {
         GuardNotResolved();
-        ArgumentNullException.ThrowIfNull(activatedBy);
         if (string.IsNullOrWhiteSpace(lraId))
             throw new BusinessRuleViolationException("LraId is required.");
         if (curePeriodDays <= 0)
@@ -163,7 +156,6 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         if (Status != ForeclosurePreventionCaseStatus.Active)
             throw new BusinessRuleViolationException(
                 "ForeclosurePreventionCase must be Active to resolve.");
-        ArgumentNullException.ThrowIfNull(resolvedBy);
 
         ApplyChange(new ForeclosurePreventionCaseResolved(
             Id.Value, outcome, resolvedDate,

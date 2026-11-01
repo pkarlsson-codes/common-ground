@@ -65,10 +65,8 @@ public sealed class Home : AggregateRoot<HomeId>
         UnitAssessment initialAssessment,
         UserId registeredBy)
     {
-        ArgumentNullException.ThrowIfNull(landParcelId);
         ArgumentNullException.ThrowIfNull(unitType);
         ArgumentNullException.ThrowIfNull(initialAssessment);
-        ArgumentNullException.ThrowIfNull(registeredBy);
 
         var minYear = 1800;
         var maxYear = TimeProviderContext.Current.UtcNow.Year + 5;
@@ -167,7 +165,6 @@ public sealed class Home : AggregateRoot<HomeId>
     /// <summary>Records a new assessed value for this unit.</summary>
     public void RecordAssessment(decimal assessedValue, DateOnly assessmentDate, string? appraiserName, string? conditionNotes, UserId recordedById)
     {
-        ArgumentNullException.ThrowIfNull(recordedById);
 
         if (assessedValue < 0)
             throw BusinessRuleViolation.Home.RecordAssessment.AssessedValueNegative(assessedValue);

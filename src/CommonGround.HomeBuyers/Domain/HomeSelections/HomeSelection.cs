@@ -40,10 +40,9 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
         ArgumentNullException.ThrowIfNull(candidates);
-        ArgumentNullException.ThrowIfNull(startedBy);
 
         if (activeSelectionId is not null)
-            throw BusinessRuleViolation.HomeSelection.Start.HomeHasActiveSelection(homeId, activeSelectionId);
+            throw BusinessRuleViolation.HomeSelection.Start.HomeHasActiveSelection(homeId, activeSelectionId.Value);
 
         if (candidates.Count == 0)
             throw BusinessRuleViolation.HomeSelection.Start.WaitingListEmpty(homeId);
@@ -74,9 +73,7 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
         string reason,
         UserId selectedBy)
     {
-        ArgumentNullException.ThrowIfNull(applicationId);
         ArgumentNullException.ThrowIfNull(priorities);
-        ArgumentNullException.ThrowIfNull(selectedBy);
         if (priorities.Count == 0)
             throw BusinessRuleViolation.HomeSelection.SelectByPriority.PrioritiesRequired();
         if (string.IsNullOrWhiteSpace(reason))
@@ -106,7 +103,6 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
         UserId drawnBy)
     {
         ArgumentNullException.ThrowIfNull(eligibleApplicationIds);
-        ArgumentNullException.ThrowIfNull(drawnBy);
 
         EnsureOpen();
 
@@ -143,7 +139,6 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
     /// <summary>Cancels the selection without choosing anyone, freeing the home for a new selection.</summary>
     public void Cancel(string reason, UserId cancelledBy)
     {
-        ArgumentNullException.ThrowIfNull(cancelledBy);
         if (string.IsNullOrWhiteSpace(reason))
             throw BusinessRuleViolation.HomeSelection.Cancel.ReasonRequired();
 

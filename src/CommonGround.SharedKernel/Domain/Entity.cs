@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace CommonGround.SharedKernel.Domain;
 
 /// <summary>
@@ -7,7 +5,7 @@ namespace CommonGround.SharedKernel.Domain;
 /// </summary>
 /// <typeparam name="TIdentity">The type of the entity's unique identifier.</typeparam>
 public abstract class Entity<TIdentity>
-    where TIdentity : EntityId
+    where TIdentity : struct, IEntityId<TIdentity>
 {
     /// <summary>
     /// Initializes a new instance of the Entity class.
@@ -19,8 +17,7 @@ public abstract class Entity<TIdentity>
     /// <summary>
     /// Gets the unique identifier for this entity.
     /// </summary>
-    [NotNull]
-    public TIdentity Id { get; protected set; } = default!;
+    public TIdentity Id { get; protected set; }
 
     /// <summary>
     /// Determines whether two entities are equal.
@@ -86,7 +83,7 @@ public abstract class Entity<TIdentity>
             return false;
         }
 
-        return Id!.Equals(other.Id);
+        return Id.Equals(other.Id);
     }
 
     /// <summary>
@@ -95,7 +92,7 @@ public abstract class Entity<TIdentity>
     /// <returns>The hash code.</returns>
     public override int GetHashCode()
     {
-        return Id?.GetHashCode() ?? 0;
+        return Id.GetHashCode();
     }
 
     /// <summary>
@@ -113,6 +110,6 @@ public abstract class Entity<TIdentity>
     /// <returns>True if the entity is transient; otherwise, false.</returns>
     protected virtual bool IsTransient()
     {
-        return Id == null;
+        return Id.Value is null;
     }
 }

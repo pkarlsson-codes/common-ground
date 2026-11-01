@@ -50,7 +50,6 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         UserId registeredBy)
     {
         ArgumentNullException.ThrowIfNull(acquisitionMethod);
-        ArgumentNullException.ThrowIfNull(registeredBy);
 
         if (string.IsNullOrWhiteSpace(legalParcelNumber))
             throw BusinessRuleViolation.LandParcel.Register.LegalParcelNumberRequired();
@@ -79,7 +78,6 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
     /// <summary>Lists the parcel for placement.</summary>
     public void ListForPlacement(UserId changedBy)
     {
-        ArgumentNullException.ThrowIfNull(changedBy);
 
         if (IsDecommissioned)
             throw BusinessRuleViolation.LandParcel.ListForPlacement.ParcelDecommissioned();
@@ -90,7 +88,6 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
     /// <summary>Withdraws the parcel for redevelopment.</summary>
     public void WithdrawForRedevelopment(UserId changedBy)
     {
-        ArgumentNullException.ThrowIfNull(changedBy);
 
         if (IsDecommissioned)
             throw BusinessRuleViolation.LandParcel.WithdrawForRedevelopment.ParcelDecommissioned();
@@ -101,7 +98,6 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
     /// <summary>Decommissions the parcel.</summary>
     public void Decommission(UserId changedBy)
     {
-        ArgumentNullException.ThrowIfNull(changedBy);
 
         if (IsDecommissioned)
             return;
@@ -112,7 +108,6 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
     /// <summary>Recommissions a decommissioned parcel. Idempotent if already active.</summary>
     public void Recommission(UserId changedBy)
     {
-        ArgumentNullException.ThrowIfNull(changedBy);
 
         if (!IsDecommissioned)
             return;

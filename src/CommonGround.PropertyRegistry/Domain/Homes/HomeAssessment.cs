@@ -22,7 +22,6 @@ public sealed class UnitAssessment : ValueObject
     /// </summary>
     public static UnitAssessment Create(decimal assessedValue, DateOnly assessmentDate, string? appraiserName, string? conditionNotes, UserId recordedById, DateTimeOffset occurredAt, DateOnly today)
     {
-        ArgumentNullException.ThrowIfNull(recordedById);
 
         if (assessedValue < 0)
             throw BusinessRuleViolation.UnitAssessment.Create.AssessedValueNegative(assessedValue);

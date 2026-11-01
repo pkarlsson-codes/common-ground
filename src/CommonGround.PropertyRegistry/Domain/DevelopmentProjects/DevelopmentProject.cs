@@ -48,8 +48,6 @@ public sealed class DevelopmentProject : AggregateRoot<DevelopmentProjectId>
         string? description,
         UserId initiatedBy)
     {
-        ArgumentNullException.ThrowIfNull(landParcelId);
-        ArgumentNullException.ThrowIfNull(initiatedBy);
 
         if (string.IsNullOrWhiteSpace(name))
             throw BusinessRuleViolation.DevelopmentProject.Initiate.NameRequired();
@@ -84,8 +82,6 @@ public sealed class DevelopmentProject : AggregateRoot<DevelopmentProjectId>
         IReadOnlyCollection<HomeId> homeIds,
         UserId initiatedBy)
     {
-        ArgumentNullException.ThrowIfNull(landParcelId);
-        ArgumentNullException.ThrowIfNull(initiatedBy);
 
         if (string.IsNullOrWhiteSpace(name))
             throw BusinessRuleViolation.DevelopmentProject.Initiate.NameRequired();

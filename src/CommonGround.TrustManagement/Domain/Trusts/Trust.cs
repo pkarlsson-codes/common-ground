@@ -37,7 +37,6 @@ public sealed class Trust : AggregateRoot<TrustId>
     /// <summary>Raises an onboarding event that links this trust to an authenticated creator user.</summary>
     public void RequestOnboarding(UserId creatorUserId, string correlationId)
     {
-        ArgumentNullException.ThrowIfNull(creatorUserId);
 
         if (string.IsNullOrWhiteSpace(correlationId))
         {

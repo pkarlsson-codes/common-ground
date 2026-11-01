@@ -128,11 +128,9 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         string? applicationId = null,
         string? householdId = null)
     {
-        ArgumentNullException.ThrowIfNull(groundLeaseTemplateId);
         ArgumentNullException.ThrowIfNull(landParcelId);
         ArgumentNullException.ThrowIfNull(homeId);
         ArgumentNullException.ThrowIfNull(buyer);
-        ArgumentNullException.ThrowIfNull(initiatedBy);
 
         if (purchasePrice <= 0)
         {
@@ -163,7 +161,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     public void RecordEligibilityVerified(
         DateOnly verifiedDate, string? notes, UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
         GuardNotTerminal();
         if (IsEligibilityVerified) return;
 
@@ -181,7 +178,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         string lenderName, decimal committedAmount,
         DateOnly preapprovalLetterDate, UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
         GuardNotTerminal();
         if (IsFinancingCommitted) return;
 
@@ -199,7 +195,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         DateOnly inspectionDate, string inspectorName,
         string? notes, UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
         GuardNotTerminal();
         if (IsInspectionCompleted) return;
 
@@ -216,7 +211,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         DateOnly clearedDate, string? titleCompanyName,
         UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
         GuardNotTerminal();
         if (IsTitleCleared) return;
 
@@ -231,7 +225,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     public void RecordLeaseExecuted(
         DateOnly signedDate, UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
         GuardNotTerminal();
         if (IsLeaseExecuted) return;
 
@@ -245,7 +238,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     public void ScheduleClosing(
         DateOnly scheduledClosingDate, UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
         GuardNotTerminal();
 
         if (!AllMandatoryTracksSatisfied)
@@ -275,7 +267,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         DateOnly actualClosingDate, string? notes,
         UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
 
         if (Phase != WorkflowPhase.ClosingScheduled)
         {
@@ -295,7 +286,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         string failureReason, DateOnly failedDate,
         UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
         GuardNotTerminal();
 
         if (string.IsNullOrWhiteSpace(failureReason))
@@ -316,7 +306,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         DateOnly withdrawnDate, string? reason,
         UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
         GuardNotTerminal();
 
         ApplyChange(new PurchaseWithdrawn(
@@ -333,7 +322,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         string stalledReason, DateOnly stalledDate,
         DateOnly resolutionTargetDate, UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
 
         if (Phase != WorkflowPhase.InProgress)
         {

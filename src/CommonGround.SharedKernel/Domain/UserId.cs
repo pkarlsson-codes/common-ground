@@ -1,18 +1,30 @@
+using System.Text.Json.Serialization;
+
 namespace CommonGround.SharedKernel.Domain;
 
 /// <summary>
 /// Unique identifier for a User.
 /// </summary>
-public sealed class UserId : EntityId<UserId>
+[JsonConverter(typeof(EntityIdJsonConverter<UserId>))]
+public readonly record struct UserId : IEntityId<UserId>
 {
-    private const string Prefix = "user";
+    private UserId(string value) => Value = value;
 
-    /// <summary>
-    /// Initializes a new instance of the UserId class.
-    /// </summary>
-    /// <param name="value">The unique identifier value.</param>
-    public UserId(string value)
-        : base(value, Prefix)
-    {
-    }
+    /// <summary>Gets the prefix every value starts with, before a hyphen.</summary>
+    public static string Prefix => "user";
+
+    /// <inheritdoc/>
+    public string Value { get; }
+
+    /// <summary>Wraps an existing value, rejecting one without the prefix.</summary>
+    /// <param name="value">The value to wrap.</param>
+    /// <returns>The identifier.</returns>
+    public static UserId Create(string value) => new(EntityIds.Validate(value, Prefix));
+
+    /// <summary>Creates a new, unique identifier.</summary>
+    /// <returns>The identifier.</returns>
+    public static UserId Generate() => new(EntityIds.New(Prefix));
+
+    /// <inheritdoc/>
+    public override string ToString() => Value;
 }

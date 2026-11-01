@@ -20,7 +20,7 @@ public sealed class HouseholdsInitialData : IInitialData
         PropertyNameCaseInsensitive = true,
     };
 
-    private static readonly UserId SeederUserId = new("user-seeder-system");
+    private static readonly UserId SeederUserId = UserId.Create("user-seeder-system");
 
     /// <inheritdoc/>
     public async Task Populate(IDocumentStore store, CancellationToken cancellation)

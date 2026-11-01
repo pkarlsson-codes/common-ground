@@ -36,8 +36,6 @@ public sealed class SelectionCandidate : ValueObject
         bool requiresAccessibility,
         DateOnly waitingSince)
     {
-        ArgumentNullException.ThrowIfNull(applicationId);
-        ArgumentNullException.ThrowIfNull(householdId);
         ArgumentOutOfRangeException.ThrowIfNegative(annualIncome);
         ArgumentOutOfRangeException.ThrowIfLessThan(householdSize, 1);
 

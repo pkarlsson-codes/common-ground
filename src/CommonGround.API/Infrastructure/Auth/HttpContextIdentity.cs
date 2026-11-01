@@ -47,6 +47,6 @@ internal static class HttpContextIdentity
     public static TrustId? TryGetTenantId(this HttpContext httpContext)
     {
         var id = httpContext.User?.FindFirst("tenant_id")?.Value;
-        return id is not null ? TrustId.Create(id) : null;
+        return EntityIds.CreateOrNull<TrustId>(id);
     }
 }

@@ -80,7 +80,7 @@ public static class StartHomeSelectionHandler
         var selection = HomeSelection.Start(
             homeId,
             candidates,
-            activeSelectionId is null ? null : HomeSelectionId.Create(activeSelectionId),
+            EntityIds.CreateOrNull<HomeSelectionId>(activeSelectionId),
             startedBy);
 
         session.CreateAggregate<HomeSelection, HomeSelectionId>(selection);

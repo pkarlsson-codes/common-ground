@@ -1,11 +1,30 @@
+using System.Text.Json.Serialization;
 using CommonGround.SharedKernel.Domain;
 
 namespace CommonGround.HomeBuyers.Domain.HomeSelections;
 
 /// <summary>Strongly-typed identifier for a <see cref="HomeSelection"/>.</summary>
 /// <remarks>Initializes a new instance of <see cref="HomeSelectionId"/>.</remarks>
-public sealed class HomeSelectionId(string value)
-: EntityId<HomeSelectionId>(value, Prefix)
+[JsonConverter(typeof(EntityIdJsonConverter<HomeSelectionId>))]
+public readonly record struct HomeSelectionId : IEntityId<HomeSelectionId>
 {
-    private const string Prefix = "selection";
+    private HomeSelectionId(string value) => Value = value;
+
+    /// <summary>Gets the prefix every value starts with, before a hyphen.</summary>
+    public static string Prefix => "selection";
+
+    /// <inheritdoc/>
+    public string Value { get; }
+
+    /// <summary>Wraps an existing value, rejecting one without the prefix.</summary>
+    /// <param name="value">The value to wrap.</param>
+    /// <returns>The identifier.</returns>
+    public static HomeSelectionId Create(string value) => new(EntityIds.Validate(value, Prefix));
+
+    /// <summary>Creates a new, unique identifier.</summary>
+    /// <returns>The identifier.</returns>
+    public static HomeSelectionId Generate() => new(EntityIds.New(Prefix));
+
+    /// <inheritdoc/>
+    public override string ToString() => Value;
 }

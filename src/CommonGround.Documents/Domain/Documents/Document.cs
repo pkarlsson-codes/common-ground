@@ -76,7 +76,6 @@ public sealed class Document : AggregateRoot<DocumentId>
         ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
         ArgumentException.ThrowIfNullOrWhiteSpace(contentType);
         ArgumentException.ThrowIfNullOrWhiteSpace(sha256);
-        ArgumentNullException.ThrowIfNull(uploadedBy);
 
         if (sizeBytes <= 0)
             throw BusinessRuleViolation.Document.Upload.SizeNonPositive(sizeBytes);
@@ -110,7 +109,6 @@ public sealed class Document : AggregateRoot<DocumentId>
     public void Attach(string entityType, string entityId, string? role, UserId attachedBy)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(entityType);
-        ArgumentNullException.ThrowIfNull(attachedBy);
 
         if (IsDeleted)
             throw BusinessRuleViolation.Document.Attach.DocumentDeleted();
@@ -131,7 +129,6 @@ public sealed class Document : AggregateRoot<DocumentId>
     public void Detach(string entityType, string entityId, string? role, UserId detachedBy)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(entityType);
-        ArgumentNullException.ThrowIfNull(detachedBy);
 
         var existing = _attachments.FirstOrDefault(x =>
             x.EntityType == entityType && x.EntityId == entityId && x.Role == role);
@@ -151,7 +148,6 @@ public sealed class Document : AggregateRoot<DocumentId>
     public void SoftDelete(string reason, UserId deletedBy)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
-        ArgumentNullException.ThrowIfNull(deletedBy);
 
         if (IsDeleted)
             return;
@@ -184,7 +180,6 @@ public sealed class Document : AggregateRoot<DocumentId>
         ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
         ArgumentException.ThrowIfNullOrWhiteSpace(contentType);
         ArgumentException.ThrowIfNullOrWhiteSpace(sha256);
-        ArgumentNullException.ThrowIfNull(uploadedBy);
 
         if (sizeBytes <= 0)
             throw BusinessRuleViolation.Document.AddVersion.SizeNonPositive(sizeBytes);
@@ -216,7 +211,6 @@ public sealed class Document : AggregateRoot<DocumentId>
         bool clearExpiresOn,
         UserId updatedBy)
     {
-        ArgumentNullException.ThrowIfNull(updatedBy);
 
         if (IsDeleted)
             throw BusinessRuleViolation.Document.UpdateMetadata.DocumentDeleted();
@@ -244,7 +238,6 @@ public sealed class Document : AggregateRoot<DocumentId>
     public void Tag(string tag, UserId taggedBy)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(tag);
-        ArgumentNullException.ThrowIfNull(taggedBy);
 
         if (IsDeleted)
             throw BusinessRuleViolation.Document.Tag.DocumentDeleted();
@@ -261,7 +254,6 @@ public sealed class Document : AggregateRoot<DocumentId>
     public void Untag(string tag, UserId untaggedBy)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(tag);
-        ArgumentNullException.ThrowIfNull(untaggedBy);
 
         var normalised = NormaliseTag(tag);
         if (!_tags.Contains(normalised))

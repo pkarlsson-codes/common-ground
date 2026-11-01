@@ -32,9 +32,9 @@ public static class GetPurchaseWorkflowsHandler
 
         IQueryable<PurchaseWorkflowListItemView> query = session.Query<PurchaseWorkflowListItemView>();
 
-        if (request.GroundLeaseTemplateId is not null)
+        if (request.GroundLeaseTemplateId is { } templateId)
         {
-            query = query.Where(v => v.GroundLeaseTemplateId == request.GroundLeaseTemplateId.Value);
+            query = query.Where(v => v.GroundLeaseTemplateId == templateId.Value);
         }
 
         if (!string.IsNullOrWhiteSpace(request.HomeId))

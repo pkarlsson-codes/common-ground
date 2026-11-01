@@ -38,7 +38,7 @@ public static class SubmitApplicationHandler
         var application = HomeownerApplication.Submit(
             command.HouseholdId,
             household.Declare(),
-            openApplicationId is null ? null : HomeownerApplicationId.Create(openApplicationId),
+            EntityIds.CreateOrNull<HomeownerApplicationId>(openApplicationId),
             command.SubmittedBy);
 
         session.CreateAggregate<HomeownerApplication, HomeownerApplicationId>(application);

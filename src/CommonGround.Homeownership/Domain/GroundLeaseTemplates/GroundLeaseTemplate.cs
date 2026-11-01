@@ -45,7 +45,6 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
         UserId createdBy)
     {
         ArgumentNullException.ThrowIfNull(resalePolicyTerms);
-        ArgumentNullException.ThrowIfNull(createdBy);
 
         if (string.IsNullOrWhiteSpace(templateName))
         {
@@ -82,7 +81,6 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
     /// <summary>Restores this template to active status.</summary>
     public void Restore(UserId restoredBy)
     {
-        ArgumentNullException.ThrowIfNull(restoredBy);
 
         if (Status == GroundLeaseTemplateStatus.Active)
         {
@@ -97,7 +95,6 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
     /// <summary>Archives this template, making it inactive.</summary>
     public void Archive(UserId archivedBy)
     {
-        ArgumentNullException.ThrowIfNull(archivedBy);
 
         if (Status == GroundLeaseTemplateStatus.Inactive)
         {

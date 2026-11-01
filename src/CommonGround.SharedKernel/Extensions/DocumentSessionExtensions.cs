@@ -20,7 +20,7 @@ public static class DocumentSessionExtensions
     /// <exception cref="AggregateNotFoundException">Thrown when no stream exists for the given id.</exception>
     public static async Task<TAggregate> LoadAggregateAsync<TAggregate>(
         this IDocumentSession session,
-        EntityId id,
+        IEntityId id,
         CancellationToken cancellationToken = default)
         where TAggregate : class
     {
@@ -41,7 +41,7 @@ public static class DocumentSessionExtensions
         this IDocumentSession session,
         TAggregate aggregate)
         where TAggregate : AggregateRoot<TEntityId>
-        where TEntityId : EntityId
+        where TEntityId : struct, IEntityId<TEntityId>
     {
         aggregate.ValidateInvariants();
         session.Events.StartStream<TAggregate>(aggregate.Id.Value, [.. aggregate.UncommittedEvents]);
@@ -57,7 +57,7 @@ public static class DocumentSessionExtensions
     public static void UpdateAggregate<TIdentity>(
         this IDocumentSession session,
         AggregateRoot<TIdentity> aggregate)
-        where TIdentity : EntityId
+        where TIdentity : struct, IEntityId<TIdentity>
     {
         aggregate.ValidateInvariants();
         session.Events.Append(aggregate.Id.Value, [.. aggregate.UncommittedEvents]);

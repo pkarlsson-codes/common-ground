@@ -7,6 +7,7 @@ using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
@@ -46,9 +47,7 @@ public static class PurchaseWorkflowsEndpoints
         IMessageBus bus,
         CancellationToken cancellationToken = default)
     {
-        var groundLeaseTemplateFilter = request.GroundLeaseTemplateId is not null
-            ? GroundLeaseTemplateId.Create(request.GroundLeaseTemplateId)
-            : null;
+        var groundLeaseTemplateFilter = EntityIds.CreateOrNull<GroundLeaseTemplateId>(request.GroundLeaseTemplateId);
 
         var query = new GetPurchaseWorkflows(
             request.Page, groundLeaseTemplateFilter, request.Phase, request.Search, request.HomeId, request.HouseholdId);

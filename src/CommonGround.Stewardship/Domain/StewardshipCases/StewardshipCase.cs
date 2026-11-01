@@ -48,7 +48,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     {
         if (string.IsNullOrWhiteSpace(groundLeaseId))
             throw new BusinessRuleViolationException("GroundLeaseId is required.");
-        ArgumentNullException.ThrowIfNull(openedBy);
 
         var sc = new StewardshipCase();
         sc.ApplyChange(new StewardshipCaseOpened(
@@ -64,7 +63,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         int periodYear, DateOnly? surveyDeadline, UserId initiatedBy)
     {
         GuardActive();
-        ArgumentNullException.ThrowIfNull(initiatedBy);
 
         ApplyChange(new OccupancyVerificationInitiated(
             Id.Value,
@@ -99,7 +97,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     public void VerifyOccupancy(Guid verificationId, DateOnly verifiedDate, UserId verifiedBy)
     {
         GuardActive();
-        ArgumentNullException.ThrowIfNull(verifiedBy);
         var v = FindVerification(verificationId);
         if (v.Status != OccupancyVerificationStatus.Submitted)
             throw new BusinessRuleViolationException(
@@ -114,7 +111,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     public void FailOccupancy(Guid verificationId, string reason, DateOnly failedDate, UserId recordedBy)
     {
         GuardActive();
-        ArgumentNullException.ThrowIfNull(recordedBy);
         if (string.IsNullOrWhiteSpace(reason))
             throw new BusinessRuleViolationException("Failure reason is required.");
         var v = FindVerification(verificationId);
@@ -145,7 +141,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         DateOnly scheduledDate, string inspectorName, UserId scheduledBy)
     {
         GuardActive();
-        ArgumentNullException.ThrowIfNull(scheduledBy);
         if (string.IsNullOrWhiteSpace(inspectorName))
             throw new BusinessRuleViolationException("Inspector name is required.");
 
@@ -161,7 +156,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         string? conditionNotes, DateOnly completedDate, UserId recordedBy)
     {
         GuardActive();
-        ArgumentNullException.ThrowIfNull(recordedBy);
         var insp = FindInspection(inspectionId);
         if (insp.Status != PropertyInspectionStatus.Scheduled)
             throw new BusinessRuleViolationException(
@@ -177,7 +171,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     public void CancelPropertyInspection(Guid inspectionId, string reason, UserId cancelledBy)
     {
         GuardActive();
-        ArgumentNullException.ThrowIfNull(cancelledBy);
         if (string.IsNullOrWhiteSpace(reason))
             throw new BusinessRuleViolationException("Cancellation reason is required.");
         var insp = FindInspection(inspectionId);
@@ -196,7 +189,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         DateOnly identifiedDate, UserId identifiedBy)
     {
         GuardActive();
-        ArgumentNullException.ThrowIfNull(identifiedBy);
         if (string.IsNullOrWhiteSpace(description))
             throw new BusinessRuleViolationException("Description is required.");
 
@@ -210,7 +202,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         Guid violationId, DateOnly noticeDate, DateOnly cureDeadline, UserId issuedBy)
     {
         GuardActive();
-        ArgumentNullException.ThrowIfNull(issuedBy);
         var v = FindViolation(violationId);
         if (v.Status != LeaseViolationStatus.Identified)
             throw new BusinessRuleViolationException(
@@ -225,7 +216,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     public void CureViolation(Guid violationId, DateOnly curedDate, UserId verifiedBy)
     {
         GuardActive();
-        ArgumentNullException.ThrowIfNull(verifiedBy);
         var v = FindViolation(violationId);
         if (v.Status != LeaseViolationStatus.NoticeIssued)
             throw new BusinessRuleViolationException(
@@ -241,7 +231,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         Guid violationId, string reason, DateOnly escalatedDate, UserId escalatedBy)
     {
         GuardActive();
-        ArgumentNullException.ThrowIfNull(escalatedBy);
         if (string.IsNullOrWhiteSpace(reason))
             throw new BusinessRuleViolationException("Escalation reason is required.");
         var v = FindViolation(violationId);
@@ -258,7 +247,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     public void Close(string reason, DateOnly closedDate, UserId closedBy)
     {
         GuardActive();
-        ArgumentNullException.ThrowIfNull(closedBy);
         if (string.IsNullOrWhiteSpace(reason))
             throw new BusinessRuleViolationException("Close reason is required.");
 

@@ -70,7 +70,6 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         ArgumentNullException.ThrowIfNull(landParcelId);
         ArgumentNullException.ThrowIfNull(unitId);
         ArgumentNullException.ThrowIfNull(resalePolicyTerms);
-        ArgumentNullException.ThrowIfNull(createdBy);
 
         if (termYears <= 0)
             throw BusinessRuleViolation.GroundLease.Create.TermYearsNonPositive(termYears);
@@ -106,7 +105,6 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     {
         ArgumentNullException.ThrowIfNull(template);
         ArgumentNullException.ThrowIfNull(purchaseWorkflow);
-        ArgumentNullException.ThrowIfNull(createdBy);
 
         if (template.Status != GroundLeaseTemplateStatus.Active)
         {
@@ -143,7 +141,6 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <param name="terminatedBy">The user recording this action.</param>
     public void Terminate(string reason, DateOnly terminatedDate, UserId terminatedBy)
     {
-        ArgumentNullException.ThrowIfNull(terminatedBy);
 
         if (string.IsNullOrWhiteSpace(reason))
             throw BusinessRuleViolation.GroundLease.Terminate.ReasonRequired();
@@ -164,7 +161,6 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <param name="recordedBy">The user recording this action.</param>
     public void RecordStewardshipCheckIn(DateOnly checkInDate, string notes, UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
 
         if (string.IsNullOrWhiteSpace(notes))
         {
@@ -219,7 +215,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     private void Apply(GroundLeaseCreatedFromPurchase e)
     {
         Id = GroundLeaseId.Create(e.AggregateId);
-        PurchaseWorkflowId = PurchaseWorkflowId.Create(e.PurchaseWorkflowId);
+        PurchaseWorkflowId = PurchaseWorkflows.PurchaseWorkflowId.Create(e.PurchaseWorkflowId);
         TemplateId = GroundLeaseTemplateId.Create(e.GroundLeaseTemplateId);
         LandParcelId = e.LandParcelId;
         UnitId = e.HomeId;

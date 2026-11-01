@@ -67,7 +67,6 @@ public class Household : AggregateRoot<HouseholdId>
     /// <returns>The new member's ID.</returns>
     public HouseholdMemberId AddMember(string name, string email, string phone, UserId addedBy)
     {
-        ArgumentNullException.ThrowIfNull(addedBy);
         var member = HouseholdMember.Create(name, email, phone, isPrimary: false);
 
         ApplyChange(new HouseholdMemberAdded(
@@ -78,7 +77,6 @@ public class Household : AggregateRoot<HouseholdId>
     /// <summary>Updates a member's contact details. No-op when nothing changed.</summary>
     public void UpdateMember(HouseholdMemberId memberId, string name, string email, string phone, UserId updatedBy)
     {
-        ArgumentNullException.ThrowIfNull(updatedBy);
         HouseholdMember.ValidateContactDetails(name, email, phone);
         var member = FindMember(memberId);
         if (member.Name == name && member.Email == email && member.Phone == phone) return;
@@ -89,7 +87,6 @@ public class Household : AggregateRoot<HouseholdId>
     /// <summary>Removes a non-primary member from the household.</summary>
     public void RemoveMember(HouseholdMemberId memberId, UserId removedBy)
     {
-        ArgumentNullException.ThrowIfNull(removedBy);
         var member = FindMember(memberId);
         if (member.IsPrimary)
             throw BusinessRuleViolation.Household.Members.CannotRemovePrimaryMember(memberId);
@@ -101,7 +98,6 @@ public class Household : AggregateRoot<HouseholdId>
     public void UpdateCircumstances(HouseholdCircumstances circumstances, UserId updatedBy)
     {
         ArgumentNullException.ThrowIfNull(circumstances);
-        ArgumentNullException.ThrowIfNull(updatedBy);
         if (Circumstances == circumstances) return;
 
         ApplyChange(new HouseholdCircumstancesUpdated(
@@ -111,7 +107,6 @@ public class Household : AggregateRoot<HouseholdId>
     /// <summary>Records CLT orientation completion. Idempotent.</summary>
     public void RecordCltOrientation(DateOnly completedDate, UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
         if (IsCltOrientationCompleted) return;
 
         ApplyChange(new CltOrientationRecorded(Id.Value, completedDate, recordedBy.Value));
@@ -122,7 +117,6 @@ public class Household : AggregateRoot<HouseholdId>
         string certificationNumber, DateOnly completedDate,
         string counselorOrganization, UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
         if (IsHousingCounselingCompleted) return;
 
         ApplyChange(new HousingCounselingRecorded(
@@ -143,7 +137,6 @@ public class Household : AggregateRoot<HouseholdId>
         string lenderName, decimal approvedAmount,
         DateOnly expiryDate, UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
 
         ApplyChange(new MortgagePrequalificationRecorded(
             Id.Value, lenderName, approvedAmount, expiryDate, recordedBy.Value));
@@ -217,7 +210,6 @@ public class Household : AggregateRoot<HouseholdId>
 
     private HouseholdMember FindMember(HouseholdMemberId memberId)
     {
-        ArgumentNullException.ThrowIfNull(memberId);
         return _members.FirstOrDefault(m => m.Id == memberId)
             ?? throw BusinessRuleViolation.Household.Members.MemberNotFound(memberId);
     }

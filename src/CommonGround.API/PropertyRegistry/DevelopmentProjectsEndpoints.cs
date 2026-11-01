@@ -62,7 +62,7 @@ public static class DevelopmentProjectsEndpoints
         ArgumentNullException.ThrowIfNull(request);
 
         var userId = httpContext.GetUserId();
-        var landParcelId = new LandParcelId(request.LandParcelId);
+        var landParcelId = LandParcelId.Create(request.LandParcelId);
 
         if (!ProjectType.TryFromDisplayName(request.Type, out var projectType))
         {
@@ -76,7 +76,7 @@ public static class DevelopmentProjectsEndpoints
             : await bus.InvokeForTenantAsync<DevelopmentProjectId>(bus.TenantId!,
                 new InitiateRehabilitationProject(
                     landParcelId,
-                    (request.ExistingHomes ?? []).Select(h => new HomeId(h)).ToList(),
+                    (request.ExistingHomes ?? []).Select(h => HomeId.Create(h)).ToList(),
                     request.Name,
                     request.Description,
                     userId),

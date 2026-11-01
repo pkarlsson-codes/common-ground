@@ -8,7 +8,7 @@ namespace CommonGround.SharedKernel.Domain;
 /// </summary>
 /// <typeparam name="TIdentity">The type of the aggregate's unique identifier.</typeparam>
 public abstract class AggregateRoot<TIdentity> : Entity<TIdentity>
-    where TIdentity : EntityId
+    where TIdentity : struct, IEntityId<TIdentity>
 {
     private readonly List<Action> _invariants = [];
 

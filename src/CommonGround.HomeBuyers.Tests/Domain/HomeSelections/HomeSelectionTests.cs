@@ -231,7 +231,7 @@ public class HomeSelectionTests
             var drawn = sut.UncommittedEvents.OfType<HouseholdSelectedByLottery>().Should().ContainSingle().Subject;
             drawn.PoolApplicationIds.Should().Equal("application-a", "application-b", "application-c");
             drawn.Seed.Should().Be(42);
-            sut.SelectedApplicationId!.Value.Should().Be(drawn.ApplicationId);
+            sut.SelectedApplicationId?.Value.Should().Be(drawn.ApplicationId);
         }
 
         [Fact]

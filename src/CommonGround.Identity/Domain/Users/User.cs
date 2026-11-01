@@ -43,7 +43,6 @@ public sealed class User : AggregateRoot<UserId>
     /// <summary>Assigns the user to a trust when no trust is currently assigned.</summary>
     public void AssignTrust(TrustId trustId)
     {
-        ArgumentNullException.ThrowIfNull(trustId);
 
         if (TrustId is not null)
         {
@@ -75,6 +74,6 @@ public sealed class User : AggregateRoot<UserId>
 
     private void Apply(UserTrustAssigned e)
     {
-        TrustId = TrustId.Create(e.TrustId);
+        TrustId = global::CommonGround.SharedKernel.Domain.TrustId.Create(e.TrustId);
     }
 }

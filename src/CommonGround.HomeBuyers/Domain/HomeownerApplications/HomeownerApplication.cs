@@ -38,12 +38,10 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
         HomeownerApplicationId? openApplicationId,
         UserId submittedBy)
     {
-        ArgumentNullException.ThrowIfNull(householdId);
         ArgumentNullException.ThrowIfNull(declaration);
-        ArgumentNullException.ThrowIfNull(submittedBy);
 
         if (openApplicationId is not null)
-            throw BusinessRuleViolation.HomeownerApplication.Submit.HouseholdHasOpenApplication(openApplicationId);
+            throw BusinessRuleViolation.HomeownerApplication.Submit.HouseholdHasOpenApplication(openApplicationId.Value);
 
         var application = new HomeownerApplication();
         application.ApplyChange(new ApplicationSubmitted(
@@ -59,7 +57,6 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
 
     public void Approve(DateOnly approvedDate, string? notes, UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
         GuardNotTerminal();
 
         if (Phase != ApplicationPhase.Submitted)
@@ -93,7 +90,6 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
         decimal purchasePrice, DateOnly selectedDate, UserId selectedBy)
     {
         ArgumentNullException.ThrowIfNull(household);
-        ArgumentNullException.ThrowIfNull(selectedBy);
         if (household.Id != HouseholdId)
             throw new ArgumentException("Household does not belong to this application.", nameof(household));
         GuardNotTerminal();
@@ -132,7 +128,6 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     /// <summary>Records that another household was chosen for <paramref name="homeId"/> in <paramref name="selectionId"/>.</summary>
     public void PassOver(HomeSelectionId selectionId, string homeId)
     {
-        ArgumentNullException.ThrowIfNull(selectionId);
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
 
         if (Phase != ApplicationPhase.Approved)
@@ -169,7 +164,6 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
 
     public void DenyApplication(string reason, DateOnly deniedDate, UserId recordedBy)
     {
-        ArgumentNullException.ThrowIfNull(recordedBy);
         if (string.IsNullOrWhiteSpace(reason))
             throw BusinessRuleViolation.HomeownerApplication.Deny.ReasonRequired();
         GuardNotTerminal();
