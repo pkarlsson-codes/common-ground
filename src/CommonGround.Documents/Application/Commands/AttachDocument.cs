@@ -1,7 +1,7 @@
 using CommonGround.Documents.Domain.Documents;
+using CommonGround.Documents.Domain.Documents.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Exceptions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Documents.Application.Commands;
 
@@ -16,22 +16,12 @@ public sealed record AttachDocument(
 /// <summary>Handles <see cref="AttachDocument"/>.</summary>
 public static class AttachDocumentHandler
 {
-    /// <summary>Loads the document, attaches it, and persists.</summary>
-    public static async Task Handle(
-        AttachDocument command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    /// <summary>Attaches the document, unless it is already attached with that role.</summary>
+    public static DocumentAttached? Handle(AttachDocument command, [WriteAggregate] Document document)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(document);
 
-        var stream = await session.Events
-            .FetchForWriting<Document>(command.DocumentId.Value, cancellationToken)
-            .ConfigureAwait(false);
-        var doc = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(Document), command.DocumentId.Value);
-
-        doc.Attach(command.EntityType, command.EntityId, command.Role, command.AttachedBy);
-        doc.ValidateInvariants();
-        stream.AppendMany(doc.UncommittedEvents.ToArray());
-        doc.UncommittedEvents.MarkAsCommitted();
+        return document.Attach(command.EntityType, command.EntityId, command.Role, command.AttachedBy);
     }
 }

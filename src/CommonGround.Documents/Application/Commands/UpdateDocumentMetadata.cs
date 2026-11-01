@@ -1,7 +1,7 @@
 using CommonGround.Documents.Domain.Documents;
+using CommonGround.Documents.Domain.Documents.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Exceptions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Documents.Application.Commands;
 
@@ -23,22 +23,12 @@ public sealed record UpdateDocumentMetadata(
 /// <summary>Handles <see cref="UpdateDocumentMetadata"/>.</summary>
 public static class UpdateDocumentMetadataHandler
 {
-    /// <summary>Loads the document, updates metadata, and persists.</summary>
-    public static async Task Handle(
-        UpdateDocumentMetadata command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    /// <summary>Updates the metadata, unless nothing changes.</summary>
+    public static DocumentMetadataUpdated? Handle(UpdateDocumentMetadata command, [WriteAggregate] Document document)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(document);
 
-        var stream = await session.Events
-            .FetchForWriting<Document>(command.DocumentId.Value, cancellationToken)
-            .ConfigureAwait(false);
-        var doc = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(Document), command.DocumentId.Value);
-
-        doc.UpdateMetadata(command.Title, command.Sensitivity, command.ExpiresOn, command.ClearExpiresOn, command.UpdatedBy);
-        doc.ValidateInvariants();
-        stream.AppendMany(doc.UncommittedEvents.ToArray());
-        doc.UncommittedEvents.MarkAsCommitted();
+        return document.UpdateMetadata(command.Title, command.Sensitivity, command.ExpiresOn, command.ClearExpiresOn, command.UpdatedBy);
     }
 }

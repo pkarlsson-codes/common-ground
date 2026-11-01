@@ -2,241 +2,285 @@ using CommonGround.Documents.Domain.Documents;
 using CommonGround.Documents.Domain.Documents.Events;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.Testing;
 using FluentAssertions;
 using Xunit;
 
 namespace CommonGround.Documents.Tests;
 
-/// <summary>Unit tests for the <see cref="Document"/> aggregate.</summary>
-public sealed class DocumentTests
+public class DocumentTests
 {
-    private static readonly UserId User = UserId.Generate();
-
-    private static Document NewDoc(
-        string title = "Title",
-        (string EntityType, string EntityId, string? Role)? attach = null) =>
-        Document.Upload(
-            title,
-            SensitivityLevel.Internal,
-            RetentionClass.Permanent,
-            blobKey: "documents/abc/v1.pdf",
-            fileName: "v1.pdf",
-            contentType: "application/pdf",
-            sizeBytes: 1234,
-            sha256: "deadbeef",
-            uploadedBy: User,
-            initialAttachment: attach);
-
-    [Fact]
-    public void Upload_creates_document_with_first_version()
+    public class TestBed
     {
-        var doc = NewDoc();
+        public UserId User { get; } = UserId.Generate();
 
-        doc.Title.Should().Be("Title");
-        doc.Versions.Should().HaveCount(1);
-        doc.Versions[0].VersionNumber.Should().Be(1);
-        doc.CurrentVersionId.Should().Be(doc.Versions[0].VersionId);
-        doc.IsDeleted.Should().BeFalse();
-        doc.UncommittedEvents.Should().ContainItemsAssignableTo<DocumentUploaded>();
+        public DocumentId DocumentId { get; } = DocumentId.Generate();
+
+        public IReadOnlyList<object> Upload((string EntityType, string EntityId, string? Role)? attach = null) =>
+            Document.Upload(
+                DocumentId,
+                DocumentVersionId.Generate(),
+                "Title",
+                SensitivityLevel.Internal,
+                RetentionClass.Permanent,
+                blobKey: "documents/abc/v1.pdf",
+                fileName: "v1.pdf",
+                contentType: "application/pdf",
+                sizeBytes: 1234,
+                sha256: "deadbeef",
+                uploadedBy: User,
+                initialAttachment: attach);
+
+        public Document UploadedDocument() => EventReplay.Replay<Document>(Upload());
+
+        public Document AttachedDocument(params string[] entityIds) =>
+            UploadedDocument().Evolve(entityIds.Select(id => (object)Attached(id)))!;
+
+        public Document DeletedDocument() => UploadedDocument().Evolve(new DocumentSoftDeleted(DocumentId.Value, "gone", User.Value))!;
+
+        public Document TaggedDocument(string tag) => UploadedDocument().Evolve(new DocumentTagged(DocumentId.Value, tag, User.Value))!;
+
+        public DocumentAttached Attached(string entityId, string? role = null) =>
+            new(DocumentId.Value, "Building", entityId, role, "Title", "v1.pdf", "application/pdf", 1234, User.Value);
     }
 
-    [Fact]
-    public void Upload_with_zero_size_throws()
+    public class TheUploadMethod
     {
-        var act = () => Document.Upload(
-            "t", SensitivityLevel.Internal, RetentionClass.Permanent,
-            "key", "f", "application/pdf", sizeBytes: 0, sha256: "x", uploadedBy: User);
+        private readonly TestBed _testBed = new();
 
-        act.Should().Throw<BusinessRuleViolationException>();
+        [Fact]
+        public void GivenZeroSize_WhenUploaded_ThenThrowsBusinessRuleViolation()
+        {
+            var act = () => Document.Upload(
+                _testBed.DocumentId, DocumentVersionId.Generate(), "t", SensitivityLevel.Internal, RetentionClass.Permanent,
+                "key", "f", "application/pdf", sizeBytes: 0, sha256: "x", uploadedBy: _testBed.User);
+
+            act.Should().Throw<BusinessRuleViolationException>();
+        }
+
+        [Fact]
+        public void GivenValidInputs_WhenUploaded_ThenStartsWithTheFirstVersion()
+        {
+            var events = _testBed.Upload();
+
+            var sut = EventReplay.Replay<Document>(events);
+            sut.Versions.Should().ContainSingle().Which.VersionNumber.Should().Be(1);
+            sut.CurrentVersionId.Should().Be(sut.Versions[0].VersionId);
+        }
+
+        [Fact]
+        public void GivenInitialAttachment_WhenUploaded_ThenAlsoAttaches()
+        {
+            var events = _testBed.Upload(("Building", "building-1", "primary"));
+
+            events.Should().SatisfyRespectively(
+                e => e.Should().BeOfType<DocumentUploaded>(),
+                e => e.Should().BeEquivalentTo(new { EntityType = "Building", EntityId = "building-1", Role = "primary" }));
+        }
     }
 
-    [Fact]
-    public void Upload_with_initial_attachment_attaches_it()
+    public class TheAttachMethod
     {
-        var entityId = Guid.NewGuid().ToString();
-        var doc = NewDoc(attach: ("Building", entityId, "primary"));
+        private readonly TestBed _testBed = new();
 
-        doc.Attachments.Should().ContainSingle(a =>
-            a.EntityType == "Building" && a.EntityId == entityId && a.Role == "primary");
+        [Fact]
+        public void GivenAlreadyAttachedWithTheSameRole_WhenAttached_ThenDecidesNothing()
+        {
+            var sut = _testBed.AttachedDocument("building-1");
+
+            var attached = sut.Attach("Building", "building-1", null, _testBed.User);
+
+            attached.Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenDeletedDocument_WhenAttached_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = _testBed.DeletedDocument();
+
+            var act = () => sut.Attach("Building", "building-1", null, _testBed.User);
+
+            act.Should().Throw<BusinessRuleViolationException>();
+        }
     }
 
-    [Fact]
-    public void Attach_is_idempotent()
+    public class TheDetachMethod
     {
-        var doc = NewDoc();
-        var entityId = Guid.NewGuid().ToString();
+        private readonly TestBed _testBed = new();
 
-        doc.Attach("Building", entityId, "primary", User);
-        doc.Attach("Building", entityId, "primary", User);
+        [Fact]
+        public void GivenTwoAttachments_WhenOneIsDetached_ThenOnlyThatOneIsRemoved()
+        {
+            var sut = _testBed.AttachedDocument("building-a", "building-b");
 
-        doc.Attachments.Should().HaveCount(1);
+            var detached = sut.Detach("Building", "building-a", null, _testBed.User);
+
+            sut.Evolve(detached!)!.Attachments.Should().ContainSingle(a => a.EntityId == "building-b");
+        }
+
+        [Fact]
+        public void GivenNotAttached_WhenDetached_ThenDecidesNothing()
+        {
+            var sut = _testBed.UploadedDocument();
+
+            var detached = sut.Detach("Building", "building-1", null, _testBed.User);
+
+            detached.Should().BeNull();
+        }
     }
 
-    [Fact]
-    public void Attach_to_deleted_document_throws()
+    public class TheAddVersionMethod
     {
-        var doc = NewDoc();
-        doc.SoftDelete("test", User);
+        private readonly TestBed _testBed = new();
 
-        var act = () => doc.Attach("Building", Guid.NewGuid().ToString(), null, User);
+        [Fact]
+        public void GivenUploadedDocument_WhenVersionAdded_ThenNumbersItNextAndMakesItCurrent()
+        {
+            var sut = _testBed.UploadedDocument();
+            var versionId = DocumentVersionId.Generate();
 
-        act.Should().Throw<BusinessRuleViolationException>();
+            var added = sut.AddVersion(versionId, "documents/abc/v2.pdf", "v2.pdf", "application/pdf", 2345, "feedface", "second draft", _testBed.User);
+
+            added.VersionNumber.Should().Be(2);
+            sut.Evolve(added)!.CurrentVersionId.Should().Be(versionId);
+        }
+
+        [Fact]
+        public void GivenDeletedDocument_WhenVersionAdded_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = _testBed.DeletedDocument();
+
+            var act = () => sut.AddVersion(DocumentVersionId.Generate(), "k", "f", "application/pdf", 1, "x", null, _testBed.User);
+
+            act.Should().Throw<BusinessRuleViolationException>();
+        }
     }
 
-    [Fact]
-    public void Detach_removes_matching_attachment_only()
+    public class TheSoftDeleteMethod
     {
-        var doc = NewDoc();
-        var idA = Guid.NewGuid().ToString();
-        var idB = Guid.NewGuid().ToString();
-        doc.Attach("Building", idA, null, User);
-        doc.Attach("Building", idB, null, User);
+        private readonly TestBed _testBed = new();
 
-        doc.Detach("Building", idA, null, User);
+        [Fact]
+        public void GivenDeletedDocument_WhenSoftDeleted_ThenDecidesNothing()
+        {
+            var sut = _testBed.DeletedDocument();
 
-        doc.Attachments.Should().ContainSingle(a => a.EntityId == idB);
+            var events = sut.SoftDelete("again", _testBed.User);
+
+            events.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void GivenTwoAttachments_WhenSoftDeleted_ThenFansOutOneEventPerAttachment()
+        {
+            var sut = _testBed.AttachedDocument("building-a", "building-b");
+
+            var events = sut.SoftDelete("reason", _testBed.User);
+
+            events.OfType<DocumentSoftDeleted>().Should().ContainSingle();
+            events.OfType<DocumentSoftDeletedForAttachment>().Should().HaveCount(2);
+        }
     }
 
-    [Fact]
-    public void Detach_when_not_attached_is_noop()
+    public class TheTagMethod
     {
-        var doc = NewDoc();
-        doc.Detach("Building", Guid.NewGuid().ToString(), null, User);
+        private readonly TestBed _testBed = new();
 
-        doc.Attachments.Should().BeEmpty();
+        [Fact]
+        public void GivenUntaggedDocument_WhenTagged_ThenNormalisesTheTag()
+        {
+            var sut = _testBed.UploadedDocument();
+
+            var tagged = sut.Tag("  Hello  ", _testBed.User);
+
+            tagged!.Tag.Should().Be("hello");
+        }
+
+        [Fact]
+        public void GivenTaggedDocument_WhenTaggedInAnotherCase_ThenDecidesNothing()
+        {
+            var sut = _testBed.TaggedDocument("hello");
+
+            var tagged = sut.Tag("HELLO", _testBed.User);
+
+            tagged.Should().BeNull();
+        }
     }
 
-    [Fact]
-    public void AddVersion_increments_version_number_and_advances_pointer()
+    public class TheUntagMethod
     {
-        var doc = NewDoc();
-        var v1Id = doc.CurrentVersionId;
+        private readonly TestBed _testBed = new();
 
-        doc.AddVersion(
-            "documents/abc/v2.pdf", "v2.pdf", "application/pdf",
-            sizeBytes: 2345, sha256: "feedface", note: "second draft", uploadedBy: User);
+        [Fact]
+        public void GivenTaggedDocument_WhenUntaggedInAnotherCase_ThenRemovesTheTag()
+        {
+            var sut = _testBed.TaggedDocument("important");
 
-        doc.Versions.Should().HaveCount(2);
-        doc.Versions[1].VersionNumber.Should().Be(2);
-        doc.CurrentVersionId.Should().NotBe(v1Id).And.Be(doc.Versions[1].VersionId);
+            var untagged = sut.Untag("IMPORTANT", _testBed.User);
+
+            sut.Evolve(untagged!)!.Tags.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void GivenTagAbsent_WhenUntagged_ThenDecidesNothing()
+        {
+            var sut = _testBed.UploadedDocument();
+
+            var untagged = sut.Untag("nope", _testBed.User);
+
+            untagged.Should().BeNull();
+        }
     }
 
-    [Fact]
-    public void AddVersion_to_deleted_document_throws()
+    public class TheUpdateMetadataMethod
     {
-        var doc = NewDoc();
-        doc.SoftDelete("reason", User);
+        private readonly TestBed _testBed = new();
 
-        var act = () => doc.AddVersion("k", "f", "application/pdf", 1, "x", null, User);
+        [Fact]
+        public void GivenOnlySomeFields_WhenUpdated_ThenKeepsTheOthers()
+        {
+            var sut = _testBed.UploadedDocument();
+            var newExpiry = new DateOnly(2026, 11, 27);
 
-        act.Should().Throw<BusinessRuleViolationException>();
-    }
+            var updated = sut.UpdateMetadata("New Title", null, newExpiry, clearExpiresOn: false, _testBed.User);
 
-    [Fact]
-    public void SoftDelete_is_idempotent()
-    {
-        var doc = NewDoc();
-        doc.SoftDelete("first", User);
-        var countAfterFirst = doc.UncommittedEvents.Count();
+            sut.Evolve(updated!).Should().BeEquivalentTo(new
+            {
+                Title = "New Title",
+                Sensitivity = SensitivityLevel.Internal,
+                ExpiresOn = newExpiry,
+            });
+        }
 
-        doc.SoftDelete("second", User);
+        [Fact]
+        public void GivenExpiry_WhenClearedExplicitly_ThenHasNoExpiry()
+        {
+            var sut = _testBed.UploadedDocument();
+            sut = sut.Evolve(sut.UpdateMetadata(null, null, new DateOnly(2026, 10, 28), false, _testBed.User)!)!;
 
-        doc.UncommittedEvents.Count().Should().Be(countAfterFirst);
-        doc.IsDeleted.Should().BeTrue();
-    }
+            var updated = sut.UpdateMetadata(null, null, null, clearExpiresOn: true, _testBed.User);
 
-    [Fact]
-    public void SoftDelete_fans_out_one_event_per_active_attachment()
-    {
-        var doc = NewDoc();
-        doc.Attach("Building", Guid.NewGuid().ToString(), "primary", User);
-        doc.Attach("Lease", Guid.NewGuid().ToString(), null, User);
-        doc.UncommittedEvents.MarkAsCommitted();
+            sut.Evolve(updated!)!.ExpiresOn.Should().BeNull();
+        }
 
-        doc.SoftDelete("reason", User);
+        [Fact]
+        public void GivenNoChanges_WhenUpdated_ThenDecidesNothing()
+        {
+            var sut = _testBed.UploadedDocument();
 
-        var events = doc.UncommittedEvents.ToList();
-        events.OfType<DocumentSoftDeleted>().Should().HaveCount(1);
-        events.OfType<DocumentSoftDeletedForAttachment>().Should().HaveCount(2);
-    }
+            var updated = sut.UpdateMetadata(sut.Title, sut.Sensitivity, null, false, _testBed.User);
 
-    [Fact]
-    public void Tag_normalises_to_lowercase_and_dedupes()
-    {
-        var doc = NewDoc();
+            updated.Should().BeNull();
+        }
 
-        doc.Tag("  Hello  ", User);
-        doc.Tag("hello", User);
-        doc.Tag("HELLO", User);
+        [Fact]
+        public void GivenBlankTitle_WhenUpdated_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = _testBed.UploadedDocument();
 
-        doc.Tags.Should().BeEquivalentTo(["hello"]);
-    }
+            var act = () => sut.UpdateMetadata("   ", null, null, false, _testBed.User);
 
-    [Fact]
-    public void Untag_removes_normalised_tag()
-    {
-        var doc = NewDoc();
-        doc.Tag("Important", User);
-
-        doc.Untag("IMPORTANT", User);
-
-        doc.Tags.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void Untag_when_absent_is_noop()
-    {
-        var doc = NewDoc();
-        doc.UncommittedEvents.MarkAsCommitted();
-
-        doc.Untag("nope", User);
-
-        doc.UncommittedEvents.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void UpdateMetadata_changes_only_supplied_fields()
-    {
-        var doc = NewDoc();
-        var newExpiry = new DateOnly(2026, 11, 27);
-
-        doc.UpdateMetadata("New Title", null, newExpiry, clearExpiresOn: false, User);
-
-        doc.Title.Should().Be("New Title");
-        doc.Sensitivity.Should().Be(SensitivityLevel.Internal);
-        doc.ExpiresOn.Should().Be(newExpiry);
-    }
-
-    [Fact]
-    public void UpdateMetadata_can_clear_expiry_explicitly()
-    {
-        var doc = NewDoc();
-        doc.UpdateMetadata(null, null, new DateOnly(2026, 10, 28), false, User);
-        doc.ExpiresOn.Should().NotBeNull();
-
-        doc.UpdateMetadata(null, null, null, clearExpiresOn: true, User);
-
-        doc.ExpiresOn.Should().BeNull();
-    }
-
-    [Fact]
-    public void UpdateMetadata_with_no_changes_is_noop()
-    {
-        var doc = NewDoc();
-        doc.UncommittedEvents.MarkAsCommitted();
-
-        doc.UpdateMetadata(doc.Title, doc.Sensitivity, null, false, User);
-
-        doc.UncommittedEvents.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void UpdateMetadata_blank_title_throws()
-    {
-        var doc = NewDoc();
-
-        var act = () => doc.UpdateMetadata("   ", null, null, false, User);
-
-        act.Should().Throw<BusinessRuleViolationException>();
+            act.Should().Throw<BusinessRuleViolationException>();
+        }
     }
 }

@@ -1,12 +1,13 @@
 using CommonGround.Documents.Domain.Documents;
+using CommonGround.Documents.Domain.Documents.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Exceptions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Documents.Application.Commands;
 
 /// <summary>Adds a new version to an existing document.</summary>
 /// <param name="DocumentId">The document to extend.</param>
+/// <param name="VersionId">The new version's ID, chosen by the caller (it is also part of the blob key).</param>
 /// <param name="BlobKey">The MinIO object key produced by the uploader.</param>
 /// <param name="FileName">Original filename as submitted.</param>
 /// <param name="ContentType">MIME type.</param>
@@ -14,47 +15,34 @@ namespace CommonGround.Documents.Application.Commands;
 /// <param name="Sha256">Hex-encoded SHA-256 of the blob contents.</param>
 /// <param name="Note">Optional version note.</param>
 /// <param name="UploadedBy">The staff user uploading.</param>
-/// <param name="VersionId">Optional pre-computed version ID (used for deterministic blob keys).</param>
 public sealed record AddDocumentVersion(
     DocumentId DocumentId,
+    DocumentVersionId VersionId,
     string BlobKey,
     string FileName,
     string ContentType,
     long SizeBytes,
     string Sha256,
     string? Note,
-    UserId UploadedBy,
-    DocumentVersionId? VersionId = null);
+    UserId UploadedBy);
 
 /// <summary>Handles <see cref="AddDocumentVersion"/>.</summary>
 public static class AddDocumentVersionHandler
 {
-    /// <summary>Loads the document, appends a version, and persists.</summary>
-    public static async Task<DocumentVersionId> Handle(
-        AddDocumentVersion command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    /// <summary>Adds the version to the document.</summary>
+    public static DocumentVersionAdded Handle(AddDocumentVersion command, [WriteAggregate] Document document)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(document);
 
-        var stream = await session.Events
-            .FetchForWriting<Document>(command.DocumentId.Value, cancellationToken)
-            .ConfigureAwait(false);
-        var doc = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(Document), command.DocumentId.Value);
-
-        doc.AddVersion(
+        return document.AddVersion(
+            command.VersionId,
             command.BlobKey,
             command.FileName,
             command.ContentType,
             command.SizeBytes,
             command.Sha256,
             command.Note,
-            command.UploadedBy,
-            command.VersionId);
-        doc.ValidateInvariants();
-        stream.AppendMany(doc.UncommittedEvents.ToArray());
-        doc.UncommittedEvents.MarkAsCommitted();
-
-        return doc.CurrentVersionId;
+            command.UploadedBy);
     }
 }

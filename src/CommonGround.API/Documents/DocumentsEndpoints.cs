@@ -65,6 +65,8 @@ public static class DocumentsEndpoints
                 : null;
 
             var command = new UploadDocument(
+                documentId,
+                versionId,
                 metadata.Title,
                 sensitivity,
                 retention,
@@ -74,13 +76,11 @@ public static class DocumentsEndpoints
                 uploadResult.SizeBytes,
                 uploadResult.Sha256,
                 userId,
-                initialAttachment,
-                documentId,
-                versionId);
+                initialAttachment);
 
-            var assignedId = await bus.InvokeForTenantAsync<DocumentId>(bus.TenantId!, command, cancellationToken).ConfigureAwait(false);
+            await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken).ConfigureAwait(false);
 
-            return Results.Created($"/api/documents/{assignedId.Value}", new UploadDocumentResponse(assignedId.Value));
+            return Results.Created($"/api/documents/{documentId.Value}", new UploadDocumentResponse(documentId.Value));
         }
     }
 
@@ -193,18 +193,18 @@ public static class DocumentsEndpoints
 
         var command = new AddDocumentVersion(
             docId,
+            versionId,
             uploadResult.BlobKey,
             file.FileName,
             file.ContentType,
             uploadResult.SizeBytes,
             uploadResult.Sha256,
             metadata.Note,
-            userId,
-            versionId);
+            userId);
 
-        var assignedVersionId = await bus.InvokeForTenantAsync<DocumentVersionId>(bus.TenantId!, command, cancellationToken).ConfigureAwait(false);
+        await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken).ConfigureAwait(false);
 
-        return Results.Created($"/api/documents/{docId.Value}", new AddDocumentVersionResponse(docId.Value, assignedVersionId.Value));
+        return Results.Created($"/api/documents/{docId.Value}", new AddDocumentVersionResponse(docId.Value, versionId.Value));
     }
 
     [WolverinePatch("/api/documents/{documentId}")]

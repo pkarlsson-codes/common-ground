@@ -16,6 +16,7 @@
   <Project Path="CommonGround.SharedKernel/CommonGround.SharedKernel.csproj" />
   <Project Path="CommonGround.Stewardship.Tests/CommonGround.Stewardship.Tests.csproj" />
   <Project Path="CommonGround.Stewardship/CommonGround.Stewardship.csproj" />
+  <Project Path="CommonGround.Testing/CommonGround.Testing.csproj" />
   <Project Path="CommonGround.TrustManagement.Contracts/CommonGround.TrustManagement.Contracts.csproj" />
   <Project Path="CommonGround.TrustManagement/CommonGround.TrustManagement.csproj" />
   <Project Path="CommonGround.Management.Gateway/CommonGround.Management.Gateway.csproj" />

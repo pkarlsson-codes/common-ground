@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CommonGround.Testing\CommonGround.Testing.csproj" />
     <ProjectReference Include="..\CommonGround.Homeownership\CommonGround.Homeownership.csproj" />
   </ItemGroup>
 

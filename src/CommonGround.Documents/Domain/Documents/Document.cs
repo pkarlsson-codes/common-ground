@@ -14,9 +14,8 @@ public sealed class Document : AggregateRoot<DocumentId>
     private readonly List<DocumentAttachment> _attachments = [];
     private readonly SortedSet<string> _tags = new(StringComparer.Ordinal);
 
-#pragma warning disable CS8618
-    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
-    public Document() { }
+#pragma warning disable CS8618 // State is set by Create from the stream's first event.
+    private Document() { }
 #pragma warning restore CS8618
 
     /// <summary>Gets the human-readable title of this document.</summary>
@@ -55,8 +54,11 @@ public sealed class Document : AggregateRoot<DocumentId>
     /// <summary>Gets a value indicating whether this document is on legal hold.</summary>
     public bool IsOnLegalHold { get; private set; }
 
-    /// <summary>Uploads a brand-new document with its first version, and optionally attaches it to an entity.</summary>
-    public static Document Upload(
+    /// <summary>Decides to upload a brand-new document with its first version, and optionally attach it to an entity.</summary>
+    /// <returns>The events that start the document's stream.</returns>
+    public static IReadOnlyList<IDomainEvent> Upload(
+        DocumentId documentId,
+        DocumentVersionId versionId,
         string title,
         SensitivityLevel sensitivity,
         RetentionClass retention,
@@ -66,9 +68,7 @@ public sealed class Document : AggregateRoot<DocumentId>
         long sizeBytes,
         string sha256,
         UserId uploadedBy,
-        (string EntityType, string EntityId, string? Role)? initialAttachment = null,
-        DocumentId? documentId = null,
-        DocumentVersionId? versionId = null)
+        (string EntityType, string EntityId, string? Role)? initialAttachment = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
         ArgumentNullException.ThrowIfNull(sensitivity);
@@ -81,13 +81,9 @@ public sealed class Document : AggregateRoot<DocumentId>
         if (sizeBytes <= 0)
             throw BusinessRuleViolation.Document.Upload.SizeNonPositive(sizeBytes);
 
-        var doc = new Document();
-        var actualVersionId = versionId ?? DocumentVersionId.Generate();
-        var actualDocumentId = documentId ?? DocumentId.Generate();
-
-        doc.ApplyChange(new DocumentUploaded(
-            actualDocumentId.Value,
-            actualVersionId.Value,
+        var uploaded = new DocumentUploaded(
+            documentId.Value,
+            versionId.Value,
             title,
             sensitivity.DisplayName,
             retention.DisplayName,
@@ -96,18 +92,20 @@ public sealed class Document : AggregateRoot<DocumentId>
             contentType,
             sizeBytes,
             sha256,
-            uploadedBy.Value));
+            uploadedBy.Value);
 
-        if (initialAttachment is { } a)
+        if (initialAttachment is not { } a)
         {
-            doc.Attach(a.EntityType, a.EntityId, a.Role, uploadedBy);
+            return [uploaded];
         }
 
-        return doc;
+        var attached = Create(uploaded).Attach(a.EntityType, a.EntityId, a.Role, uploadedBy);
+        return attached is null ? [uploaded] : [uploaded, attached];
     }
 
-    /// <summary>Attaches this document to an entity. Idempotent on (EntityType, EntityId, Role).</summary>
-    public void Attach(string entityType, string entityId, string? role, UserId attachedBy)
+    /// <summary>Decides to attach this document to an entity.</summary>
+    /// <returns>The attachment, or <see langword="null"/> when already attached with that role.</returns>
+    public DocumentAttached? Attach(string entityType, string entityId, string? role, UserId attachedBy)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(entityType);
 
@@ -117,65 +115,64 @@ public sealed class Document : AggregateRoot<DocumentId>
         var existing = _attachments.FirstOrDefault(x =>
             x.EntityType == entityType && x.EntityId == entityId && x.Role == role);
         if (existing is not null)
-            return;
+            return null;
 
         var current = _versions[^1];
-        ApplyChange(new DocumentAttached(
+        return new DocumentAttached(
             Id.Value, entityType, entityId, role,
             Title, current.FileName, current.ContentType, current.SizeBytes,
-            attachedBy.Value));
+            attachedBy.Value);
     }
 
-    /// <summary>Detaches this document from an entity. Idempotent if not attached.</summary>
-    public void Detach(string entityType, string entityId, string? role, UserId detachedBy)
+    /// <summary>Decides to detach this document from an entity.</summary>
+    /// <returns>The detachment, or <see langword="null"/> when not attached.</returns>
+    public DocumentDetached? Detach(string entityType, string entityId, string? role, UserId detachedBy)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(entityType);
 
         var existing = _attachments.FirstOrDefault(x =>
             x.EntityType == entityType && x.EntityId == entityId && x.Role == role);
         if (existing is null)
-            return;
+            return null;
 
-        ApplyChange(new DocumentDetached(
-            Id.Value, entityType, entityId, role, detachedBy.Value));
+        return new DocumentDetached(Id.Value, entityType, entityId, role, detachedBy.Value);
     }
 
-    /// <summary>Soft-deletes this document. Idempotent if already deleted.</summary>
+    /// <summary>Decides to soft-delete this document. Nothing happens if it is already deleted.</summary>
     /// <remarks>
-    /// Raises one <see cref="DocumentSoftDeleted"/> aggregate-stream event followed by one
+    /// Decides one <see cref="DocumentSoftDeleted"/> aggregate-stream event followed by one
     /// <see cref="DocumentSoftDeletedForAttachment"/> per active attachment so the per-entity
     /// projection can flag the row as deleted without a cross-stream lookup.
     /// </remarks>
-    public void SoftDelete(string reason, UserId deletedBy)
+    /// <returns>The events, or none when the document is already deleted.</returns>
+    public IReadOnlyList<IDomainEvent> SoftDelete(string reason, UserId deletedBy)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
 
         if (IsDeleted)
-            return;
+            return [];
 
         if (IsOnLegalHold)
             throw BusinessRuleViolation.Document.SoftDelete.LegalHoldActive();
 
-        ApplyChange(new DocumentSoftDeleted(Id.Value, reason, deletedBy.Value));
-
-        // Snapshot before raising fanout events — the apply paths don't mutate _attachments here.
-        foreach (var att in _attachments.ToArray())
-        {
-            ApplyChange(new DocumentSoftDeletedForAttachment(
-                Id.Value, att.EntityType, att.EntityId, att.Role));
-        }
+        return
+        [
+            new DocumentSoftDeleted(Id.Value, reason, deletedBy.Value),
+            .. _attachments.Select(att => new DocumentSoftDeletedForAttachment(
+                Id.Value, att.EntityType, att.EntityId, att.Role)),
+        ];
     }
 
-    /// <summary>Adds a new version to this document.</summary>
-    public void AddVersion(
+    /// <summary>Decides to add a new version to this document.</summary>
+    public DocumentVersionAdded AddVersion(
+        DocumentVersionId versionId,
         string blobKey,
         string fileName,
         string contentType,
         long sizeBytes,
         string sha256,
         string? note,
-        UserId uploadedBy,
-        DocumentVersionId? versionId = null)
+        UserId uploadedBy)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(blobKey);
         ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
@@ -188,12 +185,11 @@ public sealed class Document : AggregateRoot<DocumentId>
         if (IsDeleted)
             throw BusinessRuleViolation.Document.AddVersion.DocumentDeleted();
 
-        var actualVersionId = versionId ?? DocumentVersionId.Generate();
         var nextNumber = _versions[^1].VersionNumber + 1;
 
-        ApplyChange(new DocumentVersionAdded(
+        return new DocumentVersionAdded(
             Id.Value,
-            actualVersionId.Value,
+            versionId.Value,
             nextNumber,
             blobKey,
             fileName,
@@ -201,11 +197,12 @@ public sealed class Document : AggregateRoot<DocumentId>
             sizeBytes,
             sha256,
             note,
-            uploadedBy.Value));
+            uploadedBy.Value);
     }
 
-    /// <summary>Updates editable metadata fields. Nulls leave the corresponding field untouched.</summary>
-    public void UpdateMetadata(
+    /// <summary>Decides to update editable metadata fields. Nulls leave the corresponding field untouched.</summary>
+    /// <returns>The update, or <see langword="null"/> when nothing changes.</returns>
+    public DocumentMetadataUpdated? UpdateMetadata(
         string? title,
         SensitivityLevel? sensitivity,
         DateOnly? expiresOn,
@@ -227,16 +224,17 @@ public sealed class Document : AggregateRoot<DocumentId>
             && newSensitivity == Sensitivity.DisplayName
             && newExpiresOn == ExpiresOn)
         {
-            return;
+            return null;
         }
 
-        ApplyChange(new DocumentMetadataUpdated(
+        return new DocumentMetadataUpdated(
             Id.Value, newTitle, newSensitivity, newExpiresOn, clearExpiresOn,
-            updatedBy.Value));
+            updatedBy.Value);
     }
 
-    /// <summary>Adds a tag (lowercased, trimmed). Idempotent.</summary>
-    public void Tag(string tag, UserId taggedBy)
+    /// <summary>Decides to add a tag (lowercased, trimmed).</summary>
+    /// <returns>The tagging, or <see langword="null"/> when the document already has the tag.</returns>
+    public DocumentTagged? Tag(string tag, UserId taggedBy)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(tag);
 
@@ -245,23 +243,22 @@ public sealed class Document : AggregateRoot<DocumentId>
 
         var normalised = NormaliseTag(tag);
         if (_tags.Contains(normalised))
-            return;
+            return null;
 
-        ApplyChange(new DocumentTagged(
-            Id.Value, normalised, taggedBy.Value));
+        return new DocumentTagged(Id.Value, normalised, taggedBy.Value);
     }
 
-    /// <summary>Removes a tag. Idempotent.</summary>
-    public void Untag(string tag, UserId untaggedBy)
+    /// <summary>Decides to remove a tag.</summary>
+    /// <returns>The untagging, or <see langword="null"/> when the document doesn't have the tag.</returns>
+    public DocumentUntagged? Untag(string tag, UserId untaggedBy)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(tag);
 
         var normalised = NormaliseTag(tag);
         if (!_tags.Contains(normalised))
-            return;
+            return null;
 
-        ApplyChange(new DocumentUntagged(
-            Id.Value, normalised, untaggedBy.Value));
+        return new DocumentUntagged(Id.Value, normalised, untaggedBy.Value);
     }
 
     /// <summary>Normalises a tag string to lowercase, trimmed.</summary>
@@ -271,27 +268,17 @@ public sealed class Document : AggregateRoot<DocumentId>
         return tag.Trim().ToLowerInvariant();
     }
 
-    /// <inheritdoc/>
-    protected override void ApplyEvent(IDomainEvent domainEvent)
+    /// <summary>Starts a document from its first event.</summary>
+    public static Document Create(DocumentUploaded e)
     {
-        switch (domainEvent)
-        {
-            case DocumentUploaded e: Apply(e); break;
-            case DocumentVersionAdded e: Apply(e); break;
-            case DocumentAttached e: Apply(e); break;
-            case DocumentDetached e: Apply(e); break;
-            case DocumentSoftDeleted e: Apply(e); break;
-            case DocumentSoftDeletedForAttachment _: break; // fanout-only, no aggregate state change
-            case DocumentMetadataUpdated e: Apply(e); break;
-            case DocumentTagged e: Apply(e); break;
-            case DocumentUntagged e: Apply(e); break;
-            default: throw new InvalidOperationException($"Unknown event: {domainEvent?.GetType().Name}");
-        }
+        ArgumentNullException.ThrowIfNull(e);
+
+        var doc = new Document();
+        doc.Apply(e);
+        return doc;
     }
 
-    /// <summary>Applies <see cref="DocumentUploaded"/>.</summary>
-
-    public void Apply(DocumentUploaded e)
+    private void Apply(DocumentUploaded e)
     {
         Id = DocumentId.Create(e.AggregateId);
         Title = e.Title;
@@ -312,7 +299,6 @@ public sealed class Document : AggregateRoot<DocumentId>
     }
 
     /// <summary>Applies <see cref="DocumentVersionAdded"/>.</summary>
-
     public void Apply(DocumentVersionAdded e)
     {
         var version = new DocumentVersion(
@@ -326,7 +312,6 @@ public sealed class Document : AggregateRoot<DocumentId>
     }
 
     /// <summary>Applies <see cref="DocumentAttached"/>.</summary>
-
     public void Apply(DocumentAttached e)
     {
         _attachments.Add(new DocumentAttachment(
@@ -335,7 +320,6 @@ public sealed class Document : AggregateRoot<DocumentId>
     }
 
     /// <summary>Applies <see cref="DocumentDetached"/>.</summary>
-
     public void Apply(DocumentDetached e)
     {
         _attachments.RemoveAll(x =>
@@ -343,14 +327,12 @@ public sealed class Document : AggregateRoot<DocumentId>
     }
 
     /// <summary>Applies <see cref="DocumentSoftDeleted"/>.</summary>
-
     public void Apply(DocumentSoftDeleted _)
     {
         IsDeleted = true;
     }
 
     /// <summary>Applies <see cref="DocumentMetadataUpdated"/>.</summary>
-
     public void Apply(DocumentMetadataUpdated e)
     {
         Title = e.Title;
@@ -359,14 +341,12 @@ public sealed class Document : AggregateRoot<DocumentId>
     }
 
     /// <summary>Applies <see cref="DocumentTagged"/>.</summary>
-
     public void Apply(DocumentTagged e)
     {
         _tags.Add(e.Tag);
     }
 
     /// <summary>Applies <see cref="DocumentUntagged"/>.</summary>
-
     public void Apply(DocumentUntagged e)
     {
         _tags.Remove(e.Tag);

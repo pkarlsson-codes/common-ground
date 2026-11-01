@@ -6,6 +6,7 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CommonGround.Testing\CommonGround.Testing.csproj" />
     <ProjectReference Include="..\CommonGround.Stewardship\CommonGround.Stewardship.csproj" />
   </ItemGroup>
   <ItemGroup>

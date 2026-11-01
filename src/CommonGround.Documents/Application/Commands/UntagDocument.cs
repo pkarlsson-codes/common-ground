@@ -1,7 +1,7 @@
 using CommonGround.Documents.Domain.Documents;
+using CommonGround.Documents.Domain.Documents.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Exceptions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Documents.Application.Commands;
 
@@ -11,22 +11,12 @@ public sealed record UntagDocument(DocumentId DocumentId, string Tag, UserId Unt
 /// <summary>Handles <see cref="UntagDocument"/>.</summary>
 public static class UntagDocumentHandler
 {
-    /// <summary>Loads the document, removes the tag, and persists.</summary>
-    public static async Task Handle(
-        UntagDocument command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    /// <summary>Untags the document, unless it doesn't have the tag.</summary>
+    public static DocumentUntagged? Handle(UntagDocument command, [WriteAggregate] Document document)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(document);
 
-        var stream = await session.Events
-            .FetchForWriting<Document>(command.DocumentId.Value, cancellationToken)
-            .ConfigureAwait(false);
-        var doc = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(Document), command.DocumentId.Value);
-
-        doc.Untag(command.Tag, command.UntaggedBy);
-        doc.ValidateInvariants();
-        stream.AppendMany(doc.UncommittedEvents.ToArray());
-        doc.UncommittedEvents.MarkAsCommitted();
+        return document.Untag(command.Tag, command.UntaggedBy);
     }
 }

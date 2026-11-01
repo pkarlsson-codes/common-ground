@@ -1,7 +1,7 @@
 using CommonGround.Documents.Domain.Documents;
+using CommonGround.Documents.Domain.Documents.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Exceptions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Documents.Application.Commands;
 
@@ -11,22 +11,12 @@ public sealed record SoftDeleteDocument(DocumentId DocumentId, string Reason, Us
 /// <summary>Handles <see cref="SoftDeleteDocument"/>.</summary>
 public static class SoftDeleteDocumentHandler
 {
-    /// <summary>Loads the document, soft-deletes it, and persists.</summary>
-    public static async Task Handle(
-        SoftDeleteDocument command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    /// <summary>Soft-deletes the document, unless it already is.</summary>
+    public static IEnumerable<object> Handle(SoftDeleteDocument command, [WriteAggregate] Document document)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(document);
 
-        var stream = await session.Events
-            .FetchForWriting<Document>(command.DocumentId.Value, cancellationToken)
-            .ConfigureAwait(false);
-        var doc = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(Document), command.DocumentId.Value);
-
-        doc.SoftDelete(command.Reason, command.DeletedBy);
-        doc.ValidateInvariants();
-        stream.AppendMany(doc.UncommittedEvents.ToArray());
-        doc.UncommittedEvents.MarkAsCommitted();
+        return document.SoftDelete(command.Reason, command.DeletedBy);
     }
 }

@@ -1,7 +1,7 @@
 using CommonGround.Documents.Domain.Documents;
+using CommonGround.Documents.Domain.Documents.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Exceptions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Documents.Application.Commands;
 
@@ -11,22 +11,12 @@ public sealed record TagDocument(DocumentId DocumentId, string Tag, UserId Tagge
 /// <summary>Handles <see cref="TagDocument"/>.</summary>
 public static class TagDocumentHandler
 {
-    /// <summary>Loads the document, applies the tag, and persists.</summary>
-    public static async Task Handle(
-        TagDocument command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    /// <summary>Tags the document, unless it already has the tag.</summary>
+    public static DocumentTagged? Handle(TagDocument command, [WriteAggregate] Document document)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(document);
 
-        var stream = await session.Events
-            .FetchForWriting<Document>(command.DocumentId.Value, cancellationToken)
-            .ConfigureAwait(false);
-        var doc = stream.Aggregate ?? throw new AggregateNotFoundException(typeof(Document), command.DocumentId.Value);
-
-        doc.Tag(command.Tag, command.TaggedBy);
-        doc.ValidateInvariants();
-        stream.AppendMany(doc.UncommittedEvents.ToArray());
-        doc.UncommittedEvents.MarkAsCommitted();
+        return document.Tag(command.Tag, command.TaggedBy);
     }
 }
