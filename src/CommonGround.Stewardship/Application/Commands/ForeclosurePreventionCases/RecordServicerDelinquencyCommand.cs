@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain;
+using CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
 
 namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
 
@@ -11,7 +12,7 @@ namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCas
 /// <param name="RecordedDate">The date the delinquency was recorded.</param>
 /// <param name="RecordedBy">The user ID of who recorded the delinquency.</param>
 public sealed record RecordServicerDelinquencyCommand(
-    string ForeclosurePreventionCaseId,
+    ForeclosurePreventionCaseId ForeclosurePreventionCaseId,
     string ServicerName,
     int DelinquentMonths,
     DateOnly RecordedDate,

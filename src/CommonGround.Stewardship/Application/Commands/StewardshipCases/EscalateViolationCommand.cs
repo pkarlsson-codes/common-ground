@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain;
+using CommonGround.Stewardship.Domain.StewardshipCases;
 
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
@@ -11,7 +12,7 @@ namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 /// <param name="EscalatedDate">The date the violation was escalated.</param>
 /// <param name="EscalatedBy">The user ID of who escalated the violation.</param>
 public sealed record EscalateViolationCommand(
-    string StewardshipCaseId,
+    StewardshipCaseId StewardshipCaseId,
     Guid ViolationId,
     string Reason,
     DateOnly EscalatedDate,

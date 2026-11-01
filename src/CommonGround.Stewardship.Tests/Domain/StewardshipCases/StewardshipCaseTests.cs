@@ -2,6 +2,7 @@ using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using CommonGround.Stewardship.Domain.StewardshipCases;
 using CommonGround.Stewardship.Domain.StewardshipCases.Events;
+using CommonGround.Testing;
 using FluentAssertions;
 
 namespace CommonGround.Stewardship.Tests.Domain.StewardshipCases;
@@ -13,7 +14,7 @@ public class StewardshipCaseTests
     private static readonly DateOnly Today = new(2026, 4, 24);
 
     private static StewardshipCase OpenCase() =>
-        StewardshipCase.Open(GroundLeaseIdValue, Today, Staff);
+        EventReplay.Replay<StewardshipCase>(StewardshipCase.Open(StewardshipCaseId.Generate(), GroundLeaseIdValue, Today, Staff));
 
     // --- Open ---
 
@@ -29,13 +30,12 @@ public class StewardshipCaseTests
         sc.OccupancyVerifications.Should().BeEmpty();
         sc.PropertyInspections.Should().BeEmpty();
         sc.LeaseViolations.Should().BeEmpty();
-        sc.UncommittedEvents.Should().ContainSingle(e => e is StewardshipCaseOpened);
     }
 
     [Fact]
     public void Open_EmptyGroundLeaseId_Throws()
     {
-        var act = () => StewardshipCase.Open("", Today, Staff);
+        var act = () => StewardshipCase.Open(StewardshipCaseId.Generate(), "", Today, Staff);
         act.Should().Throw<BusinessRuleViolationException>();
     }
 
@@ -45,7 +45,7 @@ public class StewardshipCaseTests
     public void InitiateOccupancyVerification_ActiveCase_CreatesPendingVerification()
     {
         var sc = OpenCase();
-        sc.InitiateOccupancyVerification(2026, new DateOnly(2026, 6, 1), Staff);
+        sc = sc.Decide(a => a.InitiateOccupancyVerification(2026, new DateOnly(2026, 6, 1), Staff)).Aggregate;
 
         sc.OccupancyVerifications.Should().ContainSingle();
         sc.OccupancyVerifications[0].PeriodYear.Should().Be(2026);
@@ -56,7 +56,7 @@ public class StewardshipCaseTests
     public void InitiateOccupancyVerification_ClosedCase_Throws()
     {
         var sc = OpenCase();
-        sc.Close("Terminated", Today, Staff);
+        sc = sc.Decide(a => a.Close("Terminated", Today, Staff)).Aggregate;
 
         var act = () => sc.InitiateOccupancyVerification(2026, null, Staff);
         act.Should().Throw<BusinessRuleViolationException>();
@@ -66,10 +66,10 @@ public class StewardshipCaseTests
     public void SubmitOccupancyVerification_WhenPending_TransitionsToSubmitted()
     {
         var sc = OpenCase();
-        sc.InitiateOccupancyVerification(2026, null, Staff);
+        sc = sc.Decide(a => a.InitiateOccupancyVerification(2026, null, Staff)).Aggregate;
         var id = sc.OccupancyVerifications[0].Id;
 
-        sc.SubmitOccupancyVerification(id, true, false, null, Today);
+        sc = sc.Decide(a => a.SubmitOccupancyVerification(id, true, false, null, Today)).Aggregate;
 
         sc.OccupancyVerifications[0].Status.Should().Be(OccupancyVerificationStatus.Submitted);
         sc.OccupancyVerifications[0].IsPrimaryResident.Should().Be(true);
@@ -80,11 +80,11 @@ public class StewardshipCaseTests
     public void SubmitOccupancyVerification_WhenOverdue_Accepted()
     {
         var sc = OpenCase();
-        sc.InitiateOccupancyVerification(2026, null, Staff);
+        sc = sc.Decide(a => a.InitiateOccupancyVerification(2026, null, Staff)).Aggregate;
         var id = sc.OccupancyVerifications[0].Id;
-        sc.MarkOccupancyVerificationOverdue(id, Today);
+        sc = sc.Decide(a => a.MarkOccupancyVerificationOverdue(id, Today)).Aggregate;
 
-        sc.SubmitOccupancyVerification(id, true, false, null, Today);
+        sc = sc.Decide(a => a.SubmitOccupancyVerification(id, true, false, null, Today)).Aggregate;
 
         sc.OccupancyVerifications[0].Status.Should().Be(OccupancyVerificationStatus.Submitted);
     }
@@ -93,10 +93,10 @@ public class StewardshipCaseTests
     public void SubmitOccupancyVerification_WhenVerified_Throws()
     {
         var sc = OpenCase();
-        sc.InitiateOccupancyVerification(2026, null, Staff);
+        sc = sc.Decide(a => a.InitiateOccupancyVerification(2026, null, Staff)).Aggregate;
         var id = sc.OccupancyVerifications[0].Id;
-        sc.SubmitOccupancyVerification(id, true, false, null, Today);
-        sc.VerifyOccupancy(id, Today, Staff);
+        sc = sc.Decide(a => a.SubmitOccupancyVerification(id, true, false, null, Today)).Aggregate;
+        sc = sc.Decide(a => a.VerifyOccupancy(id, Today, Staff)).Aggregate;
 
         var act = () => sc.SubmitOccupancyVerification(id, true, false, null, Today);
         act.Should().Throw<BusinessRuleViolationException>();
@@ -106,11 +106,11 @@ public class StewardshipCaseTests
     public void VerifyOccupancy_WhenSubmitted_TransitionsToVerified()
     {
         var sc = OpenCase();
-        sc.InitiateOccupancyVerification(2026, null, Staff);
+        sc = sc.Decide(a => a.InitiateOccupancyVerification(2026, null, Staff)).Aggregate;
         var id = sc.OccupancyVerifications[0].Id;
-        sc.SubmitOccupancyVerification(id, true, false, null, Today);
+        sc = sc.Decide(a => a.SubmitOccupancyVerification(id, true, false, null, Today)).Aggregate;
 
-        sc.VerifyOccupancy(id, Today, Staff);
+        sc = sc.Decide(a => a.VerifyOccupancy(id, Today, Staff)).Aggregate;
 
         sc.OccupancyVerifications[0].Status.Should().Be(OccupancyVerificationStatus.Verified);
         sc.OccupancyVerifications[0].DecisionDate.Should().Be(Today);
@@ -120,7 +120,7 @@ public class StewardshipCaseTests
     public void VerifyOccupancy_WhenPending_Throws()
     {
         var sc = OpenCase();
-        sc.InitiateOccupancyVerification(2026, null, Staff);
+        sc = sc.Decide(a => a.InitiateOccupancyVerification(2026, null, Staff)).Aggregate;
         var id = sc.OccupancyVerifications[0].Id;
 
         var act = () => sc.VerifyOccupancy(id, Today, Staff);
@@ -131,11 +131,11 @@ public class StewardshipCaseTests
     public void FailOccupancy_WhenSubmitted_TransitionsToFailed()
     {
         var sc = OpenCase();
-        sc.InitiateOccupancyVerification(2026, null, Staff);
+        sc = sc.Decide(a => a.InitiateOccupancyVerification(2026, null, Staff)).Aggregate;
         var id = sc.OccupancyVerifications[0].Id;
-        sc.SubmitOccupancyVerification(id, true, false, null, Today);
+        sc = sc.Decide(a => a.SubmitOccupancyVerification(id, true, false, null, Today)).Aggregate;
 
-        sc.FailOccupancy(id, "Not primary resident", Today, Staff);
+        sc = sc.Decide(a => a.FailOccupancy(id, "Not primary resident", Today, Staff)).Aggregate;
 
         sc.OccupancyVerifications[0].Status.Should().Be(OccupancyVerificationStatus.Failed);
         sc.OccupancyVerifications[0].DecisionDate.Should().Be(Today);
@@ -145,10 +145,10 @@ public class StewardshipCaseTests
     public void MarkOccupancyVerificationOverdue_WhenPending_TransitionsToOverdue()
     {
         var sc = OpenCase();
-        sc.InitiateOccupancyVerification(2026, null, Staff);
+        sc = sc.Decide(a => a.InitiateOccupancyVerification(2026, null, Staff)).Aggregate;
         var id = sc.OccupancyVerifications[0].Id;
 
-        sc.MarkOccupancyVerificationOverdue(id, Today);
+        sc = sc.Decide(a => a.MarkOccupancyVerificationOverdue(id, Today)).Aggregate;
 
         sc.OccupancyVerifications[0].Status.Should().Be(OccupancyVerificationStatus.Overdue);
     }
@@ -157,9 +157,9 @@ public class StewardshipCaseTests
     public void MarkOccupancyVerificationOverdue_WhenSubmitted_Throws()
     {
         var sc = OpenCase();
-        sc.InitiateOccupancyVerification(2026, null, Staff);
+        sc = sc.Decide(a => a.InitiateOccupancyVerification(2026, null, Staff)).Aggregate;
         var id = sc.OccupancyVerifications[0].Id;
-        sc.SubmitOccupancyVerification(id, true, false, null, Today);
+        sc = sc.Decide(a => a.SubmitOccupancyVerification(id, true, false, null, Today)).Aggregate;
 
         var act = () => sc.MarkOccupancyVerificationOverdue(id, Today);
         act.Should().Throw<BusinessRuleViolationException>();
@@ -171,7 +171,7 @@ public class StewardshipCaseTests
     public void SchedulePropertyInspection_ActiveCase_CreatesScheduledInspection()
     {
         var sc = OpenCase();
-        sc.SchedulePropertyInspection(Today, "Inspector Bob", Staff);
+        sc = sc.Decide(a => a.SchedulePropertyInspection(Today, "Inspector Bob", Staff)).Aggregate;
 
         sc.PropertyInspections.Should().ContainSingle();
         sc.PropertyInspections[0].Status.Should().Be(PropertyInspectionStatus.Scheduled);
@@ -182,10 +182,10 @@ public class StewardshipCaseTests
     public void CompletePropertyInspection_WhenScheduled_TransitionsToCompleted()
     {
         var sc = OpenCase();
-        sc.SchedulePropertyInspection(Today, "Inspector Bob", Staff);
+        sc = sc.Decide(a => a.SchedulePropertyInspection(Today, "Inspector Bob", Staff)).Aggregate;
         var id = sc.PropertyInspections[0].Id;
 
-        sc.CompletePropertyInspection(id, true, "All good", Today, Staff);
+        sc = sc.Decide(a => a.CompletePropertyInspection(id, true, "All good", Today, Staff)).Aggregate;
 
         sc.PropertyInspections[0].Status.Should().Be(PropertyInspectionStatus.Completed);
         sc.PropertyInspections[0].OccupancyConfirmed.Should().Be(true);
@@ -196,10 +196,10 @@ public class StewardshipCaseTests
     public void CancelPropertyInspection_WhenScheduled_TransitionsToCancelled()
     {
         var sc = OpenCase();
-        sc.SchedulePropertyInspection(Today, "Inspector Bob", Staff);
+        sc = sc.Decide(a => a.SchedulePropertyInspection(Today, "Inspector Bob", Staff)).Aggregate;
         var id = sc.PropertyInspections[0].Id;
 
-        sc.CancelPropertyInspection(id, "Homeowner unavailable", Staff);
+        sc = sc.Decide(a => a.CancelPropertyInspection(id, "Homeowner unavailable", Staff)).Aggregate;
 
         sc.PropertyInspections[0].Status.Should().Be(PropertyInspectionStatus.Cancelled);
     }
@@ -208,9 +208,9 @@ public class StewardshipCaseTests
     public void CompletePropertyInspection_WhenCancelled_Throws()
     {
         var sc = OpenCase();
-        sc.SchedulePropertyInspection(Today, "Inspector Bob", Staff);
+        sc = sc.Decide(a => a.SchedulePropertyInspection(Today, "Inspector Bob", Staff)).Aggregate;
         var id = sc.PropertyInspections[0].Id;
-        sc.CancelPropertyInspection(id, "Cancelled", Staff);
+        sc = sc.Decide(a => a.CancelPropertyInspection(id, "Cancelled", Staff)).Aggregate;
 
         var act = () => sc.CompletePropertyInspection(id, true, null, Today, Staff);
         act.Should().Throw<BusinessRuleViolationException>();
@@ -222,7 +222,7 @@ public class StewardshipCaseTests
     public void IdentifyViolation_ActiveCase_CreatesIdentifiedViolation()
     {
         var sc = OpenCase();
-        sc.IdentifyViolation(LeaseViolationType.Occupancy, "Sublet without disclosure", Today, Staff);
+        sc = sc.Decide(a => a.IdentifyViolation(LeaseViolationType.Occupancy, "Sublet without disclosure", Today, Staff)).Aggregate;
 
         sc.LeaseViolations.Should().ContainSingle();
         sc.LeaseViolations[0].Status.Should().Be(LeaseViolationStatus.Identified);
@@ -233,10 +233,10 @@ public class StewardshipCaseTests
     public void IssueViolationNotice_WhenIdentified_TransitionsToNoticeIssued()
     {
         var sc = OpenCase();
-        sc.IdentifyViolation(LeaseViolationType.Occupancy, "Violation", Today, Staff);
+        sc = sc.Decide(a => a.IdentifyViolation(LeaseViolationType.Occupancy, "Violation", Today, Staff)).Aggregate;
         var id = sc.LeaseViolations[0].Id;
 
-        sc.IssueViolationNotice(id, Today, Today.AddDays(30), Staff);
+        sc = sc.Decide(a => a.IssueViolationNotice(id, Today, Today.AddDays(30), Staff)).Aggregate;
 
         sc.LeaseViolations[0].Status.Should().Be(LeaseViolationStatus.NoticeIssued);
         sc.LeaseViolations[0].CureDeadline.Should().Be(Today.AddDays(30));
@@ -246,10 +246,10 @@ public class StewardshipCaseTests
     public void IssueViolationNotice_WhenEscalated_Throws()
     {
         var sc = OpenCase();
-        sc.IdentifyViolation(LeaseViolationType.Occupancy, "Violation", Today, Staff);
+        sc = sc.Decide(a => a.IdentifyViolation(LeaseViolationType.Occupancy, "Violation", Today, Staff)).Aggregate;
         var id = sc.LeaseViolations[0].Id;
-        sc.IssueViolationNotice(id, Today, Today.AddDays(30), Staff);
-        sc.EscalateViolation(id, "No cure", Today, Staff);
+        sc = sc.Decide(a => a.IssueViolationNotice(id, Today, Today.AddDays(30), Staff)).Aggregate;
+        sc = sc.Decide(a => a.EscalateViolation(id, "No cure", Today, Staff)).Aggregate;
 
         var act = () => sc.IssueViolationNotice(id, Today, Today.AddDays(30), Staff);
         act.Should().Throw<BusinessRuleViolationException>();
@@ -259,11 +259,11 @@ public class StewardshipCaseTests
     public void CureViolation_WhenNoticeIssued_TransitionsToCured()
     {
         var sc = OpenCase();
-        sc.IdentifyViolation(LeaseViolationType.Occupancy, "Violation", Today, Staff);
+        sc = sc.Decide(a => a.IdentifyViolation(LeaseViolationType.Occupancy, "Violation", Today, Staff)).Aggregate;
         var id = sc.LeaseViolations[0].Id;
-        sc.IssueViolationNotice(id, Today, Today.AddDays(30), Staff);
+        sc = sc.Decide(a => a.IssueViolationNotice(id, Today, Today.AddDays(30), Staff)).Aggregate;
 
-        sc.CureViolation(id, Today.AddDays(10), Staff);
+        sc = sc.Decide(a => a.CureViolation(id, Today.AddDays(10), Staff)).Aggregate;
 
         sc.LeaseViolations[0].Status.Should().Be(LeaseViolationStatus.Cured);
         sc.LeaseViolations[0].ResolutionDate.Should().Be(Today.AddDays(10));
@@ -273,11 +273,11 @@ public class StewardshipCaseTests
     public void EscalateViolation_WhenNoticeIssued_TransitionsToEscalated()
     {
         var sc = OpenCase();
-        sc.IdentifyViolation(LeaseViolationType.Occupancy, "Violation", Today, Staff);
+        sc = sc.Decide(a => a.IdentifyViolation(LeaseViolationType.Occupancy, "Violation", Today, Staff)).Aggregate;
         var id = sc.LeaseViolations[0].Id;
-        sc.IssueViolationNotice(id, Today, Today.AddDays(30), Staff);
+        sc = sc.Decide(a => a.IssueViolationNotice(id, Today, Today.AddDays(30), Staff)).Aggregate;
 
-        sc.EscalateViolation(id, "No cure attempted", Today.AddDays(31), Staff);
+        sc = sc.Decide(a => a.EscalateViolation(id, "No cure attempted", Today.AddDays(31), Staff)).Aggregate;
 
         sc.LeaseViolations[0].Status.Should().Be(LeaseViolationStatus.Escalated);
         sc.LeaseViolations[0].ResolutionNotes.Should().Be("No cure attempted");
@@ -287,7 +287,7 @@ public class StewardshipCaseTests
     public void CureViolation_WhenIdentified_Throws()
     {
         var sc = OpenCase();
-        sc.IdentifyViolation(LeaseViolationType.Occupancy, "Violation", Today, Staff);
+        sc = sc.Decide(a => a.IdentifyViolation(LeaseViolationType.Occupancy, "Violation", Today, Staff)).Aggregate;
         var id = sc.LeaseViolations[0].Id;
 
         var act = () => sc.CureViolation(id, Today, Staff);
@@ -300,18 +300,19 @@ public class StewardshipCaseTests
     public void Close_ActiveCase_TransitionsToClosed()
     {
         var sc = OpenCase();
-        sc.Close("Ground lease terminated", Today, Staff);
+        var (decided, events) = sc.Decide(a => a.Close("Ground lease terminated", Today, Staff));
+        sc = decided;
 
         sc.Status.Should().Be(StewardshipCaseStatus.Closed);
         sc.ClosedDate.Should().Be(Today);
-        sc.UncommittedEvents.Should().Contain(e => e is StewardshipCaseClosed);
+        events.Should().ContainSingle().Which.Should().BeOfType<StewardshipCaseClosed>();
     }
 
     [Fact]
     public void Close_AlreadyClosed_Throws()
     {
         var sc = OpenCase();
-        sc.Close("Reason", Today, Staff);
+        sc = sc.Decide(a => a.Close("Reason", Today, Staff)).Aggregate;
 
         var act = () => sc.Close("Reason again", Today, Staff);
         act.Should().Throw<BusinessRuleViolationException>();
@@ -321,7 +322,7 @@ public class StewardshipCaseTests
     public void AnyMutation_AfterClosed_Throws()
     {
         var sc = OpenCase();
-        sc.Close("Terminated", Today, Staff);
+        sc = sc.Decide(a => a.Close("Terminated", Today, Staff)).Aggregate;
 
         ((Action)(() => sc.InitiateOccupancyVerification(2026, null, Staff)))
             .Should().Throw<BusinessRuleViolationException>();

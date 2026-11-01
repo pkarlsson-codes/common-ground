@@ -11,9 +11,8 @@ namespace CommonGround.Stewardship.Domain.StewardshipCases;
 /// </summary>
 public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
 {
-#pragma warning disable CS8618
-    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
-    public StewardshipCase() { }
+#pragma warning disable CS8618 // State is set by Create from the stream's first event.
+    private StewardshipCase() { }
 #pragma warning restore CS8618
 
     private readonly List<OccupancyVerification> _occupancyVerifications = [];
@@ -42,7 +41,8 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     public IReadOnlyList<LeaseViolation> LeaseViolations => _leaseViolations;
 
     /// <summary>Opens a new stewardship case for the given ground lease.</summary>
-    public static StewardshipCase Open(
+    public static StewardshipCaseOpened Open(
+        StewardshipCaseId id,
         string groundLeaseId,
         DateOnly openedDate,
         UserId openedBy)
@@ -50,31 +50,29 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         if (string.IsNullOrWhiteSpace(groundLeaseId))
             throw new BusinessRuleViolationException("GroundLeaseId is required.");
 
-        var sc = new StewardshipCase();
-        sc.ApplyChange(new StewardshipCaseOpened(
-            StewardshipCaseId.Generate().Value,
+        return new StewardshipCaseOpened(
+            id.Value,
             groundLeaseId,
             openedDate,
-            openedBy.Value));
-        return sc;
+            openedBy.Value);
     }
 
     /// <summary>Initiates an annual occupancy verification for the given period year.</summary>
-    public void InitiateOccupancyVerification(
+    public OccupancyVerificationInitiated InitiateOccupancyVerification(
         int periodYear, DateOnly? surveyDeadline, UserId initiatedBy)
     {
         GuardActive();
 
-        ApplyChange(new OccupancyVerificationInitiated(
+        return new OccupancyVerificationInitiated(
             Id.Value,
             Guid.NewGuid(),
             periodYear,
             surveyDeadline,
-            initiatedBy.Value));
+            initiatedBy.Value);
     }
 
     /// <summary>Records a homeowner's occupancy survey submission.</summary>
-    public void SubmitOccupancyVerification(
+    public OccupancyVerificationSubmitted SubmitOccupancyVerification(
         Guid verificationId,
         bool isPrimaryResident,
         bool subletDisclosed,
@@ -88,14 +86,14 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
             throw new BusinessRuleViolationException(
                 "Verification must be Pending or Overdue to submit.");
 
-        ApplyChange(new OccupancyVerificationSubmitted(
+        return new OccupancyVerificationSubmitted(
             Id.Value, verificationId,
             isPrimaryResident, subletDisclosed, majorChanges,
-            submittedDate));
+            submittedDate);
     }
 
     /// <summary>Confirms occupancy for a submitted verification.</summary>
-    public void VerifyOccupancy(Guid verificationId, DateOnly verifiedDate, UserId verifiedBy)
+    public OccupancyVerified VerifyOccupancy(Guid verificationId, DateOnly verifiedDate, UserId verifiedBy)
     {
         GuardActive();
         var v = FindVerification(verificationId);
@@ -103,13 +101,13 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
             throw new BusinessRuleViolationException(
                 "Verification must be Submitted to verify.");
 
-        ApplyChange(new OccupancyVerified(
+        return new OccupancyVerified(
             Id.Value, verificationId, verifiedDate,
-            verifiedBy.Value));
+            verifiedBy.Value);
     }
 
     /// <summary>Fails a submitted occupancy verification.</summary>
-    public void FailOccupancy(Guid verificationId, string reason, DateOnly failedDate, UserId recordedBy)
+    public OccupancyVerificationFailed FailOccupancy(Guid verificationId, string reason, DateOnly failedDate, UserId recordedBy)
     {
         GuardActive();
         if (string.IsNullOrWhiteSpace(reason))
@@ -119,13 +117,13 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
             throw new BusinessRuleViolationException(
                 "Verification must be Submitted to fail.");
 
-        ApplyChange(new OccupancyVerificationFailed(
+        return new OccupancyVerificationFailed(
             Id.Value, verificationId, reason, failedDate,
-            recordedBy.Value));
+            recordedBy.Value);
     }
 
     /// <summary>Marks a pending occupancy verification as overdue.</summary>
-    public void MarkOccupancyVerificationOverdue(Guid verificationId, DateOnly deadline)
+    public OccupancyVerificationOverdue MarkOccupancyVerificationOverdue(Guid verificationId, DateOnly deadline)
     {
         GuardActive();
         var v = FindVerification(verificationId);
@@ -133,26 +131,26 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
             throw new BusinessRuleViolationException(
                 "Only Pending verifications can become Overdue.");
 
-        ApplyChange(new OccupancyVerificationOverdue(
-            Id.Value, verificationId, deadline));
+        return new OccupancyVerificationOverdue(
+            Id.Value, verificationId, deadline);
     }
 
     /// <summary>Schedules a property inspection.</summary>
-    public void SchedulePropertyInspection(
+    public PropertyInspectionScheduled SchedulePropertyInspection(
         DateOnly scheduledDate, string inspectorName, UserId scheduledBy)
     {
         GuardActive();
         if (string.IsNullOrWhiteSpace(inspectorName))
             throw new BusinessRuleViolationException("Inspector name is required.");
 
-        ApplyChange(new PropertyInspectionScheduled(
+        return new PropertyInspectionScheduled(
             Id.Value, Guid.NewGuid(),
             scheduledDate, inspectorName,
-            scheduledBy.Value));
+            scheduledBy.Value);
     }
 
     /// <summary>Records the completion of a scheduled property inspection.</summary>
-    public void CompletePropertyInspection(
+    public PropertyInspectionCompleted CompletePropertyInspection(
         Guid inspectionId, bool occupancyConfirmed,
         string? conditionNotes, DateOnly completedDate, UserId recordedBy)
     {
@@ -162,14 +160,14 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
             throw new BusinessRuleViolationException(
                 "Only Scheduled inspections can be completed.");
 
-        ApplyChange(new PropertyInspectionCompleted(
+        return new PropertyInspectionCompleted(
             Id.Value, inspectionId, occupancyConfirmed,
             conditionNotes, completedDate,
-            recordedBy.Value));
+            recordedBy.Value);
     }
 
     /// <summary>Cancels a scheduled property inspection.</summary>
-    public void CancelPropertyInspection(Guid inspectionId, string reason, UserId cancelledBy)
+    public PropertyInspectionCancelled CancelPropertyInspection(Guid inspectionId, string reason, UserId cancelledBy)
     {
         GuardActive();
         if (string.IsNullOrWhiteSpace(reason))
@@ -179,13 +177,13 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
             throw new BusinessRuleViolationException(
                 "Only Scheduled inspections can be cancelled.");
 
-        ApplyChange(new PropertyInspectionCancelled(
+        return new PropertyInspectionCancelled(
             Id.Value, inspectionId, reason,
-            cancelledBy.Value));
+            cancelledBy.Value);
     }
 
     /// <summary>Identifies a new lease violation.</summary>
-    public void IdentifyViolation(
+    public LeaseViolationIdentified IdentifyViolation(
         LeaseViolationType type, string description,
         DateOnly identifiedDate, UserId identifiedBy)
     {
@@ -193,13 +191,13 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         if (string.IsNullOrWhiteSpace(description))
             throw new BusinessRuleViolationException("Description is required.");
 
-        ApplyChange(new LeaseViolationIdentified(
+        return new LeaseViolationIdentified(
             Id.Value, Guid.NewGuid(), type, description,
-            identifiedDate, identifiedBy.Value));
+            identifiedDate, identifiedBy.Value);
     }
 
     /// <summary>Issues a formal violation notice for an identified violation.</summary>
-    public void IssueViolationNotice(
+    public ViolationNoticeIssued IssueViolationNotice(
         Guid violationId, DateOnly noticeDate, DateOnly cureDeadline, UserId issuedBy)
     {
         GuardActive();
@@ -208,13 +206,13 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
             throw new BusinessRuleViolationException(
                 "Notice can only be issued for Identified violations.");
 
-        ApplyChange(new ViolationNoticeIssued(
+        return new ViolationNoticeIssued(
             Id.Value, violationId, noticeDate, cureDeadline,
-            issuedBy.Value));
+            issuedBy.Value);
     }
 
     /// <summary>Records the cure of a violation that has had a notice issued.</summary>
-    public void CureViolation(Guid violationId, DateOnly curedDate, UserId verifiedBy)
+    public LeaseViolationCured CureViolation(Guid violationId, DateOnly curedDate, UserId verifiedBy)
     {
         GuardActive();
         var v = FindViolation(violationId);
@@ -222,13 +220,13 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
             throw new BusinessRuleViolationException(
                 "Only NoticeIssued violations can be cured.");
 
-        ApplyChange(new LeaseViolationCured(
+        return new LeaseViolationCured(
             Id.Value, violationId, curedDate,
-            verifiedBy.Value));
+            verifiedBy.Value);
     }
 
     /// <summary>Escalates a violation that has had a notice issued but was not cured.</summary>
-    public void EscalateViolation(
+    public LeaseViolationEscalated EscalateViolation(
         Guid violationId, string reason, DateOnly escalatedDate, UserId escalatedBy)
     {
         GuardActive();
@@ -239,50 +237,34 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
             throw new BusinessRuleViolationException(
                 "Only NoticeIssued violations can be escalated.");
 
-        ApplyChange(new LeaseViolationEscalated(
+        return new LeaseViolationEscalated(
             Id.Value, violationId, reason, escalatedDate,
-            escalatedBy.Value));
+            escalatedBy.Value);
     }
 
     /// <summary>Closes the stewardship case.</summary>
-    public void Close(string reason, DateOnly closedDate, UserId closedBy)
+    public StewardshipCaseClosed Close(string reason, DateOnly closedDate, UserId closedBy)
     {
         GuardActive();
         if (string.IsNullOrWhiteSpace(reason))
             throw new BusinessRuleViolationException("Close reason is required.");
 
-        ApplyChange(new StewardshipCaseClosed(
+        return new StewardshipCaseClosed(
             Id.Value, reason, closedDate,
-            closedBy.Value));
+            closedBy.Value);
     }
 
-    /// <inheritdoc/>
-    protected override void ApplyEvent(IDomainEvent domainEvent)
+    /// <summary>Starts a stewardship case from its first event.</summary>
+    public static StewardshipCase Create(StewardshipCaseOpened e)
     {
-        switch (domainEvent)
-        {
-            case StewardshipCaseOpened e: Apply(e); break;
-            case OccupancyVerificationInitiated e: Apply(e); break;
-            case OccupancyVerificationSubmitted e: Apply(e); break;
-            case OccupancyVerified e: Apply(e); break;
-            case OccupancyVerificationFailed e: Apply(e); break;
-            case OccupancyVerificationOverdue e: Apply(e); break;
-            case PropertyInspectionScheduled e: Apply(e); break;
-            case PropertyInspectionCompleted e: Apply(e); break;
-            case PropertyInspectionCancelled e: Apply(e); break;
-            case LeaseViolationIdentified e: Apply(e); break;
-            case ViolationNoticeIssued e: Apply(e); break;
-            case LeaseViolationCured e: Apply(e); break;
-            case LeaseViolationEscalated e: Apply(e); break;
-            case StewardshipCaseClosed e: Apply(e); break;
-            default: throw new InvalidOperationException(
-                $"Unknown event: {domainEvent?.GetType().Name}");
-        }
+        ArgumentNullException.ThrowIfNull(e);
+
+        var stewardshipCase = new StewardshipCase();
+        stewardshipCase.Apply(e);
+        return stewardshipCase;
     }
 
-    /// <summary>Applies <see cref="StewardshipCaseOpened"/>.</summary>
-
-    public void Apply(StewardshipCaseOpened e)
+    private void Apply(StewardshipCaseOpened e)
     {
         Id = StewardshipCaseId.Create(e.AggregateId);
         GroundLeaseId = e.GroundLeaseId;
@@ -291,7 +273,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     }
 
     /// <summary>Applies <see cref="OccupancyVerificationInitiated"/>.</summary>
-
     public void Apply(OccupancyVerificationInitiated e)
     {
         _occupancyVerifications.Add(new OccupancyVerification
@@ -304,7 +285,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     }
 
     /// <summary>Applies <see cref="OccupancyVerificationSubmitted"/>.</summary>
-
     public void Apply(OccupancyVerificationSubmitted e)
     {
         var v = _occupancyVerifications.First(x => x.Id == e.VerificationId);
@@ -316,7 +296,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     }
 
     /// <summary>Applies <see cref="OccupancyVerified"/>.</summary>
-
     public void Apply(OccupancyVerified e)
     {
         var v = _occupancyVerifications.First(x => x.Id == e.VerificationId);
@@ -325,7 +304,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     }
 
     /// <summary>Applies <see cref="OccupancyVerificationFailed"/>.</summary>
-
     public void Apply(OccupancyVerificationFailed e)
     {
         var v = _occupancyVerifications.First(x => x.Id == e.VerificationId);
@@ -334,7 +312,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     }
 
     /// <summary>Applies <see cref="OccupancyVerificationOverdue"/>.</summary>
-
     public void Apply(OccupancyVerificationOverdue e)
     {
         var v = _occupancyVerifications.First(x => x.Id == e.VerificationId);
@@ -342,7 +319,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     }
 
     /// <summary>Applies <see cref="PropertyInspectionScheduled"/>.</summary>
-
     public void Apply(PropertyInspectionScheduled e)
     {
         _propertyInspections.Add(new PropertyInspection
@@ -355,7 +331,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     }
 
     /// <summary>Applies <see cref="PropertyInspectionCompleted"/>.</summary>
-
     public void Apply(PropertyInspectionCompleted e)
     {
         var insp = _propertyInspections.First(x => x.Id == e.InspectionId);
@@ -366,7 +341,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     }
 
     /// <summary>Applies <see cref="PropertyInspectionCancelled"/>.</summary>
-
     public void Apply(PropertyInspectionCancelled e)
     {
         var insp = _propertyInspections.First(x => x.Id == e.InspectionId);
@@ -374,7 +348,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     }
 
     /// <summary>Applies <see cref="LeaseViolationIdentified"/>.</summary>
-
     public void Apply(LeaseViolationIdentified e)
     {
         _leaseViolations.Add(new LeaseViolation
@@ -388,7 +361,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     }
 
     /// <summary>Applies <see cref="ViolationNoticeIssued"/>.</summary>
-
     public void Apply(ViolationNoticeIssued e)
     {
         var v = _leaseViolations.First(x => x.Id == e.ViolationId);
@@ -398,7 +370,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     }
 
     /// <summary>Applies <see cref="LeaseViolationCured"/>.</summary>
-
     public void Apply(LeaseViolationCured e)
     {
         var v = _leaseViolations.First(x => x.Id == e.ViolationId);
@@ -407,7 +378,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     }
 
     /// <summary>Applies <see cref="LeaseViolationEscalated"/>.</summary>
-
     public void Apply(LeaseViolationEscalated e)
     {
         var v = _leaseViolations.First(x => x.Id == e.ViolationId);
@@ -417,7 +387,6 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     }
 
     /// <summary>Applies <see cref="StewardshipCaseClosed"/>.</summary>
-
     public void Apply(StewardshipCaseClosed e)
     {
         ClosedDate = e.ClosedDate;

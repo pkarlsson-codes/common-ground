@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain;
+using CommonGround.Stewardship.Domain.StewardshipCases;
 
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
@@ -10,7 +11,7 @@ namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 /// <param name="SurveyDeadline">Optional deadline for the survey submission.</param>
 /// <param name="InitiatedBy">The user ID of who initiated the verification.</param>
 public sealed record InitiateOccupancyVerificationCommand(
-    string StewardshipCaseId,
+    StewardshipCaseId StewardshipCaseId,
     int PeriodYear,
     DateOnly? SurveyDeadline,
     UserId InitiatedBy);

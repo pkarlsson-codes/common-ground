@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain;
+using CommonGround.Stewardship.Domain.StewardshipCases;
 
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
@@ -12,7 +13,7 @@ namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 /// <param name="CompletedDate">The date the inspection was completed.</param>
 /// <param name="RecordedBy">The user ID of who recorded the completion.</param>
 public sealed record CompletePropertyInspectionCommand(
-    string StewardshipCaseId,
+    StewardshipCaseId StewardshipCaseId,
     Guid InspectionId,
     bool OccupancyConfirmed,
     string? ConditionNotes,

@@ -11,9 +11,8 @@ namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
 /// </summary>
 public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePreventionCaseId>
 {
-#pragma warning disable CS8618
-    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
-    public ForeclosurePreventionCase() { }
+#pragma warning disable CS8618 // State is set by Create from the stream's first event.
+    private ForeclosurePreventionCase() { }
 #pragma warning restore CS8618
 
     private readonly List<CounselingReferral> _counselingReferrals = [];
@@ -48,7 +47,8 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     public IReadOnlyList<CurePeriodActivation> CurePeriodActivations => _curePeriodActivations;
 
     /// <summary>Opens a new foreclosure prevention case.</summary>
-    public static ForeclosurePreventionCase Open(
+    public static ForeclosurePreventionCaseOpened Open(
+        ForeclosurePreventionCaseId id,
         string groundLeaseId,
         ForeclosurePreventionTrigger trigger,
         DateOnly openedDate,
@@ -57,16 +57,14 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         if (string.IsNullOrWhiteSpace(groundLeaseId))
             throw new BusinessRuleViolationException("GroundLeaseId is required.");
 
-        var fpc = new ForeclosurePreventionCase();
-        fpc.ApplyChange(new ForeclosurePreventionCaseOpened(
-            ForeclosurePreventionCaseId.Generate().Value,
+        return new ForeclosurePreventionCaseOpened(
+            id.Value,
             groundLeaseId, trigger, openedDate,
-            openedBy.Value));
-        return fpc;
+            openedBy.Value);
     }
 
     /// <summary>Records a servicer delinquency without advancing the case to Active.</summary>
-    public void RecordServicerDelinquency(
+    public ServicerDelinquencyRecorded RecordServicerDelinquency(
         string servicerName, int delinquentMonths, DateOnly recordedDate, UserId recordedBy)
     {
         GuardNotResolved();
@@ -75,26 +73,26 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         if (delinquentMonths <= 0)
             throw new BusinessRuleViolationException("Delinquent months must be positive.");
 
-        ApplyChange(new ServicerDelinquencyRecorded(
+        return new ServicerDelinquencyRecorded(
             Id.Value, servicerName, delinquentMonths, recordedDate,
-            recordedBy.Value));
+            recordedBy.Value);
     }
 
     /// <summary>Makes a housing counseling referral, advancing the case to Active if still Opened.</summary>
-    public void MakeCounselingReferral(
+    public CounselingReferralMade MakeCounselingReferral(
         string agencyName, DateOnly referralDate, UserId referredBy)
     {
         GuardNotResolved();
         if (string.IsNullOrWhiteSpace(agencyName))
             throw new BusinessRuleViolationException("Agency name is required.");
 
-        ApplyChange(new CounselingReferralMade(
+        return new CounselingReferralMade(
             Id.Value, Guid.NewGuid(), agencyName, referralDate,
-            referredBy.Value));
+            referredBy.Value);
     }
 
     /// <summary>Records the outcome of a counseling referral.</summary>
-    public void RecordCounselingOutcome(
+    public CounselingOutcomeRecorded RecordCounselingOutcome(
         Guid referralId, string outcome, DateOnly outcomeDate, UserId recordedBy)
     {
         GuardActive();
@@ -103,26 +101,26 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         var referral = FindReferral(referralId);
         _ = referral;
 
-        ApplyChange(new CounselingOutcomeRecorded(
+        return new CounselingOutcomeRecorded(
             Id.Value, referralId, outcome, outcomeDate,
-            recordedBy.Value));
+            recordedBy.Value);
     }
 
     /// <summary>Submits a forbearance request to a lender, advancing the case to Active if still Opened.</summary>
-    public void RequestForbearance(
+    public ForbearanceRequested RequestForbearance(
         string lenderName, DateOnly requestedDate, UserId requestedBy)
     {
         GuardNotResolved();
         if (string.IsNullOrWhiteSpace(lenderName))
             throw new BusinessRuleViolationException("Lender name is required.");
 
-        ApplyChange(new ForbearanceRequested(
+        return new ForbearanceRequested(
             Id.Value, Guid.NewGuid(), lenderName, requestedDate,
-            requestedBy.Value));
+            requestedBy.Value);
     }
 
     /// <summary>Records the lender's decision on a forbearance request.</summary>
-    public void RecordForbearanceOutcome(
+    public ForbearanceOutcomeRecorded RecordForbearanceOutcome(
         Guid requestId, ForbearanceOutcome outcome, DateOnly outcomeDate,
         string? notes, UserId recordedBy)
     {
@@ -130,13 +128,13 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         var request = FindForbearanceRequest(requestId);
         _ = request;
 
-        ApplyChange(new ForbearanceOutcomeRecorded(
+        return new ForbearanceOutcomeRecorded(
             Id.Value, requestId, outcome, outcomeDate, notes,
-            recordedBy.Value));
+            recordedBy.Value);
     }
 
     /// <summary>Activates a CLT cure period under a lender recognition agreement, advancing the case to Active if still Opened.</summary>
-    public void ActivateCurePeriod(
+    public CurePeriodActivated ActivateCurePeriod(
         string lraId, DateOnly activationDate, int curePeriodDays, UserId activatedBy)
     {
         GuardNotResolved();
@@ -146,44 +144,34 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
             throw new BusinessRuleViolationException("Cure period days must be positive.");
 
         var cureDeadline = activationDate.AddDays(curePeriodDays);
-        ApplyChange(new CurePeriodActivated(
+        return new CurePeriodActivated(
             Id.Value, Guid.NewGuid(), lraId, activationDate, curePeriodDays, cureDeadline,
-            activatedBy.Value));
+            activatedBy.Value);
     }
 
     /// <summary>Resolves the case with the given outcome.</summary>
-    public void Resolve(ForeclosurePreventionOutcome outcome, DateOnly resolvedDate, UserId resolvedBy)
+    public ForeclosurePreventionCaseResolved Resolve(ForeclosurePreventionOutcome outcome, DateOnly resolvedDate, UserId resolvedBy)
     {
         if (Status != ForeclosurePreventionCaseStatus.Active)
             throw new BusinessRuleViolationException(
                 "ForeclosurePreventionCase must be Active to resolve.");
 
-        ApplyChange(new ForeclosurePreventionCaseResolved(
+        return new ForeclosurePreventionCaseResolved(
             Id.Value, outcome, resolvedDate,
-            resolvedBy.Value));
+            resolvedBy.Value);
     }
 
-    /// <inheritdoc/>
-    protected override void ApplyEvent(IDomainEvent domainEvent)
+    /// <summary>Starts a foreclosure prevention case from its first event.</summary>
+    public static ForeclosurePreventionCase Create(ForeclosurePreventionCaseOpened e)
     {
-        switch (domainEvent)
-        {
-            case ForeclosurePreventionCaseOpened e: Apply(e); break;
-            case ServicerDelinquencyRecorded: break;
-            case CounselingReferralMade e: Apply(e); break;
-            case CounselingOutcomeRecorded e: Apply(e); break;
-            case ForbearanceRequested e: Apply(e); break;
-            case ForbearanceOutcomeRecorded e: Apply(e); break;
-            case CurePeriodActivated e: Apply(e); break;
-            case ForeclosurePreventionCaseResolved e: Apply(e); break;
-            default: throw new InvalidOperationException(
-                $"Unknown event: {domainEvent?.GetType().Name}");
-        }
+        ArgumentNullException.ThrowIfNull(e);
+
+        var foreclosurePreventionCase = new ForeclosurePreventionCase();
+        foreclosurePreventionCase.Apply(e);
+        return foreclosurePreventionCase;
     }
 
-    /// <summary>Applies <see cref="ForeclosurePreventionCaseOpened"/>.</summary>
-
-    public void Apply(ForeclosurePreventionCaseOpened e)
+    private void Apply(ForeclosurePreventionCaseOpened e)
     {
         Id = ForeclosurePreventionCaseId.Create(e.AggregateId);
         GroundLeaseId = e.GroundLeaseId;
@@ -193,7 +181,6 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     }
 
     /// <summary>Applies <see cref="CounselingReferralMade"/>.</summary>
-
     public void Apply(CounselingReferralMade e)
     {
         _counselingReferrals.Add(new CounselingReferral
@@ -207,7 +194,6 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     }
 
     /// <summary>Applies <see cref="CounselingOutcomeRecorded"/>.</summary>
-
     public void Apply(CounselingOutcomeRecorded e)
     {
         var referral = _counselingReferrals.First(r => r.Id == e.ReferralId);
@@ -216,7 +202,6 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     }
 
     /// <summary>Applies <see cref="ForbearanceRequested"/>.</summary>
-
     public void Apply(ForbearanceRequested e)
     {
         _forbearanceRequests.Add(new ForbearanceRequest
@@ -230,7 +215,6 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     }
 
     /// <summary>Applies <see cref="ForbearanceOutcomeRecorded"/>.</summary>
-
     public void Apply(ForbearanceOutcomeRecorded e)
     {
         var request = _forbearanceRequests.First(r => r.Id == e.RequestId);
@@ -240,7 +224,6 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     }
 
     /// <summary>Applies <see cref="CurePeriodActivated"/>.</summary>
-
     public void Apply(CurePeriodActivated e)
     {
         _curePeriodActivations.Add(new CurePeriodActivation
@@ -256,7 +239,6 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     }
 
     /// <summary>Applies <see cref="ForeclosurePreventionCaseResolved"/>.</summary>
-
     public void Apply(ForeclosurePreventionCaseResolved e)
     {
         Outcome = e.Outcome;

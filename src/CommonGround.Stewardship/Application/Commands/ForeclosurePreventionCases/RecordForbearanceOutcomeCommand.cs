@@ -13,7 +13,7 @@ namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCas
 /// <param name="Notes">Optional notes about the outcome.</param>
 /// <param name="RecordedBy">The user ID of who recorded the outcome.</param>
 public sealed record RecordForbearanceOutcomeCommand(
-    string ForeclosurePreventionCaseId,
+    ForeclosurePreventionCaseId ForeclosurePreventionCaseId,
     Guid RequestId,
     ForbearanceOutcome Outcome,
     DateOnly OutcomeDate,

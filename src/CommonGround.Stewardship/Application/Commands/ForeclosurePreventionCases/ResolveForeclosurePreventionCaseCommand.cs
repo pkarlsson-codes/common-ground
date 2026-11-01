@@ -11,7 +11,7 @@ namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCas
 /// <param name="ResolvedDate">The date the case was resolved.</param>
 /// <param name="ResolvedBy">The user ID of who resolved the case.</param>
 public sealed record ResolveForeclosurePreventionCaseCommand(
-    string ForeclosurePreventionCaseId,
+    ForeclosurePreventionCaseId ForeclosurePreventionCaseId,
     ForeclosurePreventionOutcome Outcome,
     DateOnly ResolvedDate,
     UserId ResolvedBy);

@@ -1,3 +1,5 @@
+using CommonGround.Stewardship.Domain.StewardshipCases;
+
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
 /// <summary>
@@ -10,7 +12,7 @@ namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 /// <param name="MajorChanges">Optional notes about major changes to the property.</param>
 /// <param name="SubmittedDate">The date the verification was submitted.</param>
 public sealed record SubmitOccupancyVerificationCommand(
-    string StewardshipCaseId,
+    StewardshipCaseId StewardshipCaseId,
     Guid VerificationId,
     bool IsPrimaryResident,
     bool SubletDisclosed,

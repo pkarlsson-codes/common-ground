@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain;
+using CommonGround.Stewardship.Domain.StewardshipCases;
 
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
@@ -10,7 +11,7 @@ namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 /// <param name="ClosedDate">The date the case was closed.</param>
 /// <param name="ClosedBy">The user ID of who closed the case.</param>
 public sealed record CloseStewardshipCaseCommand(
-    string StewardshipCaseId,
+    StewardshipCaseId StewardshipCaseId,
     string Reason,
     DateOnly ClosedDate,
     UserId ClosedBy);

@@ -12,7 +12,7 @@ namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 /// <param name="IdentifiedDate">The date the violation was identified.</param>
 /// <param name="IdentifiedBy">The user ID of who identified the violation.</param>
 public sealed record IdentifyViolationCommand(
-    string StewardshipCaseId,
+    StewardshipCaseId StewardshipCaseId,
     LeaseViolationType Type,
     string Description,
     DateOnly IdentifiedDate,

@@ -1,3 +1,5 @@
+using CommonGround.Stewardship.Domain.StewardshipCases;
+
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
 /// <summary>
@@ -7,6 +9,6 @@ namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 /// <param name="VerificationId">The ID of the occupancy verification.</param>
 /// <param name="Deadline">The deadline that was passed.</param>
 public sealed record MarkOccupancyVerificationOverdueCommand(
-    string StewardshipCaseId,
+    StewardshipCaseId StewardshipCaseId,
     Guid VerificationId,
     DateOnly Deadline);

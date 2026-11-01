@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain;
+using CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
 
 namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
 
@@ -11,7 +12,7 @@ namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCas
 /// <param name="OutcomeDate">The date the outcome occurred.</param>
 /// <param name="RecordedBy">The user ID of who recorded the outcome.</param>
 public sealed record RecordCounselingOutcomeCommand(
-    string ForeclosurePreventionCaseId,
+    ForeclosurePreventionCaseId ForeclosurePreventionCaseId,
     Guid ReferralId,
     string Outcome,
     DateOnly OutcomeDate,

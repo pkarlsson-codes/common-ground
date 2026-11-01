@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain;
+using CommonGround.Stewardship.Domain.StewardshipCases;
 
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
@@ -10,7 +11,7 @@ namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 /// <param name="Reason">The reason for cancellation.</param>
 /// <param name="CancelledBy">The user ID of who cancelled the inspection.</param>
 public sealed record CancelPropertyInspectionCommand(
-    string StewardshipCaseId,
+    StewardshipCaseId StewardshipCaseId,
     Guid InspectionId,
     string Reason,
     UserId CancelledBy);

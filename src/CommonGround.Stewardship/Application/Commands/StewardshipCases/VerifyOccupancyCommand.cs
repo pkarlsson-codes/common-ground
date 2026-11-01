@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain;
+using CommonGround.Stewardship.Domain.StewardshipCases;
 
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
@@ -10,7 +11,7 @@ namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 /// <param name="VerifiedDate">The date the occupancy was verified.</param>
 /// <param name="VerifiedBy">The user ID of who verified the occupancy.</param>
 public sealed record VerifyOccupancyCommand(
-    string StewardshipCaseId,
+    StewardshipCaseId StewardshipCaseId,
     Guid VerificationId,
     DateOnly VerifiedDate,
     UserId VerifiedBy);

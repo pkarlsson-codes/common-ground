@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain;
+using CommonGround.Stewardship.Domain.StewardshipCases;
 
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
@@ -10,7 +11,7 @@ namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 /// <param name="InspectorName">The name of the inspector.</param>
 /// <param name="ScheduledBy">The user ID of who scheduled the inspection.</param>
 public sealed record SchedulePropertyInspectionCommand(
-    string StewardshipCaseId,
+    StewardshipCaseId StewardshipCaseId,
     DateOnly ScheduledDate,
     string InspectorName,
     UserId ScheduledBy);

@@ -38,8 +38,10 @@ public static class ForeclosurePreventionCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
 
-        var id = await bus.InvokeForTenantAsync<string>(bus.TenantId!,
+        var id = ForeclosurePreventionCaseId.Generate();
+        await bus.InvokeForTenantAsync(bus.TenantId!,
             new OpenForeclosurePreventionCaseCommand(
+                id,
                 request.GroundLeaseId,
                 request.ServicerName,
                 request.DelinquentMonths,
@@ -47,7 +49,7 @@ public static class ForeclosurePreventionCasesEndpoints
                 userId),
             ct).ConfigureAwait(false);
 
-        return Results.Accepted(value: new { Id = id });
+        return Results.Accepted(value: new { Id = id.Value });
     }
 
     [WolverinePost("/api/stewardship/foreclosure-prevention/{id}/servicer-delinquency")]
@@ -56,7 +58,7 @@ public static class ForeclosurePreventionCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new RecordServicerDelinquencyCommand(
-            id, request.ServicerName, request.DelinquentMonths, request.RecordedDate, userId), ct);
+            ForeclosurePreventionCaseId.Create(id), request.ServicerName, request.DelinquentMonths, request.RecordedDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -66,7 +68,7 @@ public static class ForeclosurePreventionCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new MakeCounselingReferralCommand(
-            id, request.AgencyName, request.ReferralDate, userId), ct);
+            ForeclosurePreventionCaseId.Create(id), request.AgencyName, request.ReferralDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -76,7 +78,7 @@ public static class ForeclosurePreventionCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new RecordCounselingOutcomeCommand(
-            id, referralId, request.Outcome, request.OutcomeDate, userId), ct);
+            ForeclosurePreventionCaseId.Create(id), referralId, request.Outcome, request.OutcomeDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -86,7 +88,7 @@ public static class ForeclosurePreventionCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new RequestForbearanceCommand(
-            id, request.LenderName, request.RequestedDate, userId), ct);
+            ForeclosurePreventionCaseId.Create(id), request.LenderName, request.RequestedDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -101,7 +103,7 @@ public static class ForeclosurePreventionCasesEndpoints
         }
 
         await bus.InvokeForTenantAsync(bus.TenantId!, new RecordForbearanceOutcomeCommand(
-            id, requestId, outcome, request.OutcomeDate, request.Notes, userId), ct);
+            ForeclosurePreventionCaseId.Create(id), requestId, outcome, request.OutcomeDate, request.Notes, userId), ct);
         return Results.NoContent();
     }
 
@@ -111,7 +113,7 @@ public static class ForeclosurePreventionCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new ActivateCurePeriodCommand(
-            id, request.LraId, request.ActivationDate, request.CurePeriodDays, userId), ct);
+            ForeclosurePreventionCaseId.Create(id), request.LraId, request.ActivationDate, request.CurePeriodDays, userId), ct);
         return Results.NoContent();
     }
 
@@ -127,7 +129,7 @@ public static class ForeclosurePreventionCasesEndpoints
         }
 
         await bus.InvokeForTenantAsync(bus.TenantId!, new ResolveForeclosurePreventionCaseCommand(
-            id, outcome, request.ResolvedDate, userId), ct);
+            ForeclosurePreventionCaseId.Create(id), outcome, request.ResolvedDate, userId), ct);
         return Results.NoContent();
     }
 }

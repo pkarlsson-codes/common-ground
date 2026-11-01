@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain;
+using CommonGround.Stewardship.Domain.StewardshipCases;
 
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
@@ -11,7 +12,7 @@ namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 /// <param name="FailedDate">The date the verification failed.</param>
 /// <param name="RecordedBy">The user ID of who recorded the failure.</param>
 public sealed record FailOccupancyCommand(
-    string StewardshipCaseId,
+    StewardshipCaseId StewardshipCaseId,
     Guid VerificationId,
     string Reason,
     DateOnly FailedDate,

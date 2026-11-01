@@ -36,7 +36,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new InitiateOccupancyVerificationCommand(
-            id, request.PeriodYear, request.SurveyDeadline, userId), ct);
+            StewardshipCaseId.Create(id), request.PeriodYear, request.SurveyDeadline, userId), ct);
         return Results.NoContent();
     }
 
@@ -45,7 +45,7 @@ public static class StewardshipCasesEndpoints
     {
         ArgumentNullException.ThrowIfNull(request);
         await bus.InvokeForTenantAsync(bus.TenantId!, new SubmitOccupancyVerificationCommand(
-            id, verificationId, request.IsPrimaryResident, request.SubletDisclosed,
+            StewardshipCaseId.Create(id), verificationId, request.IsPrimaryResident, request.SubletDisclosed,
             request.MajorChanges, request.SubmittedDate), ct);
         return Results.NoContent();
     }
@@ -56,7 +56,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new VerifyOccupancyCommand(
-            id, verificationId, request.VerifiedDate, userId), ct);
+            StewardshipCaseId.Create(id), verificationId, request.VerifiedDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -66,7 +66,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new FailOccupancyCommand(
-            id, verificationId, request.Reason, request.FailedDate, userId), ct);
+            StewardshipCaseId.Create(id), verificationId, request.Reason, request.FailedDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -75,7 +75,7 @@ public static class StewardshipCasesEndpoints
     {
         ArgumentNullException.ThrowIfNull(request);
         await bus.InvokeForTenantAsync(bus.TenantId!, new MarkOccupancyVerificationOverdueCommand(
-            id, verificationId, request.Deadline), ct);
+            StewardshipCaseId.Create(id), verificationId, request.Deadline), ct);
         return Results.NoContent();
     }
 
@@ -85,7 +85,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new SchedulePropertyInspectionCommand(
-            id, request.ScheduledDate, request.InspectorName, userId), ct);
+            StewardshipCaseId.Create(id), request.ScheduledDate, request.InspectorName, userId), ct);
         return Results.NoContent();
     }
 
@@ -95,7 +95,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new CompletePropertyInspectionCommand(
-            id, inspectionId, request.OccupancyConfirmed, request.ConditionNotes,
+            StewardshipCaseId.Create(id), inspectionId, request.OccupancyConfirmed, request.ConditionNotes,
             request.CompletedDate, userId), ct);
         return Results.NoContent();
     }
@@ -106,7 +106,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new CancelPropertyInspectionCommand(
-            id, inspectionId, request.Reason, userId), ct);
+            StewardshipCaseId.Create(id), inspectionId, request.Reason, userId), ct);
         return Results.NoContent();
     }
 
@@ -117,7 +117,7 @@ public static class StewardshipCasesEndpoints
         var userId = httpContext.GetUserId();
         var violationType = LeaseViolationType.FromDisplayName(request.ViolationType);
         await bus.InvokeForTenantAsync(bus.TenantId!, new IdentifyViolationCommand(
-            id, violationType, request.Description, request.IdentifiedDate, userId), ct);
+            StewardshipCaseId.Create(id), violationType, request.Description, request.IdentifiedDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -127,7 +127,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new IssueViolationNoticeCommand(
-            id, violationId, request.NoticeDate, request.CureDeadline, userId), ct);
+            StewardshipCaseId.Create(id), violationId, request.NoticeDate, request.CureDeadline, userId), ct);
         return Results.NoContent();
     }
 
@@ -137,7 +137,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new CureViolationCommand(
-            id, violationId, request.CuredDate, userId), ct);
+            StewardshipCaseId.Create(id), violationId, request.CuredDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -147,7 +147,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new EscalateViolationCommand(
-            id, violationId, request.Reason, request.EscalatedDate, userId), ct);
+            StewardshipCaseId.Create(id), violationId, request.Reason, request.EscalatedDate, userId), ct);
         return Results.NoContent();
     }
 
@@ -157,7 +157,7 @@ public static class StewardshipCasesEndpoints
         ArgumentNullException.ThrowIfNull(request);
         var userId = httpContext.GetUserId();
         await bus.InvokeForTenantAsync(bus.TenantId!, new CloseStewardshipCaseCommand(
-            id, request.Reason, request.ClosedDate, userId), ct);
+            StewardshipCaseId.Create(id), request.Reason, request.ClosedDate, userId), ct);
         return Results.NoContent();
     }
 }

@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain;
+using CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
 
 namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
 
@@ -10,7 +11,7 @@ namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCas
 /// <param name="RequestedDate">The date forbearance was requested.</param>
 /// <param name="RequestedBy">The user ID of who requested forbearance.</param>
 public sealed record RequestForbearanceCommand(
-    string ForeclosurePreventionCaseId,
+    ForeclosurePreventionCaseId ForeclosurePreventionCaseId,
     string LenderName,
     DateOnly RequestedDate,
     UserId RequestedBy);

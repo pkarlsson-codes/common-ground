@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain;
+using CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
 
 namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
 
@@ -11,7 +12,7 @@ namespace CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCas
 /// <param name="CurePeriodDays">The number of days in the cure period.</param>
 /// <param name="ActivatedBy">The user ID of who activated the cure period.</param>
 public sealed record ActivateCurePeriodCommand(
-    string ForeclosurePreventionCaseId,
+    ForeclosurePreventionCaseId ForeclosurePreventionCaseId,
     string LraId,
     DateOnly ActivationDate,
     int CurePeriodDays,

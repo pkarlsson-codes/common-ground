@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain;
+using CommonGround.Stewardship.Domain.StewardshipCases;
 
 namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 
@@ -11,7 +12,7 @@ namespace CommonGround.Stewardship.Application.Commands.StewardshipCases;
 /// <param name="CureDeadline">The deadline to cure the violation.</param>
 /// <param name="IssuedBy">The user ID of who issued the notice.</param>
 public sealed record IssueViolationNoticeCommand(
-    string StewardshipCaseId,
+    StewardshipCaseId StewardshipCaseId,
     Guid ViolationId,
     DateOnly NoticeDate,
     DateOnly CureDeadline,
