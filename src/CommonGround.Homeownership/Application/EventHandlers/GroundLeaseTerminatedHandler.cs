@@ -1,19 +1,20 @@
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
-using Wolverine;
 using GroundLeaseTerminatedIntegration = CommonGround.Homeownership.Contracts.Events.GroundLeaseTerminated;
 
 namespace CommonGround.Homeownership.Application.EventHandlers;
 
 /// <summary>Publishes an integration event when a ground lease is terminated, so other BCs can react.</summary>
-public sealed class GroundLeaseTerminatedHandler(IMessageBus bus)
+public static class GroundLeaseTerminatedHandler
 {
-    /// <summary>Handles the domain event and publishes the integration event to the bus.</summary>
-    public async Task Handle(GroundLeaseTerminated @event, CancellationToken ct)
+    /// <summary>Maps the domain event to the integration event Wolverine publishes.</summary>
+    public static GroundLeaseTerminatedIntegration Handle(GroundLeaseTerminated @event)
     {
-        await bus.PublishAsync(new GroundLeaseTerminatedIntegration(
+        ArgumentNullException.ThrowIfNull(@event);
+
+        return new GroundLeaseTerminatedIntegration(
             @event.AggregateId,
             @event.Reason,
             @event.TerminatedDate,
-            @event.TerminatedBy)).ConfigureAwait(false);
+            @event.TerminatedBy);
     }
 }

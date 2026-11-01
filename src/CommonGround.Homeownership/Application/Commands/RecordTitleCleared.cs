@@ -1,7 +1,7 @@
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
+using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
 
@@ -16,21 +16,11 @@ public sealed record RecordTitleCleared(
 public static class RecordTitleClearedHandler
 {
     /// <summary>Loads the workflow, records title clearance, and persists.</summary>
-    public static async Task Handle(
-        RecordTitleCleared command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static TitleCleared? Handle(RecordTitleCleared command, [WriteAggregate(nameof(RecordTitleCleared.WorkflowId))] PurchaseWorkflow workflow)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(workflow);
 
-        var workflow = await session
-            .LoadAggregateAsync<PurchaseWorkflow>(
-                command.WorkflowId,
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        workflow.RecordTitleCleared(command.ClearedDate, command.TitleCompanyName, command.RecordedBy);
-
-        session.UpdateAggregate(workflow);
+        return workflow.RecordTitleCleared(command.ClearedDate, command.TitleCompanyName, command.RecordedBy);
     }
 }

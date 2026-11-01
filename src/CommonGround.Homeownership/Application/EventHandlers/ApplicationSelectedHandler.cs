@@ -4,8 +4,8 @@ using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
 using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.EventHandlers;
 
@@ -19,22 +19,28 @@ public static class ApplicationSelectedHandler
         WorkflowPhase.Withdrawn.DisplayName,
     ];
 
+    /// <summary>Finds the application's purchase workflow that is still open, if any.</summary>
+    public static Task<PurchaseWorkflowView?> LoadAsync(ApplicationSelected @event, IQuerySession session, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(@event);
+        ArgumentNullException.ThrowIfNull(session);
+
+        return session.Query<PurchaseWorkflowView>()
+            .Where(v => v.ApplicationId == @event.ApplicationId && !TerminalPhaseNames.Contains(v.Phase))
+            .FirstOrDefaultAsync(ct);
+    }
+
     /// <summary>Creates a purchase workflow when an applicant is selected for a home, unless an open workflow already exists for the application.</summary>
-    public static async Task Handle(
-        ApplicationSelected @event,
-        IDocumentSession session,
-        CancellationToken ct)
+    public static IMartenOp Handle(ApplicationSelected @event, PurchaseWorkflowView? existingOpenWorkflow)
     {
         ArgumentNullException.ThrowIfNull(@event);
 
-        var existingOpenWorkflow = await session.Query<PurchaseWorkflowView>()
-            .Where(v => v.ApplicationId == @event.ApplicationId && !TerminalPhaseNames.Contains(v.Phase))
-            .FirstOrDefaultAsync(ct).ConfigureAwait(false);
-
         if (existingOpenWorkflow is not null)
-            return;
+            return MartenOps.Nothing();
 
-        var workflow = PurchaseWorkflow.Initiate(
+        var workflowId = PurchaseWorkflowId.Generate();
+        var initiated = PurchaseWorkflow.Initiate(
+            workflowId,
             GroundLeaseTemplateId.Create(@event.GroundLeaseTemplateId),
             @event.LandParcelId,
             @event.HomeId,
@@ -44,6 +50,6 @@ public static class ApplicationSelectedHandler
             @event.ApplicationId,
             @event.HouseholdId);
 
-        session.CreateAggregate<PurchaseWorkflow, PurchaseWorkflowId>(workflow);
+        return MartenOps.StartStream<PurchaseWorkflow>(workflowId.Value, initiated);
     }
 }

@@ -4,6 +4,7 @@ using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.Testing;
 using FluentAssertions;
 
 namespace CommonGround.Homeownership.Tests.Domain.PurchaseWorkflows;
@@ -18,16 +19,17 @@ public class PurchaseWorkflowTests
 
     private static PurchaseWorkflow CreateWorkflow(decimal price = 250_000m)
     {
-        return PurchaseWorkflow.Initiate(LeaseTemplateId, ParcelId, HomeId, Buyer, price, StaffUser);
+        return EventReplay.Replay<PurchaseWorkflow>(PurchaseWorkflow.Initiate(PurchaseWorkflowId.Generate(), LeaseTemplateId, ParcelId, HomeId, Buyer, price, StaffUser));
     }
 
-    private static void SatisfyAllTracks(PurchaseWorkflow workflow)
+    private static PurchaseWorkflow SatisfyAllTracks(PurchaseWorkflow workflow)
     {
-        workflow.RecordEligibilityVerified(new DateOnly(2025, 3, 1), "Income verified", StaffUser);
-        workflow.RecordFinancingCommitted("First National", 240_000m, new DateOnly(2025, 3, 5), StaffUser);
-        workflow.RecordInspectionCompleted(new DateOnly(2025, 3, 10), "Bob Inspector", "All clear", StaffUser);
-        workflow.RecordTitleCleared(new DateOnly(2025, 3, 12), "Acme Title Co", StaffUser);
-        workflow.RecordLeaseExecuted(new DateOnly(2025, 3, 15), StaffUser);
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), "Income verified", StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordFinancingCommitted("First National", 240_000m, new DateOnly(2025, 3, 5), StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordInspectionCompleted(new DateOnly(2025, 3, 10), "Bob Inspector", "All clear", StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordTitleCleared(new DateOnly(2025, 3, 12), "Acme Title Co", StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordLeaseExecuted(new DateOnly(2025, 3, 15), StaffUser)).Aggregate;
+        return workflow;
     }
 
     // --- Initiation ---
@@ -49,24 +51,15 @@ public class PurchaseWorkflowTests
     [Fact]
     public void Initiate_ZeroPrice_Throws()
     {
-        var act = () => PurchaseWorkflow.Initiate(LeaseTemplateId, ParcelId, HomeId, Buyer, 0m, StaffUser);
+        var act = () => PurchaseWorkflow.Initiate(PurchaseWorkflowId.Generate(), LeaseTemplateId, ParcelId, HomeId, Buyer, 0m, StaffUser);
         act.Should().Throw<BusinessRuleViolationException>();
     }
 
     [Fact]
     public void Initiate_NegativePrice_Throws()
     {
-        var act = () => PurchaseWorkflow.Initiate(LeaseTemplateId, ParcelId, HomeId, Buyer, -1m, StaffUser);
+        var act = () => PurchaseWorkflow.Initiate(PurchaseWorkflowId.Generate(), LeaseTemplateId, ParcelId, HomeId, Buyer, -1m, StaffUser);
         act.Should().Throw<BusinessRuleViolationException>();
-    }
-
-    [Fact]
-    public void Initiate_EmitsPurchaseWorkflowInitiatedEvent()
-    {
-        var workflow = CreateWorkflow();
-
-        workflow.UncommittedEvents.Should().HaveCount(1);
-        workflow.UncommittedEvents.First().Should().BeOfType<PurchaseWorkflowInitiated>();
     }
 
     // --- Track recording advances phase ---
@@ -76,7 +69,7 @@ public class PurchaseWorkflowTests
     {
         var workflow = CreateWorkflow();
 
-        workflow.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser);
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser)).Aggregate;
 
         workflow.Phase.Should().Be(WorkflowPhase.InProgress);
         workflow.IsEligibilityVerified.Should().BeTrue();
@@ -88,7 +81,7 @@ public class PurchaseWorkflowTests
     {
         var workflow = CreateWorkflow();
 
-        workflow.RecordFinancingCommitted("First National", 240_000m, new DateOnly(2025, 3, 5), StaffUser);
+        workflow = workflow.Decide(a => a.RecordFinancingCommitted("First National", 240_000m, new DateOnly(2025, 3, 5), StaffUser)).Aggregate;
 
         workflow.IsFinancingCommitted.Should().BeTrue();
         workflow.FinancingDetails!.LenderName.Should().Be("First National");
@@ -100,7 +93,7 @@ public class PurchaseWorkflowTests
     {
         var workflow = CreateWorkflow();
 
-        workflow.RecordInspectionCompleted(new DateOnly(2025, 3, 10), "Bob Inspector", "All clear", StaffUser);
+        workflow = workflow.Decide(a => a.RecordInspectionCompleted(new DateOnly(2025, 3, 10), "Bob Inspector", "All clear", StaffUser)).Aggregate;
 
         workflow.IsInspectionCompleted.Should().BeTrue();
         workflow.InspectionResult!.InspectorName.Should().Be("Bob Inspector");
@@ -111,7 +104,7 @@ public class PurchaseWorkflowTests
     {
         var workflow = CreateWorkflow();
 
-        workflow.RecordTitleCleared(new DateOnly(2025, 3, 12), "Acme Title Co", StaffUser);
+        workflow = workflow.Decide(a => a.RecordTitleCleared(new DateOnly(2025, 3, 12), "Acme Title Co", StaffUser)).Aggregate;
 
         workflow.IsTitleCleared.Should().BeTrue();
         workflow.TitleDetails!.TitleCompanyName.Should().Be("Acme Title Co");
@@ -122,7 +115,7 @@ public class PurchaseWorkflowTests
     {
         var workflow = CreateWorkflow();
 
-        workflow.RecordLeaseExecuted(new DateOnly(2025, 3, 15), StaffUser);
+        workflow = workflow.Decide(a => a.RecordLeaseExecuted(new DateOnly(2025, 3, 15), StaffUser)).Aggregate;
 
         workflow.IsLeaseExecuted.Should().BeTrue();
         workflow.LeaseExecutionDetails!.SignedDate.Should().Be(new DateOnly(2025, 3, 15));
@@ -136,11 +129,11 @@ public class PurchaseWorkflowTests
         var workflow = CreateWorkflow();
 
         // Record in non-sequential order to prove parallel independence
-        workflow.RecordTitleCleared(new DateOnly(2025, 3, 12), null, StaffUser);
-        workflow.RecordLeaseExecuted(new DateOnly(2025, 3, 15), StaffUser);
-        workflow.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser);
-        workflow.RecordInspectionCompleted(new DateOnly(2025, 3, 10), "Inspector", null, StaffUser);
-        workflow.RecordFinancingCommitted("Bank", 240_000m, new DateOnly(2025, 3, 5), StaffUser);
+        workflow = workflow.Decide(a => a.RecordTitleCleared(new DateOnly(2025, 3, 12), null, StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordLeaseExecuted(new DateOnly(2025, 3, 15), StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordInspectionCompleted(new DateOnly(2025, 3, 10), "Inspector", null, StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordFinancingCommitted("Bank", 240_000m, new DateOnly(2025, 3, 5), StaffUser)).Aggregate;
 
         workflow.AllMandatoryTracksSatisfied.Should().BeTrue();
         workflow.Phase.Should().Be(WorkflowPhase.InProgress);
@@ -153,13 +146,12 @@ public class PurchaseWorkflowTests
     {
         var workflow = CreateWorkflow();
 
-        workflow.RecordEligibilityVerified(new DateOnly(2025, 3, 1), "First", StaffUser);
-        var eventCountAfterFirst = workflow.UncommittedEvents.Count();
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), "First", StaffUser)).Aggregate;
 
-        workflow.RecordEligibilityVerified(new DateOnly(2025, 4, 1), "Second", StaffUser);
+        var (after, events) = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 4, 1), "Second", StaffUser));
 
-        workflow.UncommittedEvents.Count().Should().Be(eventCountAfterFirst);
-        workflow.EligibilityDetails!.Notes.Should().Be("First");
+        events.Should().BeEmpty();
+        after.EligibilityDetails!.Notes.Should().Be("First");
     }
 
     // --- Closing ---
@@ -168,9 +160,9 @@ public class PurchaseWorkflowTests
     public void ScheduleClosing_WhenAllTracksSatisfied_Succeeds()
     {
         var workflow = CreateWorkflow();
-        SatisfyAllTracks(workflow);
+        workflow = SatisfyAllTracks(workflow);
 
-        workflow.ScheduleClosing(new DateOnly(2025, 4, 1), StaffUser);
+        workflow = workflow.Decide(a => a.ScheduleClosing(new DateOnly(2025, 4, 1), StaffUser)).Aggregate;
 
         workflow.Phase.Should().Be(WorkflowPhase.ClosingScheduled);
         workflow.ScheduledClosingDate.Should().Be(new DateOnly(2025, 4, 1));
@@ -180,7 +172,7 @@ public class PurchaseWorkflowTests
     public void ScheduleClosing_WhenTracksMissing_Throws()
     {
         var workflow = CreateWorkflow();
-        workflow.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser);
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser)).Aggregate;
 
         var act = () => workflow.ScheduleClosing(new DateOnly(2025, 4, 1), StaffUser);
 
@@ -192,10 +184,10 @@ public class PurchaseWorkflowTests
     public void ScheduleClosing_WhenStalledAndAllTracksSatisfied_Succeeds()
     {
         var workflow = CreateWorkflow();
-        SatisfyAllTracks(workflow);
-        workflow.StallWorkflow("Waiting on docs", new DateOnly(2025, 3, 20), new DateOnly(2025, 4, 15), StaffUser);
+        workflow = SatisfyAllTracks(workflow);
+        workflow = workflow.Decide(a => a.StallWorkflow("Waiting on docs", new DateOnly(2025, 3, 20), new DateOnly(2025, 4, 15), StaffUser)).Aggregate;
 
-        workflow.ScheduleClosing(new DateOnly(2025, 4, 1), StaffUser);
+        workflow = workflow.Decide(a => a.ScheduleClosing(new DateOnly(2025, 4, 1), StaffUser)).Aggregate;
 
         workflow.Phase.Should().Be(WorkflowPhase.ClosingScheduled);
         workflow.ScheduledClosingDate.Should().Be(new DateOnly(2025, 4, 1));
@@ -205,8 +197,8 @@ public class PurchaseWorkflowTests
     public void ScheduleClosing_WhenNotInProgress_Throws()
     {
         var workflow = CreateWorkflow();
-        SatisfyAllTracks(workflow);
-        workflow.ScheduleClosing(new DateOnly(2025, 4, 1), StaffUser);
+        workflow = SatisfyAllTracks(workflow);
+        workflow = workflow.Decide(a => a.ScheduleClosing(new DateOnly(2025, 4, 1), StaffUser)).Aggregate;
 
         var act = () => workflow.ScheduleClosing(new DateOnly(2025, 4, 2), StaffUser);
 
@@ -218,10 +210,10 @@ public class PurchaseWorkflowTests
     public void RecordPurchaseClosed_WhenClosingScheduled_Succeeds()
     {
         var workflow = CreateWorkflow();
-        SatisfyAllTracks(workflow);
-        workflow.ScheduleClosing(new DateOnly(2025, 4, 1), StaffUser);
+        workflow = SatisfyAllTracks(workflow);
+        workflow = workflow.Decide(a => a.ScheduleClosing(new DateOnly(2025, 4, 1), StaffUser)).Aggregate;
 
-        workflow.RecordPurchaseClosed(new DateOnly(2025, 4, 1), "Smooth closing", StaffUser);
+        workflow = workflow.Decide(a => a.RecordPurchaseClosed(new DateOnly(2025, 4, 1), "Smooth closing", StaffUser)).Aggregate;
 
         workflow.Phase.Should().Be(WorkflowPhase.Closed);
         workflow.IsTerminal.Should().BeTrue();
@@ -233,7 +225,7 @@ public class PurchaseWorkflowTests
     public void RecordPurchaseClosed_WhenNotScheduled_Throws()
     {
         var workflow = CreateWorkflow();
-        SatisfyAllTracks(workflow);
+        workflow = SatisfyAllTracks(workflow);
 
         var act = () => workflow.RecordPurchaseClosed(new DateOnly(2025, 4, 1), null, StaffUser);
 
@@ -248,7 +240,7 @@ public class PurchaseWorkflowTests
     {
         var workflow = CreateWorkflow();
 
-        workflow.FailPurchase("Buyer lost job", new DateOnly(2025, 3, 20), StaffUser);
+        workflow = workflow.Decide(a => a.FailPurchase("Buyer lost job", new DateOnly(2025, 3, 20), StaffUser)).Aggregate;
 
         workflow.Phase.Should().Be(WorkflowPhase.Failed);
         workflow.IsTerminal.Should().BeTrue();
@@ -269,7 +261,7 @@ public class PurchaseWorkflowTests
     public void FailPurchase_WhenAlreadyTerminal_Throws()
     {
         var workflow = CreateWorkflow();
-        workflow.FailPurchase("First failure", new DateOnly(2025, 3, 20), StaffUser);
+        workflow = workflow.Decide(a => a.FailPurchase("First failure", new DateOnly(2025, 3, 20), StaffUser)).Aggregate;
 
         var act = () => workflow.FailPurchase("Second attempt", new DateOnly(2025, 3, 21), StaffUser);
 
@@ -283,9 +275,9 @@ public class PurchaseWorkflowTests
     public void WithdrawPurchase_FromAnyNonTerminal_Succeeds()
     {
         var workflow = CreateWorkflow();
-        workflow.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser);
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser)).Aggregate;
 
-        workflow.WithdrawPurchase(new DateOnly(2025, 3, 20), "Changed mind", StaffUser);
+        workflow = workflow.Decide(a => a.WithdrawPurchase(new DateOnly(2025, 3, 20), "Changed mind", StaffUser)).Aggregate;
 
         workflow.Phase.Should().Be(WorkflowPhase.Withdrawn);
         workflow.IsTerminal.Should().BeTrue();
@@ -298,9 +290,9 @@ public class PurchaseWorkflowTests
     public void StallWorkflow_FromInProgress_Succeeds()
     {
         var workflow = CreateWorkflow();
-        workflow.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser);
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser)).Aggregate;
 
-        workflow.StallWorkflow("Waiting on appraisal", new DateOnly(2025, 3, 15), new DateOnly(2025, 4, 15), StaffUser);
+        workflow = workflow.Decide(a => a.StallWorkflow("Waiting on appraisal", new DateOnly(2025, 3, 15), new DateOnly(2025, 4, 15), StaffUser)).Aggregate;
 
         workflow.Phase.Should().Be(WorkflowPhase.Stalled);
         workflow.StalledReason.Should().Be("Waiting on appraisal");
@@ -324,11 +316,11 @@ public class PurchaseWorkflowTests
     public void StallWorkflow_ThenRecordTrack_ResumesToInProgress()
     {
         var workflow = CreateWorkflow();
-        workflow.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser);
-        workflow.StallWorkflow("Waiting", new DateOnly(2025, 3, 15), new DateOnly(2025, 4, 15), StaffUser);
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.StallWorkflow("Waiting", new DateOnly(2025, 3, 15), new DateOnly(2025, 4, 15), StaffUser)).Aggregate;
         workflow.Phase.Should().Be(WorkflowPhase.Stalled);
 
-        workflow.RecordFinancingCommitted("Bank", 240_000m, new DateOnly(2025, 3, 20), StaffUser);
+        workflow = workflow.Decide(a => a.RecordFinancingCommitted("Bank", 240_000m, new DateOnly(2025, 3, 20), StaffUser)).Aggregate;
 
         workflow.Phase.Should().Be(WorkflowPhase.InProgress);
     }
@@ -339,7 +331,7 @@ public class PurchaseWorkflowTests
     public void RecordTrack_WhenTerminal_Throws()
     {
         var workflow = CreateWorkflow();
-        workflow.FailPurchase("Deal fell through", new DateOnly(2025, 3, 20), StaffUser);
+        workflow = workflow.Decide(a => a.FailPurchase("Deal fell through", new DateOnly(2025, 3, 20), StaffUser)).Aggregate;
 
         var act = () => workflow.RecordEligibilityVerified(
             new DateOnly(2025, 3, 25), null, StaffUser);
@@ -353,9 +345,8 @@ public class PurchaseWorkflowTests
     [Fact]
     public void EventsEmitted_ContainCorrectData()
     {
-        var workflow = CreateWorkflow();
+        var initiated = PurchaseWorkflow.Initiate(PurchaseWorkflowId.Generate(), LeaseTemplateId, ParcelId, HomeId, Buyer, 250_000m, StaffUser);
 
-        var initiated = workflow.UncommittedEvents.OfType<PurchaseWorkflowInitiated>().Single();
         initiated.GroundLeaseTemplateId.Should().Be(LeaseTemplateId.Value);
         initiated.BuyerFullName.Should().Be("Alice Johnson");
         initiated.BuyerEmail.Should().Be("alice@example.com");

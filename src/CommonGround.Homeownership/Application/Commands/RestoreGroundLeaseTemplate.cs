@@ -1,7 +1,8 @@
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
+using CommonGround.Homeownership.Domain.GroundLeaseTemplates.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
 using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
 
@@ -15,21 +16,12 @@ public static class RestoreGroundLeaseTemplateHandler
 {
     /// <summary>Restores the ground lease template identified by the command.</summary>
     /// <param name="command">The restore command.</param>
-    /// <param name="session">The Marten document session.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    public static async Task Handle(
-        RestoreGroundLeaseTemplate command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    /// <param name="template">The template, loaded from its stream.</param>
+    public static GroundLeaseTemplateRestored Handle(RestoreGroundLeaseTemplate command, [WriteAggregate(nameof(RestoreGroundLeaseTemplate.TemplateId))] GroundLeaseTemplate template)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(template);
 
-        var template = await session
-            .LoadAggregateAsync<GroundLeaseTemplate>(command.TemplateId, cancellationToken)
-            .ConfigureAwait(false);
-
-        template.Restore(command.RestoredBy);
-
-        session.UpdateAggregate(template);
+        return template.Restore(command.RestoredBy);
     }
 }

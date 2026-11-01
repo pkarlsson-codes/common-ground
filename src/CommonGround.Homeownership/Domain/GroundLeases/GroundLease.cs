@@ -14,9 +14,8 @@ namespace CommonGround.Homeownership.Domain.GroundLeases;
 /// </summary>
 public sealed class GroundLease : AggregateRoot<GroundLeaseId>
 {
-#pragma warning disable CS8618
-    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
-    public GroundLease() { }
+#pragma warning disable CS8618 // State is set by Create from the stream's first event.
+    private GroundLease() { }
 #pragma warning restore CS8618
 
     /// <summary>Gets the ID of the land parcel this lease is for.</summary>
@@ -59,7 +58,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     public PurchaseWorkflowId? PurchaseWorkflowId { get; private set; } 
 
     /// <summary>Creates a new ground lease.</summary>
-    public static GroundLease Create(
+    public static GroundLeaseCreated Establish(
+        GroundLeaseId id,
         string landParcelId,
         string unitId,
         DateOnly leaseStartDate,
@@ -78,9 +78,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         if (string.IsNullOrWhiteSpace(covenantTerms))
             throw BusinessRuleViolation.GroundLease.Create.CovenantTermsRequired();
 
-        var lease = new GroundLease();
-        lease.ApplyChange(new GroundLeaseCreated(
-            GroundLeaseId.Generate().Value,
+        return new GroundLeaseCreated(
+            id.Value,
             landParcelId,
             unitId,
             leaseStartDate,
@@ -92,13 +91,12 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             resalePolicyTerms.BaselineIndexValue,
             resalePolicyTerms.AnnualPercentage,
             resalePolicyTerms.ImprovementsCap,
-            createdBy.Value));
-
-        return lease;
+            createdBy.Value);
     }
 
     /// <summary>Creates a new ground lease from an active template.</summary>
-    public static GroundLease CreateFromPurchase(
+    public static GroundLeaseCreatedFromPurchase CreateFromPurchase(
+        GroundLeaseId id,
         GroundLeaseTemplate template,
         PurchaseWorkflow purchaseWorkflow,
         DateOnly leaseStartDate,
@@ -112,9 +110,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             throw BusinessRuleViolation.GroundLease.CreateFromTemplate.TemplateNotActive(template.Status);
         }
 
-        var lease = new GroundLease();
-        lease.ApplyChange(new GroundLeaseCreatedFromPurchase(
-            GroundLeaseId.Generate().Value,
+        return new GroundLeaseCreatedFromPurchase(
+            id.Value,
             purchaseWorkflow.Id.Value,
             template.Id.Value,
             purchaseWorkflow.LandParcelId,
@@ -131,67 +128,57 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             createdBy.Value,
             purchaseWorkflow.Buyer.FullName,
             purchaseWorkflow.Buyer.Email,
-            purchaseWorkflow.Buyer.Phone?.Value));
-
-        return lease;
+            purchaseWorkflow.Buyer.Phone?.Value);
     }
 
     /// <summary>Terminates this ground lease.</summary>
     /// <param name="reason">The reason for termination.</param>
     /// <param name="terminatedDate">The date of termination.</param>
     /// <param name="terminatedBy">The user recording this action.</param>
-    public void Terminate(string reason, DateOnly terminatedDate, UserId terminatedBy)
+    public GroundLeaseTerminated Terminate(string reason, DateOnly terminatedDate, UserId terminatedBy)
     {
-
         if (string.IsNullOrWhiteSpace(reason))
             throw BusinessRuleViolation.GroundLease.Terminate.ReasonRequired();
 
         if (Status != GroundLeaseStatus.Active)
             throw BusinessRuleViolation.GroundLease.Terminate.StatusNotActive(Status);
 
-        ApplyChange(new GroundLeaseTerminated(
+        return new GroundLeaseTerminated(
             Id.Value,
             reason,
             terminatedDate,
-            terminatedBy.Value));
+            terminatedBy.Value);
     }
 
     /// <summary>Records a stewardship check-in visit.</summary>
     /// <param name="checkInDate">Date of the check-in.</param>
     /// <param name="notes">Notes from the visit.</param>
     /// <param name="recordedBy">The user recording this action.</param>
-    public void RecordStewardshipCheckIn(DateOnly checkInDate, string notes, UserId recordedBy)
+    public StewardshipCheckInRecorded RecordStewardshipCheckIn(DateOnly checkInDate, string notes, UserId recordedBy)
     {
-
         if (string.IsNullOrWhiteSpace(notes))
         {
             throw BusinessRuleViolation.GroundLease.RecordStewardshipCheckIn.NotesRequired();
         }
 
-        ApplyChange(new StewardshipCheckInRecorded(
+        return new StewardshipCheckInRecorded(
             Id.Value,
             checkInDate,
             notes,
-            recordedBy.Value));
+            recordedBy.Value);
     }
 
-    /// <inheritdoc/>
-    protected override void ApplyEvent(IDomainEvent domainEvent)
+    /// <summary>Starts a ground lease from its first event.</summary>
+    public static GroundLease Create(GroundLeaseCreated e)
     {
-        switch (domainEvent)
-        {
-            case GroundLeaseCreated e: Apply(e); break;
-            case GroundLeaseCreatedFromPurchase e: Apply(e); break;
-            case StewardshipCheckInRecorded: break; // No state mutation needed
-            case GroundLeaseTerminated e: Apply(e); break;
-            default: throw new InvalidOperationException(
-                $"Unknown event: {domainEvent?.GetType().Name}");
-        }
+        ArgumentNullException.ThrowIfNull(e);
+
+        var groundLease = new GroundLease();
+        groundLease.Apply(e);
+        return groundLease;
     }
 
-    /// <summary>Applies <see cref="GroundLeaseCreated"/>.</summary>
-
-    public void Apply(GroundLeaseCreated e)
+    private void Apply(GroundLeaseCreated e)
     {
         Id = GroundLeaseId.Create(e.AggregateId);
         LandParcelId = e.LandParcelId;
@@ -215,9 +202,17 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         TemplateId = null;
     }
 
-    /// <summary>Applies <see cref="GroundLeaseCreatedFromPurchase"/>.</summary>
+    /// <summary>Starts a ground lease from its first event.</summary>
+    public static GroundLease Create(GroundLeaseCreatedFromPurchase e)
+    {
+        ArgumentNullException.ThrowIfNull(e);
 
-    public void Apply(GroundLeaseCreatedFromPurchase e)
+        var groundLease = new GroundLease();
+        groundLease.Apply(e);
+        return groundLease;
+    }
+
+    private void Apply(GroundLeaseCreatedFromPurchase e)
     {
         Id = GroundLeaseId.Create(e.AggregateId);
         PurchaseWorkflowId = PurchaseWorkflows.PurchaseWorkflowId.Create(e.PurchaseWorkflowId);
@@ -244,7 +239,6 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     }
 
     /// <summary>Applies <see cref="GroundLeaseTerminated"/>.</summary>
-
     public void Apply(GroundLeaseTerminated _)
     {
         Status = GroundLeaseStatus.Inactive;

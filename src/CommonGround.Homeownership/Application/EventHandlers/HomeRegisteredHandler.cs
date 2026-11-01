@@ -1,6 +1,6 @@
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.PropertyRegistry.Contracts.Events;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.EventHandlers;
 
@@ -8,10 +8,10 @@ namespace CommonGround.Homeownership.Application.EventHandlers;
 public static class HomeRegisteredHandler
 {
     /// <summary>Records the home's label so purchases can name it.</summary>
-    public static void Handle(HomeRegistered @event, IDocumentSession session)
+    public static IMartenOp Handle(HomeRegistered @event)
     {
         ArgumentNullException.ThrowIfNull(@event);
 
-        session.Store(new HomeLabelView { Id = @event.HomeId, Label = @event.Label });
+        return MartenOps.Store(new HomeLabelView { Id = @event.HomeId, Label = @event.Label });
     }
 }

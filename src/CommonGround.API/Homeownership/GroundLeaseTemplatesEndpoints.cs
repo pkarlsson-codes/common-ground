@@ -34,14 +34,17 @@ public static class GroundLeaseTemplatesEndpoints
             request.AnnualPercentage,
             request.ImprovementsCap);
 
+        var id = GroundLeaseTemplateId.Generate();
+
         var command = new CreateGroundLeaseTemplate(
+            id,
             request.TemplateName,
             request.TermYears,
             request.CovenantTerms,
             resalePolicyTerms,
             userId);
 
-        var id = await bus.InvokeForTenantAsync<GroundLeaseTemplateId>(bus.TenantId!, command, cancellationToken);
+        await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);
 
         return Results.Created($"/api/ground-lease-templates/{id.Value}",
             new CreateGroundLeaseTemplateResponse(id.Value));

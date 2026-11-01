@@ -56,26 +56,25 @@ public sealed class GroundLeaseTemplatesInitialData : IInitialData
                 }
             }
 
-            var template = GroundLeaseTemplate.Create(
+            var templateId = GroundLeaseTemplateId.Generate();
+            var defined = GroundLeaseTemplate.Define(
+                templateId,
                 entry.TemplateName,
                 entry.TermYears,
                 entry.CovenantTerms,
                 ToResalePolicyTerms(entry),
                 SeederUserId);
 
-            if (entry.Archived)
-            {
-                template.Archive(SeederUserId);
-            }
-
-            trustSession.Events.StartStream<GroundLeaseTemplate>(template.Id.Value, template.UncommittedEvents.ToArray());
-            template.UncommittedEvents.MarkAsCommitted();
+            object[] events = entry.Archived
+                ? [defined, GroundLeaseTemplate.Create(defined).Archive(SeederUserId)]
+                : [defined];
+            trustSession.Events.StartStream<GroundLeaseTemplate>(templateId.Value, events);
 
             trustSession.Store(new GroundLeaseTemplateSeedLookup
             {
                 Id = lookupId,
                 SeedKey = entry.SeedKey,
-                TemplateId = template.Id.Value,
+                TemplateId = templateId.Value,
                 SeededAt = DateTimeOffset.UtcNow,
             });
 

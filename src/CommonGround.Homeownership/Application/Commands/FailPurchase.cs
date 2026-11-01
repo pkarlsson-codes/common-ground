@@ -1,7 +1,7 @@
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
+using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
 
@@ -16,21 +16,11 @@ public sealed record FailPurchase(
 public static class FailPurchaseHandler
 {
     /// <summary>Loads the workflow, records the failure, and persists.</summary>
-    public static async Task Handle(
-        FailPurchase command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static PurchaseFailed Handle(FailPurchase command, [WriteAggregate(nameof(FailPurchase.WorkflowId))] PurchaseWorkflow workflow)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(workflow);
 
-        var workflow = await session
-            .LoadAggregateAsync<PurchaseWorkflow>(
-                command.WorkflowId,
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        workflow.FailPurchase(command.FailureReason, command.FailedDate, command.RecordedBy);
-
-        session.UpdateAggregate(workflow);
+        return workflow.FailPurchase(command.FailureReason, command.FailedDate, command.RecordedBy);
     }
 }

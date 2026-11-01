@@ -11,9 +11,8 @@ namespace CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 /// </summary>
 public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
 {
-#pragma warning disable CS8618
-    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
-    public GroundLeaseTemplate() { }
+#pragma warning disable CS8618 // State is set by Create from the stream's first event.
+    private GroundLeaseTemplate() { }
 #pragma warning restore CS8618
 
     /// <summary>Gets the template display name.</summary>
@@ -38,7 +37,8 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
     public UserId CreatedBy { get; private set; }
 
     /// <summary>Creates a new ground lease template.</summary>
-    public static GroundLeaseTemplate Create(
+    public static GroundLeaseTemplateCreated Define(
+        GroundLeaseTemplateId id,
         string templateName,
         int termYears,
         string covenantTerms,
@@ -62,9 +62,8 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
             throw BusinessRuleViolation.GroundLeaseTemplate.Create.CovenantTermsRequired();
         }
 
-        var template = new GroundLeaseTemplate();
-        template.ApplyChange(new GroundLeaseTemplateCreated(
-            GroundLeaseTemplateId.Generate().Value,
+        return new GroundLeaseTemplateCreated(
+            id.Value,
             templateName,
             termYears,
             covenantTerms,
@@ -74,55 +73,46 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
             resalePolicyTerms.BaselineIndexValue,
             resalePolicyTerms.AnnualPercentage,
             resalePolicyTerms.ImprovementsCap,
-            createdBy.Value));
-
-        return template;
+            createdBy.Value);
     }
 
     /// <summary>Restores this template to active status.</summary>
-    public void Restore(UserId restoredBy)
+    public GroundLeaseTemplateRestored Restore(UserId restoredBy)
     {
-
         if (Status == GroundLeaseTemplateStatus.Active)
         {
             throw BusinessRuleViolation.GroundLeaseTemplate.Restore.AlreadyActive();
         }
 
-        ApplyChange(new GroundLeaseTemplateRestored(
+        return new GroundLeaseTemplateRestored(
             Id.Value,
-            restoredBy.Value));
+            restoredBy.Value);
     }
 
     /// <summary>Archives this template, making it inactive.</summary>
-    public void Archive(UserId archivedBy)
+    public GroundLeaseTemplateArchived Archive(UserId archivedBy)
     {
-
         if (Status == GroundLeaseTemplateStatus.Inactive)
         {
             throw BusinessRuleViolation.GroundLeaseTemplate.Archive.AlreadyInactive();
         }
 
-        ApplyChange(new GroundLeaseTemplateArchived(
+        return new GroundLeaseTemplateArchived(
             Id.Value,
-            archivedBy.Value));
+            archivedBy.Value);
     }
 
-    /// <inheritdoc/>
-    protected override void ApplyEvent(IDomainEvent domainEvent)
+    /// <summary>Starts a ground lease template from its first event.</summary>
+    public static GroundLeaseTemplate Create(GroundLeaseTemplateCreated e)
     {
-        switch (domainEvent)
-        {
-            case GroundLeaseTemplateCreated e: Apply(e); break;
-            case GroundLeaseTemplateArchived e: Apply(e); break;
-            case GroundLeaseTemplateRestored e: Apply(e); break;
-            default: throw new InvalidOperationException(
-                $"Unknown event: {domainEvent?.GetType().Name}");
-        }
+        ArgumentNullException.ThrowIfNull(e);
+
+        var groundLeaseTemplate = new GroundLeaseTemplate();
+        groundLeaseTemplate.Apply(e);
+        return groundLeaseTemplate;
     }
 
-    /// <summary>Applies <see cref="GroundLeaseTemplateCreated"/>.</summary>
-
-    public void Apply(GroundLeaseTemplateCreated e)
+    private void Apply(GroundLeaseTemplateCreated e)
     {
         Id = GroundLeaseTemplateId.Create(e.AggregateId);
         TemplateName = e.TemplateName;
@@ -144,14 +134,12 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
     }
 
     /// <summary>Applies <see cref="GroundLeaseTemplateArchived"/>.</summary>
-
     public void Apply(GroundLeaseTemplateArchived _)
     {
         Status = GroundLeaseTemplateStatus.Inactive;
     }
 
     /// <summary>Applies <see cref="GroundLeaseTemplateRestored"/>.</summary>
-
     public void Apply(GroundLeaseTemplateRestored _)
     {
         Status = GroundLeaseTemplateStatus.Active;

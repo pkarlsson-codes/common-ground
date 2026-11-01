@@ -34,7 +34,10 @@ public static class GroundLeasesEndpoints
             request.AnnualPercentage,
             request.ImprovementsCap);
 
+        var id = GroundLeaseId.Generate();
+
         var command = new CreateGroundLease(
+            id,
             request.LandParcelId,
             request.HomeId,
             request.LeaseStartDate,
@@ -43,7 +46,7 @@ public static class GroundLeasesEndpoints
             resalePolicyTerms,
             userId);
 
-        var id = await bus.InvokeForTenantAsync<GroundLeaseId>(bus.TenantId!, command, cancellationToken);
+        await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);
 
         return Results.Created($"/api/ground-leases/{id.Value}", new CreateGroundLeaseResponse(id.Value));
     }

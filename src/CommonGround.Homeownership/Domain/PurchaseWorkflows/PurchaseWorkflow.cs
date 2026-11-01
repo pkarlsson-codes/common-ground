@@ -15,9 +15,8 @@ namespace CommonGround.Homeownership.Domain.PurchaseWorkflows;
 /// </summary>
 public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 {
-#pragma warning disable CS8618
-    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
-    public PurchaseWorkflow() { }
+#pragma warning disable CS8618 // State is set by Create from the stream's first event.
+    private PurchaseWorkflow() { }
 #pragma warning restore CS8618
 
     /// <summary>Gets the ground lease this purchase is for.</summary>
@@ -110,6 +109,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     public bool IsTerminal => Phase.IsTerminal;
 
     /// <summary>Initiates a new purchase workflow.</summary>
+    /// <param name="id">The new stream's ID, chosen by the caller.</param>
     /// <param name="groundLeaseTemplateId">The ground lease template to use.</param>
     /// <param name="landParcelId">The land parcel ID of the property being purchased.</param>
     /// <param name="homeId">The home ID of the property being purchased.</param>
@@ -119,7 +119,8 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <param name="applicationId">The homeowner application this workflow originates from, or null for manual/resale-initiated workflows.</param>
     /// <param name="householdId">The buying household, or null for manual/resale-initiated workflows.</param>
     /// <returns>A new purchase workflow instance.</returns>
-    public static PurchaseWorkflow Initiate(
+    public static PurchaseWorkflowInitiated Initiate(
+        PurchaseWorkflowId id,
         GroundLeaseTemplateId groundLeaseTemplateId,
         string landParcelId,
         string homeId,
@@ -138,9 +139,8 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
             throw BusinessRuleViolation.PurchaseWorkflow.Initiate.PurchasePriceNonPositive(purchasePrice);
         }
 
-        var workflow = new PurchaseWorkflow();
-        workflow.ApplyChange(new PurchaseWorkflowInitiated(
-            PurchaseWorkflowId.Generate().Value,
+        return new PurchaseWorkflowInitiated(
+            id.Value,
             groundLeaseTemplateId.Value,
             landParcelId,
             homeId,
@@ -150,24 +150,22 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
             purchasePrice,
             initiatedBy.Value,
             applicationId,
-            householdId));
-
-        return workflow;
+            householdId);
     }
 
     /// <summary>Records that buyer eligibility has been verified. Idempotent.</summary>
     /// <param name="verifiedDate">Date of verification.</param>
     /// <param name="notes">Optional notes.</param>
     /// <param name="recordedBy">The user recording this fact.</param>
-    public void RecordEligibilityVerified(
+    public BuyerEligibilityVerified? RecordEligibilityVerified(
         DateOnly verifiedDate, string? notes, UserId recordedBy)
     {
         GuardNotTerminal();
-        if (IsEligibilityVerified) return;
+        if (IsEligibilityVerified) return null;
 
-        ApplyChange(new BuyerEligibilityVerified(
+        return new BuyerEligibilityVerified(
             Id.Value, verifiedDate, notes,
-            recordedBy.Value));
+            recordedBy.Value);
     }
 
     /// <summary>Records that financing has been committed by a lender. Idempotent.</summary>
@@ -175,16 +173,16 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <param name="committedAmount">Amount committed.</param>
     /// <param name="preapprovalLetterDate">Date of pre-approval letter.</param>
     /// <param name="recordedBy">The user recording this fact.</param>
-    public void RecordFinancingCommitted(
+    public FinancingCommitted? RecordFinancingCommitted(
         string lenderName, decimal committedAmount,
         DateOnly preapprovalLetterDate, UserId recordedBy)
     {
         GuardNotTerminal();
-        if (IsFinancingCommitted) return;
+        if (IsFinancingCommitted) return null;
 
-        ApplyChange(new FinancingCommitted(
+        return new FinancingCommitted(
             Id.Value, lenderName, committedAmount,
-            preapprovalLetterDate, recordedBy.Value));
+            preapprovalLetterDate, recordedBy.Value);
     }
 
     /// <summary>Records that a home inspection has been completed. Idempotent.</summary>
@@ -192,51 +190,51 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <param name="inspectorName">Name of the inspector.</param>
     /// <param name="notes">Optional notes.</param>
     /// <param name="recordedBy">The user recording this fact.</param>
-    public void RecordInspectionCompleted(
+    public InspectionCompleted? RecordInspectionCompleted(
         DateOnly inspectionDate, string inspectorName,
         string? notes, UserId recordedBy)
     {
         GuardNotTerminal();
-        if (IsInspectionCompleted) return;
+        if (IsInspectionCompleted) return null;
 
-        ApplyChange(new InspectionCompleted(
+        return new InspectionCompleted(
             Id.Value, inspectionDate, inspectorName, notes,
-            recordedBy.Value));
+            recordedBy.Value);
     }
 
     /// <summary>Records that the title has been cleared. Idempotent.</summary>
     /// <param name="clearedDate">Date the title was cleared.</param>
     /// <param name="titleCompanyName">Optional title company name.</param>
     /// <param name="recordedBy">The user recording this fact.</param>
-    public void RecordTitleCleared(
+    public TitleCleared? RecordTitleCleared(
         DateOnly clearedDate, string? titleCompanyName,
         UserId recordedBy)
     {
         GuardNotTerminal();
-        if (IsTitleCleared) return;
+        if (IsTitleCleared) return null;
 
-        ApplyChange(new TitleCleared(
+        return new TitleCleared(
             Id.Value, clearedDate, titleCompanyName,
-            recordedBy.Value));
+            recordedBy.Value);
     }
 
     /// <summary>Records that both parties have signed the ground lease. Idempotent.</summary>
     /// <param name="signedDate">Date of signing.</param>
     /// <param name="recordedBy">The user recording this fact.</param>
-    public void RecordLeaseExecuted(
+    public LeaseExecuted? RecordLeaseExecuted(
         DateOnly signedDate, UserId recordedBy)
     {
         GuardNotTerminal();
-        if (IsLeaseExecuted) return;
+        if (IsLeaseExecuted) return null;
 
-        ApplyChange(new LeaseExecuted(
-            Id.Value, signedDate, recordedBy.Value));
+        return new LeaseExecuted(
+            Id.Value, signedDate, recordedBy.Value);
     }
 
     /// <summary>Schedules the closing date. Requires all mandatory tracks satisfied and InProgress phase.</summary>
     /// <param name="scheduledClosingDate">The date to schedule closing.</param>
     /// <param name="recordedBy">The user recording this fact.</param>
-    public void ScheduleClosing(
+    public ClosingScheduled ScheduleClosing(
         DateOnly scheduledClosingDate, UserId recordedBy)
     {
         GuardNotTerminal();
@@ -255,35 +253,34 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
             throw BusinessRuleViolation.PurchaseWorkflow.ScheduleClosing.InvalidPhase(Phase);
         }
 
-        ApplyChange(new ClosingScheduled(
+        return new ClosingScheduled(
             Id.Value, scheduledClosingDate,
-            recordedBy.Value));
+            recordedBy.Value);
     }
 
     /// <summary>Records that the purchase has been closed. Requires ClosingScheduled phase.</summary>
     /// <param name="actualClosingDate">The actual date of closing.</param>
     /// <param name="notes">Optional closing notes.</param>
     /// <param name="recordedBy">The user recording this fact.</param>
-    public void RecordPurchaseClosed(
+    public PurchaseClosed RecordPurchaseClosed(
         DateOnly actualClosingDate, string? notes,
         UserId recordedBy)
     {
-
         if (Phase != WorkflowPhase.ClosingScheduled)
         {
             throw BusinessRuleViolation.PurchaseWorkflow.RecordPurchaseClosed.PhaseNotClosingScheduled(Phase);
         }
 
-        ApplyChange(new PurchaseClosed(
+        return new PurchaseClosed(
             Id.Value, actualClosingDate, notes,
-            recordedBy.Value));
+            recordedBy.Value);
     }
 
     /// <summary>Records that the purchase has failed.</summary>
     /// <param name="failureReason">Reason for failure. Required.</param>
     /// <param name="failedDate">Date of failure.</param>
     /// <param name="recordedBy">The user recording this fact.</param>
-    public void FailPurchase(
+    public PurchaseFailed FailPurchase(
         string failureReason, DateOnly failedDate,
         UserId recordedBy)
     {
@@ -294,24 +291,24 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
             throw BusinessRuleViolation.PurchaseWorkflow.FailPurchase.FailureReasonRequired();
         }
 
-        ApplyChange(new PurchaseFailed(
+        return new PurchaseFailed(
             Id.Value, failureReason, failedDate,
-            recordedBy.Value));
+            recordedBy.Value);
     }
 
     /// <summary>Records that the buyer has withdrawn.</summary>
     /// <param name="withdrawnDate">Date of withdrawal.</param>
     /// <param name="reason">Optional withdrawal reason.</param>
     /// <param name="recordedBy">The user recording this fact.</param>
-    public void WithdrawPurchase(
+    public PurchaseWithdrawn WithdrawPurchase(
         DateOnly withdrawnDate, string? reason,
         UserId recordedBy)
     {
         GuardNotTerminal();
 
-        ApplyChange(new PurchaseWithdrawn(
+        return new PurchaseWithdrawn(
             Id.Value, withdrawnDate, reason,
-            recordedBy.Value));
+            recordedBy.Value);
     }
 
     /// <summary>Records that the workflow is stalled. Only from InProgress phase.</summary>
@@ -319,45 +316,31 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <param name="stalledDate">Date the stall occurred.</param>
     /// <param name="resolutionTargetDate">Expected resolution date.</param>
     /// <param name="recordedBy">The user recording this fact.</param>
-    public void StallWorkflow(
+    public WorkflowStalled StallWorkflow(
         string stalledReason, DateOnly stalledDate,
         DateOnly resolutionTargetDate, UserId recordedBy)
     {
-
         if (Phase != WorkflowPhase.InProgress)
         {
             throw BusinessRuleViolation.PurchaseWorkflow.StallWorkflow.PhaseNotInProgress(Phase);
         }
 
-        ApplyChange(new WorkflowStalled(
+        return new WorkflowStalled(
             Id.Value, stalledReason, stalledDate,
-            resolutionTargetDate, recordedBy.Value));
+            resolutionTargetDate, recordedBy.Value);
     }
 
-    /// <inheritdoc/>
-    protected override void ApplyEvent(IDomainEvent domainEvent)
+    /// <summary>Starts a purchase workflow from its first event.</summary>
+    public static PurchaseWorkflow Create(PurchaseWorkflowInitiated e)
     {
-        switch (domainEvent)
-        {
-            case PurchaseWorkflowInitiated e: Apply(e); break;
-            case BuyerEligibilityVerified e: Apply(e); break;
-            case FinancingCommitted e: Apply(e); break;
-            case InspectionCompleted e: Apply(e); break;
-            case TitleCleared e: Apply(e); break;
-            case LeaseExecuted e: Apply(e); break;
-            case ClosingScheduled e: Apply(e); break;
-            case PurchaseClosed e: Apply(e); break;
-            case PurchaseFailed e: Apply(e); break;
-            case PurchaseWithdrawn e: Apply(e); break;
-            case WorkflowStalled e: Apply(e); break;
-            default: throw new InvalidOperationException(
-                $"Unknown event: {domainEvent?.GetType().Name}");
-        }
+        ArgumentNullException.ThrowIfNull(e);
+
+        var purchaseWorkflow = new PurchaseWorkflow();
+        purchaseWorkflow.Apply(e);
+        return purchaseWorkflow;
     }
 
-    /// <summary>Applies <see cref="PurchaseWorkflowInitiated"/>.</summary>
-
-    public void Apply(PurchaseWorkflowInitiated e)
+    private void Apply(PurchaseWorkflowInitiated e)
     {
         Id = PurchaseWorkflowId.Create(e.AggregateId);
         GroundLeaseTemplateId = GroundLeaseTemplateId.Create(e.GroundLeaseTemplateId);
@@ -373,7 +356,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     }
 
     /// <summary>Applies <see cref="BuyerEligibilityVerified"/>.</summary>
-
     public void Apply(BuyerEligibilityVerified e)
     {
         EligibilityDetails = new EligibilityDetails(e.VerifiedDate, e.EligibilityNotes);
@@ -381,7 +363,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     }
 
     /// <summary>Applies <see cref="FinancingCommitted"/>.</summary>
-
     public void Apply(FinancingCommitted e)
     {
         FinancingDetails = new FinancingDetails(
@@ -390,7 +371,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     }
 
     /// <summary>Applies <see cref="InspectionCompleted"/>.</summary>
-
     public void Apply(InspectionCompleted e)
     {
         InspectionResult = new InspectionResult(
@@ -399,7 +379,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     }
 
     /// <summary>Applies <see cref="TitleCleared"/>.</summary>
-
     public void Apply(TitleCleared e)
     {
         TitleDetails = new TitleDetails(e.ClearedDate, e.TitleCompanyName);
@@ -407,7 +386,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     }
 
     /// <summary>Applies <see cref="LeaseExecuted"/>.</summary>
-
     public void Apply(LeaseExecuted e)
     {
         LeaseExecutionDetails = new LeaseExecutionDetails(e.SignedDate);
@@ -415,7 +393,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     }
 
     /// <summary>Applies <see cref="ClosingScheduled"/>.</summary>
-
     public void Apply(ClosingScheduled e)
     {
         ScheduledClosingDate = e.ScheduledClosingDate;
@@ -423,7 +400,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     }
 
     /// <summary>Applies <see cref="PurchaseClosed"/>.</summary>
-
     public void Apply(PurchaseClosed e)
     {
         ClosingDetails = new ClosingDetails(e.ActualClosingDate, e.ClosingNotes);
@@ -431,7 +407,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     }
 
     /// <summary>Applies <see cref="PurchaseFailed"/>.</summary>
-
     public void Apply(PurchaseFailed e)
     {
         FailureReason = e.FailureReason;
@@ -439,7 +414,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     }
 
     /// <summary>Applies <see cref="PurchaseWithdrawn"/>.</summary>
-
     public void Apply(PurchaseWithdrawn e)
     {
         WithdrawalReason = e.WithdrawalReason;
@@ -447,7 +421,6 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     }
 
     /// <summary>Applies <see cref="WorkflowStalled"/>.</summary>
-
     public void Apply(WorkflowStalled e)
     {
         StalledReason = e.StalledReason;

@@ -1,7 +1,7 @@
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
+using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
 
@@ -16,21 +16,11 @@ public sealed record WithdrawPurchase(
 public static class WithdrawPurchaseHandler
 {
     /// <summary>Loads the workflow, records buyer withdrawal, and persists.</summary>
-    public static async Task Handle(
-        WithdrawPurchase command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static PurchaseWithdrawn Handle(WithdrawPurchase command, [WriteAggregate(nameof(WithdrawPurchase.WorkflowId))] PurchaseWorkflow workflow)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(workflow);
 
-        var workflow = await session
-            .LoadAggregateAsync<PurchaseWorkflow>(
-                command.WorkflowId,
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        workflow.WithdrawPurchase(command.WithdrawnDate, command.Reason, command.RecordedBy);
-
-        session.UpdateAggregate(workflow);
+        return workflow.WithdrawPurchase(command.WithdrawnDate, command.Reason, command.RecordedBy);
     }
 }

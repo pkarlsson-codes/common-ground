@@ -3,9 +3,9 @@ using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Exceptions;
 using CommonGround.SharedKernel.Extensions;
 using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.EventHandlers;
 
@@ -13,37 +13,28 @@ namespace CommonGround.Homeownership.Application.EventHandlers;
 /// Applies purchase-closing outcomes to the linked ground lease.
 /// On close, the workflow buyer becomes the lease homeowner.
 /// </summary>
-public sealed class PurchaseClosedHandler(IDocumentSession session)
+public static class PurchaseClosedHandler
 {
-    /// <summary>
-    /// Handles purchase closure by onboarding or changing the ground lease homeowner.
-    /// </summary>
-    /// <param name="event">The purchase closed domain event.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task Handle(PurchaseClosed @event, CancellationToken ct)
+    /// <summary>Loads the closed purchase workflow and the template its lease follows.</summary>
+    public static async Task<(PurchaseWorkflow, GroundLeaseTemplate)> LoadAsync(PurchaseClosed @event, IQuerySession session, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(@event);
+        ArgumentNullException.ThrowIfNull(session);
+
+        var workflow = await session.LoadAggregateAsync<PurchaseWorkflow>(@event.AggregateId, ct).ConfigureAwait(false);
+        var template = await session.LoadAggregateAsync<GroundLeaseTemplate>(workflow.GroundLeaseTemplateId, ct).ConfigureAwait(false);
+
+        return (workflow, template);
+    }
+
+    /// <summary>Starts the ground lease that makes the workflow's buyer the homeowner.</summary>
+    public static IStartStream Handle(PurchaseClosed @event, PurchaseWorkflow workflow, GroundLeaseTemplate template)
     {
         ArgumentNullException.ThrowIfNull(@event);
 
-        var workflowId = PurchaseWorkflowId.Create(@event.AggregateId);
+        var leaseId = GroundLeaseId.Generate();
+        var created = GroundLease.CreateFromPurchase(leaseId, template, workflow, @event.ActualClosingDate, UserId.Create(@event.RecordedBy));
 
-        var workflow = await session
-            .LoadAggregateAsync<PurchaseWorkflow>(workflowId, ct)
-            .ConfigureAwait(false);
-
-        var groundLeaseTemplate = await session
-            .LoadAggregateAsync<GroundLeaseTemplate>(workflow.GroundLeaseTemplateId, ct)
-            .ConfigureAwait(false);
-
-        var recordedBy = UserId.Create(@event.RecordedBy);
-
-        var lease = GroundLease.CreateFromPurchase(
-            groundLeaseTemplate,
-            workflow,
-            @event.ActualClosingDate,
-            recordedBy
-        );
-
-        session.UpdateAggregate(lease);
+        return MartenOps.StartStream<GroundLease>(leaseId.Value, created);
     }
 }

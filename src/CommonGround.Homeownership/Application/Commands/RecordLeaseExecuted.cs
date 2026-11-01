@@ -1,7 +1,7 @@
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
+using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
 
@@ -15,21 +15,11 @@ public sealed record RecordLeaseExecuted(
 public static class RecordLeaseExecutedHandler
 {
     /// <summary>Loads the workflow, records lease execution, and persists.</summary>
-    public static async Task Handle(
-        RecordLeaseExecuted command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static LeaseExecuted? Handle(RecordLeaseExecuted command, [WriteAggregate(nameof(RecordLeaseExecuted.WorkflowId))] PurchaseWorkflow workflow)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(workflow);
 
-        var workflow = await session
-            .LoadAggregateAsync<PurchaseWorkflow>(
-                command.WorkflowId,
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        workflow.RecordLeaseExecuted(command.SignedDate, command.RecordedBy);
-
-        session.UpdateAggregate(workflow);
+        return workflow.RecordLeaseExecuted(command.SignedDate, command.RecordedBy);
     }
 }

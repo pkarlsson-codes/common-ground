@@ -1,7 +1,7 @@
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
+using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
 
@@ -17,21 +17,11 @@ public sealed record StallWorkflow(
 public static class StallWorkflowHandler
 {
     /// <summary>Loads the workflow, marks it stalled, and persists.</summary>
-    public static async Task Handle(
-        StallWorkflow command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static WorkflowStalled Handle(StallWorkflow command, [WriteAggregate(nameof(StallWorkflow.WorkflowId))] PurchaseWorkflow workflow)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(workflow);
 
-        var workflow = await session
-            .LoadAggregateAsync<PurchaseWorkflow>(
-                command.WorkflowId,
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        workflow.StallWorkflow(command.StalledReason, command.StalledDate, command.ResolutionTargetDate, command.RecordedBy);
-
-        session.UpdateAggregate(workflow);
+        return workflow.StallWorkflow(command.StalledReason, command.StalledDate, command.ResolutionTargetDate, command.RecordedBy);
     }
 }

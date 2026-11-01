@@ -1,8 +1,8 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
 
@@ -17,19 +17,11 @@ public sealed record RecordStewardshipCheckIn(
 public static class RecordStewardshipCheckInHandler
 {
     /// <summary>Loads the lease, records the stewardship check-in, and persists.</summary>
-    public static async Task Handle(
-        RecordStewardshipCheckIn command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static StewardshipCheckInRecorded Handle(RecordStewardshipCheckIn command, [WriteAggregate] GroundLease lease)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(lease);
 
-        var lease = await session
-            .LoadAggregateAsync<GroundLease>(command.GroundLeaseId, cancellationToken)
-            .ConfigureAwait(false);
-
-        lease.RecordStewardshipCheckIn(command.CheckInDate, command.Notes, command.RecordedBy);
-
-        session.UpdateAggregate(lease);
+        return lease.RecordStewardshipCheckIn(command.CheckInDate, command.Notes, command.RecordedBy);
     }
 }

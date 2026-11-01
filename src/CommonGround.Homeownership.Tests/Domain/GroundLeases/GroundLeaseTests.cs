@@ -2,315 +2,230 @@ using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
+using CommonGround.Homeownership.Domain.GroundLeaseTemplates.Events;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.Testing;
 using FluentAssertions;
 
 namespace CommonGround.Homeownership.Tests.Domain.GroundLeases;
 
 public class GroundLeaseTests
 {
-    private const string ParcelId = "land-parcel-1234";
-    private const string HomeId = "home-5678";
-    private static readonly UserId StaffUser = UserId.Generate();
-    private static readonly PurchaseWorkflowId PurchaseWorkflowId = PurchaseWorkflowId.Generate();
-
-    private static PurchaseWorkflow CreatePurchaseWorkflow()
+    public class TestBed
     {
-        return PurchaseWorkflow.Initiate(
-            GroundLeaseTemplateId.Generate(),
-            ParcelId,
-            HomeId,
-            new Homeowner("Buyer Name", "buyer@example.com"),
-            250000m,
-            StaffUser);
+        public const string ParcelId = "land-parcel-1234";
+        public const string HomeId = "home-5678";
+
+        public UserId StaffUser { get; } = UserId.Generate();
+
+        public GroundLeaseId LeaseId { get; } = GroundLeaseId.Generate();
+
+        public GroundLeaseCreated Established(ResalePolicyTerms? terms = null) =>
+            GroundLease.Establish(
+                LeaseId, ParcelId, HomeId, new DateOnly(2025, 1, 1), 99, "Standard affordability covenant",
+                terms ?? ResalePolicyTerms.AppraisalBased(0.25m), StaffUser);
+
+        public GroundLease Lease(ResalePolicyTerms? terms = null) => EventReplay.Replay<GroundLease>(Established(terms));
+
+        public GroundLeaseTemplate ActiveTemplate(string covenantTerms, int termYears, ResalePolicyTerms terms) =>
+            EventReplay.Replay<GroundLeaseTemplate>(
+                GroundLeaseTemplate.Define(GroundLeaseTemplateId.Generate(), "Template", termYears, covenantTerms, terms, StaffUser));
+
+        public GroundLeaseTemplate InactiveTemplate()
+        {
+            var template = ActiveTemplate("Covenants", 50, ResalePolicyTerms.AppraisalBased(0.25m));
+            return template.Evolve(new GroundLeaseTemplateArchived(template.Id.Value, StaffUser.Value))!;
+        }
+
+        public PurchaseWorkflow Workflow() =>
+            EventReplay.Replay<PurchaseWorkflow>(PurchaseWorkflow.Initiate(
+                PurchaseWorkflowId.Generate(), GroundLeaseTemplateId.Generate(), ParcelId, HomeId,
+                new Homeowner("Buyer Name", "buyer@example.com"), 250000m, StaffUser));
+
+        public GroundLeaseCreatedFromPurchase FromPurchase(GroundLeaseTemplate template) =>
+            GroundLease.CreateFromPurchase(LeaseId, template, Workflow(), new DateOnly(2026, 1, 1), StaffUser);
     }
 
-    private static GroundLease CreateLease()
+    public class TheEstablishMethod
     {
-        return GroundLease.Create(
-            ParcelId,
-            HomeId,
-            new DateOnly(2025, 1, 1),
-            99,
-            "Standard affordability covenant",
-            ResalePolicyTerms.AppraisalBased(0.25m),
-            StaffUser);
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenValidInputs_WhenEstablished_ThenStartsAnActiveLeaseWithNoHomeownerOrTemplate()
+        {
+            var established = _testBed.Established();
+
+            EventReplay.Replay<GroundLease>(established).Should().BeEquivalentTo(new
+            {
+                LandParcelId = TestBed.ParcelId,
+                UnitId = TestBed.HomeId,
+                LeaseStartDate = new DateOnly(2025, 1, 1),
+                TermYears = 99,
+                Status = GroundLeaseStatus.Active,
+                CurrentHomeowner = (Homeowner?)null,
+                TemplateId = (GroundLeaseTemplateId?)null,
+                CreatedBy = _testBed.StaffUser,
+            });
+        }
+
+        [Theory]
+        [InlineData(0, "Terms")]
+        [InlineData(99, "")]
+        public void GivenInvalidInputs_WhenEstablished_ThenThrowsBusinessRuleViolation(int termYears, string covenantTerms)
+        {
+            var act = () => GroundLease.Establish(
+                _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, new DateOnly(2025, 1, 1),
+                termYears, covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void GivenAppraisalTerms_WhenEstablished_ThenRoundTripsTheImprovementsCap(bool withCap)
+        {
+            var terms = ResalePolicyTerms.AppraisalBased(0.25m, withCap ? 12_000m : null);
+
+            var sut = _testBed.Lease(terms);
+
+            sut.ResalePolicyTerms.Should().BeEquivalentTo(new
+            {
+                FormulaKind = FormulaKind.AppraisalBased,
+                AppreciationShare = 0.25m,
+                ImprovementsCap = withCap ? 12_000m : (decimal?)null,
+            });
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void GivenIndexTerms_WhenEstablished_ThenRoundTripsTheImprovementsCap(bool withCap)
+        {
+            var terms = ResalePolicyTerms.IndexBased("CPI", 100m, withCap ? 18_500m : null);
+
+            var sut = _testBed.Lease(terms);
+
+            sut.ResalePolicyTerms.Should().BeEquivalentTo(new
+            {
+                FormulaKind = FormulaKind.IndexBased,
+                IndexType = "CPI",
+                BaselineIndexValue = 100m,
+                ImprovementsCap = withCap ? 18_500m : (decimal?)null,
+            });
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void GivenFixedTerms_WhenEstablished_ThenRoundTripsTheImprovementsCap(bool withCap)
+        {
+            var terms = ResalePolicyTerms.FixedPercentage(0.03m, withCap ? 9_900m : null);
+
+            var sut = _testBed.Lease(terms);
+
+            sut.ResalePolicyTerms.Should().BeEquivalentTo(new
+            {
+                FormulaKind = FormulaKind.FixedPercentage,
+                AnnualPercentage = 0.03m,
+                ImprovementsCap = withCap ? 9_900m : (decimal?)null,
+            });
+        }
     }
 
-    private static GroundLease CreateLease(ResalePolicyTerms terms)
+    public class TheRecordStewardshipCheckInMethod
     {
-        return GroundLease.Create(
-            ParcelId,
-            HomeId,
-            new DateOnly(2025, 1, 1),
-            99,
-            "Standard affordability covenant",
-            terms,
-            StaffUser);
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenNotes_WhenRecorded_ThenRecordsTheCheckIn()
+        {
+            var sut = _testBed.Lease();
+            var checkInDate = new DateOnly(2025, 6, 15);
+
+            var recorded = sut.RecordStewardshipCheckIn(checkInDate, "Property in good condition", _testBed.StaffUser);
+
+            recorded.Should().BeEquivalentTo(new { CheckInDate = checkInDate, Notes = "Property in good condition" });
+        }
+
+        [Fact]
+        public void GivenEmptyNotes_WhenRecorded_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = _testBed.Lease();
+
+            var act = () => sut.RecordStewardshipCheckIn(new DateOnly(2025, 6, 15), "", _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>();
+        }
     }
 
-    [Fact]
-    public void Create_ValidInputs_CreatesActiveLeaseWithNoHomeowner()
+    public class TheCreateFromPurchaseMethod
     {
-        var lease = CreateLease();
+        private readonly TestBed _testBed = new();
 
-        lease.LandParcelId.Should().Be(ParcelId);
-        lease.UnitId.Should().Be(HomeId);
-        lease.LeaseStartDate.Should().Be(new DateOnly(2025, 1, 1));
-        lease.TermYears.Should().Be(99);
-        lease.CovenantTerms.Should().Be("Standard affordability covenant");
-        lease.Status.Should().Be(GroundLeaseStatus.Active);
-        lease.CurrentHomeowner.Should().BeNull();
-        lease.CreatedBy.Should().Be(StaffUser);
-    }
+        [Fact]
+        public void GivenActiveTemplate_WhenCreated_ThenTakesTheTemplatesTermsAndTheBuyerAsHomeowner()
+        {
+            var template = _testBed.ActiveTemplate("Template covenant terms", 99, ResalePolicyTerms.IndexBased("CPI", 100m, 7500m));
 
-    [Fact]
-    public void Create_ZeroTermYears_Throws()
-    {
-        var act = () => GroundLease.Create(
-            ParcelId, HomeId, new DateOnly(2025, 1, 1),
-            0, "Terms", ResalePolicyTerms.AppraisalBased(0.25m), StaffUser);
+            var created = _testBed.FromPurchase(template);
 
-        act.Should().Throw<BusinessRuleViolationException>();
-    }
+            EventReplay.Replay<GroundLease>(created).Should().BeEquivalentTo(new
+            {
+                TemplateId = template.Id,
+                TermYears = 99,
+                CovenantTerms = "Template covenant terms",
+                ResalePolicyTerms = new { FormulaKind = FormulaKind.IndexBased, IndexType = "CPI" },
+                CurrentHomeowner = new { FullName = "Buyer Name", Email = "buyer@example.com" },
+            });
+        }
 
-    [Fact]
-    public void Create_EmptyCovenantTerms_Throws()
-    {
-        var act = () => GroundLease.Create(
-            ParcelId, HomeId, new DateOnly(2025, 1, 1),
-            99, "", ResalePolicyTerms.AppraisalBased(0.25m), StaffUser);
+        [Fact]
+        public void GivenInactiveTemplate_WhenCreated_ThenThrowsBusinessRuleViolation()
+        {
+            var template = _testBed.InactiveTemplate();
 
-        act.Should().Throw<BusinessRuleViolationException>();
-    }
+            var act = () => _testBed.FromPurchase(template);
 
-    [Fact]
-    public void Create_EmitsGroundLeaseCreatedEvent()
-    {
-        var lease = CreateLease();
+            act.Should().Throw<BusinessRuleViolationException>();
+        }
 
-        lease.UncommittedEvents.Should().HaveCount(1);
-        lease.UncommittedEvents.First().Should().BeOfType<GroundLeaseCreated>();
-    }
+        [Fact]
+        public void GivenFixedTemplate_WhenCreated_ThenCopiesTheTermsIntoTheEvent()
+        {
+            var template = _testBed.ActiveTemplate("Template covenants", 40, ResalePolicyTerms.FixedPercentage(0.02m, 12000m));
 
-    [Fact]
-    public void Create_ResalePolicyTerms_AreHydrated()
-    {
-        var lease = CreateLease();
+            var created = _testBed.FromPurchase(template);
 
-        lease.ResalePolicyTerms.FormulaKind.Should().Be(FormulaKind.AppraisalBased);
-        lease.ResalePolicyTerms.AppreciationShare.Should().Be(0.25m);
-    }
+            created.Should().BeEquivalentTo(new
+            {
+                GroundLeaseTemplateId = template.Id.Value,
+                TermYears = 40,
+                CovenantTerms = "Template covenants",
+                FormulaKind = FormulaKind.FixedPercentage,
+                AnnualPercentage = 0.02m,
+                ImprovementsCap = 12000m,
+            });
+        }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void Create_AppraisalTerms_RoundTripsImprovementsCap(bool withCap)
-    {
-        var terms = ResalePolicyTerms.AppraisalBased(0.25m, withCap ? 12_000m : null);
-        var lease = CreateLease(terms);
+        [Theory]
+        [MemberData(nameof(TemplateTerms))]
+        public void GivenTemplateTerms_WhenCreated_ThenRoundTripsThem(ResalePolicyTerms terms)
+        {
+            var template = _testBed.ActiveTemplate("Covenants", 60, terms);
 
-        lease.ResalePolicyTerms.FormulaKind.Should().Be(FormulaKind.AppraisalBased);
-        lease.ResalePolicyTerms.AppreciationShare.Should().Be(0.25m);
-        lease.ResalePolicyTerms.ImprovementsCap.Should().Be(withCap ? 12_000m : null);
-    }
+            var created = _testBed.FromPurchase(template);
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void Create_IndexTerms_RoundTripsImprovementsCap(bool withCap)
-    {
-        var terms = ResalePolicyTerms.IndexBased("CPI", 100m, withCap ? 18_500m : null);
-        var lease = CreateLease(terms);
+            EventReplay.Replay<GroundLease>(created).ResalePolicyTerms.Should().BeEquivalentTo(terms);
+        }
 
-        lease.ResalePolicyTerms.FormulaKind.Should().Be(FormulaKind.IndexBased);
-        lease.ResalePolicyTerms.IndexType.Should().Be("CPI");
-        lease.ResalePolicyTerms.BaselineIndexValue.Should().Be(100m);
-        lease.ResalePolicyTerms.ImprovementsCap.Should().Be(withCap ? 18_500m : null);
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void Create_FixedTerms_RoundTripsImprovementsCap(bool withCap)
-    {
-        var terms = ResalePolicyTerms.FixedPercentage(0.03m, withCap ? 9_900m : null);
-        var lease = CreateLease(terms);
-
-        lease.ResalePolicyTerms.FormulaKind.Should().Be(FormulaKind.FixedPercentage);
-        lease.ResalePolicyTerms.AnnualPercentage.Should().Be(0.03m);
-        lease.ResalePolicyTerms.ImprovementsCap.Should().Be(withCap ? 9_900m : null);
-    }
-
-    [Fact]
-    public void RecordStewardshipCheckIn_ValidNotes_EmitsEvent()
-    {
-        var lease = CreateLease();
-        var checkInDate = new DateOnly(2025, 6, 15);
-
-        lease.RecordStewardshipCheckIn(checkInDate, "Property in good condition", StaffUser);
-
-        var checkInEvent = lease.UncommittedEvents.OfType<StewardshipCheckInRecorded>().Single();
-        checkInEvent.CheckInDate.Should().Be(checkInDate);
-        checkInEvent.Notes.Should().Be("Property in good condition");
-    }
-
-    [Fact]
-    public void RecordStewardshipCheckIn_EmptyNotes_Throws()
-    {
-        var lease = CreateLease();
-
-        var act = () => lease.RecordStewardshipCheckIn(
-            new DateOnly(2025, 6, 15), "", StaffUser);
-
-        act.Should().Throw<BusinessRuleViolationException>();
-    }
-
-    [Fact]
-    public void CreateFromTemplate_ActiveTemplate_CreatesLease()
-    {
-        var template = GroundLeaseTemplate.Create(
-            "Default 99-Year",
-            99,
-            "Template covenant terms",
-            ResalePolicyTerms.IndexBased("CPI", 100m, 7500m),
-            StaffUser);
-
-        var lease = GroundLease.CreateFromPurchase(
-            template,
-            CreatePurchaseWorkflow(),
-            new DateOnly(2026, 1, 1),
-            StaffUser);
-
-        lease.TemplateId.Should().Be(template.Id);
-        lease.TermYears.Should().Be(99);
-        lease.CovenantTerms.Should().Be("Template covenant terms");
-        lease.ResalePolicyTerms.FormulaKind.Should().Be(FormulaKind.IndexBased);
-        lease.ResalePolicyTerms.IndexType.Should().Be("CPI");
-        lease.CurrentHomeowner.Should().NotBeNull();
-        lease.CurrentHomeowner.FullName.Should().Be("Buyer Name");
-        lease.CurrentHomeowner.Email.Should().Be("buyer@example.com");
-    }
-
-    [Fact]
-    public void CreateFromTemplate_InactiveTemplate_Throws()
-    {
-        var template = GroundLeaseTemplate.Create(
-            "Inactive Template",
-            50,
-            "Covenants",
-            ResalePolicyTerms.AppraisalBased(0.25m),
-            StaffUser);
-        template.Archive(StaffUser);
-
-        var act = () => GroundLease.CreateFromPurchase(
-            template,
-            CreatePurchaseWorkflow(),
-            new DateOnly(2026, 1, 1),
-            StaffUser);
-
-        act.Should().Throw<BusinessRuleViolationException>();
-    }
-
-    [Fact]
-    public void CreateFromTemplate_EmitsGroundLeaseCreatedFromTemplateEvent()
-    {
-        var template = GroundLeaseTemplate.Create(
-            "Template A",
-            40,
-            "Template covenants",
-            ResalePolicyTerms.FixedPercentage(0.02m, 12000m),
-            StaffUser);
-
-        var lease = GroundLease.CreateFromPurchase(
-            template,
-            CreatePurchaseWorkflow(),
-            new DateOnly(2026, 4, 1),
-            StaffUser);
-
-        lease.UncommittedEvents.Should().HaveCount(1);
-        var evt = lease.UncommittedEvents.Single()
-            .Should().BeOfType<GroundLeaseCreatedFromPurchase>().Subject;
-
-        evt.GroundLeaseTemplateId.Should().Be(template.Id.Value);
-        evt.TermYears.Should().Be(40);
-        evt.CovenantTerms.Should().Be("Template covenants");
-        evt.FormulaKind.Should().Be(FormulaKind.FixedPercentage);
-        evt.AnnualPercentage.Should().Be(0.02m);
-        evt.ImprovementsCap.Should().Be(12000m);
-    }
-
-    [Fact]
-    public void Create_DirectPath_LeavesTemplateIdNull()
-    {
-        var lease = CreateLease();
-
-        lease.TemplateId.Should().BeNull();
-    }
-
-    [Fact]
-    public void CreateFromTemplate_AppraisalTerms_RoundTrips()
-    {
-        var template = GroundLeaseTemplate.Create(
-            "Appraisal",
-            99,
-            "Appraisal covenants",
+        public static TheoryData<ResalePolicyTerms> TemplateTerms() => new()
+        {
             ResalePolicyTerms.AppraisalBased(0.33m, 15000m),
-            StaffUser);
-
-        var lease = GroundLease.CreateFromPurchase(
-            template,
-            CreatePurchaseWorkflow(),
-            new DateOnly(2026, 2, 1),
-            StaffUser);
-
-        lease.ResalePolicyTerms.FormulaKind.Should().Be(FormulaKind.AppraisalBased);
-        lease.ResalePolicyTerms.AppreciationShare.Should().Be(0.33m);
-        lease.ResalePolicyTerms.ImprovementsCap.Should().Be(15000m);
-    }
-
-    [Fact]
-    public void CreateFromTemplate_IndexTerms_RoundTrips()
-    {
-        var template = GroundLeaseTemplate.Create(
-            "Index",
-            60,
-            "Index covenants",
             ResalePolicyTerms.IndexBased("CPI", 210m, null),
-            StaffUser);
-
-        var lease = GroundLease.CreateFromPurchase(
-            template,
-            CreatePurchaseWorkflow(),
-            new DateOnly(2026, 2, 1),
-            StaffUser);
-
-        lease.ResalePolicyTerms.FormulaKind.Should().Be(FormulaKind.IndexBased);
-        lease.ResalePolicyTerms.IndexType.Should().Be("CPI");
-        lease.ResalePolicyTerms.BaselineIndexValue.Should().Be(210m);
-        lease.ResalePolicyTerms.ImprovementsCap.Should().BeNull();
-    }
-
-    [Fact]
-    public void CreateFromTemplate_FixedTerms_RoundTrips()
-    {
-        var template = GroundLeaseTemplate.Create(
-            "Fixed",
-            30,
-            "Fixed covenants",
             ResalePolicyTerms.FixedPercentage(0.015m, 5000m),
-            StaffUser);
-
-        var lease = GroundLease.CreateFromPurchase(
-            template,
-            CreatePurchaseWorkflow(),
-            new DateOnly(2026, 2, 1),
-            StaffUser);
-
-        lease.ResalePolicyTerms.FormulaKind.Should().Be(FormulaKind.FixedPercentage);
-        lease.ResalePolicyTerms.AnnualPercentage.Should().Be(0.015m);
-        lease.ResalePolicyTerms.ImprovementsCap.Should().Be(5000m);
+        };
     }
 }

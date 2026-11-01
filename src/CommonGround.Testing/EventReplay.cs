@@ -44,6 +44,32 @@ public static class EventReplay
         return (TAggregate?)current;
     }
 
+    /// <summary>
+    /// Takes a decision on an aggregate and evolves it with what was decided: one event, several, or
+    /// nothing (<see langword="null"/> or empty).
+    /// </summary>
+    /// <typeparam name="TAggregate">The aggregate type.</typeparam>
+    /// <param name="aggregate">The aggregate before the decision.</param>
+    /// <param name="decision">The decision to take.</param>
+    /// <returns>The aggregate after the decided events, and the events.</returns>
+    public static (TAggregate Aggregate, IReadOnlyList<object> Events) Decide<TAggregate>(
+        this TAggregate aggregate,
+        Func<TAggregate, object?> decision)
+        where TAggregate : class
+    {
+        ArgumentNullException.ThrowIfNull(aggregate);
+        ArgumentNullException.ThrowIfNull(decision);
+
+        IReadOnlyList<object> events = decision(aggregate) switch
+        {
+            null => [],
+            IEnumerable<object> many => [.. many],
+            var one => [one],
+        };
+
+        return (aggregate.Evolve(events) ?? aggregate, events);
+    }
+
     private static Func<object?, object, object?> BuildEvolver(Type aggregateType)
     {
         var registration = aggregateType.Assembly.GetCustomAttributesData()

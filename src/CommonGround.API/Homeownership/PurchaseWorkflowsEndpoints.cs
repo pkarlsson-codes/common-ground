@@ -28,7 +28,10 @@ public static class PurchaseWorkflowsEndpoints
 
         var userId = httpContext.GetUserId();
 
+        var id = PurchaseWorkflowId.Generate();
+
         var command = new InitiatePurchaseWorkflow(
+            id,
             GroundLeaseTemplateId.Create(request.GroundLeaseTemplateId),
             request.LandParcelId,
             request.HomeId,
@@ -36,7 +39,7 @@ public static class PurchaseWorkflowsEndpoints
             request.PurchasePrice,
             userId);
 
-        var id = await bus.InvokeForTenantAsync<PurchaseWorkflowId>(bus.TenantId!, command, cancellationToken);
+        await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);
 
         return Results.Created($"/api/purchase-workflows/{id.Value}", new InitiatePurchaseWorkflowResponse(id.Value));
     }

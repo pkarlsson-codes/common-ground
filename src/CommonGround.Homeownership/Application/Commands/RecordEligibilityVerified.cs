@@ -1,7 +1,7 @@
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
+using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
 
@@ -16,21 +16,11 @@ public sealed record RecordEligibilityVerified(
 public static class RecordEligibilityVerifiedHandler
 {
     /// <summary>Loads the workflow, records eligibility verification, and persists.</summary>
-    public static async Task Handle(
-        RecordEligibilityVerified command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static BuyerEligibilityVerified? Handle(RecordEligibilityVerified command, [WriteAggregate(nameof(RecordEligibilityVerified.WorkflowId))] PurchaseWorkflow workflow)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(workflow);
 
-        var workflow = await session
-            .LoadAggregateAsync<PurchaseWorkflow>(
-                command.WorkflowId,
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        workflow.RecordEligibilityVerified(command.VerifiedDate, command.Notes, command.RecordedBy);
-
-        session.UpdateAggregate(workflow);
+        return workflow.RecordEligibilityVerified(command.VerifiedDate, command.Notes, command.RecordedBy);
     }
 }

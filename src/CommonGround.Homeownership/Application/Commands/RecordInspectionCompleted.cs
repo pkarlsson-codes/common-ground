@@ -1,7 +1,7 @@
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
+using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
 
@@ -17,25 +17,15 @@ public sealed record RecordInspectionCompleted(
 public static class RecordInspectionCompletedHandler
 {
     /// <summary>Loads the workflow, records inspection completion, and persists.</summary>
-    public static async Task Handle(
-        RecordInspectionCompleted command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static InspectionCompleted? Handle(RecordInspectionCompleted command, [WriteAggregate(nameof(RecordInspectionCompleted.WorkflowId))] PurchaseWorkflow workflow)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(workflow);
 
-        var workflow = await session
-            .LoadAggregateAsync<PurchaseWorkflow>(
-                command.WorkflowId,
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        workflow.RecordInspectionCompleted(
+        return workflow.RecordInspectionCompleted(
             command.InspectionDate,
             command.InspectorName,
             command.Notes,
             command.RecordedBy);
-
-        session.UpdateAggregate(workflow);
     }
 }

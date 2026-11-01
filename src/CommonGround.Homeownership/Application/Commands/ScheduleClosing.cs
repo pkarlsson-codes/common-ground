@@ -1,7 +1,7 @@
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
+using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
 
@@ -15,21 +15,11 @@ public sealed record ScheduleClosing(
 public static class ScheduleClosingHandler
 {
     /// <summary>Loads the workflow, schedules the closing date, and persists.</summary>
-    public static async Task Handle(
-        ScheduleClosing command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static ClosingScheduled Handle(ScheduleClosing command, [WriteAggregate(nameof(ScheduleClosing.WorkflowId))] PurchaseWorkflow workflow)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(workflow);
 
-        var workflow = await session
-            .LoadAggregateAsync<PurchaseWorkflow>(
-                command.WorkflowId,
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        workflow.ScheduleClosing(command.ScheduledClosingDate, command.RecordedBy);
-
-        session.UpdateAggregate(workflow);
+        return workflow.ScheduleClosing(command.ScheduledClosingDate, command.RecordedBy);
     }
 }
