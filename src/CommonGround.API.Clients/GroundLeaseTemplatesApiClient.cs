@@ -10,8 +10,8 @@ namespace CommonGround.API.Clients;
 /// All requests are automatically decorated with an internal JWT by <c>InternalGatewayAuthHandler</c>.
 /// </summary>
 public sealed class GroundLeaseTemplatesApiClient(
-    HttpClient httpClient,
-    ILogger<GroundLeaseTemplatesApiClient> logger) : BaseApiClient(httpClient, logger), IGroundLeaseTemplatesApiClient
+    IHttpClientFactory httpClientFactory,
+    ILogger<GroundLeaseTemplatesApiClient> logger) : BaseApiClient(httpClientFactory.CreateClient(nameof(GroundLeaseTemplatesApiClient)), logger), IGroundLeaseTemplatesApiClient
 {
     /// <inheritdoc/>
     public async Task<PaginatedResponse<GroundLeaseTemplateListItemResponse>> GetGroundLeaseTemplatesAsync(

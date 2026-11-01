@@ -7,8 +7,8 @@ namespace CommonGround.API.Clients;
 
 /// <summary>HTTP client for ground lease API endpoints.</summary>
 public sealed class GroundLeasesApiClient(
-    HttpClient httpClient,
-    ILogger<GroundLeasesApiClient> logger) : BaseApiClient(httpClient, logger), IGroundLeasesApiClient
+    IHttpClientFactory httpClientFactory,
+    ILogger<GroundLeasesApiClient> logger) : BaseApiClient(httpClientFactory.CreateClient(nameof(GroundLeasesApiClient)), logger), IGroundLeasesApiClient
 {
     /// <inheritdoc/>
     public async Task<CreateGroundLeaseResponse> CreateGroundLeaseAsync(CreateGroundLeaseRequest request, CancellationToken cancellationToken)

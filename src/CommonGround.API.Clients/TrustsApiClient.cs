@@ -9,8 +9,8 @@ namespace CommonGround.API.Clients;
 /// HTTP client for trust management API endpoints.
 /// </summary>
 public sealed class TrustsApiClient(
-    HttpClient httpClient,
-    ILogger<TrustsApiClient> logger) : BaseApiClient(httpClient, logger), ITrustsApiClient
+    IHttpClientFactory httpClientFactory,
+    ILogger<TrustsApiClient> logger) : BaseApiClient(httpClientFactory.CreateClient(nameof(TrustsApiClient)), logger), ITrustsApiClient
 {
     /// <inheritdoc/>
     public async Task<TrustResponse> GetCurrentTrustAsync(CancellationToken ct = default)

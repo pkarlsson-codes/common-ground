@@ -11,8 +11,8 @@ namespace CommonGround.API.Clients;
 /// because during the OIDC callback <c>HttpContext.User</c> is not yet populated.
 /// </summary>
 public sealed class UsersApiClient(
-    HttpClient httpClient,
-    ILogger<UsersApiClient> logger) : BaseApiClient(httpClient, logger), IUsersApiClient
+    IHttpClientFactory httpClientFactory,
+    ILogger<UsersApiClient> logger) : BaseApiClient(httpClientFactory.CreateClient(nameof(UsersApiClient)), logger), IUsersApiClient
 {
     /// <inheritdoc/>
     public async Task<EnsureUserResponse> EnsureUserAsync(EnsureUserRequest request, CancellationToken ct = default)

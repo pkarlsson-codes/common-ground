@@ -9,9 +9,9 @@ namespace CommonGround.API.Clients;
 
 /// <summary>HTTP client for the Documents API.</summary>
 public sealed class DocumentsApiClient(
-    HttpClient httpClient,
+    IHttpClientFactory httpClientFactory,
     ILogger<DocumentsApiClient> logger)
-    : BaseApiClient(httpClient, logger), IDocumentsApiClient
+    : BaseApiClient(httpClientFactory.CreateClient(nameof(DocumentsApiClient)), logger), IDocumentsApiClient
 {
     /// <inheritdoc/>
     public async Task<UploadDocumentResponse> UploadDocumentAsync(

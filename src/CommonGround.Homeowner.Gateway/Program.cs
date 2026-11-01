@@ -1,4 +1,5 @@
 using CommonGround.Homeowner.Gateway.Configuration;
+using JasperFx;
 using Serilog;
 using Wolverine;
 
@@ -32,7 +33,7 @@ try
     app.ConfigureApiPipeline();
 
     Log.Information(GatewayDefaults.Application.StartupCompleteMessage);
-    app.Run();
+    return await app.RunJasperFxCommands(args).ConfigureAwait(false);
 }
 catch (Exception ex) when (ex is not OperationCanceledException)
 {

@@ -8,7 +8,7 @@ using Minio.DataModel.Args;
 namespace CommonGround.Documents.Infrastructure.BlobStorage;
 
 /// <summary>MinIO-backed implementation of <see cref="IDocumentBlobStore"/>.</summary>
-internal sealed partial class MinIODocumentBlobStore(
+public sealed partial class MinIODocumentBlobStore(
     IMinioClient client,
     IOptions<MinIOOptions> options,
     ILogger<MinIODocumentBlobStore> logger)

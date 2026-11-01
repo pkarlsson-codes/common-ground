@@ -7,8 +7,8 @@ namespace CommonGround.API.Clients;
 
 /// <summary>HTTP client for purchase workflow API endpoints.</summary>
 public sealed class PurchaseWorkflowsApiClient(
-    HttpClient httpClient,
-    ILogger<PurchaseWorkflowsApiClient> logger) : BaseApiClient(httpClient, logger), IPurchaseWorkflowsApiClient
+    IHttpClientFactory httpClientFactory,
+    ILogger<PurchaseWorkflowsApiClient> logger) : BaseApiClient(httpClientFactory.CreateClient(nameof(PurchaseWorkflowsApiClient)), logger), IPurchaseWorkflowsApiClient
 {
     /// <inheritdoc/>
     public async Task<InitiatePurchaseWorkflowResponse> InitiatePurchaseWorkflowAsync(InitiatePurchaseWorkflowRequest request, CancellationToken cancellationToken)

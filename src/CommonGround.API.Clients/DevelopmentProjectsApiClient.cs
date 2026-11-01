@@ -10,8 +10,8 @@ namespace CommonGround.API.Clients;
 /// All requests are automatically decorated with an internal JWT by <c>InternalGatewayAuthHandler</c>.
 /// </summary>
 public sealed class DevelopmentProjectsApiClient(
-    HttpClient httpClient,
-    ILogger<DevelopmentProjectsApiClient> logger) : BaseApiClient(httpClient, logger), IDevelopmentProjectsApiClient
+    IHttpClientFactory httpClientFactory,
+    ILogger<DevelopmentProjectsApiClient> logger) : BaseApiClient(httpClientFactory.CreateClient(nameof(DevelopmentProjectsApiClient)), logger), IDevelopmentProjectsApiClient
 {
     /// <inheritdoc/>
     public async Task<PaginatedResponse<DevelopmentProjectListItemResponse>> GetDevelopmentProjectsAsync(

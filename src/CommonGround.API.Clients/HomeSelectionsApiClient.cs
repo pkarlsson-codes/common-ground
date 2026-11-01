@@ -7,8 +7,8 @@ namespace CommonGround.API.Clients;
 
 /// <summary>HTTP client for home selection endpoints.</summary>
 public sealed class HomeSelectionsApiClient(
-    HttpClient httpClient,
-    ILogger<HomeSelectionsApiClient> logger) : BaseApiClient(httpClient, logger), IHomeSelectionsApiClient
+    IHttpClientFactory httpClientFactory,
+    ILogger<HomeSelectionsApiClient> logger) : BaseApiClient(httpClientFactory.CreateClient(nameof(HomeSelectionsApiClient)), logger), IHomeSelectionsApiClient
 {
     /// <inheritdoc/>
     public async Task<StartHomeSelectionResponse> StartHomeSelectionAsync(string homeId, CancellationToken cancellationToken)

@@ -24,6 +24,8 @@ internal static class CorePlatformClientExtensions
         var corePlatformBaseAddress = configuration["CorePlatform:BaseAddress"]
             ?? throw new InvalidOperationException("CorePlatform:BaseAddress configuration is required");
 
+        var corePlatformUri = new Uri(corePlatformBaseAddress);
+
         services.AddHttpContextAccessor();
         services.AddSingleton<IInternalJwtService, InternalJwtService>();
         services.TryAddScoped<InternalGatewayAuthHandler>();
@@ -36,54 +38,42 @@ internal static class CorePlatformClientExtensions
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         }).AddHttpMessageHandler<InternalServiceTokenHandler>();
 
-        services.AddHttpClient<ILandParcelsApiClient, LandParcelsApiClient>(client =>
-            client.BaseAddress = new Uri(corePlatformBaseAddress))
+        services.AddApiClient<ILandParcelsApiClient, LandParcelsApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
-        services.AddHttpClient<IHomeownerApplicationsApiClient, HomeownerApplicationsApiClient>(client =>
-            client.BaseAddress = new Uri(corePlatformBaseAddress))
+        services.AddApiClient<IHomeownerApplicationsApiClient, HomeownerApplicationsApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
-        services.AddHttpClient<IHouseholdsApiClient, HouseholdsApiClient>(client =>
-            client.BaseAddress = new Uri(corePlatformBaseAddress))
+        services.AddApiClient<IHouseholdsApiClient, HouseholdsApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
-        services.AddHttpClient<IHomesApiClient, HomesApiClient>(client =>
-            client.BaseAddress = new Uri(corePlatformBaseAddress))
+        services.AddApiClient<IHomesApiClient, HomesApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
-        services.AddHttpClient<IGroundLeasesApiClient, GroundLeasesApiClient>(client =>
-            client.BaseAddress = new Uri(corePlatformBaseAddress))
+        services.AddApiClient<IGroundLeasesApiClient, GroundLeasesApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
-        services.AddHttpClient<IPurchaseWorkflowsApiClient, PurchaseWorkflowsApiClient>(client =>
-            client.BaseAddress = new Uri(corePlatformBaseAddress))
+        services.AddApiClient<IPurchaseWorkflowsApiClient, PurchaseWorkflowsApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
-        services.AddHttpClient<IUsersApiClient, UsersApiClient>(client =>
-            client.BaseAddress = new Uri(corePlatformBaseAddress))
+        services.AddApiClient<IUsersApiClient, UsersApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalServiceTokenHandler>();
 
-        services.AddHttpClient<ITrustsApiClient, TrustsApiClient>(client =>
-            client.BaseAddress = new Uri(corePlatformBaseAddress))
+        services.AddApiClient<ITrustsApiClient, TrustsApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
-        services.AddHttpClient<IStewardshipApiClient, StewardshipApiClient>(client =>
-            client.BaseAddress = new Uri(corePlatformBaseAddress))
+        services.AddApiClient<IStewardshipApiClient, StewardshipApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
         // Downloads hand the API's redirect to the presigned blob URL back to the browser, so don't follow it.
-        services.AddHttpClient<IDocumentsApiClient, DocumentsApiClient>(client =>
-            client.BaseAddress = new Uri(corePlatformBaseAddress))
+        services.AddApiClient<IDocumentsApiClient, DocumentsApiClient>(corePlatformUri)
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false })
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
-        services.AddHttpClient<IDevelopmentProjectsApiClient, DevelopmentProjectsApiClient>(client =>
-            client.BaseAddress = new Uri(corePlatformBaseAddress))
+        services.AddApiClient<IDevelopmentProjectsApiClient, DevelopmentProjectsApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
-        services.AddHttpClient<IGroundLeaseTemplatesApiClient, GroundLeaseTemplatesApiClient>(client =>
-            client.BaseAddress = new Uri(corePlatformBaseAddress))
+        services.AddApiClient<IGroundLeaseTemplatesApiClient, GroundLeaseTemplatesApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
         return services;

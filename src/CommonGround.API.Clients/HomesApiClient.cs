@@ -10,8 +10,8 @@ namespace CommonGround.API.Clients;
 /// All requests are automatically decorated with an internal JWT by <c>InternalGatewayAuthHandler</c>.
 /// </summary>
 public sealed class HomesApiClient(
-    HttpClient httpClient,
-    ILogger<HomesApiClient> logger) : BaseApiClient(httpClient, logger), IHomesApiClient
+    IHttpClientFactory httpClientFactory,
+    ILogger<HomesApiClient> logger) : BaseApiClient(httpClientFactory.CreateClient(nameof(HomesApiClient)), logger), IHomesApiClient
 {
     /// <inheritdoc/>
     public async Task<RegisterHomeResponse> RegisterHomeAsync(RegisterHomeRequest request, CancellationToken cancellationToken)

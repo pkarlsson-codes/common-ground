@@ -10,8 +10,8 @@ namespace CommonGround.API.Clients;
 /// All requests are automatically decorated with an internal JWT by <c>InternalGatewayAuthHandler</c>.
 /// </summary>
 public sealed class LandParcelsApiClient(
-    HttpClient httpClient,
-    ILogger<LandParcelsApiClient> logger) : BaseApiClient(httpClient, logger), ILandParcelsApiClient
+    IHttpClientFactory httpClientFactory,
+    ILogger<LandParcelsApiClient> logger) : BaseApiClient(httpClientFactory.CreateClient(nameof(LandParcelsApiClient)), logger), ILandParcelsApiClient
 {
     /// <inheritdoc/>
     public async Task<RegisterLandParcelResponse> RegisterLandParcelAsync(RegisterLandParcelRequest request, CancellationToken cancellationToken)

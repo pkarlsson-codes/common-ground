@@ -7,8 +7,8 @@ namespace CommonGround.API.Clients;
 
 /// <summary>HTTP client for Stewardship API endpoints.</summary>
 public sealed class StewardshipApiClient(
-    HttpClient httpClient,
-    ILogger<StewardshipApiClient> logger) : BaseApiClient(httpClient, logger), IStewardshipApiClient
+    IHttpClientFactory httpClientFactory,
+    ILogger<StewardshipApiClient> logger) : BaseApiClient(httpClientFactory.CreateClient(nameof(StewardshipApiClient)), logger), IStewardshipApiClient
 {
     // Stewardship Cases
 

@@ -7,8 +7,8 @@ namespace CommonGround.API.Clients;
 
 /// <summary>HTTP client for household endpoints.</summary>
 public sealed class HouseholdsApiClient(
-    HttpClient httpClient,
-    ILogger<HouseholdsApiClient> logger) : BaseApiClient(httpClient, logger), IHouseholdsApiClient
+    IHttpClientFactory httpClientFactory,
+    ILogger<HouseholdsApiClient> logger) : BaseApiClient(httpClientFactory.CreateClient(nameof(HouseholdsApiClient)), logger), IHouseholdsApiClient
 {
     /// <inheritdoc/>
     public async Task<RegisterHouseholdResponse> RegisterHouseholdAsync(RegisterHouseholdRequest request, CancellationToken cancellationToken)
