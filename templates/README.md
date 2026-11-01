@@ -1,6 +1,6 @@
 # DDD Item Templates
 
-`dotnet new` item templates for the domain-type plumbing used in this codebase (and any project with the same SharedKernel base types: `AggregateRoot`, `Entity`, `EntityId`, `ValueObject`).
+`dotnet new` item templates for the domain-type plumbing used in this codebase (and any project with the same SharedKernel base types: `AggregateRoot`, `Entity`, `IEntityId`, `ValueObject`).
 
 ## Install
 
@@ -22,9 +22,9 @@ Installation is machine-global. Re-run with `--force` after editing a template. 
 
 | Short name | Emits | Notes |
 |---|---|---|
-| `ddd-aggregate` | `<Plural>/<Name>.cs`, `<Plural>/<Name>Id.cs`, `<Plural>/Events/<Name>Created.cs` | Event-sourced root with factory, `ApplyEvent` switch, Created event |
+| `ddd-aggregate` | `<Plural>/<Name>.cs`, `<Plural>/<Name>Id.cs`, `<Plural>/Events/<Name>Created.cs` | Decider root: a starting decision, Marten's `Create` evolver, a struct ID, Created event |
 | `ddd-vo` | `<Name>.cs` | `ValueObject` with private ctor + `Create` factory |
-| `ddd-entity` | `<Name>.cs`, `<Name>Id.cs` | `Entity<TId>` plus its ID |
+| `ddd-entity` | `<Name>.cs`, `<Name>Id.cs` | `Entity<TId>` plus its struct ID |
 | `ddd-enum` | `<Name>.cs` | `Enumeration<T>` with a single `Default` value to replace |
 
 ## Usage
