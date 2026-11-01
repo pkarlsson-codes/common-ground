@@ -31,7 +31,7 @@ public static class RegisterLandParcelHandler
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var parcelStarted = LandParcel.Register(
+        var registered = LandParcel.Register(
             command.LandParcelId,
             command.LegalParcelNumber,
             command.Address,
@@ -41,6 +41,6 @@ public static class RegisterLandParcelHandler
             command.CovenantTerms,
             command.RegisteredBy);
 
-        return MartenOps.StartStream<LandParcel>(command.LandParcelId.Value, parcelStarted);
+        return MartenOps.StartStream<LandParcel>(command.LandParcelId.Value, registered);
     }
 }

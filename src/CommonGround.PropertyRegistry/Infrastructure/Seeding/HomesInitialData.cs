@@ -94,7 +94,7 @@ public sealed class HomesInitialData : IInitialData
 
             var unitId = HomeId.Generate();
 
-            var unitStarted = Home.Register(
+            var registered = Home.Register(
                 unitId,
                 LandParcelId.Create(landParcelLookup.LandParcelId),
                 entry.UnitDesignation,
@@ -107,7 +107,7 @@ public sealed class HomesInitialData : IInitialData
                 initialAssessment,
                 SeederUserId);
 
-            trustSession.Events.StartStream<Home>(unitId.Value, unitStarted);
+            trustSession.Events.StartStream<Home>(unitId.Value, registered);
 
             trustSession.Store(new HomeSeedLookup
             {

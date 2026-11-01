@@ -31,7 +31,7 @@ public static class InitiateRehabilitationProjectHandler
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var projectStarted = DevelopmentProject.InitiateRehabilitation(
+        var initiated = DevelopmentProject.InitiateRehabilitation(
             command.DevelopmentProjectId,
             command.LandParcelId,
             command.Name,
@@ -39,6 +39,6 @@ public static class InitiateRehabilitationProjectHandler
             command.HomeIds,
             command.InitiatedBy);
 
-        return MartenOps.StartStream<DevelopmentProject>(command.DevelopmentProjectId.Value, projectStarted);
+        return MartenOps.StartStream<DevelopmentProject>(command.DevelopmentProjectId.Value, initiated);
     }
 }

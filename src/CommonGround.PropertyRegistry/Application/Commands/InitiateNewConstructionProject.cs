@@ -26,13 +26,13 @@ public static class InitiateNewConstructionProjectHandler
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var projectStarted = DevelopmentProject.InitiateNewConstruction(
+        var initiated = DevelopmentProject.InitiateNewConstruction(
             command.DevelopmentProjectId,
             command.LandParcelId,
             command.Name,
             command.Description,
             command.InitiatedBy);
 
-        return MartenOps.StartStream<DevelopmentProject>(command.DevelopmentProjectId.Value, projectStarted);
+        return MartenOps.StartStream<DevelopmentProject>(command.DevelopmentProjectId.Value, initiated);
     }
 }

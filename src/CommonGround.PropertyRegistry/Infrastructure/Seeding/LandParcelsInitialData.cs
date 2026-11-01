@@ -55,7 +55,7 @@ public sealed class LandParcelsInitialData : IInitialData
 
             var parcelId = LandParcelId.Generate();
 
-            var parcelStarted = LandParcel.Register(
+            var registered = LandParcel.Register(
                 parcelId,
                 entry.LegalParcelNumber,
                 entry.Address,
@@ -65,7 +65,7 @@ public sealed class LandParcelsInitialData : IInitialData
                 entry.CovenantTerms,
                 SeederUserId);
 
-            trustSession.Events.StartStream<LandParcel>(parcelId.Value, parcelStarted);
+            trustSession.Events.StartStream<LandParcel>(parcelId.Value, registered);
 
             trustSession.Store(new LandParcelSeedLookup
             {
