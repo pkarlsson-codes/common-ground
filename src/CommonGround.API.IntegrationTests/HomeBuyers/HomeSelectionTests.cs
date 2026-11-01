@@ -101,6 +101,16 @@ public class HomeSelectionTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task StartHomeSelection_ForHomeHomeBuyersDoesNotKnow_Returns404()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+
+        var response = await client.PostAsync($"/api/homes/{Guid.NewGuid()}/home-selections", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
     public async Task StartHomeSelection_WhenHomeHasActiveSelection_Returns422()
     {
         var client = factory.CreateClient().WithAuthToken();

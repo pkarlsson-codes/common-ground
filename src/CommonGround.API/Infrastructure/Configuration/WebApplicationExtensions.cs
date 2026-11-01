@@ -22,7 +22,6 @@ internal static class WebApplicationExtensions
             return app;
         }
 
-        app.UseExceptionHandler();
         app.MapOpenApi();
         app.MapScalarApiReference();
 
@@ -36,12 +35,14 @@ internal static class WebApplicationExtensions
     /// <returns>The web application for chaining.</returns>
     public static WebApplication ConfigureStandardPipeline(this WebApplication app)
     {
-        app.UseExceptionHandler();
+        // Request logging wraps the exception handler, so it logs the status the handler wrote
+        // (e.g. 404 for AggregateNotFoundException) rather than a 500 for the escaping exception.
         app.UseSerilogRequestLogging(options =>
         {
             options.MessageTemplate =
                 "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
         });
+        app.UseExceptionHandler();
         app.UseCorrelationId();
         app.UseCors();
         app.UseAuthentication();
