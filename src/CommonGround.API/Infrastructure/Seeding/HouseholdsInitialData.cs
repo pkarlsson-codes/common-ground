@@ -56,50 +56,50 @@ public sealed class HouseholdsInitialData : IInitialData
                 }
             }
 
-            var household = Household.Register(
+            var householdId = HouseholdId.Generate();
+            var registered = Household.Register(
+                householdId,
                 [.. entry.Members.Select(m => HouseholdMember.Create(m.Name, m.Email, m.Phone, m.IsPrimary))],
                 HouseholdCircumstances.Create(entry.RequiresAccessibility, entry.AnnualIncome),
                 SeederUserId);
 
-            if (entry.HousingCounseling is { } counseling)
-            {
-                household.RecordHousingCounseling(
-                    counseling.CertificationNumber, counseling.CompletedDate, counseling.CounselorOrganization, SeederUserId);
-            }
+            // Readiness doesn't change the declaration, so each decision is taken on the registered household.
+            var household = Household.Create(registered);
+            object?[] readiness =
+            [
+                entry.HousingCounseling is { } counseling
+                    ? household.RecordHousingCounseling(
+                        counseling.CertificationNumber, counseling.CompletedDate, counseling.CounselorOrganization, SeederUserId)
+                    : null,
+                entry.CltOrientationCompleted is { } orientationDate
+                    ? household.RecordCltOrientation(orientationDate, SeederUserId)
+                    : null,
+                entry.Prequalification is { } prequalification
+                    ? household.RecordMortgagePrequalification(
+                        prequalification.LenderName, prequalification.ApprovedAmount, prequalification.ExpiryDate, SeederUserId)
+                    : null,
+            ];
 
-            if (entry.CltOrientationCompleted is { } orientationDate)
-            {
-                household.RecordCltOrientation(orientationDate, SeederUserId);
-            }
-
-            if (entry.Prequalification is { } prequalification)
-            {
-                household.RecordMortgagePrequalification(
-                    prequalification.LenderName, prequalification.ApprovedAmount, prequalification.ExpiryDate, SeederUserId);
-            }
-
-            trustSession.Events.StartStream<Household>(household.Id.Value, household.UncommittedEvents.ToArray());
-            household.UncommittedEvents.MarkAsCommitted();
+            trustSession.Events.StartStream<Household>(householdId.Value, [registered, .. readiness.OfType<object>()]);
 
             string? applicationId = null;
             if (entry.Application is { } applicationEntry)
             {
-                var application = HomeownerApplication.Submit(household.Id, household.Declare(), null, SeederUserId);
-                if (applicationEntry.ApprovedDate is { } approvedDate)
-                {
-                    application.Approve(approvedDate, null, SeederUserId);
-                }
+                var id = HomeownerApplicationId.Generate();
+                var submitted = HomeownerApplication.Submit(id, householdId, household.Declare(), null, SeederUserId);
+                object[] applicationEvents = applicationEntry.ApprovedDate is { } approvedDate
+                    ? [submitted, HomeownerApplication.Create(submitted).Approve(approvedDate, null, SeederUserId)]
+                    : [submitted];
 
-                trustSession.Events.StartStream<HomeownerApplication>(application.Id.Value, application.UncommittedEvents.ToArray());
-                application.UncommittedEvents.MarkAsCommitted();
-                applicationId = application.Id.Value;
+                trustSession.Events.StartStream<HomeownerApplication>(id.Value, applicationEvents);
+                applicationId = id.Value;
             }
 
             trustSession.Store(new HouseholdSeedLookup
             {
                 Id = lookupId,
                 SeedKey = entry.SeedKey,
-                HouseholdId = household.Id.Value,
+                HouseholdId = householdId.Value,
                 ApplicationId = applicationId,
                 SeededAt = DateTimeOffset.UtcNow,
             });

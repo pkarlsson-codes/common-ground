@@ -1,32 +1,24 @@
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.Households;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using CommonGround.HomeBuyers.Domain.Households.Events;
+using Wolverine.Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
 /// <summary>Expires a mortgage prequalification if it is still current.</summary>
 public sealed record ExpireMortgagePrequalification(
-    HouseholdId ApplicationId,
+    HouseholdId HouseholdId,
     DateOnly OriginalExpiryDate);
 
 /// <summary>Handles <see cref="ExpireMortgagePrequalification"/>.</summary>
 public static class ExpireMortgagePrequalificationHandler
 {
-    /// <summary>Loads the household, expires the prequalification when applicable, and persists it.</summary>
-    public static async Task Handle(
-        ExpireMortgagePrequalification command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    /// <summary>Expires the prequalification, unless it has since been replaced or expired.</summary>
+    public static MortgagePrequalificationExpired? Handle(ExpireMortgagePrequalification command, [WriteAggregate] Household household)
     {
         ArgumentNullException.ThrowIfNull(command);
-    
-        var household = await session
-            .LoadAggregateAsync<Household>(command.ApplicationId, cancellationToken)
-            .ConfigureAwait(false);
+        ArgumentNullException.ThrowIfNull(household);
 
-        var changed = household.ExpirePrequalification(command.OriginalExpiryDate);
-        if (changed)
-            session.UpdateAggregate(household);
+        return household.ExpirePrequalification(command.OriginalExpiryDate);
     }
 }

@@ -1,7 +1,7 @@
 using CommonGround.HomeBuyers.Domain.HomeSelections;
+using CommonGround.HomeBuyers.Domain.HomeSelections.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
@@ -15,19 +15,11 @@ public sealed record CancelHomeSelection(
 public static class CancelHomeSelectionHandler
 {
     /// <summary>Loads the selection, cancels it, and persists it.</summary>
-    public static async Task Handle(
-        CancelHomeSelection command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static HomeSelectionCancelled Handle(CancelHomeSelection command, [WriteAggregate(nameof(CancelHomeSelection.SelectionId))] HomeSelection selection)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(selection);
 
-        var selection = await session
-            .LoadAggregateAsync<HomeSelection>(command.SelectionId, cancellationToken)
-            .ConfigureAwait(false);
-
-        selection.Cancel(command.Reason, command.CancelledBy);
-
-        session.UpdateAggregate(selection);
+        return selection.Cancel(command.Reason, command.CancelledBy);
     }
 }

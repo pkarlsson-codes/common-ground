@@ -1,7 +1,7 @@
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
+using CommonGround.HomeBuyers.Domain.HomeownerApplications.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
@@ -16,19 +16,11 @@ public sealed record DenyApplication(
 public static class DenyApplicationHandler
 {
     /// <summary>Loads the application, denies it, and persists it.</summary>
-    public static async Task Handle(
-        DenyApplication command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static ApplicationDenied Handle(DenyApplication command, [WriteAggregate(nameof(DenyApplication.ApplicationId))] HomeownerApplication application)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(application);
 
-        var application = await session
-            .LoadAggregateAsync<HomeownerApplication>(command.ApplicationId, cancellationToken)
-            .ConfigureAwait(false);
-
-        application.DenyApplication(command.Reason, command.DeniedDate, command.RecordedBy);
-
-        session.UpdateAggregate(application);
+        return application.DenyApplication(command.Reason, command.DeniedDate, command.RecordedBy);
     }
 }

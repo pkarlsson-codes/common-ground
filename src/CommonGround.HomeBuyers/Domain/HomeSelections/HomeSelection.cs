@@ -15,9 +15,8 @@ namespace CommonGround.HomeBuyers.Domain.HomeSelections;
 /// </summary>
 public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
 {
-#pragma warning disable CS8618
-    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
-    public HomeSelection() { }
+#pragma warning disable CS8618 // State is set by Create from the stream's first event.
+    private HomeSelection() { }
 #pragma warning restore CS8618
 
     public string HomeId { get; private set; }
@@ -33,7 +32,8 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
     /// <paramref name="activeSelectionId"/> (the home's open or completed selection, if any) is set,
     /// or when nobody is waiting.
     /// </summary>
-    public static HomeSelection Start(
+    public static HomeSelectionStarted Start(
+        HomeSelectionId id,
         string homeId,
         IReadOnlyList<SelectionCandidate> candidates,
         HomeSelectionId? activeSelectionId,
@@ -48,9 +48,8 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
         if (candidates.Count == 0)
             throw BusinessRuleViolation.HomeSelection.Start.WaitingListEmpty(homeId);
 
-        var selection = new HomeSelection();
-        selection.ApplyChange(new HomeSelectionStarted(
-            HomeSelectionId.Generate().Value,
+        return new HomeSelectionStarted(
+            id.Value,
             homeId,
             [.. candidates.Select(c => new SnapshotCandidate(
                 c.ApplicationId.Value,
@@ -59,16 +58,14 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
                 c.HouseholdSize,
                 c.RequiresAccessibility,
                 c.WaitingSince))],
-            startedBy.Value));
-
-        return selection;
+            startedBy.Value);
     }
 
     /// <summary>
     /// Chooses <paramref name="applicationId"/>, citing the <paramref name="priorities"/> that put
     /// it ahead of the other candidates and explaining the choice in <paramref name="reason"/>.
     /// </summary>
-    public void SelectByPriority(
+    public HouseholdSelectedByPriority SelectByPriority(
         HomeownerApplicationId applicationId,
         IReadOnlyCollection<SelectionPriority> priorities,
         string reason,
@@ -83,12 +80,12 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
         EnsureOpen();
         EnsureCandidate(applicationId);
 
-        ApplyChange(new HouseholdSelectedByPriority(
+        return new HouseholdSelectedByPriority(
             Id.Value,
             applicationId.Value,
             [.. priorities.Distinct().Select(p => p.DisplayName)],
             reason,
-            selectedBy.Value));
+            selectedBy.Value);
     }
 
     /// <summary>
@@ -97,7 +94,7 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
     /// <paramref name="eligibleApplicationIds"/> so the winner can always be selected.
     /// <paramref name="seed"/> is recorded so the draw can be re-run and checked.
     /// </summary>
-    public void DrawLottery(
+    public HouseholdSelectedByLottery DrawLottery(
         IReadOnlyCollection<HomeownerApplicationId>? tiedApplicationIds,
         IReadOnlySet<HomeownerApplicationId> eligibleApplicationIds,
         int seed,
@@ -128,35 +125,35 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
 
         var winner = SelectionLottery.Draw(pool, seed);
 
-        ApplyChange(new HouseholdSelectedByLottery(
+        return new HouseholdSelectedByLottery(
             Id.Value,
             winner.Value,
             [.. pool.Select(id => id.Value).Order(StringComparer.Ordinal)],
             [.. ineligible.Select(id => id.Value).Order(StringComparer.Ordinal)],
             seed,
-            drawnBy.Value));
+            drawnBy.Value);
     }
 
     /// <summary>Cancels the selection without choosing anyone, freeing the home for a new selection.</summary>
-    public void Cancel(string reason, UserId cancelledBy)
+    public HomeSelectionCancelled Cancel(string reason, UserId cancelledBy)
     {
         if (string.IsNullOrWhiteSpace(reason))
             throw BusinessRuleViolation.HomeSelection.Cancel.ReasonRequired();
 
         EnsureOpen();
 
-        ApplyChange(new HomeSelectionCancelled(Id.Value, reason, cancelledBy.Value));
+        return new HomeSelectionCancelled(Id.Value, reason, cancelledBy.Value);
     }
 
     /// <summary>Records that the purchase the chosen household started fell through, freeing the home for a new selection.</summary>
-    public void RecordPurchaseFellThrough(string reason, DateOnly fellThroughDate)
+    public HomeSelectionPurchaseFellThrough RecordPurchaseFellThrough(string reason, DateOnly fellThroughDate)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
 
         if (Status != HomeSelectionStatus.Completed)
             throw BusinessRuleViolation.HomeSelection.RecordPurchaseFellThrough.NotCompleted(Status);
 
-        ApplyChange(new HomeSelectionPurchaseFellThrough(Id.Value, reason, fellThroughDate));
+        return new HomeSelectionPurchaseFellThrough(Id.Value, reason, fellThroughDate);
     }
 
     private void EnsureOpen()
@@ -171,23 +168,17 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
             throw BusinessRuleViolation.HomeSelection.Modify.NotACandidate(applicationId);
     }
 
-    /// <inheritdoc/>
-    protected override void ApplyEvent(IDomainEvent domainEvent)
+    /// <summary>Starts a home selection from its first event.</summary>
+    public static HomeSelection Create(HomeSelectionStarted e)
     {
-        switch (domainEvent)
-        {
-            case HomeSelectionStarted e: Apply(e); break;
-            case HouseholdSelectedByPriority e: Apply(e); break;
-            case HouseholdSelectedByLottery e: Apply(e); break;
-            case HomeSelectionCancelled e: Apply(e); break;
-            case HomeSelectionPurchaseFellThrough e: Apply(e); break;
-            default: throw new InvalidOperationException($"Unknown event: {domainEvent?.GetType().Name}");
-        }
+        ArgumentNullException.ThrowIfNull(e);
+
+        var homeSelection = new HomeSelection();
+        homeSelection.Apply(e);
+        return homeSelection;
     }
 
-    /// <summary>Applies <see cref="HomeSelectionStarted"/>.</summary>
-
-    public void Apply(HomeSelectionStarted e)
+    private void Apply(HomeSelectionStarted e)
     {
         Id = HomeSelectionId.Create(e.AggregateId);
         HomeId = e.HomeId;
@@ -206,7 +197,6 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
     }
 
     /// <summary>Applies <see cref="HouseholdSelectedByPriority"/>.</summary>
-
     public void Apply(HouseholdSelectedByPriority e)
     {
         SelectedApplicationId = HomeownerApplicationId.Create(e.ApplicationId);
@@ -214,7 +204,6 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
     }
 
     /// <summary>Applies <see cref="HouseholdSelectedByLottery"/>.</summary>
-
     public void Apply(HouseholdSelectedByLottery e)
     {
         SelectedApplicationId = HomeownerApplicationId.Create(e.ApplicationId);
@@ -222,14 +211,12 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
     }
 
     /// <summary>Applies <see cref="HomeSelectionPurchaseFellThrough"/>.</summary>
-
     public void Apply(HomeSelectionPurchaseFellThrough _)
     {
         Status = HomeSelectionStatus.FellThrough;
     }
 
     /// <summary>Applies <see cref="HomeSelectionCancelled"/>.</summary>
-
     public void Apply(HomeSelectionCancelled e)
     {
         CancellationReason = e.Reason;

@@ -25,13 +25,16 @@ public static class HouseholdEndpoints
 
         var userId = httpContext.GetUserId();
 
+        var id = HouseholdId.Generate();
+
         var command = new RegisterHousehold(
+            id,
             [.. request.Members.Select(m => new RegisterHouseholdMember(m.Name, m.Email, m.Phone, m.IsPrimary))],
             request.RequiresAccessibility,
             request.AnnualIncome,
             userId);
 
-        var id = await bus.InvokeForTenantAsync<HouseholdId>(bus.TenantId!, command, cancellationToken);
+        await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);
 
         return Results.Created($"/api/households/{id.Value}", new RegisterHouseholdResponse(id.Value));
     }
@@ -87,9 +90,11 @@ public static class HouseholdEndpoints
 
         var userId = httpContext.GetUserId();
 
-        var memberId = await bus.InvokeForTenantAsync<HouseholdMemberId>(bus.TenantId!,
+        var memberId = HouseholdMemberId.Generate();
+        await bus.InvokeForTenantAsync(bus.TenantId!,
             new AddHouseholdMember(
                 HouseholdId.Create(householdId),
+                memberId,
                 request.Name,
                 request.Email,
                 request.Phone,

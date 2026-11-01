@@ -1,16 +1,17 @@
 using CommonGround.HomeBuyers.Contracts.Events;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications.Events;
-using Wolverine;
 
 namespace CommonGround.HomeBuyers.Application.EventHandlers;
 
 /// <summary>Publishes the ApplicationSelected integration event when an applicant is selected for a home.</summary>
-public sealed class ApplicationSelectedForHomeHandler(IMessageBus bus)
+public static class ApplicationSelectedForHomeHandler
 {
-    /// <summary>Maps domain event to integration event and publishes it.</summary>
-    public async Task Handle(ApplicationSelectedForHome @event, CancellationToken cancellationToken)
+    /// <summary>Maps the domain event to the integration event Wolverine publishes.</summary>
+    public static ApplicationSelected Handle(ApplicationSelectedForHome @event)
     {
-        await bus.PublishAsync(new ApplicationSelected(
+        ArgumentNullException.ThrowIfNull(@event);
+
+        return new ApplicationSelected(
             @event.AggregateId,
             @event.HouseholdId,
             @event.ApplicantFullName,
@@ -21,6 +22,6 @@ public sealed class ApplicationSelectedForHomeHandler(IMessageBus bus)
             @event.GroundLeaseTemplateId,
             @event.PurchasePrice,
             @event.SelectedDate,
-            @event.SelectedBy)).ConfigureAwait(false);
+            @event.SelectedBy);
     }
 }

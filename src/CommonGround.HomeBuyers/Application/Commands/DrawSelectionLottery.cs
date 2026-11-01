@@ -23,43 +23,41 @@ public sealed record DrawSelectionLottery(
 /// <summary>Handles <see cref="DrawSelectionLottery"/>.</summary>
 public static class DrawSelectionLotteryHandler
 {
-    /// <summary>
-    /// Draws with a fresh random seed among the candidates who can be selected on the selected
-    /// date, selects the winner's application, passes over the others, and persists them.
-    /// </summary>
-    public static async Task Handle(
+    /// <summary>Fetches the selection and its candidates' applications for writing.</summary>
+    public static Task<SelectionCompletion> LoadAsync(
         DrawSelectionLottery command,
         IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var selection = await session
-            .LoadAggregateAsync<HomeSelection>(command.SelectionId, cancellationToken)
-            .ConfigureAwait(false);
+        return HomeSelectionCompletion.LoadAsync(session, command.SelectionId, cancellationToken);
+    }
 
-        var candidates = await HomeSelectionCompletion
-            .LoadCandidatesAsync(session, selection, cancellationToken)
-            .ConfigureAwait(false);
+    /// <summary>
+    /// Draws with a fresh random seed among the candidates who can be selected on the selected
+    /// date, selects the winner's application, and passes over the others.
+    /// </summary>
+    public static void Handle(DrawSelectionLottery command, SelectionCompletion completion)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(completion);
 
-        var eligibleApplicationIds = candidates
-            .Where(c => c.Application.CanBeSelected(c.Household, command.SelectedDate))
-            .Select(c => c.Application.Id)
+        var eligibleApplicationIds = completion.Candidates
+            .Where(c => c.Application.Aggregate!.CanBeSelected(c.Household, command.SelectedDate))
+            .Select(c => c.Application.Aggregate!.Id)
             .ToHashSet();
-
         var seed = RandomNumberGenerator.GetInt32(int.MaxValue);
-        selection.DrawLottery(command.TiedApplicationIds, eligibleApplicationIds, seed, command.DrawnBy);
 
-        await HomeSelectionCompletion.CompleteAsync(
-            session,
-            selection,
-            candidates,
+        var drawn = completion.CurrentSelection.DrawLottery(command.TiedApplicationIds, eligibleApplicationIds, seed, command.DrawnBy);
+        completion.Selection.AppendOne(drawn);
+
+        HomeSelectionCompletion.Complete(
+            completion,
+            HomeownerApplicationId.Create(drawn.ApplicationId),
             command.GroundLeaseTemplateId,
             command.PurchasePrice,
             command.SelectedDate,
-            command.DrawnBy,
-            cancellationToken).ConfigureAwait(false);
-
-        session.UpdateAggregate(selection);
+            command.DrawnBy);
     }
 }

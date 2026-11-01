@@ -1,7 +1,7 @@
 using CommonGround.HomeBuyers.Domain.Households;
+using CommonGround.HomeBuyers.Domain.Households.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
@@ -15,19 +15,11 @@ public sealed record RemoveHouseholdMember(
 public static class RemoveHouseholdMemberHandler
 {
     /// <summary>Loads the household, removes the member, and persists it.</summary>
-    public static async Task Handle(
-        RemoveHouseholdMember command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static HouseholdMemberRemoved Handle(RemoveHouseholdMember command, [WriteAggregate] Household household)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(household);
 
-        var household = await session
-            .LoadAggregateAsync<Household>(command.HouseholdId, cancellationToken)
-            .ConfigureAwait(false);
-
-        household.RemoveMember(command.MemberId, command.RemovedBy);
-
-        session.UpdateAggregate(household);
+        return household.RemoveMember(command.MemberId, command.RemovedBy);
     }
 }

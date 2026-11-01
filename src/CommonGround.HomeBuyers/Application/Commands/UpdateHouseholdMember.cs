@@ -1,7 +1,7 @@
 using CommonGround.HomeBuyers.Domain.Households;
+using CommonGround.HomeBuyers.Domain.Households.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
@@ -18,19 +18,11 @@ public sealed record UpdateHouseholdMember(
 public static class UpdateHouseholdMemberHandler
 {
     /// <summary>Loads the household, updates the member, and persists it.</summary>
-    public static async Task Handle(
-        UpdateHouseholdMember command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static HouseholdMemberUpdated? Handle(UpdateHouseholdMember command, [WriteAggregate] Household household)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(household);
 
-        var household = await session
-            .LoadAggregateAsync<Household>(command.HouseholdId, cancellationToken)
-            .ConfigureAwait(false);
-
-        household.UpdateMember(command.MemberId, command.Name, command.Email, command.Phone, command.UpdatedBy);
-
-        session.UpdateAggregate(household);
+        return household.UpdateMember(command.MemberId, command.Name, command.Email, command.Phone, command.UpdatedBy);
     }
 }

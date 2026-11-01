@@ -1,8 +1,8 @@
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.Households;
+using CommonGround.HomeBuyers.Domain.Households.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
@@ -18,23 +18,15 @@ public sealed record RecordHousingCounseling(
 public static class RecordHousingCounselingHandler
 {
     /// <summary>Loads the application, records counseling completion, and persists it.</summary>
-    public static async Task Handle(
-        RecordHousingCounseling command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static HousingCounselingRecorded? Handle(RecordHousingCounseling command, [WriteAggregate] Household household)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(household);
 
-        var household = await session
-            .LoadAggregateAsync<Household>(command.HouseholdId, cancellationToken)
-            .ConfigureAwait(false);
-
-        household.RecordHousingCounseling(
+        return household.RecordHousingCounseling(
             command.CertificationNumber,
             command.CompletedDate,
             command.CounselorOrganization,
             command.RecordedBy);
-
-        session.UpdateAggregate(household);
     }
 }

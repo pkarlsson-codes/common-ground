@@ -1,8 +1,8 @@
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.Households;
+using CommonGround.HomeBuyers.Domain.Households.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
@@ -16,19 +16,11 @@ public sealed record RecordCltOrientation(
 public static class RecordCltOrientationHandler
 {
     /// <summary>Loads the application, records orientation completion, and persists it.</summary>
-    public static async Task Handle(
-        RecordCltOrientation command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static CltOrientationRecorded? Handle(RecordCltOrientation command, [WriteAggregate] Household household)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(household);
 
-        var household = await session
-            .LoadAggregateAsync<Household>(command.HouseholdId, cancellationToken)
-            .ConfigureAwait(false);
-
-        household.RecordCltOrientation(command.CompletedDate, command.RecordedBy);
-
-        session.UpdateAggregate(household);
+        return household.RecordCltOrientation(command.CompletedDate, command.RecordedBy);
     }
 }

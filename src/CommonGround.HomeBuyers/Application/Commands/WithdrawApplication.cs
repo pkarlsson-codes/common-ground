@@ -1,7 +1,7 @@
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
+using CommonGround.HomeBuyers.Domain.HomeownerApplications.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
@@ -18,19 +18,11 @@ public sealed record WithdrawApplication(
 public static class WithdrawApplicationHandler
 {
     /// <summary>Loads the application, withdraws it, and persists it.</summary>
-    public static async Task Handle(
-        WithdrawApplication command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static ApplicationWithdrawn Handle(WithdrawApplication command, [WriteAggregate(nameof(WithdrawApplication.ApplicationId))] HomeownerApplication application)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(application);
 
-        var application = await session
-            .LoadAggregateAsync<HomeownerApplication>(command.ApplicationId, cancellationToken)
-            .ConfigureAwait(false);
-
-        application.Withdraw(command.WithdrawnDate, command.Reason, command.RecordedById);
-
-        session.UpdateAggregate(application);
+        return application.Withdraw(command.WithdrawnDate, command.Reason, command.RecordedById);
     }
 }

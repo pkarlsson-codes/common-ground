@@ -4,15 +4,24 @@ using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
-using CommonGround.SharedKernel.Extensions;
 using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
 /// <summary>Starts choosing a household for a home from the current waiting list.</summary>
+/// <param name="SelectionId">The new selection's ID, chosen by the caller.</param>
+/// <param name="HomeId">The home to choose a household for.</param>
+/// <param name="StartedBy">The staff user starting the selection.</param>
 public sealed record StartHomeSelection(
+    HomeSelectionId SelectionId,
     string HomeId,
     UserId StartedBy);
+
+/// <summary>What starting a home selection decides from.</summary>
+/// <param name="Candidates">Every approved application, waiting since its approval date, longest waiting first.</param>
+/// <param name="ActiveSelectionId">The home's open or completed selection, if any.</param>
+public sealed record SelectionStart(IReadOnlyList<SelectionCandidate> Candidates, HomeSelectionId? ActiveSelectionId);
 
 /// <summary>Handles <see cref="StartHomeSelection"/>.</summary>
 public static class StartHomeSelectionHandler
@@ -20,32 +29,32 @@ public static class StartHomeSelectionHandler
     private static readonly string[] ActiveStatuses =
         [HomeSelectionStatus.Open.DisplayName, HomeSelectionStatus.Completed.DisplayName];
 
-    /// <summary>
-    /// Snapshots every approved application as a candidate, waiting since its approval date,
-    /// starts the selection, and returns its ID.
-    /// </summary>
-    public static async Task<HomeSelectionId> Handle(
+    /// <summary>Snapshots the waiting list and finds the home's active selection.</summary>
+    public static Task<SelectionStart> LoadAsync(
         StartHomeSelection command,
-        IDocumentSession session,
+        IQuerySession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var selection = await StartAsync(session, command.HomeId, command.StartedBy, endedSelectionId: null, cancellationToken)
-            .ConfigureAwait(false);
+        return LoadStartAsync(session, command.HomeId, endedSelectionId: null, cancellationToken);
+    }
 
-        return selection.Id;
+    /// <summary>Starts the selection with every approved application as a candidate.</summary>
+    public static IStartStream Handle(StartHomeSelection command, SelectionStart start)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+
+        return Start(command.SelectionId, command.HomeId, start, command.StartedBy);
     }
 
     /// <summary>
-    /// Starts a selection for <paramref name="homeId"/> from the approved applications as of the last save.
-    /// <paramref name="endedSelectionId"/> names a selection ended in this session but not yet saved, so it
-    /// no longer counts as the home's active selection.
+    /// Snapshots the waiting list for <paramref name="homeId"/> and finds its active selection, ignoring
+    /// <paramref name="endedSelectionId"/>, the selection a caller is ending in the same change.
     /// </summary>
-    internal static async Task<HomeSelection> StartAsync(
-        IDocumentSession session,
+    internal static async Task<SelectionStart> LoadStartAsync(
+        IQuerySession session,
         string homeId,
-        UserId startedBy,
         string? endedSelectionId,
         CancellationToken cancellationToken)
     {
@@ -77,14 +86,15 @@ public static class StartHomeSelectionHandler
                 v.ApprovedDate ?? throw new InvalidOperationException($"Approved application {v.Id} has no approval date.")))
             .ToList();
 
-        var selection = HomeSelection.Start(
-            homeId,
-            candidates,
-            EntityIds.CreateOrNull<HomeSelectionId>(activeSelectionId),
-            startedBy);
+        return new SelectionStart(candidates, EntityIds.CreateOrNull<HomeSelectionId>(activeSelectionId));
+    }
 
-        session.CreateAggregate<HomeSelection, HomeSelectionId>(selection);
+    /// <summary>Starts a selection's stream from what was loaded.</summary>
+    internal static IStartStream Start(HomeSelectionId selectionId, string homeId, SelectionStart start, UserId startedBy)
+    {
+        ArgumentNullException.ThrowIfNull(start);
 
-        return selection;
+        var started = HomeSelection.Start(selectionId, homeId, start.Candidates, start.ActiveSelectionId, startedBy);
+        return MartenOps.StartStream<HomeSelection>(selectionId.Value, started);
     }
 }

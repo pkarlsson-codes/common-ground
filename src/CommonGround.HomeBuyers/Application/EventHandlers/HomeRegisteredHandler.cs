@@ -1,6 +1,6 @@
 using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.PropertyRegistry.Contracts.Events;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.HomeBuyers.Application.EventHandlers;
 
@@ -8,11 +8,11 @@ namespace CommonGround.HomeBuyers.Application.EventHandlers;
 public static class HomeRegisteredHandler
 {
     /// <summary>Records the home's facts for later use in applicant selection.</summary>
-    public static void Handle(HomeRegistered @event, IDocumentSession session)
+    public static IMartenOp Handle(HomeRegistered @event)
     {
         ArgumentNullException.ThrowIfNull(@event);
 
-        session.Store(new HomeFactsView
+        return MartenOps.Store(new HomeFactsView
         {
             Id = @event.HomeId,
             LandParcelId = @event.LandParcelId,

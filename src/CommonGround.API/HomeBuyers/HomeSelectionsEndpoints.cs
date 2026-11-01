@@ -26,8 +26,9 @@ public static class HomeSelectionsEndpoints
 
         var userId = httpContext.GetUserId();
 
-        var id = await bus.InvokeForTenantAsync<HomeSelectionId>(bus.TenantId!,
-            new StartHomeSelection(homeId, userId),
+        var id = HomeSelectionId.Generate();
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new StartHomeSelection(id, homeId, userId),
             cancellationToken);
 
         return Results.Created($"/api/home-selections/{id.Value}", new StartHomeSelectionResponse(id.Value));

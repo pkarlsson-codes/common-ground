@@ -1,13 +1,14 @@
 using CommonGround.HomeBuyers.Domain.Households;
+using CommonGround.HomeBuyers.Domain.Households.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
 /// <summary>Adds a non-primary member to a household.</summary>
 public sealed record AddHouseholdMember(
     HouseholdId HouseholdId,
+    HouseholdMemberId MemberId,
     string Name,
     string Email,
     string Phone,
@@ -16,21 +17,12 @@ public sealed record AddHouseholdMember(
 /// <summary>Handles <see cref="AddHouseholdMember"/>.</summary>
 public static class AddHouseholdMemberHandler
 {
-    /// <summary>Loads the household, adds the member, persists it, and returns the new member's ID.</summary>
-    public static async Task<HouseholdMemberId> Handle(
-        AddHouseholdMember command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    /// <summary>Adds the member to the household.</summary>
+    public static HouseholdMemberAdded Handle(AddHouseholdMember command, [WriteAggregate] Household household)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(household);
 
-        var household = await session
-            .LoadAggregateAsync<Household>(command.HouseholdId, cancellationToken)
-            .ConfigureAwait(false);
-
-        var memberId = household.AddMember(command.Name, command.Email, command.Phone, command.AddedBy);
-
-        session.UpdateAggregate(household);
-        return memberId;
+        return household.AddMember(command.MemberId, command.Name, command.Email, command.Phone, command.AddedBy);
     }
 }

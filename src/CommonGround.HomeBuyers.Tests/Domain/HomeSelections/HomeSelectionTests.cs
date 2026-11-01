@@ -4,6 +4,7 @@ using CommonGround.HomeBuyers.Domain.HomeSelections.Events;
 using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.Testing;
 using FluentAssertions;
 
 namespace CommonGround.HomeBuyers.Tests.Domain.HomeSelections;
@@ -27,19 +28,19 @@ public class HomeSelectionTests
 
         public string HomeId { get; } = "home-1";
 
-        public HomeSelection OpenSelection() => HomeSelection.Start(HomeId, Candidates, null, StaffUser);
+        public HomeSelection OpenSelection() => EventReplay.Replay<HomeSelection>(HomeSelection.Start(HomeSelectionId.Generate(), HomeId, Candidates, null, StaffUser));
 
         public HomeSelection CompletedSelection()
         {
             var selection = OpenSelection();
-            selection.SelectByPriority(A, [SelectionPriority.LowerIncome], "Lowest income", StaffUser);
+            selection = selection.Decide(a => a.SelectByPriority(A, [SelectionPriority.LowerIncome], "Lowest income", StaffUser)).Aggregate;
             return selection;
         }
 
         public HomeSelection CancelledSelection()
         {
             var selection = OpenSelection();
-            selection.Cancel("Home withdrawn from sale", StaffUser);
+            selection = selection.Decide(a => a.Cancel("Home withdrawn from sale", StaffUser)).Aggregate;
             return selection;
         }
 
@@ -66,7 +67,7 @@ public class HomeSelectionTests
         public void GivenHomeHasActiveSelection_WhenStarted_ThenThrowsHomeHasActiveSelection()
         {
             var act = () => HomeSelection.Start(
-                _testBed.HomeId, _testBed.Candidates, activeSelectionId: HomeSelectionId.Generate(), _testBed.StaffUser);
+                HomeSelectionId.Generate(), _testBed.HomeId, _testBed.Candidates, activeSelectionId: HomeSelectionId.Generate(), _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.home_selection.start.home_has_active_selection");
@@ -75,7 +76,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenNobodyWaiting_WhenStarted_ThenThrowsWaitingListEmpty()
         {
-            var act = () => HomeSelection.Start(_testBed.HomeId, candidates: [], null, _testBed.StaffUser);
+            var act = () => HomeSelection.Start(HomeSelectionId.Generate(), _testBed.HomeId, candidates: [], null, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.home_selection.start.waiting_list_empty");
@@ -84,7 +85,9 @@ public class HomeSelectionTests
         [Fact]
         public void GivenWaitingCandidates_WhenStarted_ThenIsOpenWithTheCandidatesSnapshotted()
         {
-            var sut = HomeSelection.Start(_testBed.HomeId, _testBed.Candidates, null, _testBed.StaffUser);
+            var started = HomeSelection.Start(HomeSelectionId.Generate(), _testBed.HomeId, _testBed.Candidates, null, _testBed.StaffUser);
+
+            var sut = EventReplay.Replay<HomeSelection>(started);
 
             sut.Status.Should().Be(HomeSelectionStatus.Open);
             sut.Candidates.Should().Equal(_testBed.Candidates);
@@ -147,15 +150,15 @@ public class HomeSelectionTests
         {
             var sut = _testBed.OpenSelection();
 
-            sut.SelectByPriority(
+            (sut, var events) = sut.Decide(a => a.SelectByPriority(
                 _testBed.B,
                 [SelectionPriority.AccessibilityNeed, SelectionPriority.LowerIncome, SelectionPriority.AccessibilityNeed],
                 "Needs the accessible unit",
-                _testBed.StaffUser);
+                _testBed.StaffUser));
 
             sut.Status.Should().Be(HomeSelectionStatus.Completed);
             sut.SelectedApplicationId.Should().Be(_testBed.B);
-            sut.UncommittedEvents.OfType<HouseholdSelectedByPriority>().Should().ContainSingle()
+            events.OfType<HouseholdSelectedByPriority>().Should().ContainSingle()
                 .Which.Priorities.Should().Equal("AccessibilityNeed", "LowerIncome");
         }
     }
@@ -225,10 +228,10 @@ public class HomeSelectionTests
         {
             var sut = _testBed.OpenSelection();
 
-            sut.DrawLottery(null, _testBed.AllEligible(), 42, _testBed.StaffUser);
+            (sut, var events) = sut.Decide(a => a.DrawLottery(null, _testBed.AllEligible(), 42, _testBed.StaffUser));
 
             sut.Status.Should().Be(HomeSelectionStatus.Completed);
-            var drawn = sut.UncommittedEvents.OfType<HouseholdSelectedByLottery>().Should().ContainSingle().Subject;
+            var drawn = events.OfType<HouseholdSelectedByLottery>().Should().ContainSingle().Subject;
             drawn.PoolApplicationIds.Should().Equal("application-a", "application-b", "application-c");
             drawn.Seed.Should().Be(42);
             sut.SelectedApplicationId?.Value.Should().Be(drawn.ApplicationId);
@@ -239,9 +242,9 @@ public class HomeSelectionTests
         {
             var sut = _testBed.OpenSelection();
 
-            sut.DrawLottery([_testBed.C, _testBed.A], _testBed.AllEligible(), 42, _testBed.StaffUser);
+            (sut, var events) = sut.Decide(a => a.DrawLottery([_testBed.C, _testBed.A], _testBed.AllEligible(), 42, _testBed.StaffUser));
 
-            sut.UncommittedEvents.OfType<HouseholdSelectedByLottery>().Should().ContainSingle()
+            events.OfType<HouseholdSelectedByLottery>().Should().ContainSingle()
                 .Which.PoolApplicationIds.Should().Equal("application-a", "application-c");
         }
 
@@ -250,10 +253,10 @@ public class HomeSelectionTests
         {
             var sut = _testBed.OpenSelection();
 
-            sut.DrawLottery(null, TestBed.Eligible(_testBed.B), 42, _testBed.StaffUser);
+            (sut, var events) = sut.Decide(a => a.DrawLottery(null, TestBed.Eligible(_testBed.B), 42, _testBed.StaffUser));
 
             sut.SelectedApplicationId.Should().Be(_testBed.B);
-            sut.UncommittedEvents.OfType<HouseholdSelectedByLottery>().Should().ContainSingle()
+            events.OfType<HouseholdSelectedByLottery>().Should().ContainSingle()
                 .Which.Should().BeEquivalentTo(new
                 {
                     PoolApplicationIds = new[] { "application-b" },
@@ -295,7 +298,7 @@ public class HomeSelectionTests
         {
             var sut = _testBed.OpenSelection();
 
-            sut.Cancel("Home withdrawn from sale", _testBed.StaffUser);
+            sut = sut.Decide(a => a.Cancel("Home withdrawn from sale", _testBed.StaffUser)).Aggregate;
 
             sut.Status.Should().Be(HomeSelectionStatus.Cancelled);
             sut.CancellationReason.Should().Be("Home withdrawn from sale");
@@ -324,7 +327,7 @@ public class HomeSelectionTests
             var sut = _testBed.CompletedSelection();
             var chosen = sut.SelectedApplicationId;
 
-            sut.RecordPurchaseFellThrough("Financing fell through", new DateOnly(2026, 9, 1));
+            sut = sut.Decide(a => a.RecordPurchaseFellThrough("Financing fell through", new DateOnly(2026, 9, 1))).Aggregate;
 
             sut.Status.Should().Be(HomeSelectionStatus.FellThrough);
             sut.SelectedApplicationId.Should().Be(chosen);

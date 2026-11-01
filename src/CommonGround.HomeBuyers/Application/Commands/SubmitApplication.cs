@@ -2,13 +2,17 @@ using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
 using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
 /// <summary>Submits a new homeowner application.</summary>
+/// <param name="ApplicationId">The new application's ID, chosen by the caller.</param>
+/// <param name="HouseholdId">The household applying.</param>
+/// <param name="SubmittedBy">The staff user submitting the application.</param>
 public sealed record SubmitApplication(
+    HomeownerApplicationId ApplicationId,
     HouseholdId HouseholdId,
     UserId SubmittedBy);
 
@@ -18,31 +22,37 @@ public static class SubmitApplicationHandler
     private static readonly string[] OpenPhases =
         [.. ApplicationPhase.GetAll().Where(p => !p.IsTerminal).Select(p => p.DisplayName)];
 
-    /// <summary>Creates a new homeowner application and returns its ID.</summary>
-    public static async Task<HomeownerApplicationId> Handle(
+    /// <summary>Finds the household's application that is still open, if any.</summary>
+    public static async Task<HomeownerApplicationListItemView?> LoadAsync(
         SubmitApplication command,
-        IDocumentSession session)
+        IQuerySession session,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(session);
 
-        var household = await session
-            .LoadAggregateAsync<Household>(command.HouseholdId)
-            .ConfigureAwait(false);
-
-        var openApplicationId = await session.Query<HomeownerApplicationListItemView>()
+        return await session.Query<HomeownerApplicationListItemView>()
             .Where(v => v.HouseholdId == command.HouseholdId.Value && OpenPhases.Contains(v.Phase))
-            .Select(v => v.Id)
-            .FirstOrDefaultAsync()
+            .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
+    }
 
-        var application = HomeownerApplication.Submit(
+    /// <summary>Starts the application with the household's declaration, unless it already has one open.</summary>
+    public static IStartStream Handle(
+        SubmitApplication command,
+        [ReadAggregate] Household household,
+        HomeownerApplicationListItemView? openApplication)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(household);
+
+        var submitted = HomeownerApplication.Submit(
+            command.ApplicationId,
             command.HouseholdId,
             household.Declare(),
-            EntityIds.CreateOrNull<HomeownerApplicationId>(openApplicationId),
+            EntityIds.CreateOrNull<HomeownerApplicationId>(openApplication?.Id),
             command.SubmittedBy);
 
-        session.CreateAggregate<HomeownerApplication, HomeownerApplicationId>(application);
-
-        return application.Id;
+        return MartenOps.StartStream<HomeownerApplication>(command.ApplicationId.Value, submitted);
     }
 }

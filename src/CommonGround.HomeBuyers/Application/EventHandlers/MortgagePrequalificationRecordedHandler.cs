@@ -1,24 +1,21 @@
 using CommonGround.HomeBuyers.Application.Commands;
-using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.HomeBuyers.Domain.Households.Events;
+using CommonGround.HomeBuyers.Domain.Households;
 using Wolverine;
 
 namespace CommonGround.HomeBuyers.Application.EventHandlers;
 
 /// <summary>Schedules expiry of a mortgage prequalification when one is recorded.</summary>
-public sealed class MortgagePrequalificationRecordedHandler(IMessageBus bus)
+public static class MortgagePrequalificationRecordedHandler
 {
     /// <summary>Schedules an <see cref="ExpireMortgagePrequalification"/> message at the prequalification's expiry date.</summary>
-    public async Task Handle(MortgagePrequalificationRecorded @event, CancellationToken cancellationToken)
+    public static ScheduledMessage<ExpireMortgagePrequalification> Handle(MortgagePrequalificationRecorded @event)
     {
-        var expiryTimestampUtc = DateTime.SpecifyKind(
-            @event.ExpiryDate.ToDateTime(TimeOnly.MinValue),
-            DateTimeKind.Utc);
+        ArgumentNullException.ThrowIfNull(@event);
 
-        await bus.ScheduleAsync(
-            new ExpireMortgagePrequalification(
-                HouseholdId.Create(@event.AggregateId),
-                @event.ExpiryDate),
-            expiryTimestampUtc).ConfigureAwait(false);
+        var expiryTimestampUtc = new DateTimeOffset(@event.ExpiryDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+
+        return new ExpireMortgagePrequalification(HouseholdId.Create(@event.AggregateId), @event.ExpiryDate)
+            .ScheduledAt(expiryTimestampUtc);
     }
 }

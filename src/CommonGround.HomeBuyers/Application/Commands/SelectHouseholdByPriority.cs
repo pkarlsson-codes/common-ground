@@ -23,34 +23,32 @@ public sealed record SelectHouseholdByPriority(
 /// <summary>Handles <see cref="SelectHouseholdByPriority"/>.</summary>
 public static class SelectHouseholdByPriorityHandler
 {
-    /// <summary>Records the choice, selects the chosen application, passes over the others, and persists them.</summary>
-    public static async Task Handle(
+    /// <summary>Fetches the selection and its candidates' applications for writing.</summary>
+    public static Task<SelectionCompletion> LoadAsync(
         SelectHouseholdByPriority command,
         IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var selection = await session
-            .LoadAggregateAsync<HomeSelection>(command.SelectionId, cancellationToken)
-            .ConfigureAwait(false);
+        return HomeSelectionCompletion.LoadAsync(session, command.SelectionId, cancellationToken);
+    }
 
-        selection.SelectByPriority(command.ApplicationId, command.Priorities, command.Reason, command.SelectedBy);
+    /// <summary>Records the choice, selects the chosen application, and passes over the others.</summary>
+    public static void Handle(SelectHouseholdByPriority command, SelectionCompletion completion)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(completion);
 
-        var candidates = await HomeSelectionCompletion
-            .LoadCandidatesAsync(session, selection, cancellationToken)
-            .ConfigureAwait(false);
+        completion.Selection.Decide(selection =>
+            selection.SelectByPriority(command.ApplicationId, command.Priorities, command.Reason, command.SelectedBy));
 
-        await HomeSelectionCompletion.CompleteAsync(
-            session,
-            selection,
-            candidates,
+        HomeSelectionCompletion.Complete(
+            completion,
+            command.ApplicationId,
             command.GroundLeaseTemplateId,
             command.PurchasePrice,
             command.SelectedDate,
-            command.SelectedBy,
-            cancellationToken).ConfigureAwait(false);
-
-        session.UpdateAggregate(selection);
+            command.SelectedBy);
     }
 }

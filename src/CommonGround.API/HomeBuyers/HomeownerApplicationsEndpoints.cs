@@ -25,11 +25,14 @@ public static class HomeownerApplicationsEndpoints
 
         var userId = httpContext.GetUserId();
 
+        var id = HomeownerApplicationId.Generate();
+
         var command = new SubmitApplication(
+            id,
             HouseholdId.Create(request.HouseholdId),
             userId);
 
-        var id = await bus.InvokeForTenantAsync<HomeownerApplicationId>(bus.TenantId!, command, cancellationToken);
+        await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);
 
         return Results.Created($"/api/homeowner-applications/{id.Value}", new SubmitApplicationResponse(id.Value));
     }

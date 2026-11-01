@@ -4,6 +4,7 @@ using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.Testing;
 using FluentAssertions;
 
 namespace CommonGround.HomeBuyers.Tests.Domain.HomeownerApplications;
@@ -14,36 +15,37 @@ public class HomeownerApplicationTests
     {
         public UserId StaffUser { get; } = UserId.Generate();
         public DateOnly SelectedDate { get; } = new(2026, 7, 20);
-        public Household Household { get; }
+        public Household Household { get; private set; }
 
         public TestBed()
         {
-            Household = Household.Register(
+            Household = EventReplay.Replay<Household>(Household.Register(
+                HouseholdId.Generate(),
                 [
                     HouseholdMember.Create("Alice Johnson", "alice@example.com", "555-0100", true),
                     HouseholdMember.Create("Bob Johnson", "bob@example.com", "555-0101", false),
                 ],
                 HouseholdCircumstances.Create(false, 65000m),
-                StaffUser);
+                StaffUser));
         }
 
         public TestBed WithReadiness(bool counseling = true, bool orientation = true, DateOnly? prequalificationExpiry = null)
         {
             if (counseling)
-                Household.RecordHousingCounseling("CERT-001", new DateOnly(2026, 6, 2), "Counseling Org", StaffUser);
+                Household = Household.Decide(a => a.RecordHousingCounseling("CERT-001", new DateOnly(2026, 6, 2), "Counseling Org", StaffUser)).Aggregate;
             if (orientation)
-                Household.RecordCltOrientation(new DateOnly(2026, 6, 3), StaffUser);
-            Household.RecordMortgagePrequalification("Lender", 210000m, prequalificationExpiry ?? new DateOnly(2027, 1, 1), StaffUser);
+                Household = Household.Decide(a => a.RecordCltOrientation(new DateOnly(2026, 6, 3), StaffUser)).Aggregate;
+            Household = Household.Decide(a => a.RecordMortgagePrequalification("Lender", 210000m, prequalificationExpiry ?? new DateOnly(2027, 1, 1), StaffUser)).Aggregate;
             return this;
         }
 
         public HomeownerApplication SubmittedApplication() =>
-            HomeownerApplication.Submit(Household.Id, Household.Declare(), null, StaffUser);
+            EventReplay.Replay<HomeownerApplication>(HomeownerApplication.Submit(HomeownerApplicationId.Generate(), Household.Id, Household.Declare(), null, StaffUser));
 
         public HomeownerApplication ApprovedApplication()
         {
             var application = SubmittedApplication();
-            application.Approve(new DateOnly(2026, 6, 1), null, StaffUser);
+            application = application.Decide(a => a.Approve(new DateOnly(2026, 6, 1), null, StaffUser)).Aggregate;
             return application;
         }
 
@@ -51,7 +53,7 @@ public class HomeownerApplicationTests
         {
             WithReadiness();
             var application = ApprovedApplication();
-            application.SelectForHome(Household, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, SelectedDate, StaffUser);
+            application = application.Decide(a => a.SelectForHome(Household, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, SelectedDate, StaffUser)).Aggregate;
             return application;
         }
     }
@@ -64,6 +66,7 @@ public class HomeownerApplicationTests
         public void GivenHouseholdHasOpenApplication_WhenSubmitted_ThenThrowsHouseholdHasOpenApplication()
         {
             var act = () => HomeownerApplication.Submit(
+                HomeownerApplicationId.Generate(),
                 _testBed.Household.Id, _testBed.Household.Declare(), openApplicationId: HomeownerApplicationId.Generate(), _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
@@ -73,7 +76,7 @@ public class HomeownerApplicationTests
         [Fact]
         public void GivenNoOpenApplication_WhenSubmitted_ThenIsSubmittedWithHouseholdSnapshot()
         {
-            var sut = HomeownerApplication.Submit(_testBed.Household.Id, _testBed.Household.Declare(), null, _testBed.StaffUser);
+            var sut = EventReplay.Replay<HomeownerApplication>(HomeownerApplication.Submit(HomeownerApplicationId.Generate(), _testBed.Household.Id, _testBed.Household.Declare(), null, _testBed.StaffUser));
 
             sut.Phase.Should().Be(ApplicationPhase.Submitted);
             sut.Declaration.Should().Be(_testBed.Household.Declare());
@@ -122,7 +125,7 @@ public class HomeownerApplicationTests
         public void GivenWithdrawnApplication_WhenWithdrawnAgain_ThenThrowsTerminalPhase()
         {
             var sut = _testBed.SubmittedApplication();
-            sut.Withdraw(new DateOnly(2026, 6, 1), null, _testBed.StaffUser);
+            sut = sut.Decide(a => a.Withdraw(new DateOnly(2026, 6, 1), null, _testBed.StaffUser)).Aggregate;
 
             var act = () => sut.Withdraw(new DateOnly(2026, 6, 2), null, _testBed.StaffUser);
 
@@ -207,11 +210,11 @@ public class HomeownerApplicationTests
             _testBed.WithReadiness();
             var sut = _testBed.ApprovedApplication();
 
-            sut.SelectForHome(
-                _testBed.Household, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser);
+            (sut, var events) = sut.Decide(a => a.SelectForHome(
+                _testBed.Household, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser));
 
             sut.Phase.Should().Be(ApplicationPhase.Selected);
-            sut.UncommittedEvents.OfType<ApplicationSelectedForHome>().Should().ContainSingle()
+            events.OfType<ApplicationSelectedForHome>().Should().ContainSingle()
                 .Which.Should().BeEquivalentTo(new { ApplicantFullName = "Alice Johnson", ApplicantEmail = "alice@example.com" });
         }
     }
@@ -287,10 +290,10 @@ public class HomeownerApplicationTests
         {
             var sut = _testBed.ApprovedApplication();
 
-            sut.PassOver(HomeSelectionId.Generate(), "home-1");
+            (sut, var events) = sut.Decide(a => a.PassOver(HomeSelectionId.Generate(), "home-1"));
 
             sut.Phase.Should().Be(ApplicationPhase.Approved);
-            sut.UncommittedEvents.OfType<ApplicationPassedOver>().Should().ContainSingle()
+            events.OfType<ApplicationPassedOver>().Should().ContainSingle()
                 .Which.HouseholdId.Should().Be(_testBed.Household.Id.Value);
         }
     }
@@ -315,7 +318,7 @@ public class HomeownerApplicationTests
         {
             var sut = _testBed.SelectedApplication();
 
-            sut.ReturnToWaitingList("home-1", "Financing fell through", _testBed.SelectedDate.AddDays(30));
+            sut = sut.Decide(a => a.ReturnToWaitingList("home-1", "Financing fell through", _testBed.SelectedDate.AddDays(30))).Aggregate;
 
             sut.Phase.Should().Be(ApplicationPhase.Approved);
             sut.CanBeSelected(_testBed.Household, _testBed.SelectedDate.AddDays(31)).Should().BeTrue();
@@ -342,7 +345,7 @@ public class HomeownerApplicationTests
         {
             var sut = _testBed.SelectedApplication();
 
-            sut.RecordPurchaseClosed("home-1", _testBed.SelectedDate.AddDays(60));
+            sut = sut.Decide(a => a.RecordPurchaseClosed("home-1", _testBed.SelectedDate.AddDays(60))).Aggregate;
 
             sut.Phase.Should().Be(ApplicationPhase.Purchased);
             sut.IsTerminal.Should().BeTrue();

@@ -27,10 +27,14 @@ public sealed class HouseholdMember : Entity<HouseholdMemberId>
     public bool IsPrimary { get; private set; }
 
     /// <summary>Creates a new HouseholdMember.</summary>
-    public static HouseholdMember Create(string name, string email, string phone, bool isPrimary)
+    public static HouseholdMember Create(string name, string email, string phone, bool isPrimary) =>
+        Create(HouseholdMemberId.Generate(), name, email, phone, isPrimary);
+
+    /// <summary>Creates a member with an ID chosen by the caller, validating contact details.</summary>
+    public static HouseholdMember Create(HouseholdMemberId id, string name, string email, string phone, bool isPrimary)
     {
         ValidateContactDetails(name, email, phone);
-        return new HouseholdMember(HouseholdMemberId.Generate(), name, email, phone, isPrimary);
+        return new HouseholdMember(id, name, email, phone, isPrimary);
     }
 
     /// <summary>Validates contact details for a household member.</summary>

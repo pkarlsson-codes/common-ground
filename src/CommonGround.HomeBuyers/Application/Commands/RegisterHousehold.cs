@@ -1,12 +1,12 @@
 using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
 /// <summary>Registers a household.</summary>
 public sealed record RegisterHousehold(
+    HouseholdId HouseholdId,
     IReadOnlyList<RegisterHouseholdMember> Members,
     bool RequiresAccessibility,
     decimal AnnualIncome,
@@ -22,10 +22,8 @@ public sealed record RegisterHouseholdMember(
 /// <summary>Handles <see cref="RegisterHousehold"/>.</summary>
 public static class RegisterHouseholdHandler
 {
-    /// <summary>Registers the household and persists it.</summary>
-    public static HouseholdId Handle(
-        RegisterHousehold command,
-        IDocumentSession session)
+    /// <summary>Starts the household's stream.</summary>
+    public static IStartStream Handle(RegisterHousehold command)
     {
         ArgumentNullException.ThrowIfNull(command);
 
@@ -33,8 +31,8 @@ public static class RegisterHouseholdHandler
             .Select(m => HouseholdMember.Create(m.Name, m.Email, m.Phone, m.IsPrimary))
             .ToList();
         var circumstances = HouseholdCircumstances.Create(command.RequiresAccessibility, command.AnnualIncome);
-        var household = Household.Register(members, circumstances, command.RegisteredBy);
-        session.CreateAggregate<Household, HouseholdId>(household);
-        return household.Id;
+        var registered = Household.Register(command.HouseholdId, members, circumstances, command.RegisteredBy);
+
+        return MartenOps.StartStream<Household>(command.HouseholdId.Value, registered);
     }
 }

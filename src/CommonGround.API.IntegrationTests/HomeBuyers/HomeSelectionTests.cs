@@ -137,9 +137,12 @@ public class HomeSelectionTests(ApiFactory factory)
         await using var second = store.LightweightSession(ApiFactory.TestTrustId);
 
         // Both starts check for an active selection before either is saved.
-        var command = new StartHomeSelection(homeId, UserId.Generate());
-        await StartHomeSelectionHandler.Handle(command, first, CancellationToken.None);
-        await StartHomeSelectionHandler.Handle(command, second, CancellationToken.None);
+        var firstCommand = new StartHomeSelection(HomeSelectionId.Generate(), homeId, UserId.Generate());
+        var secondCommand = firstCommand with { SelectionId = HomeSelectionId.Generate() };
+        var firstStart = await StartHomeSelectionHandler.LoadAsync(firstCommand, first, CancellationToken.None);
+        var secondStart = await StartHomeSelectionHandler.LoadAsync(secondCommand, second, CancellationToken.None);
+        StartHomeSelectionHandler.Handle(firstCommand, firstStart).Execute(first);
+        StartHomeSelectionHandler.Handle(secondCommand, secondStart).Execute(second);
         await first.SaveChangesAsync();
 
         var conflict = await FluentActions.Awaiting(() => second.SaveChangesAsync())

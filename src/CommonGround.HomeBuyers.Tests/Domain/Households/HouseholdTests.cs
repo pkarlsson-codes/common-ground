@@ -2,6 +2,7 @@ using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.HomeBuyers.Domain.Households.Events;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.Testing;
 using FluentAssertions;
 
 namespace CommonGround.HomeBuyers.Tests.Domain.Households;
@@ -16,14 +17,14 @@ public class HouseholdTests
         public HouseholdMember Primary { get; } = HouseholdMember.Create("Alice Johnson", "alice@example.com", "555-0100", true);
         public HouseholdMember Partner { get; } = HouseholdMember.Create("Bob Johnson", "bob@example.com", "555-0101", false);
 
-        public Household RegisteredHousehold() => Household.Register([Primary, Partner], Circumstances, StaffUser);
+        public Household RegisteredHousehold() => EventReplay.Replay<Household>(Household.Register(HouseholdId.Generate(), [Primary, Partner], Circumstances, StaffUser));
 
         public Household ReadyHousehold(DateOnly prequalificationExpiry)
         {
             var household = RegisteredHousehold();
-            household.RecordHousingCounseling("CERT-001", new DateOnly(2026, 6, 2), "Counseling Org", StaffUser);
-            household.RecordCltOrientation(new DateOnly(2026, 6, 3), StaffUser);
-            household.RecordMortgagePrequalification("Lender", 210000m, prequalificationExpiry, StaffUser);
+            household = household.Decide(a => a.RecordHousingCounseling("CERT-001", new DateOnly(2026, 6, 2), "Counseling Org", StaffUser)).Aggregate;
+            household = household.Decide(a => a.RecordCltOrientation(new DateOnly(2026, 6, 3), StaffUser)).Aggregate;
+            household = household.Decide(a => a.RecordMortgagePrequalification("Lender", 210000m, prequalificationExpiry, StaffUser)).Aggregate;
             return household;
         }
     }
@@ -35,7 +36,7 @@ public class HouseholdTests
         [Fact]
         public void GivenNoPrimaryMember_WhenRegistered_ThenThrowsMustHaveExactlyOnePrimaryMember()
         {
-            var act = () => Household.Register([_testBed.Partner], _testBed.Circumstances, _testBed.StaffUser);
+            var act = () => Household.Register(HouseholdId.Generate(), [_testBed.Partner], _testBed.Circumstances, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.household.register.must_have_exactly_one_primary_member");
@@ -46,7 +47,7 @@ public class HouseholdTests
         {
             var secondPrimary = HouseholdMember.Create("Carol Smith", "carol@example.com", "555-0102", true);
 
-            var act = () => Household.Register([_testBed.Primary, secondPrimary], _testBed.Circumstances, _testBed.StaffUser);
+            var act = () => Household.Register(HouseholdId.Generate(), [_testBed.Primary, secondPrimary], _testBed.Circumstances, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.household.register.must_have_exactly_one_primary_member");
@@ -55,10 +56,10 @@ public class HouseholdTests
         [Fact]
         public void GivenValidMembers_WhenRegistered_ThenKeepsEachMembersId()
         {
-            var sut = Household.Register([_testBed.Primary, _testBed.Partner], _testBed.Circumstances, _testBed.StaffUser);
+            var registered = Household.Register(HouseholdId.Generate(), [_testBed.Primary, _testBed.Partner], _testBed.Circumstances, _testBed.StaffUser);
 
-            sut.Members.Select(m => m.Id).Should().Equal(_testBed.Primary.Id, _testBed.Partner.Id);
-            sut.UncommittedEvents.OfType<HouseholdRegistered>().Single().Members
+            EventReplay.Replay<Household>(registered).Members.Select(m => m.Id).Should().Equal(_testBed.Primary.Id, _testBed.Partner.Id);
+            registered.Members
                 .Select(m => m.MemberId).Should().Equal(_testBed.Primary.Id.Value, _testBed.Partner.Id.Value);
         }
     }
@@ -72,7 +73,8 @@ public class HouseholdTests
         {
             var sut = _testBed.RegisteredHousehold();
 
-            var memberId = sut.AddMember("Carol Johnson", "carol@example.com", "555-0102", _testBed.StaffUser);
+            var memberId = HouseholdMemberId.Generate();
+            sut = sut.Decide(a => a.AddMember(memberId, "Carol Johnson", "carol@example.com", "555-0102", _testBed.StaffUser)).Aggregate;
 
             sut.Members.Should().ContainSingle(m => m.Id == memberId)
                 .Which.IsPrimary.Should().BeFalse();
@@ -100,7 +102,7 @@ public class HouseholdTests
         {
             var sut = _testBed.RegisteredHousehold();
 
-            sut.UpdateMember(_testBed.Partner.Id, "Robert Johnson", "robert@example.com", "555-0199", _testBed.StaffUser);
+            sut = sut.Decide(a => a.UpdateMember(_testBed.Partner.Id, "Robert Johnson", "robert@example.com", "555-0199", _testBed.StaffUser)).Aggregate;
 
             sut.Members.Single(m => m.Id == _testBed.Partner.Id).Should().BeEquivalentTo(
                 new { Name = "Robert Johnson", Email = "robert@example.com", Phone = "555-0199" });
@@ -111,9 +113,9 @@ public class HouseholdTests
         {
             var sut = _testBed.RegisteredHousehold();
 
-            sut.UpdateMember(_testBed.Partner.Id, "Bob Johnson", "bob@example.com", "555-0101", _testBed.StaffUser);
+            (sut, var events) = sut.Decide(a => a.UpdateMember(_testBed.Partner.Id, "Bob Johnson", "bob@example.com", "555-0101", _testBed.StaffUser));
 
-            sut.UncommittedEvents.OfType<HouseholdMemberUpdated>().Should().BeEmpty();
+            events.OfType<HouseholdMemberUpdated>().Should().BeEmpty();
         }
     }
 
@@ -148,7 +150,7 @@ public class HouseholdTests
         {
             var sut = _testBed.RegisteredHousehold();
 
-            sut.RemoveMember(_testBed.Partner.Id, _testBed.StaffUser);
+            sut = sut.Decide(a => a.RemoveMember(_testBed.Partner.Id, _testBed.StaffUser)).Aggregate;
 
             sut.Members.Should().ContainSingle().Which.Id.Should().Be(_testBed.Primary.Id);
         }
@@ -164,7 +166,7 @@ public class HouseholdTests
             var sut = _testBed.RegisteredHousehold();
             var updated = HouseholdCircumstances.Create(true, 72000m);
 
-            sut.UpdateCircumstances(updated, _testBed.StaffUser);
+            sut = sut.Decide(a => a.UpdateCircumstances(updated, _testBed.StaffUser)).Aggregate;
 
             sut.Declare().Circumstances.Should().Be(updated);
         }
@@ -174,9 +176,9 @@ public class HouseholdTests
         {
             var sut = _testBed.RegisteredHousehold();
 
-            sut.UpdateCircumstances(HouseholdCircumstances.Create(false, 65000m), _testBed.StaffUser);
+            (sut, var events) = sut.Decide(a => a.UpdateCircumstances(HouseholdCircumstances.Create(false, 65000m), _testBed.StaffUser));
 
-            sut.UncommittedEvents.OfType<HouseholdCircumstancesUpdated>().Should().BeEmpty();
+            events.OfType<HouseholdCircumstancesUpdated>().Should().BeEmpty();
         }
     }
 
@@ -198,7 +200,7 @@ public class HouseholdTests
             var expiry = new DateOnly(2026, 12, 31);
             var sut = _testBed.ReadyHousehold(expiry);
 
-            sut.ExpirePrequalification(expiry);
+            sut = sut.Decide(a => a.ExpirePrequalification(expiry)).Aggregate;
 
             sut.OutstandingReadinessItems.Should().Equal("MortgagePrequalification");
         }
