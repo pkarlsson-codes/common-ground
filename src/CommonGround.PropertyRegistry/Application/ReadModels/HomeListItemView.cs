@@ -9,6 +9,9 @@ public class HomeListItemView
     /// <summary>Gets or sets the parent land parcel ID.</summary>
     public string LandParcelId { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the unit designation (e.g. "Unit B"), if any.</summary>
+    public string? UnitDesignation { get; set; }
+
     /// <summary>Gets or sets the unit type display name.</summary>
     public string UnitType { get; set; } = string.Empty;
 

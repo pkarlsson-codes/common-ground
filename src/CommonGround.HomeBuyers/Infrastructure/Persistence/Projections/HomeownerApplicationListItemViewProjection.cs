@@ -26,18 +26,35 @@ internal sealed class HomeownerApplicationListItemViewProjection : SingleStreamP
         view.ApprovedDate = e.ApprovedDate;
     }
 
-    public static void Apply(HomeownerApplicationListItemView view, ApplicationSelectedForHome _)
+    public static void Apply(HomeownerApplicationListItemView view, ApplicationSelectedForHome e)
     {
         view.Phase = ApplicationPhase.Selected.DisplayName;
+        view.SelectedHomeId = e.HomeId;
+        view.SelectedDate = e.SelectedDate;
     }
 
-    public static void Apply(HomeownerApplicationListItemView view, ApplicationDenied _)
+    public static void Apply(HomeownerApplicationListItemView view, ApplicationReturnedToWaitingList _)
+    {
+        view.Phase = ApplicationPhase.Approved.DisplayName;
+        view.SelectedHomeId = null;
+        view.SelectedDate = null;
+    }
+
+    public static void Apply(HomeownerApplicationListItemView view, ApplicationPurchaseClosed e)
+    {
+        view.Phase = ApplicationPhase.Purchased.DisplayName;
+        view.PurchasedDate = e.ClosingDate;
+    }
+
+    public static void Apply(HomeownerApplicationListItemView view, ApplicationDenied e)
     {
         view.Phase = ApplicationPhase.Denied.DisplayName;
+        view.ClosedDate = e.DeniedDate;
     }
 
-    public static void Apply(HomeownerApplicationListItemView view, ApplicationWithdrawn _)
+    public static void Apply(HomeownerApplicationListItemView view, ApplicationWithdrawn e)
     {
         view.Phase = ApplicationPhase.Withdrawn.DisplayName;
+        view.ClosedDate = e.WithdrawnDate;
     }
 }

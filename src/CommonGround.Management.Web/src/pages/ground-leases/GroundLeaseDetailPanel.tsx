@@ -2,7 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGroundLease, useRecordStewardshipCheckIn } from '../../hooks/groundLeases'
 import { FORMULA_KIND_LABELS, statusLabel, type RecordCheckInForm } from '../../hooks/types'
-import NavIdLink from '../../components/NavIdLink'
+import ConnectedRecords, { type ConnectedRecord } from '../../components/lifecycle/ConnectedRecords'
+import { useHome } from '../../hooks/homes'
+import { usePurchaseWorkflow } from '../../hooks/purchaseWorkflows'
+import type { GroundLeaseResponse } from '../../api'
 import SlideOver from '../../components/SlideOver'
 import StatusBadge from '../../components/StatusBadge'
 import { getErrorMessage } from '../../lib/getErrorMessage'
@@ -131,16 +134,6 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
                 <div className="detail-field__value">{detail.covenantTerms}</div>
               </div>
             )}
-            <div className="detail-field full-span">
-              <div className="detail-field__value">
-                <NavIdLink id={detail.homeId} to="/homes" label="Open Home" />
-              </div>
-            </div>
-            <div className="detail-field full-span">
-              <div className="detail-field__value">
-                <NavIdLink id={detail.landParcelId} to="/land-parcels" label="Open Land Parcel" />
-              </div>
-            </div>
             <div className="detail-field">
               <div className="detail-field__label">Created</div>
               <div className="detail-field__value mono">
@@ -148,6 +141,8 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
               </div>
             </div>
           </div>
+
+          <LeaseConnectedRecords lease={detail} />
 
           <div className="detail-section">
             <div className="detail-section__title">Stewardship Check-Ins</div>
@@ -223,4 +218,23 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
       )}
     </SlideOver>
   )
+}
+
+/** Links to the lease's home, land parcel, and the purchase and household it came from. */
+function LeaseConnectedRecords({ lease }: { lease: GroundLeaseResponse }) {
+  const { data: home } = useHome(lease.homeId ?? null)
+  const { data: purchase } = usePurchaseWorkflow(lease.purchaseWorkflowId ?? null)
+
+  const records: ConnectedRecord[] = [
+    ...(lease.homeId ? [{ key: 'home', type: 'Home', name: home?.label || 'Home', to: '/homes', openId: lease.homeId }] : []),
+    ...(lease.landParcelId ? [{ key: 'parcel', type: 'Land parcel', name: 'Land parcel', to: '/land-parcels', openId: lease.landParcelId }] : []),
+    ...(lease.purchaseWorkflowId
+      ? [{ key: 'purchase', type: 'Purchase', name: purchase?.buyerFullName ?? 'Purchase', status: purchase?.phase ?? undefined, to: '/purchase-workflows', openId: lease.purchaseWorkflowId }]
+      : []),
+    ...(purchase?.householdId
+      ? [{ key: 'household', type: 'Household', name: purchase.buyerFullName ?? 'Household', to: '/households', openId: purchase.householdId }]
+      : []),
+  ]
+
+  return <ConnectedRecords records={records} />
 }

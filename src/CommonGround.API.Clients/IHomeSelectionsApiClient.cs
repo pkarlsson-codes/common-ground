@@ -1,5 +1,6 @@
 using CommonGround.API.Contracts.HomeBuyers.Requests;
 using CommonGround.API.Contracts.HomeBuyers.Responses;
+using CommonGround.SharedKernel.Infrastructure.API;
 
 #pragma warning disable SA1611
 #pragma warning disable SA1615
@@ -14,6 +15,9 @@ public interface IHomeSelectionsApiClient
 
     /// <summary>Gets every selection started for a home, newest first.</summary>
     Task<IReadOnlyList<HomeSelectionSummaryResponse>> GetHomeSelectionsForHomeAsync(string homeId, CancellationToken cancellationToken);
+
+    /// <summary>Gets home selections across every home, newest first, optionally filtered by status.</summary>
+    Task<PaginatedResponse<HomeSelectionListItemResponse>> GetHomeSelectionsAsync(GetHomeSelectionsQuerySpec querySpec, CancellationToken cancellationToken);
 
     /// <summary>Gets a home selection with its candidates' priority facts.</summary>
     Task<HomeSelectionResponse> GetHomeSelectionAsync(string selectionId, CancellationToken cancellationToken);

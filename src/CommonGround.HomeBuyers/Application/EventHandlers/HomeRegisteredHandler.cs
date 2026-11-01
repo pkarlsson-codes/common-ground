@@ -16,6 +16,7 @@ public static class HomeRegisteredHandler
         {
             Id = @event.HomeId,
             LandParcelId = @event.LandParcelId,
+            Label = @event.Label,
             Bedrooms = @event.Bedrooms,
             IsAccessible = @event.IsAccessible,
         });

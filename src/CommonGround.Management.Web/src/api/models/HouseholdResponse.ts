@@ -28,6 +28,13 @@ import {
     HouseholdApplicationDtoToJSON,
     HouseholdApplicationDtoToJSONTyped,
 } from './HouseholdApplicationDto';
+import type { HouseholdJourneyDto } from './HouseholdJourneyDto';
+import {
+    HouseholdJourneyDtoFromJSON,
+    HouseholdJourneyDtoFromJSONTyped,
+    HouseholdJourneyDtoToJSON,
+    HouseholdJourneyDtoToJSONTyped,
+} from './HouseholdJourneyDto';
 import type { MortgagePrequalificationDto } from './MortgagePrequalificationDto';
 import {
     MortgagePrequalificationDtoFromJSON,
@@ -139,6 +146,12 @@ export interface HouseholdResponse {
      * @memberof HouseholdResponse
      */
     applications?: Array<HouseholdApplicationDto>;
+    /**
+     * 
+     * @type {HouseholdJourneyDto}
+     * @memberof HouseholdResponse
+     */
+    journey?: HouseholdJourneyDto;
 }
 
 /**
@@ -173,6 +186,7 @@ export function HouseholdResponseFromJSONTyped(json: any, ignoreDiscriminator: b
         'registeredAt': json['registeredAt'] == null ? undefined : (new Date(json['registeredAt'])),
         'registeredBy': json['registeredBy'] == null ? undefined : json['registeredBy'],
         'applications': json['applications'] == null ? undefined : ((json['applications'] as Array<any>).map(HouseholdApplicationDtoFromJSON)),
+        'journey': json['journey'] == null ? undefined : HouseholdJourneyDtoFromJSON(json['journey']),
     };
 }
 
@@ -202,6 +216,7 @@ export function HouseholdResponseToJSONTyped(value?: HouseholdResponse | null, i
         'registeredAt': value['registeredAt'] == null ? undefined : ((value['registeredAt']).toISOString()),
         'registeredBy': value['registeredBy'],
         'applications': value['applications'] == null ? undefined : ((value['applications'] as Array<any>).map(HouseholdApplicationDtoToJSON)),
+        'journey': HouseholdJourneyDtoToJSON(value['journey']),
     };
 }
 

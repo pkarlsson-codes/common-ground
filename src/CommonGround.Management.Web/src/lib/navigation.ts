@@ -6,6 +6,7 @@ import {
   HeartHandshake,
   House,
   KeyRound,
+  ListChecks,
   ListOrdered,
   Map as MapIcon,
   Repeat,
@@ -15,7 +16,7 @@ import {
 } from 'lucide-react'
 
 /** The part of the CLT's work a page belongs to. Records and settings have none. */
-export type WorkArea = 'applicants' | 'purchases' | 'stewardship' | 'resales'
+export type WorkArea = 'applicants' | 'selections' | 'purchases' | 'stewardship' | 'resales'
 
 export type NavGroup = 'work' | 'records' | 'settings'
 
@@ -32,6 +33,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Households',      to: '/households',             icon: Users,          group: 'work', area: 'applicants' },
   { label: 'Applications',    to: '/applications',           icon: ClipboardList,  group: 'work', area: 'applicants' },
   { label: 'Waiting list',    to: '/waiting-list',           icon: ListOrdered,    group: 'work', area: 'applicants' },
+  { label: 'Home selections', to: '/home-selections',        icon: ListChecks,     group: 'work', area: 'selections' },
   { label: 'Purchases',       to: '/purchase-workflows',     icon: KeyRound,       group: 'work', area: 'purchases' },
   { label: 'Stewardship',     to: '/stewardship',            icon: HeartHandshake, group: 'work', area: 'stewardship' },
   { label: 'Resales',         to: '/resale-workflows',       icon: Repeat,         group: 'work', area: 'resales' },
@@ -54,7 +56,7 @@ export const FOCUSES: readonly { value: Focus; label: string }[] = [
 
 const FOCUS_AREAS: Record<Exclude<Focus, 'everything'>, readonly WorkArea[]> = {
   intake:      ['applicants'],
-  sales:       ['purchases', 'resales'],
+  sales:       ['selections', 'purchases', 'resales'],
   stewardship: ['stewardship'],
 }
 

@@ -13,20 +13,35 @@ internal sealed class PurchaseWorkflowListItemViewProjection : SingleStreamProje
         {
             Id = e.Data.AggregateId,
             GroundLeaseTemplateId = e.Data.GroundLeaseTemplateId,
+            HomeId = e.Data.HomeId,
+            HouseholdId = e.Data.HouseholdId,
             BuyerFullName = e.Data.BuyerFullName,
             PurchasePrice = e.Data.PurchasePrice,
             Phase = "Initiated",
             CreatedAt = e.Data.OccurredAt,
+            StepEnteredAt = e.Data.OccurredAt,
         };
 
-    public static void Apply(PurchaseWorkflowListItemView view, BuyerEligibilityVerified _) => view.Phase = "InProgress";
-    public static void Apply(PurchaseWorkflowListItemView view, FinancingCommitted _) => view.Phase = "InProgress";
-    public static void Apply(PurchaseWorkflowListItemView view, InspectionCompleted _) => view.Phase = "InProgress";
-    public static void Apply(PurchaseWorkflowListItemView view, TitleCleared _) => view.Phase = "InProgress";
-    public static void Apply(PurchaseWorkflowListItemView view, LeaseExecuted _) => view.Phase = "InProgress";
-    public static void Apply(PurchaseWorkflowListItemView view, ClosingScheduled _) => view.Phase = "ClosingScheduled";
-    public static void Apply(PurchaseWorkflowListItemView view, PurchaseClosed _) => view.Phase = "Closed";
-    public static void Apply(PurchaseWorkflowListItemView view, PurchaseFailed _) => view.Phase = "Failed";
-    public static void Apply(PurchaseWorkflowListItemView view, PurchaseWithdrawn _) => view.Phase = "Withdrawn";
-    public static void Apply(PurchaseWorkflowListItemView view, WorkflowStalled _) => view.Phase = "Stalled";
+    public static void Apply(PurchaseWorkflowListItemView view, BuyerEligibilityVerified e) => MoveOn(view, "InProgress", e.OccurredAt);
+    public static void Apply(PurchaseWorkflowListItemView view, FinancingCommitted e) => MoveOn(view, "InProgress", e.OccurredAt);
+    public static void Apply(PurchaseWorkflowListItemView view, InspectionCompleted e) => MoveOn(view, "InProgress", e.OccurredAt);
+    public static void Apply(PurchaseWorkflowListItemView view, TitleCleared e) => MoveOn(view, "InProgress", e.OccurredAt);
+    public static void Apply(PurchaseWorkflowListItemView view, LeaseExecuted e) => MoveOn(view, "InProgress", e.OccurredAt);
+
+    public static void Apply(PurchaseWorkflowListItemView view, ClosingScheduled e)
+    {
+        MoveOn(view, "ClosingScheduled", e.OccurredAt);
+        view.ScheduledClosingDate = e.ScheduledClosingDate;
+    }
+
+    public static void Apply(PurchaseWorkflowListItemView view, PurchaseClosed e) => MoveOn(view, "Closed", e.OccurredAt);
+    public static void Apply(PurchaseWorkflowListItemView view, PurchaseFailed e) => MoveOn(view, "Failed", e.OccurredAt);
+    public static void Apply(PurchaseWorkflowListItemView view, PurchaseWithdrawn e) => MoveOn(view, "Withdrawn", e.OccurredAt);
+    public static void Apply(PurchaseWorkflowListItemView view, WorkflowStalled e) => MoveOn(view, "Stalled", e.OccurredAt);
+
+    private static void MoveOn(PurchaseWorkflowListItemView view, string phase, DateTimeOffset at)
+    {
+        view.Phase = phase;
+        view.StepEnteredAt = at;
+    }
 }

@@ -11,6 +11,7 @@ public sealed record RegisterHomeRequest(
     int YearBuilt,
     string AppraiserName,
     DateOnly InitialAssessedDate,
-    decimal InitialAssessedValue)
+    decimal InitialAssessedValue,
+    string? UnitDesignation = null)
 {
 }

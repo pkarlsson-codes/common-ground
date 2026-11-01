@@ -43,6 +43,20 @@ internal sealed class HomeownerApplicationViewProjection : SingleStreamProjectio
         view.SelectedBy = e.SelectedBy;
     }
 
+    public static void Apply(HomeownerApplicationView view, ApplicationReturnedToWaitingList _)
+    {
+        view.Phase = ApplicationPhase.Approved.DisplayName;
+        view.SelectedDate = null;
+        view.SelectedHomeId = null;
+        view.SelectedLandParcelId = null;
+        view.SelectedBy = null;
+    }
+
+    public static void Apply(HomeownerApplicationView view, ApplicationPurchaseClosed _)
+    {
+        view.Phase = ApplicationPhase.Purchased.DisplayName;
+    }
+
     public static void Apply(HomeownerApplicationView view, ApplicationWithdrawn e)
     {
         view.Phase = ApplicationPhase.Withdrawn.DisplayName;

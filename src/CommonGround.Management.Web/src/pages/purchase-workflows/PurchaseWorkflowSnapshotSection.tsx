@@ -1,6 +1,8 @@
 import type { PurchaseWorkflowResponse } from '../../api'
-import NavIdLink from '../../components/NavIdLink'
+import { formatStepDate } from '../../lib/lifecycle'
+import ConnectedRecords, { type ConnectedRecord } from '../../components/lifecycle/ConnectedRecords'
 import StatusBadge from '../../components/StatusBadge'
+import { useConnectedGroundLeases } from '../../hooks/groundLeases'
 import { formatPhoneDisplay } from '../../lib/phone'
 
 const fmtCurrency = (n: number) =>
@@ -57,15 +59,12 @@ export default function PurchaseWorkflowSnapshotSection({ detail }: PurchaseWork
             <div className="detail-field__value mono">{formatPhoneDisplay(detail.buyerPhone)}</div>
           </div>
         )}
-        <div className="detail-field full-span">
-          <div className="detail-field__value" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <NavIdLink id={detail.groundLeaseTemplateId} to="/ground-lease-templates" label="Open Lease Template" />
-            <NavIdLink id={detail.landParcelId} to="/land-parcels" label="Open Land Parcel" />
-            <NavIdLink id={detail.homeId} to="/homes" label="Open Home" />
-            <NavIdLink id={detail.applicationId} to="/applications" label="Open Application" />
-            <NavIdLink id={detail.householdId} to="/households" label="Open Household" />
+        {detail.scheduledClosingDate && (
+          <div className="detail-field">
+            <div className="detail-field__label">Scheduled Closing</div>
+            <div className="detail-field__value mono">{formatStepDate(detail.scheduledClosingDate)}</div>
           </div>
-        </div>
+        )}
         {detail.failureReason && (
           <div className="detail-field full-span">
             <div className="detail-field__label">Failure Reason</div>
@@ -91,6 +90,30 @@ export default function PurchaseWorkflowSnapshotSection({ detail }: PurchaseWork
           </div>
         </div>
       </div>
+      <PurchaseConnectedRecords detail={detail} />
     </>
   )
+}
+
+/** Links to the purchase's home, land parcel, lease template, application, household, and the lease its closing created. */
+function PurchaseConnectedRecords({ detail }: { detail: PurchaseWorkflowResponse }) {
+  const { data: leases, isLoading } = useConnectedGroundLeases({ homeId: detail.phase === 'Closed' ? detail.homeId ?? undefined : undefined })
+  const lease = leases?.items?.find(l => l.purchaseWorkflowId === detail.id)
+
+  const records: ConnectedRecord[] = [
+    { key: 'home', type: 'Home', name: detail.homeLabel ?? 'Home', to: '/homes', openId: detail.homeId! },
+    { key: 'parcel', type: 'Land parcel', name: 'Land parcel', to: '/land-parcels', openId: detail.landParcelId! },
+    { key: 'template', type: 'Lease template', name: 'Lease template', to: '/ground-lease-templates', openId: detail.groundLeaseTemplateId! },
+    ...(detail.applicationId
+      ? [{ key: 'application', type: 'Application', name: 'Application', to: '/applications', openId: detail.applicationId }]
+      : []),
+    ...(detail.householdId
+      ? [{ key: 'household', type: 'Household', name: detail.buyerFullName ?? 'Household', to: '/households', openId: detail.householdId }]
+      : []),
+    ...(lease
+      ? [{ key: 'lease', type: 'Ground lease', name: lease.homeownerFullName ?? 'Ground lease', status: lease.status ?? undefined, to: '/ground-leases', openId: lease.id! }]
+      : []),
+  ]
+
+  return <ConnectedRecords records={records} isLoading={isLoading && detail.phase === 'Closed'} />
 }

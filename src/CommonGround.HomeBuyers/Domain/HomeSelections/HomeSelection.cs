@@ -10,7 +10,8 @@ namespace CommonGround.HomeBuyers.Domain.HomeSelections;
 /// <summary>
 /// Staff choosing which household on the waiting list gets a home, either by citing
 /// <see cref="SelectionPriority"/> values or by lottery. Staff can cancel it without choosing
-/// anyone, after which a new selection can start for the same home.
+/// anyone, after which a new selection can start for the same home. A new selection can also start once
+/// the purchase a completed selection led to falls through.
 /// </summary>
 public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
 {
@@ -151,6 +152,17 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
         ApplyChange(new HomeSelectionCancelled(Id.Value, reason, cancelledBy.Value));
     }
 
+    /// <summary>Records that the purchase the chosen household started fell through, freeing the home for a new selection.</summary>
+    public void RecordPurchaseFellThrough(string reason, DateOnly fellThroughDate)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+
+        if (Status != HomeSelectionStatus.Completed)
+            throw BusinessRuleViolation.HomeSelection.RecordPurchaseFellThrough.NotCompleted(Status);
+
+        ApplyChange(new HomeSelectionPurchaseFellThrough(Id.Value, reason, fellThroughDate));
+    }
+
     private void EnsureOpen()
     {
         if (Status != HomeSelectionStatus.Open)
@@ -172,6 +184,7 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
             case HouseholdSelectedByPriority e: Apply(e); break;
             case HouseholdSelectedByLottery e: Apply(e); break;
             case HomeSelectionCancelled e: Apply(e); break;
+            case HomeSelectionPurchaseFellThrough e: Apply(e); break;
             default: throw new InvalidOperationException($"Unknown event: {domainEvent?.GetType().Name}");
         }
     }
@@ -204,6 +217,11 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
     {
         SelectedApplicationId = HomeownerApplicationId.Create(e.ApplicationId);
         Status = HomeSelectionStatus.Completed;
+    }
+
+    private void Apply(HomeSelectionPurchaseFellThrough _)
+    {
+        Status = HomeSelectionStatus.FellThrough;
     }
 
     private void Apply(HomeSelectionCancelled e)

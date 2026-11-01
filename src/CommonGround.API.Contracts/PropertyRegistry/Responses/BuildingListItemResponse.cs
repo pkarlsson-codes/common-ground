@@ -4,6 +4,8 @@ namespace CommonGround.API.Contracts.PropertyRegistry.Responses;
 public sealed record HomeListItemResponse(
     string Id,
     string LandParcelId,
+    string Label,
+    string? UnitDesignation,
     string HomeType,
     int Bedrooms,
     decimal Bathrooms,

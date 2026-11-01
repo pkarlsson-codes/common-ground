@@ -114,9 +114,10 @@ export async function createPurchaseWorkflow(page: Page, buyerName: string, { fr
   const purchasePrice = 200000
 
   let applicationId: string | undefined
+  let householdId: string | undefined
   let workflowId: string
   if (fromApplication) {
-    applicationId = (await createApplication(page, buyerName)).applicationId
+    ;({ applicationId, householdId } = await createApplication(page, buyerName))
     // HomeBuyers learns about the new home from an integration event, so retry until it has.
     let selectionId = ''
     await expect(async () => {
@@ -151,7 +152,7 @@ export async function createPurchaseWorkflow(page: Page, buyerName: string, { fr
     }))
   }
 
-  return { workflowId, parcelId, apn, homeId, groundLeaseTemplateId, templateName, applicationId, buyerName }
+  return { workflowId, parcelId, apn, homeId, groundLeaseTemplateId, templateName, applicationId, householdId, buyerName }
 }
 
 /**

@@ -275,6 +275,14 @@ public static class HouseholdEndpoints
             mortgagePrequalification,
             view.RegisteredAt,
             view.RegisteredBy,
-            applications);
+            applications,
+            new HouseholdJourneyDto(
+                details.Journey.Stage,
+                details.Journey.ReadyDate,
+                details.Journey.ApprovedDate,
+                details.Journey.SelectedDate,
+                details.Journey.PurchasedDate,
+                details.Journey.CurrentApplicationId,
+                details.Journey.SelectedHomeId));
     }
 }

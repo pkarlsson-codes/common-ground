@@ -46,6 +46,14 @@ public class HomeownerApplicationTests
             application.Approve(new DateOnly(2026, 6, 1), null, StaffUser);
             return application;
         }
+
+        public HomeownerApplication SelectedApplication()
+        {
+            WithReadiness();
+            var application = ApprovedApplication();
+            application.SelectForHome(Household, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, SelectedDate, StaffUser);
+            return application;
+        }
     }
 
     public class TheSubmitMethod
@@ -284,6 +292,60 @@ public class HomeownerApplicationTests
             sut.Phase.Should().Be(ApplicationPhase.Approved);
             sut.UncommittedEvents.OfType<ApplicationPassedOver>().Should().ContainSingle()
                 .Which.HouseholdId.Should().Be(_testBed.Household.Id.Value);
+        }
+    }
+
+    public class TheReturnToWaitingListMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenApprovedApplication_WhenReturned_ThenThrowsPhaseNotSelected()
+        {
+            var sut = _testBed.ApprovedApplication();
+
+            var act = () => sut.ReturnToWaitingList("home-1", "Financing fell through", _testBed.SelectedDate);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.return_to_waiting_list.phase_not_selected");
+        }
+
+        [Fact]
+        public void GivenSelectedApplication_WhenReturned_ThenIsApprovedAgainAndCanBeSelectedAgain()
+        {
+            var sut = _testBed.SelectedApplication();
+
+            sut.ReturnToWaitingList("home-1", "Financing fell through", _testBed.SelectedDate.AddDays(30));
+
+            sut.Phase.Should().Be(ApplicationPhase.Approved);
+            sut.CanBeSelected(_testBed.Household, _testBed.SelectedDate.AddDays(31)).Should().BeTrue();
+        }
+    }
+
+    public class TheRecordPurchaseClosedMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenApprovedApplication_WhenPurchaseClosed_ThenThrowsPhaseNotSelected()
+        {
+            var sut = _testBed.ApprovedApplication();
+
+            var act = () => sut.RecordPurchaseClosed("home-1", _testBed.SelectedDate);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.record_purchase_closed.phase_not_selected");
+        }
+
+        [Fact]
+        public void GivenSelectedApplication_WhenPurchaseClosed_ThenIsPurchasedAndTerminal()
+        {
+            var sut = _testBed.SelectedApplication();
+
+            sut.RecordPurchaseClosed("home-1", _testBed.SelectedDate.AddDays(60));
+
+            sut.Phase.Should().Be(ApplicationPhase.Purchased);
+            sut.IsTerminal.Should().BeTrue();
         }
     }
 }

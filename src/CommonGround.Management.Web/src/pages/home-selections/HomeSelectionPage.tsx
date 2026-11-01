@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { formatStepDate } from '../../lib/lifecycle'
 import type { HomeSelectionCandidateDto, HomeSelectionResponse } from '../../api'
 import NavIdLink from '../../components/NavIdLink'
 import StatusBadge from '../../components/StatusBadge'
@@ -101,6 +102,14 @@ function Outcome({ selection }: { selection: HomeSelectionResponse }) {
         <div className="detail-field__label">Selected At</div>
         <div className="detail-field__value mono">{fmtDateTime(selection.closedAt)}</div>
       </div>
+      {selection.status === 'FellThrough' && (
+        <div className="detail-field full-span">
+          <div className="detail-field__label">Purchase fell through</div>
+          <div className="detail-field__value">
+            {formatStepDate(selection.fellThroughDate)}{selection.fellThroughReason ? ` · ${selection.fellThroughReason}` : ''}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -133,10 +142,10 @@ export default function HomeSelectionPage() {
       <div className="page-header">
         <div>
           <div className="page-header__eyebrow">Home Selection</div>
-          <h1 className="page-header__title">{selection ? homeDescription(selection) : '…'}</h1>
+          <h1 className="page-header__title">{selection ? selection.homeLabel || homeDescription(selection) : '…'}</h1>
           {selection && (
             <div className="page-header__count">
-              Started {fmtDateTime(selection.startedAt)} by {selection.startedBy} · {candidates.length} candidate{candidates.length !== 1 ? 's' : ''}
+              {selection.homeLabel && `${homeDescription(selection)} · `}Started {fmtDateTime(selection.startedAt)} by {selection.startedBy} · {candidates.length} candidate{candidates.length !== 1 ? 's' : ''}
             </div>
           )}
         </div>

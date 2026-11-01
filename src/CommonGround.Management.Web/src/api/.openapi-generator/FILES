@@ -61,12 +61,14 @@ models/HomeAssessmentItemResponse.ts
 models/HomeListItemResponse.ts
 models/HomeResponse.ts
 models/HomeSelectionCandidateDto.ts
+models/HomeSelectionListItemResponse.ts
 models/HomeSelectionResponse.ts
 models/HomeSelectionSummaryResponse.ts
 models/HomeownerApplicationListItemResponse.ts
 models/HomeownerApplicationResponse.ts
 models/HouseholdApplicationDto.ts
 models/HouseholdContactDto.ts
+models/HouseholdJourneyDto.ts
 models/HouseholdListItemResponse.ts
 models/HouseholdMemberDto.ts
 models/HouseholdMemberRequest.ts
@@ -97,6 +99,7 @@ models/PaginatedResponseOfGroundLeaseListItemResponse.ts
 models/PaginatedResponseOfGroundLeaseTemplateListItemResponse.ts
 models/PaginatedResponseOfHomeAssessmentItemResponse.ts
 models/PaginatedResponseOfHomeListItemResponse.ts
+models/PaginatedResponseOfHomeSelectionListItemResponse.ts
 models/PaginatedResponseOfHomeownerApplicationListItemResponse.ts
 models/PaginatedResponseOfHouseholdListItemResponse.ts
 models/PaginatedResponseOfLandParcelListItemResponse.ts

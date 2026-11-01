@@ -16,7 +16,21 @@ public sealed record HouseholdResponse(
     MortgagePrequalificationDto? MortgagePrequalification,
     DateTimeOffset RegisteredAt,
     string RegisteredBy,
-    IReadOnlyList<HouseholdApplicationDto> Applications);
+    IReadOnlyList<HouseholdApplicationDto> Applications,
+    HouseholdJourneyDto Journey);
+
+/// <summary>
+/// Where the household is on its way to owning a home: Stage is Intake, Ready, Waiting, Purchasing or Homeowner,
+/// with the date each step so far was reached.
+/// </summary>
+public sealed record HouseholdJourneyDto(
+    string Stage,
+    DateOnly? ReadyDate,
+    DateOnly? ApprovedDate,
+    DateOnly? SelectedDate,
+    DateOnly? PurchasedDate,
+    string? CurrentApplicationId,
+    string? SelectedHomeId);
 
 /// <summary>A household member.</summary>
 public sealed record HouseholdMemberDto(

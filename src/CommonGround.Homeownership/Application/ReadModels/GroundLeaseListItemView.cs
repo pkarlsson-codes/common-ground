@@ -12,6 +12,9 @@ public class GroundLeaseListItemView
     /// <summary>Gets or sets the building ID.</summary>
     public string HomeId { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the purchase workflow whose closing created the lease, if any.</summary>
+    public string? PurchaseWorkflowId { get; set; }
+
     /// <summary>Gets or sets the lease start date.</summary>
     public DateOnly LeaseStartDate { get; set; }
 

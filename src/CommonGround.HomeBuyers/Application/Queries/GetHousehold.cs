@@ -1,6 +1,7 @@
 using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.SharedKernel.Domain.Services;
 using Marten;
 
 namespace CommonGround.HomeBuyers.Application.Queries;
@@ -15,6 +16,7 @@ public static class GetHouseholdHandler
     public static async Task<HouseholdDetails> Handle(
         GetHousehold request,
         IQuerySession session,
+        ITrustClock trustClock,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -28,6 +30,12 @@ public static class GetHouseholdHandler
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        return new HouseholdDetails(view, applications);
+        var today = await trustClock.TodayAsync(session.TenantId, cancellationToken).ConfigureAwait(false);
+        DateOnly? prequalificationRecordedDate = view.MortgagePrequalification is { } prequalification
+            ? await trustClock.ToTrustDateAsync(session.TenantId, prequalification.RecordedAt, cancellationToken).ConfigureAwait(false)
+            : null;
+
+        return new HouseholdDetails(view, applications,
+            HouseholdJourney.Derive(view, applications, prequalificationRecordedDate, today));
     }
 }

@@ -42,8 +42,15 @@ test('search matches any member, and detail shows members, circumstances and rea
   await expect(detailValue(members, 'Member')).toContainText(otherEmail)
 
   await expect(detail.locator('.checklist .checklist-item--done')).toHaveCount(0)
-  await expect(detail.getByText('No applications yet.')).toBeVisible()
-  await expect(detail.getByRole('button', { name: 'Start Application' })).toBeVisible()
+  await expect(detail.getByText('No connected records yet.')).toBeVisible()
+
+  // At Intake the next step is readiness; applying is under More actions.
+  await expect(detail.locator('[aria-current="step"]')).toContainText('Intake')
+  const nextStep = detail.getByRole('region', { name: 'Next step' })
+  await expect(nextStep).toContainText('Still to record: Housing Counseling, CLT Orientation, Mortgage Prequalification.')
+  await expect(nextStep.getByRole('button', { name: 'Record Housing Counseling' })).toBeVisible()
+  await nextStep.getByRole('button', { name: 'More actions' }).click()
+  await expect(nextStep.getByRole('menuitem', { name: 'Start Application' })).toBeVisible()
 })
 
 test('household with an open application links to it instead of offering a new one', async ({ page }) => {
@@ -55,8 +62,10 @@ test('household with an open application links to it instead of offering a new o
   const detail = panel(page, name)
 
   await expect(detail.locator('.checklist .checklist-item--done')).toHaveCount(3)
+  await expect(detail.locator('[aria-current="step"]')).toContainText('Waiting')
   await expect(detail.getByRole('button', { name: 'Start Application' })).toHaveCount(0)
-  await detail.getByRole('button', { name: 'Open Active Application' }).click()
+  await expect(detail.getByRole('region', { name: 'Next step' }).getByRole('button', { name: 'Open Waiting List' })).toBeVisible()
+  await detail.getByRole('button', { name: /^Open Application:/ }).click()
 
   await expect(page).toHaveURL(/\/applications$/)
   const application = panel(page, name)
@@ -70,17 +79,19 @@ test('starting an application for a household whose last one was withdrawn', asy
   const row = await findHousehold(page, email, name)
   await row.click()
   const detail = panel(page, name)
-  const history = detail.locator('.detail-section', { hasText: 'Applications' }).locator('tbody tr')
+  const history = detail.getByRole('button', { name: /^Open Application:/ })
   await expect(history).toHaveCount(1)
   await expect(history.first()).toContainText('Withdrawn')
 
+  // Withdrawing took the household back to Ready, whose next step is applying again.
+  await expect(detail.locator('[aria-current="step"]')).toContainText('Ready')
   await detail.getByRole('button', { name: 'Start Application' }).click()
   await expectToast(page, 'Application submitted')
 
   await expect(history).toHaveCount(2)
-  await expect(history.filter({ hasText: 'Submitted' })).toHaveCount(1)
+  await expect(history.filter({ has: page.locator('.badge', { hasText: 'Submitted' }) })).toHaveCount(1)
   await expect(detail.getByRole('button', { name: 'Start Application' })).toHaveCount(0)
-  await expect(detail.getByRole('button', { name: 'Open Active Application' })).toBeVisible()
+  await expect(detail.getByRole('region', { name: 'Next step' }).getByRole('button', { name: 'Open Application' })).toBeVisible()
 })
 
 test('editing circumstances and adding, editing and removing members', async ({ page }) => {
@@ -163,10 +174,10 @@ test('recording readiness on a household without an application, then updating t
   await expect(row).toContainText('Not ready')
   await row.click()
   const detail = panel(page, primaryName)
-  await expect(detail.getByText('No applications yet.')).toBeVisible()
+  await expect(detail.getByText('No connected records yet.')).toBeVisible()
   const item = (label: string) => detail.locator('.checklist-item', { hasText: label })
 
-  await detail.getByRole('button', { name: 'Record Housing Counseling' }).click()
+  await detail.locator('.checklist').getByRole('button', { name: 'Record Housing Counseling' }).click()
   const counseling = panel(page, 'Record Housing Counseling')
   await field(counseling, 'Certification Number').fill('CERT-E2E')
   await field(counseling, 'Completed Date').fill(isoDate(-7))
@@ -176,7 +187,7 @@ test('recording readiness on a household without an application, then updating t
   await expect(item('Housing Counseling')).toHaveClass(/checklist-item--done/)
   await expect(item('Housing Counseling').getByRole('button')).toHaveCount(0)
 
-  await detail.getByRole('button', { name: 'Record CLT Orientation' }).click()
+  await detail.locator('.checklist').getByRole('button', { name: 'Record CLT Orientation' }).click()
   const orientation = panel(page, 'Record CLT Orientation')
   await field(orientation, 'Completed Date').fill(isoDate(-3))
   await orientation.getByRole('button', { name: 'Record Orientation' }).click()
@@ -184,7 +195,7 @@ test('recording readiness on a household without an application, then updating t
   await expect(item('CLT Orientation')).toHaveClass(/checklist-item--done/)
   await expect(item('CLT Orientation').getByRole('button')).toHaveCount(0)
 
-  await detail.getByRole('button', { name: 'Record Mortgage Prequalification' }).click()
+  await detail.locator('.checklist').getByRole('button', { name: 'Record Mortgage Prequalification' }).click()
   let prequal = panel(page, 'Record Mortgage Prequalification')
   await field(prequal, 'Lender Name').fill('E2E Lender')
   await field(prequal, 'Approved Amount ($)').fill('210000')
@@ -194,7 +205,7 @@ test('recording readiness on a household without an application, then updating t
   await expect(item('Mortgage Prequalification')).toContainText('E2E Lender · $210,000')
   await expect(row).toContainText('Ready')
 
-  await detail.getByRole('button', { name: 'Update Mortgage Prequalification' }).click()
+  await detail.locator('.checklist').getByRole('button', { name: 'Update Mortgage Prequalification' }).click()
   prequal = panel(page, 'Record Mortgage Prequalification')
   await field(prequal, 'Lender Name').fill('Second Lender')
   await field(prequal, 'Approved Amount ($)').fill('225000')

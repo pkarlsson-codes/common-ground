@@ -15,6 +15,7 @@ internal sealed class HomeListItemViewProjection : SingleStreamProjection<HomeLi
         {
             Id = e.Data.AggregateId,
             LandParcelId = e.Data.LandParcelId,
+            UnitDesignation = e.Data.UnitDesignation,
             UnitType = e.Data.UnitType,
             Bedrooms = e.Data.Bedrooms,
             Bathrooms = e.Data.Bathrooms,
@@ -29,8 +30,18 @@ internal sealed class HomeListItemViewProjection : SingleStreamProjection<HomeLi
         view.AssessedValue = e.AssessedValue;
     }
 
-    public static void Apply(HomeListItemView view, HomeUnderContract e)
-    {
+    public static void Apply(HomeListItemView view, HomeSelectionOpened e) =>
+        view.Status = HomeStatus.InSelection.DisplayName;
+
+    public static void Apply(HomeListItemView view, HomeSelectionClosedWithoutSale e) =>
+        view.Status = HomeStatus.Available.DisplayName;
+
+    public static void Apply(HomeListItemView view, HomeUnderContract e) =>
         view.Status = HomeStatus.UnderContract.DisplayName;
-    }
+
+    public static void Apply(HomeListItemView view, HomeContractReleased e) =>
+        view.Status = HomeStatus.Available.DisplayName;
+
+    public static void Apply(HomeListItemView view, HomeLeased e) =>
+        view.Status = HomeStatus.Leased.DisplayName;
 }

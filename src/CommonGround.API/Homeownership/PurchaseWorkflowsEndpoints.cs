@@ -50,17 +50,23 @@ public static class PurchaseWorkflowsEndpoints
             ? GroundLeaseTemplateId.Create(request.GroundLeaseTemplateId)
             : null;
 
-        var query = new GetPurchaseWorkflows(request.Page, groundLeaseTemplateFilter, request.Phase, request.Search);
+        var query = new GetPurchaseWorkflows(
+            request.Page, groundLeaseTemplateFilter, request.Phase, request.Search, request.HomeId, request.HouseholdId);
 
-        var result = await bus.InvokeForTenantAsync<PaginatedResponse<PurchaseWorkflowListItemView>>(bus.TenantId!, query, cancellationToken);
+        var result = await bus.InvokeForTenantAsync<PaginatedResponse<PurchaseWorkflowListItem>>(bus.TenantId!, query, cancellationToken);
 
-        var response = result.MapItems(v => new PurchaseWorkflowListItemResponse(
-            v.Id,
-            v.GroundLeaseTemplateId,
-            v.BuyerFullName,
-            v.PurchasePrice,
-            v.Phase,
-            v.CreatedAt));
+        var response = result.MapItems(i => new PurchaseWorkflowListItemResponse(
+            i.Workflow.Id,
+            i.Workflow.GroundLeaseTemplateId,
+            i.Workflow.HomeId,
+            i.HomeLabel,
+            i.Workflow.HouseholdId,
+            i.Workflow.BuyerFullName,
+            i.Workflow.PurchasePrice,
+            i.Workflow.Phase,
+            i.Workflow.CreatedAt,
+            i.Workflow.StepEnteredAt,
+            i.Workflow.ScheduledClosingDate));
 
         return Results.Ok(response);
     }
@@ -73,11 +79,11 @@ public static class PurchaseWorkflowsEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
 
-        var view = await bus.InvokeForTenantAsync<PurchaseWorkflowView>(bus.TenantId!,
+        var (view, homeLabel) = await bus.InvokeForTenantAsync<PurchaseWorkflowDetails>(bus.TenantId!,
             new GetPurchaseWorkflow(PurchaseWorkflowId.Create(workflowId)),
             cancellationToken);
 
-        return Results.Ok(MapToResponse(view));
+        return Results.Ok(MapToResponse(view, homeLabel));
     }
 
     [WolverinePost("/api/purchase-workflows/{workflowId}/eligibility")]
@@ -321,7 +327,7 @@ public static class PurchaseWorkflowsEndpoints
         return Results.NoContent();
     }
 
-    private static PurchaseWorkflowResponse MapToResponse(PurchaseWorkflowView view)
+    private static PurchaseWorkflowResponse MapToResponse(PurchaseWorkflowView view, string? homeLabel)
     {
         var eligibility = view.EligibilityDetails is null ? null
             : new EligibilityDetailsDto(view.EligibilityDetails.VerifiedDate, view.EligibilityDetails.Notes);
@@ -339,6 +345,7 @@ public static class PurchaseWorkflowsEndpoints
             view.GroundLeaseTemplateId,
             view.LandParcelId,
             view.HomeId,
+            homeLabel,
             view.ApplicationId,
             view.HouseholdId,
             view.Phase,

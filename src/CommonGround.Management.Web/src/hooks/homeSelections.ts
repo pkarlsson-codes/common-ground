@@ -4,6 +4,7 @@ import {
   type CancelHomeSelectionRequest,
   type DrawSelectionLotteryRequest,
   type HomeSelectionResponse,
+  type PaginatedResponseOfHomeSelectionListItemResponse,
   type HomeSelectionSummaryResponse,
   type SelectHouseholdByPriorityRequest,
   type StartHomeSelectionResponse,
@@ -32,6 +33,14 @@ export function useHomeSelectionsForHome(homeId: string | null) {
     queryKey: ['home-selections', 'home', homeId],
     queryFn: () => api.getHomeSelectionsForHome({ homeId: homeId! }),
     enabled: !!homeId,
+  })
+}
+
+/** Home selections across every home, newest first, optionally only those with <paramref name="status"/>. */
+export function useHomeSelections(pageNumber: number, status?: string) {
+  return useQuery<PaginatedResponseOfHomeSelectionListItemResponse>({
+    queryKey: ['home-selections', 'all', pageNumber, status],
+    queryFn: () => api.getHomeSelections({ pageNumber, pageSize: 20, status }),
   })
 }
 

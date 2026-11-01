@@ -14,6 +14,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
 import type { HomeSelectionCandidateDto } from './HomeSelectionCandidateDto';
 import {
     HomeSelectionCandidateDtoFromJSON,
@@ -42,6 +49,12 @@ export interface HomeSelectionResponse {
      * @memberof HomeSelectionResponse
      */
     homeId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof HomeSelectionResponse
+     */
+    homeLabel?: string | null;
     /**
      * 
      * @type {number}
@@ -138,6 +151,18 @@ export interface HomeSelectionResponse {
      * @memberof HomeSelectionResponse
      */
     closedAt?: Date | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof HomeSelectionResponse
+     */
+    fellThroughReason?: string | null;
+    /**
+     * 
+     * @type {CalendarDate}
+     * @memberof HomeSelectionResponse
+     */
+    fellThroughDate?: CalendarDate | null;
 }
 
 /**
@@ -159,6 +184,7 @@ export function HomeSelectionResponseFromJSONTyped(json: any, ignoreDiscriminato
         
         'id': json['id'] == null ? undefined : json['id'],
         'homeId': json['homeId'] == null ? undefined : json['homeId'],
+        'homeLabel': json['homeLabel'] == null ? undefined : json['homeLabel'],
         'homeBedrooms': json['homeBedrooms'] == null ? undefined : json['homeBedrooms'],
         'homeIsAccessible': json['homeIsAccessible'] == null ? undefined : json['homeIsAccessible'],
         'status': json['status'] == null ? undefined : json['status'],
@@ -175,6 +201,8 @@ export function HomeSelectionResponseFromJSONTyped(json: any, ignoreDiscriminato
         'cancellationReason': json['cancellationReason'] == null ? undefined : json['cancellationReason'],
         'closedBy': json['closedBy'] == null ? undefined : json['closedBy'],
         'closedAt': json['closedAt'] == null ? undefined : (new Date(json['closedAt'])),
+        'fellThroughReason': json['fellThroughReason'] == null ? undefined : json['fellThroughReason'],
+        'fellThroughDate': json['fellThroughDate'] == null ? undefined : CalendarDateFromJSON(json['fellThroughDate']),
     };
 }
 
@@ -191,6 +219,7 @@ export function HomeSelectionResponseToJSONTyped(value?: HomeSelectionResponse |
         
         'id': value['id'],
         'homeId': value['homeId'],
+        'homeLabel': value['homeLabel'],
         'homeBedrooms': value['homeBedrooms'],
         'homeIsAccessible': value['homeIsAccessible'],
         'status': value['status'],
@@ -207,6 +236,8 @@ export function HomeSelectionResponseToJSONTyped(value?: HomeSelectionResponse |
         'cancellationReason': value['cancellationReason'],
         'closedBy': value['closedBy'],
         'closedAt': value['closedAt'] === null ? null : ((value['closedAt'] as any)?.toISOString()),
+        'fellThroughReason': value['fellThroughReason'],
+        'fellThroughDate': CalendarDateToJSON(value['fellThroughDate']),
     };
 }
 

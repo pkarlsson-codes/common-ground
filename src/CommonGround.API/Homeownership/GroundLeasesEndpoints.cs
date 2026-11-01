@@ -71,7 +71,8 @@ public static class GroundLeasesEndpoints
             v.FormulaKind,
             v.HomeownerFullName,
             v.HomeownerEmail,
-            v.CreatedAt));
+            v.CreatedAt,
+            v.PurchaseWorkflowId));
 
         return Results.Ok(response);
     }

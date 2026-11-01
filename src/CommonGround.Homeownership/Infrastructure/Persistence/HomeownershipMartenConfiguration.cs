@@ -31,7 +31,10 @@ public static class HomeownershipMartenConfiguration
         options.Schema.For<PurchaseWorkflowView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<PurchaseWorkflowListItemView>()
             .DatabaseSchemaName(SchemaName)
-            .Index(x => x.BuyerFullName);
+            .Index(x => x.BuyerFullName)
+            .Index(x => x.HomeId)
+            .Index(x => x.HouseholdId);
+        options.Schema.For<HomeLabelView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<GroundLeaseTemplateListItemView>()
             .DatabaseSchemaName(SchemaName)
             .Index(x => x.TemplateName);

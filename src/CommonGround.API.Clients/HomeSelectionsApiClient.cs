@@ -25,6 +25,14 @@ public sealed class HomeSelectionsApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task<PaginatedResponse<HomeSelectionListItemResponse>> GetHomeSelectionsAsync(
+        GetHomeSelectionsQuerySpec querySpec, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(querySpec);
+        return await GetAsync<PaginatedResponse<HomeSelectionListItemResponse>>($"api/home-selections{querySpec.ToQueryString()}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task<HomeSelectionResponse> GetHomeSelectionAsync(string selectionId, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(selectionId);

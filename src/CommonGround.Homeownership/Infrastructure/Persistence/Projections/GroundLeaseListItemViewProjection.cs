@@ -27,6 +27,7 @@ internal sealed class GroundLeaseListItemViewProjection : SingleStreamProjection
             Id = e.Data.AggregateId,
             LandParcelId = e.Data.LandParcelId,
             HomeId = e.Data.HomeId,
+            PurchaseWorkflowId = e.Data.PurchaseWorkflowId,
             LeaseStartDate = e.Data.LeaseStartDate,
             TermYears = e.Data.TermYears,
             Status = "Active",

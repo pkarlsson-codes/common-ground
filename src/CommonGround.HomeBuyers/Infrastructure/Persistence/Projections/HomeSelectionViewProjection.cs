@@ -51,6 +51,13 @@ internal sealed class HomeSelectionViewProjection : SingleStreamProjection<HomeS
         view.ClosedAt = e.OccurredAt;
     }
 
+    public static void Apply(HomeSelectionView view, HomeSelectionPurchaseFellThrough e)
+    {
+        view.Status = HomeSelectionStatus.FellThrough.DisplayName;
+        view.FellThroughReason = e.Reason;
+        view.FellThroughDate = e.FellThroughDate;
+    }
+
     public static void Apply(HomeSelectionView view, HomeSelectionCancelled e)
     {
         view.Status = HomeSelectionStatus.Cancelled.DisplayName;

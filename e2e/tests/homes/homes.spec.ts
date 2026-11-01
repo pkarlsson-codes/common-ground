@@ -21,7 +21,7 @@ async function openSeededHome(page: Page) {
   const { parcelId, apn } = await createLandParcel(page)
   const homeId = await createHome(page, parcelId)
   await (await filterByParcel(page, apn)).click()
-  return { detail: panel(page, 'Single Family'), homeId, apn }
+  return { detail: panel(page, `${apn} Elm St`), homeId, apn }
 }
 
 const assessmentsSection = (detail: Locator) =>
@@ -64,6 +64,7 @@ test('registering a home adds it to the registry with its details and initial as
   await page.getByPlaceholder('Search parcels…').fill(apn)
   await page.getByRole('listbox').getByRole('option', { name: `${apn} — ${apn} Elm St` }).click()
   await field(register, 'Home Type').selectOption('Duplex')
+  await field(register, 'Unit Designation (optional)').fill('Unit B')
   await field(register, 'Bedrooms').fill('4')
   await field(register, 'Bathrooms').fill('2.5')
   await register.getByRole('checkbox', { name: 'Accessible home' }).check()
@@ -83,16 +84,18 @@ test('registering a home adds it to the registry with its details and initial as
   await expect(row).toContainText('$310,000')
   await expect(row).toContainText('Available')
 
-  // The status filter finds it under Available, not under Occupied.
+  await expect(row).toContainText(`${apn} Elm St, Unit B`)
+
+  // The status filter finds it under Available, not under Leased.
   const statusFilter = page.locator('.filter-bar select')
-  await statusFilter.selectOption('Occupied')
+  await statusFilter.selectOption('Leased')
   await expect(page.locator('.empty-state')).toBeVisible()
   await statusFilter.selectOption('Available')
   await expect(page.locator('tbody tr')).toHaveCount(1)
 
   await row.click()
-  const detail = panel(page, 'Duplex')
-  await expect(detail).toContainText('4 bd · 2.5 ba · 1,500 sq ft')
+  const detail = panel(page, `${apn} Elm St, Unit B`)
+  await expect(detail).toContainText('Duplex · 4 bd · 2.5 ba · 1,500 sq ft')
   await expect(detailValue(detail, 'Status')).toHaveText('Available')
   await expect(detailValue(detail, 'Accessible')).toHaveText('Yes')
   await expect(detailValue(detail, 'Year Built')).toHaveText('1978')

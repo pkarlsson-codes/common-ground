@@ -2,17 +2,17 @@ import { useState } from 'react'
 import { formatCalendarDate, numericDate, type CalendarDate } from '../../lib/calendarDate'
 import type { HouseholdResponse } from '../../api'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
-import NavIdLink from '../../components/NavIdLink'
 import SlideOver from '../../components/SlideOver'
-import { findOpenApplication, useHousehold, useStartApplication, useUpdateHouseholdCircumstances } from '../../hooks/households'
+import { useHousehold, useStartApplication, useUpdateHouseholdCircumstances } from '../../hooks/households'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, getResponseStatus, type ApiProblemDetails } from '../../lib/getErrorMessage'
 import { formatPhoneDisplay } from '../../lib/phone'
-import ApplicationPhaseBadge from '../applications/ApplicationPhaseBadge'
 import HouseholdMembersSection from './HouseholdMembersSection'
 import RecordCltOrientationPanel from './RecordCltOrientationPanel'
 import RecordHousingCounselingPanel from './RecordHousingCounselingPanel'
 import RecordMortgagePrequalificationPanel from './RecordMortgagePrequalificationPanel'
+import { missingReadiness, READINESS_LABELS, type ReadinessItem } from '../../lib/lifecycle'
+import { HouseholdConnectedRecords, HouseholdLifecycle } from './HouseholdLifecycle'
 
 type Props = {
   householdId: string
@@ -34,7 +34,7 @@ function SkeletonRows() {
   )
 }
 
-type ReadinessPanel = 'housing-counseling' | 'clt-orientation' | 'mortgage-prequalification'
+type ReadinessPanel = ReadinessItem
 
 function ReadinessItem({ label, done, status, actionLabel, onAction }: {
   label: string
@@ -59,8 +59,9 @@ function ReadinessItem({ label, done, status, actionLabel, onAction }: {
   )
 }
 
-function CircumstancesSection({ householdId, household }: { householdId: string; household: HouseholdResponse }) {
+function CircumstancesSection({ householdId, household, editRequest }: { householdId: string; household: HouseholdResponse; editRequest: number }) {
   const [editing, setEditing] = useState(false)
+  const [handledEditRequest, setHandledEditRequest] = useState(editRequest)
   const [form, setForm] = useState({ annualIncome: 0, requiresAccessibility: false })
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   const update = useUpdateHouseholdCircumstances(householdId)
@@ -73,6 +74,12 @@ function CircumstancesSection({ householdId, household }: { householdId: string;
     })
     setProblem(null)
     setEditing(true)
+  }
+
+  // "Edit Circumstances" under More actions asks for the form by bumping editRequest.
+  if (editRequest !== handledEditRequest) {
+    setHandledEditRequest(editRequest)
+    startEditing()
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -166,11 +173,10 @@ export default function HouseholdDetailPanel({ householdId, onClose }: Props) {
   const { success } = useToast()
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   const [readinessPanel, setReadinessPanel] = useState<ReadinessPanel | null>(null)
+  const [editCircumstancesRequest, setEditCircumstancesRequest] = useState(0)
 
   const status = getResponseStatus(error)
   const primary = household?.members?.find(m => m.isPrimary)
-  const applications = household?.applications ?? []
-  const openApplication = findOpenApplication(household)
   const prequalification = household?.mortgagePrequalification
 
   const handleStartApplication = async () => {
@@ -208,7 +214,29 @@ export default function HouseholdDetailPanel({ householdId, onClose }: Props) {
 
       {!isLoading && !isError && household && (
         <>
-          <CircumstancesSection householdId={householdId} household={household} />
+          <HouseholdLifecycle
+            household={household}
+            onRecordReadiness={setReadinessPanel}
+            onStartApplication={() => { void handleStartApplication() }}
+            startingApplication={startApplication.isPending}
+            moreActions={[
+              ...(household.journey?.stage === 'Intake' && !household.journey.currentApplicationId
+                ? [{ label: 'Start Application', onClick: () => { void handleStartApplication() }, disabled: startApplication.isPending }]
+                : []),
+              { label: 'Edit Circumstances', onClick: () => setEditCircumstancesRequest(r => r + 1) },
+              ...missingReadiness(household).map(item => ({
+                label: `Record ${READINESS_LABELS[item]}`,
+                onClick: () => setReadinessPanel(item),
+              })),
+              ...(prequalification && !missingReadiness(household).includes('mortgage-prequalification')
+                ? [{ label: 'Update Mortgage Prequalification', onClick: () => setReadinessPanel('mortgage-prequalification') }]
+                : []),
+            ]}
+          >
+            <ApiProblemAlert problem={problem} />
+          </HouseholdLifecycle>
+
+          <CircumstancesSection householdId={householdId} household={household} editRequest={editCircumstancesRequest} />
 
           <HouseholdMembersSection householdId={householdId} members={household.members ?? []} />
 
@@ -241,50 +269,7 @@ export default function HouseholdDetailPanel({ householdId, onClose }: Props) {
             </div>
           </div>
 
-          <div className="detail-section" style={{ marginTop: 16 }}>
-            <div className="detail-section__title">Applications</div>
-            {applications.length === 0 && (
-              <div className="detail-field__value">No applications yet.</div>
-            )}
-            {applications.length > 0 && (
-              <table className="registry-table" style={{ marginTop: 10 }}>
-                <thead>
-                  <tr>
-                    <th>Phase</th>
-                    <th>Submitted</th>
-                    <th />
-                  </tr>
-                </thead>
-                <tbody>
-                  {applications.map(application => (
-                    <tr key={application.id}>
-                      <td><ApplicationPhaseBadge phase={application.phase} /></td>
-                      <td><span className="cell-mono">{fmtDate(application.submittedAt)}</span></td>
-                      <td style={{ textAlign: 'right' }}>
-                        <NavIdLink id={application.id} to="/applications" label="Open" />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            <div style={{ marginTop: 12 }}>
-              <ApiProblemAlert problem={problem} />
-              {openApplication ? (
-                <NavIdLink id={openApplication.id} to="/applications" label="Open Active Application" />
-              ) : (
-                <button
-                  className="btn btn-primary btn-sm"
-                  type="button"
-                  onClick={() => { void handleStartApplication() }}
-                  disabled={startApplication.isPending}
-                >
-                  {startApplication.isPending ? 'Submitting…' : 'Start Application'}
-                </button>
-              )}
-            </div>
-          </div>
+          <HouseholdConnectedRecords household={household} />
         </>
       )}
 

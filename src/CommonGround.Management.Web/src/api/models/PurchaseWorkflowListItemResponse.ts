@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+
 /**
  * Summary item for purchase workflow list responses.
  * @export
@@ -32,6 +40,24 @@ export interface PurchaseWorkflowListItemResponse {
      * @memberof PurchaseWorkflowListItemResponse
      */
     groundLeaseTemplateId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseWorkflowListItemResponse
+     */
+    homeId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseWorkflowListItemResponse
+     */
+    homeLabel?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseWorkflowListItemResponse
+     */
+    householdId?: string | null;
     /**
      * 
      * @type {string}
@@ -56,6 +82,18 @@ export interface PurchaseWorkflowListItemResponse {
      * @memberof PurchaseWorkflowListItemResponse
      */
     createdAt?: Date;
+    /**
+     * 
+     * @type {Date}
+     * @memberof PurchaseWorkflowListItemResponse
+     */
+    stepEnteredAt?: Date;
+    /**
+     * 
+     * @type {CalendarDate}
+     * @memberof PurchaseWorkflowListItemResponse
+     */
+    scheduledClosingDate?: CalendarDate | null;
 }
 
 /**
@@ -77,10 +115,15 @@ export function PurchaseWorkflowListItemResponseFromJSONTyped(json: any, ignoreD
         
         'id': json['id'] == null ? undefined : json['id'],
         'groundLeaseTemplateId': json['groundLeaseTemplateId'] == null ? undefined : json['groundLeaseTemplateId'],
+        'homeId': json['homeId'] == null ? undefined : json['homeId'],
+        'homeLabel': json['homeLabel'] == null ? undefined : json['homeLabel'],
+        'householdId': json['householdId'] == null ? undefined : json['householdId'],
         'buyerFullName': json['buyerFullName'] == null ? undefined : json['buyerFullName'],
         'purchasePrice': json['purchasePrice'] == null ? undefined : json['purchasePrice'],
         'phase': json['phase'] == null ? undefined : json['phase'],
         'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
+        'stepEnteredAt': json['stepEnteredAt'] == null ? undefined : (new Date(json['stepEnteredAt'])),
+        'scheduledClosingDate': json['scheduledClosingDate'] == null ? undefined : CalendarDateFromJSON(json['scheduledClosingDate']),
     };
 }
 
@@ -97,10 +140,15 @@ export function PurchaseWorkflowListItemResponseToJSONTyped(value?: PurchaseWork
         
         'id': value['id'],
         'groundLeaseTemplateId': value['groundLeaseTemplateId'],
+        'homeId': value['homeId'],
+        'homeLabel': value['homeLabel'],
+        'householdId': value['householdId'],
         'buyerFullName': value['buyerFullName'],
         'purchasePrice': value['purchasePrice'],
         'phase': value['phase'],
         'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
+        'stepEnteredAt': value['stepEnteredAt'] == null ? undefined : ((value['stepEnteredAt']).toISOString()),
+        'scheduledClosingDate': CalendarDateToJSON(value['scheduledClosingDate']),
     };
 }
 

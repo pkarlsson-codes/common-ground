@@ -3,6 +3,9 @@ import { useLandParcel, useDecommissionParcel, useRecommissionParcel } from '../
 import SlideOver from '../../components/SlideOver'
 import { useToast } from '../../hooks/useToast'
 import HomesSection from './HomesSection'
+import ConnectedRecords from '../../components/lifecycle/ConnectedRecords'
+import { formatStepDate } from '../../lib/lifecycle'
+import { useConnectedGroundLeases } from '../../hooks/groundLeases'
 import DevelopmentProjectsSection from './DevelopmentProjectsSection'
 
 function SkeletonRows() {
@@ -183,8 +186,29 @@ export default function LandParcelDetailPanel({ parcelId, onClose }: Props) {
 
           <HomesSection parcelId={parcelId} />
           <DevelopmentProjectsSection parcelId={parcelId} />
+          <ParcelConnectedRecords parcelId={parcelId} />
         </>
       )}
     </SlideOver>
+  )
+}
+
+/** Links to the ground leases on the parcel's homes. */
+function ParcelConnectedRecords({ parcelId }: { parcelId: string }) {
+  const { data: leases, isLoading } = useConnectedGroundLeases({ landParcelId: parcelId })
+
+  return (
+    <ConnectedRecords
+      isLoading={isLoading}
+      records={(leases?.items ?? []).map(l => ({
+        key: `lease-${l.id}`,
+        type: 'Ground lease',
+        name: l.homeownerFullName ?? 'Ground lease',
+        meta: `From ${formatStepDate(l.leaseStartDate)}`,
+        status: l.status ?? undefined,
+        to: '/ground-leases',
+        openId: l.id!,
+      }))}
+    />
   )
 }

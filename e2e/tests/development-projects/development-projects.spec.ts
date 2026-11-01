@@ -100,7 +100,7 @@ test('initiating a rehabilitation project requires a home on the parcel and link
   await expect(detailValue(detail, 'Homes')).toContainText('Single Family · 3 bd / 2.0 ba')
   await detail.getByRole('button', { name: 'Open Home' }).click()
   await expect(page).toHaveURL(/\/homes$/)
-  await expect(panel(page, 'Single Family')).toBeVisible()
+  await expect(panel(page, `${apn} Elm St`)).toBeVisible()
 })
 
 test('projects list newest first and search matches name or description', async ({ page }) => {

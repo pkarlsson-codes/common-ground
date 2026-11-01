@@ -8,3 +8,6 @@
 6. User clicks "Mark as Failed" to confirm (or "Cancel" to back out)
 7. Toast: "Workflow marked failed"
 8. Panel shows Failure Reason; the workflow moves to the Failed phase and Purchase Tracks and Exception Actions are no longer shown
+9. If the workflow was initiated by selecting an applicant for a home, in the background the home goes back to the Selection stage with a new home selection started for it, the completed selection is marked Fell Through, and the household's application returns to the waiting list with its original approved date
+
+Continues in: [View Home Selection](../home-selections/view-home-selection.md)

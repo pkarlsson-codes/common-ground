@@ -16,6 +16,15 @@ export function useGroundLeases(pageNumber: number, status?: string, landParcelI
   })
 }
 
+/** The ground leases on a home or a land parcel, newest first. */
+export function useConnectedGroundLeases(filter: { homeId?: string; landParcelId?: string }) {
+  return useQuery({
+    queryKey: ['ground-leases', 'connected', filter.homeId, filter.landParcelId],
+    queryFn: () => api.getGroundLeases({ pageNumber: 1, pageSize: 50, homeId: filter.homeId, landParcelId: filter.landParcelId }),
+    enabled: !!(filter.homeId || filter.landParcelId),
+  })
+}
+
 export function useAllActiveGroundLeases() {
   return useQuery({
     queryKey: ['ground-leases', 'all-active'],

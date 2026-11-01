@@ -9,6 +9,9 @@ public class HomeView
     /// <summary>Gets or sets the parent land parcel ID.</summary>
     public string LandParcelId { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the unit designation (e.g. "Unit B"), if any.</summary>
+    public string? UnitDesignation { get; set; }
+
     /// <summary>Gets or sets the unit type display name.</summary>
     public string UnitType { get; set; } = string.Empty;
 
@@ -41,4 +44,16 @@ public class HomeView
 
     /// <summary>Gets or sets when this unit was registered.</summary>
     public DateTimeOffset RegisteredAt { get; set; }
+
+    /// <summary>Gets or sets the date the home last became available again after its purchase fell through, if it has.</summary>
+    public DateOnly? AvailableAgainDate { get; set; }
+
+    /// <summary>Gets or sets the date the home's current selection opened, while it is in selection or later.</summary>
+    public DateOnly? SelectionOpenedDate { get; set; }
+
+    /// <summary>Gets or sets the date the home went under contract, while it is under contract or later.</summary>
+    public DateOnly? UnderContractDate { get; set; }
+
+    /// <summary>Gets or sets the date the home's purchase closed and it was leased.</summary>
+    public DateOnly? LeasedDate { get; set; }
 }

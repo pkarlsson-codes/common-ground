@@ -69,6 +69,7 @@ export default function HomesTable({
           <table className="registry-table">
             <thead>
               <tr>
+                <th>Home</th>
                 <th>Type</th>
                 <th>Beds / Baths</th>
                 <th>Sq. Ft.</th>
@@ -84,6 +85,7 @@ export default function HomesTable({
                   onClick={() => onRowClick(h.id!)}
                   className={selectedId === h.id && panel === 'detail' ? 'row--selected' : ''}
                 >
+                  <td>{h.label || '—'}</td>
                   <td>{HOME_TYPE_LABELS[h.homeType ?? ''] ?? h.homeType}</td>
                   <td>
                     <span className="cell-mono">

@@ -2,6 +2,7 @@ using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.PropertyRegistry.Domain.Homes.Events;
 
-/// <summary>Raised when a home marked under contract.</summary>
+/// <summary>Raised when a household is selected for a home, putting it under contract.</summary>
 public sealed record HomeUnderContract(
-    string AggregateId) : DomainEvent(AggregateId);
+    string AggregateId,
+    DateOnly ContractDate) : DomainEvent(AggregateId);

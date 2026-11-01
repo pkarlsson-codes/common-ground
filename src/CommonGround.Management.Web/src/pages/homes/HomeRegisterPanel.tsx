@@ -16,6 +16,7 @@ const landParcelsApi = new LandParcelsApi(apiConfig)
 interface FormState {
   landParcelId: string
   homeType: string
+  unitDesignation: string
   bedrooms: number
   bathrooms: number
   isAccessible: boolean
@@ -29,6 +30,7 @@ interface FormState {
 const emptyForm = (parcelId = ''): FormState => ({
   landParcelId: parcelId,
   homeType: 'SingleFamily',
+  unitDesignation: '',
   bedrooms: 0,
   bathrooms: 0,
   isAccessible: false,
@@ -78,6 +80,7 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
         initialAssessedValue: Number(form.initialAssessedValue),
         initialAssessedDate:  form.initialAssessedDate ?? undefined,
         appraiserName:        form.appraiserName || undefined,
+        unitDesignation:      form.unitDesignation.trim() || undefined,
       })
       success('Home registered successfully')
       onClose()
@@ -140,6 +143,17 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
                 <option key={t} value={t}>{HOME_TYPE_LABELS[t]}</option>
               ))}
             </select>
+          </div>
+          <div className="form-field full">
+            <label className="form-label" htmlFor="home-unit-designation">Unit Designation (optional)</label>
+            <input
+              id="home-unit-designation"
+              className="form-input"
+              type="text"
+              placeholder="e.g. Unit B"
+              value={form.unitDesignation}
+              onChange={e => setForm(f => ({ ...f, unitDesignation: e.target.value }))}
+            />
           </div>
           <div className="form-field">
             <label className="form-label">Bedrooms</label>

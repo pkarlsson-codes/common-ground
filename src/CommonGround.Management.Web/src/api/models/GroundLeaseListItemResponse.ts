@@ -88,6 +88,12 @@ export interface GroundLeaseListItemResponse {
      * @memberof GroundLeaseListItemResponse
      */
     createdAt?: Date;
+    /**
+     * 
+     * @type {string}
+     * @memberof GroundLeaseListItemResponse
+     */
+    purchaseWorkflowId?: string | null;
 }
 
 /**
@@ -117,6 +123,7 @@ export function GroundLeaseListItemResponseFromJSONTyped(json: any, ignoreDiscri
         'homeownerFullName': json['homeownerFullName'] == null ? undefined : json['homeownerFullName'],
         'homeownerEmail': json['homeownerEmail'] == null ? undefined : json['homeownerEmail'],
         'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
+        'purchaseWorkflowId': json['purchaseWorkflowId'] == null ? undefined : json['purchaseWorkflowId'],
     };
 }
 
@@ -141,6 +148,7 @@ export function GroundLeaseListItemResponseToJSONTyped(value?: GroundLeaseListIt
         'homeownerFullName': value['homeownerFullName'],
         'homeownerEmail': value['homeownerEmail'],
         'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
+        'purchaseWorkflowId': value['purchaseWorkflowId'],
     };
 }
 

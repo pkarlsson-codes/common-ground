@@ -6,6 +6,8 @@ using CommonGround.HomeBuyers.Application.Queries;
 using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
+using CommonGround.SharedKernel.Infrastructure.API;
+using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
 
@@ -53,6 +55,31 @@ public static class HomeSelectionsEndpoints
             s.SelectedApplicationId,
             s.SelectionMethod,
             s.ClosedAt));
+
+        return Results.Ok(response);
+    }
+
+    [WolverineGet("/api/home-selections")]
+    public static async Task<IResult> GetHomeSelections(
+        [FromQuery] GetHomeSelectionsQuerySpec request,
+        IMessageBus bus,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await bus.InvokeForTenantAsync<PaginatedResponse<HomeSelectionListItem>>(bus.TenantId!,
+            new GetHomeSelections(request.Page, request.Status),
+            cancellationToken);
+
+        var response = result.MapItems(i => new HomeSelectionListItemResponse(
+            i.Selection.Id,
+            i.Selection.HomeId,
+            i.HomeLabel,
+            i.Selection.Status,
+            i.Selection.StartedAt,
+            i.Selection.Candidates.Count,
+            i.Selection.SelectedApplicationId,
+            MapContact(i.ChosenContact),
+            i.Selection.ClosedAt,
+            i.Selection.FellThroughDate));
 
         return Results.Ok(response);
     }
@@ -164,6 +191,7 @@ public static class HomeSelectionsEndpoints
         return new HomeSelectionResponse(
             view.Id,
             view.HomeId,
+            details.Home?.Label,
             details.Home?.Bedrooms,
             details.Home?.IsAccessible,
             view.Status,
@@ -179,7 +207,9 @@ public static class HomeSelectionsEndpoints
             view.LotteryIneligibleApplicationIds,
             view.CancellationReason,
             view.ClosedBy,
-            view.ClosedAt);
+            view.ClosedAt,
+            view.FellThroughReason,
+            view.FellThroughDate);
     }
 
     private static HomeSelectionCandidateDto MapCandidate(HomeSelectionCandidateDetails candidate) =>

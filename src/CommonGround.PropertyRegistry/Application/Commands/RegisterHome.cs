@@ -9,6 +9,7 @@ namespace CommonGround.PropertyRegistry.Application.Commands;
 
 /// <summary>Registers a new home on a CLT land parcel.</summary>
 /// <param name="LandParcelId">The parcel this home sits on.</param>
+/// <param name="UnitDesignation">Optional unit designation (e.g. "Unit B") for a parcel with several homes.</param>
 /// <param name="UnitType">The physical type of the home.</param>
 /// <param name="Bedrooms">Number of bedrooms.</param>
 /// <param name="Bathrooms">Number of bathrooms (supports 1.5 etc.).</param>
@@ -21,6 +22,7 @@ namespace CommonGround.PropertyRegistry.Application.Commands;
 /// <param name="RegisteredBy">The staff user registering the home.</param>
 public sealed record RegisterHome(
     LandParcelId LandParcelId,
+    string? UnitDesignation,
     HomeType UnitType,
     int Bedrooms,
     decimal Bathrooms,
@@ -58,6 +60,7 @@ public static class RegisterHomeHandler
 
         var home = Home.Register(
             command.LandParcelId,
+            command.UnitDesignation,
             command.UnitType,
             command.Bedrooms,
             command.Bathrooms,

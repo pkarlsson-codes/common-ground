@@ -76,4 +76,7 @@ public class MortgagePrequalificationEntry
 
     /// <summary>Gets or sets the expiry date.</summary>
     public DateOnly ExpiryDate { get; set; }
+
+    /// <summary>Gets or sets when the prequalification was recorded.</summary>
+    public DateTimeOffset RecordedAt { get; set; }
 }

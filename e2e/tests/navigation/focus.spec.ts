@@ -16,6 +16,7 @@ test('choosing a focus puts its pages under My work and is remembered', async ({
 
   // Sales pages under My work; the rest folded away under Other work.
   await expect(sidebar(page).getByText('My work', { exact: true })).toBeVisible()
+  await expect(navLink(page, 'Home selections')).toBeVisible()
   await expect(navLink(page, 'Purchases')).toBeVisible()
   await expect(navLink(page, 'Resales')).toBeVisible()
   await expect(navLink(page, 'Households')).toBeHidden()
@@ -32,8 +33,8 @@ test('choosing a focus puts its pages under My work and is remembered', async ({
 
   // The focus and the open toggle survive a reload, and the root lands on the focus's first page.
   await page.goto('/')
-  await expect(page).toHaveURL(/\/purchase-workflows$/)
-  await expect(page.getByRole('heading', { name: 'Purchases', level: 1 })).toBeVisible()
+  await expect(page).toHaveURL(/\/home-selections$/)
+  await expect(page.getByRole('heading', { name: 'Home Selections', level: 1 })).toBeVisible()
   await expect(page.getByRole('combobox', { name: 'My focus' })).toHaveValue('sales')
   await expect(navLink(page, 'Households')).toBeVisible()
 

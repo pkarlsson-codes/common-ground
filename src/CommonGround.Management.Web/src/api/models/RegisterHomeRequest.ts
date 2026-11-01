@@ -88,6 +88,12 @@ export interface RegisterHomeRequest {
      * @memberof RegisterHomeRequest
      */
     initialAssessedValue?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof RegisterHomeRequest
+     */
+    unitDesignation?: string | null;
 }
 
 /**
@@ -117,6 +123,7 @@ export function RegisterHomeRequestFromJSONTyped(json: any, ignoreDiscriminator:
         'appraiserName': json['appraiserName'] == null ? undefined : json['appraiserName'],
         'initialAssessedDate': json['initialAssessedDate'] == null ? undefined : CalendarDateFromJSON(json['initialAssessedDate']),
         'initialAssessedValue': json['initialAssessedValue'] == null ? undefined : json['initialAssessedValue'],
+        'unitDesignation': json['unitDesignation'] == null ? undefined : json['unitDesignation'],
     };
 }
 
@@ -141,6 +148,7 @@ export function RegisterHomeRequestToJSONTyped(value?: RegisterHomeRequest | nul
         'appraiserName': value['appraiserName'],
         'initialAssessedDate': CalendarDateToJSON(value['initialAssessedDate']),
         'initialAssessedValue': value['initialAssessedValue'],
+        'unitDesignation': value['unitDesignation'],
     };
 }
 

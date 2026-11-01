@@ -2095,6 +2095,73 @@
         }
       }
     },
+    "/api/v1/home-selections": {
+      "get": {
+        "tags": [
+          "HomeSelections"
+        ],
+        "operationId": "GetHomeSelections",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfHomeSelectionListItemResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/home-selections/{selectionId}": {
       "get": {
         "tags": [
@@ -3726,6 +3793,24 @@
               "nullable": true
             },
             "x-position": 5
+          },
+          {
+            "name": "homeId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 6
+          },
+          {
+            "name": "householdId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 7
           }
         ],
         "responses": {
@@ -7358,6 +7443,10 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "purchaseWorkflowId": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -8015,6 +8104,100 @@
           }
         }
       },
+      "PaginatedResponseOfHomeSelectionListItemResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/HomeSelectionListItemResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "HomeSelectionListItemResponse": {
+        "type": "object",
+        "description": "A home selection in the list across homes.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "homeId": {
+            "type": "string"
+          },
+          "homeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "selectedApplicationId": {
+            "type": "string",
+            "nullable": true
+          },
+          "chosenContact": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/HouseholdContactDto"
+              }
+            ]
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "fellThroughDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
       "HomeSelectionResponse": {
         "type": "object",
         "description": "A home selection with the home's facts and each candidate's priority facts side by side, in\nwaiting-list order. Status is \"Open\", \"Completed\" or \"Cancelled\";\nSelectionMethod is \"Priority\" or \"Lottery\" once completed.",
@@ -8025,6 +8208,10 @@
           },
           "homeId": {
             "type": "string"
+          },
+          "homeLabel": {
+            "type": "string",
+            "nullable": true
           },
           "homeBedrooms": {
             "type": "integer",
@@ -8097,6 +8284,15 @@
           "closedAt": {
             "type": "string",
             "format": "date-time",
+            "nullable": true
+          },
+          "fellThroughReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "fellThroughDate": {
+            "type": "string",
+            "format": "date",
             "nullable": true
           }
         }
@@ -8258,6 +8454,10 @@
           "initialAssessedValue": {
             "type": "number",
             "format": "decimal"
+          },
+          "unitDesignation": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -8271,6 +8471,13 @@
           },
           "landParcelId": {
             "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "unitDesignation": {
+            "type": "string",
+            "nullable": true
           },
           "homeType": {
             "type": "string"
@@ -8313,6 +8520,26 @@
           "registeredAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "availableAgainDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "selectionOpenedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "underContractDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "leasedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
           }
         }
       },
@@ -8370,6 +8597,13 @@
           },
           "landParcelId": {
             "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "unitDesignation": {
+            "type": "string",
+            "nullable": true
           },
           "homeType": {
             "type": "string"
@@ -8695,6 +8929,9 @@
             "items": {
               "$ref": "#/components/schemas/HouseholdApplicationDto"
             }
+          },
+          "journey": {
+            "$ref": "#/components/schemas/HouseholdJourneyDto"
           }
         }
       },
@@ -8758,6 +8995,44 @@
             "type": "string",
             "description": "When the application was submitted.",
             "format": "date-time"
+          }
+        }
+      },
+      "HouseholdJourneyDto": {
+        "type": "object",
+        "description": "Where the household is on its way to owning a home: Stage is Intake, Ready, Waiting, Purchasing or Homeowner,\nwith the date each step so far was reached.",
+        "additionalProperties": false,
+        "properties": {
+          "stage": {
+            "type": "string"
+          },
+          "readyDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "approvedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "selectedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "purchasedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "currentApplicationId": {
+            "type": "string",
+            "nullable": true
+          },
+          "selectedHomeId": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -9080,6 +9355,10 @@
           "homeId": {
             "type": "string"
           },
+          "homeLabel": {
+            "type": "string",
+            "nullable": true
+          },
           "applicationId": {
             "type": "string",
             "nullable": true
@@ -9333,6 +9612,17 @@
           "groundLeaseTemplateId": {
             "type": "string"
           },
+          "homeId": {
+            "type": "string"
+          },
+          "homeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "householdId": {
+            "type": "string",
+            "nullable": true
+          },
           "buyerFullName": {
             "type": "string"
           },
@@ -9346,6 +9636,15 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "stepEnteredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "scheduledClosingDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
           }
         }
       },

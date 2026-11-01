@@ -31,6 +31,9 @@ public sealed class Home : AggregateRoot<HomeId>
     /// <summary>Gets the ID of the user who registered this unit.</summary>
     public UserId RegisteredBy { get; private set; }
 
+    /// <summary>Gets the unit designation (e.g. "Unit B") that tells this home apart from others on its parcel, if any.</summary>
+    public string? UnitDesignation { get; private set; }
+
     /// <summary>Gets the physical type of this home.</summary>
     public HomeType UnitType { get; private set; }
 
@@ -52,6 +55,7 @@ public sealed class Home : AggregateRoot<HomeId>
     /// <summary>Registers a new home on a CLT land parcel.</summary>
     public static Home Register(
         LandParcels.LandParcelId landParcelId,
+        string? unitDesignation,
         HomeType unitType,
         int bedrooms,
         decimal bathrooms,
@@ -86,6 +90,7 @@ public sealed class Home : AggregateRoot<HomeId>
         home.ApplyChange(new HomeRegistered(
             HomeId.Generate().Value,
             landParcelId.Value,
+            string.IsNullOrWhiteSpace(unitDesignation) ? null : unitDesignation.Trim(),
             unitType.DisplayName,
             bedrooms,
             bathrooms,
@@ -100,17 +105,65 @@ public sealed class Home : AggregateRoot<HomeId>
         return home;
     }
 
-    /// <summary>Mark the home under contract.</summary>
-    public void MarkUnderContract()
+    /// <summary>
+    /// Records that a home selection has started choosing a household for this home. A home under
+    /// contract only gets a new selection once its purchase has fallen through, and news of that may
+    /// arrive after the selection's, so the contract is released here first.
+    /// </summary>
+    public void OpenSelection(string homeSelectionId, DateOnly openedDate)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeSelectionId);
+
+        if (Status == HomeStatus.UnderContract)
+            ReleaseContract(openedDate);
+
         if (Status != HomeStatus.Available)
-        {
-            throw BusinessRuleViolation.Home.MarkUnderContract.HomeNotAvailable();
-        }
-        
-        ApplyChange(new HomeUnderContract(Id.Value));
+            throw BusinessRuleViolation.Home.OpenSelection.HomeNotAvailable(Status);
+
+        ApplyChange(new HomeSelectionOpened(Id.Value, homeSelectionId, openedDate));
     }
-    
+
+    /// <summary>Records that the home's selection was cancelled without choosing anyone, making the home available again.</summary>
+    public void CloseSelectionWithoutSale(string homeSelectionId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeSelectionId);
+
+        if (Status != HomeStatus.InSelection)
+            throw BusinessRuleViolation.Home.CloseSelectionWithoutSale.HomeNotInSelection(Status);
+
+        ApplyChange(new HomeSelectionClosedWithoutSale(Id.Value, homeSelectionId));
+    }
+
+    /// <summary>Marks the home under contract to the household selected for it.</summary>
+    public void MarkUnderContract(DateOnly contractDate)
+    {
+        if (Status != HomeStatus.Available && Status != HomeStatus.InSelection)
+            throw BusinessRuleViolation.Home.MarkUnderContract.HomeNotAvailable();
+
+        ApplyChange(new HomeUnderContract(Id.Value, contractDate));
+    }
+
+    /// <summary>Makes the home available again after its purchase failed or was withdrawn.</summary>
+    public void ReleaseContract(DateOnly releasedDate)
+    {
+        if (Status != HomeStatus.UnderContract)
+            throw BusinessRuleViolation.Home.ReleaseContract.HomeNotUnderContract(Status);
+
+        ApplyChange(new HomeContractReleased(Id.Value, releasedDate));
+    }
+
+    /// <summary>
+    /// Marks the home leased once its purchase closes. A purchase started directly, rather than
+    /// from a home selection, closes without the home ever having been under contract.
+    /// </summary>
+    public void MarkLeased(DateOnly leasedDate)
+    {
+        if (Status == HomeStatus.Leased || Status == HomeStatus.Resale)
+            throw BusinessRuleViolation.Home.MarkLeased.HomeAlreadyLeased(Status);
+
+        ApplyChange(new HomeLeased(Id.Value, leasedDate));
+    }
+
     /// <summary>Records a new assessed value for this unit.</summary>
     public void RecordAssessment(decimal assessedValue, DateOnly assessmentDate, string? appraiserName, string? conditionNotes, UserId recordedById)
     {
@@ -129,7 +182,11 @@ public sealed class Home : AggregateRoot<HomeId>
         {
             case HomeRegistered e: Apply(e); break;
             case HomeAssessed e: Apply(e); break;
+            case HomeSelectionOpened e: Apply(e); break;
+            case HomeSelectionClosedWithoutSale e: Apply(e); break;
             case HomeUnderContract e: Apply(e); break;
+            case HomeContractReleased e: Apply(e); break;
+            case HomeLeased e: Apply(e); break;
             default: throw new InvalidOperationException($"Unknown event: {domainEvent?.GetType().Name}");
         }
     }
@@ -138,6 +195,7 @@ public sealed class Home : AggregateRoot<HomeId>
     {
         Id = HomeId.Create(e.AggregateId);
         LandParcelId = LandParcels.LandParcelId.Create(e.LandParcelId);
+        UnitDesignation = e.UnitDesignation;
         UnitType = HomeType.FromDisplayName(e.UnitType);
         Bedrooms = e.Bedrooms;
         Bathrooms = e.Bathrooms;
@@ -160,8 +218,13 @@ public sealed class Home : AggregateRoot<HomeId>
         _assessments.Add(UnitAssessment.Reconstitute(e.AssessedValue, e.AssessmentDate, e.AppraiserName, e.ConditionNotes, UserId.Create(e.RecordedById), e.OccurredAt));
     }
 
-    private void Apply(HomeUnderContract _)
-    {
-        Status = HomeStatus.UnderContract;
-    }
+    private void Apply(HomeSelectionOpened _) => Status = HomeStatus.InSelection;
+
+    private void Apply(HomeSelectionClosedWithoutSale _) => Status = HomeStatus.Available;
+
+    private void Apply(HomeUnderContract _) => Status = HomeStatus.UnderContract;
+
+    private void Apply(HomeContractReleased _) => Status = HomeStatus.Available;
+
+    private void Apply(HomeLeased _) => Status = HomeStatus.Leased;
 }

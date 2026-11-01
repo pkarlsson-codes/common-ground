@@ -94,6 +94,7 @@ public sealed class HomesInitialData : IInitialData
 
             var unit = Home.Register(
                 LandParcelId.Create(landParcelLookup.LandParcelId),
+                entry.UnitDesignation,
                 HomeType.FromDisplayName(entry.Type),
                 entry.Bedrooms,
                 entry.Bathrooms,
@@ -161,6 +162,8 @@ public sealed class HomesInitialData : IInitialData
         public string LandParcelSeedKey { get; set; } = string.Empty;
 
         public string Type { get; set; } = string.Empty;
+
+        public string? UnitDesignation { get; set; }
 
         public int Bedrooms { get; set; }
 

@@ -302,4 +302,33 @@ public class HomeSelectionTests
             sut.SelectedApplicationId.Should().BeNull();
         }
     }
+
+    public class TheRecordPurchaseFellThroughMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenOpenSelection_WhenPurchaseFellThrough_ThenThrowsNotCompleted()
+        {
+            var sut = _testBed.OpenSelection();
+
+            var act = () => sut.RecordPurchaseFellThrough("Financing fell through", new DateOnly(2026, 9, 1));
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.home_selection.record_purchase_fell_through.not_completed");
+        }
+
+        [Fact]
+        public void GivenCompletedSelection_WhenPurchaseFellThrough_ThenHasFallenThroughKeepingTheChosenHousehold()
+        {
+            var sut = _testBed.CompletedSelection();
+            var chosen = sut.SelectedApplicationId;
+
+            sut.RecordPurchaseFellThrough("Financing fell through", new DateOnly(2026, 9, 1));
+
+            sut.Status.Should().Be(HomeSelectionStatus.FellThrough);
+            sut.SelectedApplicationId.Should().Be(chosen);
+        }
+    }
 }
+

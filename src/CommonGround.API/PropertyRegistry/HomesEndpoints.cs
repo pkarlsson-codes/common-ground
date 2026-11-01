@@ -38,6 +38,7 @@ public static class HomesEndpoints
 
         var command = new RegisterHome(
             LandParcelId.Create(request.LandParcelId),
+            request.UnitDesignation,
             homeType,
             request.Bedrooms,
             request.Bathrooms,
@@ -63,14 +64,15 @@ public static class HomesEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
 
-        var view = await bus.InvokeForTenantAsync<HomeView>(bus.TenantId!,
+        var (view, label) = await bus.InvokeForTenantAsync<HomeDetails>(bus.TenantId!,
             new GetHome(HomeId.Create(homeId)),
             cancellationToken);
 
-        var response = new HomeResponse(view.Id, view.LandParcelId,
+        var response = new HomeResponse(view.Id, view.LandParcelId, label, view.UnitDesignation,
             view.UnitType, view.Bedrooms, view.Bathrooms, view.IsAccessible, view.SquareFootage,
             view.YearBuilt, view.AssessedValue, view.LastAssessedDate,
-            view.ConditionNotes, view.Status, view.RegisteredAt);
+            view.ConditionNotes, view.Status, view.RegisteredAt,
+            view.AvailableAgainDate, view.SelectionOpenedDate, view.UnderContractDate, view.LeasedDate);
 
         return Results.Ok(response);
     }
@@ -89,11 +91,12 @@ public static class HomesEndpoints
         var query = new GetHomes(request.Page, landParcelFilter, statusFilter);
 
         var result = await bus
-            .InvokeForTenantAsync<PaginatedResponse<HomeListItemView>>(
+            .InvokeForTenantAsync<PaginatedResponse<HomeListItem>>(
                 bus.TenantId!, query, cancellationToken);
 
-        var response = result.MapItems(v => new HomeListItemResponse(
-            v.Id, v.LandParcelId, v.UnitType, v.Bedrooms, v.Bathrooms, v.SquareFootage, v.AssessedValue, v.Status));
+        var response = result.MapItems(i => new HomeListItemResponse(
+            i.Home.Id, i.Home.LandParcelId, i.Label, i.Home.UnitDesignation, i.Home.UnitType, i.Home.Bedrooms,
+            i.Home.Bathrooms, i.Home.SquareFootage, i.Home.AssessedValue, i.Home.Status));
 
         return Results.Ok(response);
     }

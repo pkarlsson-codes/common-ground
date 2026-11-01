@@ -66,6 +66,7 @@ internal sealed class HouseholdViewProjection : SingleStreamProjection<Household
             LenderName = e.LenderName,
             ApprovedAmount = e.ApprovedAmount,
             ExpiryDate = e.ExpiryDate,
+            RecordedAt = e.OccurredAt,
         };
     }
 

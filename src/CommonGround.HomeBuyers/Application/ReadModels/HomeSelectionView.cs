@@ -45,6 +45,12 @@ public class HomeSelectionView
     /// <summary>Gets or sets the reason staff gave for cancelling the selection.</summary>
     public string? CancellationReason { get; set; }
 
+    /// <summary>Gets or sets why the purchase the selection led to fell through, once it has.</summary>
+    public string? FellThroughReason { get; set; }
+
+    /// <summary>Gets or sets the date the purchase the selection led to fell through, once it has.</summary>
+    public DateOnly? FellThroughDate { get; set; }
+
     /// <summary>Gets or sets who completed or cancelled the selection.</summary>
     public string? ClosedBy { get; set; }
 

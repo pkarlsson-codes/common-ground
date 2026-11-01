@@ -17,11 +17,14 @@ public sealed record GetHomes(
     IReadOnlyList<LandParcelId>? LandParcelIds = null,
     IReadOnlyList<HomeStatus>? Statuses = null);
 
+/// <summary>A home list item and the label staff know the home by.</summary>
+public sealed record HomeListItem(HomeListItemView Home, string Label);
+
 /// <summary>Handles <see cref="GetHomes"/>.</summary>
 public static class GetHomesHandler
 {
-    /// <summary>Returns a paginated list of <see cref="HomeListItemView"/>.</summary>
-    public static async Task<PaginatedResponse<HomeListItemView>> Handle(
+    /// <summary>Returns a paginated list of homes, each labelled with its parcel's address.</summary>
+    public static async Task<PaginatedResponse<HomeListItem>> Handle(
         GetHomes request,
         IQuerySession session,
         CancellationToken cancellationToken)
@@ -46,9 +49,14 @@ public static class GetHomesHandler
             .ToPagedListAsync(request.Page.Number, request.Page.Size, cancellationToken)
             .ConfigureAwait(false);
 
-        return new PaginatedResponse<HomeListItemView>
+        var parcelIds = page.Select(h => h.LandParcelId).Distinct().ToList();
+        var parcels = await session.LoadManyAsync<LandParcelView>(cancellationToken, parcelIds).ConfigureAwait(false);
+        var addresses = parcels.ToDictionary(p => p.Id, p => p.Address);
+
+        return new PaginatedResponse<HomeListItem>
         {
-            Items = [.. page],
+            Items = [.. page.Select(h => new HomeListItem(
+                h, HomeLabel.Format(addresses.GetValueOrDefault(h.LandParcelId, string.Empty), h.UnitDesignation)))],
             TotalCount = (int)page.TotalItemCount,
             PageSize = (int)page.PageSize,
             PageNumber = (int)page.PageNumber,

@@ -80,6 +80,8 @@ export interface GetPurchaseWorkflowsRequest {
     groundLeaseTemplateId?: string | null;
     phase?: string | null;
     search?: string | null;
+    homeId?: string | null;
+    householdId?: string | null;
 }
 
 export interface InitiatePurchaseWorkflowOperationRequest {
@@ -172,6 +174,8 @@ export interface PurchaseWorkflowsApiInterface {
      * @param {string} [groundLeaseTemplateId] 
      * @param {string} [phase] 
      * @param {string} [search] 
+     * @param {string} [homeId] 
+     * @param {string} [householdId] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PurchaseWorkflowsApiInterface
@@ -438,6 +442,14 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
 
         if (requestParameters['search'] != null) {
             queryParameters['search'] = requestParameters['search'];
+        }
+
+        if (requestParameters['homeId'] != null) {
+            queryParameters['homeId'] = requestParameters['homeId'];
+        }
+
+        if (requestParameters['householdId'] != null) {
+            queryParameters['householdId'] = requestParameters['householdId'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

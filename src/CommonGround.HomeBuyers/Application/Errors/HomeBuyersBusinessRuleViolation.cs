@@ -86,6 +86,30 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class ReturnToWaitingList
+        {
+            public static BusinessRuleViolationException PhaseNotSelected(ApplicationPhase phase)
+                => new(
+                    "home_buyers.homeowner_application.return_to_waiting_list.phase_not_selected",
+                    new Dictionary<string, object?>
+                    {
+                        ["phase"] = phase.DisplayName,
+                        ["requiredPhase"] = ApplicationPhase.Selected.DisplayName,
+                    });
+        }
+
+        public static class RecordPurchaseClosed
+        {
+            public static BusinessRuleViolationException PhaseNotSelected(ApplicationPhase phase)
+                => new(
+                    "home_buyers.homeowner_application.record_purchase_closed.phase_not_selected",
+                    new Dictionary<string, object?>
+                    {
+                        ["phase"] = phase.DisplayName,
+                        ["requiredPhase"] = ApplicationPhase.Selected.DisplayName,
+                    });
+        }
+
         public static class Submit
         {
             public static BusinessRuleViolationException HouseholdHasOpenApplication(HomeownerApplicationId openApplicationId)
@@ -167,6 +191,18 @@ public static class BusinessRuleViolation
             public static BusinessRuleViolationException ReasonRequired()
                 => new(
                     "home_buyers.home_selection.cancel.reason_required");
+        }
+
+        public static class RecordPurchaseFellThrough
+        {
+            public static BusinessRuleViolationException NotCompleted(HomeSelectionStatus status)
+                => new(
+                    "home_buyers.home_selection.record_purchase_fell_through.not_completed",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                        ["requiredStatus"] = HomeSelectionStatus.Completed.DisplayName,
+                    });
         }
 
         public static class Modify

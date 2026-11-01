@@ -6,6 +6,7 @@ namespace CommonGround.PropertyRegistry.Domain.Homes.Events;
 public sealed record HomeRegistered(
     string AggregateId,
     string LandParcelId,
+    string? UnitDesignation,
     string UnitType,
     int Bedrooms,
     decimal Bathrooms,

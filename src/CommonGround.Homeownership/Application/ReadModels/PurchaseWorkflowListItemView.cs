@@ -9,6 +9,12 @@ public class PurchaseWorkflowListItemView
     /// <summary>Gets or sets the associated ground lease ID.</summary>
     public string GroundLeaseTemplateId { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the home being purchased.</summary>
+    public string HomeId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the buying household, when the purchase was started by selecting an applicant.</summary>
+    public string? HouseholdId { get; set; }
+
     /// <summary>Gets or sets the buyer's full name.</summary>
     public string BuyerFullName { get; set; } = string.Empty;
 
@@ -20,4 +26,10 @@ public class PurchaseWorkflowListItemView
 
     /// <summary>Gets or sets when the workflow was created.</summary>
     public DateTimeOffset CreatedAt { get; set; }
+
+    /// <summary>Gets or sets when the workflow last moved on, i.e. when it started waiting on its current step.</summary>
+    public DateTimeOffset StepEnteredAt { get; set; }
+
+    /// <summary>Gets or sets the scheduled closing date, once closing is scheduled.</summary>
+    public DateOnly? ScheduledClosingDate { get; set; }
 }

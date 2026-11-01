@@ -161,7 +161,7 @@ test('editing a document updates its details and tags, lists its versions, and l
   // Attached To links to the home.
   await detail.getByRole('button', { name: 'Open Home' }).click()
   await expect(page).toHaveURL(/\/homes$/)
-  await expect(panel(page, 'Single Family')).toBeVisible()
+  await expect(page.getByRole('dialog').filter({ hasText: 'Single Family · 3 bd' })).toBeVisible()
 })
 
 test('expired and soon-expiring documents are listed soonest first from the banner', async ({ page }) => {

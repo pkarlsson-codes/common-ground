@@ -27,6 +27,32 @@ export function usePurchaseWorkflows(pageNumber: number, groundLeaseTemplateId?:
   })
 }
 
+/** The purchases of a home, or of a household, newest first. */
+export function useConnectedPurchaseWorkflows(filter: { homeId?: string; householdId?: string }) {
+  return useQuery({
+    queryKey: ['purchase-workflows', 'connected', filter.homeId, filter.householdId],
+    queryFn: () => api.getPurchaseWorkflows({ pageNumber: 1, pageSize: 50, homeId: filter.homeId, householdId: filter.householdId }),
+    enabled: !!(filter.homeId || filter.householdId),
+  })
+}
+
+const TERMINAL_PHASES = ['Closed', 'Failed', 'Withdrawn']
+
+/** Whether a purchase in <paramref name="phase"/> is still under way. */
+export const isOpenPurchasePhase = (phase?: string | null) => !!phase && !TERMINAL_PHASES.includes(phase)
+
+/** The step an open purchase is waiting on, in the order the tracks are usually worked. */
+export function purchaseWaitingOn(workflow: PurchaseWorkflowResponse): string {
+  if (workflow.phase === 'Stalled') return 'resolving the stall'
+  if (!workflow.eligibilityDetails) return 'eligibility verification'
+  if (!workflow.financingDetails) return 'the financing commitment'
+  if (!workflow.inspectionResult) return 'the inspection'
+  if (!workflow.titleDetails) return 'title clearance'
+  if (!workflow.leaseExecutionDetails) return 'the lease signing'
+  if (!workflow.scheduledClosingDate) return 'scheduling the closing'
+  return 'the closing'
+}
+
 export function usePurchaseWorkflow(id: string | null) {
   return useQuery({
     queryKey: ['purchase-workflow', id],

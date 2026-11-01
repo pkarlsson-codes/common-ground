@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CommonGround.HomeBuyers.Contracts\CommonGround.HomeBuyers.Contracts.csproj" />
     <ProjectReference Include="..\CommonGround.PropertyRegistry.Contracts\CommonGround.PropertyRegistry.Contracts.csproj" />
+    <ProjectReference Include="..\CommonGround.Homeownership.Contracts\CommonGround.Homeownership.Contracts.csproj" />
     <ProjectReference Include="..\CommonGround.SharedKernel\CommonGround.SharedKernel.csproj" />
     <ProjectReference Include="..\CommonGround.TrustManagement\CommonGround.TrustManagement.csproj" />
   </ItemGroup>

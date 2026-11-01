@@ -9,8 +9,12 @@ using CommonGround.Identity.Infrastructure;
 using CommonGround.PropertyRegistry.Infrastructure;
 using CommonGround.Stewardship;
 using CommonGround.TrustManagement.Infrastructure;
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Events;
 using Serilog;
 using Wolverine;
+using Wolverine.ErrorHandling;
 using Wolverine.Http;
 using Wolverine.RabbitMQ;
 
@@ -38,6 +42,13 @@ try
     builder.Host.UseWolverine(opts =>
     {
         opts.Policies.AutoApplyTransactions();
+
+        // Two handlers appending to the same event stream at once (e.g. a home's selection opening and
+        // its household being chosen) lose the race with a version conflict. Re-running the handler reloads
+        // the aggregate, so the loser applies its change on top of the winner's.
+        opts.OnException<EventStreamUnexpectedMaxEventIdException>()
+            .Or<ConcurrencyException>()
+            .RetryWithCooldown(50.Milliseconds(), 100.Milliseconds(), 250.Milliseconds());
 
         if (useRabbitMq)
         {

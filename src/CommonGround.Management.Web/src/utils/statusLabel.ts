@@ -6,6 +6,8 @@ const STATUS_LABELS: Record<string, string> = {
   Transitioning: 'Transitioning',
   Decommissioned: 'Decommissioned',
   Occupied: 'Occupied',
+  InSelection: 'In Selection',
+  FellThrough: 'Fell Through',
   UnderDevelopment: 'Under Development',
   UnderRenovation: 'Under Renovation',
 }

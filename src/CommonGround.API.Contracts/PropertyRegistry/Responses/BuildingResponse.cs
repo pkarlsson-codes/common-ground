@@ -4,6 +4,8 @@ namespace CommonGround.API.Contracts.PropertyRegistry.Responses;
 public sealed record HomeResponse(
     string Id,
     string LandParcelId,
+    string Label,
+    string? UnitDesignation,
     string HomeType,
     int Bedrooms,
     decimal Bathrooms,
@@ -14,4 +16,8 @@ public sealed record HomeResponse(
     DateOnly? LastAssessedDate,
     string? ConditionNotes,
     string Status,
-    DateTimeOffset RegisteredAt);
+    DateTimeOffset RegisteredAt,
+    DateOnly? AvailableAgainDate,
+    DateOnly? SelectionOpenedDate,
+    DateOnly? UnderContractDate,
+    DateOnly? LeasedDate);

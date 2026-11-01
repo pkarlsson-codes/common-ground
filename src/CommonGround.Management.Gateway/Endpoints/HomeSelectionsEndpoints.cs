@@ -1,6 +1,7 @@
 using CommonGround.API.Clients;
 using CommonGround.API.Contracts.HomeBuyers.Requests;
 using CommonGround.API.Contracts.HomeBuyers.Responses;
+using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine.Http;
 
@@ -29,6 +30,17 @@ public static class HomeSelectionsEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
         var result = await client.GetHomeSelectionsForHomeAsync(homeId, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+
+    [WolverineGet("/api/v1/home-selections")]
+    [ProducesResponseType<PaginatedResponse<HomeSelectionListItemResponse>>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetHomeSelections(
+        [FromQuery] GetHomeSelectionsQuerySpec querySpec,
+        IHomeSelectionsApiClient client,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await client.GetHomeSelectionsAsync(querySpec, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
 

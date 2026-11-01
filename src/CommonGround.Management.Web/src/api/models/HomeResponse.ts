@@ -45,6 +45,18 @@ export interface HomeResponse {
      * @type {string}
      * @memberof HomeResponse
      */
+    label?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof HomeResponse
+     */
+    unitDesignation?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof HomeResponse
+     */
     homeType?: string;
     /**
      * 
@@ -106,6 +118,30 @@ export interface HomeResponse {
      * @memberof HomeResponse
      */
     registeredAt?: Date;
+    /**
+     * 
+     * @type {CalendarDate}
+     * @memberof HomeResponse
+     */
+    availableAgainDate?: CalendarDate | null;
+    /**
+     * 
+     * @type {CalendarDate}
+     * @memberof HomeResponse
+     */
+    selectionOpenedDate?: CalendarDate | null;
+    /**
+     * 
+     * @type {CalendarDate}
+     * @memberof HomeResponse
+     */
+    underContractDate?: CalendarDate | null;
+    /**
+     * 
+     * @type {CalendarDate}
+     * @memberof HomeResponse
+     */
+    leasedDate?: CalendarDate | null;
 }
 
 /**
@@ -127,6 +163,8 @@ export function HomeResponseFromJSONTyped(json: any, ignoreDiscriminator: boolea
         
         'id': json['id'] == null ? undefined : json['id'],
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
+        'label': json['label'] == null ? undefined : json['label'],
+        'unitDesignation': json['unitDesignation'] == null ? undefined : json['unitDesignation'],
         'homeType': json['homeType'] == null ? undefined : json['homeType'],
         'bedrooms': json['bedrooms'] == null ? undefined : json['bedrooms'],
         'bathrooms': json['bathrooms'] == null ? undefined : json['bathrooms'],
@@ -138,6 +176,10 @@ export function HomeResponseFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'conditionNotes': json['conditionNotes'] == null ? undefined : json['conditionNotes'],
         'status': json['status'] == null ? undefined : json['status'],
         'registeredAt': json['registeredAt'] == null ? undefined : (new Date(json['registeredAt'])),
+        'availableAgainDate': json['availableAgainDate'] == null ? undefined : CalendarDateFromJSON(json['availableAgainDate']),
+        'selectionOpenedDate': json['selectionOpenedDate'] == null ? undefined : CalendarDateFromJSON(json['selectionOpenedDate']),
+        'underContractDate': json['underContractDate'] == null ? undefined : CalendarDateFromJSON(json['underContractDate']),
+        'leasedDate': json['leasedDate'] == null ? undefined : CalendarDateFromJSON(json['leasedDate']),
     };
 }
 
@@ -154,6 +196,8 @@ export function HomeResponseToJSONTyped(value?: HomeResponse | null, ignoreDiscr
         
         'id': value['id'],
         'landParcelId': value['landParcelId'],
+        'label': value['label'],
+        'unitDesignation': value['unitDesignation'],
         'homeType': value['homeType'],
         'bedrooms': value['bedrooms'],
         'bathrooms': value['bathrooms'],
@@ -165,6 +209,10 @@ export function HomeResponseToJSONTyped(value?: HomeResponse | null, ignoreDiscr
         'conditionNotes': value['conditionNotes'],
         'status': value['status'],
         'registeredAt': value['registeredAt'] == null ? undefined : ((value['registeredAt']).toISOString()),
+        'availableAgainDate': CalendarDateToJSON(value['availableAgainDate']),
+        'selectionOpenedDate': CalendarDateToJSON(value['selectionOpenedDate']),
+        'underContractDate': CalendarDateToJSON(value['underContractDate']),
+        'leasedDate': CalendarDateToJSON(value['leasedDate']),
     };
 }
 

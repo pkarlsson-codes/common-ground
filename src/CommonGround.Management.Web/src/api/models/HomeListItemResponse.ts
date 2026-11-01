@@ -37,6 +37,18 @@ export interface HomeListItemResponse {
      * @type {string}
      * @memberof HomeListItemResponse
      */
+    label?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof HomeListItemResponse
+     */
+    unitDesignation?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof HomeListItemResponse
+     */
     homeType?: string;
     /**
      * 
@@ -89,6 +101,8 @@ export function HomeListItemResponseFromJSONTyped(json: any, ignoreDiscriminator
         
         'id': json['id'] == null ? undefined : json['id'],
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
+        'label': json['label'] == null ? undefined : json['label'],
+        'unitDesignation': json['unitDesignation'] == null ? undefined : json['unitDesignation'],
         'homeType': json['homeType'] == null ? undefined : json['homeType'],
         'bedrooms': json['bedrooms'] == null ? undefined : json['bedrooms'],
         'bathrooms': json['bathrooms'] == null ? undefined : json['bathrooms'],
@@ -111,6 +125,8 @@ export function HomeListItemResponseToJSONTyped(value?: HomeListItemResponse | n
         
         'id': value['id'],
         'landParcelId': value['landParcelId'],
+        'label': value['label'],
+        'unitDesignation': value['unitDesignation'],
         'homeType': value['homeType'],
         'bedrooms': value['bedrooms'],
         'bathrooms': value['bathrooms'],

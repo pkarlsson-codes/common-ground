@@ -20,6 +20,7 @@ import type {
   DrawSelectionLotteryRequest,
   HomeSelectionResponse,
   HomeSelectionSummaryResponse,
+  PaginatedResponseOfHomeSelectionListItemResponse,
   ProblemDetails,
   SelectHouseholdByPriorityRequest,
   StartHomeSelectionResponse,
@@ -33,6 +34,8 @@ import {
     HomeSelectionResponseToJSON,
     HomeSelectionSummaryResponseFromJSON,
     HomeSelectionSummaryResponseToJSON,
+    PaginatedResponseOfHomeSelectionListItemResponseFromJSON,
+    PaginatedResponseOfHomeSelectionListItemResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
     SelectHouseholdByPriorityRequestFromJSON,
@@ -53,6 +56,12 @@ export interface DrawSelectionLotteryOperationRequest {
 
 export interface GetHomeSelectionRequest {
     selectionId: string;
+}
+
+export interface GetHomeSelectionsRequest {
+    pageNumber?: number;
+    pageSize?: number;
+    status?: string | null;
 }
 
 export interface GetHomeSelectionsForHomeRequest {
@@ -115,6 +124,21 @@ export interface HomeSelectionsApiInterface {
     /**
      */
     getHomeSelection(requestParameters: GetHomeSelectionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HomeSelectionResponse>;
+
+    /**
+     * 
+     * @param {number} [pageNumber] 
+     * @param {number} [pageSize] 
+     * @param {string} [status] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof HomeSelectionsApiInterface
+     */
+    getHomeSelectionsRaw(requestParameters: GetHomeSelectionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfHomeSelectionListItemResponse>>;
+
+    /**
+     */
+    getHomeSelections(requestParameters: GetHomeSelectionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeSelectionListItemResponse>;
 
     /**
      * 
@@ -299,6 +323,45 @@ export class HomeSelectionsApi extends runtime.BaseAPI implements HomeSelections
      */
     async getHomeSelection(requestParameters: GetHomeSelectionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HomeSelectionResponse> {
         const response = await this.getHomeSelectionRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getHomeSelectionsRaw(requestParameters: GetHomeSelectionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfHomeSelectionListItemResponse>> {
+        const queryParameters: any = {};
+
+        if (requestParameters['pageNumber'] != null) {
+            queryParameters['pageNumber'] = requestParameters['pageNumber'];
+        }
+
+        if (requestParameters['pageSize'] != null) {
+            queryParameters['pageSize'] = requestParameters['pageSize'];
+        }
+
+        if (requestParameters['status'] != null) {
+            queryParameters['status'] = requestParameters['status'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/home-selections`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedResponseOfHomeSelectionListItemResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getHomeSelections(requestParameters: GetHomeSelectionsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfHomeSelectionListItemResponse> {
+        const response = await this.getHomeSelectionsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -15,6 +15,7 @@ internal sealed class HomeViewProjection : SingleStreamProjection<HomeView, stri
         {
             Id = e.Data.AggregateId,
             LandParcelId = e.Data.LandParcelId,
+            UnitDesignation = e.Data.UnitDesignation,
             UnitType = e.Data.UnitType,
             Bedrooms = e.Data.Bedrooms,
             Bathrooms = e.Data.Bathrooms,
@@ -35,9 +36,35 @@ internal sealed class HomeViewProjection : SingleStreamProjection<HomeView, stri
         view.ConditionNotes = e.ConditionNotes;
     }
 
-    /// <summary>Applies an under-contract status change.</summary>
+    public static void Apply(HomeView view, HomeSelectionOpened e)
+    {
+        view.Status = HomeStatus.InSelection.DisplayName;
+        view.SelectionOpenedDate = e.OpenedDate;
+    }
+
+    public static void Apply(HomeView view, HomeSelectionClosedWithoutSale e)
+    {
+        view.Status = HomeStatus.Available.DisplayName;
+        view.SelectionOpenedDate = null;
+    }
+
     public static void Apply(HomeView view, HomeUnderContract e)
     {
         view.Status = HomeStatus.UnderContract.DisplayName;
+        view.UnderContractDate = e.ContractDate;
+    }
+
+    public static void Apply(HomeView view, HomeContractReleased e)
+    {
+        view.Status = HomeStatus.Available.DisplayName;
+        view.AvailableAgainDate = e.ReleasedDate;
+        view.SelectionOpenedDate = null;
+        view.UnderContractDate = null;
+    }
+
+    public static void Apply(HomeView view, HomeLeased e)
+    {
+        view.Status = HomeStatus.Leased.DisplayName;
+        view.LeasedDate = e.LeasedDate;
     }
 }

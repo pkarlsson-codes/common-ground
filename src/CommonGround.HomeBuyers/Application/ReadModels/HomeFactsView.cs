@@ -14,6 +14,9 @@ public class HomeFactsView
     /// <summary>Gets or sets the land parcel ID the home sits on.</summary>
     public string LandParcelId { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the label staff know the home by (its parcel address plus any unit designation).</summary>
+    public string Label { get; set; } = string.Empty;
+
     /// <summary>Gets or sets the number of bedrooms.</summary>
     public int Bedrooms { get; set; }
 

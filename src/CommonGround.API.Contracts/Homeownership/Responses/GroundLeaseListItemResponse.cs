@@ -11,4 +11,5 @@ public sealed record GroundLeaseListItemResponse(
     string FormulaKind,
     string? HomeownerFullName,
     string? HomeownerEmail,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    string? PurchaseWorkflowId);

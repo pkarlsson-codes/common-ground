@@ -29,7 +29,7 @@ export const HOME_TYPE_LABELS: Record<string, string> = {
   Duplex: 'Duplex',
   Townhouse: 'Townhouse',
 }
-export const HOME_STATUSES = ['Available', 'PendingOccupancy', 'Occupied', 'Resale'] as const
+export const HOME_STATUSES = ['Available', 'InSelection', 'UnderContract', 'Leased', 'Resale'] as const
 export const DEVELOPMENT_PROJECT_STATUSES = ['Initiated', 'Active', 'Completed', 'Abandoned'] as const
 export const PROJECT_TYPE_LABELS: Record<string, string> = {
   NewConstruction: 'New Construction',

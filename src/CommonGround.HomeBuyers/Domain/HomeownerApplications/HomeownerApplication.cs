@@ -141,6 +141,32 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
         ApplyChange(new ApplicationPassedOver(Id.Value, HouseholdId.Value, selectionId.Value, homeId));
     }
 
+    /// <summary>
+    /// Returns the application to the waiting list after the purchase of <paramref name="homeId"/> it was
+    /// selected for fell through. It keeps its original approval date, so the household keeps its place.
+    /// </summary>
+    public void ReturnToWaitingList(string homeId, string reason, DateOnly returnedDate)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+
+        if (Phase != ApplicationPhase.Selected)
+            throw BusinessRuleViolation.HomeownerApplication.ReturnToWaitingList.PhaseNotSelected(Phase);
+
+        ApplyChange(new ApplicationReturnedToWaitingList(Id.Value, HouseholdId.Value, homeId, reason, returnedDate));
+    }
+
+    /// <summary>Records that the purchase of <paramref name="homeId"/> the application was selected for has closed.</summary>
+    public void RecordPurchaseClosed(string homeId, DateOnly closingDate)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+
+        if (Phase != ApplicationPhase.Selected)
+            throw BusinessRuleViolation.HomeownerApplication.RecordPurchaseClosed.PhaseNotSelected(Phase);
+
+        ApplyChange(new ApplicationPurchaseClosed(Id.Value, HouseholdId.Value, homeId, closingDate));
+    }
+
     public void DenyApplication(string reason, DateOnly deniedDate, UserId recordedBy)
     {
         ArgumentNullException.ThrowIfNull(recordedBy);
@@ -165,6 +191,8 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
             case ApplicationApproved e: Apply(e); break;
             case ApplicationSelectedForHome e: Apply(e); break;
             case ApplicationPassedOver: break;
+            case ApplicationReturnedToWaitingList e: Apply(e); break;
+            case ApplicationPurchaseClosed e: Apply(e); break;
             case ApplicationDenied e: Apply(e); break;
             case ApplicationWithdrawn e: Apply(e); break;
             default: throw new InvalidOperationException(
@@ -192,6 +220,16 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
         Phase = ApplicationPhase.Approved;
     }
     
+    private void Apply(ApplicationReturnedToWaitingList _)
+    {
+        Phase = ApplicationPhase.Approved;
+    }
+
+    private void Apply(ApplicationPurchaseClosed _)
+    {
+        Phase = ApplicationPhase.Purchased;
+    }
+
     private void Apply(ApplicationDenied e)
     {
         DenialReason = e.Reason;

@@ -3,11 +3,10 @@ import { useHome, useHomeAssessments, useRecordHomeAssessment } from '../../hook
 import { HOME_TYPE_LABELS, type RecordHomeAssessmentRequest } from '../../hooks/types'
 import SlideOver from '../../components/SlideOver'
 import StatusBadge from '../../components/StatusBadge'
-import NavIdLink from '../../components/NavIdLink'
 import DocumentList from '../../components/DocumentList'
 import { useToast } from '../../hooks/useToast'
 import DevelopmentProjectsSection from '../land-parcels/DevelopmentProjectsSection'
-import HomeSelectionSection from '../home-selections/HomeSelectionSection'
+import { HomeConnectedRecords, HomeLifecycle } from './HomeLifecycle'
 import { trustToday } from '../../lib/calendarDate'
 import { DateInput } from '../../components/DateInput'
 
@@ -71,12 +70,20 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
 
   return (
     <SlideOver
-      title={detail ? (HOME_TYPE_LABELS[detail.homeType ?? ''] ?? detail.homeType ?? '…') : '…'}
-      subtitle={detail ? `${detail.bedrooms} bd · ${Number(detail.bathrooms).toFixed(1)} ba · ${fmtNumber(Number(detail.squareFootage))} sq ft` : undefined}
+      title={detail ? (detail.label || HOME_TYPE_LABELS[detail.homeType ?? ''] || '…') : '…'}
+      subtitle={detail ? `${HOME_TYPE_LABELS[detail.homeType ?? ''] ?? detail.homeType} · ${detail.bedrooms} bd · ${Number(detail.bathrooms).toFixed(1)} ba · ${fmtNumber(Number(detail.squareFootage))} sq ft` : undefined}
       onClose={onClose}
     >
       {detailLoading || !detail ? <SkeletonRows /> : (
         <>
+          <HomeLifecycle
+            home={detail}
+            moreActions={[
+              { label: 'Add New Assessment', onClick: () => { setActiveTab('details'); setShowAssessmentForm(true) } },
+              { label: 'Upload Document', onClick: () => setActiveTab('documents') },
+            ]}
+          />
+
           <div style={{
             display: 'flex',
             gap: 4,
@@ -140,11 +147,6 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
                   </div>
                 )}
                 <div className="detail-field full-span">
-                  <div className="detail-field__value">
-                    <NavIdLink id={detail.landParcelId ?? ''} to="/land-parcels" label="Open Land Parcel" />
-                  </div>
-                </div>
-                <div className="detail-field full-span">
                   <div className="detail-field__label">Registered At</div>
                   <div className="detail-field__value mono">
                     {new Date(detail.registeredAt).toLocaleString()}
@@ -152,7 +154,7 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
                 </div>
               </div>
 
-              <HomeSelectionSection homeId={homeId} homeStatus={detail.status ?? ''} />
+              <HomeConnectedRecords home={detail} />
 
               {detail.landParcelId && (
                 <DevelopmentProjectsSection

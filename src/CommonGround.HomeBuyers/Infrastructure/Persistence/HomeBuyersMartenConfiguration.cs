@@ -39,7 +39,8 @@ public static class HomeBuyersMartenConfiguration
             {
                 index.IsUnique = true;
                 index.TenancyScope = TenancyScope.PerTenant;
-                index.Predicate = $"data ->> 'Status' <> '{HomeSelectionStatus.Cancelled.DisplayName}'";
+                index.Predicate =
+                    $"data ->> 'Status' in ('{HomeSelectionStatus.Open.DisplayName}', '{HomeSelectionStatus.Completed.DisplayName}')";
             });
         options.Schema.For<HouseholdView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<HouseholdListItemView>().DatabaseSchemaName(SchemaName);

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useHomes } from '../../hooks/homes'
 import type { HomeListItemResponse } from '../../api'
 import { HOME_TYPE_LABELS } from '../../hooks/types'
@@ -12,6 +13,7 @@ interface Props {
 export default function HomesSection({ parcelId }: Props) {
   const [expanded, setExpanded] = useState(true)
   const [showRegister, setShowRegister] = useState(false)
+  const navigate = useNavigate()
   const { data, isLoading } = useHomes({ pageNumber: 1, pageSize: 50, landParcelId: parcelId })
   const homes = data?.items ?? []
 
@@ -47,9 +49,17 @@ export default function HomesSection({ parcelId }: Props) {
               <div className="detail-field__value">No homes registered on this parcel.</div>
             )}
             {!isLoading && homes.map((h: HomeListItemResponse) => (
-              <div
+              <button
+                type="button"
                 key={h.id}
+                aria-label={`Open Home: ${h.label}`}
+                onClick={() => navigate('/homes', { state: { openId: h.id } })}
                 style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  font: 'inherit',
+                  color: 'inherit',
+                  cursor: 'pointer',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto auto',
                   gap: 10,
@@ -61,12 +71,14 @@ export default function HomesSection({ parcelId }: Props) {
                 }}
               >
                 <span style={{ fontSize: 13 }}>
+                  {h.label}
+                  {' · '}
                   {HOME_TYPE_LABELS[h.homeType ?? ''] ?? h.homeType}
                   {' · '}
                   <span className="cell-mono">{h.bedrooms} bd / {Number(h.bathrooms).toFixed(1)} ba</span>
                 </span>
                 <StatusBadge status={h.status ?? ''} />
-              </div>
+              </button>
             ))}
           </div>
         )}

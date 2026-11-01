@@ -23,4 +23,16 @@ public class HomeownerApplicationListItemView
 
     /// <summary>Gets or sets the approval date; the household has been on the waiting list since then.</summary>
     public DateOnly? ApprovedDate { get; set; }
+
+    /// <summary>Gets or sets the home the application is selected for, while it is selected or once purchased.</summary>
+    public string? SelectedHomeId { get; set; }
+
+    /// <summary>Gets or sets the date the application was selected for its home, while it is selected or once purchased.</summary>
+    public DateOnly? SelectedDate { get; set; }
+
+    /// <summary>Gets or sets the closing date of the purchase, once purchased.</summary>
+    public DateOnly? PurchasedDate { get; set; }
+
+    /// <summary>Gets or sets the date the application last closed (denied or withdrawn), if it has.</summary>
+    public DateOnly? ClosedDate { get; set; }
 }

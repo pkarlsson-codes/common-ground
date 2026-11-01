@@ -31,13 +31,31 @@ public static class StartHomeSelectionHandler
     {
         ArgumentNullException.ThrowIfNull(command);
 
+        var selection = await StartAsync(session, command.HomeId, command.StartedBy, endedSelectionId: null, cancellationToken)
+            .ConfigureAwait(false);
+
+        return selection.Id;
+    }
+
+    /// <summary>
+    /// Starts a selection for <paramref name="homeId"/> from the approved applications as of the last save.
+    /// <paramref name="endedSelectionId"/> names a selection ended in this session but not yet saved, so it
+    /// no longer counts as the home's active selection.
+    /// </summary>
+    internal static async Task<HomeSelection> StartAsync(
+        IDocumentSession session,
+        string homeId,
+        UserId startedBy,
+        string? endedSelectionId,
+        CancellationToken cancellationToken)
+    {
         _ = await session
-            .LoadAsync<HomeFactsView>(command.HomeId, cancellationToken)
+            .LoadAsync<HomeFactsView>(homeId, cancellationToken)
             .ConfigureAwait(false)
-            ?? throw new AggregateNotFoundException(command.HomeId);
+            ?? throw new AggregateNotFoundException(homeId);
 
         var activeSelectionId = await session.Query<HomeSelectionView>()
-            .Where(v => v.HomeId == command.HomeId && ActiveStatuses.Contains(v.Status))
+            .Where(v => v.HomeId == homeId && ActiveStatuses.Contains(v.Status) && v.Id != endedSelectionId)
             .Select(v => v.Id)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -60,13 +78,13 @@ public static class StartHomeSelectionHandler
             .ToList();
 
         var selection = HomeSelection.Start(
-            command.HomeId,
+            homeId,
             candidates,
             activeSelectionId is null ? null : HomeSelectionId.Create(activeSelectionId),
-            command.StartedBy);
+            startedBy);
 
         session.CreateAggregate<HomeSelection, HomeSelectionId>(selection);
 
-        return selection.Id;
+        return selection;
     }
 }

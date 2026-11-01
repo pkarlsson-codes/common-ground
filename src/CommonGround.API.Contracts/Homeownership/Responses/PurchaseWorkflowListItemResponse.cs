@@ -4,7 +4,12 @@ namespace CommonGround.API.Contracts.Homeownership.Responses;
 public sealed record PurchaseWorkflowListItemResponse(
     string Id,
     string GroundLeaseTemplateId,
+    string HomeId,
+    string? HomeLabel,
+    string? HouseholdId,
     string BuyerFullName,
     decimal PurchasePrice,
     string Phase,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    DateTimeOffset StepEnteredAt,
+    DateOnly? ScheduledClosingDate);

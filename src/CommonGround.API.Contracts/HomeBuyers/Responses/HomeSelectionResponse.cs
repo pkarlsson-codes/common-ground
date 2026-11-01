@@ -8,6 +8,7 @@ namespace CommonGround.API.Contracts.HomeBuyers.Responses;
 public sealed record HomeSelectionResponse(
     string Id,
     string HomeId,
+    string? HomeLabel,
     int? HomeBedrooms,
     bool? HomeIsAccessible,
     string Status,
@@ -23,7 +24,9 @@ public sealed record HomeSelectionResponse(
     IReadOnlyList<string> LotteryIneligibleApplicationIds,
     string? CancellationReason,
     string? ClosedBy,
-    DateTimeOffset? ClosedAt);
+    DateTimeOffset? ClosedAt,
+    string? FellThroughReason,
+    DateOnly? FellThroughDate);
 
 /// <summary>
 /// A candidate's priority facts as they stood when the selection started, with its household's

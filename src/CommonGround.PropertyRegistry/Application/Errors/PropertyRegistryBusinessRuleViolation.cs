@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.PropertyRegistry.Domain.Homes;
 
 namespace CommonGround.PropertyRegistry.Application.Errors;
 
@@ -84,6 +85,50 @@ public static class BusinessRuleViolation
             public static BusinessRuleViolationException HomeNotAvailable()
                 => new(
                     "property_registry.home.mark_under_contract.home_not_available");
+        }
+
+        public static class OpenSelection
+        {
+            public static BusinessRuleViolationException HomeNotAvailable(HomeStatus status)
+                => new(
+                    "property_registry.home.open_selection.home_not_available",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+        }
+
+        public static class CloseSelectionWithoutSale
+        {
+            public static BusinessRuleViolationException HomeNotInSelection(HomeStatus status)
+                => new(
+                    "property_registry.home.close_selection_without_sale.home_not_in_selection",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+        }
+
+        public static class ReleaseContract
+        {
+            public static BusinessRuleViolationException HomeNotUnderContract(HomeStatus status)
+                => new(
+                    "property_registry.home.release_contract.home_not_under_contract",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+        }
+
+        public static class MarkLeased
+        {
+            public static BusinessRuleViolationException HomeAlreadyLeased(HomeStatus status)
+                => new(
+                    "property_registry.home.mark_leased.home_already_leased",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
         }
 
         public static class RecordAssessment

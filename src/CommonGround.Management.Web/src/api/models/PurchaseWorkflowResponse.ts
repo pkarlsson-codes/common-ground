@@ -92,6 +92,12 @@ export interface PurchaseWorkflowResponse {
      * @type {string}
      * @memberof PurchaseWorkflowResponse
      */
+    homeLabel?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseWorkflowResponse
+     */
     applicationId?: string | null;
     /**
      * 
@@ -242,6 +248,7 @@ export function PurchaseWorkflowResponseFromJSONTyped(json: any, ignoreDiscrimin
         'groundLeaseTemplateId': json['groundLeaseTemplateId'] == null ? undefined : json['groundLeaseTemplateId'],
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
         'homeId': json['homeId'] == null ? undefined : json['homeId'],
+        'homeLabel': json['homeLabel'] == null ? undefined : json['homeLabel'],
         'applicationId': json['applicationId'] == null ? undefined : json['applicationId'],
         'householdId': json['householdId'] == null ? undefined : json['householdId'],
         'phase': json['phase'] == null ? undefined : json['phase'],
@@ -282,6 +289,7 @@ export function PurchaseWorkflowResponseToJSONTyped(value?: PurchaseWorkflowResp
         'groundLeaseTemplateId': value['groundLeaseTemplateId'],
         'landParcelId': value['landParcelId'],
         'homeId': value['homeId'],
+        'homeLabel': value['homeLabel'],
         'applicationId': value['applicationId'],
         'householdId': value['householdId'],
         'phase': value['phase'],
