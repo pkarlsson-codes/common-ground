@@ -1,17 +1,18 @@
 using CommonGround.PropertyRegistry.Domain.DevelopmentProjects;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
 
 /// <summary>Initiates a new development project for a land parcel.</summary>
+/// <param name="DevelopmentProjectId">The new project's ID, chosen by the caller.</param>
 /// <param name="LandParcelId">The parcel to associate the project with.</param>
 /// <param name="Name">The name of the development project.</param>
 /// <param name="Description">A description of the development project.</param>
 /// <param name="InitiatedBy">The staff user initiating the project.</param>
 public sealed record InitiateNewConstructionProject(
+    DevelopmentProjectId DevelopmentProjectId,
     LandParcelId LandParcelId,
     string Name,
     string? Description,
@@ -20,21 +21,18 @@ public sealed record InitiateNewConstructionProject(
 /// <summary>Handles <see cref="InitiateNewConstructionProject"/> by creating and persisting a new DevelopmentProject.</summary>
 public static class InitiateNewConstructionProjectHandler
 {
-    /// <summary>Creates a new DevelopmentProject, persists it, and returns its ID.</summary>
-    public static DevelopmentProjectId Handle(
-        InitiateNewConstructionProject command,
-        IDocumentSession session)
+    /// <summary>Starts the new project's stream.</summary>
+    public static IStartStream Handle(InitiateNewConstructionProject command)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var project = DevelopmentProject.InitiateNewConstruction(
+        var projectStarted = DevelopmentProject.InitiateNewConstruction(
+            command.DevelopmentProjectId,
             command.LandParcelId,
             command.Name,
             command.Description,
             command.InitiatedBy);
 
-        session.CreateAggregate<DevelopmentProject, DevelopmentProjectId>(project);
-
-        return project.Id;
+        return MartenOps.StartStream<DevelopmentProject>(command.DevelopmentProjectId.Value, projectStarted);
     }
 }

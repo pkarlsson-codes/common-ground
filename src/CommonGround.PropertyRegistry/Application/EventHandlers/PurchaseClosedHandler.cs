@@ -1,6 +1,8 @@
 using CommonGround.Homeownership.Contracts.Events;
 using CommonGround.PropertyRegistry.Domain.Homes;
+using CommonGround.PropertyRegistry.Domain.Homes.Events;
 using CommonGround.SharedKernel.Extensions;
+using JasperFx.Events;
 using Marten;
 
 namespace CommonGround.PropertyRegistry.Application.EventHandlers;
@@ -8,16 +10,24 @@ namespace CommonGround.PropertyRegistry.Application.EventHandlers;
 /// <summary>Marks a home leased when its purchase closes.</summary>
 public static class PurchaseClosedHandler
 {
-    /// <summary>Marks the home leased from the closing date.</summary>
-    public static async Task Handle(
-        PurchaseClosed @event,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    /// <summary>Fetches the home's stream for writing.</summary>
+    public static Task<IEventStream<Home>> LoadAsync(PurchaseClosed @event, IDocumentSession session, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(@event);
+        ArgumentNullException.ThrowIfNull(session);
 
-        var home = await session.LoadAggregateAsync<Home>(HomeId.Create(@event.HomeId), cancellationToken).ConfigureAwait(false);
-        home.MarkLeased(@event.ClosingDate);
-        session.UpdateAggregate(home);
+        return session.Events.FetchForWriting<Home>(@event.HomeId, cancellationToken);
+    }
+
+    /// <summary>Marks the home leased from the closing date.</summary>
+    public static void Handle(PurchaseClosed @event, IEventStream<Home> stream)
+    {
+        ArgumentNullException.ThrowIfNull(@event);
+        ArgumentNullException.ThrowIfNull(stream);
+
+        stream.Decide(home =>
+        {
+            return home.MarkLeased(@event.ClosingDate);
+        });
     }
 }

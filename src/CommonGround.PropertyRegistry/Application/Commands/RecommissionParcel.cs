@@ -1,7 +1,7 @@
 using CommonGround.PropertyRegistry.Domain.LandParcels;
+using CommonGround.PropertyRegistry.Domain.LandParcels.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
 
@@ -12,19 +12,11 @@ public sealed record RecommissionParcel(LandParcelId LandParcelId, UserId Change
 public static class RecommissionParcelHandler
 {
     /// <summary>Loads the parcel, recommissions it, and persists.</summary>
-    public static async Task Handle(
-        RecommissionParcel command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static ParcelRecommissioned? Handle(RecommissionParcel command, [WriteAggregate] LandParcel parcel)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(parcel);
 
-        var parcel = await session
-            .LoadAggregateAsync<LandParcel>(command.LandParcelId, cancellationToken)
-            .ConfigureAwait(false);
-
-        parcel.Recommission(command.ChangedBy);
-
-        session.UpdateAggregate(parcel);
+        return parcel.Recommission(command.ChangedBy);
     }
 }

@@ -15,9 +15,8 @@ public sealed class Home : AggregateRoot<HomeId>
 {
     private readonly List<UnitAssessment> _assessments = [];
 
-#pragma warning disable CS8618
-    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
-    public Home() { }
+#pragma warning disable CS8618 // State is set by Create from the stream's first event.
+    private Home() { }
 #pragma warning restore CS8618
 
     /// <summary>Gets the ID of the land parcel this unit sits on.</summary>
@@ -54,7 +53,8 @@ public sealed class Home : AggregateRoot<HomeId>
     public IReadOnlyList<UnitAssessment> Assessments => _assessments;
 
     /// <summary>Registers a new home on a CLT land parcel.</summary>
-    public static Home Register(
+    public static HomeRegistered Register(
+        HomeId id,
         LandParcels.LandParcelId landParcelId,
         string? unitDesignation,
         HomeType unitType,
@@ -84,10 +84,8 @@ public sealed class Home : AggregateRoot<HomeId>
         if (yearBuilt < minYear || yearBuilt > maxYear)
             throw BusinessRuleViolation.Home.Register.YearBuiltOutOfRange(yearBuilt, minYear, maxYear);
 
-        var home = new Home();
-
-        home.ApplyChange(new HomeRegistered(
-            HomeId.Generate().Value,
+        return new HomeRegistered(
+            id.Value,
             landParcelId.Value,
             string.IsNullOrWhiteSpace(unitDesignation) ? null : unitDesignation.Trim(),
             unitType.DisplayName,
@@ -99,9 +97,7 @@ public sealed class Home : AggregateRoot<HomeId>
             initialAssessment.AssessedValue,
             initialAssessment.AssessedAt,
             initialAssessment.AppraiserName,
-            registeredBy.Value));
-
-        return home;
+            registeredBy.Value);
     }
 
     /// <summary>
@@ -109,89 +105,84 @@ public sealed class Home : AggregateRoot<HomeId>
     /// contract only gets a new selection once its purchase has fallen through, and news of that may
     /// arrive after the selection's, so the contract is released here first.
     /// </summary>
-    public void OpenSelection(string homeSelectionId, DateOnly openedDate)
+    /// <returns>The opening, preceded by the contract's release when the home is still under contract.</returns>
+    public IReadOnlyList<IDomainEvent> OpenSelection(string homeSelectionId, DateOnly openedDate)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeSelectionId);
 
+        var opened = new HomeSelectionOpened(Id.Value, homeSelectionId, openedDate);
+
+        // Releasing the contract makes the home available, so the selection can open straight after.
         if (Status == HomeStatus.UnderContract)
-            ReleaseContract(openedDate);
+            return [ReleaseContract(openedDate), opened];
 
         if (Status != HomeStatus.Available)
             throw BusinessRuleViolation.Home.OpenSelection.HomeNotAvailable(Status);
 
-        ApplyChange(new HomeSelectionOpened(Id.Value, homeSelectionId, openedDate));
+        return [opened];
     }
 
     /// <summary>Records that the home's selection was cancelled without choosing anyone, making the home available again.</summary>
-    public void CloseSelectionWithoutSale(string homeSelectionId)
+    public HomeSelectionClosedWithoutSale CloseSelectionWithoutSale(string homeSelectionId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeSelectionId);
 
         if (Status != HomeStatus.InSelection)
             throw BusinessRuleViolation.Home.CloseSelectionWithoutSale.HomeNotInSelection(Status);
 
-        ApplyChange(new HomeSelectionClosedWithoutSale(Id.Value, homeSelectionId));
+        return new HomeSelectionClosedWithoutSale(Id.Value, homeSelectionId);
     }
 
     /// <summary>Marks the home under contract to the household selected for it.</summary>
-    public void MarkUnderContract(DateOnly contractDate)
+    public HomeUnderContract MarkUnderContract(DateOnly contractDate)
     {
         if (Status != HomeStatus.Available && Status != HomeStatus.InSelection)
             throw BusinessRuleViolation.Home.MarkUnderContract.HomeNotAvailable();
 
-        ApplyChange(new HomeUnderContract(Id.Value, contractDate));
+        return new HomeUnderContract(Id.Value, contractDate);
     }
 
     /// <summary>Makes the home available again after its purchase failed or was withdrawn.</summary>
-    public void ReleaseContract(DateOnly releasedDate)
+    public HomeContractReleased ReleaseContract(DateOnly releasedDate)
     {
         if (Status != HomeStatus.UnderContract)
             throw BusinessRuleViolation.Home.ReleaseContract.HomeNotUnderContract(Status);
 
-        ApplyChange(new HomeContractReleased(Id.Value, releasedDate));
+        return new HomeContractReleased(Id.Value, releasedDate);
     }
 
     /// <summary>
     /// Marks the home leased once its purchase closes. A purchase started directly, rather than
     /// from a home selection, closes without the home ever having been under contract.
     /// </summary>
-    public void MarkLeased(DateOnly leasedDate)
+    public HomeLeased MarkLeased(DateOnly leasedDate)
     {
         if (Status == HomeStatus.Leased || Status == HomeStatus.Resale)
             throw BusinessRuleViolation.Home.MarkLeased.HomeAlreadyLeased(Status);
 
-        ApplyChange(new HomeLeased(Id.Value, leasedDate));
+        return new HomeLeased(Id.Value, leasedDate);
     }
 
     /// <summary>Records a new assessed value for this unit.</summary>
-    public void RecordAssessment(decimal assessedValue, DateOnly assessmentDate, string? appraiserName, string? conditionNotes, UserId recordedById)
+    public HomeAssessed RecordAssessment(decimal assessedValue, DateOnly assessmentDate, string? appraiserName, string? conditionNotes, UserId recordedById)
     {
-
         if (assessedValue < 0)
             throw BusinessRuleViolation.Home.RecordAssessment.AssessedValueNegative(assessedValue);
 
-        ApplyChange(new HomeAssessed(Id.Value, assessedValue, assessmentDate, appraiserName, conditionNotes, recordedById.Value));
+        return new HomeAssessed(Id.Value, assessedValue, assessmentDate, appraiserName, conditionNotes, recordedById.Value);
     }
 
-    /// <inheritdoc/>
-    protected override void ApplyEvent(IDomainEvent domainEvent)
+    /// <summary>Starts a home from its first event.</summary>
+    public static Home Create(HomeRegistered e)
     {
-        switch (domainEvent)
-        {
-            case HomeRegistered e: Apply(e); break;
-            case HomeAssessed e: Apply(e); break;
-            case HomeSelectionOpened e: Apply(e); break;
-            case HomeSelectionClosedWithoutSale e: Apply(e); break;
-            case HomeUnderContract e: Apply(e); break;
-            case HomeContractReleased e: Apply(e); break;
-            case HomeLeased e: Apply(e); break;
-            default: throw new InvalidOperationException($"Unknown event: {domainEvent?.GetType().Name}");
-        }
+        ArgumentNullException.ThrowIfNull(e);
+
+        var home = new Home();
+        home.Apply(e);
+        return home;
     }
 
-    /// <summary>Applies <see cref="HomeRegistered"/>.</summary>
-
-    public void Apply(HomeRegistered e)
+    private void Apply(HomeRegistered e)
     {
         Id = HomeId.Create(e.AggregateId);
         LandParcelId = LandParcels.LandParcelId.Create(e.LandParcelId);
@@ -214,29 +205,23 @@ public sealed class Home : AggregateRoot<HomeId>
     }
 
     /// <summary>Applies <see cref="HomeAssessed"/>.</summary>
-
     public void Apply(HomeAssessed e)
     {
         _assessments.Add(UnitAssessment.Reconstitute(e.AssessedValue, e.AssessmentDate, e.AppraiserName, e.ConditionNotes, UserId.Create(e.RecordedById), e.OccurredAt));
     }
 
     /// <summary>Applies <see cref="HomeSelectionOpened"/>.</summary>
-
     public void Apply(HomeSelectionOpened _) => Status = HomeStatus.InSelection;
 
     /// <summary>Applies <see cref="HomeSelectionClosedWithoutSale"/>.</summary>
-
     public void Apply(HomeSelectionClosedWithoutSale _) => Status = HomeStatus.Available;
 
     /// <summary>Applies <see cref="HomeUnderContract"/>.</summary>
-
     public void Apply(HomeUnderContract _) => Status = HomeStatus.UnderContract;
 
     /// <summary>Applies <see cref="HomeContractReleased"/>.</summary>
-
     public void Apply(HomeContractReleased _) => Status = HomeStatus.Available;
 
     /// <summary>Applies <see cref="HomeLeased"/>.</summary>
-
     public void Apply(HomeLeased _) => Status = HomeStatus.Leased;
 }

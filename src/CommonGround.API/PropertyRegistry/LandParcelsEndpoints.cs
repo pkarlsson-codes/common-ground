@@ -26,7 +26,10 @@ public static class LandParcelsEndpoints
         var userId = httpContext.GetUserId();
         var acquisitionMethod = AcquisitionMethod.FromDisplayName(request.AcquisitionMethod);
 
+        var id = LandParcelId.Generate();
+
         var command = new RegisterLandParcel(
+            id,
             request.LegalParcelNumber,
             request.Address,
             request.AreaAcres,
@@ -35,7 +38,7 @@ public static class LandParcelsEndpoints
             request.CovenantTerms,
             userId);
 
-        var id = await bus.InvokeForTenantAsync<LandParcelId>(bus.TenantId!, command, cancellationToken);
+        await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);
 
         return Results.Created($"/api/land-parcels/{id.Value}", new RegisterLandParcelResponse(id.Value));
     }

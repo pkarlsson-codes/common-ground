@@ -1,11 +1,11 @@
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
 
 /// <summary>Registers a new land parcel in the CLT portfolio.</summary>
+/// <param name="LandParcelId">The new parcel's ID, chosen by the caller.</param>
 /// <param name="LegalParcelNumber">The legal parcel identifier (APN or description).</param>
 /// <param name="Address">The street address of the parcel.</param>
 /// <param name="AreaAcres">The area of the parcel in acres.</param>
@@ -14,6 +14,7 @@ namespace CommonGround.PropertyRegistry.Application.Commands;
 /// <param name="CovenantTerms">Optional free-text affordability covenant description.</param>
 /// <param name="RegisteredBy">The staff user registering the parcel.</param>
 public sealed record RegisterLandParcel(
+    LandParcelId LandParcelId,
     string LegalParcelNumber,
     string Address,
     decimal AreaAcres,
@@ -25,14 +26,13 @@ public sealed record RegisterLandParcel(
 /// <summary>Handles <see cref="RegisterLandParcel"/> by creating and persisting a new LandParcel.</summary>
 public static class RegisterLandParcelHandler
 {
-    /// <summary>Creates a new LandParcel and returns its ID.</summary>
-    public static LandParcelId Handle(
-        RegisterLandParcel command,
-        IDocumentSession session)
+    /// <summary>Starts the new parcel's stream.</summary>
+    public static IStartStream Handle(RegisterLandParcel command)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var parcel = LandParcel.Register(
+        var parcelStarted = LandParcel.Register(
+            command.LandParcelId,
             command.LegalParcelNumber,
             command.Address,
             command.AreaAcres,
@@ -41,8 +41,6 @@ public static class RegisterLandParcelHandler
             command.CovenantTerms,
             command.RegisteredBy);
 
-        session.CreateAggregate<LandParcel, LandParcelId>(parcel);
-
-        return parcel.Id;
+        return MartenOps.StartStream<LandParcel>(command.LandParcelId.Value, parcelStarted);
     }
 }

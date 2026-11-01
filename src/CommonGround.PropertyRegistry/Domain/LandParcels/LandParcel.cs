@@ -11,9 +11,8 @@ namespace CommonGround.PropertyRegistry.Domain.LandParcels;
 /// </summary>
 public sealed class LandParcel : AggregateRoot<LandParcelId>
 {
-#pragma warning disable CS8618
-    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
-    public LandParcel() { }
+#pragma warning disable CS8618 // State is set by Create from the stream's first event.
+    private LandParcel() { }
 #pragma warning restore CS8618
 
     /// <summary>Gets the legal parcel number (APN or legal description).</summary>
@@ -41,7 +40,8 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
     public bool IsDecommissioned { get; private set; }
 
     /// <summary>Registers a new land parcel in the CLT portfolio.</summary>
-    public static LandParcel Register(
+    public static LandParcelRegistered Register(
+        LandParcelId id,
         string legalParcelNumber,
         string address,
         decimal areaAcres,
@@ -61,78 +61,64 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         if (areaAcres <= 0)
             throw BusinessRuleViolation.LandParcel.Register.AreaNonPositive(areaAcres);
 
-        var parcel = new LandParcel();
-
-        parcel.ApplyChange(new LandParcelRegistered(
-            LandParcelId.Generate().Value,
+        return new LandParcelRegistered(
+            id.Value,
             legalParcelNumber,
             address,
             areaAcres,
             acquisitionDate,
             acquisitionMethod.DisplayName,
             covenantTerms,
-            registeredBy.Value));
-
-        return parcel;
+            registeredBy.Value);
     }
 
     /// <summary>Lists the parcel for placement.</summary>
-    public void ListForPlacement(UserId changedBy)
+    public ParcelListedForPlacement ListForPlacement(UserId changedBy)
     {
-
         if (IsDecommissioned)
             throw BusinessRuleViolation.LandParcel.ListForPlacement.ParcelDecommissioned();
 
-        ApplyChange(new ParcelListedForPlacement(Id.Value, changedBy.Value));
+        return new ParcelListedForPlacement(Id.Value, changedBy.Value);
     }
 
     /// <summary>Withdraws the parcel for redevelopment.</summary>
-    public void WithdrawForRedevelopment(UserId changedBy)
+    public ParcelWithdrawnForRedevelopment WithdrawForRedevelopment(UserId changedBy)
     {
-
         if (IsDecommissioned)
             throw BusinessRuleViolation.LandParcel.WithdrawForRedevelopment.ParcelDecommissioned();
 
-        ApplyChange(new ParcelWithdrawnForRedevelopment(Id.Value, changedBy.Value));
+        return new ParcelWithdrawnForRedevelopment(Id.Value, changedBy.Value);
     }
 
     /// <summary>Decommissions the parcel.</summary>
-    public void Decommission(UserId changedBy)
+    public ParcelDecommissioned? Decommission(UserId changedBy)
     {
-
         if (IsDecommissioned)
-            return;
+            return null;
 
-        ApplyChange(new ParcelDecommissioned(Id.Value, changedBy.Value));
+        return new ParcelDecommissioned(Id.Value, changedBy.Value);
     }
 
     /// <summary>Recommissions a decommissioned parcel. Idempotent if already active.</summary>
-    public void Recommission(UserId changedBy)
+    public ParcelRecommissioned? Recommission(UserId changedBy)
     {
-
         if (!IsDecommissioned)
-            return;
+            return null;
 
-        ApplyChange(new ParcelRecommissioned(Id.Value, changedBy.Value));
+        return new ParcelRecommissioned(Id.Value, changedBy.Value);
     }
 
-    /// <inheritdoc/>
-    protected override void ApplyEvent(IDomainEvent domainEvent)
+    /// <summary>Starts a land parcel from its first event.</summary>
+    public static LandParcel Create(LandParcelRegistered e)
     {
-        switch (domainEvent)
-        {
-            case LandParcelRegistered e: Apply(e); break;
-            case ParcelListedForPlacement: break;
-            case ParcelWithdrawnForRedevelopment: break;
-            case ParcelDecommissioned e: Apply(e); break;
-            case ParcelRecommissioned e: Apply(e); break;
-            default: throw new InvalidOperationException($"Unknown event: {domainEvent?.GetType().Name}");
-        }
+        ArgumentNullException.ThrowIfNull(e);
+
+        var landParcel = new LandParcel();
+        landParcel.Apply(e);
+        return landParcel;
     }
 
-    /// <summary>Applies <see cref="LandParcelRegistered"/>.</summary>
-
-    public void Apply(LandParcelRegistered e)
+    private void Apply(LandParcelRegistered e)
     {
         Id = LandParcelId.Create(e.AggregateId);
         LegalParcelNumber = e.LegalParcelNumber;
@@ -145,14 +131,12 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
     }
 
     /// <summary>Applies <see cref="ParcelDecommissioned"/>.</summary>
-
     public void Apply(ParcelDecommissioned _)
     {
         IsDecommissioned = true;
     }
 
     /// <summary>Applies <see cref="ParcelRecommissioned"/>.</summary>
-
     public void Apply(ParcelRecommissioned _)
     {
         IsDecommissioned = false;

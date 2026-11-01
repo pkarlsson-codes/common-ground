@@ -2,12 +2,13 @@ using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Services;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine;
+using Wolverine.Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
 
 /// <summary>Registers a new home on a CLT land parcel.</summary>
+/// <param name="HomeId">The new home's ID, chosen by the caller.</param>
 /// <param name="LandParcelId">The parcel this home sits on.</param>
 /// <param name="UnitDesignation">Optional unit designation (e.g. "Unit B") for a parcel with several homes.</param>
 /// <param name="UnitType">The physical type of the home.</param>
@@ -21,6 +22,7 @@ namespace CommonGround.PropertyRegistry.Application.Commands;
 /// <param name="AppraiserName">The name of the appraiser.</param>
 /// <param name="RegisteredBy">The staff user registering the home.</param>
 public sealed record RegisterHome(
+    HomeId HomeId,
     LandParcelId LandParcelId,
     string? UnitDesignation,
     HomeType UnitType,
@@ -37,17 +39,23 @@ public sealed record RegisterHome(
 /// <summary>Handles <see cref="RegisterHome"/> by creating and persisting a new Home.</summary>
 public static class RegisterHomeHandler
 {
-    /// <summary>Creates a new Home and returns its ID.</summary>
-    public static async Task<HomeId> Handle(
+    /// <summary>Resolves today's date in the trust's time zone, which dates the initial assessment.</summary>
+    public static Task<DateOnly> LoadAsync(
         RegisterHome command,
-        IDocumentSession session,
         ITrustClock trustClock,
+        IMessageContext context,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(trustClock);
+        ArgumentNullException.ThrowIfNull(context);
 
-        var now = TimeProviderContext.Current.UtcNow;
-        var today = await trustClock.ToTrustDateAsync(session.TenantId, now, cancellationToken).ConfigureAwait(false);
+        return trustClock.TodayAsync(context.TenantId!, cancellationToken);
+    }
+
+    /// <summary>Starts the new home's stream with its initial assessment.</summary>
+    public static IStartStream Handle(RegisterHome command, DateOnly today)
+    {
+        ArgumentNullException.ThrowIfNull(command);
 
         var initialAssessment = UnitAssessment.Create(
             command.InitialAssessedValue,
@@ -55,10 +63,11 @@ public static class RegisterHomeHandler
             command.AppraiserName,
             conditionNotes: null,
             command.RegisteredBy,
-            now,
+            TimeProviderContext.Current.UtcNow,
             today);
 
-        var home = Home.Register(
+        var registered = Home.Register(
+            command.HomeId,
             command.LandParcelId,
             command.UnitDesignation,
             command.UnitType,
@@ -70,8 +79,6 @@ public static class RegisterHomeHandler
             initialAssessment,
             command.RegisteredBy);
 
-        session.CreateAggregate<Home, HomeId>(home);
-
-        return home.Id;
+        return MartenOps.StartStream<Home>(command.HomeId.Value, registered);
     }
 }

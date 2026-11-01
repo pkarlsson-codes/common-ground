@@ -1,7 +1,7 @@
 using CommonGround.PropertyRegistry.Domain.Homes;
+using CommonGround.PropertyRegistry.Domain.Homes.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
 
@@ -24,24 +24,16 @@ public sealed record RecordHomeAssessment(
 public static class RecordHomeAssessmentHandler
 {
     /// <summary>Loads the unit, records the assessment, and persists.</summary>
-    public static async Task Handle(
-        RecordHomeAssessment command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static HomeAssessed Handle(RecordHomeAssessment command, [WriteAggregate] Home home)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(home);
 
-        var home = await session
-            .LoadAggregateAsync<Home>(command.HomeId, cancellationToken)
-            .ConfigureAwait(false);
-
-        home.RecordAssessment(
+        return home.RecordAssessment(
             command.AssessedValue,
             command.AssessmentDate,
             command.AppraiserName,
             command.ConditionNotes,
             command.RecordedById);
-
-        session.UpdateAggregate(home);
     }
 }

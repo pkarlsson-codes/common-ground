@@ -15,9 +15,8 @@ public sealed class DevelopmentProject : AggregateRoot<DevelopmentProjectId>
 {
     private readonly List<HomeId> _homeIds = [];
 
-#pragma warning disable CS8618
-    /// <summary>Interim: Marten 9 only calls public constructors. Removed once this aggregate is a decider.</summary>
-    public DevelopmentProject() { }
+#pragma warning disable CS8618 // State is set by Create from the stream's first event.
+    private DevelopmentProject() { }
 #pragma warning restore CS8618
 
     /// <summary>Gets the ID of the land parcel this project is for.</summary>
@@ -39,51 +38,49 @@ public sealed class DevelopmentProject : AggregateRoot<DevelopmentProjectId>
     public ProjectStatus ProjectStatus { get; private set; }
 
     /// <summary>Initiates a new development project for a land parcel.</summary>
+    /// <param name="id">The new stream's ID, chosen by the caller.</param>
     /// <param name="landParcelId">The parcel to associate the project with.</param>
     /// <param name="name">The name of the development project.</param>
     /// <param name="description">A description of the development project.</param>
     /// <param name="initiatedBy">The staff user initiating the project.</param>
-    public static DevelopmentProject InitiateNewConstruction(
+    public static DevelopmentProjectInitiated InitiateNewConstruction(
+        DevelopmentProjectId id,
         LandParcelId landParcelId,
         string name,
         string? description,
         UserId initiatedBy)
     {
-
         if (string.IsNullOrWhiteSpace(name))
             throw BusinessRuleViolation.DevelopmentProject.Initiate.NameRequired();
 
         if (string.IsNullOrWhiteSpace(description))
             throw BusinessRuleViolation.DevelopmentProject.Initiate.DescriptionRequired();
 
-        var project = new DevelopmentProject();
-
-        project.ApplyChange(new DevelopmentProjectInitiated(
-            DevelopmentProjectId.Generate().Value,
+        return new DevelopmentProjectInitiated(
+            id.Value,
             landParcelId.Value,
             [],
             name,
             description,
             ProjectType.NewConstruction.Value,
-            initiatedBy.Value));
-
-        return project;
+            initiatedBy.Value);
     }
 
     /// <summary>Initiates a new rehabilitation development project for a land parcel.</summary>
+    /// <param name="id">The new stream's ID, chosen by the caller.</param>
     /// <param name="landParcelId">The parcel to associate the project with.</param>    
     /// <param name="name">The name of the development project.</param>
     /// <param name="description">A description of the development project.</param>
     /// <param name="homeIds">The homes associated with the rehabilitation project.</param>
     /// <param name="initiatedBy">The staff user initiating the project.</param>
-    public static DevelopmentProject InitiateRehabilitation(
+    public static DevelopmentProjectInitiated InitiateRehabilitation(
+        DevelopmentProjectId id,
         LandParcelId landParcelId,
         string name,
         string? description,
         IReadOnlyCollection<HomeId> homeIds,
         UserId initiatedBy)
     {
-
         if (string.IsNullOrWhiteSpace(name))
             throw BusinessRuleViolation.DevelopmentProject.Initiate.NameRequired();
 
@@ -93,33 +90,27 @@ public sealed class DevelopmentProject : AggregateRoot<DevelopmentProjectId>
         if (homeIds == null || homeIds.Count == 0)
             throw BusinessRuleViolation.DevelopmentProject.InitiateRehabilitation.HomeIdsRequired();
 
-        var project = new DevelopmentProject();
-
-        project.ApplyChange(new DevelopmentProjectInitiated(
-            DevelopmentProjectId.Generate().Value,
+        return new DevelopmentProjectInitiated(
+            id.Value,
             landParcelId.Value,
             [.. homeIds.Select(h => h.Value)],
             name,
             description,
             ProjectType.Rehabilitation.Value,
-            initiatedBy.Value));
-
-        return project;
+            initiatedBy.Value);
     }
 
-    /// <inheritdoc/>
-    protected override void ApplyEvent(IDomainEvent domainEvent)
+    /// <summary>Starts a development project from its first event.</summary>
+    public static DevelopmentProject Create(DevelopmentProjectInitiated e)
     {
-        switch (domainEvent)
-        {
-            case DevelopmentProjectInitiated e: Apply(e); break;
-            default: throw new InvalidOperationException($"Unknown event: {domainEvent?.GetType().Name}");
-        }
+        ArgumentNullException.ThrowIfNull(e);
+
+        var developmentProject = new DevelopmentProject();
+        developmentProject.Apply(e);
+        return developmentProject;
     }
 
-    /// <summary>Applies <see cref="DevelopmentProjectInitiated"/>.</summary>
-
-    public void Apply(DevelopmentProjectInitiated e)
+    private void Apply(DevelopmentProjectInitiated e)
     {
         Id = DevelopmentProjectId.Create(e.AggregateId);
         LandParcelId = LandParcelId.Create(e.LandParcelId);

@@ -53,7 +53,10 @@ public sealed class LandParcelsInitialData : IInitialData
                 }
             }
 
-            var parcel = LandParcel.Register(
+            var parcelId = LandParcelId.Generate();
+
+            var parcelStarted = LandParcel.Register(
+                parcelId,
                 entry.LegalParcelNumber,
                 entry.Address,
                 entry.AreaAcres,
@@ -62,14 +65,13 @@ public sealed class LandParcelsInitialData : IInitialData
                 entry.CovenantTerms,
                 SeederUserId);
 
-            trustSession.Events.StartStream<LandParcel>(parcel.Id.Value, parcel.UncommittedEvents.ToArray());
-            parcel.UncommittedEvents.MarkAsCommitted();
+            trustSession.Events.StartStream<LandParcel>(parcelId.Value, parcelStarted);
 
             trustSession.Store(new LandParcelSeedLookup
             {
                 Id = lookupId,
                 SeedKey = entry.SeedKey,
-                LandParcelId = parcel.Id.Value,
+                LandParcelId = parcelId.Value,
                 SeededAt = DateTimeOffset.UtcNow,
             });
 

@@ -1,7 +1,7 @@
 using CommonGround.PropertyRegistry.Domain.LandParcels;
+using CommonGround.PropertyRegistry.Domain.LandParcels.Events;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
 
@@ -12,19 +12,11 @@ public sealed record ListParcelForPlacement(LandParcelId LandParcelId, UserId Ch
 public static class ListParcelForPlacementHandler
 {
     /// <summary>Loads the parcel, lists it for placement, and persists.</summary>
-    public static async Task Handle(
-        ListParcelForPlacement command,
-        IDocumentSession session,
-        CancellationToken cancellationToken)
+    public static ParcelListedForPlacement Handle(ListParcelForPlacement command, [WriteAggregate] LandParcel parcel)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(parcel);
 
-        var parcel = await session
-            .LoadAggregateAsync<LandParcel>(command.LandParcelId, cancellationToken)
-            .ConfigureAwait(false);
-
-        parcel.ListForPlacement(command.ChangedBy);
-
-        session.UpdateAggregate(parcel);
+        return parcel.ListForPlacement(command.ChangedBy);
     }
 }

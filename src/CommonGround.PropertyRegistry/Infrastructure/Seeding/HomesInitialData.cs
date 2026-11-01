@@ -92,7 +92,10 @@ public sealed class HomesInitialData : IInitialData
                 now,
                 today);
 
-            var unit = Home.Register(
+            var unitId = HomeId.Generate();
+
+            var unitStarted = Home.Register(
+                unitId,
                 LandParcelId.Create(landParcelLookup.LandParcelId),
                 entry.UnitDesignation,
                 HomeType.FromDisplayName(entry.Type),
@@ -104,14 +107,13 @@ public sealed class HomesInitialData : IInitialData
                 initialAssessment,
                 SeederUserId);
 
-            trustSession.Events.StartStream<Home>(unit.Id.Value, unit.UncommittedEvents.ToArray());
-            unit.UncommittedEvents.MarkAsCommitted();
+            trustSession.Events.StartStream<Home>(unitId.Value, unitStarted);
 
             trustSession.Store(new HomeSeedLookup
             {
                 Id = lookupId,
                 SeedKey = entry.SeedKey,
-                UnitId = unit.Id.Value,
+                UnitId = unitId.Value,
                 SeededAt = DateTimeOffset.UtcNow,
             });
 

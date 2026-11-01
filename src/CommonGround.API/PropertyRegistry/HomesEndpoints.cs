@@ -36,7 +36,10 @@ public static class HomesEndpoints
             return Results.BadRequest($"Unrecognized home type: '{request.HomeType}'.");
         }
 
+        var id = HomeId.Generate();
+
         var command = new RegisterHome(
+            id,
             LandParcelId.Create(request.LandParcelId),
             request.UnitDesignation,
             homeType,
@@ -50,7 +53,7 @@ public static class HomesEndpoints
             request.AppraiserName,
             userId);
 
-        var id = await bus.InvokeForTenantAsync<HomeId>(bus.TenantId!, command, cancellationToken);
+        await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);
 
         return Results.Created($"/api/homes/{id.Value}", new RegisterHomeResponse(id.Value));
     }
