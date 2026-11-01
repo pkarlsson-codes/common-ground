@@ -44,6 +44,11 @@ try
     {
         opts.Policies.AutoApplyTransactions();
 
+        // Local queues go through the Marten inbox, so a message survives a restart and a scheduled one
+        // (a prequalification's expiry, months out) is stored and polled for rather than held in an
+        // in-memory Task.Delay, which can't wait longer than ~24.8 days.
+        opts.Policies.UseDurableLocalQueues();
+
         // A [WriteAggregate] handler whose stream doesn't exist must fail, not silently skip.
         // The exception handler turns RequiredDataMissingException into a 404.
         opts.EntityDefaults.OnMissing = OnMissing.ThrowException;
