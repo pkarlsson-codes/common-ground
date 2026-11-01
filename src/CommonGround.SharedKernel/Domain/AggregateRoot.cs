@@ -1,93 +1,19 @@
-using CommonGround.SharedKernel.Domain.Events;
-using CommonGround.SharedKernel.Domain.Exceptions;
-
 namespace CommonGround.SharedKernel.Domain;
 
 /// <summary>
-/// Base class for all aggregate roots in the domain.
+/// Base class for all aggregate roots in the domain. An aggregate is a decider: its decision methods
+/// validate a request against its current state and return the events it decides on (or null when there
+/// is nothing to do) without changing state; Marten evolves it by calling its public static <c>Create</c>
+/// for the first event and its public <c>Apply</c> methods for the rest.
 /// </summary>
 /// <typeparam name="TIdentity">The type of the aggregate's unique identifier.</typeparam>
 public abstract class AggregateRoot<TIdentity> : Entity<TIdentity>
     where TIdentity : struct, IEntityId<TIdentity>
 {
-    private readonly List<Action> _invariants = [];
-
-    private readonly UncommittedEvents _uncommittedEvents = new();
-
     /// <summary>
     /// Initializes a new instance of the AggregateRoot class.
     /// </summary>
     protected AggregateRoot()
     {
-    }
-
-    /// <summary>
-    /// Gets the collection of uncommitted domain events for this aggregate.
-    /// </summary>
-    public IUncommittedEvents UncommittedEvents => _uncommittedEvents;
-
-    /// <summary>
-    /// Gets the current version of this aggregate for event sourcing and concurrency control.
-    /// </summary>
-    public long Version { get; protected set; }
-
-    /// <summary>
-    /// Validates all invariants for this aggregate.
-    /// </summary>
-    /// <exception cref="InvariantViolationException">Thrown when any invariant fails validation.</exception>
-    public void ValidateInvariants()
-    {
-        foreach (var invariant in _invariants)
-        {
-            invariant();
-        }
-    }
-
-    /// <summary>
-    /// Raises a domain event and adds it to the aggregate's event collection.
-    /// Automatically increments the aggregate version and passes it to the event.
-    /// Also applies the event to update the aggregate state immediately.
-    /// </summary>
-    /// <param name="domainEvent">The domain event to raise.</param>
-    protected void ApplyChange(IDomainEvent domainEvent)
-    {
-        ArgumentNullException.ThrowIfNull(domainEvent);
-
-        ApplyEvent(domainEvent, true);
-    }
-
-    /// <summary>
-    /// Adds invariants to the aggregate.
-    /// </summary>
-    /// <param name="invariants">The invariants to add.</param>
-    protected void AddInvariants(params Action[] invariants)
-    {
-        _invariants.AddRange(invariants);
-    }
-
-    /// <summary>
-    /// Applies a domain event to this aggregate.
-    /// This method must be implemented by derived classes to handle specific event types.
-    /// </summary>
-    /// <param name="domainEvent">The domain event to apply.</param>
-    protected virtual void ApplyEvent(IDomainEvent domainEvent)
-    {
-    }
-
-    /// <summary>
-    /// Applies a domain event to this aggregate.
-    /// This method must be implemented by derived classes to handle specific event types.
-    /// </summary>
-    /// <param name="domainEvent">The domain event to apply.</param>
-    /// <param name="isNew">Indicates whether the event is a new event or previously committed event.</param>
-    private void ApplyEvent(IDomainEvent domainEvent, bool isNew)
-    {
-        ApplyEvent(domainEvent);
-        Version++;
-
-        if (isNew)
-        {
-            _uncommittedEvents.Append(domainEvent);
-        }
     }
 }

@@ -5,9 +5,9 @@ using Marten;
 namespace CommonGround.SharedKernel.Extensions;
 
 /// <summary>
-/// Extension methods for <see cref="IDocumentSession"/> that reduce boilerplate when persisting aggregates.
+/// Read-only aggregate loading for handlers that decide with an aggregate they don't write to.
 /// </summary>
-public static class DocumentSessionExtensions
+public static class QuerySessionExtensions
 {
     /// <summary>
     /// Loads an aggregate by replaying its event stream. Throws if not found.
@@ -49,39 +49,5 @@ public static class DocumentSessionExtensions
             .AggregateStreamAsync<TAggregate>(streamKey, token: cancellationToken)
             .ConfigureAwait(false);
         return aggregate ?? throw new AggregateNotFoundException(typeof(TAggregate), streamKey);
-    }
-
-    /// <summary>
-    /// Validates invariants, starts a new event stream for <typeparamref name="TAggregate"/>, and marks events as committed.
-    /// </summary>
-    /// <typeparam name="TAggregate">The type of the aggregate being created.</typeparam>
-    /// <typeparam name="TEntityId">The type of the aggregate's unique identifier.</typeparam>
-    /// <param name="session">The document session to use for starting the stream.</param>
-    /// <param name="aggregate">The aggregate to create and persist.</param>
-    public static void CreateAggregate<TAggregate, TEntityId>(
-        this IDocumentSession session,
-        TAggregate aggregate)
-        where TAggregate : AggregateRoot<TEntityId>
-        where TEntityId : struct, IEntityId<TEntityId>
-    {
-        aggregate.ValidateInvariants();
-        session.Events.StartStream<TAggregate>(aggregate.Id.Value, [.. aggregate.UncommittedEvents]);
-        aggregate.UncommittedEvents.MarkAsCommitted();
-    }
-
-    /// <summary>
-    /// Validates invariants, appends uncommitted events to an existing stream, and marks events as committed.
-    /// </summary>
-    /// <typeparam name="TIdentity">The type of the aggregate's unique identifier.</typeparam>
-    /// <param name="session">The document session to use for appending events.</param>
-    /// <param name="aggregate">The aggregate whose events should be appended.</param>
-    public static void UpdateAggregate<TIdentity>(
-        this IDocumentSession session,
-        AggregateRoot<TIdentity> aggregate)
-        where TIdentity : struct, IEntityId<TIdentity>
-    {
-        aggregate.ValidateInvariants();
-        session.Events.Append(aggregate.Id.Value, [.. aggregate.UncommittedEvents]);
-        aggregate.UncommittedEvents.MarkAsCommitted();
     }
 }

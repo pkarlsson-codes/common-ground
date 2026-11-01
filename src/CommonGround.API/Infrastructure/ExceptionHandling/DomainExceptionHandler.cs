@@ -6,8 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CommonGround.API.Infrastructure.ExceptionHandling;
 
 /// <summary>
-/// Handles <see cref="DomainException"/> (including <see cref="BusinessRuleViolationException"/>
-/// and <see cref="InvariantViolationException"/>) and writes a 422 Unprocessable Entity ProblemDetails response.
+/// Handles <see cref="DomainException"/> (including <see cref="BusinessRuleViolationException"/>) and writes a 422 Unprocessable Entity ProblemDetails response.
 /// </summary>
 internal sealed class DomainExceptionHandler(IProblemDetailsService problemDetailsService) : IExceptionHandler
 {
