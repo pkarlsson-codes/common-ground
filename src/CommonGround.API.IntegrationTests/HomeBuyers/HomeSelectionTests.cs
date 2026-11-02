@@ -8,9 +8,10 @@ using CommonGround.API.Contracts.Homeownership.Responses;
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
 using CommonGround.HomeBuyers.Application.Commands;
-using CommonGround.HomeBuyers.Contracts.Events;
+using CommonGround.HomeBuyers.Application.EventHandlers;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
+using CommonGround.PropertyRegistry.Contracts.Events;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Infrastructure.API;
 using FluentAssertions;
@@ -18,7 +19,6 @@ using Marten;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Wolverine;
 
 namespace CommonGround.API.IntegrationTests.HomeBuyers;
 
@@ -33,9 +33,9 @@ namespace CommonGround.API.IntegrationTests.HomeBuyers;
 /// is known.
 ///
 /// As in <see cref="Homeownership.PurchaseWorkflowCloseTests"/>, the test host runs Wolverine in
-/// MediatorOnly mode, so domain events are not forwarded as integration events. HomeRegistered is
-/// dispatched directly to seed HomeBuyers's HomeFactsView, and ApplicationSelected is dispatched
-/// directly to exercise the hand-off to PropertyRegistry and Homeownership.
+/// MediatorOnly mode, so domain events are not forwarded as integration events. HomeBuyers's
+/// HomeFactsView is seeded by calling its HomeRegistered handler directly; the hand-off to
+/// Homeownership and PropertyRegistry is covered by <see cref="Flows.HomePurchaseFlowTests"/>.
 /// </summary>
 [Collection(IntegrationCollection.Name)]
 public class HomeSelectionTests(ApiFactory factory)
@@ -346,130 +346,6 @@ public class HomeSelectionTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task SelectByPriority_HandOff_MarksHomeUnderContractAndCreatesWorkflowLinkedToApplicationAndHousehold()
-    {
-        var client = factory.CreateClient().WithAuthToken();
-
-        var landParcelId = await CreateLandParcelAsync(client);
-        var homeId = await CreateHomeAsync(client, landParcelId);
-        var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
-        var applicant = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
-
-        var selectionId = await StartSelectionAsync(client, homeId);
-        await SelectByPriorityAsync(client, selectionId, applicant.ApplicationId, templateId);
-
-        await InvokeForTenantAsync(new HomeSelectionStarted(selectionId, homeId, DateTimeOffset.UtcNow));
-        await InvokeForTenantAsync(new ApplicationSelected(
-            applicant.ApplicationId,
-            applicant.HouseholdId,
-            applicant.FullName,
-            applicant.Email,
-            null,
-            selectionId,
-            homeId,
-            landParcelId,
-            templateId,
-            200000m,
-            SelectedDate,
-            "user-test"));
-
-        var home = await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}");
-        home!.Status.Should().Be("UnderContract");
-
-        var page = await client.GetFromJsonAsync<PaginatedResponse<PurchaseWorkflowListItemResponse>>(
-            $"/api/purchase-workflows?groundLeaseTemplateId={templateId}");
-        var workflow = page!.Items.Should().ContainSingle("completing a selection should initiate a purchase workflow").Subject;
-
-        workflow.Should().BeEquivalentTo(new { HomeId = homeId, applicant.HouseholdId });
-        (await client.GetFromJsonAsync<PaginatedResponse<PurchaseWorkflowListItemResponse>>($"/api/purchase-workflows?homeId={homeId}"))!
-            .Items.Should().ContainSingle().Which.Id.Should().Be(workflow.Id);
-        (await client.GetFromJsonAsync<PaginatedResponse<PurchaseWorkflowListItemResponse>>($"/api/purchase-workflows?householdId={applicant.HouseholdId}"))!
-            .Items.Should().ContainSingle().Which.Id.Should().Be(workflow.Id);
-
-        var workflowDetail = await client.GetFromJsonAsync<PurchaseWorkflowResponse>($"/api/purchase-workflows/{workflow.Id}");
-        workflowDetail.Should().BeEquivalentTo(new
-        {
-            applicant.ApplicationId,
-            applicant.HouseholdId,
-            HomeId = homeId,
-            LandParcelId = landParcelId,
-        });
-    }
-
-    [Fact]
-    public async Task PurchaseFellThrough_ReturnsHouseholdToWaitingListAndHomeToSelection()
-    {
-        var client = factory.CreateClient().WithAuthToken();
-
-        var landParcelId = await CreateLandParcelAsync(client);
-        var homeId = await CreateHomeAsync(client, landParcelId);
-        var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
-        var applicant = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
-        await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 2));
-
-        var selectionId = await StartSelectionAsync(client, homeId);
-        await SelectByPriorityAsync(client, selectionId, applicant.ApplicationId, templateId);
-        await InvokeForTenantAsync(new HomeSelectionStarted(selectionId, homeId, DateTimeOffset.UtcNow));
-        await InvokeForTenantAsync(new ApplicationSelected(
-            applicant.ApplicationId, applicant.HouseholdId, applicant.FullName, applicant.Email, null,
-            selectionId, homeId, landParcelId, templateId, 200000m, SelectedDate, "user-test"));
-
-        (await client.GetFromJsonAsync<HouseholdResponse>($"/api/households/{applicant.HouseholdId}"))!
-            .Journey.Stage.Should().Be("Purchasing");
-
-        await InvokeForTenantAsync(new CommonGround.Homeownership.Contracts.Events.PurchaseFellThrough(
-            "purchase-workflow-test", homeId, applicant.ApplicationId, applicant.HouseholdId,
-            "Financing fell through", SelectedDate.AddDays(20), "user-test"));
-
-        var application = await GetApplicationAsync(client, applicant.ApplicationId);
-        application.Phase.Should().Be("Approved");
-        application.ApprovedDate.Should().Be(new DateOnly(2026, 6, 1));
-
-        var household = await client.GetFromJsonAsync<HouseholdResponse>($"/api/households/{applicant.HouseholdId}");
-        household!.Journey.Should().BeEquivalentTo(new { Stage = "Waiting", ApprovedDate = new DateOnly(2026, 6, 1), SelectedDate = (DateOnly?)null });
-
-        var selections = await GetSelectionsForHomeAsync(client, homeId);
-        selections.Select(s => s.Status).Should().Equal("Open", "FellThrough");
-        var newSelection = await GetSelectionAsync(client, selections[0].Id);
-        newSelection.Candidates.Should().NotContain(c => c.ApplicationId == applicant.ApplicationId,
-            "the household isn't a candidate for the home its purchase just fell through on");
-
-        var home = await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}");
-        home!.Status.Should().Be("Available");
-        home.UnderContractDate.Should().BeNull();
-        home.AvailableAgainDate.Should().Be(SelectedDate.AddDays(20));
-    }
-
-    [Fact]
-    public async Task PurchaseClosed_MakesHouseholdHomeownerAndHomeLeased()
-    {
-        var client = factory.CreateClient().WithAuthToken();
-
-        var landParcelId = await CreateLandParcelAsync(client);
-        var homeId = await CreateHomeAsync(client, landParcelId);
-        var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
-        var applicant = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
-
-        var selectionId = await StartSelectionAsync(client, homeId);
-        await SelectByPriorityAsync(client, selectionId, applicant.ApplicationId, templateId);
-        await InvokeForTenantAsync(new HomeSelectionStarted(selectionId, homeId, DateTimeOffset.UtcNow));
-        await InvokeForTenantAsync(new ApplicationSelected(
-            applicant.ApplicationId, applicant.HouseholdId, applicant.FullName, applicant.Email, null,
-            selectionId, homeId, landParcelId, templateId, 200000m, SelectedDate, "user-test"));
-
-        await InvokeForTenantAsync(new CommonGround.Homeownership.Contracts.Events.PurchaseClosed(
-            "purchase-workflow-test", homeId, applicant.ApplicationId, applicant.HouseholdId,
-            SelectedDate.AddDays(45), "user-test"));
-
-        var home = await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}");
-        home!.Status.Should().Be("Leased");
-        home.LeasedDate.Should().Be(SelectedDate.AddDays(45));
-
-        var household = await client.GetFromJsonAsync<HouseholdResponse>($"/api/households/{applicant.HouseholdId}");
-        household!.Journey.Should().BeEquivalentTo(new { Stage = "Homeowner", PurchasedDate = SelectedDate.AddDays(45), SelectedHomeId = homeId });
-    }
-
-    [Fact]
     public async Task GetHomeSelections_FiltersByStatusAcrossHomes()
     {
         var client = factory.CreateClient().WithAuthToken();
@@ -556,13 +432,6 @@ public class HomeSelectionTests(ApiFactory factory)
         }
     }
 
-    private async Task InvokeForTenantAsync(object message)
-    {
-        using var scope = factory.Services.CreateScope();
-        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
-        await bus.InvokeForTenantAsync(ApiFactory.TestTrustId, message);
-    }
-
     /// <summary>Registers a home and seeds HomeBuyers's view of it, which MediatorOnly mode would not forward.</summary>
     private async Task<string> CreateHomeAsync(HttpClient client, string? landParcelId = null)
     {
@@ -583,8 +452,12 @@ public class HomeSelectionTests(ApiFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var homeId = (await response.Content.ReadFromJsonAsync<RegisterHomeResponse>())!.HomeId;
 
-        await InvokeForTenantAsync(
-            new CommonGround.PropertyRegistry.Contracts.Events.HomeRegistered(homeId, landParcelId, Label: "1 Test Lane", Bedrooms: 3, IsAccessible: false));
+        using var scope = factory.Services.CreateScope();
+        await using var session = scope.ServiceProvider.GetRequiredService<IDocumentStore>().LightweightSession(ApiFactory.TestTrustId);
+        HomeRegisteredHandler.Handle(
+            new HomeRegistered(homeId, landParcelId, Label: "1 Test Lane", Bedrooms: 3, IsAccessible: false))
+            .Execute(session);
+        await session.SaveChangesAsync();
 
         return homeId;
     }

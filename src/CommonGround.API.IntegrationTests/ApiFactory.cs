@@ -120,9 +120,14 @@ public class ApiFactory : WebApplicationFactory<Program>
 
             services.AddSingleton<IDocumentBlobStore, InMemoryDocumentBlobStore>();
 
-            services.AddWolverineExtension<MediatorOnlyExtension>();
+            ConfigureWolverine(services);
         });
     }
+
+    /// <summary>Sets how Wolverine runs under test: in-process mediator only, unless a subclass needs more.</summary>
+    /// <param name="services">The host's services.</param>
+    protected virtual void ConfigureWolverine(IServiceCollection services) =>
+        services.AddWolverineExtension<MediatorOnlyExtension>();
 
     private void EnsureContainerStarted()
     {

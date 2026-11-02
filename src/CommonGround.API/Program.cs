@@ -50,6 +50,11 @@ try
         // in-memory Task.Delay, which can't wait longer than ~24.8 days.
         opts.Policies.UseDurableLocalQueues();
 
+        // A message several bounded contexts react to (a household selected, a purchase closed or fallen
+        // through, a home registered) gets one handler per context, each on its own local queue with its
+        // own transaction and retries, so one context's failure doesn't roll back or re-run another's.
+        opts.MultipleHandlerBehavior = MultipleHandlerBehavior.Separated;
+
         // A [WriteAggregate] handler whose stream doesn't exist must fail, not silently skip.
         // The exception handler turns RequiredDataMissingException into a 404.
         opts.EntityDefaults.OnMissing = OnMissing.ThrowException;
