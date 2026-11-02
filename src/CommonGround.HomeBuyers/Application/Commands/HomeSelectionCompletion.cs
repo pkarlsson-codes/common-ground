@@ -89,6 +89,7 @@ public static class HomeSelectionCompletion
                 {
                     return candidate.SelectForHome(
                         household,
+                        selection.Id,
                         selection.HomeId,
                         completion.Home.LandParcelId,
                         groundLeaseTemplateId,
@@ -97,9 +98,7 @@ public static class HomeSelectionCompletion
                         selectedBy);
                 }
 
-                return candidate.CanBeSelected(household, selectedDate)
-                    ? candidate.PassOver(selection.Id, selection.HomeId)
-                    : null;
+                return candidate.PassOver(selection.Id, selection.HomeId, household, selectedDate);
             });
         }
     }

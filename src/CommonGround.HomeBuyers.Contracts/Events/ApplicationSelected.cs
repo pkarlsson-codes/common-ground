@@ -4,7 +4,7 @@ namespace CommonGround.HomeBuyers.Contracts.Events;
 
 /// <summary>
 /// Integration event published when an applicant is selected for a specific home.
-/// Consumed by Homeownership to initiate a PurchaseWorkflow.
+/// Consumed by Homeownership to initiate a PurchaseWorkflow, and by PropertyRegistry to show the home under contract.
 /// </summary>
 public sealed record ApplicationSelected(
     string ApplicationId,
@@ -12,6 +12,7 @@ public sealed record ApplicationSelected(
     string ApplicantFullName,
     string ApplicantEmail,
     string? ApplicantPhone,
+    string HomeSelectionId,
     string HomeId,
     string LandParcelId,
     string GroundLeaseTemplateId,

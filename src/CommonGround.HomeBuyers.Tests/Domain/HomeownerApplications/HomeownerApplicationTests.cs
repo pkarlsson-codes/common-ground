@@ -15,6 +15,7 @@ public class HomeownerApplicationTests
     {
         public UserId StaffUser { get; } = UserId.Generate();
         public DateOnly SelectedDate { get; } = new(2026, 7, 20);
+        public HomeSelectionId SelectionId { get; } = HomeSelectionId.Generate();
         public Household Household { get; private set; }
 
         public TestBed()
@@ -53,7 +54,7 @@ public class HomeownerApplicationTests
         {
             WithReadiness();
             var application = ApprovedApplication();
-            application = application.Decide(a => a.SelectForHome(Household, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, SelectedDate, StaffUser)).Aggregate;
+            application = application.Decide(a => a.SelectForHome(Household, SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, SelectedDate, StaffUser)).Aggregate;
             return application;
         }
     }
@@ -145,7 +146,7 @@ public class HomeownerApplicationTests
             var sut = _testBed.SubmittedApplication();
 
             var act = () => sut.SelectForHome(
-                _testBed.Household, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser);
+                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.homeowner_application.select_applicant.phase_not_approved");
@@ -158,7 +159,7 @@ public class HomeownerApplicationTests
             var sut = _testBed.ApprovedApplication();
 
             var act = () => sut.SelectForHome(
-                _testBed.Household, "home-1", "land-parcel-1", "ground-lease-template-1", purchasePrice: 0m, _testBed.SelectedDate, _testBed.StaffUser);
+                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", purchasePrice: 0m, _testBed.SelectedDate, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.homeowner_application.select_applicant.purchase_price_non_positive");
@@ -171,7 +172,7 @@ public class HomeownerApplicationTests
             var sut = _testBed.ApprovedApplication();
 
             var act = () => sut.SelectForHome(
-                _testBed.Household, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser);
+                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser);
 
             var thrown = act.Should().Throw<BusinessRuleViolationException>().Which;
             thrown.Code.Should().Be("home_buyers.homeowner_application.select_applicant.household_readiness_incomplete");
@@ -185,7 +186,7 @@ public class HomeownerApplicationTests
             var sut = _testBed.ApprovedApplication();
 
             var act = () => sut.SelectForHome(
-                _testBed.Household, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser);
+                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.homeowner_application.select_applicant.prequalification_expired");
@@ -199,7 +200,7 @@ public class HomeownerApplicationTests
             var otherHousehold = new TestBed().WithReadiness().Household;
 
             var act = () => sut.SelectForHome(
-                otherHousehold, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser);
+                otherHousehold, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser);
 
             act.Should().Throw<ArgumentException>();
         }
@@ -211,11 +212,16 @@ public class HomeownerApplicationTests
             var sut = _testBed.ApprovedApplication();
 
             (sut, var events) = sut.Decide(a => a.SelectForHome(
-                _testBed.Household, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser));
+                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser));
 
             sut.Phase.Should().Be(ApplicationPhase.Selected);
             events.OfType<ApplicationSelectedForHome>().Should().ContainSingle()
-                .Which.Should().BeEquivalentTo(new { ApplicantFullName = "Alice Johnson", ApplicantEmail = "alice@example.com" });
+                .Which.Should().BeEquivalentTo(new
+                {
+                    HomeSelectionId = _testBed.SelectionId.Value,
+                    ApplicantFullName = "Alice Johnson",
+                    ApplicantEmail = "alice@example.com",
+                });
         }
     }
 
@@ -275,22 +281,23 @@ public class HomeownerApplicationTests
         private readonly TestBed _testBed = new();
 
         [Fact]
-        public void GivenSubmittedApplication_WhenPassedOver_ThenThrowsPhaseNotApproved()
+        public void GivenApplicationThatCouldNotHaveBeenSelected_WhenPassedOver_ThenDecidesNothing()
         {
+            _testBed.WithReadiness();
             var sut = _testBed.SubmittedApplication();
 
-            var act = () => sut.PassOver(HomeSelectionId.Generate(), "home-1");
+            var passedOver = sut.PassOver(_testBed.SelectionId, "home-1", _testBed.Household, _testBed.SelectedDate);
 
-            act.Should().Throw<BusinessRuleViolationException>()
-                .Which.Code.Should().Be("home_buyers.homeowner_application.pass_over.phase_not_approved");
+            passedOver.Should().BeNull();
         }
 
         [Fact]
         public void GivenApprovedApplication_WhenPassedOver_ThenStaysApprovedAndRecordsTheHousehold()
         {
+            _testBed.WithReadiness();
             var sut = _testBed.ApprovedApplication();
 
-            (sut, var events) = sut.Decide(a => a.PassOver(HomeSelectionId.Generate(), "home-1"));
+            (sut, var events) = sut.Decide(a => a.PassOver(_testBed.SelectionId, "home-1", _testBed.Household, _testBed.SelectedDate));
 
             sut.Phase.Should().Be(ApplicationPhase.Approved);
             events.OfType<ApplicationPassedOver>().Should().ContainSingle()
@@ -303,14 +310,25 @@ public class HomeownerApplicationTests
         private readonly TestBed _testBed = new();
 
         [Fact]
-        public void GivenApprovedApplication_WhenReturned_ThenThrowsPhaseNotSelected()
+        public void GivenSubmittedApplication_WhenReturned_ThenThrowsPhaseNotSelected()
         {
-            var sut = _testBed.ApprovedApplication();
+            var sut = _testBed.SubmittedApplication();
 
             var act = () => sut.ReturnToWaitingList("home-1", "Financing fell through", _testBed.SelectedDate);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.homeowner_application.return_to_waiting_list.phase_not_selected");
+        }
+
+        [Fact]
+        public void GivenApplicationAlreadyReturned_WhenReturned_ThenDecidesNothing()
+        {
+            var sut = _testBed.SelectedApplication();
+            sut = sut.Decide(a => a.ReturnToWaitingList("home-1", "Financing fell through", _testBed.SelectedDate.AddDays(30))).Aggregate;
+
+            var returned = sut.ReturnToWaitingList("home-1", "Financing fell through", _testBed.SelectedDate.AddDays(30));
+
+            returned.Should().BeNull();
         }
 
         [Fact]
@@ -338,6 +356,17 @@ public class HomeownerApplicationTests
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.homeowner_application.record_purchase_closed.phase_not_selected");
+        }
+
+        [Fact]
+        public void GivenPurchaseAlreadyRecorded_WhenPurchaseClosed_ThenDecidesNothing()
+        {
+            var sut = _testBed.SelectedApplication();
+            sut = sut.Decide(a => a.RecordPurchaseClosed("home-1", _testBed.SelectedDate.AddDays(60))).Aggregate;
+
+            var closed = sut.RecordPurchaseClosed("home-1", _testBed.SelectedDate.AddDays(60));
+
+            closed.Should().BeNull();
         }
 
         [Fact]

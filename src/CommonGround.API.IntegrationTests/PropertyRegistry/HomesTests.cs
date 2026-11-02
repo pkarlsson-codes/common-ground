@@ -2,8 +2,11 @@ using System.Net;
 using System.Net.Http.Json;
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
+using CommonGround.HomeBuyers.Contracts.Events;
 using CommonGround.SharedKernel.Infrastructure.API;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using Wolverine;
 
 namespace CommonGround.API.IntegrationTests.PropertyRegistry;
 
@@ -206,6 +209,36 @@ public class HomesTests(ApiFactory factory)
             (firstDate, 310000m, "Test Appraiser"),
             (new DateOnly(2024, 1, 1), 300000m, "Test Appraiser"));
         result.Items.Should().AllSatisfy(a => a.RecordedBy.Should().NotBeNullOrEmpty());
+    }
+
+    [Fact]
+    public async Task GetHomes_FilteredByStatus_ReturnsHomesInThoseStatuses()
+    {
+        var parcelId = await CreateLandParcelAsync();
+        var client = factory.CreateClient().WithAuthToken();
+        var availableHomeId = await RegisterHomeAsync(client, parcelId);
+        var inSelectionHomeId = await RegisterHomeAsync(client, parcelId);
+        using (var scope = factory.Services.CreateScope())
+        {
+            await scope.ServiceProvider.GetRequiredService<IMessageBus>().InvokeForTenantAsync(
+                ApiFactory.TestTrustId, new HomeSelectionStarted("homeselection-filter", inSelectionHomeId, DateTimeOffset.UtcNow));
+        }
+
+        var available = await client.GetFromJsonAsync<PaginatedResponse<HomeListItemResponse>>(
+            $"/api/homes?landParcelIds={parcelId}&statuses=Available");
+        var inSelection = await client.GetFromJsonAsync<PaginatedResponse<HomeListItemResponse>>(
+            $"/api/homes?landParcelIds={parcelId}&statuses=InSelection&statuses=UnderContract");
+
+        available!.Items.Select(h => (h.Id, h.Status)).Should().Equal((availableHomeId, "Available"));
+        inSelection!.Items.Select(h => (h.Id, h.Status)).Should().Equal((inSelectionHomeId, "InSelection"));
+    }
+
+    private static async Task<string> RegisterHomeAsync(HttpClient client, string parcelId)
+    {
+        var response = await client.PostAsJsonAsync("/api/homes",
+            new RegisterHomeRequest(parcelId, "SingleFamily", 3, 2m, false, 1200m, 1990, "Test Appraiser", new DateOnly(2024, 1, 1), 280000m));
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<RegisterHomeResponse>())!.HomeId;
     }
 
     private async Task<string> CreateLandParcelAsync()

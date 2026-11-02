@@ -1,8 +1,11 @@
 using CommonGround.SharedKernel.Domain;
 
-namespace CommonGround.PropertyRegistry.Domain.Homes;
+namespace CommonGround.PropertyRegistry.Application.ReadModels;
 
-/// <summary>Where a home is in its lifecycle, from offering it to the waiting list through leasing and resale.</summary>
+/// <summary>
+/// Where a home stands in being sold, from offering it to the waiting list through leasing and resale, as
+/// <see cref="HomeAvailabilityView"/> shows it.
+/// </summary>
 public sealed class HomeStatus : Enumeration<HomeStatus>
 {
     /// <summary>Home is vacant and available for a new homeowner.</summary>

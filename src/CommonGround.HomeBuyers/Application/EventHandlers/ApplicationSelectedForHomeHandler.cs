@@ -17,6 +17,7 @@ public static class ApplicationSelectedForHomeHandler
             @event.ApplicantFullName,
             @event.ApplicantEmail,
             @event.ApplicantPhone,
+            @event.HomeSelectionId,
             @event.HomeId,
             @event.LandParcelId,
             @event.GroundLeaseTemplateId,

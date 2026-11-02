@@ -74,18 +74,6 @@ public static class BusinessRuleViolation
                     });
         }
 
-        public static class PassOver
-        {
-            public static BusinessRuleViolationException PhaseNotApproved(ApplicationPhase phase)
-                => new(
-                    "home_buyers.homeowner_application.pass_over.phase_not_approved",
-                    new Dictionary<string, object?>
-                    {
-                        ["phase"] = phase.DisplayName,
-                        ["requiredPhase"] = ApplicationPhase.Approved.DisplayName,
-                    });
-        }
-
         public static class ReturnToWaitingList
         {
             public static BusinessRuleViolationException PhaseNotSelected(ApplicationPhase phase)

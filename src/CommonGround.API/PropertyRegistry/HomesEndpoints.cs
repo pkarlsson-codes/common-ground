@@ -67,15 +67,16 @@ public static class HomesEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
 
-        var (view, label) = await bus.InvokeForTenantAsync<HomeDetails>(bus.TenantId!,
+        var (view, availability, label) = await bus.InvokeForTenantAsync<HomeDetails>(bus.TenantId!,
             new GetHome(HomeId.Create(homeId)),
             cancellationToken);
 
         var response = new HomeResponse(view.Id, view.LandParcelId, label, view.UnitDesignation,
             view.UnitType, view.Bedrooms, view.Bathrooms, view.IsAccessible, view.SquareFootage,
             view.YearBuilt, view.AssessedValue, view.LastAssessedDate,
-            view.ConditionNotes, view.Status, view.RegisteredAt,
-            view.AvailableAgainDate, view.SelectionOpenedDate, view.UnderContractDate, view.LeasedDate);
+            view.ConditionNotes, availability.Status, view.RegisteredAt,
+            availability.AvailableAgainDate, availability.SelectionOpenedDate, availability.UnderContractDate,
+            availability.LeasedDate);
 
         return Results.Ok(response);
     }
@@ -99,7 +100,7 @@ public static class HomesEndpoints
 
         var response = result.MapItems(i => new HomeListItemResponse(
             i.Home.Id, i.Home.LandParcelId, i.Label, i.Home.UnitDesignation, i.Home.UnitType, i.Home.Bedrooms,
-            i.Home.Bathrooms, i.Home.SquareFootage, i.Home.AssessedValue, i.Home.Status));
+            i.Home.Bathrooms, i.Home.SquareFootage, i.Home.AssessedValue, i.Status));
 
         return Results.Ok(response);
     }

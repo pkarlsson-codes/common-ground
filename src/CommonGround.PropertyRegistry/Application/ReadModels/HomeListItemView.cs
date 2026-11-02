@@ -26,7 +26,4 @@ public class HomeListItemView
 
     /// <summary>Gets or sets the current assessed value.</summary>
     public decimal AssessedValue { get; set; }
-
-    /// <summary>Gets or sets the current status display name.</summary>
-    public string Status { get; set; } = string.Empty;
 }

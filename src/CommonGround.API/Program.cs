@@ -12,6 +12,7 @@ using CommonGround.TrustManagement.Infrastructure;
 using JasperFx;
 using JasperFx.Core;
 using JasperFx.Events;
+using Marten.Exceptions;
 using Serilog;
 using Wolverine;
 using Wolverine.ErrorHandling;
@@ -53,11 +54,13 @@ try
         // The exception handler turns RequiredDataMissingException into a 404.
         opts.EntityDefaults.OnMissing = OnMissing.ThrowException;
 
-        // Two handlers appending to the same event stream at once (e.g. a home's selection opening and
-        // its household being chosen) lose the race with a version conflict. Re-running the handler reloads
-        // the aggregate, so the loser applies its change on top of the winner's.
+        // Two handlers writing the same event stream or versioned document at once (e.g. news of a home's
+        // selection opening and of its household being chosen) lose the race with a version conflict, or,
+        // for a document both are creating, a duplicate. Re-running the handler reloads what it writes, so
+        // the loser applies its change on top of the winner's.
         opts.OnException<EventStreamUnexpectedMaxEventIdException>()
             .Or<ConcurrencyException>()
+            .Or<DocumentAlreadyExistsException>()
             .RetryWithCooldown(50.Milliseconds(), 100.Milliseconds(), 250.Milliseconds());
 
         if (useRabbitMq)

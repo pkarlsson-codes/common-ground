@@ -39,6 +39,9 @@ public static class PropertyRegistryMartenConfiguration
             .Index(x => x.SeedKey);
         options.Schema.For<HomeView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<HomeListItemView>().DatabaseSchemaName(SchemaName);
+
+        // Several handlers record news on the same home's availability; a version conflict retries the loser.
+        options.Schema.For<HomeAvailabilityView>().DatabaseSchemaName(SchemaName).UseOptimisticConcurrency(true);
         options.Schema.For<HomeAssessmentView>()
             .DatabaseSchemaName(SchemaName)
             .Index(x => x.UnitId);

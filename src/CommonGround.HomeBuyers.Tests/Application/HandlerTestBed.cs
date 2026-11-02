@@ -45,7 +45,7 @@ public class HandlerTestBed
     public HomeownerApplication SelectedApplication(Household household)
     {
         var application = ApprovedApplication(household);
-        return application.Evolve(application.SelectForHome(household, HomeId, "land-parcel-1", "template-1", 200000m, SelectedDate, StaffUser))!;
+        return application.Evolve(application.SelectForHome(household, HomeSelectionId.Generate(), HomeId, "land-parcel-1", "template-1", 200000m, SelectedDate, StaffUser))!;
     }
 
     public HomeSelection OpenSelection(params (HomeownerApplication Application, Household Household)[] candidates) =>

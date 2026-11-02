@@ -9,13 +9,13 @@ namespace CommonGround.PropertyRegistry.Application.Queries;
 /// <param name="UnitId">The ID of the home to fetch.</param>
 public sealed record GetHome(HomeId UnitId);
 
-/// <summary>A home and the label staff know it by.</summary>
-public sealed record HomeDetails(HomeView Home, string Label);
+/// <summary>A home, where it stands in being sold, and the label staff know it by.</summary>
+public sealed record HomeDetails(HomeView Home, HomeAvailabilityView Availability, string Label);
 
 /// <summary>Handles <see cref="GetHome"/>.</summary>
 public static class GetHomeHandler
 {
-    /// <summary>Returns the home, labelled with its parcel's address, or throws if not found.</summary>
+    /// <summary>Returns the home with its availability, labelled with its parcel's address, or throws if not found.</summary>
     public static async Task<HomeDetails> Handle(
         GetHome request,
         IQuerySession session,
@@ -26,8 +26,10 @@ public static class GetHomeHandler
         var view = await session.LoadAsync<HomeView>(request.UnitId.Value, cancellationToken).ConfigureAwait(false)
             ?? throw new AggregateNotFoundException(request.UnitId.Value);
 
+        var availability = await session.LoadAsync<HomeAvailabilityView>(view.Id, cancellationToken).ConfigureAwait(false)
+            ?? new HomeAvailabilityView { Id = view.Id };
         var parcel = await session.LoadAsync<LandParcelView>(view.LandParcelId, cancellationToken).ConfigureAwait(false);
 
-        return new HomeDetails(view, HomeLabel.Format(parcel?.Address ?? string.Empty, view.UnitDesignation));
+        return new HomeDetails(view, availability, HomeLabel.Format(parcel?.Address ?? string.Empty, view.UnitDesignation));
     }
 }

@@ -79,11 +79,13 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     }
 
     /// <summary>
-    /// Selects the application for a home. The household must be this application's household,
-    /// have completed readiness, and hold a prequalification still valid on <paramref name="selectedDate"/>.
+    /// Selects the application for a home in <paramref name="selectionId"/>. The household must be this
+    /// application's household, have completed readiness, and hold a prequalification still valid on
+    /// <paramref name="selectedDate"/>.
     /// </summary>
     public ApplicationSelectedForHome SelectForHome(
         Household household,
+        HomeSelectionId selectionId,
         string homeId, string landParcelId, string groundLeaseTemplateId,
         decimal purchasePrice, DateOnly selectedDate, UserId selectedBy)
     {
@@ -115,6 +117,7 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
             applicant.Name,
             applicant.Email,
             applicant.Phone,
+            selectionId.Value,
             homeId,
             landParcelId,
             groundLeaseTemplateId,
@@ -123,13 +126,18 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
             selectedBy.Value);
     }
 
-    /// <summary>Records that another household was chosen for <paramref name="homeId"/> in <paramref name="selectionId"/>.</summary>
-    public ApplicationPassedOver PassOver(HomeSelectionId selectionId, string homeId)
+    /// <summary>
+    /// Records that another household was chosen for <paramref name="homeId"/> in <paramref name="selectionId"/>.
+    /// An application that couldn't have been selected on <paramref name="selectedDate"/>, because it withdrew
+    /// or its household's readiness lapsed, was never really in the running, so it isn't passed over.
+    /// </summary>
+    /// <returns>The passing over, or <see langword="null"/> when the application couldn't have been selected.</returns>
+    public ApplicationPassedOver? PassOver(HomeSelectionId selectionId, string homeId, Household household, DateOnly selectedDate)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
 
-        if (Phase != ApplicationPhase.Approved)
-            throw BusinessRuleViolation.HomeownerApplication.PassOver.PhaseNotApproved(Phase);
+        if (!CanBeSelected(household, selectedDate))
+            return null;
 
         return new ApplicationPassedOver(Id.Value, HouseholdId.Value, selectionId.Value, homeId);
     }
@@ -138,10 +146,14 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     /// Returns the application to the waiting list after the purchase of <paramref name="homeId"/> it was
     /// selected for fell through. It keeps its original approval date, so the household keeps its place.
     /// </summary>
-    public ApplicationReturnedToWaitingList ReturnToWaitingList(string homeId, string reason, DateOnly returnedDate)
+    /// <returns>The return, or <see langword="null"/> when the application is already back on the waiting list.</returns>
+    public ApplicationReturnedToWaitingList? ReturnToWaitingList(string homeId, string reason, DateOnly returnedDate)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+
+        if (Phase == ApplicationPhase.Approved)
+            return null;
 
         if (Phase != ApplicationPhase.Selected)
             throw BusinessRuleViolation.HomeownerApplication.ReturnToWaitingList.PhaseNotSelected(Phase);
@@ -150,9 +162,13 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     }
 
     /// <summary>Records that the purchase of <paramref name="homeId"/> the application was selected for has closed.</summary>
-    public ApplicationPurchaseClosed RecordPurchaseClosed(string homeId, DateOnly closingDate)
+    /// <returns>The closing, or <see langword="null"/> when it is already recorded.</returns>
+    public ApplicationPurchaseClosed? RecordPurchaseClosed(string homeId, DateOnly closingDate)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+
+        if (Phase == ApplicationPhase.Purchased)
+            return null;
 
         if (Phase != ApplicationPhase.Selected)
             throw BusinessRuleViolation.HomeownerApplication.RecordPurchaseClosed.PhaseNotSelected(Phase);

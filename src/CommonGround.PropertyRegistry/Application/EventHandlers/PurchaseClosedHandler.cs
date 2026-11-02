@@ -1,33 +1,26 @@
 using CommonGround.Homeownership.Contracts.Events;
-using CommonGround.PropertyRegistry.Domain.Homes;
-using CommonGround.PropertyRegistry.Domain.Homes.Events;
-using CommonGround.SharedKernel.Extensions;
-using JasperFx.Events;
+using CommonGround.PropertyRegistry.Application.ReadModels;
 using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.PropertyRegistry.Application.EventHandlers;
 
-/// <summary>Marks a home leased when its purchase closes.</summary>
+/// <summary>Shows a home leased when its purchase closes.</summary>
 public static class PurchaseClosedHandler
 {
-    /// <summary>Fetches the home's stream for writing.</summary>
-    public static Task<IEventStream<Home>> LoadAsync(PurchaseClosed @event, IDocumentSession session, CancellationToken cancellationToken)
+    /// <summary>Loads the home's availability.</summary>
+    public static Task<HomeAvailabilityView?> LoadAsync(PurchaseClosed @event, IDocumentSession session, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(@event);
-        ArgumentNullException.ThrowIfNull(session);
 
-        return session.Events.FetchForWriting<Home>(@event.HomeId, cancellationToken);
+        return HomeAvailabilityUpdate.LoadAsync(session, @event.HomeId, cancellationToken);
     }
 
-    /// <summary>Marks the home leased from the closing date.</summary>
-    public static void Handle(PurchaseClosed @event, IEventStream<Home> stream)
+    /// <summary>Records the closing on the home's availability.</summary>
+    public static IMartenOp Handle(PurchaseClosed @event, HomeAvailabilityView? availability)
     {
         ArgumentNullException.ThrowIfNull(@event);
-        ArgumentNullException.ThrowIfNull(stream);
 
-        stream.Decide(home =>
-        {
-            return home.MarkLeased(@event.ClosingDate);
-        });
+        return HomeAvailabilityUpdate.Record(@event.HomeId, availability, view => view.RecordPurchaseClosed(@event.ClosingDate));
     }
 }

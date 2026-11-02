@@ -1,5 +1,4 @@
 using CommonGround.PropertyRegistry.Application.ReadModels;
-using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.Homes.Events;
 using JasperFx.Events;
 using Marten.Events.Aggregation;
@@ -24,7 +23,6 @@ internal sealed class HomeViewProjection : SingleStreamProjection<HomeView, stri
             YearBuilt = e.Data.YearBuilt,
             AssessedValue = e.Data.InitialAssessedValue,
             LastAssessedDate = e.Data.InitiallyAssessedAt,
-            Status = HomeStatus.Available.DisplayName,
             RegisteredAt = e.Data.OccurredAt,
         };
 
@@ -34,37 +32,5 @@ internal sealed class HomeViewProjection : SingleStreamProjection<HomeView, stri
         view.AssessedValue = e.AssessedValue;
         view.LastAssessedDate = e.AssessmentDate;
         view.ConditionNotes = e.ConditionNotes;
-    }
-
-    public static void Apply(HomeView view, HomeSelectionOpened e)
-    {
-        view.Status = HomeStatus.InSelection.DisplayName;
-        view.SelectionOpenedDate = e.OpenedDate;
-    }
-
-    public static void Apply(HomeView view, HomeSelectionClosedWithoutSale e)
-    {
-        view.Status = HomeStatus.Available.DisplayName;
-        view.SelectionOpenedDate = null;
-    }
-
-    public static void Apply(HomeView view, HomeUnderContract e)
-    {
-        view.Status = HomeStatus.UnderContract.DisplayName;
-        view.UnderContractDate = e.ContractDate;
-    }
-
-    public static void Apply(HomeView view, HomeContractReleased e)
-    {
-        view.Status = HomeStatus.Available.DisplayName;
-        view.AvailableAgainDate = e.ReleasedDate;
-        view.SelectionOpenedDate = null;
-        view.UnderContractDate = null;
-    }
-
-    public static void Apply(HomeView view, HomeLeased e)
-    {
-        view.Status = HomeStatus.Leased.DisplayName;
-        view.LeasedDate = e.LeasedDate;
     }
 }

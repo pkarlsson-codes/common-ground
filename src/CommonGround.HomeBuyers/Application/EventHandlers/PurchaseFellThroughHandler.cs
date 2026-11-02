@@ -13,7 +13,7 @@ namespace CommonGround.HomeBuyers.Application.EventHandlers;
 
 /// <summary>What reacting to a purchase falling through reads and writes.</summary>
 /// <param name="Application">The household's application stream.</param>
-/// <param name="Selection">The completed selection that chose the household, if the application is still selected.</param>
+/// <param name="Selection">The completed selection that chose the household, unless its purchase has already fallen through.</param>
 /// <param name="NextSelection">What a new selection for the home would start from.</param>
 public sealed record FallenThroughPurchase(
     IEventStream<HomeownerApplication> Application,
@@ -27,7 +27,7 @@ public sealed record FallenThroughPurchase(
 public static class PurchaseFellThroughHandler
 {
     /// <summary>
-    /// Fetches the application and, while it is still selected, the selection that chose it, both for
+    /// Fetches the application and, while it is still completed, the selection that chose it, both for
     /// writing, and snapshots the waiting list a new selection would start from. A purchase started
     /// directly has no application.
     /// </summary>
@@ -45,8 +45,6 @@ public static class PurchaseFellThroughHandler
         var application = await session.Events
             .FetchForWriting<HomeownerApplication>(@event.ApplicationId, cancellationToken)
             .ConfigureAwait(false);
-        if (application.Aggregate?.Phase != ApplicationPhase.Selected)
-            return new FallenThroughPurchase(application, null, null);
 
         var completedStatus = HomeSelectionStatus.Completed.DisplayName;
         var selectionId = await session.Query<HomeSelectionView>()
@@ -80,7 +78,7 @@ public static class PurchaseFellThroughHandler
     {
         ArgumentNullException.ThrowIfNull(@event);
 
-        if (purchase?.Application.Aggregate?.Phase != ApplicationPhase.Selected)
+        if (purchase is null)
             return MartenOps.Nothing();
 
         IMartenOp nextSelection = MartenOps.Nothing();

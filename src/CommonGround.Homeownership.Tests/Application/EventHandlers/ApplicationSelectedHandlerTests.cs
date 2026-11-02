@@ -12,7 +12,7 @@ public class ApplicationSelectedHandlerTests
     {
         private static readonly ApplicationSelected Selected = new(
             "application-1", "household-1", "Alice Johnson", "alice@example.com", null,
-            "home-1", "land-parcel-1", "groundleasetemplate-1", 250_000m, new DateOnly(2026, 6, 1), "user-1");
+            "homeselection-1", "home-1", "land-parcel-1", "groundleasetemplate-1", 250_000m, new DateOnly(2026, 6, 1), "user-1");
 
         [Fact]
         public void GivenNoOpenWorkflow_WhenApplicationSelected_ThenStartsAPurchaseWorkflow()

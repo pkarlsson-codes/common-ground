@@ -31,8 +31,6 @@ public static class PurchaseClosedHandler
     {
         ArgumentNullException.ThrowIfNull(@event);
 
-        application?.Decide(a => a.Phase == ApplicationPhase.Selected
-            ? a.RecordPurchaseClosed(@event.HomeId, @event.ClosingDate)
-            : null);
+        application?.Decide(a => a.RecordPurchaseClosed(@event.HomeId, @event.ClosingDate));
     }
 }

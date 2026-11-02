@@ -9,6 +9,7 @@ public sealed record ApplicationSelectedForHome(
     string ApplicantFullName,
     string ApplicantEmail,
     string? ApplicantPhone,
+    string HomeSelectionId,
     string HomeId,
     string LandParcelId,
     string GroundLeaseTemplateId,

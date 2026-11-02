@@ -29,7 +29,6 @@ internal static class BusinessRuleErrorMessageMap
             ["home_buyers.homeowner_application.deny.phase_not_submitted"] = "Only submitted applications can be denied. This application is {phase}.",
             ["home_buyers.homeowner_application.deny.reason_required"] = "A reason is required to deny an application.",
             ["home_buyers.homeowner_application.modify.terminal_phase"] = "This application is {phase} and can no longer be changed.",
-            ["home_buyers.homeowner_application.pass_over.phase_not_approved"] = "Only approved applications can be passed over. This application is {phase}.",
             ["home_buyers.homeowner_application.select_applicant.household_readiness_incomplete"] = "The household has not completed housing counseling, CLT orientation and mortgage prequalification.",
             ["home_buyers.homeowner_application.select_applicant.phase_not_approved"] = "Only approved applications can be selected. This application is {phase}.",
             ["home_buyers.homeowner_application.select_applicant.prequalification_expired"] = "The household's mortgage prequalification expired on {expiryDate}.",

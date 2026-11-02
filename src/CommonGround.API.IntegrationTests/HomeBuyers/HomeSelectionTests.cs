@@ -358,12 +358,14 @@ public class HomeSelectionTests(ApiFactory factory)
         var selectionId = await StartSelectionAsync(client, homeId);
         await SelectByPriorityAsync(client, selectionId, applicant.ApplicationId, templateId);
 
+        await InvokeForTenantAsync(new HomeSelectionStarted(selectionId, homeId, DateTimeOffset.UtcNow));
         await InvokeForTenantAsync(new ApplicationSelected(
             applicant.ApplicationId,
             applicant.HouseholdId,
             applicant.FullName,
             applicant.Email,
             null,
+            selectionId,
             homeId,
             landParcelId,
             templateId,
@@ -407,9 +409,10 @@ public class HomeSelectionTests(ApiFactory factory)
 
         var selectionId = await StartSelectionAsync(client, homeId);
         await SelectByPriorityAsync(client, selectionId, applicant.ApplicationId, templateId);
+        await InvokeForTenantAsync(new HomeSelectionStarted(selectionId, homeId, DateTimeOffset.UtcNow));
         await InvokeForTenantAsync(new ApplicationSelected(
             applicant.ApplicationId, applicant.HouseholdId, applicant.FullName, applicant.Email, null,
-            homeId, landParcelId, templateId, 200000m, SelectedDate, "user-test"));
+            selectionId, homeId, landParcelId, templateId, 200000m, SelectedDate, "user-test"));
 
         (await client.GetFromJsonAsync<HouseholdResponse>($"/api/households/{applicant.HouseholdId}"))!
             .Journey.Stage.Should().Be("Purchasing");
@@ -449,9 +452,10 @@ public class HomeSelectionTests(ApiFactory factory)
 
         var selectionId = await StartSelectionAsync(client, homeId);
         await SelectByPriorityAsync(client, selectionId, applicant.ApplicationId, templateId);
+        await InvokeForTenantAsync(new HomeSelectionStarted(selectionId, homeId, DateTimeOffset.UtcNow));
         await InvokeForTenantAsync(new ApplicationSelected(
             applicant.ApplicationId, applicant.HouseholdId, applicant.FullName, applicant.Email, null,
-            homeId, landParcelId, templateId, 200000m, SelectedDate, "user-test"));
+            selectionId, homeId, landParcelId, templateId, 200000m, SelectedDate, "user-test"));
 
         await InvokeForTenantAsync(new CommonGround.Homeownership.Contracts.Events.PurchaseClosed(
             "purchase-workflow-test", homeId, applicant.ApplicationId, applicant.HouseholdId,

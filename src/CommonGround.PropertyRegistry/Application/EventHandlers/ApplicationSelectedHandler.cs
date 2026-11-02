@@ -1,33 +1,26 @@
 using CommonGround.HomeBuyers.Contracts.Events;
-using CommonGround.PropertyRegistry.Domain.Homes;
-using CommonGround.PropertyRegistry.Domain.Homes.Events;
-using CommonGround.SharedKernel.Extensions;
-using JasperFx.Events;
+using CommonGround.PropertyRegistry.Application.ReadModels;
 using Marten;
+using Wolverine.Marten;
 
 namespace CommonGround.PropertyRegistry.Application.EventHandlers;
 
-/// <summary>Reacts to applicant selection by marking a home under contract.</summary>
+/// <summary>Shows a home under contract when a household is selected for it.</summary>
 public static class ApplicationSelectedHandler
 {
-    /// <summary>Fetches the home's stream for writing.</summary>
-    public static Task<IEventStream<Home>> LoadAsync(ApplicationSelected @event, IDocumentSession session, CancellationToken cancellationToken)
+    /// <summary>Loads the home's availability.</summary>
+    public static Task<HomeAvailabilityView?> LoadAsync(ApplicationSelected @event, IDocumentSession session, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(@event);
-        ArgumentNullException.ThrowIfNull(session);
 
-        return session.Events.FetchForWriting<Home>(@event.HomeId, cancellationToken);
+        return HomeAvailabilityUpdate.LoadAsync(session, @event.HomeId, cancellationToken);
     }
 
-    /// <summary>Marks the home under contract from the day the applicant was selected.</summary>
-    public static void Handle(ApplicationSelected @event, IEventStream<Home> stream)
+    /// <summary>Records the selection on the home's availability.</summary>
+    public static IMartenOp Handle(ApplicationSelected @event, HomeAvailabilityView? availability)
     {
         ArgumentNullException.ThrowIfNull(@event);
-        ArgumentNullException.ThrowIfNull(stream);
 
-        stream.Decide(home =>
-        {
-            return home.MarkUnderContract(@event.SelectedDate);
-        });
+        return HomeAvailabilityUpdate.Record(@event.HomeId, availability, view => view.RecordApplicationSelected(@event.HomeSelectionId, @event.ApplicationId, @event.SelectedDate));
     }
 }
