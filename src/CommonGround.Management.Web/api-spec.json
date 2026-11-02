@@ -6327,6 +6327,60 @@
         }
       }
     },
+    "/api/v1/today": {
+      "get": {
+        "tags": [
+          "Today"
+        ],
+        "operationId": "GetToday",
+        "parameters": [
+          {
+            "name": "areas",
+            "in": "query",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/trusts/current": {
       "get": {
         "tags": [
@@ -10591,6 +10645,106 @@
           "resolvedDate": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "TodayResponse": {
+        "type": "object",
+        "description": "What needs attention today, most urgent first, and how many items each area and kind has.",
+        "additionalProperties": false,
+        "properties": {
+          "today": {
+            "type": "string",
+            "description": "The trust's today.",
+            "format": "date"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "How many items there are across every area, including those filtered out.",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "description": "The items in the requested areas, most urgent first.",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemResponse"
+            }
+          },
+          "areaCounts": {
+            "type": "array",
+            "description": "How many items each area has, every area in work order, including those filtered out.",
+            "items": {
+              "$ref": "#/components/schemas/WorkCountResponse"
+            }
+          },
+          "kindCounts": {
+            "type": "array",
+            "description": "How many items each kind has, including those filtered out.",
+            "items": {
+              "$ref": "#/components/schemas/WorkCountResponse"
+            }
+          }
+        }
+      },
+      "WorkItemResponse": {
+        "type": "object",
+        "description": "Something that needs a staff member.",
+        "additionalProperties": false,
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "The area it belongs to: applicants, selections, purchases or records."
+          },
+          "kind": {
+            "type": "string",
+            "description": "What is waiting, e.g. application-awaiting-decision."
+          },
+          "recordType": {
+            "type": "string",
+            "description": "The kind of record it is about, e.g. application."
+          },
+          "recordId": {
+            "type": "string",
+            "description": "The record's ID."
+          },
+          "label": {
+            "type": "string",
+            "description": "The name staff know the record by."
+          },
+          "detail": {
+            "type": "string",
+            "description": "One line saying what is waiting."
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "The date it must be done by, if it has one.",
+            "format": "date",
+            "nullable": true
+          },
+          "waitingSince": {
+            "type": "string",
+            "description": "The date it started waiting, or became due soon.",
+            "format": "date"
+          },
+          "urgency": {
+            "type": "string",
+            "description": "\"overdue\" when past its due date, \"soon\" when due within a week, otherwise \"plain\"."
+          }
+        }
+      },
+      "WorkCountResponse": {
+        "type": "object",
+        "description": "How many items an area or kind has.",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "The area or kind."
+          },
+          "count": {
+            "type": "integer",
+            "description": "How many items it has.",
+            "format": "int32"
           }
         }
       },

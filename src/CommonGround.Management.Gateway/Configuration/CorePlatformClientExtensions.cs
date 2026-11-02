@@ -79,6 +79,9 @@ internal static class CorePlatformClientExtensions
         services.AddApiClient<IGroundLeaseTemplatesApiClient, GroundLeaseTemplatesApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
+        services.AddApiClient<ITodayApiClient, TodayApiClient>(corePlatformUri)
+            .AddHttpMessageHandler<InternalGatewayAuthHandler>();
+
         return services;
     }
 }

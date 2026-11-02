@@ -6,6 +6,7 @@ using CommonGround.API.Contracts.Homeownership.Requests;
 using CommonGround.API.Contracts.Homeownership.Responses;
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
+using CommonGround.API.Contracts.Today.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
 using FluentAssertions;
 using Wolverine.Marten;
@@ -68,6 +69,41 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
             .Items.Should().ContainSingle().Which.Id.Should().Be(purchase.WorkflowId);
         (await client.GetFromJsonAsync<PaginatedResponse<PurchaseWorkflowListItemResponse>>($"/api/purchase-workflows?groundLeaseTemplateId={purchase.TemplateId}"))!
             .Items.Should().ContainSingle().Which.Id.Should().Be(purchase.WorkflowId);
+    }
+
+    [Fact]
+    public async Task SelectingAHousehold_MovesTheHomeFromSelectionsToPurchasesOnToday()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var landParcelId = await CreateLandParcelAsync(client);
+        var homeId = await TrackAsync(() => RegisterHomeAsync(client, landParcelId));
+        var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
+        var applicant = await CreateApprovedApplicationAsync(client);
+
+        (await GetTodayAsync(client)).Items.Should().ContainSingle(i => i.RecordId == homeId)
+            .Which.Should().BeEquivalentTo(new { Area = "selections", Kind = "home-available", Label = "789 Elm St" });
+
+        var selectionId = await TrackAsync(() => StartSelectionAsync(client, homeId));
+        var selecting = await GetTodayAsync(client);
+        selecting.Items.Should().NotContain(i => i.RecordId == homeId);
+        selecting.Items.Should().ContainSingle(i => i.RecordId == selectionId).Which.Kind.Should().Be("selection-open");
+
+        await TrackAsync(async () =>
+            (await client.PostAsJsonAsync($"/api/home-selections/{selectionId}/select-by-priority",
+                new SelectHouseholdByPriorityRequest(
+                    applicant.ApplicationId, ["WaitingListTenure"], "Longest on the waiting list", templateId, 200000m, SelectedDate)))
+                .StatusCode.Should().Be(HttpStatusCode.NoContent));
+        var workflowId = (await client.GetFromJsonAsync<PaginatedResponse<PurchaseWorkflowListItemResponse>>(
+            $"/api/purchase-workflows?homeId={homeId}"))!.Items.Single().Id;
+
+        var purchasing = await GetTodayAsync(client);
+        purchasing.Items.Should().NotContain(i => i.RecordId == selectionId || i.RecordId == homeId);
+        purchasing.Items.Should().ContainSingle(i => i.RecordId == workflowId).Which.Should().BeEquivalentTo(new
+        {
+            Area = "purchases",
+            Kind = "purchase-step-waiting",
+            Label = "789 Elm St",
+        });
     }
 
     [Fact]
@@ -205,6 +241,9 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
 
         return new Purchase(landParcelId, homeId, templateId, applicant, workflowId);
     }
+
+    private static async Task<TodayResponse> GetTodayAsync(HttpClient client) =>
+        (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!;
 
     private static async Task<string> CreateLandParcelAsync(HttpClient client)
     {

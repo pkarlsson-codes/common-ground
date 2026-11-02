@@ -12,6 +12,7 @@ apis/LandParcelsApi.ts
 apis/OidcApi.ts
 apis/PurchaseWorkflowsApi.ts
 apis/StewardshipApi.ts
+apis/TodayApi.ts
 apis/TrustsApi.ts
 apis/index.ts
 index.ts
@@ -149,6 +150,7 @@ models/SubmitApplicationResponse.ts
 models/SubmitOccupancyVerificationRequest.ts
 models/TagDocumentRequest.ts
 models/TitleDetailsDto.ts
+models/TodayResponse.ts
 models/TrustResponse.ts
 models/UpdateDocumentMetadataRequest.ts
 models/UpdateHouseholdCircumstancesRequest.ts
@@ -158,5 +160,7 @@ models/VerifyOccupancyRequest.ts
 models/WaitingListEntryResponse.ts
 models/WithdrawApplicationRequest.ts
 models/WithdrawPurchaseRequest.ts
+models/WorkCountResponse.ts
+models/WorkItemResponse.ts
 models/index.ts
 runtime.ts
