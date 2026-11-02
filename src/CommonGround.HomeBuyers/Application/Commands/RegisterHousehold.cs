@@ -14,9 +14,9 @@ public sealed record RegisterHousehold(
 
 /// <summary>A member to register as part of <see cref="RegisterHousehold"/>.</summary>
 public sealed record RegisterHouseholdMember(
-    string Name,
-    string Email,
-    string Phone,
+    PersonName Name,
+    EmailAddress Email,
+    PhoneNumber Phone,
     bool IsPrimary);
 
 /// <summary>Handles <see cref="RegisterHousehold"/>.</summary>

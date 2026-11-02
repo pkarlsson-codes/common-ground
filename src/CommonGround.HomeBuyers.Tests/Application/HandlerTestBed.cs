@@ -24,7 +24,7 @@ public class HandlerTestBed
     {
         var household = EventReplay.Replay<Household>(global::CommonGround.HomeBuyers.Domain.Households.Household.Register(
             HouseholdId.Generate(),
-            [HouseholdMember.Create("Alice Johnson", "alice@example.com", "555-0100", true)],
+            [HouseholdMember.Create(PersonName.Create("Alice Johnson"), EmailAddress.Create("alice@example.com"), new PhoneNumber("(202) 555-0100"), true)],
             HouseholdCircumstances.Create(false, 65000m),
             StaffUser));
         return ready

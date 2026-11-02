@@ -9,9 +9,9 @@ namespace CommonGround.HomeBuyers.Application.Commands;
 public sealed record AddHouseholdMember(
     HouseholdId HouseholdId,
     HouseholdMemberId MemberId,
-    string Name,
-    string Email,
-    string Phone,
+    PersonName Name,
+    EmailAddress Email,
+    PhoneNumber Phone,
     UserId AddedBy);
 
 /// <summary>Handles <see cref="AddHouseholdMember"/>.</summary>

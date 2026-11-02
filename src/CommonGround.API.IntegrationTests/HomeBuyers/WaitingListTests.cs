@@ -102,8 +102,8 @@ public class WaitingListTests(ApiFactory factory)
         var householdResponse = await client.PostAsJsonAsync("/api/households",
             new RegisterHouseholdRequest(
                 [
-                    new HouseholdMemberRequest("Searched Primary", $"searched-primary-{marker}@example.com", "555-0100", true),
-                    new HouseholdMemberRequest($"Second {marker}", "searched-second@example.com", "555-0101", false),
+                    new HouseholdMemberRequest("Searched Primary", $"searched-primary-{marker}@example.com", "(202) 555-0100", true),
+                    new HouseholdMemberRequest($"Second {marker}", "searched-second@example.com", "(202) 555-0101", false),
                 ],
                 false,
                 65000m));
@@ -144,7 +144,7 @@ public class WaitingListTests(ApiFactory factory)
     {
         var response = await client.PostAsJsonAsync("/api/households",
             new RegisterHouseholdRequest(
-                [new HouseholdMemberRequest("Waiting Applicant", email, "555-0100", true)],
+                [new HouseholdMemberRequest("Waiting Applicant", email, "(202) 555-0100", true)],
                 false,
                 65000m));
         response.StatusCode.Should().Be(HttpStatusCode.Created);

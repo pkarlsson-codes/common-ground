@@ -47,9 +47,11 @@ public class PhoneNumberTests
     }
 
     [Fact]
-    public void Constructor_WhitespaceInput_ThrowsArgumentException()
+    public void Constructor_WhitespaceInput_ThrowsBusinessRuleViolation()
     {
-        Assert.Throws<ArgumentException>(() => new PhoneNumber("   "));
+        var exception = Assert.Throws<BusinessRuleViolationException>(() => new PhoneNumber("   "));
+
+        Assert.Equal("shared.phone.required", exception.Code);
     }
 
     [Theory]

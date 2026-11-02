@@ -16,10 +16,13 @@ public sealed class PhoneNumber : ValueObject
     /// Initializes a new instance of the PhoneNumber class by parsing the input.
     /// </summary>
     /// <param name="input">A phone number in any common format, e.g. "(202) 555-1234" or "+12025551234".</param>
-    /// <exception cref="BusinessRuleViolationException">The input is not a valid phone number.</exception>
+    /// <exception cref="BusinessRuleViolationException">The input is empty or not a valid phone number.</exception>
     public PhoneNumber(string input)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(input);
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            throw BusinessRuleViolation.Phone.Required();
+        }
 
         var util = PhoneNumberUtil.GetInstance();
         PhoneNumbers.PhoneNumber parsed;

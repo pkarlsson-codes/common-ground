@@ -531,7 +531,7 @@ public class HomeSelectionTests(ApiFactory factory)
 
         var response = await client.PostAsJsonAsync("/api/households",
             new RegisterHouseholdRequest(
-                [new HouseholdMemberRequest(fullName, email, "555-0100", true)],
+                [new HouseholdMemberRequest(fullName, email, "(202) 555-0100", true)],
                 requiresAccessibility,
                 annualIncome));
         response.StatusCode.Should().Be(HttpStatusCode.Created);

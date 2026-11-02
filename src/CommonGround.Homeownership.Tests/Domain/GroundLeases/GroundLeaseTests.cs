@@ -42,7 +42,7 @@ public class GroundLeaseTests
         public PurchaseWorkflow Workflow() =>
             EventReplay.Replay<PurchaseWorkflow>(PurchaseWorkflow.Initiate(
                 PurchaseWorkflowId.Generate(), GroundLeaseTemplateId.Generate(), ParcelId, HomeId,
-                new Homeowner("Buyer Name", "buyer@example.com"), 250000m, StaffUser));
+                Homeowner.From("Buyer Name", "buyer@example.com"), 250000m, StaffUser));
 
         public GroundLeaseCreatedFromPurchase FromPurchase(GroundLeaseTemplate template) =>
             GroundLease.CreateFromPurchase(LeaseId, template, Workflow(), new DateOnly(2026, 1, 1), StaffUser);
@@ -178,7 +178,7 @@ public class GroundLeaseTests
                 TermYears = 99,
                 CovenantTerms = "Template covenant terms",
                 ResalePolicyTerms = new { FormulaKind = FormulaKind.IndexBased, IndexType = "CPI" },
-                CurrentHomeowner = new { FullName = "Buyer Name", Email = "buyer@example.com" },
+                CurrentHomeowner = new { FullName = new { Value = "Buyer Name" }, Email = new { Value = "buyer@example.com" } },
             });
         }
 

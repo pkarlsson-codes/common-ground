@@ -15,7 +15,7 @@ public class PurchaseWorkflowTests
     private const string HomeId = "home-5678";
     private static readonly UserId StaffUser = UserId.Generate();
     private static readonly GroundLeaseTemplateId LeaseTemplateId = GroundLeaseTemplateId.Generate();
-    private static readonly Homeowner Buyer = new("Alice Johnson", "alice@example.com", "+12025551234");
+    private static readonly Homeowner Buyer = Homeowner.From("Alice Johnson", "alice@example.com", "+12025551234");
 
     private static PurchaseWorkflow CreateWorkflow(decimal price = 250_000m)
     {
@@ -40,7 +40,7 @@ public class PurchaseWorkflowTests
         var workflow = CreateWorkflow();
 
         workflow.GroundLeaseTemplateId.Should().Be(LeaseTemplateId);
-        workflow.Buyer.FullName.Should().Be("Alice Johnson");
+        workflow.Buyer.FullName.Value.Should().Be("Alice Johnson");
         workflow.PurchasePrice.Should().Be(250_000m);
         workflow.Phase.Should().Be(WorkflowPhase.Initiated);
         workflow.InitiatedBy.Should().Be(StaffUser);

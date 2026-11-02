@@ -34,7 +34,7 @@ public class HomeownerApplicationEligibilityTests(ApiFactory factory)
     {
         var response = await client.PostAsJsonAsync("/api/households",
             new RegisterHouseholdRequest(
-                [new HouseholdMemberRequest("Eligibility Applicant", email, "555-0100", true)],
+                [new HouseholdMemberRequest("Eligibility Applicant", email, "(202) 555-0100", true)],
                 false,
                 65000m));
         response.StatusCode.Should().Be(HttpStatusCode.Created);

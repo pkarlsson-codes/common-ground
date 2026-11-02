@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using CommonGround.API.Contracts.HomeBuyers.Requests;
 using CommonGround.API.Contracts.HomeBuyers.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
@@ -27,17 +28,43 @@ public class HouseholdEndpointsTests(ApiFactory factory)
             .Which.Should().BeEquivalentTo(new { Id = householdId, PrimaryContact = new { Email = email }, HouseholdSize = 1 });
     }
 
+    [Theory]
+    [InlineData("Invalid Phone", "invalid-phone@example.com", "555-0100", "shared.phone.invalid_format")]
+    [InlineData("Invalid Email", "invalid-email.example.com", "(202) 555-0100", "shared.email.invalid_format")]
+    [InlineData("", "no-name@example.com", "(202) 555-0100", "shared.person_name.required")]
+    public async Task RegisterHousehold_WithInvalidContactDetails_Returns422(string name, string email, string phone, string code)
+    {
+        var client = factory.CreateClient().WithAuthToken();
+
+        var response = await client.PostAsJsonAsync("/api/households",
+            new RegisterHouseholdRequest([new HouseholdMemberRequest(name, email, phone, true)], false, 65000m));
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("code").GetString().Should().Be(code);
+    }
+
+    [Fact]
+    public async Task RegisterHousehold_WithLocalPhone_StoresItInE164()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var householdId = await RegisterHouseholdAsync(client, $"e164-{Guid.NewGuid():N}@example.com");
+
+        var household = await client.GetFromJsonAsync<HouseholdResponse>($"/api/households/{householdId}");
+
+        household!.Members.Should().ContainSingle().Which.Phone.Should().Be("+12025550100");
+    }
+
     [Fact]
     public async Task GetHouseholds_SearchByOtherMemberName_ReturnsHouseholdUsingTheMembersCurrentName()
     {
         var client = factory.CreateClient().WithAuthToken();
         var householdId = await RegisterHouseholdAsync(client, $"other-member-{Guid.NewGuid():N}@example.com");
         var added = await client.PostAsJsonAsync($"/api/households/{householdId}/members",
-            new AddHouseholdMemberRequest("Partner", "partner@example.com", "555-0101"));
+            new AddHouseholdMemberRequest("Partner", "partner@example.com", "(202) 555-0101"));
         var memberId = (await added.Content.ReadFromJsonAsync<AddHouseholdMemberResponse>())!.MemberId;
         var newName = $"Renamed-{Guid.NewGuid():N}";
         await client.PutAsJsonAsync($"/api/households/{householdId}/members/{memberId}",
-            new UpdateHouseholdMemberRequest(newName, "partner@example.com", "555-0101"));
+            new UpdateHouseholdMemberRequest(newName, "partner@example.com", "(202) 555-0101"));
 
         var page = await client.GetFromJsonAsync<PaginatedResponse<HouseholdListItemResponse>>(
             $"/api/households?search={Uri.EscapeDataString(newName.ToLowerInvariant())}");
@@ -52,18 +79,18 @@ public class HouseholdEndpointsTests(ApiFactory factory)
         var householdId = await RegisterHouseholdAsync(client, $"members-{Guid.NewGuid():N}@example.com");
 
         var added = await client.PostAsJsonAsync($"/api/households/{householdId}/members",
-            new AddHouseholdMemberRequest("Partner", "partner@example.com", "555-0101"));
+            new AddHouseholdMemberRequest("Partner", "partner@example.com", "(202) 555-0101"));
         added.StatusCode.Should().Be(HttpStatusCode.Created);
         var memberId = (await added.Content.ReadFromJsonAsync<AddHouseholdMemberResponse>())!.MemberId;
 
         (await client.PutAsJsonAsync($"/api/households/{householdId}/members/{memberId}",
-            new UpdateHouseholdMemberRequest("Partner Renamed", "partner@example.com", "555-0199")))
+            new UpdateHouseholdMemberRequest("Partner Renamed", "partner@example.com", "(202) 555-0199")))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var household = await GetHouseholdAsync(client, householdId);
         household.HouseholdSize.Should().Be(2);
         household.Members.Should().ContainSingle(m => m.Id == memberId)
-            .Which.Should().BeEquivalentTo(new { Name = "Partner Renamed", Phone = "555-0199", IsPrimary = false });
+            .Which.Should().BeEquivalentTo(new { Name = "Partner Renamed", Phone = "+12025550199", IsPrimary = false });
 
         (await client.DeleteAsync($"/api/households/{householdId}/members/{memberId}"))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -115,7 +142,7 @@ public class HouseholdEndpointsTests(ApiFactory factory)
     {
         var response = await client.PostAsJsonAsync("/api/households",
             new RegisterHouseholdRequest(
-                [new HouseholdMemberRequest("Household Applicant", email, "555-0100", true)],
+                [new HouseholdMemberRequest("Household Applicant", email, "(202) 555-0100", true)],
                 false,
                 65000m));
         response.StatusCode.Should().Be(HttpStatusCode.Created);

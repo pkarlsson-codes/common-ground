@@ -44,7 +44,7 @@ public static class ApplicationSelectedHandler
             GroundLeaseTemplateId.Create(@event.GroundLeaseTemplateId),
             @event.LandParcelId,
             @event.HomeId,
-            new Homeowner(@event.ApplicantFullName, @event.ApplicantEmail, @event.ApplicantPhone),
+            Homeowner.From(@event.ApplicantFullName, @event.ApplicantEmail, @event.ApplicantPhone),
             @event.PurchasePrice,
             UserId.Create(@event.SelectedBy),
             @event.ApplicationId,

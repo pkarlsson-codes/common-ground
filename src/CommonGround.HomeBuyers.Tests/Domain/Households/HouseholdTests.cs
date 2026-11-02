@@ -14,8 +14,8 @@ public class HouseholdTests
         public UserId StaffUser { get; } = UserId.Generate();
         public HouseholdCircumstances Circumstances { get; } = HouseholdCircumstances.Create(false, 65000m);
 
-        public HouseholdMember Primary { get; } = HouseholdMember.Create("Alice Johnson", "alice@example.com", "555-0100", true);
-        public HouseholdMember Partner { get; } = HouseholdMember.Create("Bob Johnson", "bob@example.com", "555-0101", false);
+        public HouseholdMember Primary { get; } = HouseholdMember.Create(PersonName.Create("Alice Johnson"), EmailAddress.Create("alice@example.com"), new PhoneNumber("(202) 555-0100"), true);
+        public HouseholdMember Partner { get; } = HouseholdMember.Create(PersonName.Create("Bob Johnson"), EmailAddress.Create("bob@example.com"), new PhoneNumber("(202) 555-0101"), false);
 
         public Household RegisteredHousehold() => EventReplay.Replay<Household>(Household.Register(HouseholdId.Generate(), [Primary, Partner], Circumstances, StaffUser));
 
@@ -45,7 +45,7 @@ public class HouseholdTests
         [Fact]
         public void GivenTwoPrimaryMembers_WhenRegistered_ThenThrowsMustHaveExactlyOnePrimaryMember()
         {
-            var secondPrimary = HouseholdMember.Create("Carol Smith", "carol@example.com", "555-0102", true);
+            var secondPrimary = HouseholdMember.Create(PersonName.Create("Carol Smith"), EmailAddress.Create("carol@example.com"), new PhoneNumber("(202) 555-0102"), true);
 
             var act = () => Household.Register(HouseholdId.Generate(), [_testBed.Primary, secondPrimary], _testBed.Circumstances, _testBed.StaffUser);
 
@@ -69,12 +69,22 @@ public class HouseholdTests
         private readonly TestBed _testBed = new();
 
         [Fact]
+        public void GivenLocalPhone_WhenMemberAdded_ThenRecordsItInE164()
+        {
+            var sut = _testBed.RegisteredHousehold();
+
+            var added = sut.AddMember(HouseholdMemberId.Generate(), PersonName.Create("Carol Johnson"), EmailAddress.Create("carol@example.com"), new PhoneNumber("(202) 555-0102"), _testBed.StaffUser);
+
+            added.Phone.Should().Be("+12025550102");
+        }
+
+        [Fact]
         public void GivenRegisteredHousehold_WhenMemberAdded_ThenMemberIsNonPrimaryAndCountsTowardsSize()
         {
             var sut = _testBed.RegisteredHousehold();
 
             var memberId = HouseholdMemberId.Generate();
-            sut = sut.Decide(a => a.AddMember(memberId, "Carol Johnson", "carol@example.com", "555-0102", _testBed.StaffUser)).Aggregate;
+            sut = sut.Decide(a => a.AddMember(memberId, PersonName.Create("Carol Johnson"), EmailAddress.Create("carol@example.com"), new PhoneNumber("(202) 555-0102"), _testBed.StaffUser)).Aggregate;
 
             sut.Members.Should().ContainSingle(m => m.Id == memberId)
                 .Which.IsPrimary.Should().BeFalse();
@@ -91,7 +101,7 @@ public class HouseholdTests
         {
             var sut = _testBed.RegisteredHousehold();
 
-            var act = () => sut.UpdateMember(HouseholdMemberId.Generate(), "Name", "e@example.com", "555", _testBed.StaffUser);
+            var act = () => sut.UpdateMember(HouseholdMemberId.Generate(), PersonName.Create("Name"), EmailAddress.Create("e@example.com"), new PhoneNumber("(202) 555-0103"), _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.household.members.member_not_found");
@@ -102,10 +112,11 @@ public class HouseholdTests
         {
             var sut = _testBed.RegisteredHousehold();
 
-            sut = sut.Decide(a => a.UpdateMember(_testBed.Partner.Id, "Robert Johnson", "robert@example.com", "555-0199", _testBed.StaffUser)).Aggregate;
+            sut = sut.Decide(a => a.UpdateMember(_testBed.Partner.Id, PersonName.Create(" Robert Johnson "), EmailAddress.Create("robert@example.com "), new PhoneNumber("(202) 555-0199"), _testBed.StaffUser)).Aggregate;
 
-            sut.Members.Single(m => m.Id == _testBed.Partner.Id).Should().BeEquivalentTo(
-                new { Name = "Robert Johnson", Email = "robert@example.com", Phone = "555-0199" });
+            var partner = sut.Members.Single(m => m.Id == _testBed.Partner.Id);
+            (partner.Name.Value, partner.Email.Value, partner.Phone.Value)
+                .Should().Be(("Robert Johnson", "robert@example.com", "+12025550199"));
         }
 
         [Fact]
@@ -113,7 +124,7 @@ public class HouseholdTests
         {
             var sut = _testBed.RegisteredHousehold();
 
-            (sut, var events) = sut.Decide(a => a.UpdateMember(_testBed.Partner.Id, "Bob Johnson", "bob@example.com", "555-0101", _testBed.StaffUser));
+            (sut, var events) = sut.Decide(a => a.UpdateMember(_testBed.Partner.Id, PersonName.Create("Bob Johnson"), EmailAddress.Create("bob@example.com"), new PhoneNumber("+12025550101"), _testBed.StaffUser));
 
             events.OfType<HouseholdMemberUpdated>().Should().BeEmpty();
         }

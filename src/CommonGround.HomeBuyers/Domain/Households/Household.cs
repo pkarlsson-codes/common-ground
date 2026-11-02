@@ -54,29 +54,32 @@ public sealed class Household : AggregateRoot<HouseholdId>
 
         return new HouseholdRegistered(
                 id.Value,
-                [..members.Select(m => new RegisteredMember(m.Id.Value, m.Name, m.Email, m.Phone, m.IsPrimary))],
+                [..members.Select(m => new RegisteredMember(m.Id.Value, m.Name.Value, m.Email.Value, m.Phone.Value, m.IsPrimary))],
                 circumstances.AnnualIncome,
                 circumstances.RequiresAccessibility,
                 registeredById.Value);
     }
     
     /// <summary>Adds a non-primary member to the household.</summary>
-    public HouseholdMemberAdded AddMember(HouseholdMemberId memberId, string name, string email, string phone, UserId addedBy)
+    public HouseholdMemberAdded AddMember(HouseholdMemberId memberId, PersonName name, EmailAddress email, PhoneNumber phone, UserId addedBy)
     {
         var member = HouseholdMember.Create(memberId, name, email, phone, isPrimary: false);
 
         return new HouseholdMemberAdded(
-            Id.Value, member.Id.Value, member.Name, member.Email, member.Phone, addedBy.Value);
+            Id.Value, member.Id.Value, member.Name.Value, member.Email.Value, member.Phone.Value, addedBy.Value);
     }
 
     /// <summary>Updates a member's contact details. No-op when nothing changed.</summary>
-    public HouseholdMemberUpdated? UpdateMember(HouseholdMemberId memberId, string name, string email, string phone, UserId updatedBy)
+    public HouseholdMemberUpdated? UpdateMember(HouseholdMemberId memberId, PersonName name, EmailAddress email, PhoneNumber phone, UserId updatedBy)
     {
-        HouseholdMember.ValidateContactDetails(name, email, phone);
+        ArgumentNullException.ThrowIfNull(name);
+        ArgumentNullException.ThrowIfNull(email);
+        ArgumentNullException.ThrowIfNull(phone);
+
         var member = FindMember(memberId);
         if (member.Name == name && member.Email == email && member.Phone == phone) return null;
 
-        return new HouseholdMemberUpdated(Id.Value, memberId.Value, name, email, phone, updatedBy.Value);
+        return new HouseholdMemberUpdated(Id.Value, memberId.Value, name.Value, email.Value, phone.Value, updatedBy.Value);
     }
 
     /// <summary>Removes a non-primary member from the household.</summary>
@@ -163,7 +166,7 @@ public sealed class Household : AggregateRoot<HouseholdId>
     /// <summary>Applies <see cref="HouseholdMemberUpdated"/>.</summary>
     public void Apply(HouseholdMemberUpdated e)
     {
-        FindMember(HouseholdMemberId.Create(e.MemberId)).ChangeContactDetails(e.Name, e.Email, e.Phone);
+        FindMember(HouseholdMemberId.Create(e.MemberId)).ChangeContactDetails(PersonName.Create(e.Name), EmailAddress.Create(e.Email), new PhoneNumber(e.Phone));
     }
 
     /// <summary>Applies <see cref="HouseholdMemberRemoved"/>.</summary>

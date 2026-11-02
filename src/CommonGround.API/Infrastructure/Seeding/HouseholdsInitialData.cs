@@ -59,7 +59,7 @@ public sealed class HouseholdsInitialData : IInitialData
             var householdId = HouseholdId.Generate();
             var registered = Household.Register(
                 householdId,
-                [.. entry.Members.Select(m => HouseholdMember.Create(m.Name, m.Email, m.Phone, m.IsPrimary))],
+                [.. entry.Members.Select(m => HouseholdMember.Create(PersonName.Create(m.Name), EmailAddress.Create(m.Email), new PhoneNumber(m.Phone), m.IsPrimary))],
                 HouseholdCircumstances.Create(entry.RequiresAccessibility, entry.AnnualIncome),
                 SeederUserId);
 

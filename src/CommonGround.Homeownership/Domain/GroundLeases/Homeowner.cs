@@ -1,4 +1,3 @@
-using CommonGround.Homeownership.Application.Errors;
 using CommonGround.SharedKernel.Domain;
 
 namespace CommonGround.Homeownership.Domain.GroundLeases;
@@ -7,34 +6,36 @@ namespace CommonGround.Homeownership.Domain.GroundLeases;
 public sealed class Homeowner : ValueObject
 {
     /// <summary>Gets the homeowner's full name.</summary>
-    public string FullName { get; }
+    public PersonName FullName { get; }
 
     /// <summary>Gets the homeowner's email address.</summary>
-    public string Email { get; }
+    public EmailAddress Email { get; }
 
     /// <summary>Gets the homeowner's phone number, if provided.</summary>
     public PhoneNumber? Phone { get; }
 
     /// <summary>Creates a new homeowner value object.</summary>
-    /// <param name="fullName">Full name (1-200 characters).</param>
-    /// <param name="email">Valid email address.</param>
-    /// <param name="phone">Optional phone number in any common format.</param>
-    public Homeowner(string fullName, string email, string? phone = null)
+    /// <param name="fullName">Full name.</param>
+    /// <param name="email">Email address.</param>
+    /// <param name="phone">Phone number, if provided.</param>
+    public Homeowner(PersonName fullName, EmailAddress email, PhoneNumber? phone = null)
     {
-        if (string.IsNullOrWhiteSpace(fullName) || fullName.Length > 200)
-        {
-            throw BusinessRuleViolation.Homeowner.Create.FullNameInvalid(fullName);
-        }
-
-        if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
-        {
-            throw BusinessRuleViolation.Homeowner.Create.EmailInvalid(email);
-        }
+        ArgumentNullException.ThrowIfNull(fullName);
+        ArgumentNullException.ThrowIfNull(email);
 
         FullName = fullName;
         Email = email;
-        Phone = PhoneNumber.FromOptional(phone);
+        Phone = phone;
     }
+
+    /// <summary>Creates a homeowner from contact details as recorded or entered.</summary>
+    /// <param name="fullName">Full name; see <see cref="PersonName"/>.</param>
+    /// <param name="email">Email address; see <see cref="EmailAddress"/>.</param>
+    /// <param name="phone">Phone number in any common format, if provided.</param>
+    /// <returns>The homeowner.</returns>
+    /// <exception cref="SharedKernel.Domain.Exceptions.BusinessRuleViolationException">A detail is missing or invalid.</exception>
+    public static Homeowner From(string? fullName, string? email, string? phone = null) =>
+        new(PersonName.Create(fullName), EmailAddress.Create(email), PhoneNumber.FromOptional(phone));
 
     /// <inheritdoc/>
     protected override IEnumerable<object> GetEqualityComponents()

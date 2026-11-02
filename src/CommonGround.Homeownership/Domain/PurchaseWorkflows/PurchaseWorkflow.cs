@@ -144,8 +144,8 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
             groundLeaseTemplateId.Value,
             landParcelId,
             homeId,
-            buyer.FullName,
-            buyer.Email,
+            buyer.FullName.Value,
+            buyer.Email.Value,
             buyer.Phone?.Value,
             purchasePrice,
             initiatedBy.Value,
@@ -346,7 +346,7 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         GroundLeaseTemplateId = GroundLeaseTemplateId.Create(e.GroundLeaseTemplateId);
         LandParcelId = e.LandParcelId;
         HomeId = e.HomeId;
-        Buyer = new Homeowner(e.BuyerFullName, e.BuyerEmail, e.BuyerPhone);
+        Buyer = Homeowner.From(e.BuyerFullName, e.BuyerEmail, e.BuyerPhone);
         PurchasePrice = e.PurchasePrice;
         Phase = WorkflowPhase.Initiated;
         InitiatedBy = UserId.Create(e.InitiatedBy);

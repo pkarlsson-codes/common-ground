@@ -35,7 +35,7 @@ public static class PurchaseWorkflowsEndpoints
             GroundLeaseTemplateId.Create(request.GroundLeaseTemplateId),
             request.LandParcelId,
             request.HomeId,
-            new Homeowner(request.BuyerFullName, request.BuyerEmail, request.BuyerPhone),
+            Homeowner.From(request.BuyerFullName, request.BuyerEmail, request.BuyerPhone),
             request.PurchasePrice,
             userId);
 

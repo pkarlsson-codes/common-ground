@@ -146,29 +146,6 @@ public static class BusinessRuleViolation
         }
     }
 
-    public static class Homeowner
-    {
-        public static class Create
-        {
-            public static BusinessRuleViolationException FullNameInvalid(string? fullName)
-                => new(
-                    "homeownership.homeowner.create.full_name_invalid",
-                    new Dictionary<string, object?>
-                    {
-                        ["fullNameLength"] = fullName?.Length,
-                        ["maxLength"] = 200,
-                    });
-
-            public static BusinessRuleViolationException EmailInvalid(string? email)
-                => new(
-                    "homeownership.homeowner.create.email_invalid",
-                    new Dictionary<string, object?>
-                    {
-                        ["email"] = email,
-                    });
-        }
-    }
-
     public static class GroundLeaseTemplate
     {
         public static class Create

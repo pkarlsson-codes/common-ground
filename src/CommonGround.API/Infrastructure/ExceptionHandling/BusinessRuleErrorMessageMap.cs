@@ -53,8 +53,6 @@ internal static class BusinessRuleErrorMessageMap
             ["homeownership.ground_lease_template.deactivate.already_inactive"] = "Ground lease template is already inactive.",
             ["homeownership.ground_lease.terminate.reason_required"] = "Termination reason is required.",
             ["homeownership.ground_lease.terminate.status_not_active"] = "Only active ground leases can be terminated.",
-            ["homeownership.homeowner.create.email_invalid"] = "Enter a valid email address.",
-            ["homeownership.homeowner.create.full_name_invalid"] = "Enter a valid full name (up to {maxLength} characters).",
             ["homeownership.purchase_workflow.fail_purchase.failure_reason_required"] = "Failure reason is required.",
             ["homeownership.purchase_workflow.initiate.purchase_price_non_positive"] = "Purchase price must be greater than zero.",
             ["homeownership.purchase_workflow.modify.terminal_phase"] = "This purchase workflow is in a terminal phase and cannot be modified.",
@@ -85,7 +83,12 @@ internal static class BusinessRuleErrorMessageMap
             ["property_registry.unit_assessment.create.assessed_value_negative"] = "Assessed value cannot be negative.",
             ["property_registry.unit_assessment.create.assessment_date_in_future"] = "Assessment date cannot be in the future.",
 
+            ["shared.email.invalid_format"] = "Enter a valid email address.",
+            ["shared.email.required"] = "Email address is required.",
+            ["shared.person_name.required"] = "Name is required.",
+            ["shared.person_name.too_long"] = "Name must be {maxLength} characters or fewer.",
             ["shared.phone.invalid_format"] = "Enter a valid phone number.",
+            ["shared.phone.required"] = "Phone number is required.",
             ["shared.time_zone.required"] = "Time zone is required.",
             ["shared.time_zone.unknown"] = "Choose a valid time zone.",
 

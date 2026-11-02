@@ -5,6 +5,7 @@ using CommonGround.HomeBuyers.Application.Commands;
 using CommonGround.HomeBuyers.Application.Queries;
 using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.Households;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
@@ -29,7 +30,7 @@ public static class HouseholdEndpoints
 
         var command = new RegisterHousehold(
             id,
-            [.. request.Members.Select(m => new RegisterHouseholdMember(m.Name, m.Email, m.Phone, m.IsPrimary))],
+            [.. request.Members.Select(m => new RegisterHouseholdMember(PersonName.Create(m.Name), EmailAddress.Create(m.Email), new PhoneNumber(m.Phone), m.IsPrimary))],
             request.RequiresAccessibility,
             request.AnnualIncome,
             userId);
@@ -95,9 +96,9 @@ public static class HouseholdEndpoints
             new AddHouseholdMember(
                 HouseholdId.Create(householdId),
                 memberId,
-                request.Name,
-                request.Email,
-                request.Phone,
+                PersonName.Create(request.Name),
+                EmailAddress.Create(request.Email),
+                new PhoneNumber(request.Phone),
                 userId),
             cancellationToken);
 
@@ -123,9 +124,9 @@ public static class HouseholdEndpoints
             new UpdateHouseholdMember(
                 HouseholdId.Create(householdId),
                 HouseholdMemberId.Create(memberId),
-                request.Name,
-                request.Email,
-                request.Phone,
+                PersonName.Create(request.Name),
+                EmailAddress.Create(request.Email),
+                new PhoneNumber(request.Phone),
                 userId),
             cancellationToken);
 

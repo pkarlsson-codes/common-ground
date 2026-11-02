@@ -126,8 +126,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             template.ResalePolicyTerms.AnnualPercentage,
             template.ResalePolicyTerms.ImprovementsCap,
             createdBy.Value,
-            purchaseWorkflow.Buyer.FullName,
-            purchaseWorkflow.Buyer.Email,
+            purchaseWorkflow.Buyer.FullName.Value,
+            purchaseWorkflow.Buyer.Email.Value,
             purchaseWorkflow.Buyer.Phone?.Value);
     }
 
@@ -235,7 +235,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         Status = GroundLeaseStatus.Active;
         CreatedBy = UserId.Create(e.RegisteredBy);
         CreatedAt = e.OccurredAt;
-        CurrentHomeowner = new Homeowner(e.BuyerFullName, e.BuyerEmail, e.BuyerPhone);
+        CurrentHomeowner = Homeowner.From(e.BuyerFullName, e.BuyerEmail, e.BuyerPhone);
     }
 
     /// <summary>Applies <see cref="GroundLeaseTerminated"/>.</summary>

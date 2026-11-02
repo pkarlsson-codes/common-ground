@@ -114,9 +114,9 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
         return new ApplicationSelectedForHome(
             Id.Value,
             HouseholdId.Value,
-            applicant.Name,
-            applicant.Email,
-            applicant.Phone,
+            applicant.Name.Value,
+            applicant.Email.Value,
+            applicant.Phone.Value,
             selectionId.Value,
             homeId,
             landParcelId,

@@ -9,9 +9,9 @@ namespace CommonGround.HomeBuyers.Application.Commands;
 public sealed record UpdateHouseholdMember(
     HouseholdId HouseholdId,
     HouseholdMemberId MemberId,
-    string Name,
-    string Email,
-    string Phone,
+    PersonName Name,
+    EmailAddress Email,
+    PhoneNumber Phone,
     UserId UpdatedBy);
 
 /// <summary>Handles <see cref="UpdateHouseholdMember"/>.</summary>
