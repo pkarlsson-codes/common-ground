@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# Drops all Marten-managed schemas, wiping all application data.
+# Drops all Marten-managed schemas, wiping all application data, and clears the gateways'
+# Redis sessions, which name users and trusts that no longer exist once the data is gone.
 set -euo pipefail
 
 POSTGRES_CONTAINER="${POSTGRES_CONTAINER:-commonground_postgres}"
 POSTGRES_DB="${POSTGRES_DB:-commonground}"
 POSTGRES_USER="${POSTGRES_USER:-postgres}"
 POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-postgres}"
+REDIS_CONTAINER="${REDIS_CONTAINER:-commonground_redis}"
 
 psql_exec() {
     local sql="$1"
@@ -38,4 +40,7 @@ done
 echo "[db-reset-marten]   DROP SCHEMA IF EXISTS public CASCADE + recreate"
 psql_exec "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;"
 
-echo "[db-reset-marten] Done. Restart the API to recreate schemas."
+echo "[db-reset-marten] Clearing gateway sessions from Redis..."
+docker exec "$REDIS_CONTAINER" redis-cli FLUSHDB
+
+echo "[db-reset-marten] Done. Restart the API to recreate schemas, then log in again."
