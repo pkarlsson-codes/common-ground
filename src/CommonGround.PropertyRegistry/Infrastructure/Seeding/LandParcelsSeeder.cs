@@ -11,7 +11,7 @@ namespace CommonGround.PropertyRegistry.Infrastructure.Seeding;
 /// <summary>
 /// Seeds development land parcels from JSON and persists deterministic seed-key mappings.
 /// </summary>
-public sealed class LandParcelsSeeder(ITrustClock trustClock) : IDevelopmentSeeder
+public sealed class LandParcelsSeeder(ITrustClock trustClock, PropagationWaiter propagation) : IDevelopmentSeeder
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -54,30 +54,45 @@ public sealed class LandParcelsSeeder(ITrustClock trustClock) : IDevelopmentSeed
                 }
             }
 
-            var today = await trustClock.TodayAsync(trustLookup.TrustId, cancellation).ConfigureAwait(false);
-            var parcelId = LandParcelId.Generate();
+            var timeZone = await trustClock.GetTimeZoneAsync(trustLookup.TrustId, cancellation).ConfigureAwait(false);
+            var today = timeZone.ToDate(TimeProviderContext.Current.UtcNow);
 
-            var registered = LandParcel.Register(
-                parcelId,
-                entry.LegalParcelNumber,
-                entry.Address,
-                entry.AreaAcres,
-                entry.AcquisitionDate.Resolve(today),
-                AcquisitionMethod.FromDisplayName(entry.AcquisitionMethod),
-                entry.CovenantTerms,
-                SeederUserId);
-
-            trustSession.Events.StartStream<LandParcel>(parcelId.Value, registered);
-
-            trustSession.Store(new LandParcelSeedLookup
+            // The parcel is registered on the day it was acquired, and decommissioned on its own date.
+            await SeedClock.RunAsync(timeZone, async clock =>
             {
-                Id = lookupId,
-                SeedKey = entry.SeedKey,
-                LandParcelId = parcelId.Value,
-                SeededAt = DateTimeOffset.UtcNow,
-            });
+                var parcelId = LandParcelId.Generate();
+                var acquisitionDate = entry.AcquisitionDate.Resolve(today);
+                clock.MoveTo(acquisitionDate);
+                var registered = LandParcel.Register(
+                    parcelId,
+                    entry.LegalParcelNumber,
+                    entry.Address,
+                    entry.AreaAcres,
+                    acquisitionDate,
+                    AcquisitionMethod.FromDisplayName(entry.AcquisitionMethod),
+                    entry.CovenantTerms,
+                    SeederUserId);
 
-            await trustSession.SaveChangesAsync(cancellation).ConfigureAwait(false);
+                List<object> events = [registered];
+                if (entry.DecommissionedDate is { } decommissioned)
+                {
+                    clock.MoveTo(decommissioned.Resolve(today));
+                    events.Add(LandParcel.Create(registered).Decommission(SeederUserId)!);
+                }
+
+                trustSession.Events.StartStream<LandParcel>(parcelId.Value, events);
+
+                trustSession.Store(new LandParcelSeedLookup
+                {
+                    Id = lookupId,
+                    SeedKey = entry.SeedKey,
+                    LandParcelId = parcelId.Value,
+                    SeededAt = DateTimeOffset.UtcNow,
+                });
+
+                await trustSession.SaveChangesAsync(cancellation).ConfigureAwait(false);
+                await propagation.WaitForIdleAsync(cancellation).ConfigureAwait(false);
+            }).ConfigureAwait(false);
         }
     }
 
@@ -132,5 +147,7 @@ public sealed class LandParcelsSeeder(ITrustClock trustClock) : IDevelopmentSeed
         public string AcquisitionMethod { get; set; } = string.Empty;
 
         public string? CovenantTerms { get; set; }
+
+        public SeedDate? DecommissionedDate { get; set; }
     }
 }

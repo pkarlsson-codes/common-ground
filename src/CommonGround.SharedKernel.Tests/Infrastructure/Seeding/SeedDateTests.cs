@@ -23,6 +23,7 @@ public class SeedDateTests
         [InlineData("today+1w", "2026-11-10")]
         [InlineData("today-6m", "2026-05-03")]
         [InlineData("today+3m", "2027-02-03")]
+        [InlineData("today-5y", "2021-11-03")]
         public void GivenRelativeToken_WhenResolved_ThenOffsetsFromToday(string value, string expected)
         {
             var sut = SeedDate.Parse(value);
@@ -45,6 +46,14 @@ public class SeedDateTests
 
             sut.Resolve(new DateOnly(2026, 3, 31)).Should().Be(new DateOnly(2026, 2, 28));
         }
+
+        [Fact]
+        public void GivenYearOffsetFromLeapDay_WhenResolved_ThenClampsToFebruary28()
+        {
+            var sut = SeedDate.Parse("today-1y");
+
+            sut.Resolve(new DateOnly(2028, 2, 29)).Should().Be(new DateOnly(2027, 2, 28));
+        }
     }
 
     public class TheParseMethod
@@ -53,7 +62,7 @@ public class SeedDateTests
         [InlineData("")]
         [InlineData("tomorrow")]
         [InlineData("today-30")]
-        [InlineData("today-30y")]
+        [InlineData("today-30q")]
         [InlineData("today - 30d")]
         [InlineData("Today")]
         [InlineData("2026-13-01")]

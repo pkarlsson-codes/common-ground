@@ -12,7 +12,7 @@ namespace CommonGround.PropertyRegistry.Infrastructure.Seeding;
 /// <summary>
 /// Seeds development homes from JSON and persists deterministic seed-key mappings.
 /// </summary>
-public sealed class HomesSeeder(ITrustClock trustClock) : IDevelopmentSeeder
+public sealed class HomesSeeder(ITrustClock trustClock, PropagationWaiter propagation) : IDevelopmentSeeder
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -75,43 +75,65 @@ public sealed class HomesSeeder(ITrustClock trustClock) : IDevelopmentSeeder
                 }
             }
 
-            var now = TimeProviderContext.Current.UtcNow;
-            var today = await trustClock.ToTrustDateAsync(trustLookup.TrustId, now, cancellation).ConfigureAwait(false);
-            var initialAssessment = UnitAssessment.Create(
-                entry.InitialAssessedValue,
-                new DateOnly(entry.YearBuilt, 1, 1),
-                appraiserName: null,
-                conditionNotes: null,
-                SeederUserId,
-                now,
-                today);
+            var timeZone = await trustClock.GetTimeZoneAsync(trustLookup.TrustId, cancellation).ConfigureAwait(false);
+            var today = timeZone.ToDate(TimeProviderContext.Current.UtcNow);
 
-            var unitId = HomeId.Generate();
-
-            var registered = Home.Register(
-                unitId,
-                LandParcelId.Create(landParcelLookup.LandParcelId),
-                entry.UnitDesignation,
-                HomeType.FromDisplayName(entry.Type),
-                entry.Bedrooms,
-                entry.Bathrooms,
-                entry.IsAccessible,
-                entry.SquareFootage,
-                entry.YearBuilt,
-                initialAssessment,
-                SeederUserId);
-
-            trustSession.Events.StartStream<Home>(unitId.Value, registered);
-
-            trustSession.Store(new HomeSeedLookup
+            // The home is registered with its initial assessment, and each later assessment is
+            // recorded on its own date, so the assessment history reads as built up over the years.
+            await SeedClock.RunAsync(timeZone, async clock =>
             {
-                Id = lookupId,
-                SeedKey = entry.SeedKey,
-                UnitId = unitId.Value,
-                SeededAt = DateTimeOffset.UtcNow,
-            });
+                var registeredDate = entry.RegisteredDate.Resolve(today);
+                clock.MoveTo(registeredDate);
+                var initialAssessment = UnitAssessment.Create(
+                    entry.InitialAssessedValue,
+                    registeredDate,
+                    entry.InitialAppraiserName,
+                    conditionNotes: null,
+                    SeederUserId,
+                    TimeProviderContext.Current.UtcNow,
+                    today);
 
-            await trustSession.SaveChangesAsync(cancellation).ConfigureAwait(false);
+                var homeId = HomeId.Generate();
+                var registered = Home.Register(
+                    homeId,
+                    LandParcelId.Create(landParcelLookup.LandParcelId),
+                    entry.UnitDesignation,
+                    HomeType.FromDisplayName(entry.Type),
+                    entry.Bedrooms,
+                    entry.Bathrooms,
+                    entry.IsAccessible,
+                    entry.SquareFootage,
+                    entry.YearBuilt,
+                    initialAssessment,
+                    SeederUserId);
+
+                // Recording an assessment doesn't depend on earlier ones, so each is taken on the registered home.
+                var home = Home.Create(registered);
+                List<object> events = [registered];
+                foreach (var assessment in entry.Assessments.Select(a => (Entry: a, Date: a.AssessmentDate.Resolve(today))).OrderBy(a => a.Date))
+                {
+                    clock.MoveTo(assessment.Date);
+                    events.Add(home.RecordAssessment(
+                        assessment.Entry.AssessedValue,
+                        assessment.Date,
+                        assessment.Entry.AppraiserName,
+                        assessment.Entry.ConditionNotes,
+                        SeederUserId));
+                }
+
+                trustSession.Events.StartStream<Home>(homeId.Value, events);
+
+                trustSession.Store(new HomeSeedLookup
+                {
+                    Id = lookupId,
+                    SeedKey = entry.SeedKey,
+                    UnitId = homeId.Value,
+                    SeededAt = DateTimeOffset.UtcNow,
+                });
+
+                await trustSession.SaveChangesAsync(cancellation).ConfigureAwait(false);
+                await propagation.WaitForIdleAsync(cancellation).ConfigureAwait(false);
+            }).ConfigureAwait(false);
         }
     }
 
@@ -171,6 +193,23 @@ public sealed class HomesSeeder(ITrustClock trustClock) : IDevelopmentSeeder
 
         public int YearBuilt { get; set; }
 
+        public SeedDate RegisteredDate { get; set; }
+
         public decimal InitialAssessedValue { get; set; }
+
+        public string? InitialAppraiserName { get; set; }
+
+        public List<HomeAssessmentSeedEntry> Assessments { get; set; } = [];
+    }
+
+    private sealed class HomeAssessmentSeedEntry
+    {
+        public SeedDate AssessmentDate { get; set; }
+
+        public decimal AssessedValue { get; set; }
+
+        public string? AppraiserName { get; set; }
+
+        public string? ConditionNotes { get; set; }
     }
 }

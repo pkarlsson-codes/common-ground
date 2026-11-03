@@ -18,6 +18,7 @@ internal static class DevelopmentSeeder
     /// <item>Trusts, which everything else belongs to.</item>
     /// <item>Land parcels.</item>
     /// <item>Homes, on the land parcels.</item>
+    /// <item>Development projects, on the land parcels and their homes.</item>
     /// <item>Users, assigned to their trust.</item>
     /// <item>Households and their applications.</item>
     /// <item>Ground lease templates.</item>
@@ -33,6 +34,7 @@ internal static class DevelopmentSeeder
         services.AddTransient<IDevelopmentSeeder, TrustsSeeder>();
         services.AddTransient<IDevelopmentSeeder, LandParcelsSeeder>();
         services.AddTransient<IDevelopmentSeeder, HomesSeeder>();
+        services.AddTransient<IDevelopmentSeeder, DevelopmentProjectsSeeder>();
         services.AddTransient<IDevelopmentSeeder, UsersSeeder>();
         services.AddTransient<IDevelopmentSeeder, HouseholdsSeeder>();
         services.AddTransient<IDevelopmentSeeder, GroundLeaseTemplatesSeeder>();

@@ -5,7 +5,7 @@
     "legalParcelNumber": "APN-217-44-019",
     "address": "1458 Cedar Avenue, Riverton, OR 97211",
     "areaAcres": 0.83,
-    "acquisitionDate": "2021-09-15",
+    "acquisitionDate": "today-5y",
     "acquisitionMethod": "Purchase",
     "covenantTerms": "99-year ground lease with permanent affordability restrictions."
   },
@@ -15,7 +15,7 @@
     "legalParcelNumber": "APN-332-08-114",
     "address": "902 Riverbend Lane, Riverton, OR 97212",
     "areaAcres": 1.27,
-    "acquisitionDate": "2020-04-03",
+    "acquisitionDate": "today-6y",
     "acquisitionMethod": "Donation",
     "covenantTerms": "Land use limited to owner-occupied affordable housing units."
   },
@@ -25,7 +25,7 @@
     "legalParcelNumber": "APN-118-73-221",
     "address": "3770 East Grove Street, Riverton, OR 97210",
     "areaAcres": 0.64,
-    "acquisitionDate": "2022-11-29",
+    "acquisitionDate": "today-4y",
     "acquisitionMethod": "Transfer",
     "covenantTerms": "Transferred from city land bank with resale formula protections."
   },
@@ -35,8 +35,89 @@
     "legalParcelNumber": "APN-501-12-008",
     "address": "64 Harbor View Court, Riverton, OR 97209",
     "areaAcres": 1.91,
-    "acquisitionDate": "2019-06-21",
+    "acquisitionDate": "today-7y",
     "acquisitionMethod": "Purchase",
     "covenantTerms": "Ground lease requires perpetual affordability and stewardship compliance."
+  },
+  {
+    "seedKey": "lp-maple-row-005",
+    "trustSeedKey": "dev-default",
+    "legalParcelNumber": "APN-244-19-063",
+    "address": "215 Maple Row, Riverton, OR 97211",
+    "areaAcres": 0.22,
+    "acquisitionDate": "today-3y",
+    "acquisitionMethod": "Purchase",
+    "covenantTerms": "Single-family use; resale restricted to households at or below 80% AMI."
+  },
+  {
+    "seedKey": "lp-orchard-006",
+    "trustSeedKey": "dev-default",
+    "legalParcelNumber": "APN-410-55-187",
+    "address": "88 Old Orchard Road, Riverton, OR 97213",
+    "areaAcres": 0.41,
+    "acquisitionDate": "today-8y",
+    "acquisitionMethod": "Donation",
+    "covenantTerms": "Bequeathed to the trust on condition the house stays owner-occupied."
+  },
+  {
+    "seedKey": "lp-willow-007",
+    "trustSeedKey": "dev-default",
+    "legalParcelNumber": "APN-129-30-442",
+    "address": "1720 Willow Bend Drive, Riverton, OR 97210",
+    "areaAcres": 0.35,
+    "acquisitionDate": "today-2y",
+    "acquisitionMethod": "Transfer",
+    "covenantTerms": "Transferred by the county housing authority under its inclusionary housing program."
+  },
+  {
+    "seedKey": "lp-alder-008",
+    "trustSeedKey": "dev-default",
+    "legalParcelNumber": "APN-306-61-095",
+    "address": "531 Alder Court, Riverton, OR 97212",
+    "areaAcres": 0.19,
+    "acquisitionDate": "today-30m",
+    "acquisitionMethod": "Purchase",
+    "covenantTerms": "Accessible housing preference for households with a member who uses a mobility device."
+  },
+  {
+    "seedKey": "lp-hillcrest-009",
+    "trustSeedKey": "dev-default",
+    "legalParcelNumber": "APN-087-14-330",
+    "address": "4402 Hillcrest Avenue, Riverton, OR 97209",
+    "areaAcres": 0.28,
+    "acquisitionDate": "today-9y",
+    "acquisitionMethod": "Donation",
+    "covenantTerms": "Donated by a retiring homeowner; 99-year ground lease with permanent affordability."
+  },
+  {
+    "seedKey": "lp-north-field-010",
+    "trustSeedKey": "dev-default",
+    "legalParcelNumber": "APN-612-02-751",
+    "address": "North Field Way and 14th Street, Riverton, OR 97213",
+    "areaAcres": 2.45,
+    "acquisitionDate": "today-10m",
+    "acquisitionMethod": "Purchase",
+    "covenantTerms": "Purchased with state housing trust fund money; at least 60% of homes at or below 60% AMI."
+  },
+  {
+    "seedKey": "lp-sawmill-011",
+    "trustSeedKey": "dev-default",
+    "legalParcelNumber": "APN-275-48-016",
+    "address": "300 Sawmill Street, Riverton, OR 97211",
+    "areaAcres": 0.31,
+    "acquisitionDate": "today-5m",
+    "acquisitionMethod": "Transfer",
+    "covenantTerms": "Transferred from the city land bank as a vacant infill lot."
+  },
+  {
+    "seedKey": "lp-old-depot-012",
+    "trustSeedKey": "dev-default",
+    "legalParcelNumber": "APN-150-90-204",
+    "address": "12 Depot Street, Riverton, OR 97210",
+    "areaAcres": 0.72,
+    "acquisitionDate": "today-9y",
+    "acquisitionMethod": "Donation",
+    "covenantTerms": "Former rail depot site; returned to the city after soil contamination was found.",
+    "decommissionedDate": "today-14m"
   }
 ]

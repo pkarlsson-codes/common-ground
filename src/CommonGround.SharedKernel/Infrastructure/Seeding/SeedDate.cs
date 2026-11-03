@@ -7,7 +7,7 @@ namespace CommonGround.SharedKernel.Infrastructure.Seeding;
 
 /// <summary>
 /// A date in seed JSON: either a fixed ISO date ("2021-09-15") or one relative to the day seeding
-/// runs ("today", "today-30d", "today+2w", "today-6m"), so seeded data doesn't go stale.
+/// runs ("today", "today-30d", "today+2w", "today-6m", "today-5y"), so seeded data doesn't go stale.
 /// </summary>
 [JsonConverter(typeof(SeedDateJsonConverter))]
 public readonly partial record struct SeedDate
@@ -40,7 +40,7 @@ public readonly partial record struct SeedDate
         if (!match.Success)
         {
             throw new FormatException(
-                $"Seed date '{value}' is neither an ISO date (yyyy-MM-dd) nor a relative date such as 'today', 'today-30d', 'today+2w' or 'today-6m'.");
+                $"Seed date '{value}' is neither an ISO date (yyyy-MM-dd) nor a relative date such as 'today', 'today-30d', 'today+2w', 'today-6m' or 'today-5y'.");
         }
 
         if (!match.Groups["sign"].Success)
@@ -60,10 +60,11 @@ public readonly partial record struct SeedDate
     {
         'w' => today.AddDays(_offset * 7),
         'm' => today.AddMonths(_offset),
+        'y' => today.AddYears(_offset),
         _ => today.AddDays(_offset),
     };
 
-    [GeneratedRegex(@"^today(?:(?<sign>[+-])(?<amount>\d+)(?<unit>[dwm]))?$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^today(?:(?<sign>[+-])(?<amount>\d+)(?<unit>[dwmy]))?$", RegexOptions.CultureInvariant)]
     private static partial Regex RelativePattern();
 }
 

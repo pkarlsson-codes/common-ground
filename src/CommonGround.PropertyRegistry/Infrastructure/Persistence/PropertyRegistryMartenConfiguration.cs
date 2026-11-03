@@ -37,6 +37,9 @@ public static class PropertyRegistryMartenConfiguration
         options.Schema.For<HomeSeedLookup>()
             .DatabaseSchemaName(SeedSchemaName)
             .Index(x => x.SeedKey);
+        options.Schema.For<DevelopmentProjectSeedLookup>()
+            .DatabaseSchemaName(SeedSchemaName)
+            .Index(x => x.SeedKey);
         options.Schema.For<HomeView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<HomeListItemView>().DatabaseSchemaName(SchemaName);
 

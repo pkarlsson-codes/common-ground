@@ -4,22 +4,85 @@
     "trustSeedKey": "dev-default",
     "landParcelSeedKey": "lp-downtown-civic-001",
     "type": "Townhouse",
+    "unitDesignation": "Unit 1",
     "bedrooms": 3,
     "bathrooms": 2.5,
     "squareFootage": 1480,
     "yearBuilt": 2021,
-    "initialAssessedValue": 346000
+    "registeredDate": "today-4y",
+    "initialAssessedValue": 346000,
+    "initialAppraiserName": "Dana Whitfield, Cascade Appraisal Group",
+    "assessments": [
+      { "assessmentDate": "today-3y", "assessedValue": 352500, "appraiserName": "Dana Whitfield, Cascade Appraisal Group" },
+      { "assessmentDate": "today-2y", "assessedValue": 361000, "appraiserName": "Dana Whitfield, Cascade Appraisal Group", "conditionNotes": "Well maintained; exterior paint touched up." }
+    ]
+  },
+  {
+    "seedKey": "home-downtown-civic-002",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-downtown-civic-001",
+    "type": "Townhouse",
+    "unitDesignation": "Unit 2",
+    "bedrooms": 2,
+    "bathrooms": 1.5,
+    "squareFootage": 1210,
+    "yearBuilt": 2021,
+    "registeredDate": "today-4y",
+    "initialAssessedValue": 298000,
+    "initialAppraiserName": "Dana Whitfield, Cascade Appraisal Group",
+    "assessments": [
+      { "assessmentDate": "today-2y", "assessedValue": 309500, "appraiserName": "Dana Whitfield, Cascade Appraisal Group" }
+    ]
+  },
+  {
+    "seedKey": "home-downtown-civic-003",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-downtown-civic-001",
+    "type": "Townhouse",
+    "unitDesignation": "Unit 3",
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "isAccessible": true,
+    "squareFootage": 1395,
+    "yearBuilt": 2021,
+    "registeredDate": "today-4y",
+    "initialAssessedValue": 338000,
+    "initialAppraiserName": "Dana Whitfield, Cascade Appraisal Group"
   },
   {
     "seedKey": "home-riverbend-002",
     "trustSeedKey": "dev-default",
     "landParcelSeedKey": "lp-riverbend-002",
     "type": "Duplex",
+    "unitDesignation": "Unit A",
     "bedrooms": 4,
     "bathrooms": 3.0,
     "squareFootage": 2125,
-    "yearBuilt": 2020,
-    "initialAssessedValue": 421500
+    "yearBuilt": 1994,
+    "registeredDate": "today-6y",
+    "initialAssessedValue": 389000,
+    "initialAppraiserName": "Marcus Oyelaran, Willamette Valuation",
+    "assessments": [
+      { "assessmentDate": "today-4y", "assessedValue": 405000, "appraiserName": "Marcus Oyelaran, Willamette Valuation" },
+      { "assessmentDate": "today-1y", "assessedValue": 421500, "appraiserName": "Marcus Oyelaran, Willamette Valuation", "conditionNotes": "Roof near end of life; siding weathered on the south face." }
+    ]
+  },
+  {
+    "seedKey": "home-riverbend-002b",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-riverbend-002",
+    "type": "Duplex",
+    "unitDesignation": "Unit B",
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "squareFootage": 1640,
+    "yearBuilt": 1994,
+    "registeredDate": "today-6y",
+    "initialAssessedValue": 342000,
+    "initialAppraiserName": "Marcus Oyelaran, Willamette Valuation",
+    "assessments": [
+      { "assessmentDate": "today-1y", "assessedValue": 368000, "appraiserName": "Marcus Oyelaran, Willamette Valuation", "conditionNotes": "Shares the roof with Unit A; same repairs needed." }
+    ]
   },
   {
     "seedKey": "home-east-grove-003",
@@ -31,17 +94,186 @@
     "isAccessible": true,
     "squareFootage": 1180,
     "yearBuilt": 2022,
-    "initialAssessedValue": 287000
+    "registeredDate": "today-46m",
+    "initialAssessedValue": 287000,
+    "initialAppraiserName": "Priya Raman, Northwest Residential Appraisers",
+    "assessments": [
+      { "assessmentDate": "today-2y", "assessedValue": 296500, "appraiserName": "Priya Raman, Northwest Residential Appraisers" }
+    ]
   },
   {
     "seedKey": "home-harbor-view-004",
     "trustSeedKey": "dev-default",
     "landParcelSeedKey": "lp-harbor-view-004",
     "type": "CondoUnit",
+    "unitDesignation": "Unit 101",
     "bedrooms": 2,
     "bathrooms": 2.0,
+    "isAccessible": true,
     "squareFootage": 1015,
     "yearBuilt": 2019,
-    "initialAssessedValue": 305500
+    "registeredDate": "today-6y",
+    "initialAssessedValue": 289000,
+    "initialAppraiserName": "Marcus Oyelaran, Willamette Valuation",
+    "assessments": [
+      { "assessmentDate": "today-4y", "assessedValue": 297000, "appraiserName": "Marcus Oyelaran, Willamette Valuation" },
+      { "assessmentDate": "today-2y", "assessedValue": 305500, "appraiserName": "Priya Raman, Northwest Residential Appraisers" }
+    ]
+  },
+  {
+    "seedKey": "home-harbor-view-102",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-harbor-view-004",
+    "type": "CondoUnit",
+    "unitDesignation": "Unit 102",
+    "bedrooms": 1,
+    "bathrooms": 1.0,
+    "isAccessible": true,
+    "squareFootage": 720,
+    "yearBuilt": 2019,
+    "registeredDate": "today-6y",
+    "initialAssessedValue": 214000,
+    "initialAppraiserName": "Marcus Oyelaran, Willamette Valuation",
+    "assessments": [
+      { "assessmentDate": "today-2y", "assessedValue": 226000, "appraiserName": "Priya Raman, Northwest Residential Appraisers" }
+    ]
+  },
+  {
+    "seedKey": "home-harbor-view-201",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-harbor-view-004",
+    "type": "CondoUnit",
+    "unitDesignation": "Unit 201",
+    "bedrooms": 2,
+    "bathrooms": 1.0,
+    "squareFootage": 940,
+    "yearBuilt": 2019,
+    "registeredDate": "today-6y",
+    "initialAssessedValue": 268000,
+    "initialAppraiserName": "Marcus Oyelaran, Willamette Valuation"
+  },
+  {
+    "seedKey": "home-harbor-view-202",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-harbor-view-004",
+    "type": "CondoUnit",
+    "unitDesignation": "Unit 202",
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "squareFootage": 1260,
+    "yearBuilt": 2019,
+    "registeredDate": "today-6y",
+    "initialAssessedValue": 318000,
+    "initialAppraiserName": "Marcus Oyelaran, Willamette Valuation",
+    "assessments": [
+      { "assessmentDate": "today-2y", "assessedValue": 331000, "appraiserName": "Priya Raman, Northwest Residential Appraisers" }
+    ]
+  },
+  {
+    "seedKey": "home-harbor-view-301",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-harbor-view-004",
+    "type": "CondoUnit",
+    "unitDesignation": "Unit 301",
+    "bedrooms": 2,
+    "bathrooms": 2.0,
+    "squareFootage": 1030,
+    "yearBuilt": 2019,
+    "registeredDate": "today-6y",
+    "initialAssessedValue": 296000,
+    "initialAppraiserName": "Marcus Oyelaran, Willamette Valuation"
+  },
+  {
+    "seedKey": "home-maple-row-005",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-maple-row-005",
+    "type": "SingleFamily",
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "squareFootage": 1560,
+    "yearBuilt": 1987,
+    "registeredDate": "today-3y",
+    "initialAssessedValue": 352000,
+    "initialAppraiserName": "Priya Raman, Northwest Residential Appraisers",
+    "assessments": [
+      { "assessmentDate": "today-1y", "assessedValue": 366500, "appraiserName": "Priya Raman, Northwest Residential Appraisers", "conditionNotes": "New water heater installed." }
+    ]
+  },
+  {
+    "seedKey": "home-orchard-006",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-orchard-006",
+    "type": "SingleFamily",
+    "bedrooms": 3,
+    "bathrooms": 1.0,
+    "squareFootage": 1320,
+    "yearBuilt": 1962,
+    "registeredDate": "today-8y",
+    "initialAssessedValue": 241000,
+    "initialAppraiserName": "Dana Whitfield, Cascade Appraisal Group",
+    "assessments": [
+      { "assessmentDate": "today-5y", "assessedValue": 262000, "appraiserName": "Dana Whitfield, Cascade Appraisal Group" },
+      { "assessmentDate": "today-6m", "assessedValue": 248000, "appraiserName": "Dana Whitfield, Cascade Appraisal Group", "conditionNotes": "Foundation settling at the northeast corner; original knob-and-tube wiring in the attic." }
+    ]
+  },
+  {
+    "seedKey": "home-willow-007a",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-willow-007",
+    "type": "Duplex",
+    "unitDesignation": "Unit A",
+    "bedrooms": 2,
+    "bathrooms": 1.0,
+    "squareFootage": 980,
+    "yearBuilt": 2018,
+    "registeredDate": "today-2y",
+    "initialAssessedValue": 274000,
+    "initialAppraiserName": "Marcus Oyelaran, Willamette Valuation"
+  },
+  {
+    "seedKey": "home-willow-007b",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-willow-007",
+    "type": "Duplex",
+    "unitDesignation": "Unit B",
+    "bedrooms": 3,
+    "bathrooms": 1.5,
+    "squareFootage": 1190,
+    "yearBuilt": 2018,
+    "registeredDate": "today-2y",
+    "initialAssessedValue": 301000,
+    "initialAppraiserName": "Marcus Oyelaran, Willamette Valuation"
+  },
+  {
+    "seedKey": "home-alder-008",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-alder-008",
+    "type": "SingleFamily",
+    "bedrooms": 1,
+    "bathrooms": 1.0,
+    "isAccessible": true,
+    "squareFootage": 820,
+    "yearBuilt": 2023,
+    "registeredDate": "today-2y",
+    "initialAssessedValue": 236000,
+    "initialAppraiserName": "Priya Raman, Northwest Residential Appraisers"
+  },
+  {
+    "seedKey": "home-hillcrest-009",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-hillcrest-009",
+    "type": "SingleFamily",
+    "bedrooms": 4,
+    "bathrooms": 2.0,
+    "squareFootage": 1880,
+    "yearBuilt": 1948,
+    "registeredDate": "today-9y",
+    "initialAssessedValue": 298000,
+    "initialAppraiserName": "Dana Whitfield, Cascade Appraisal Group",
+    "assessments": [
+      { "assessmentDate": "today-6y", "assessedValue": 327000, "appraiserName": "Dana Whitfield, Cascade Appraisal Group" },
+      { "assessmentDate": "today-3y", "assessedValue": 351000, "appraiserName": "Dana Whitfield, Cascade Appraisal Group" },
+      { "assessmentDate": "today-1y", "assessedValue": 344000, "appraiserName": "Dana Whitfield, Cascade Appraisal Group", "conditionNotes": "Steps at every entrance and a narrow upstairs bathroom; not usable with a wheelchair." }
+    ]
   }
 ]

@@ -1,0 +1,50 @@
+[
+  {
+    "seedKey": "dp-north-field-cottages",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-north-field-010",
+    "type": "NewConstruction",
+    "name": "North Field Cottages",
+    "description": "Twelve one- and two-bedroom cottages around a shared green, built to Earth Advantage standards.",
+    "initiatedDate": "today-6m"
+  },
+  {
+    "seedKey": "dp-harbor-view-phase-2",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-harbor-view-004",
+    "type": "NewConstruction",
+    "name": "Harbor View Phase II",
+    "description": "A second four-storey building on the parking lot at the north end of the parcel, adding 16 condo units.",
+    "initiatedDate": "today-3w"
+  },
+  {
+    "seedKey": "dp-orchard-house-rehab",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-orchard-006",
+    "type": "Rehabilitation",
+    "homeSeedKeys": ["home-orchard-006"],
+    "name": "Old Orchard House Rehabilitation",
+    "description": "Stabilize the foundation, replace the knob-and-tube wiring and add a second bathroom before resale.",
+    "initiatedDate": "today-4m"
+  },
+  {
+    "seedKey": "dp-riverbend-roof-siding",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-riverbend-002",
+    "type": "Rehabilitation",
+    "homeSeedKeys": ["home-riverbend-002", "home-riverbend-002b"],
+    "name": "Riverbend Duplex Roof and Siding",
+    "description": "Replace the shared roof and re-side the south face of both units.",
+    "initiatedDate": "today-2w"
+  },
+  {
+    "seedKey": "dp-hillcrest-accessibility",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-hillcrest-009",
+    "type": "Rehabilitation",
+    "homeSeedKeys": ["home-hillcrest-009"],
+    "name": "Hillcrest Accessibility Retrofit",
+    "description": "Add a ramped entrance, widen interior doorways and convert the main-floor bathroom to a roll-in shower.",
+    "initiatedDate": "today-10m"
+  }
+]
