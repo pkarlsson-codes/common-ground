@@ -1,13 +1,13 @@
 using System.Text.Json;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Infrastructure.Seeding;
 using CommonGround.TrustManagement.Domain.Trusts;
 using Marten;
-using Marten.Schema;
 
 namespace CommonGround.TrustManagement.Infrastructure.Seeding;
 
 /// <summary>Seeds development trusts from JSON and persists deterministic seed-key mappings.</summary>
-public sealed class TrustsInitialData : IInitialData
+public sealed class TrustsSeeder : IDevelopmentSeeder
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -15,7 +15,7 @@ public sealed class TrustsInitialData : IInitialData
     };
 
     /// <inheritdoc/>
-    public async Task Populate(IDocumentStore store, CancellationToken cancellation)
+    public async Task SeedAsync(IDocumentStore store, CancellationToken cancellation)
     {
         ArgumentNullException.ThrowIfNull(store);
 
@@ -57,7 +57,7 @@ public sealed class TrustsInitialData : IInitialData
 
     private static async Task<IReadOnlyList<TrustSeedEntry>> LoadEntriesAsync(CancellationToken cancellation)
     {
-        var assembly = typeof(TrustsInitialData).Assembly;
+        var assembly = typeof(TrustsSeeder).Assembly;
         var resourceName = assembly
             .GetManifestResourceNames()
             .SingleOrDefault(name => name.EndsWith("trusts.seed.json", StringComparison.OrdinalIgnoreCase));

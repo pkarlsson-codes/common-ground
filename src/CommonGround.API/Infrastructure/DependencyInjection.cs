@@ -11,13 +11,11 @@ using CommonGround.Identity.Infrastructure;
 using CommonGround.Identity.Infrastructure.Persistence;
 using CommonGround.PropertyRegistry.Infrastructure;
 using CommonGround.PropertyRegistry.Infrastructure.Persistence;
-using CommonGround.PropertyRegistry.Infrastructure.Seeding;
 using CommonGround.SharedKernel.Extensions;
 using CommonGround.Stewardship.Infrastructure;
 using CommonGround.Stewardship.Infrastructure.Persistence;
 using CommonGround.TrustManagement.Infrastructure;
 using CommonGround.TrustManagement.Infrastructure.Persistence;
-using CommonGround.TrustManagement.Infrastructure.Seeding;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -88,15 +86,9 @@ internal static class CommonGroundServiceCollectionExtensions
             TrustManagementMartenConfiguration.Configure(opts);
             StewardshipMartenConfiguration.Configure(opts);
             DocumentsMartenConfiguration.Configure(opts);
-        }, configureBuilder: marten =>
-        {
-            marten.InitializeWith<TrustsInitialData>();
-            marten.InitializeWith<LandParcelsInitialData>();
-            marten.InitializeWith<HomesInitialData>();
-            marten.InitializeWith<UsersInitialData>();
-            marten.InitializeWith<HouseholdsInitialData>();
-            marten.InitializeWith<GroundLeaseTemplatesInitialData>();
         });
+
+        services.AddDevelopmentSeeders();
 
         return services;
     }

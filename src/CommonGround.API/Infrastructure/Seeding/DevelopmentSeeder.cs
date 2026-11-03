@@ -1,16 +1,45 @@
+using CommonGround.PropertyRegistry.Infrastructure.Seeding;
+using CommonGround.SharedKernel.Infrastructure.Seeding;
+using CommonGround.TrustManagement.Infrastructure.Seeding;
 using Marten;
-using Marten.Schema;
 
 namespace CommonGround.API.Infrastructure.Seeding;
 
 /// <summary>
-/// Executes development-only data seeders after the application has started.
+/// Runs the development seeders after the application has started, once the event subscription
+/// and Wolverine are running.
 /// </summary>
 internal static class DevelopmentSeeder
 {
     /// <summary>
-    /// Runs all registered Marten <see cref="IInitialData"/> seeders in development.
+    /// Registers the development seeders. They run in the order registered here, and each starts
+    /// once propagation from the ones before it has gone idle:
+    /// <list type="number">
+    /// <item>Trusts, which everything else belongs to.</item>
+    /// <item>Land parcels.</item>
+    /// <item>Homes, on the land parcels.</item>
+    /// <item>Users, assigned to their trust.</item>
+    /// <item>Households and their applications.</item>
+    /// <item>Ground lease templates.</item>
+    /// </list>
     /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddDevelopmentSeeders(this IServiceCollection services)
+    {
+        services.AddSingleton<IPropagationProbe, MartenWolverinePropagationProbe>();
+        services.AddSingleton<PropagationWaiter>(sp => new PropagationWaiter(sp.GetRequiredService<IPropagationProbe>()));
+
+        services.AddTransient<IDevelopmentSeeder, TrustsSeeder>();
+        services.AddTransient<IDevelopmentSeeder, LandParcelsSeeder>();
+        services.AddTransient<IDevelopmentSeeder, HomesSeeder>();
+        services.AddTransient<IDevelopmentSeeder, UsersSeeder>();
+        services.AddTransient<IDevelopmentSeeder, HouseholdsSeeder>();
+        services.AddTransient<IDevelopmentSeeder, GroundLeaseTemplatesSeeder>();
+        return services;
+    }
+
+    /// <summary>Runs the registered <see cref="IDevelopmentSeeder"/>s in development.</summary>
     /// <param name="app">The web application instance.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A task that completes when all development seeders have finished.</returns>
@@ -25,24 +54,20 @@ internal static class DevelopmentSeeder
 
         using var scope = app.Services.CreateScope();
         var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("DevelopmentSeeder");
-        var seeders = scope.ServiceProvider.GetServices<IInitialData>().ToArray();
-
-        if (seeders.Length == 0)
-        {
-            logger.LogInformation("No development seeders were registered.");
-            return;
-        }
-
         var store = scope.ServiceProvider.GetRequiredService<IDocumentStore>();
+        var propagation = scope.ServiceProvider.GetRequiredService<PropagationWaiter>();
 
-        foreach (var seeder in seeders)
+        foreach (var seeder in scope.ServiceProvider.GetServices<IDevelopmentSeeder>())
         {
             if (logger.IsEnabled(LogLevel.Information))
             {
                 logger.LogInformation("Running development seeder {SeederType}", seeder.GetType().Name);
             }
 
-            await seeder.Populate(store, cancellationToken).ConfigureAwait(false);
+            await seeder.SeedAsync(store, cancellationToken).ConfigureAwait(false);
+
+            // The next seeder may build on this one's propagated records, or set the clock back.
+            await propagation.WaitForIdleAsync(cancellationToken).ConfigureAwait(false);
         }
 
         logger.LogInformation("Completed development seeders.");

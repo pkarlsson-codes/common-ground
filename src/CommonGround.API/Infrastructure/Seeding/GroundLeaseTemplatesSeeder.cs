@@ -3,9 +3,9 @@ using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Infrastructure.Seeding;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Infrastructure.Seeding;
 using CommonGround.TrustManagement.Infrastructure.Seeding;
 using Marten;
-using Marten.Schema;
 
 namespace CommonGround.API.Infrastructure.Seeding;
 
@@ -13,7 +13,7 @@ namespace CommonGround.API.Infrastructure.Seeding;
 /// Seeds development ground lease templates from JSON, one per resale formula, so ground
 /// leases and purchase workflows have templates to pick from.
 /// </summary>
-public sealed class GroundLeaseTemplatesInitialData : IInitialData
+public sealed class GroundLeaseTemplatesSeeder : IDevelopmentSeeder
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -23,7 +23,7 @@ public sealed class GroundLeaseTemplatesInitialData : IInitialData
     private static readonly UserId SeederUserId = UserId.Create("user-seeder-system");
 
     /// <inheritdoc/>
-    public async Task Populate(IDocumentStore store, CancellationToken cancellation)
+    public async Task SeedAsync(IDocumentStore store, CancellationToken cancellation)
     {
         ArgumentNullException.ThrowIfNull(store);
 
@@ -41,7 +41,7 @@ public sealed class GroundLeaseTemplatesInitialData : IInitialData
                 .LoadAsync<TrustSeedLookup>(TrustSeedLookup.BuildId(entry.TrustSeedKey), cancellation)
                 .ConfigureAwait(false)
                 ?? throw new InvalidOperationException(
-                    $"Trust seed '{entry.TrustSeedKey}' not found for ground lease template seed '{entry.SeedKey}'. Ensure TrustsInitialData runs first.");
+                    $"Trust seed '{entry.TrustSeedKey}' not found for ground lease template seed '{entry.SeedKey}'. Ensure TrustsSeeder runs first.");
 
             using var trustSession = store.LightweightSession(trustLookup.TrustId);
 
@@ -96,7 +96,7 @@ public sealed class GroundLeaseTemplatesInitialData : IInitialData
 
     private static async Task<IReadOnlyList<GroundLeaseTemplateSeedEntry>> LoadEntriesAsync(CancellationToken cancellation)
     {
-        var assembly = typeof(GroundLeaseTemplatesInitialData).Assembly;
+        var assembly = typeof(GroundLeaseTemplatesSeeder).Assembly;
         var resourceName = assembly
             .GetManifestResourceNames()
             .SingleOrDefault(name => name.EndsWith("ground-lease-templates.seed.json", StringComparison.OrdinalIgnoreCase));

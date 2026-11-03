@@ -1,16 +1,17 @@
 using System.Text.Json;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Domain.Services;
+using CommonGround.SharedKernel.Infrastructure.Seeding;
 using CommonGround.TrustManagement.Infrastructure.Seeding;
 using Marten;
-using Marten.Schema;
 
 namespace CommonGround.PropertyRegistry.Infrastructure.Seeding;
 
 /// <summary>
 /// Seeds development land parcels from JSON and persists deterministic seed-key mappings.
 /// </summary>
-public sealed class LandParcelsInitialData : IInitialData
+public sealed class LandParcelsSeeder(ITrustClock trustClock) : IDevelopmentSeeder
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -20,7 +21,7 @@ public sealed class LandParcelsInitialData : IInitialData
     private static readonly UserId SeederUserId = UserId.Create("user-seeder-system");
 
     /// <inheritdoc/>
-    public async Task Populate(IDocumentStore store, CancellationToken cancellation)
+    public async Task SeedAsync(IDocumentStore store, CancellationToken cancellation)
     {
         ArgumentNullException.ThrowIfNull(store);
 
@@ -38,7 +39,7 @@ public sealed class LandParcelsInitialData : IInitialData
                 .LoadAsync<TrustSeedLookup>(TrustSeedLookup.BuildId(entry.TrustSeedKey), cancellation)
                 .ConfigureAwait(false)
                 ?? throw new InvalidOperationException(
-                    $"Trust seed '{entry.TrustSeedKey}' not found for land parcel seed '{entry.SeedKey}'. Ensure TrustsInitialData runs first.");
+                    $"Trust seed '{entry.TrustSeedKey}' not found for land parcel seed '{entry.SeedKey}'. Ensure TrustsSeeder runs first.");
 
             using var trustSession = store.LightweightSession(trustLookup.TrustId);
 
@@ -53,6 +54,7 @@ public sealed class LandParcelsInitialData : IInitialData
                 }
             }
 
+            var today = await trustClock.TodayAsync(trustLookup.TrustId, cancellation).ConfigureAwait(false);
             var parcelId = LandParcelId.Generate();
 
             var registered = LandParcel.Register(
@@ -60,7 +62,7 @@ public sealed class LandParcelsInitialData : IInitialData
                 entry.LegalParcelNumber,
                 entry.Address,
                 entry.AreaAcres,
-                entry.AcquisitionDate,
+                entry.AcquisitionDate.Resolve(today),
                 AcquisitionMethod.FromDisplayName(entry.AcquisitionMethod),
                 entry.CovenantTerms,
                 SeederUserId);
@@ -81,7 +83,7 @@ public sealed class LandParcelsInitialData : IInitialData
 
     private static async Task<IReadOnlyList<LandParcelSeedEntry>> LoadEntriesAsync(CancellationToken cancellation)
     {
-        var assembly = typeof(LandParcelsInitialData).Assembly;
+        var assembly = typeof(LandParcelsSeeder).Assembly;
         var resourceName = assembly
             .GetManifestResourceNames()
             .SingleOrDefault(name => name.EndsWith("land-parcels.seed.json", StringComparison.OrdinalIgnoreCase));
@@ -125,7 +127,7 @@ public sealed class LandParcelsInitialData : IInitialData
 
         public decimal AreaAcres { get; set; }
 
-        public DateOnly AcquisitionDate { get; set; }
+        public SeedDate AcquisitionDate { get; set; }
 
         public string AcquisitionMethod { get; set; } = string.Empty;
 

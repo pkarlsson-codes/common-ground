@@ -21,12 +21,10 @@ public static class MartenServiceCollectionExtensions
     /// <param name="connectionString">The PostgreSQL connection string.</param>
     /// <param name="configureOptions">Optional configuration action for Marten options.</param>
     /// <returns>The service collection for chaining.</returns>
-    /// <param name="configureBuilder">Optional configuration action for the Marten builder (e.g., registering IInitialData seeders).</param>
     public static IServiceCollection AddMartenServices(
         this IServiceCollection services,
         string connectionString,
-        Action<StoreOptions>? configureOptions = null,
-        Action<Marten.MartenServiceCollectionExtensions.MartenConfigurationExpression>? configureBuilder = null)
+        Action<StoreOptions>? configureOptions = null)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
@@ -51,8 +49,6 @@ public static class MartenServiceCollectionExtensions
 
         marten.AddAsyncDaemon(DaemonMode.Solo);
         marten.ApplyAllDatabaseChangesOnStartup();
-
-        configureBuilder?.Invoke(marten);
 
         return services;
     }

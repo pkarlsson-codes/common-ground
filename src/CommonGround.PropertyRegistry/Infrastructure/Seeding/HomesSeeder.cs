@@ -3,17 +3,16 @@ using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Services;
-using CommonGround.TrustManagement.Domain.Trusts;
+using CommonGround.SharedKernel.Infrastructure.Seeding;
 using CommonGround.TrustManagement.Infrastructure.Seeding;
 using Marten;
-using Marten.Schema;
 
 namespace CommonGround.PropertyRegistry.Infrastructure.Seeding;
 
 /// <summary>
 /// Seeds development homes from JSON and persists deterministic seed-key mappings.
 /// </summary>
-public sealed class HomesInitialData : IInitialData
+public sealed class HomesSeeder(ITrustClock trustClock) : IDevelopmentSeeder
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -23,7 +22,7 @@ public sealed class HomesInitialData : IInitialData
     private static readonly UserId SeederUserId = UserId.Create("user-seeder-system");
 
     /// <inheritdoc/>
-    public async Task Populate(IDocumentStore store, CancellationToken cancellation)
+    public async Task SeedAsync(IDocumentStore store, CancellationToken cancellation)
     {
         ArgumentNullException.ThrowIfNull(store);
 
@@ -41,7 +40,7 @@ public sealed class HomesInitialData : IInitialData
                 .LoadAsync<TrustSeedLookup>(TrustSeedLookup.BuildId(entry.TrustSeedKey), cancellation)
                 .ConfigureAwait(false)
                 ?? throw new InvalidOperationException(
-                    $"Trust seed '{entry.TrustSeedKey}' not found for home seed '{entry.SeedKey}'. Ensure TrustsInitialData runs first.");
+                    $"Trust seed '{entry.TrustSeedKey}' not found for home seed '{entry.SeedKey}'. Ensure TrustsSeeder runs first.");
 
             using var trustSession = store.LightweightSession(trustLookup.TrustId);
 
@@ -77,12 +76,7 @@ public sealed class HomesInitialData : IInitialData
             }
 
             var now = TimeProviderContext.Current.UtcNow;
-            // Not ITrustClock: it depends on the document store this seeder runs while building.
-            var trust = await defaultSession.Events
-                .AggregateStreamAsync<Trust>(trustLookup.TrustId, token: cancellation)
-                .ConfigureAwait(false)
-                ?? throw new InvalidOperationException($"Trust stream '{trustLookup.TrustId}' does not exist for home seed '{entry.SeedKey}'.");
-            var today = trust.TimeZone.ToDate(now);
+            var today = await trustClock.ToTrustDateAsync(trustLookup.TrustId, now, cancellation).ConfigureAwait(false);
             var initialAssessment = UnitAssessment.Create(
                 entry.InitialAssessedValue,
                 new DateOnly(entry.YearBuilt, 1, 1),
@@ -123,7 +117,7 @@ public sealed class HomesInitialData : IInitialData
 
     private static async Task<IReadOnlyList<HomeSeedEntry>> LoadEntriesAsync(CancellationToken cancellation)
     {
-        var assembly = typeof(HomesInitialData).Assembly;
+        var assembly = typeof(HomesSeeder).Assembly;
         var resourceName = assembly
             .GetManifestResourceNames()
             .SingleOrDefault(name => name.EndsWith("homes.seed.json", StringComparison.OrdinalIgnoreCase));

@@ -2,6 +2,7 @@
   {
     "seedKey": "hh-garcia-001",
     "trustSeedKey": "dev-default",
+    "registeredDate": "today-309d",
     "annualIncome": 42000,
     "requiresAccessibility": false,
     "members": [
@@ -10,14 +11,15 @@
       { "name": "Sofia Garcia", "email": "sofia.garcia@example.com", "phone": "(503) 555-0143", "isPrimary": false },
       { "name": "Mateo Garcia", "email": "mateo.garcia@example.com", "phone": "(503) 555-0144", "isPrimary": false }
     ],
-    "housingCounseling": { "certificationNumber": "HUD-2026-0112", "completedDate": "2026-01-12", "counselorOrganization": "Riverton Housing Counseling" },
-    "cltOrientationCompleted": "2026-01-20",
-    "prequalification": { "lenderName": "Cascade Community Credit Union", "approvedAmount": 215000, "expiryDate": "2027-04-30" },
-    "application": { "approvedDate": "2026-02-10" }
+    "housingCounseling": { "certificationNumber": "HUD-2026-0112", "completedDate": "today-295d", "counselorOrganization": "Riverton Housing Counseling" },
+    "cltOrientationCompleted": "today-287d",
+    "prequalification": { "lenderName": "Cascade Community Credit Union", "approvedAmount": 215000, "recordedDate": "today-273d", "expiryDate": "today+178d" },
+    "application": { "submittedDate": "today-280d", "approvedDate": "today-266d" }
   },
   {
     "seedKey": "hh-nguyen-002",
     "trustSeedKey": "dev-default",
+    "registeredDate": "today-283d",
     "annualIncome": 38500,
     "requiresAccessibility": true,
     "members": [
@@ -25,28 +27,30 @@
       { "name": "Minh Nguyen", "email": "minh.nguyen@example.com", "phone": "(503) 555-0152", "isPrimary": false },
       { "name": "An Nguyen", "email": "an.nguyen@example.com", "phone": "(503) 555-0153", "isPrimary": false }
     ],
-    "housingCounseling": { "certificationNumber": "HUD-2026-0207", "completedDate": "2026-02-07", "counselorOrganization": "Riverton Housing Counseling" },
-    "cltOrientationCompleted": "2026-02-14",
-    "prequalification": { "lenderName": "Willamette Valley Bank", "approvedAmount": 190000, "expiryDate": "2027-03-31" },
-    "application": { "approvedDate": "2026-03-05" }
+    "housingCounseling": { "certificationNumber": "HUD-2026-0207", "completedDate": "today-269d", "counselorOrganization": "Riverton Housing Counseling" },
+    "cltOrientationCompleted": "today-262d",
+    "prequalification": { "lenderName": "Willamette Valley Bank", "approvedAmount": 190000, "recordedDate": "today-250d", "expiryDate": "today+148d" },
+    "application": { "submittedDate": "today-257d", "approvedDate": "today-243d" }
   },
   {
     "seedKey": "hh-okafor-003",
     "trustSeedKey": "dev-default",
+    "registeredDate": "today-276d",
     "annualIncome": 51000,
     "requiresAccessibility": false,
     "members": [
       { "name": "Chidi Okafor", "email": "chidi.okafor@example.com", "phone": "(503) 555-0161", "isPrimary": true },
       { "name": "Ada Okafor", "email": "ada.okafor@example.com", "phone": "(503) 555-0162", "isPrimary": false }
     ],
-    "housingCounseling": { "certificationNumber": "HUD-2026-0219", "completedDate": "2026-02-19", "counselorOrganization": "Neighborhood Partnerships" },
-    "cltOrientationCompleted": "2026-02-14",
-    "prequalification": { "lenderName": "Cascade Community Credit Union", "approvedAmount": 240000, "expiryDate": "2027-05-31" },
-    "application": { "approvedDate": "2026-03-05" }
+    "housingCounseling": { "certificationNumber": "HUD-2026-0219", "completedDate": "today-257d", "counselorOrganization": "Neighborhood Partnerships" },
+    "cltOrientationCompleted": "today-262d",
+    "prequalification": { "lenderName": "Cascade Community Credit Union", "approvedAmount": 240000, "recordedDate": "today-248d", "expiryDate": "today+209d" },
+    "application": { "submittedDate": "today-250d", "approvedDate": "today-243d" }
   },
   {
     "seedKey": "hh-patel-004",
     "trustSeedKey": "dev-default",
+    "registeredDate": "today-240d",
     "annualIncome": 46000,
     "requiresAccessibility": false,
     "members": [
@@ -56,27 +60,29 @@
       { "name": "Dev Patel", "email": "dev.patel@example.com", "phone": "(503) 555-0174", "isPrimary": false },
       { "name": "Meera Patel", "email": "meera.patel@example.com", "phone": "(503) 555-0175", "isPrimary": false }
     ],
-    "housingCounseling": { "certificationNumber": "HUD-2026-0322", "completedDate": "2026-03-22", "counselorOrganization": "Neighborhood Partnerships" },
-    "cltOrientationCompleted": "2026-04-02",
-    "prequalification": { "lenderName": "Willamette Valley Bank", "approvedAmount": 225000, "expiryDate": "2027-06-30" },
-    "application": { "approvedDate": "2026-04-18" }
+    "housingCounseling": { "certificationNumber": "HUD-2026-0322", "completedDate": "today-226d", "counselorOrganization": "Neighborhood Partnerships" },
+    "cltOrientationCompleted": "today-215d",
+    "prequalification": { "lenderName": "Willamette Valley Bank", "approvedAmount": 225000, "recordedDate": "today-206d", "expiryDate": "today+239d" },
+    "application": { "submittedDate": "today-213d", "approvedDate": "today-199d" }
   },
   {
     "seedKey": "hh-kowalski-005",
     "trustSeedKey": "dev-default",
+    "registeredDate": "today-222d",
     "annualIncome": 59000,
     "requiresAccessibility": false,
     "members": [
       { "name": "Anna Kowalski", "email": "anna.kowalski@example.com", "phone": "(503) 555-0181", "isPrimary": true }
     ],
-    "housingCounseling": { "certificationNumber": "HUD-2026-0409", "completedDate": "2026-04-09", "counselorOrganization": "Riverton Housing Counseling" },
-    "cltOrientationCompleted": "2026-04-16",
-    "prequalification": { "lenderName": "Cascade Community Credit Union", "approvedAmount": 180000, "expiryDate": "2026-09-30" },
-    "application": { "approvedDate": "2026-05-22" }
+    "housingCounseling": { "certificationNumber": "HUD-2026-0409", "completedDate": "today-208d", "counselorOrganization": "Riverton Housing Counseling" },
+    "cltOrientationCompleted": "today-201d",
+    "prequalification": { "lenderName": "Cascade Community Credit Union", "approvedAmount": 180000, "recordedDate": "today-172d", "expiryDate": "today+21d" },
+    "application": { "submittedDate": "today-179d", "approvedDate": "today-165d" }
   },
   {
     "seedKey": "hh-haddad-006",
     "trustSeedKey": "dev-default",
+    "registeredDate": "today-173d",
     "annualIncome": 44000,
     "requiresAccessibility": true,
     "members": [
@@ -84,20 +90,21 @@
       { "name": "Layla Haddad", "email": "layla.haddad@example.com", "phone": "(503) 555-0192", "isPrimary": false },
       { "name": "Yusuf Haddad", "email": "yusuf.haddad@example.com", "phone": "(503) 555-0193", "isPrimary": false }
     ],
-    "housingCounseling": { "certificationNumber": "HUD-2026-0528", "completedDate": "2026-05-28", "counselorOrganization": "Neighborhood Partnerships" },
-    "prequalification": { "lenderName": "Willamette Valley Bank", "approvedAmount": 205000, "expiryDate": "2027-08-31" },
-    "application": { "approvedDate": "2026-06-14" }
+    "housingCounseling": { "certificationNumber": "HUD-2026-0528", "completedDate": "today-159d", "counselorOrganization": "Neighborhood Partnerships" },
+    "prequalification": { "lenderName": "Willamette Valley Bank", "approvedAmount": 205000, "recordedDate": "today-149d", "expiryDate": "today+301d" },
+    "application": { "submittedDate": "today-156d", "approvedDate": "today-142d" }
   },
   {
     "seedKey": "hh-brooks-007",
     "trustSeedKey": "dev-default",
+    "registeredDate": "today-75d",
     "annualIncome": 47500,
     "requiresAccessibility": false,
     "members": [
       { "name": "Jordan Brooks", "email": "jordan.brooks@example.com", "phone": "(503) 555-0201", "isPrimary": true },
       { "name": "Casey Brooks", "email": "casey.brooks@example.com", "phone": "(503) 555-0202", "isPrimary": false }
     ],
-    "housingCounseling": { "certificationNumber": "HUD-2026-0903", "completedDate": "2026-09-03", "counselorOrganization": "Riverton Housing Counseling" },
-    "application": {}
+    "housingCounseling": { "certificationNumber": "HUD-2026-0903", "completedDate": "today-61d", "counselorOrganization": "Riverton Housing Counseling" },
+    "application": { "submittedDate": "today-10d" }
   }
 ]

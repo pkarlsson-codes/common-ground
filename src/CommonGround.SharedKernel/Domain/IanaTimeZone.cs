@@ -46,6 +46,16 @@ public sealed class IanaTimeZone : ValueObject
     public DateOnly ToDate(DateTimeOffset instant)
         => DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(instant, Info).DateTime);
 
+    /// <summary>Returns the instant at which this time zone's clocks show the given date and time.</summary>
+    /// <param name="date">The local calendar date.</param>
+    /// <param name="time">The local time of day.</param>
+    /// <returns>The instant, in UTC.</returns>
+    public DateTimeOffset ToInstant(DateOnly date, TimeOnly time)
+    {
+        var local = date.ToDateTime(time, DateTimeKind.Unspecified);
+        return new DateTimeOffset(local, Info.GetUtcOffset(local)).ToUniversalTime();
+    }
+
     /// <inheritdoc/>
     public override string ToString() => Value;
 

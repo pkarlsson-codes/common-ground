@@ -60,4 +60,33 @@ public class IanaTimeZoneTests
             sut.ToDate(lateUtcEvening).Should().Be(new DateOnly(2026, 10, 29));
         }
     }
+    public class TheToInstantMethod
+    {
+        [Fact]
+        public void GivenSummerDateInDenver_WhenConverted_ThenAppliesDaylightOffset()
+        {
+            var sut = IanaTimeZone.Create("America/Denver");
+
+            sut.ToInstant(new DateOnly(2026, 7, 1), new TimeOnly(10, 0))
+                .Should().Be(new DateTimeOffset(2026, 7, 1, 16, 0, 0, TimeSpan.Zero));
+        }
+
+        [Fact]
+        public void GivenWinterDateInDenver_WhenConverted_ThenAppliesStandardOffset()
+        {
+            var sut = IanaTimeZone.Create("America/Denver");
+
+            sut.ToInstant(new DateOnly(2026, 1, 15), new TimeOnly(10, 0))
+                .Should().Be(new DateTimeOffset(2026, 1, 15, 17, 0, 0, TimeSpan.Zero));
+        }
+
+        [Fact]
+        public void GivenLateEveningInDenver_WhenConvertedBack_ThenToDateReturnsTheSameDate()
+        {
+            var sut = IanaTimeZone.Create("America/Denver");
+            var date = new DateOnly(2026, 10, 28);
+
+            sut.ToDate(sut.ToInstant(date, new TimeOnly(23, 30))).Should().Be(date);
+        }
+    }
 }

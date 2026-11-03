@@ -2,14 +2,14 @@ using System.Text.Json;
 using CommonGround.Identity.Domain.Users;
 using CommonGround.Identity.Infrastructure.Seeding;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Infrastructure.Seeding;
 using CommonGround.TrustManagement.Infrastructure.Seeding;
 using Marten;
-using Marten.Schema;
 
 namespace CommonGround.API.Infrastructure.Seeding;
 
 /// <summary>Seeds development users in the identity store and wires them to their trust.</summary>
-public sealed class UsersInitialData : IInitialData
+public sealed class UsersSeeder : IDevelopmentSeeder
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -17,7 +17,7 @@ public sealed class UsersInitialData : IInitialData
     };
 
     /// <inheritdoc/>
-    public async Task Populate(IDocumentStore store, CancellationToken cancellation)
+    public async Task SeedAsync(IDocumentStore store, CancellationToken cancellation)
     {
         ArgumentNullException.ThrowIfNull(store);
 
@@ -36,7 +36,7 @@ public sealed class UsersInitialData : IInitialData
                 .LoadAsync<TrustSeedLookup>(TrustSeedLookup.BuildId(entry.TrustSeedKey), cancellation)
                 .ConfigureAwait(false)
                 ?? throw new InvalidOperationException(
-                    $"Trust seed '{entry.TrustSeedKey}' not found for user seed '{entry.SeedKey}'. Ensure TrustsInitialData runs first.");
+                    $"Trust seed '{entry.TrustSeedKey}' not found for user seed '{entry.SeedKey}'. Ensure TrustsSeeder runs first.");
 
             var lookupId = UserSeedLookup.BuildId(entry.SeedKey);
             var lookup = await session.LoadAsync<UserSeedLookup>(lookupId, cancellation).ConfigureAwait(false);
@@ -69,7 +69,7 @@ public sealed class UsersInitialData : IInitialData
 
     private static async Task<IReadOnlyList<UserSeedEntry>> LoadEntriesAsync(CancellationToken cancellation)
     {
-        var assembly = typeof(UsersInitialData).Assembly;
+        var assembly = typeof(UsersSeeder).Assembly;
         var resourceName = assembly
             .GetManifestResourceNames()
             .SingleOrDefault(name => name.EndsWith("users.seed.json", StringComparison.OrdinalIgnoreCase));
