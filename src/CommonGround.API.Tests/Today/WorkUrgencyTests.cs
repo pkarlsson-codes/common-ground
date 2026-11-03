@@ -11,7 +11,7 @@ public class WorkUrgencyTests
         public DateOnly Today { get; } = new(2026, 11, 2);
 
         public WorkItem Item(string label, DateOnly? due, DateOnly waitingSince) =>
-            new(WorkArea.Applicants, "kind", "record", label, label, "detail", due, waitingSince);
+            new(WorkArea.Applicants, "kind", "record", label, label, "detail", due, waitingSince, []);
     }
 
     public class TheOrderMethod

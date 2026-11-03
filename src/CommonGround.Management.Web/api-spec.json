@@ -10726,6 +10726,13 @@
             "description": "The date it started waiting, or became due soon.",
             "format": "date"
           },
+          "actions": {
+            "type": "array",
+            "description": "What staff can do to fix it, as keys such as approve-application, in the order to offer them.",
+            "items": {
+              "type": "string"
+            }
+          },
           "urgency": {
             "type": "string",
             "description": "\"overdue\" when past its due date, \"soon\" when due within a week, otherwise \"plain\"."

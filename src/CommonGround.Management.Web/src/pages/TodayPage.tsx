@@ -1,10 +1,15 @@
-import { useState } from 'react'
-import { Link, useNavigate, useOutletContext } from 'react-router-dom'
+import { useState, type ReactNode } from 'react'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import type { WorkItemResponse } from '../api'
 import { useToday } from '../hooks/today'
 import type { LayoutContext } from '../components/Layout'
 import { daysBetween, formatCalendarDate, type CalendarDate } from '../lib/calendarDate'
-import { TODAY_SECTIONS, areasForFocus, recordLink, type TodaySection } from '../lib/today'
+import { TODAY_SECTIONS, areasForFocus, recordLink, rowActions, type TodaySection } from '../lib/today'
+import ApproveApplicationPanel from './applications/ApproveApplicationPanel'
+import DenyApplicationPanel from './applications/DenyApplicationPanel'
+import RecordCltOrientationPanel from './households/RecordCltOrientationPanel'
+import RecordHousingCounselingPanel from './households/RecordHousingCounselingPanel'
+import RecordMortgagePrequalificationPanel from './households/RecordMortgagePrequalificationPanel'
 
 const KIND_LABELS: Record<string, string> = {
   'application-awaiting-decision': 'Application to decide',
@@ -16,6 +21,17 @@ const KIND_LABELS: Record<string, string> = {
   'purchase-stalled': 'Purchase stalled',
   'closing-scheduled': 'Closing coming up',
   'document-expiring': 'Document expiring',
+}
+
+type ActivePanel = { action: string; recordId: string }
+
+/** The panel each action that opens over Today renders, given the item's record. */
+const ACTION_PANELS: Record<string, (recordId: string, onClose: () => void) => ReactNode> = {
+  'approve-application': (id, onClose) => <ApproveApplicationPanel applicationId={id} onClose={onClose} />,
+  'deny-application': (id, onClose) => <DenyApplicationPanel applicationId={id} onClose={onClose} />,
+  'record-housing-counseling': (id, onClose) => <RecordHousingCounselingPanel householdId={id} onClose={onClose} />,
+  'record-clt-orientation': (id, onClose) => <RecordCltOrientationPanel householdId={id} onClose={onClose} />,
+  'record-mortgage-prequalification': (id, onClose) => <RecordMortgagePrequalificationPanel householdId={id} onClose={onClose} />,
 }
 
 const plural = (n: number, word: string) => `${n.toLocaleString()} ${word}${n === 1 ? '' : 's'}`
@@ -34,7 +50,12 @@ function DueChip({ item, today }: { item: WorkItemResponse; today: CalendarDate 
   return <span className="due-chip due-chip--waiting">{days > 0 ? `Waiting ${plural(days, 'day')}` : 'Since today'}</span>
 }
 
-function SectionTable({ section, items, today }: { section: TodaySection; items: WorkItemResponse[]; today: CalendarDate }) {
+function SectionTable({ section, items, today, onAction }: {
+  section: TodaySection
+  items: WorkItemResponse[]
+  today: CalendarDate
+  onAction: (panel: ActivePanel) => void
+}) {
   const navigate = useNavigate()
 
   return (
@@ -43,7 +64,6 @@ function SectionTable({ section, items, today }: { section: TodaySection; items:
         <h2 id={`today-${section.area}`} className="today-section__title">
           {section.label} <span className="today-section__count">{items.length}</span>
         </h2>
-        <Link className="today-section__link" to={section.to}>{section.linkLabel} →</Link>
       </div>
       <div className="registry-table-wrap">
         <table className="registry-table">
@@ -53,20 +73,38 @@ function SectionTable({ section, items, today }: { section: TodaySection; items:
               <th>Record</th>
               <th>Detail</th>
               <th>Due</th>
+              <th><span className="sr-only">Actions</span></th>
             </tr>
           </thead>
           <tbody>
             {items.map(item => {
               const link = recordLink(item)
+              const open = link ? () => navigate(link.to, { state: link.state }) : undefined
               return (
-                <tr
-                  key={`${item.kind}-${item.recordId}`}
-                  onClick={link ? () => navigate(link.to, { state: link.state }) : undefined}
-                >
+                <tr key={`${item.kind}-${item.recordId}`} onClick={open}>
                   <td>{KIND_LABELS[item.kind ?? ''] ?? item.kind}</td>
                   <td>{item.label}</td>
                   <td style={{ color: 'var(--text-secondary)' }}>{item.detail}</td>
                   <td><DueChip item={item} today={today} /></td>
+                  <td>
+                    <div className="today-actions">
+                      {rowActions(item).map(action => (
+                        <button
+                          key={action.key}
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          aria-label={`${action.label}: ${item.label}`}
+                          onClick={e => {
+                            e.stopPropagation()
+                            if (action.opensPanel) onAction({ action: action.key, recordId: item.recordId! })
+                            else open?.()
+                          }}
+                        >
+                          {action.label}
+                        </button>
+                      ))}
+                    </div>
+                  </td>
                 </tr>
               )
             })}
@@ -82,6 +120,7 @@ export default function TodayPage() {
   const { data, isLoading, isError, refetch } = useToday()
   const { focus } = useOutletContext<LayoutContext>()
   const [showAll, setShowAll] = useState(false)
+  const [panel, setPanel] = useState<ActivePanel | null>(null)
 
   const focusAreas = areasForFocus(focus)
   const shownAreas = showAll ? areasForFocus('everything') : focusAreas
@@ -142,8 +181,10 @@ export default function TodayPage() {
       )}
 
       {data?.today && sections.map(({ section, items: sectionItems }) => (
-        <SectionTable key={section.area} section={section} items={sectionItems} today={data.today!} />
+        <SectionTable key={section.area} section={section} items={sectionItems} today={data.today!} onAction={setPanel} />
       ))}
+
+      {panel && ACTION_PANELS[panel.action]?.(panel.recordId, () => setPanel(null))}
     </div>
   )
 }

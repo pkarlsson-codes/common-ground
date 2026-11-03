@@ -22,6 +22,7 @@ public sealed record TodayResponse(
 /// <param name="Detail">One line saying what is waiting.</param>
 /// <param name="DueDate">The date it must be done by, if it has one.</param>
 /// <param name="WaitingSince">The date it started waiting, or became due soon.</param>
+/// <param name="Actions">What staff can do to fix it, as keys such as <c>approve-application</c>, in the order to offer them.</param>
 /// <param name="Urgency">"overdue" when past its due date, "soon" when due within a week, otherwise "plain".</param>
 public sealed record WorkItemResponse(
     string Area,
@@ -32,6 +33,7 @@ public sealed record WorkItemResponse(
     string Detail,
     DateOnly? DueDate,
     DateOnly WaitingSince,
+    IReadOnlyList<string> Actions,
     string Urgency);
 
 /// <summary>How many items an area or kind has.</summary>

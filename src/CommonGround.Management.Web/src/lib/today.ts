@@ -7,17 +7,14 @@ export type TodayArea = 'applicants' | 'selections' | 'purchases' | 'records'
 export interface TodaySection {
   area: TodayArea
   label: string
-  /** The list page the section's "Open … →" link goes to. */
-  to: string
-  linkLabel: string
 }
 
 /** Today's sections, in work order. */
 export const TODAY_SECTIONS: readonly TodaySection[] = [
-  { area: 'applicants', label: 'Applicants', to: '/applications',       linkLabel: 'Open applicants' },
-  { area: 'selections', label: 'Selections', to: '/home-selections',    linkLabel: 'Open selections' },
-  { area: 'purchases',  label: 'Purchases',  to: '/purchase-workflows', linkLabel: 'Open purchases' },
-  { area: 'records',    label: 'Records',    to: '/documents',          linkLabel: 'Open documents' },
+  { area: 'applicants', label: 'Applicants' },
+  { area: 'selections', label: 'Selections' },
+  { area: 'purchases', label: 'Purchases' },
+  { area: 'records', label: 'Records' },
 ]
 
 /** The areas Today shows for a focus: everything, or the focus's own areas plus Records. */
@@ -71,4 +68,44 @@ export function countsByPage(kindCounts: readonly WorkCountResponse[]): Record<s
     if (page && count) counts[page] = (counts[page] ?? 0) + count
   }
   return counts
+}
+
+const ACTION_LABELS: Record<string, string> = {
+  'approve-application': 'Approve',
+  'deny-application': 'Deny',
+  'record-housing-counseling': 'Record counseling',
+  'record-clt-orientation': 'Record orientation',
+  'record-mortgage-prequalification': 'Record prequalification',
+  'start-selection': 'Start selection',
+  'choose-household': 'Choose household',
+  'record-eligibility': 'Record eligibility',
+  'record-financing': 'Record financing',
+  'record-inspection': 'Record inspection',
+  'record-title': 'Record title',
+  'record-lease-execution': 'Record lease signing',
+  'schedule-closing': 'Schedule closing',
+  'record-closing': 'Record closing',
+}
+
+/** The actions whose panel opens over Today; the rest open the record, where the action is. */
+const PANEL_ACTIONS = new Set([
+  'approve-application',
+  'deny-application',
+  'record-housing-counseling',
+  'record-clt-orientation',
+  'record-mortgage-prequalification',
+])
+
+export interface RowAction {
+  key: string
+  label: string
+  /** Whether the action's panel opens over Today, rather than on the record's page. */
+  opensPanel: boolean
+}
+
+/** The buttons a row offers, in the order the API gives; actions this app doesn't know are left out. */
+export function rowActions(item: Pick<WorkItemResponse, 'actions'>): RowAction[] {
+  return (item.actions ?? [])
+    .filter(key => key in ACTION_LABELS)
+    .map(key => ({ key, label: ACTION_LABELS[key], opensPanel: PANEL_ACTIONS.has(key) }))
 }

@@ -24,7 +24,7 @@ public class HomeownershipWorkItemsTests
         private readonly TestBed _testBed = new();
 
         [Fact]
-        public void GivenPurchaseWithEligibilityVerified_WhenDerived_ThenWaitsOnTheOtherStepsSinceItLastMovedOn()
+        public void GivenPurchaseWithEligibilityVerified_WhenDerived_ThenWaitsOnAndOffersTheOtherStepsSinceItLastMovedOn()
         {
             var workflow = _testBed.Workflow("InProgress");
             workflow.EligibilityDetails = new EligibilityDetailsEntry();
@@ -38,7 +38,12 @@ public class HomeownershipWorkItemsTests
                 Detail = "Alice Johnson: waiting on financing, inspection, title, lease signing",
                 DueDate = (DateOnly?)null,
                 WaitingSince = new DateOnly(2026, 10, 9),
-            });
+                Actions = new[]
+                {
+                    HomeownershipWorkItems.RecordFinancing, HomeownershipWorkItems.RecordInspection,
+                    HomeownershipWorkItems.RecordTitle, HomeownershipWorkItems.RecordLeaseExecution,
+                },
+            }, o => o.WithStrictOrdering());
         }
 
         [Fact]
@@ -53,11 +58,15 @@ public class HomeownershipWorkItemsTests
 
             var item = HomeownershipWorkItems.ForPurchase(workflow, _testBed.StepEnteredAt, "14 Alder Lane", _testBed.Today, _testBed.Zone);
 
-            item.Detail.Should().Be("Alice Johnson: ready to schedule closing");
+            item.Should().BeEquivalentTo(new
+            {
+                Detail = "Alice Johnson: ready to schedule closing",
+                Actions = new[] { HomeownershipWorkItems.ScheduleClosing },
+            });
         }
 
         [Fact]
-        public void GivenStalledPurchase_WhenDerived_ThenIsDueByItsResolutionTarget()
+        public void GivenStalledPurchase_WhenDerived_ThenIsDueByItsResolutionTargetAndResumedByRecordingAStep()
         {
             var workflow = _testBed.Workflow("Stalled");
             workflow.StalledReason = "Lender paused underwriting";
@@ -72,6 +81,12 @@ public class HomeownershipWorkItemsTests
                 Detail = "Alice Johnson: stalled, Lender paused underwriting",
                 DueDate = (DateOnly?)new DateOnly(2026, 11, 20),
                 WaitingSince = new DateOnly(2026, 10, 20),
+                Actions = new[]
+                {
+                    HomeownershipWorkItems.RecordEligibility, HomeownershipWorkItems.RecordFinancing,
+                    HomeownershipWorkItems.RecordInspection, HomeownershipWorkItems.RecordTitle,
+                    HomeownershipWorkItems.RecordLeaseExecution,
+                },
             });
         }
 
@@ -86,6 +101,17 @@ public class HomeownershipWorkItemsTests
             var item = HomeownershipWorkItems.ForPurchase(workflow, _testBed.StepEnteredAt, "14 Alder Lane", _testBed.Today, _testBed.Zone);
 
             item.Kind.Should().Be(kind);
+        }
+
+        [Fact]
+        public void GivenClosingScheduled_WhenDerived_ThenOffersToRecordTheClosing()
+        {
+            var workflow = _testBed.Workflow("ClosingScheduled");
+            workflow.ScheduledClosingDate = _testBed.Today.AddDays(3);
+
+            var item = HomeownershipWorkItems.ForPurchase(workflow, _testBed.StepEnteredAt, "14 Alder Lane", _testBed.Today, _testBed.Zone);
+
+            item.Actions.Should().Equal(HomeownershipWorkItems.RecordClosing);
         }
     }
 }

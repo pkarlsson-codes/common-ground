@@ -19,7 +19,7 @@ namespace CommonGround.API.IntegrationTests.Today;
 public class TodayTests(ApiFactory factory)
 {
     [Fact]
-    public async Task GetToday_ListsASubmittedApplicationUntilItIsApproved()
+    public async Task GetToday_ListsASubmittedApplicationWithItsDecisionsUntilItIsApproved()
     {
         var client = factory.CreateClient().WithAuthToken();
         var applicationId = await SubmitAsync(client, await RegisterHouseholdAsync(client, "today-submitted@example.com"));
@@ -27,7 +27,7 @@ public class TodayTests(ApiFactory factory)
         var before = await GetTodayAsync(client);
 
         before.Items.Should().ContainSingle(i => i.RecordId == applicationId)
-            .Which.Should().BeEquivalentTo(new { Area = "applicants", Kind = "application-awaiting-decision", Label = "Today Applicant" });
+            .Which.Should().BeEquivalentTo(new { Area = "applicants", Kind = "application-awaiting-decision", Label = "Today Applicant", Actions = new[] { "approve-application", "deny-application" } });
 
         (await client.PostAsJsonAsync($"/api/homeowner-applications/{applicationId}/approve",
             new ApproveApplicationRequest(before.Today, null)))

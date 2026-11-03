@@ -42,7 +42,7 @@ public static class TodayEndpoints
         var requested = areas is { Length: > 0 } ? all.Where(i => areas.Contains(i.Area, StringComparer.Ordinal)) : all;
 
         WorkItemResponse[] items = [.. requested.Select(i => new WorkItemResponse(
-            i.Area, i.Kind, i.RecordType, i.RecordId, i.Label, i.Detail, i.DueDate, i.WaitingSince, WorkUrgency.UrgencyOf(i, today)))];
+            i.Area, i.Kind, i.RecordType, i.RecordId, i.Label, i.Detail, i.DueDate, i.WaitingSince, i.Actions, WorkUrgency.UrgencyOf(i, today)))];
 
         return Results.Ok(new TodayResponse(
             today,

@@ -20,6 +20,27 @@ public static class HomeownershipWorkItems
     /// <summary>A purchase whose closing is coming up.</summary>
     public const string ClosingScheduled = "closing-scheduled";
 
+    /// <summary>Record the buyer's eligibility.</summary>
+    public const string RecordEligibility = "record-eligibility";
+
+    /// <summary>Record the buyer's financing commitment.</summary>
+    public const string RecordFinancing = "record-financing";
+
+    /// <summary>Record the home inspection.</summary>
+    public const string RecordInspection = "record-inspection";
+
+    /// <summary>Record that title has cleared.</summary>
+    public const string RecordTitle = "record-title";
+
+    /// <summary>Record that the ground lease was signed.</summary>
+    public const string RecordLeaseExecution = "record-lease-execution";
+
+    /// <summary>Schedule the closing, once every step is recorded.</summary>
+    public const string ScheduleClosing = "schedule-closing";
+
+    /// <summary>Record that the purchase closed.</summary>
+    public const string RecordClosing = "record-closing";
+
     /// <summary>
     /// The one item for an open purchase: stalled, closing within <see cref="ClosingWindowDays"/> of
     /// <paramref name="today"/>, or otherwise waiting on the steps it hasn't recorded since it last moved on.
@@ -48,19 +69,19 @@ public static class HomeownershipWorkItems
             return new WorkItem(
                 WorkArea.Purchases, PurchaseStalled, "purchase", workflow.Id, label,
                 $"{workflow.BuyerFullName}: stalled, {workflow.StalledReason}", workflow.ResolutionTargetDate,
-                workflow.StalledDate ?? stepEnteredOn);
+                workflow.StalledDate ?? stepEnteredOn, NextActions(workflow));
         }
 
         if (workflow.ScheduledClosingDate is { } closing && closing <= today.AddDays(ClosingWindowDays))
         {
             return new WorkItem(
                 WorkArea.Purchases, ClosingScheduled, "purchase", workflow.Id, label,
-                $"{workflow.BuyerFullName}: closing", closing, closing.AddDays(-ClosingWindowDays));
+                $"{workflow.BuyerFullName}: closing", closing, closing.AddDays(-ClosingWindowDays), [RecordClosing]);
         }
 
         return new WorkItem(
             WorkArea.Purchases, PurchaseStepWaiting, "purchase", workflow.Id, label,
-            $"{workflow.BuyerFullName}: {Waiting(workflow)}", null, stepEnteredOn);
+            $"{workflow.BuyerFullName}: {Waiting(workflow)}", null, stepEnteredOn, NextActions(workflow));
     }
 
     private static string Waiting(PurchaseWorkflowView workflow)
@@ -68,18 +89,33 @@ public static class HomeownershipWorkItems
         if (workflow.ScheduledClosingDate is not null)
             return "waiting for the closing date";
 
-        var missing = new List<string>();
-        if (workflow.EligibilityDetails is null)
-            missing.Add("eligibility");
-        if (workflow.FinancingDetails is null)
-            missing.Add("financing");
-        if (workflow.InspectionResult is null)
-            missing.Add("inspection");
-        if (workflow.TitleDetails is null)
-            missing.Add("title");
-        if (workflow.LeaseExecutionDetails is null)
-            missing.Add("lease signing");
+        var missing = MissingSteps(workflow);
+        return missing.Count == 0 ? "ready to schedule closing" : $"waiting on {string.Join(", ", missing.Select(m => m.Step))}";
+    }
 
-        return missing.Count == 0 ? "ready to schedule closing" : $"waiting on {string.Join(", ", missing)}";
+    // Recording a step also resumes a stalled purchase, so a stalled one is fixed the same way as a waiting one.
+    private static List<string> NextActions(PurchaseWorkflowView workflow)
+    {
+        if (workflow.ScheduledClosingDate is not null)
+            return [RecordClosing];
+
+        var missing = MissingSteps(workflow);
+        return missing.Count == 0 ? [ScheduleClosing] : [.. missing.Select(m => m.Action)];
+    }
+
+    private static List<(string Step, string Action)> MissingSteps(PurchaseWorkflowView workflow)
+    {
+        var missing = new List<(string Step, string Action)>();
+        if (workflow.EligibilityDetails is null)
+            missing.Add(("eligibility", RecordEligibility));
+        if (workflow.FinancingDetails is null)
+            missing.Add(("financing", RecordFinancing));
+        if (workflow.InspectionResult is null)
+            missing.Add(("inspection", RecordInspection));
+        if (workflow.TitleDetails is null)
+            missing.Add(("title", RecordTitle));
+        if (workflow.LeaseExecutionDetails is null)
+            missing.Add(("lease signing", RecordLeaseExecution));
+        return missing;
     }
 }

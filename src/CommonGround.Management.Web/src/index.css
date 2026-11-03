@@ -1110,13 +1110,8 @@ body {
   color: var(--text-secondary);
   margin-left: 6px;
 }
-.today-section__link {
-  font-size: 12.5px;
-  color: var(--amber);
-  text-decoration: none;
-}
-.today-section__link:hover { color: var(--amber-bright); }
 .today-toggle { display: flex; gap: 6px; }
+.today-actions { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
 .today-toggle .btn[aria-pressed='true'] {
   background: var(--amber-dim);
   color: var(--amber-bright);

@@ -1,13 +1,13 @@
 import { expect, test, type Page } from '@playwright/test'
-import { createApplication, setDocumentExpiry, uploadDocument } from '../support/api'
+import { createApplication, createHome, createLandParcel, setDocumentExpiry, uploadDocument } from '../support/api'
 import { expectToast, isoDate, panel, uniqueId } from '../support/ui'
 
 // Journeys (docs/journeys/today/):
-//   work-through-today — items grouped by area, a row opens its record, acting on it takes it off, focus narrows the areas
+//   work-through-today — items grouped by area, a row's actions fix it on Today, a row opens its record, focus narrows the areas
 
 const section = (page: Page, name: string) => page.getByRole('region', { name: new RegExp(`^${name}`) })
 
-test('a submitted application waits on Today until it is approved from there', async ({ page }) => {
+test('a submitted application waits on Today until it is approved there, without leaving', async ({ page }) => {
   const name = `Today ${uniqueId()}`
   await createApplication(page, name, { approve: false })
 
@@ -18,18 +18,43 @@ test('a submitted application waits on Today until it is approved from there', a
   const row = section(page, 'Applicants').getByRole('row', { name: new RegExp(`Application to decide ${name}`) })
   await expect(row).toContainText('Submitted, waiting for a decision')
   await expect(row).toContainText(/Waiting \d+ day|Since today/)
+  await expect(row.getByRole('button', { name: `Deny: ${name}` })).toBeVisible()
 
-  await row.click()
-  await expect(page).toHaveURL(/\/applications$/)
-  const detail = panel(page, name)
-  await detail.getByRole('button', { name: 'Approve Application' }).click()
+  await row.getByRole('button', { name: `Approve: ${name}` }).click()
   await panel(page, 'Approve Application').getByRole('button', { name: 'Approve', exact: true }).click()
   await expectToast(page, 'Application approved')
-  await detail.getByRole('button', { name: 'Close' }).first().click()
 
-  await page.locator('.sidebar').getByRole('link', { name: 'Today', exact: true }).click()
   await expect(page).toHaveURL(/\/$/)
-  await expect(page.getByRole('row', { name: new RegExp(name) })).toHaveCount(0)
+  await expect(page.getByRole('row', { name: new RegExp(`Application to decide ${name}`) })).toHaveCount(0)
+})
+
+test('a household missing a readiness step offers to record just that step, on Today', async ({ page }) => {
+  const name = `Today ready ${uniqueId()}`
+  await createApplication(page, name, { ready: false })
+
+  await page.goto('/')
+  const row = section(page, 'Applicants').getByRole('row', { name: new RegExp(`Readiness incomplete ${name}`) })
+  await expect(row).toContainText('Missing CLT orientation')
+  await expect(row.getByRole('button', { name: `Record counseling: ${name}` })).toHaveCount(0)
+
+  await row.getByRole('button', { name: `Record orientation: ${name}` }).click()
+  await panel(page, 'Record CLT Orientation').getByRole('button', { name: 'Record Orientation' }).click()
+  await expectToast(page, 'CLT orientation recorded')
+
+  await expect(page).toHaveURL(/\/$/)
+  await expect(page.getByRole('row', { name: new RegExp(`Readiness incomplete ${name}`) })).toHaveCount(0)
+})
+
+test('an action with no panel on Today yet opens the record, where the action is', async ({ page }) => {
+  const { parcelId, apn } = await createLandParcel(page)
+  await createHome(page, parcelId)
+
+  await page.goto('/')
+  const row = section(page, 'Selections').getByRole('row', { name: new RegExp(`Home available ${apn}`) })
+  await row.getByRole('button', { name: /^Start selection: / }).click()
+
+  await expect(page).toHaveURL(/\/homes$/)
+  await expect(panel(page, `${apn} Elm St`).getByRole('button', { name: 'Start Selection' })).toBeVisible()
 })
 
 test('a document expiring soon is a Records item with a due chip, and opens the document', async ({ page }) => {

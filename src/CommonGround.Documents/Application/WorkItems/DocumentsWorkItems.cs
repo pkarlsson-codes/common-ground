@@ -28,6 +28,6 @@ public static class DocumentsWorkItems
 
         return new WorkItem(
             WorkArea.Records, DocumentExpiring, "document", document.Id, document.Title,
-            expiresOn < today ? "Expired" : "Expiring", expiresOn, expiresOn.AddDays(-ExpiryWindowDays));
+            expiresOn < today ? "Expired" : "Expiring", expiresOn, expiresOn.AddDays(-ExpiryWindowDays), []);
     }
 }

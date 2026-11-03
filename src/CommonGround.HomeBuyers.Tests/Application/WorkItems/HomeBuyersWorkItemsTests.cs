@@ -33,7 +33,7 @@ public class HomeBuyersWorkItemsTests
         private readonly TestBed _testBed = new();
 
         [Fact]
-        public void GivenSubmittedApplicationOfReadyHousehold_WhenDerived_ThenAwaitsDecisionSinceTheTrustDateItWasSubmitted()
+        public void GivenSubmittedApplicationOfReadyHousehold_WhenDerived_ThenAwaitsApprovalOrDenialSinceTheTrustDateItWasSubmitted()
         {
             var household = _testBed.ReadyHousehold(_testBed.Today.AddDays(90));
 
@@ -45,6 +45,7 @@ public class HomeBuyersWorkItemsTests
                 RecordId = "application-1",
                 Label = "Alice Johnson",
                 WaitingSince = new DateOnly(2026, 10, 19),
+                Actions = new[] { HomeBuyersWorkItems.ApproveApplication, HomeBuyersWorkItems.DenyApplication },
             });
         }
 
@@ -59,7 +60,7 @@ public class HomeBuyersWorkItemsTests
         }
 
         [Fact]
-        public void GivenHouseholdMissingOrientationAndPrequalification_WhenDerived_ThenListsBothMissingSteps()
+        public void GivenHouseholdMissingOrientationAndPrequalification_WhenDerived_ThenListsBothMissingStepsAndOffersToRecordEach()
         {
             var household = _testBed.ReadyHousehold(_testBed.Today);
             household.IsCltOrientationCompleted = false;
@@ -73,7 +74,8 @@ public class HomeBuyersWorkItemsTests
                 RecordType = "household",
                 RecordId = "household-1",
                 Detail = "Missing CLT orientation, mortgage prequalification",
-            });
+                Actions = new[] { HomeBuyersWorkItems.RecordCltOrientation, HomeBuyersWorkItems.RecordMortgagePrequalification },
+            }, o => o.WithStrictOrdering());
         }
 
         [Fact]
@@ -104,6 +106,7 @@ public class HomeBuyersWorkItemsTests
                     Kind = HomeBuyersWorkItems.PrequalificationExpiring,
                     DueDate = (DateOnly?)expiry,
                     WaitingSince = expiry.AddDays(-30),
+                    Actions = new[] { HomeBuyersWorkItems.RecordMortgagePrequalification },
                 });
             }
             else
@@ -144,6 +147,7 @@ public class HomeBuyersWorkItemsTests
                 Label = "14 Alder Lane",
                 Detail = "Open, 2 candidates to choose from",
                 WaitingSince = new DateOnly(2026, 10, 28),
+                Actions = new[] { HomeBuyersWorkItems.ChooseHousehold },
             });
         }
     }

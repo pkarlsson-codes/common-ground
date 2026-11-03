@@ -23,6 +23,24 @@ public static class HomeBuyersWorkItems
     /// <summary>A home selection that hasn't chosen a household yet.</summary>
     public const string SelectionOpen = "selection-open";
 
+    /// <summary>Approve a submitted application.</summary>
+    public const string ApproveApplication = "approve-application";
+
+    /// <summary>Deny a submitted application.</summary>
+    public const string DenyApplication = "deny-application";
+
+    /// <summary>Record that the household completed housing counseling.</summary>
+    public const string RecordHousingCounseling = "record-housing-counseling";
+
+    /// <summary>Record that the household completed CLT orientation.</summary>
+    public const string RecordCltOrientation = "record-clt-orientation";
+
+    /// <summary>Record the household's mortgage prequalification.</summary>
+    public const string RecordMortgagePrequalification = "record-mortgage-prequalification";
+
+    /// <summary>Choose the household a selection goes to.</summary>
+    public const string ChooseHousehold = "choose-household";
+
     /// <summary>
     /// The items for an open (submitted or approved) application: a decision while it is submitted, and its
     /// household's missing readiness or expiring prequalification as of <paramref name="today"/>. Readiness of
@@ -49,7 +67,8 @@ public static class HomeBuyersWorkItems
         {
             yield return new WorkItem(
                 WorkArea.Applicants, ApplicationAwaitingDecision, "application", application.Id, label,
-                "Submitted, waiting for a decision", null, submittedOn);
+                "Submitted, waiting for a decision", null, submittedOn,
+                [ApproveApplication, DenyApplication]);
         }
 
         if (household is null)
@@ -60,13 +79,15 @@ public static class HomeBuyersWorkItems
         {
             yield return new WorkItem(
                 WorkArea.Applicants, ReadinessStepMissing, "household", household.Id, label,
-                $"Missing {string.Join(", ", missing)}", null, submittedOn);
+                $"Missing {string.Join(", ", missing.Select(m => m.Step))}", null, submittedOn,
+                [.. missing.Select(m => m.Action)]);
         }
         else if (household.MortgagePrequalificationExpiryDate is { } expiry && expiry <= today.AddDays(PrequalificationWindowDays))
         {
             yield return new WorkItem(
                 WorkArea.Applicants, PrequalificationExpiring, "household", household.Id, label,
-                "Mortgage prequalification expiring", expiry, expiry.AddDays(-PrequalificationWindowDays));
+                "Mortgage prequalification expiring", expiry, expiry.AddDays(-PrequalificationWindowDays),
+                [RecordMortgagePrequalification]);
         }
     }
 
@@ -83,18 +104,23 @@ public static class HomeBuyersWorkItems
         var candidates = selection.Candidates.Count == 1 ? "1 candidate" : $"{selection.Candidates.Count} candidates";
         return new WorkItem(
             WorkArea.Selections, SelectionOpen, "selection", selection.Id, homeLabel ?? "Home",
-            $"Open, {candidates} to choose from", null, zone.ToDate(selection.StartedAt));
+            $"Open, {candidates} to choose from", null, zone.ToDate(selection.StartedAt), [ChooseHousehold]);
     }
 
-    private static List<string> MissingReadiness(HouseholdListItemView household, DateOnly today)
+    private static List<(string Step, string Action)> MissingReadiness(HouseholdListItemView household, DateOnly today)
     {
-        var missing = new List<string>();
+        var missing = new List<(string Step, string Action)>();
         if (!household.IsHousingCounselingCompleted)
-            missing.Add("housing counseling");
+            missing.Add(("housing counseling", RecordHousingCounseling));
         if (!household.IsCltOrientationCompleted)
-            missing.Add("CLT orientation");
+            missing.Add(("CLT orientation", RecordCltOrientation));
         if (!(household.MortgagePrequalificationExpiryDate >= today))
-            missing.Add(household.NeedsReverificationOn(today) ? "a current mortgage prequalification" : "mortgage prequalification");
+        {
+            missing.Add((
+                household.NeedsReverificationOn(today) ? "a current mortgage prequalification" : "mortgage prequalification",
+                RecordMortgagePrequalification));
+        }
+
         return missing;
     }
 }

@@ -10,6 +10,9 @@ public static class PropertyRegistryWorkItems
     /// <summary>An available home that no selection is choosing a household for.</summary>
     public const string HomeAvailable = "home-available";
 
+    /// <summary>Start choosing a household for the home.</summary>
+    public const string StartSelection = "start-selection";
+
     /// <summary>
     /// The item for a home that is available with no selection open, waiting since it was registered or last
     /// became available again; none for a home in any other status.
@@ -29,8 +32,8 @@ public static class PropertyRegistryWorkItems
 
         return availability?.AvailableAgainDate is { } availableAgain
             ? new WorkItem(WorkArea.Selections, HomeAvailable, "home", home.Id, label,
-                "Available again after a purchase fell through", null, availableAgain)
+                "Available again after a purchase fell through", null, availableAgain, [StartSelection])
             : new WorkItem(WorkArea.Selections, HomeAvailable, "home", home.Id, label,
-                "Available, no selection started", null, zone.ToDate(home.RegisteredAt));
+                "Available, no selection started", null, zone.ToDate(home.RegisteredAt), [StartSelection]);
     }
 }

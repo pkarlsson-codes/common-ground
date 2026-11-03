@@ -29,7 +29,7 @@ public class DocumentsWorkItemsTests
 
             var item = DocumentsWorkItems.ForDocument(_testBed.Document(expiresOn), _testBed.Today);
 
-            item.Should().BeEquivalentTo(new { Label = "Homeowner insurance", Detail = detail, DueDate = (DateOnly?)expiresOn });
+            item.Should().BeEquivalentTo(new { Label = "Homeowner insurance", Detail = detail, DueDate = (DateOnly?)expiresOn, Actions = Array.Empty<string>() });
         }
 
         [Fact]

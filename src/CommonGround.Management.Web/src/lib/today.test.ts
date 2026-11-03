@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Focus } from './navigation'
-import { areasForFocus, countsByPage, recordLink, type TodayArea } from './today'
+import { areasForFocus, countsByPage, recordLink, rowActions, type TodayArea } from './today'
 
 describe('areasForFocus', () => {
   it.each<[Focus, TodayArea[]]>([
@@ -36,5 +36,22 @@ describe('countsByPage', () => {
       { key: 'closing-scheduled', count: 3 },
       { key: 'mystery', count: 9 },
     ])).toEqual({ '/households': 3, '/purchase-workflows': 3 })
+  })
+})
+
+describe('rowActions', () => {
+  it('labels each action in the order given, saying which open over Today', () => {
+    expect(rowActions({ actions: ['approve-application', 'start-selection'] })).toEqual([
+      { key: 'approve-application', label: 'Approve', opensPanel: true },
+      { key: 'start-selection', label: 'Start selection', opensPanel: false },
+    ])
+  })
+
+  it('leaves out actions it does not know', () => {
+    expect(rowActions({ actions: ['mystery', 'deny-application'] }).map(a => a.key)).toEqual(['deny-application'])
+  })
+
+  it('offers nothing when the item has no actions', () => {
+    expect(rowActions({})).toEqual([])
   })
 })

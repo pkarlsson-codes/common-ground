@@ -24,7 +24,7 @@ public class PropertyRegistryWorkItemsTests
         private readonly TestBed _testBed = new();
 
         [Fact]
-        public void GivenNoAvailabilityYet_WhenDerived_ThenAvailableSinceTheTrustDateItWasRegistered()
+        public void GivenNoAvailabilityYet_WhenDerived_ThenAvailableToStartASelectionSinceTheTrustDateItWasRegistered()
         {
             var item = PropertyRegistryWorkItems.ForHome(_testBed.Home, null, "14 Alder Lane", _testBed.Zone);
 
@@ -33,6 +33,7 @@ public class PropertyRegistryWorkItemsTests
                 Kind = PropertyRegistryWorkItems.HomeAvailable,
                 Label = "14 Alder Lane",
                 WaitingSince = new DateOnly(2026, 8, 31),
+                Actions = new[] { PropertyRegistryWorkItems.StartSelection },
             });
         }
 

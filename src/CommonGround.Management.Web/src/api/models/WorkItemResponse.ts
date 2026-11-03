@@ -77,6 +77,12 @@ export interface WorkItemResponse {
      */
     waitingSince?: CalendarDate;
     /**
+     * What staff can do to fix it, as keys such as approve-application, in the order to offer them.
+     * @type {Array<string>}
+     * @memberof WorkItemResponse
+     */
+    actions?: Array<string>;
+    /**
      * "overdue" when past its due date, "soon" when due within a week, otherwise "plain".
      * @type {string}
      * @memberof WorkItemResponse
@@ -109,6 +115,7 @@ export function WorkItemResponseFromJSONTyped(json: any, ignoreDiscriminator: bo
         'detail': json['detail'] == null ? undefined : json['detail'],
         'dueDate': json['dueDate'] == null ? undefined : CalendarDateFromJSON(json['dueDate']),
         'waitingSince': json['waitingSince'] == null ? undefined : CalendarDateFromJSON(json['waitingSince']),
+        'actions': json['actions'] == null ? undefined : json['actions'],
         'urgency': json['urgency'] == null ? undefined : json['urgency'],
     };
 }
@@ -132,6 +139,7 @@ export function WorkItemResponseToJSONTyped(value?: WorkItemResponse | null, ign
         'detail': value['detail'],
         'dueDate': CalendarDateToJSON(value['dueDate']),
         'waitingSince': CalendarDateToJSON(value['waitingSince']),
+        'actions': value['actions'],
         'urgency': value['urgency'],
     };
 }
