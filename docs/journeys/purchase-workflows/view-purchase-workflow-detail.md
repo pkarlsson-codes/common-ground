@@ -1,6 +1,6 @@
 # View Purchase Workflow Detail
 
-1. User navigates to Purchases
+1. User navigates to Purchases, or clicks a purchase row on [Today](../today/work-through-today.md) to go straight to its detail panel (skipping steps 2–3)
 2. User optionally filters the table by phase (All Phases, Initiated, In Progress, Closing Scheduled, Closed, Failed, Withdrawn, Stalled) or by lease template
 3. User clicks a row in the Purchases table
 4. Detail panel opens titled with the buyer's full name, showing purchase price and phase in the subtitle

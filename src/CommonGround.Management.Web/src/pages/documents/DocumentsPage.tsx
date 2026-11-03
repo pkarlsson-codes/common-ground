@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import type { DocumentLibraryItemResponse } from '../../api'
 import { useDocuments, useExpiringDocuments, downloadDocument } from '../../hooks/documents'
 import DocumentSensitivityBadge from '../../components/DocumentSensitivityBadge'
@@ -19,7 +20,23 @@ export default function DocumentsPage() {
   const [tag, setTag] = useState('')
   const [contentType, setContentType] = useState('')
   const [tagInput, setTagInput] = useState('')
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const location = useLocation()
+  const navigate = useNavigate()
+  // A link from elsewhere (e.g. Today) opens a document's detail on arrival.
+  const [selectedId, setSelectedId] = useState<string | null>(
+    () => (location.state as { openId?: string } | null)?.openId ?? null,
+  )
+
+  useEffect(() => {
+    if (!(location.state as { openId?: string } | null)?.openId) {
+      return
+    }
+
+    navigate(
+      { pathname: location.pathname, search: location.search, hash: location.hash },
+      { replace: true, state: null },
+    )
+  }, [location, navigate])
 
   const { data, isLoading, isError } = useDocuments({
     page,

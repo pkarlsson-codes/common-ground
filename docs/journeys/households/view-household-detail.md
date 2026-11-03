@@ -1,6 +1,6 @@
 # View Household Detail
 
-1. User opens a household from the Households table, or arrives via a link to it
+1. User opens a household from the Households table, from a "Readiness incomplete" or "Prequalification expiring" row on [Today](../today/work-through-today.md), or via a link to it
 2. Panel opens titled with the primary contact's name, with their email as subtitle
 3. A lifecycle stepper at the top shows Intake → Ready → Approved → Waiting → Selected → Purchasing → Homeowner: steps already passed are marked done with their date, the household's current stage is highlighted, and later steps are dimmed
    - Intake is current from registration until housing counseling, CLT orientation and a mortgage prequalification have all been recorded; Ready is current from then until an application is approved

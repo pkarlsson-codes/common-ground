@@ -54,7 +54,7 @@ export const FOCUSES: readonly { value: Focus; label: string }[] = [
   { value: 'stewardship', label: 'Stewardship' },
 ]
 
-const FOCUS_AREAS: Record<Exclude<Focus, 'everything'>, readonly WorkArea[]> = {
+export const FOCUS_AREAS: Record<Exclude<Focus, 'everything'>, readonly WorkArea[]> = {
   intake:      ['applicants'],
   sales:       ['selections', 'purchases', 'resales'],
   stewardship: ['stewardship'],
@@ -74,9 +74,4 @@ export function splitWork(items: readonly NavItem[], focus: Focus): { mine: NavI
     mine: work.filter(i => i.area !== undefined && areas.includes(i.area)),
     other: work.filter(i => i.area === undefined || !areas.includes(i.area)),
   }
-}
-
-/** Where the app's root lands: the first page under My work. */
-export function landingPath(focus: Focus): string {
-  return splitWork(NAV_ITEMS, focus).mine[0].to
 }

@@ -196,6 +196,18 @@ export async function uploadHomeDocument(page: Page, homeId: string, title: stri
   return ok<{ documentId: string }>(response, 'POST /api/v1/documents')
 }
 
+/** Uploads a text file as a document attached to nothing. */
+export async function uploadDocument(page: Page, title: string) {
+  const response = await page.request.post('/api/v1/documents', {
+    headers: await headers(page),
+    multipart: {
+      metadata: JSON.stringify({ title, sensitivity: 'Internal', retention: 'Standard3yr' }),
+      file: { name: 'document.txt', mimeType: 'text/plain', buffer: Buffer.from(title) },
+    },
+  })
+  return ok<{ documentId: string }>(response, 'POST /api/v1/documents')
+}
+
 /** Adds a text file as a new version of a document. */
 export async function addDocumentVersion(page: Page, documentId: string, fileName: string, contents: string) {
   const response = await page.request.post(`/api/v1/documents/${documentId}/versions`, {

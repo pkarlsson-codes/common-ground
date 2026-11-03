@@ -12,7 +12,7 @@ setup('authenticate', async ({ page }) => {
   await page.locator('#password').fill('e2e')
   await page.locator('#kc-login').click()
 
-  await page.waitForURL(/localhost:3000\/(onboarding|households)/)
+  await page.waitForURL(/localhost:3000\/(onboarding)?$/)
 
   if (page.url().includes('/onboarding')) {
     await page.getByRole('link', { name: 'Create a trust' }).click()
@@ -20,6 +20,6 @@ setup('authenticate', async ({ page }) => {
     await page.getByRole('button', { name: 'Create trust and continue' }).click()
   }
 
-  await expect(page).toHaveURL(/\/households/)
+  await expect(page.getByRole('heading', { name: 'Today', level: 1 })).toBeVisible()
   await page.context().storageState({ path: authFile })
 })

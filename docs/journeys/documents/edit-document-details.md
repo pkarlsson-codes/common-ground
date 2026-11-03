@@ -1,6 +1,6 @@
 # Edit Document Details
 
-1. User navigates to Documents and clicks a document row; a panel opens titled with the document's title and current file name
+1. User navigates to Documents and clicks a document row, or clicks a "Document expiring" row on [Today](../today/work-through-today.md); a panel opens titled with the document's title and current file name
 2. User clicks "Download" to download the current version in a new tab
 3. Details: the panel shows the sensitivity badge and expiry, plus a form with Title, Sensitivity (Public, Internal, Confidential, Restricted), and Expires On
 4. User edits any of them and clicks "Save Details" (enabled only when something changed); clearing Expires On removes the expiry

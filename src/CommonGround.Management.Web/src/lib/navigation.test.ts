@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { FOCUSES, NAV_ITEMS, landingPath, splitWork, type Focus } from './navigation'
+import { FOCUSES, NAV_ITEMS, splitWork, type Focus } from './navigation'
 
 const labels = (items: { label: string }[]) => items.map(i => i.label)
 
@@ -26,16 +26,5 @@ describe('splitWork', () => {
     const { mine, other } = splitWork(NAV_ITEMS, focus)
 
     expect([...mine, ...other].every(i => i.group === 'work')).toBe(true)
-  })
-})
-
-describe('landingPath', () => {
-  it.each<[Focus, string]>([
-    ['everything', '/households'],
-    ['intake', '/households'],
-    ['sales', '/home-selections'],
-    ['stewardship', '/stewardship'],
-  ])('lands %s on %s', (focus, path) => {
-    expect(landingPath(focus)).toBe(path)
   })
 })

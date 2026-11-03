@@ -1,14 +1,14 @@
 import { expect, test, type Page } from '@playwright/test'
 
 // Journeys (docs/journeys/navigation/):
-//   choose-a-focus — picking a focus splits Work into My work and Other work, is remembered, and sets the landing page
+//   choose-a-focus — picking a focus splits Work into My work and Other work and is remembered
 
 const sidebar = (page: Page) => page.locator('.sidebar')
 const navLink = (page: Page, name: string) => sidebar(page).getByRole('link', { name, exact: true })
 
 test('choosing a focus puts its pages under My work and is remembered', async ({ page }) => {
   await page.goto('/')
-  await expect(page).toHaveURL(/\/households$/)
+  await expect(page.getByRole('heading', { name: 'Today', level: 1 })).toBeVisible()
   await expect(sidebar(page).getByText('Work', { exact: true })).toBeVisible()
   await expect(navLink(page, 'Resales')).toBeVisible()
 
@@ -31,10 +31,9 @@ test('choosing a focus puts its pages under My work and is remembered', async ({
   await navLink(page, 'Households').click()
   await expect(page).toHaveURL(/\/households$/)
 
-  // The focus and the open toggle survive a reload, and the root lands on the focus's first page.
+  // The focus and the open toggle survive a reload; the root lands on Today.
   await page.goto('/')
-  await expect(page).toHaveURL(/\/home-selections$/)
-  await expect(page.getByRole('heading', { name: 'Home Selections', level: 1 })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Today', level: 1 })).toBeVisible()
   await expect(page.getByRole('combobox', { name: 'My focus' })).toHaveValue('sales')
   await expect(navLink(page, 'Households')).toBeVisible()
 
