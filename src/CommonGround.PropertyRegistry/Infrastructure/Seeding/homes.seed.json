@@ -184,6 +184,20 @@
     "initialAppraiserName": "Marcus Oyelaran, Willamette Valuation"
   },
   {
+    "seedKey": "home-harbor-view-302",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-harbor-view-004",
+    "type": "CondoUnit",
+    "unitDesignation": "Unit 302",
+    "bedrooms": 2,
+    "bathrooms": 1.0,
+    "squareFootage": 960,
+    "yearBuilt": 2019,
+    "registeredDate": "today-6y",
+    "initialAssessedValue": 274000,
+    "initialAppraiserName": "Marcus Oyelaran, Willamette Valuation"
+  },
+  {
     "seedKey": "home-maple-row-005",
     "trustSeedKey": "dev-default",
     "landParcelSeedKey": "lp-maple-row-005",

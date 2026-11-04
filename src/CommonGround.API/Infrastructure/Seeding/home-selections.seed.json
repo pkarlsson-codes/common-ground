@@ -163,6 +163,20 @@
     }
   },
   {
+    "seedKey": "sel-harbor-view-302",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-harbor-view-302",
+    "startedDate": "today-30d",
+    "priority": {
+      "householdSeedKey": "hh-mensah-013",
+      "priorities": ["WaitingListTenure", "HouseholdSizeFit"],
+      "reason": "Longest waiting among the couples, and a couple suits the two-bedroom condo.",
+      "selectedDate": "today-24d",
+      "groundLeaseTemplateSeedKey": "glt-standard-appraisal",
+      "purchasePrice": 176000
+    }
+  },
+  {
     "seedKey": "sel-alder-008",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-alder-008",

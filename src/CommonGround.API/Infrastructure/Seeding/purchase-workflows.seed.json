@@ -1,0 +1,170 @@
+[
+  {
+    "seedKey": "pw-maple-row-005",
+    "trustSeedKey": "dev-default",
+    "homeSelectionSeedKey": "sel-maple-row-005",
+    "eligibility": {
+      "date": "today-146d",
+      "notes": "Income and household size checked against the trust's limits; housing counseling certificate on file."
+    },
+    "financing": {
+      "date": "today-131d",
+      "lenderName": "Cascade Community Credit Union",
+      "committedAmount": 199500,
+      "preapprovalLetterDate": "today-134d"
+    },
+    "inspection": {
+      "date": "today-118d",
+      "inspectorName": "Rosa Delacruz, Keystone Home Inspections",
+      "notes": "Sound overall. Loose downspout on the garage and a missing GFCI outlet in the hall bath, both fixed by the trust."
+    },
+    "title": {
+      "date": "today-96d",
+      "titleCompanyName": "Pacific Crest Title"
+    },
+    "leaseSigning": {
+      "date": "today-41d"
+    },
+    "closingScheduled": {
+      "date": "today-12d",
+      "closingDate": "today+9d"
+    }
+  },
+  {
+    "seedKey": "pw-harbor-view-004",
+    "trustSeedKey": "dev-default",
+    "homeSelectionSeedKey": "sel-harbor-view-004",
+    "eligibility": {
+      "date": "today-124d",
+      "notes": "Income and household size checked against the trust's limits; accessibility need confirmed with the household."
+    },
+    "financing": {
+      "date": "today-110d",
+      "lenderName": "Willamette Valley Bank",
+      "committedAmount": 174800,
+      "preapprovalLetterDate": "today-114d"
+    },
+    "inspection": {
+      "date": "today-97d",
+      "inspectorName": "Tom Haverford, Clearview Inspection Services",
+      "notes": "No defects. Grab bars and roll-in shower in good order."
+    },
+    "title": {
+      "date": "today-63d",
+      "titleCompanyName": "Willamette Escrow & Title"
+    },
+    "leaseSigning": {
+      "date": "today-9d"
+    }
+  },
+  {
+    "seedKey": "pw-harbor-view-301",
+    "trustSeedKey": "dev-default",
+    "homeSelectionSeedKey": "sel-harbor-view-301",
+    "eligibility": {
+      "date": "today-108d",
+      "notes": "Income and household size checked against the trust's limits."
+    },
+    "financing": {
+      "date": "today-96d",
+      "lenderName": "Cascade Community Credit Union",
+      "committedAmount": 169100,
+      "preapprovalLetterDate": "today-99d"
+    },
+    "inspection": {
+      "date": "today-82d",
+      "inspectorName": "Rosa Delacruz, Keystone Home Inspections",
+      "notes": "Bathroom exhaust fan vents into the attic space; the HOA is rerouting it."
+    },
+    "title": {
+      "date": "today-33d",
+      "titleCompanyName": "Pacific Crest Title"
+    }
+  },
+  {
+    "seedKey": "pw-willow-007b",
+    "trustSeedKey": "dev-default",
+    "homeSelectionSeedKey": "sel-willow-007b",
+    "eligibility": {
+      "date": "today-88d",
+      "notes": "Income checked against the trust's limits for a household of five."
+    },
+    "financing": {
+      "date": "today-74d",
+      "lenderName": "Willamette Valley Bank",
+      "committedAmount": 171950,
+      "preapprovalLetterDate": "today-78d"
+    },
+    "inspection": {
+      "date": "today-61d",
+      "inspectorName": "Tom Haverford, Clearview Inspection Services",
+      "notes": "Water heater near end of life; the trust is replacing it before closing."
+    },
+    "stall": {
+      "date": "today-41d",
+      "reason": "the title search found an unreleased lien from a previous owner's roofing contractor",
+      "resolutionTargetDate": "today-11d"
+    }
+  },
+  {
+    "seedKey": "pw-downtown-civic-002",
+    "trustSeedKey": "dev-default",
+    "homeSelectionSeedKey": "sel-downtown-civic-002",
+    "eligibility": {
+      "date": "today-72d",
+      "notes": "Income and household size checked against the trust's limits."
+    },
+    "financing": {
+      "date": "today-58d",
+      "lenderName": "Willamette Valley Bank",
+      "committedAmount": 176700,
+      "preapprovalLetterDate": "today-61d"
+    },
+    "failure": {
+      "date": "today-3d",
+      "reason": "The lender withdrew its commitment after the buyer's hours were cut; the household no longer qualifies for the loan."
+    }
+  },
+  {
+    "seedKey": "pw-harbor-view-202",
+    "trustSeedKey": "dev-default",
+    "homeSelectionSeedKey": "sel-harbor-view-202",
+    "eligibility": {
+      "date": "today-49d",
+      "notes": "Income checked against the trust's limits for a household of six."
+    },
+    "financing": {
+      "date": "today-36d",
+      "lenderName": "Oregon Homeownership Fund",
+      "committedAmount": 189050,
+      "preapprovalLetterDate": "today-40d"
+    },
+    "stall": {
+      "date": "today-18d",
+      "reason": "the inspector needs the HOA to open the shared mechanical room, and its board meets next week",
+      "resolutionTargetDate": "today+10d"
+    }
+  },
+  {
+    "seedKey": "pw-east-grove-003",
+    "trustSeedKey": "dev-default",
+    "homeSelectionSeedKey": "sel-east-grove-003",
+    "eligibility": {
+      "date": "today-33d",
+      "notes": "Income and household size checked against the trust's limits; orientation completed."
+    }
+  },
+  {
+    "seedKey": "pw-harbor-view-302",
+    "trustSeedKey": "dev-default",
+    "homeSelectionSeedKey": "sel-harbor-view-302",
+    "eligibility": {
+      "date": "today-20d",
+      "notes": "Income and household size checked against the trust's limits."
+    },
+    "withdrawal": {
+      "date": "today-2d",
+      "reason": "The household is moving out of state for a new job."
+    }
+  }
+]
