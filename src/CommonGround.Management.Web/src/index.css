@@ -1144,3 +1144,55 @@ body {
   color: var(--text-dim);
 }
 .nav-item.active .nav-item__count { color: var(--amber-bright); }
+
+/* ── Purchase board ─── */
+.board {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(220px, 1fr);
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+.board-column {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 160px;
+}
+.board-column__title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-bright);
+  margin-bottom: 10px;
+}
+.board-column__count {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+.board-column__empty { font-size: 12.5px; color: var(--text-secondary); }
+.board-column__cards { display: flex; flex-direction: column; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.board-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.board-card:hover { border-color: var(--border-bright); }
+.board-card:focus-visible { outline: none; box-shadow: var(--focus-ring-amber); border-color: var(--amber); }
+.board-card--selected { border-color: var(--amber); }
+.board-card__title { font-weight: 600; color: var(--text-bright); }
+.board-card__buyer { font-size: 13px; color: var(--text-secondary); }
+.board-card__meta { display: flex; flex-wrap: wrap; gap: 6px 10px; font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); }
+.board-card__flag { color: var(--warning); background: var(--warning-surface); border-radius: 999px; padding: 0 6px; }

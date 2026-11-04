@@ -1,26 +1,9 @@
 import { useCallback, useState } from 'react'
 import { isFocus, type Focus } from '../lib/navigation'
+import { readPreference as read, writePreference as write } from '../lib/preferences'
 
 const FOCUS_KEY = 'cg.nav.focus'
 const OTHER_WORK_OPEN_KEY = 'cg.nav.otherWorkOpen'
-
-// Browser storage can be missing, blocked or full; a preference that can't be
-// read falls back to its default and one that can't be written is just not kept.
-function read(key: string): string | null {
-  try {
-    return window.localStorage.getItem(key)
-  } catch {
-    return null
-  }
-}
-
-function write(key: string, value: string) {
-  try {
-    window.localStorage.setItem(key, value)
-  } catch {
-    // not kept
-  }
-}
 
 export function readFocus(): Focus {
   const value = read(FOCUS_KEY)

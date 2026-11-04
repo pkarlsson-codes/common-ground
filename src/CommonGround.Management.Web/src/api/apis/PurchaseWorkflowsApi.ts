@@ -21,6 +21,7 @@ import type {
   InitiatePurchaseWorkflowResponse,
   PaginatedResponseOfPurchaseWorkflowListItemResponse,
   ProblemDetails,
+  PurchaseBoardResponse,
   PurchaseWorkflowResponse,
   RecordEligibilityVerifiedRequest,
   RecordFinancingCommittedRequest,
@@ -43,6 +44,8 @@ import {
     PaginatedResponseOfPurchaseWorkflowListItemResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
+    PurchaseBoardResponseFromJSON,
+    PurchaseBoardResponseToJSON,
     PurchaseWorkflowResponseFromJSON,
     PurchaseWorkflowResponseToJSON,
     RecordEligibilityVerifiedRequestFromJSON,
@@ -153,6 +156,18 @@ export interface PurchaseWorkflowsApiInterface {
     /**
      */
     failPurchase(requestParameters: FailPurchaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PurchaseWorkflowsApiInterface
+     */
+    getPurchaseBoardRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PurchaseBoardResponse>>;
+
+    /**
+     */
+    getPurchaseBoard(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PurchaseBoardResponse>;
 
     /**
      * 
@@ -382,6 +397,33 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
             default:
                 return await response.value();
         }
+    }
+
+    /**
+     */
+    async getPurchaseBoardRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PurchaseBoardResponse>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/purchase-workflows/board`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PurchaseBoardResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getPurchaseBoard(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PurchaseBoardResponse> {
+        const response = await this.getPurchaseBoardRaw(initOverrides);
+        return await response.value();
     }
 
     /**

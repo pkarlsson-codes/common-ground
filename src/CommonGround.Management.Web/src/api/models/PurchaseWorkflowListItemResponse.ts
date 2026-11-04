@@ -94,6 +94,12 @@ export interface PurchaseWorkflowListItemResponse {
      * @memberof PurchaseWorkflowListItemResponse
      */
     scheduledClosingDate?: CalendarDate | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseWorkflowListItemResponse
+     */
+    nextStep?: string;
 }
 
 /**
@@ -124,6 +130,7 @@ export function PurchaseWorkflowListItemResponseFromJSONTyped(json: any, ignoreD
         'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
         'stepEnteredAt': json['stepEnteredAt'] == null ? undefined : (new Date(json['stepEnteredAt'])),
         'scheduledClosingDate': json['scheduledClosingDate'] == null ? undefined : CalendarDateFromJSON(json['scheduledClosingDate']),
+        'nextStep': json['nextStep'] == null ? undefined : json['nextStep'],
     };
 }
 
@@ -149,6 +156,7 @@ export function PurchaseWorkflowListItemResponseToJSONTyped(value?: PurchaseWork
         'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
         'stepEnteredAt': value['stepEnteredAt'] == null ? undefined : ((value['stepEnteredAt']).toISOString()),
         'scheduledClosingDate': CalendarDateToJSON(value['scheduledClosingDate']),
+        'nextStep': value['nextStep'],
     };
 }
 

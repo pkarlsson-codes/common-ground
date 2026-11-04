@@ -10,6 +10,7 @@ import { detailValue, expectToast, field, isoDate, panel, uniqueId } from '../su
 /** Opens a workflow's detail panel via the lease template filter (the template is unique to each test). */
 async function openWorkflow(page: Page, templateName: string, buyerName: string) {
   await page.goto('/purchase-workflows')
+  await page.getByRole('button', { name: 'List', exact: true }).click()
   await page.getByRole('combobox').filter({ hasText: 'Filter by lease template…' }).click()
   await page.getByPlaceholder('Filter by lease template…').fill(templateName)
   await page.getByRole('listbox').getByRole('option', { name: templateName }).click()

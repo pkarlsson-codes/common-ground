@@ -110,6 +110,9 @@ models/PaginatedResponseOfWaitingListEntryResponse.ts
 models/PassOverDto.ts
 models/ProblemDetails.ts
 models/PropertyInspectionResponse.ts
+models/PurchaseBoardCardResponse.ts
+models/PurchaseBoardColumnResponse.ts
+models/PurchaseBoardResponse.ts
 models/PurchaseWorkflowListItemResponse.ts
 models/PurchaseWorkflowResponse.ts
 models/RecordCltOrientationRequest.ts

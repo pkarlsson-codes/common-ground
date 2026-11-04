@@ -3845,6 +3845,44 @@
         }
       }
     },
+    "/api/v1/purchase-workflows/board": {
+      "get": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "operationId": "GetPurchaseBoard",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseBoardResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/purchase-workflows/{workflowId}": {
       "get": {
         "tags": [
@@ -9392,6 +9430,82 @@
           }
         }
       },
+      "PurchaseBoardResponse": {
+        "type": "object",
+        "description": "Every open purchase, in one column per step it waits on.",
+        "additionalProperties": false,
+        "properties": {
+          "today": {
+            "type": "string",
+            "description": "The trust's today, to count days on a step against.",
+            "format": "date"
+          },
+          "columns": {
+            "type": "array",
+            "description": "One column per step, in step order, empty ones included.",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseBoardColumnResponse"
+            }
+          }
+        }
+      },
+      "PurchaseBoardColumnResponse": {
+        "type": "object",
+        "description": "The purchases waiting on one step, longest waiting first.",
+        "additionalProperties": false,
+        "properties": {
+          "step": {
+            "type": "string",
+            "description": "The step: Eligibility, Financing, Inspection, Title, LeaseSigning, or Closing."
+          },
+          "cards": {
+            "type": "array",
+            "description": "The purchases waiting on it.",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseBoardCardResponse"
+            }
+          }
+        }
+      },
+      "PurchaseBoardCardResponse": {
+        "type": "object",
+        "description": "An open purchase on the board.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The purchase workflow ID."
+          },
+          "homeId": {
+            "type": "string",
+            "description": "The home being bought."
+          },
+          "homeLabel": {
+            "type": "string",
+            "description": "The home's label, if known.",
+            "nullable": true
+          },
+          "buyerFullName": {
+            "type": "string",
+            "description": "The buyer's full name."
+          },
+          "phase": {
+            "type": "string",
+            "description": "The workflow phase, e.g. Stalled."
+          },
+          "stepEnteredOn": {
+            "type": "string",
+            "description": "The trust date the purchase last moved on.",
+            "format": "date"
+          },
+          "scheduledClosingDate": {
+            "type": "string",
+            "description": "The scheduled closing date, once closing is scheduled.",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
       "PurchaseWorkflowResponse": {
         "type": "object",
         "description": "Detail response for a purchase workflow.",
@@ -9699,6 +9813,9 @@
             "type": "string",
             "format": "date",
             "nullable": true
+          },
+          "nextStep": {
+            "type": "string"
           }
         }
       },

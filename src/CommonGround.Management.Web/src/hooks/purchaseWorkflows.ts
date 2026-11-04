@@ -20,10 +20,19 @@ import { trustToday } from '../lib/calendarDate'
 
 const api = new PurchaseWorkflowsApi(apiConfig)
 
-export function usePurchaseWorkflows(pageNumber: number, groundLeaseTemplateId?: string, phase?: string, search?: string) {
+export function usePurchaseWorkflows(pageNumber: number, groundLeaseTemplateId?: string, phase?: string, search?: string, enabled = true) {
   return useQuery({
     queryKey: ['purchase-workflows', pageNumber, groundLeaseTemplateId, phase, search],
     queryFn: () => api.getPurchaseWorkflows({ pageNumber, pageSize: 20, groundLeaseTemplateId, phase, search }),
+    enabled,
+  })
+}
+
+/** Every open purchase, in one column per step it waits on. */
+export function usePurchaseBoard() {
+  return useQuery({
+    queryKey: ['purchase-workflows', 'board'],
+    queryFn: () => api.getPurchaseBoard(),
   })
 }
 
@@ -34,6 +43,16 @@ export function useConnectedPurchaseWorkflows(filter: { homeId?: string; househo
     queryFn: () => api.getPurchaseWorkflows({ pageNumber: 1, pageSize: 50, homeId: filter.homeId, householdId: filter.householdId }),
     enabled: !!(filter.homeId || filter.householdId),
   })
+}
+
+/** What staff call each step a purchase can wait on, by the API's step name. */
+export const PURCHASE_STEP_LABELS: Record<string, string> = {
+  Eligibility: 'Eligibility',
+  Financing: 'Financing',
+  Inspection: 'Inspection',
+  Title: 'Title',
+  LeaseSigning: 'Lease signing',
+  Closing: 'Closing',
 }
 
 const TERMINAL_PHASES = ['Closed', 'Failed', 'Withdrawn']

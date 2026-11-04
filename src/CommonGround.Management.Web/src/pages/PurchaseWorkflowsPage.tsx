@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { usePurchaseWorkflows } from '../hooks/purchaseWorkflows'
+import { isOpenPurchasePhase, usePurchaseWorkflows, PURCHASE_STEP_LABELS } from '../hooks/purchaseWorkflows'
 import { statusLabel, WORKFLOW_PHASES } from '../hooks/types'
 import EntityCombobox from '../components/EntityCombobox'
 import Pagination from '../components/Pagination'
@@ -8,11 +8,17 @@ import StatusBadge from '../components/StatusBadge'
 import { GroundLeaseTemplatesApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
 import PurchaseWorkflowDetailPanel from './purchase-workflows/PurchaseWorkflowDetailPanel'
+import PurchaseBoard from './purchase-workflows/PurchaseBoard'
+import { readPreference, writePreference } from '../lib/preferences'
 import { useToast } from '../hooks/useToast'
 
 const groundLeaseTemplatesApi = new GroundLeaseTemplatesApi(apiConfig)
 
 type Panel = 'detail' | null
+type View = 'board' | 'list'
+
+const VIEW_KEY = 'cg.purchases.view'
+const readView = (): View => (readPreference(VIEW_KEY) === 'list' ? 'list' : 'board')
 
 const fmtCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
@@ -34,10 +40,16 @@ export default function PurchaseWorkflowsPage() {
   const [templateFilter, setTemplateFilter] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [panel, setPanel] = useState<Panel>(null)
+  const [view, setViewState] = useState<View>(readView)
+
+  const setView = (value: View) => {
+    setViewState(value)
+    writePreference(VIEW_KEY, value)
+  }
 
   const { success, error } = useToast()
 
-  const { data, isLoading, isError } = usePurchaseWorkflows(page, templateFilter || undefined, phaseFilter || undefined)
+  const { data, isLoading, isError } = usePurchaseWorkflows(page, templateFilter || undefined, phaseFilter || undefined, undefined, view === 'list')
 
   const showToast = (msg: string, kind: 'success' | 'error' = 'success') => {
     if (kind === 'error') {
@@ -84,13 +96,21 @@ export default function PurchaseWorkflowsPage() {
         <div>
           <div className="page-header__eyebrow">Homeownership</div>
           <h1 className="page-header__title">Purchases</h1>
-          {data && (
+          {view === 'list' && data && (
             <div className="page-header__count">
               {data.totalCount?.toLocaleString()} workflow{data.totalCount !== 1 ? 's' : ''}
             </div>
           )}
         </div>
+        <div className="today-toggle" role="group" aria-label="View">
+          <button type="button" className="btn btn-secondary btn-sm" aria-pressed={view === 'board'} onClick={() => setView('board')}>Board</button>
+          <button type="button" className="btn btn-secondary btn-sm" aria-pressed={view === 'list'} onClick={() => setView('list')}>List</button>
+        </div>
       </div>
+
+      {view === 'board' && <PurchaseBoard selectedId={panel === 'detail' ? selectedId : null} onOpen={openDetail} />}
+
+      {view === 'list' && (<>
 
       <div className="filter-bar">
         <select
@@ -151,6 +171,7 @@ export default function PurchaseWorkflowsPage() {
                   <th>Buyer</th>
                   <th>Purchase Price</th>
                   <th>Phase</th>
+                  <th>Waiting On</th>
                   <th>Lease Template</th>
                   <th>Created</th>
                 </tr>
@@ -165,6 +186,7 @@ export default function PurchaseWorkflowsPage() {
                     <td>{w.buyerFullName}</td>
                     <td><span className="cell-mono">{fmtCurrency(Number(w.purchasePrice))}</span></td>
                     <td><StatusBadge status={w.phase ?? ''} /></td>
+                    <td>{isOpenPurchasePhase(w.phase) ? PURCHASE_STEP_LABELS[w.nextStep ?? ''] ?? w.nextStep : '—'}</td>
                     <td>
                       <span className="cell-id" title={w.groundLeaseTemplateId}>
                         {w.groundLeaseTemplateId?.slice(0, 8)}…
@@ -187,6 +209,8 @@ export default function PurchaseWorkflowsPage() {
           </>
         )}
       </div>
+
+      </>)}
 
       {/* ── Detail panel ─── */}
       {panel === 'detail' && (
