@@ -1,0 +1,185 @@
+[
+  {
+    "seedKey": "sel-downtown-civic-001",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-downtown-civic-001",
+    "startedDate": "today-280d",
+    "priority": {
+      "householdSeedKey": "hh-whitaker-008",
+      "priorities": ["WaitingListTenure", "HouseholdSizeFit"],
+      "reason": "Longest on the waiting list, and a household of three suits the three-bedroom townhouse.",
+      "selectedDate": "today-270d",
+      "groundLeaseTemplateSeedKey": "glt-standard-appraisal",
+      "purchasePrice": 218000
+    }
+  },
+  {
+    "seedKey": "sel-harbor-view-201",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-harbor-view-201",
+    "startedDate": "today-258d",
+    "priority": {
+      "householdSeedKey": "hh-fontaine-009",
+      "priorities": ["WaitingListTenure", "LowerIncome"],
+      "reason": "Next longest waiting and the lowest income among the candidates.",
+      "selectedDate": "today-250d",
+      "groundLeaseTemplateSeedKey": "glt-cpi-index",
+      "purchasePrice": 162000
+    }
+  },
+  {
+    "seedKey": "sel-downtown-civic-003",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-downtown-civic-003",
+    "startedDate": "today-238d",
+    "priority": {
+      "householdSeedKey": "hh-osei-010",
+      "priorities": ["AccessibilityNeed", "HouseholdSizeFit"],
+      "reason": "Needs an accessible home, and a family of four fits three bedrooms better than the other household that needs one.",
+      "selectedDate": "today-230d",
+      "groundLeaseTemplateSeedKey": "glt-standard-appraisal",
+      "purchasePrice": 204000
+    }
+  },
+  {
+    "seedKey": "sel-willow-007a",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-willow-007a",
+    "startedDate": "today-218d",
+    "priority": {
+      "householdSeedKey": "hh-delgado-011",
+      "priorities": ["WaitingListTenure", "HouseholdSizeFit"],
+      "reason": "Longest waiting, and a couple suits the two-bedroom unit.",
+      "selectedDate": "today-210d",
+      "groundLeaseTemplateSeedKey": "glt-fixed-two-percent",
+      "purchasePrice": 165000
+    }
+  },
+  {
+    "seedKey": "sel-maple-row-005",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-maple-row-005",
+    "startedDate": "today-160d",
+    "priority": {
+      "householdSeedKey": "hh-garcia-001",
+      "priorities": ["WaitingListTenure", "HouseholdSizeFit"],
+      "reason": "Longest waiting, and a family of four fits the three-bedroom house.",
+      "selectedDate": "today-150d",
+      "groundLeaseTemplateSeedKey": "glt-standard-appraisal",
+      "purchasePrice": 210000
+    }
+  },
+  {
+    "seedKey": "sel-harbor-view-004",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-harbor-view-004",
+    "startedDate": "today-136d",
+    "priority": {
+      "householdSeedKey": "hh-nguyen-002",
+      "priorities": ["AccessibilityNeed"],
+      "reason": "Needs an accessible home, and Unit 101 is step-free from the street.",
+      "selectedDate": "today-128d",
+      "groundLeaseTemplateSeedKey": "glt-ami-index",
+      "purchasePrice": 184000
+    }
+  },
+  {
+    "seedKey": "sel-harbor-view-301",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-harbor-view-301",
+    "startedDate": "today-120d",
+    "priority": {
+      "householdSeedKey": "hh-okafor-003",
+      "priorities": ["WaitingListTenure", "HouseholdSizeFit"],
+      "reason": "Longest waiting among households that fit a two-bedroom condo.",
+      "selectedDate": "today-112d",
+      "groundLeaseTemplateSeedKey": "glt-standard-appraisal",
+      "purchasePrice": 178000
+    }
+  },
+  {
+    "seedKey": "sel-willow-007b",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-willow-007b",
+    "startedDate": "today-100d",
+    "priority": {
+      "householdSeedKey": "hh-patel-004",
+      "priorities": ["HouseholdSizeFit"],
+      "reason": "A household of five needs the three bedrooms; the others waiting are smaller.",
+      "selectedDate": "today-92d",
+      "groundLeaseTemplateSeedKey": "glt-cpi-index",
+      "purchasePrice": 181000
+    }
+  },
+  {
+    "seedKey": "sel-downtown-civic-002",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-downtown-civic-002",
+    "startedDate": "today-84d",
+    "priority": {
+      "householdSeedKey": "hh-tran-012",
+      "priorities": ["HouseholdSizeFit", "WaitingListTenure"],
+      "reason": "Household of three fits the two-bedroom townhouse better than the single-person household ahead of them.",
+      "selectedDate": "today-76d",
+      "groundLeaseTemplateSeedKey": "glt-standard-appraisal",
+      "purchasePrice": 186000
+    }
+  },
+  {
+    "seedKey": "sel-harbor-view-102-first",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-harbor-view-102",
+    "startedDate": "today-72d",
+    "cancellation": {
+      "date": "today-66d",
+      "reason": "Inspection found a failing water heater and water-damaged flooring. Starting again once the repairs are done."
+    }
+  },
+  {
+    "seedKey": "sel-harbor-view-202",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-harbor-view-202",
+    "startedDate": "today-60d",
+    "priority": {
+      "householdSeedKey": "hh-ramirez-014",
+      "priorities": ["HouseholdSizeFit"],
+      "reason": "A household of six needs the most bedrooms; everyone else waiting is smaller.",
+      "selectedDate": "today-53d",
+      "groundLeaseTemplateSeedKey": "glt-standard-appraisal",
+      "purchasePrice": 199000
+    }
+  },
+  {
+    "seedKey": "sel-east-grove-003",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-east-grove-003",
+    "startedDate": "today-44d",
+    "lottery": {
+      "tiedHouseholdSeedKeys": ["hh-castillo-015", "hh-novak-016"],
+      "lotterySeed": 20261103,
+      "selectedDate": "today-37d",
+      "groundLeaseTemplateSeedKey": "glt-fixed-two-percent",
+      "purchasePrice": 178000
+    }
+  },
+  {
+    "seedKey": "sel-alder-008",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-alder-008",
+    "startedDate": "today-16d",
+    "priority": {
+      "householdSeedKey": "hh-abdi-018",
+      "priorities": ["AccessibilityNeed", "LowerIncome"],
+      "reason": "Needs an accessible home, with the lower income of the two households that do.",
+      "selectedDate": "today-12d",
+      "groundLeaseTemplateSeedKey": "glt-ami-index",
+      "purchasePrice": 142000
+    }
+  },
+  {
+    "seedKey": "sel-harbor-view-102",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-harbor-view-102",
+    "startedDate": "today-6d"
+  }
+]

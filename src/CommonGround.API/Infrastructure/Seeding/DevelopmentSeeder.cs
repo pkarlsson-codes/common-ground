@@ -22,6 +22,7 @@ internal static class DevelopmentSeeder
     /// <item>Users, assigned to their trust.</item>
     /// <item>Households and their applications.</item>
     /// <item>Ground lease templates.</item>
+    /// <item>Home selections, choosing households for homes, which starts their purchases.</item>
     /// </list>
     /// </summary>
     /// <param name="services">The service collection.</param>
@@ -38,6 +39,7 @@ internal static class DevelopmentSeeder
         services.AddTransient<IDevelopmentSeeder, UsersSeeder>();
         services.AddTransient<IDevelopmentSeeder, HouseholdsSeeder>();
         services.AddTransient<IDevelopmentSeeder, GroundLeaseTemplatesSeeder>();
+        services.AddTransient<IDevelopmentSeeder, HomeSelectionsSeeder>();
         return services;
     }
 
