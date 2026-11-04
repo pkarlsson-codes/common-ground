@@ -45,6 +45,9 @@ public static class HomeownershipMartenConfiguration
         options.Schema.For<PurchaseWorkflowSeedLookup>()
             .DatabaseSchemaName(SeedSchemaName)
             .Index(x => x.SeedKey);
+        options.Schema.For<GroundLeaseSeedLookup>()
+            .DatabaseSchemaName(SeedSchemaName)
+            .Index(x => x.SeedKey);
     }
 
     private static void ConfigureProjections(StoreOptions options)

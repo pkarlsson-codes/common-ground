@@ -63,4 +63,6 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             OccurredAt = e.OccurredAt,
         });
     }
+
+    public static void Apply(GroundLeaseView view, GroundLeaseTerminated _) => view.Status = "Inactive";
 }

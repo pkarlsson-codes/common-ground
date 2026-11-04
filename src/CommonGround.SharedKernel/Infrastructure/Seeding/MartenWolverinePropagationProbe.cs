@@ -17,9 +17,10 @@ public sealed class MartenWolverinePropagationProbe(IDocumentStore store, IWolve
         var progress = (await store.Advanced.AllProjectionProgress(token: cancellationToken).ConfigureAwait(false))
             .ToDictionary(s => s.ShardName, s => s.Sequence, StringComparer.Ordinal);
 
-        // A shard with no progress row hasn't run yet, so it is behind too.
-        var behind = store.Advanced.AllAsyncProjectionShardNames()
-            .Select(shard => (Name: shard.Identity, Sequence: progress.GetValueOrDefault(shard.Identity)))
+        // A shard with no progress row hasn't run yet, so it is behind too. AllShards, unlike
+        // AllAsyncProjectionShardNames, includes subscriptions, so the Wolverine relay is counted.
+        var behind = ((StoreOptions)store.Options).Projections.AllShards()
+            .Select(shard => (Name: shard.Name.Identity, Sequence: progress.GetValueOrDefault(shard.Name.Identity)))
             .Where(shard => shard.Sequence < statistics.EventSequenceNumber)
             .Select(shard => $"{shard.Name} at {shard.Sequence} of {statistics.EventSequenceNumber}")
             .ToList();

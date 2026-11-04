@@ -289,5 +289,36 @@
       { "assessmentDate": "today-3y", "assessedValue": 351000, "appraiserName": "Dana Whitfield, Cascade Appraisal Group" },
       { "assessmentDate": "today-1y", "assessedValue": 344000, "appraiserName": "Dana Whitfield, Cascade Appraisal Group", "conditionNotes": "Steps at every entrance and a narrow upstairs bathroom; not usable with a wheelchair." }
     ]
+  },
+  {
+    "seedKey": "home-cedar-lane-013a",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-cedar-lane-013",
+    "type": "Duplex",
+    "unitDesignation": "Unit A",
+    "bedrooms": 2,
+    "bathrooms": 1.0,
+    "squareFootage": 1040,
+    "yearBuilt": 2008,
+    "registeredDate": "today-8y",
+    "initialAssessedValue": 252000,
+    "initialAppraiserName": "Dana Whitfield, Cascade Appraisal Group",
+    "assessments": [
+      { "assessmentDate": "today-2y", "assessedValue": 284000, "appraiserName": "Dana Whitfield, Cascade Appraisal Group" }
+    ]
+  },
+  {
+    "seedKey": "home-cedar-lane-013b",
+    "trustSeedKey": "dev-default",
+    "landParcelSeedKey": "lp-cedar-lane-013",
+    "type": "Duplex",
+    "unitDesignation": "Unit B",
+    "bedrooms": 3,
+    "bathrooms": 1.5,
+    "squareFootage": 1260,
+    "yearBuilt": 2008,
+    "registeredDate": "today-8y",
+    "initialAssessedValue": 279000,
+    "initialAppraiserName": "Dana Whitfield, Cascade Appraisal Group"
   }
 ]

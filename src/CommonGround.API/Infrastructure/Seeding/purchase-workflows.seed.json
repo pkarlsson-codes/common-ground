@@ -1,5 +1,180 @@
 [
   {
+    "seedKey": "pw-downtown-civic-001",
+    "trustSeedKey": "dev-default",
+    "homeSelectionSeedKey": "sel-downtown-civic-001",
+    "eligibility": {
+      "date": "today-262d",
+      "notes": "Income and household size checked against the trust's limits for a household of three."
+    },
+    "financing": {
+      "date": "today-250d",
+      "lenderName": "Cascade Community Credit Union",
+      "committedAmount": 207100,
+      "preapprovalLetterDate": "today-253d"
+    },
+    "inspection": {
+      "date": "today-238d",
+      "inspectorName": "Rosa Delacruz, Keystone Home Inspections",
+      "notes": "No defects found."
+    },
+    "title": {
+      "date": "today-222d",
+      "titleCompanyName": "Pacific Crest Title"
+    },
+    "leaseSigning": {
+      "date": "today-209d"
+    },
+    "closingScheduled": {
+      "date": "today-205d",
+      "closingDate": "today-192d"
+    },
+    "closed": {
+      "date": "today-192d",
+      "notes": "Closed at Pacific Crest Title; keys handed over the same afternoon."
+    }
+  },
+  {
+    "seedKey": "pw-harbor-view-201",
+    "trustSeedKey": "dev-default",
+    "homeSelectionSeedKey": "sel-harbor-view-201",
+    "eligibility": {
+      "date": "today-243d",
+      "notes": "Income and household size checked against the trust's limits."
+    },
+    "financing": {
+      "date": "today-231d",
+      "lenderName": "Willamette Valley Bank",
+      "committedAmount": 153900,
+      "preapprovalLetterDate": "today-235d"
+    },
+    "inspection": {
+      "date": "today-219d",
+      "inspectorName": "Tom Haverford, Clearview Inspection Services",
+      "notes": "Kitchen faucet leaking under the sink; the HOA repaired it before closing."
+    },
+    "title": {
+      "date": "today-204d",
+      "titleCompanyName": "Willamette Escrow & Title"
+    },
+    "leaseSigning": {
+      "date": "today-186d"
+    },
+    "closingScheduled": {
+      "date": "today-183d",
+      "closingDate": "today-170d"
+    },
+    "closed": {
+      "date": "today-170d",
+      "notes": "Closed at Willamette Escrow & Title."
+    }
+  },
+  {
+    "seedKey": "pw-downtown-civic-003",
+    "trustSeedKey": "dev-default",
+    "homeSelectionSeedKey": "sel-downtown-civic-003",
+    "eligibility": {
+      "date": "today-222d",
+      "notes": "Income and household size checked against the trust's limits; accessibility need confirmed with the household."
+    },
+    "financing": {
+      "date": "today-209d",
+      "lenderName": "Oregon Homeownership Fund",
+      "committedAmount": 193800,
+      "preapprovalLetterDate": "today-213d"
+    },
+    "inspection": {
+      "date": "today-196d",
+      "inspectorName": "Rosa Delacruz, Keystone Home Inspections",
+      "notes": "Ramp and doorway widths meet the accessibility need; no defects."
+    },
+    "title": {
+      "date": "today-180d",
+      "titleCompanyName": "Pacific Crest Title"
+    },
+    "leaseSigning": {
+      "date": "today-165d"
+    },
+    "closingScheduled": {
+      "date": "today-160d",
+      "closingDate": "today-148d"
+    },
+    "closed": {
+      "date": "today-148d",
+      "notes": "Closed at Pacific Crest Title; the trust's accessibility grant paid the buyer's closing costs."
+    }
+  },
+  {
+    "seedKey": "pw-willow-007a",
+    "trustSeedKey": "dev-default",
+    "homeSelectionSeedKey": "sel-willow-007a",
+    "eligibility": {
+      "date": "today-203d",
+      "notes": "Income and household size checked against the trust's limits."
+    },
+    "financing": {
+      "date": "today-190d",
+      "lenderName": "Cascade Community Credit Union",
+      "committedAmount": 156750,
+      "preapprovalLetterDate": "today-194d"
+    },
+    "inspection": {
+      "date": "today-177d",
+      "inspectorName": "Tom Haverford, Clearview Inspection Services",
+      "notes": "Smoke detectors missing in both bedrooms; the trust installed them."
+    },
+    "title": {
+      "date": "today-160d",
+      "titleCompanyName": "Willamette Escrow & Title"
+    },
+    "leaseSigning": {
+      "date": "today-143d"
+    },
+    "closingScheduled": {
+      "date": "today-140d",
+      "closingDate": "today-127d"
+    },
+    "closed": {
+      "date": "today-127d",
+      "notes": "Closed at Willamette Escrow & Title."
+    }
+  },
+  {
+    "seedKey": "pw-cedar-lane-013a",
+    "trustSeedKey": "dev-default",
+    "homeSelectionSeedKey": "sel-cedar-lane-013a",
+    "eligibility": {
+      "date": "today-190d",
+      "notes": "Income and household size checked against the trust's limits."
+    },
+    "financing": {
+      "date": "today-178d",
+      "lenderName": "Willamette Valley Bank",
+      "committedAmount": 163400,
+      "preapprovalLetterDate": "today-182d"
+    },
+    "inspection": {
+      "date": "today-165d",
+      "inspectorName": "Rosa Delacruz, Keystone Home Inspections",
+      "notes": "Gutters clogged and one cracked window pane; both fixed by the trust."
+    },
+    "title": {
+      "date": "today-150d",
+      "titleCompanyName": "Pacific Crest Title"
+    },
+    "leaseSigning": {
+      "date": "today-134d"
+    },
+    "closingScheduled": {
+      "date": "today-130d",
+      "closingDate": "today-118d"
+    },
+    "closed": {
+      "date": "today-118d",
+      "notes": "Closed at Pacific Crest Title."
+    }
+  },
+  {
     "seedKey": "pw-maple-row-005",
     "trustSeedKey": "dev-default",
     "homeSelectionSeedKey": "sel-maple-row-005",

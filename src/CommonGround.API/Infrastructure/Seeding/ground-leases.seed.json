@@ -1,0 +1,64 @@
+[
+  {
+    "seedKey": "gl-cedar-lane-013b",
+    "trustSeedKey": "dev-default",
+    "direct": {
+      "landParcelSeedKey": "lp-cedar-lane-013",
+      "homeSeedKey": "home-cedar-lane-013b",
+      "leaseStartDate": "today-6y",
+      "termYears": 75,
+      "covenantTerms": "Owner-occupancy as primary residence required. Resale only to income-eligible buyers at or below the formula price. Signed on paper before the trust adopted lease templates.",
+      "resalePolicy": { "formulaKind": "AppraisalBased", "appreciationShare": 0.30 }
+    },
+    "checkIns": [
+      { "date": "today-14m", "notes": "Annual visit. Home in good repair; the homeowner replaced the back deck last summer and has the receipts for an improvements credit." },
+      { "date": "today-2m", "notes": "Annual visit. Living there with two children; no concerns." }
+    ]
+  },
+  {
+    "seedKey": "gl-downtown-civic-001",
+    "trustSeedKey": "dev-default",
+    "purchaseWorkflowSeedKey": "pw-downtown-civic-001",
+    "checkIns": [
+      { "date": "today-100d", "notes": "First visit after move-in. Settled in; walked through the maintenance calendar and the improvements pre-approval process." }
+    ],
+    "resale": {
+      "date": "today-12d",
+      "buyer": { "fullName": "Marisol Vega", "email": "marisol.vega@example.com", "phone": "(503) 555-0411" },
+      "purchasePrice": 219750
+    }
+  },
+  {
+    "seedKey": "gl-harbor-view-201",
+    "trustSeedKey": "dev-default",
+    "purchaseWorkflowSeedKey": "pw-harbor-view-201",
+    "checkIns": [
+      { "date": "today-80d", "notes": "First visit after move-in. Asked about the HOA's window replacement assessment; referred to the condo association." }
+    ]
+  },
+  {
+    "seedKey": "gl-downtown-civic-003",
+    "trustSeedKey": "dev-default",
+    "purchaseWorkflowSeedKey": "pw-downtown-civic-003",
+    "checkIns": [
+      { "date": "today-60d", "notes": "First visit after move-in. Accessibility features working well; the family asked about adding a grab bar in the second bathroom." }
+    ]
+  },
+  {
+    "seedKey": "gl-willow-007a",
+    "trustSeedKey": "dev-default",
+    "purchaseWorkflowSeedKey": "pw-willow-007a"
+  },
+  {
+    "seedKey": "gl-cedar-lane-013a",
+    "trustSeedKey": "dev-default",
+    "purchaseWorkflowSeedKey": "pw-cedar-lane-013a",
+    "checkIns": [
+      { "date": "today-75d", "notes": "First visit after move-in. Mentioned Lars may be offered a job in Denver." }
+    ],
+    "termination": {
+      "date": "today-21d",
+      "reason": "The homeowners moved out of state for work and sold the home back to the trust under its purchase option."
+    }
+  }
+]

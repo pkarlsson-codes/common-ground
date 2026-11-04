@@ -14,9 +14,9 @@ namespace CommonGround.API.Infrastructure.Seeding;
 
 /// <summary>
 /// Seeds progress on the purchase workflows that home selections started, from JSON: the steps
-/// recorded so far, and a scheduled closing, a stall, a failure or a withdrawal. A purchase that
-/// fails or is withdrawn propagates back, returning the household to the waiting list and the
-/// home to selection.
+/// recorded so far, and a scheduled closing, a stall, a failure or a withdrawal. A closed purchase
+/// propagates on to its ground lease and stewardship case. A purchase that fails or is withdrawn
+/// propagates back, returning the household to the waiting list and the home to selection.
 /// </summary>
 public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationWaiter propagation) : IDevelopmentSeeder
 {
@@ -150,6 +150,12 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
             steps.Add((closing.Date.Resolve(today), w => w.ScheduleClosing(closing.ClosingDate.Resolve(today), SeederUserId)));
         }
 
+        if (entry.Closed is { } closed)
+        {
+            var closedOn = closed.Date.Resolve(today);
+            steps.Add((closedOn, w => w.RecordPurchaseClosed(closedOn, closed.Notes, SeederUserId)));
+        }
+
         if (entry.Stall is { } stall)
         {
             var stalled = stall.Date.Resolve(today);
@@ -207,6 +213,12 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
                 throw new InvalidOperationException($"Purchase workflow seed '{outcomes.SeedKey}' has more than one of closingScheduled, stall, failure and withdrawal.");
             }
 
+            var unscheduled = entries.FirstOrDefault(e => e.Closed is not null && e.ClosingScheduled is null);
+            if (unscheduled is not null)
+            {
+                throw new InvalidOperationException($"Purchase workflow seed '{unscheduled.SeedKey}' is closed without a scheduled closing.");
+            }
+
             return entries;
         }
     }
@@ -230,6 +242,8 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
         public DatedSeedEntry? LeaseSigning { get; set; }
 
         public ClosingScheduledSeedEntry? ClosingScheduled { get; set; }
+
+        public ClosedSeedEntry? Closed { get; set; }
 
         public StallSeedEntry? Stall { get; set; }
 
@@ -272,6 +286,11 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
     private sealed class ClosingScheduledSeedEntry : DatedSeedEntry
     {
         public SeedDate ClosingDate { get; set; }
+    }
+
+    private sealed class ClosedSeedEntry : DatedSeedEntry
+    {
+        public string? Notes { get; set; }
     }
 
     private sealed class StallSeedEntry : DatedSeedEntry

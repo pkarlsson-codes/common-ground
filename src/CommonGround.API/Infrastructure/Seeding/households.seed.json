@@ -396,5 +396,20 @@
       { "name": "Simran Singh", "email": "simran.singh@example.com", "phone": "(503) 555-0393", "isPrimary": false },
       { "name": "Arjun Singh", "email": "arjun.singh@example.com", "phone": "(503) 555-0394", "isPrimary": false }
     ]
+  },
+  {
+    "seedKey": "hh-haugen-027",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-340d",
+    "annualIncome": 50500,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Ingrid Haugen", "email": "ingrid.haugen@example.com", "phone": "(503) 555-0401", "isPrimary": true },
+      { "name": "Lars Haugen", "email": "lars.haugen@example.com", "phone": "(503) 555-0402", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2025-1338", "completedDate": "today-326d", "counselorOrganization": "Riverton Housing Counseling" },
+    "cltOrientationCompleted": "today-319d",
+    "prequalification": { "lenderName": "Willamette Valley Bank", "approvedAmount": 195000, "recordedDate": "today-262d", "expiryDate": "today+103d" },
+    "application": { "submittedDate": "today-312d", "approvedDate": "today-298d" }
   }
 ]

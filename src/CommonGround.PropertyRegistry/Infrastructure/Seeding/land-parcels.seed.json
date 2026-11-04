@@ -119,5 +119,15 @@
     "acquisitionMethod": "Donation",
     "covenantTerms": "Former rail depot site; returned to the city after soil contamination was found.",
     "decommissionedDate": "today-14m"
+  },
+  {
+    "seedKey": "lp-cedar-lane-013",
+    "trustSeedKey": "dev-default",
+    "legalParcelNumber": "APN-318-22-071",
+    "address": "455 Cedar Lane, Riverton, OR 97212",
+    "areaAcres": 0.29,
+    "acquisitionDate": "today-8y",
+    "acquisitionMethod": "Purchase",
+    "covenantTerms": "Land use limited to owner-occupied affordable housing units."
   }
 ]

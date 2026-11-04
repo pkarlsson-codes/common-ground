@@ -37,7 +37,7 @@
       "priorities": ["AccessibilityNeed", "HouseholdSizeFit"],
       "reason": "Needs an accessible home, and a family of four fits three bedrooms better than the other household that needs one.",
       "selectedDate": "today-230d",
-      "groundLeaseTemplateSeedKey": "glt-standard-appraisal",
+      "groundLeaseTemplateSeedKey": "glt-ami-index",
       "purchasePrice": 204000
     }
   },
@@ -53,6 +53,20 @@
       "selectedDate": "today-210d",
       "groundLeaseTemplateSeedKey": "glt-fixed-two-percent",
       "purchasePrice": 165000
+    }
+  },
+  {
+    "seedKey": "sel-cedar-lane-013a",
+    "trustSeedKey": "dev-default",
+    "homeSeedKey": "home-cedar-lane-013a",
+    "startedDate": "today-205d",
+    "priority": {
+      "householdSeedKey": "hh-haugen-027",
+      "priorities": ["WaitingListTenure", "HouseholdSizeFit"],
+      "reason": "Longest on the waiting list, and a couple suits the two-bedroom unit.",
+      "selectedDate": "today-198d",
+      "groundLeaseTemplateSeedKey": "glt-standard-appraisal",
+      "purchasePrice": 172000
     }
   },
   {
