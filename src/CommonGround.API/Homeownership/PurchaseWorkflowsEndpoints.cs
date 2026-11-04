@@ -8,6 +8,7 @@ using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Domain.Services;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
@@ -68,9 +69,23 @@ public static class PurchaseWorkflowsEndpoints
             i.Workflow.Phase,
             i.Workflow.CreatedAt,
             i.Workflow.StepEnteredAt,
-            i.Workflow.ScheduledClosingDate));
+            i.Workflow.ScheduledClosingDate,
+            i.Workflow.NextStep));
 
         return Results.Ok(response);
+    }
+
+    [WolverineGet("/api/purchase-workflows/board")]
+    public static async Task<IResult> GetPurchaseBoard(
+        IMessageBus bus,
+        ITrustClock trustClock,
+        CancellationToken cancellationToken)
+    {
+        var tenantId = bus.TenantId!;
+        var today = await trustClock.TodayAsync(tenantId, cancellationToken).ConfigureAwait(false);
+        var board = await bus.InvokeForTenantAsync<PurchaseBoard>(tenantId, new GetPurchaseBoard(), cancellationToken).ConfigureAwait(false);
+
+        return Results.Ok(new PurchaseBoardResponse(today, [.. board.Columns.Select(MapToColumnResponse)]));
     }
 
     [WolverineGet("/api/purchase-workflows/{workflowId}")]
@@ -328,6 +343,19 @@ public static class PurchaseWorkflowsEndpoints
 
         return Results.NoContent();
     }
+
+    private static PurchaseBoardColumnResponse MapToColumnResponse(PurchaseBoardColumn column) =>
+        new(column.Step, [.. column.Cards.Select(MapToCardResponse)]);
+
+    private static PurchaseBoardCardResponse MapToCardResponse(PurchaseBoardCard card) =>
+        new(
+            card.Workflow.Id,
+            card.Workflow.HomeId,
+            card.HomeLabel,
+            card.Workflow.BuyerFullName,
+            card.Workflow.Phase,
+            card.StepEnteredOn,
+            card.Workflow.ScheduledClosingDate);
 
     private static PurchaseWorkflowResponse MapToResponse(PurchaseWorkflowView view, string? homeLabel)
     {

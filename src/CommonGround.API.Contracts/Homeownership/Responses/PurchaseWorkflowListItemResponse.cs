@@ -12,4 +12,5 @@ public sealed record PurchaseWorkflowListItemResponse(
     string Phase,
     DateTimeOffset CreatedAt,
     DateTimeOffset StepEnteredAt,
-    DateOnly? ScheduledClosingDate);
+    DateOnly? ScheduledClosingDate,
+    string NextStep);

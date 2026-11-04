@@ -21,6 +21,16 @@ public static class PurchaseWorkflowsEndpoints
         return Results.Created($"/api/v1/purchase-workflows/{result.PurchaseWorkflowId}", result);
     }
 
+    [WolverineGet("/api/v1/purchase-workflows/board")]
+    [ProducesResponseType<PurchaseBoardResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetPurchaseBoard(
+        IPurchaseWorkflowsApiClient client,
+        CancellationToken cancellationToken)
+    {
+        var result = await client.GetPurchaseBoardAsync(cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+
     [WolverineGet("/api/v1/purchase-workflows/{workflowId}")]
     [ProducesResponseType<PurchaseWorkflowResponse>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetPurchaseWorkflow(

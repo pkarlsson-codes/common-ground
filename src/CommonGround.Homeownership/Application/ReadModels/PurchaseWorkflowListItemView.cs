@@ -32,4 +32,10 @@ public class PurchaseWorkflowListItemView
 
     /// <summary>Gets or sets the scheduled closing date, once closing is scheduled.</summary>
     public DateOnly? ScheduledClosingDate { get; set; }
+
+    /// <summary>Gets or sets the steps recorded so far, by <c>PurchaseStep</c> name.</summary>
+    public List<string> RecordedSteps { get; set; } = [];
+
+    /// <summary>Gets or sets the <c>PurchaseStep</c> the purchase waits on next.</summary>
+    public string NextStep { get; set; } = string.Empty;
 }

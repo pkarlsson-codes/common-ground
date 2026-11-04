@@ -34,6 +34,10 @@ public sealed class PurchaseWorkflowsApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task<PurchaseBoardResponse> GetPurchaseBoardAsync(CancellationToken cancellationToken) =>
+        await GetAsync<PurchaseBoardResponse>("api/purchase-workflows/board", cancellationToken).ConfigureAwait(false);
+
+    /// <inheritdoc/>
     public async Task RecordEligibilityVerifiedAsync(string workflowId, RecordEligibilityVerifiedRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);

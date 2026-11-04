@@ -25,6 +25,11 @@ public interface IPurchaseWorkflowsApiClient
     /// <returns>A paginated list of purchase workflow summaries.</returns>
     Task<PaginatedResponse<PurchaseWorkflowListItemResponse>> GetPurchaseWorkflowsAsync(GetPurchaseWorkflowsQuerySpec querySpec, CancellationToken cancellationToken);
 
+    /// <summary>Gets every open purchase, grouped by the step it waits on.</summary>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The purchase board.</returns>
+    Task<PurchaseBoardResponse> GetPurchaseBoardAsync(CancellationToken cancellationToken);
+
     /// <summary>Records buyer eligibility verified.</summary>
     /// <param name="workflowId">The ID of the purchase workflow.</param>
     /// <param name="request">The eligibility verification details.</param>
