@@ -112,12 +112,28 @@ public sealed class HouseholdsSeeder(ITrustClock trustClock, PropagationWaiter p
                     var id = HomeownerApplicationId.Generate();
                     clock.MoveTo(applicationEntry.SubmittedDate.Resolve(today));
                     var submitted = HomeownerApplication.Submit(id, householdId, household.Declare(), null, SeederUserId);
+                    var application = HomeownerApplication.Create(submitted);
                     List<object> applicationEvents = [submitted];
                     if (applicationEntry.ApprovedDate is { } approved)
                     {
                         var approvedDate = approved.Resolve(today);
                         clock.MoveTo(approvedDate);
-                        applicationEvents.Add(HomeownerApplication.Create(submitted).Approve(approvedDate, null, SeederUserId));
+                        var approval = application.Approve(approvedDate, null, SeederUserId);
+                        application.Apply(approval);
+                        applicationEvents.Add(approval);
+                    }
+
+                    if (applicationEntry.Denial is { } denial)
+                    {
+                        var deniedDate = denial.Date.Resolve(today);
+                        clock.MoveTo(deniedDate);
+                        applicationEvents.Add(application.DenyApplication(denial.Reason, deniedDate, SeederUserId));
+                    }
+                    else if (applicationEntry.Withdrawal is { } withdrawal)
+                    {
+                        var withdrawnDate = withdrawal.Date.Resolve(today);
+                        clock.MoveTo(withdrawnDate);
+                        applicationEvents.Add(application.Withdraw(withdrawnDate, withdrawal.Reason, SeederUserId));
                     }
 
                     trustSession.Events.StartStream<HomeownerApplication>(id.Value, applicationEvents);
@@ -232,5 +248,16 @@ public sealed class HouseholdsSeeder(ITrustClock trustClock, PropagationWaiter p
         public SeedDate SubmittedDate { get; set; }
 
         public SeedDate? ApprovedDate { get; set; }
+
+        public ApplicationOutcomeSeedEntry? Denial { get; set; }
+
+        public ApplicationOutcomeSeedEntry? Withdrawal { get; set; }
+    }
+
+    private sealed class ApplicationOutcomeSeedEntry
+    {
+        public SeedDate Date { get; set; }
+
+        public string Reason { get; set; } = string.Empty;
     }
 }

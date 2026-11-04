@@ -106,5 +106,295 @@
     ],
     "housingCounseling": { "certificationNumber": "HUD-2026-0903", "completedDate": "today-61d", "counselorOrganization": "Riverton Housing Counseling" },
     "application": { "submittedDate": "today-10d" }
+  },
+  {
+    "seedKey": "hh-whitaker-008",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-410d",
+    "annualIncome": 54000,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Grace Whitaker", "email": "grace.whitaker@example.com", "phone": "(503) 555-0211", "isPrimary": true },
+      { "name": "Henry Whitaker", "email": "henry.whitaker@example.com", "phone": "(503) 555-0212", "isPrimary": false },
+      { "name": "Ella Whitaker", "email": "ella.whitaker@example.com", "phone": "(503) 555-0213", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2025-1104", "completedDate": "today-396d", "counselorOrganization": "Riverton Housing Counseling" },
+    "cltOrientationCompleted": "today-389d",
+    "prequalification": { "lenderName": "Cascade Community Credit Union", "approvedAmount": 230000, "recordedDate": "today-330d", "expiryDate": "today+65d" },
+    "application": { "submittedDate": "today-382d", "approvedDate": "today-368d" }
+  },
+  {
+    "seedKey": "hh-fontaine-009",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-392d",
+    "annualIncome": 36500,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Claire Fontaine", "email": "claire.fontaine@example.com", "phone": "(503) 555-0221", "isPrimary": true }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2025-1187", "completedDate": "today-378d", "counselorOrganization": "Neighborhood Partnerships" },
+    "cltOrientationCompleted": "today-371d",
+    "prequalification": { "lenderName": "Willamette Valley Bank", "approvedAmount": 170000, "recordedDate": "today-312d", "expiryDate": "today+83d" },
+    "application": { "submittedDate": "today-364d", "approvedDate": "today-350d" }
+  },
+  {
+    "seedKey": "hh-osei-010",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-371d",
+    "annualIncome": 49500,
+    "requiresAccessibility": true,
+    "members": [
+      { "name": "Kwame Osei", "email": "kwame.osei@example.com", "phone": "(503) 555-0231", "isPrimary": true },
+      { "name": "Abena Osei", "email": "abena.osei@example.com", "phone": "(503) 555-0232", "isPrimary": false },
+      { "name": "Kofi Osei", "email": "kofi.osei@example.com", "phone": "(503) 555-0233", "isPrimary": false },
+      { "name": "Ama Osei", "email": "ama.osei@example.com", "phone": "(503) 555-0234", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2025-1240", "completedDate": "today-357d", "counselorOrganization": "Riverton Housing Counseling" },
+    "cltOrientationCompleted": "today-350d",
+    "prequalification": { "lenderName": "Oregon Homeownership Fund", "approvedAmount": 235000, "recordedDate": "today-295d", "expiryDate": "today+100d" },
+    "application": { "submittedDate": "today-343d", "approvedDate": "today-329d" }
+  },
+  {
+    "seedKey": "hh-delgado-011",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-351d",
+    "annualIncome": 61000,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Rosa Delgado", "email": "rosa.delgado@example.com", "phone": "(503) 555-0241", "isPrimary": true },
+      { "name": "Tomas Delgado", "email": "tomas.delgado@example.com", "phone": "(503) 555-0242", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2025-1302", "completedDate": "today-337d", "counselorOrganization": "Neighborhood Partnerships" },
+    "cltOrientationCompleted": "today-330d",
+    "prequalification": { "lenderName": "Cascade Community Credit Union", "approvedAmount": 255000, "recordedDate": "today-280d", "expiryDate": "today+115d" },
+    "application": { "submittedDate": "today-323d", "approvedDate": "today-301d" }
+  },
+  {
+    "seedKey": "hh-tran-012",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-150d",
+    "annualIncome": 43000,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Bao Tran", "email": "bao.tran@example.com", "phone": "(503) 555-0251", "isPrimary": true },
+      { "name": "Hoa Tran", "email": "hoa.tran@example.com", "phone": "(503) 555-0252", "isPrimary": false },
+      { "name": "Kim Tran", "email": "kim.tran@example.com", "phone": "(503) 555-0253", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2026-0611", "completedDate": "today-136d", "counselorOrganization": "Riverton Housing Counseling" },
+    "cltOrientationCompleted": "today-129d",
+    "prequalification": { "lenderName": "Willamette Valley Bank", "approvedAmount": 200000, "recordedDate": "today-122d", "expiryDate": "today+243d" },
+    "application": { "submittedDate": "today-127d", "approvedDate": "today-120d" }
+  },
+  {
+    "seedKey": "hh-mensah-013",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-131d",
+    "annualIncome": 39000,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Efua Mensah", "email": "efua.mensah@example.com", "phone": "(503) 555-0261", "isPrimary": true },
+      { "name": "Yaw Mensah", "email": "yaw.mensah@example.com", "phone": "(503) 555-0262", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2026-0645", "completedDate": "today-117d", "counselorOrganization": "Neighborhood Partnerships" },
+    "cltOrientationCompleted": "today-110d",
+    "prequalification": { "lenderName": "Cascade Community Credit Union", "approvedAmount": 185000, "recordedDate": "today-103d", "expiryDate": "today+262d" },
+    "application": { "submittedDate": "today-105d", "approvedDate": "today-98d" }
+  },
+  {
+    "seedKey": "hh-ramirez-014",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-118d",
+    "annualIncome": 57500,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Diego Ramirez", "email": "diego.ramirez@example.com", "phone": "(503) 555-0271", "isPrimary": true },
+      { "name": "Valeria Ramirez", "email": "valeria.ramirez@example.com", "phone": "(503) 555-0272", "isPrimary": false },
+      { "name": "Camila Ramirez", "email": "camila.ramirez@example.com", "phone": "(503) 555-0273", "isPrimary": false },
+      { "name": "Lucas Ramirez", "email": "lucas.ramirez@example.com", "phone": "(503) 555-0274", "isPrimary": false },
+      { "name": "Isabel Ramirez", "email": "isabel.ramirez@example.com", "phone": "(503) 555-0275", "isPrimary": false },
+      { "name": "Elena Ramirez", "email": "elena.ramirez@example.com", "phone": "(503) 555-0276", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2026-0689", "completedDate": "today-104d", "counselorOrganization": "Riverton Housing Counseling" },
+    "cltOrientationCompleted": "today-97d",
+    "prequalification": { "lenderName": "Oregon Homeownership Fund", "approvedAmount": 250000, "recordedDate": "today-90d", "expiryDate": "today+275d" },
+    "application": { "submittedDate": "today-92d", "approvedDate": "today-85d" }
+  },
+  {
+    "seedKey": "hh-castillo-015",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-96d",
+    "annualIncome": 45000,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Ana Castillo", "email": "ana.castillo@example.com", "phone": "(503) 555-0281", "isPrimary": true },
+      { "name": "Jorge Castillo", "email": "jorge.castillo@example.com", "phone": "(503) 555-0282", "isPrimary": false },
+      { "name": "Lucia Castillo", "email": "lucia.castillo@example.com", "phone": "(503) 555-0283", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2026-0734", "completedDate": "today-82d", "counselorOrganization": "Neighborhood Partnerships" },
+    "cltOrientationCompleted": "today-75d",
+    "prequalification": { "lenderName": "Willamette Valley Bank", "approvedAmount": 210000, "recordedDate": "today-70d", "expiryDate": "today+295d" },
+    "application": { "submittedDate": "today-68d", "approvedDate": "today-61d" }
+  },
+  {
+    "seedKey": "hh-novak-016",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-94d",
+    "annualIncome": 45500,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Petra Novak", "email": "petra.novak@example.com", "phone": "(503) 555-0291", "isPrimary": true },
+      { "name": "Jan Novak", "email": "jan.novak@example.com", "phone": "(503) 555-0292", "isPrimary": false },
+      { "name": "Eva Novak", "email": "eva.novak@example.com", "phone": "(503) 555-0293", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2026-0741", "completedDate": "today-80d", "counselorOrganization": "Riverton Housing Counseling" },
+    "cltOrientationCompleted": "today-75d",
+    "prequalification": { "lenderName": "Cascade Community Credit Union", "approvedAmount": 212000, "recordedDate": "today-69d", "expiryDate": "today+296d" },
+    "application": { "submittedDate": "today-66d", "approvedDate": "today-61d" }
+  },
+  {
+    "seedKey": "hh-yamamoto-017",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-80d",
+    "annualIncome": 52000,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Kenji Yamamoto", "email": "kenji.yamamoto@example.com", "phone": "(503) 555-0301", "isPrimary": true },
+      { "name": "Aiko Yamamoto", "email": "aiko.yamamoto@example.com", "phone": "(503) 555-0302", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2026-0790", "completedDate": "today-66d", "counselorOrganization": "Neighborhood Partnerships" },
+    "cltOrientationCompleted": "today-59d",
+    "prequalification": { "lenderName": "Oregon Homeownership Fund", "approvedAmount": 228000, "recordedDate": "today-55d", "expiryDate": "today+310d" },
+    "application": { "submittedDate": "today-54d", "approvedDate": "today-47d" }
+  },
+  {
+    "seedKey": "hh-abdi-018",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-66d",
+    "annualIncome": 33500,
+    "requiresAccessibility": true,
+    "members": [
+      { "name": "Hodan Abdi", "email": "hodan.abdi@example.com", "phone": "(503) 555-0311", "isPrimary": true },
+      { "name": "Farah Abdi", "email": "farah.abdi@example.com", "phone": "(503) 555-0312", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2026-0832", "completedDate": "today-52d", "counselorOrganization": "Riverton Housing Counseling" },
+    "cltOrientationCompleted": "today-45d",
+    "prequalification": { "lenderName": "Willamette Valley Bank", "approvedAmount": 160000, "recordedDate": "today-42d", "expiryDate": "today+323d" },
+    "application": { "submittedDate": "today-40d", "approvedDate": "today-33d" }
+  },
+  {
+    "seedKey": "hh-begay-019",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-52d",
+    "annualIncome": 47000,
+    "requiresAccessibility": true,
+    "members": [
+      { "name": "Tyler Begay", "email": "tyler.begay@example.com", "phone": "(503) 555-0321", "isPrimary": true },
+      { "name": "Naomi Begay", "email": "naomi.begay@example.com", "phone": "(503) 555-0322", "isPrimary": false },
+      { "name": "Ruth Begay", "email": "ruth.begay@example.com", "phone": "(503) 555-0323", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2026-0871", "completedDate": "today-38d", "counselorOrganization": "Neighborhood Partnerships" },
+    "cltOrientationCompleted": "today-31d",
+    "prequalification": { "lenderName": "Cascade Community Credit Union", "approvedAmount": 215000, "recordedDate": "today-28d", "expiryDate": "today+337d" },
+    "application": { "submittedDate": "today-26d", "approvedDate": "today-19d" }
+  },
+  {
+    "seedKey": "hh-schmidt-020",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-220d",
+    "annualIncome": 50500,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Lena Schmidt", "email": "lena.schmidt@example.com", "phone": "(503) 555-0331", "isPrimary": true },
+      { "name": "Felix Schmidt", "email": "felix.schmidt@example.com", "phone": "(503) 555-0332", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2026-0455", "completedDate": "today-206d", "counselorOrganization": "Riverton Housing Counseling" },
+    "cltOrientationCompleted": "today-199d",
+    "prequalification": { "lenderName": "Willamette Valley Bank", "approvedAmount": 220000, "recordedDate": "today-190d", "expiryDate": "today-9d" },
+    "application": { "submittedDate": "today-192d", "approvedDate": "today-130d" }
+  },
+  {
+    "seedKey": "hh-ferreira-021",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-40d",
+    "annualIncome": 41000,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Beatriz Ferreira", "email": "beatriz.ferreira@example.com", "phone": "(503) 555-0341", "isPrimary": true },
+      { "name": "Paulo Ferreira", "email": "paulo.ferreira@example.com", "phone": "(503) 555-0342", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2026-0880", "completedDate": "today-26d", "counselorOrganization": "Neighborhood Partnerships" },
+    "cltOrientationCompleted": "today-19d",
+    "prequalification": { "lenderName": "Oregon Homeownership Fund", "approvedAmount": 195000, "recordedDate": "today-12d", "expiryDate": "today+353d" },
+    "application": { "submittedDate": "today-3d" }
+  },
+  {
+    "seedKey": "hh-kim-022",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-45d",
+    "annualIncome": 55000,
+    "requiresAccessibility": true,
+    "members": [
+      { "name": "Ji-woo Kim", "email": "ji-woo.kim@example.com", "phone": "(503) 555-0351", "isPrimary": true },
+      { "name": "Min-jun Kim", "email": "min-jun.kim@example.com", "phone": "(503) 555-0352", "isPrimary": false }
+    ],
+    "cltOrientationCompleted": "today-33d",
+    "prequalification": { "lenderName": "Cascade Community Credit Union", "approvedAmount": 240000, "recordedDate": "today-29d", "expiryDate": "today+336d" },
+    "application": { "submittedDate": "today-24d" }
+  },
+  {
+    "seedKey": "hh-volkov-023",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-95d",
+    "annualIncome": 98000,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Irina Volkov", "email": "irina.volkov@example.com", "phone": "(503) 555-0361", "isPrimary": true },
+      { "name": "Sergei Volkov", "email": "sergei.volkov@example.com", "phone": "(503) 555-0362", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2026-0702", "completedDate": "today-84d", "counselorOrganization": "Riverton Housing Counseling" },
+    "cltOrientationCompleted": "today-80d",
+    "prequalification": { "lenderName": "Willamette Valley Bank", "approvedAmount": 310000, "recordedDate": "today-76d", "expiryDate": "today+289d" },
+    "application": { "submittedDate": "today-70d", "denial": { "date": "today-55d", "reason": "Household income is above 80% of area median income for a household of two." } }
+  },
+  {
+    "seedKey": "hh-larsen-024",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-200d",
+    "annualIncome": 46500,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Erik Larsen", "email": "erik.larsen@example.com", "phone": "(503) 555-0371", "isPrimary": true },
+      { "name": "Maja Larsen", "email": "maja.larsen@example.com", "phone": "(503) 555-0372", "isPrimary": false },
+      { "name": "Oskar Larsen", "email": "oskar.larsen@example.com", "phone": "(503) 555-0373", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2026-0501", "completedDate": "today-186d", "counselorOrganization": "Neighborhood Partnerships" },
+    "cltOrientationCompleted": "today-179d",
+    "prequalification": { "lenderName": "Cascade Community Credit Union", "approvedAmount": 205000, "recordedDate": "today-172d", "expiryDate": "today+193d" },
+    "application": { "submittedDate": "today-170d", "approvedDate": "today-150d", "withdrawal": { "date": "today-40d", "reason": "Relocating out of state for work." } }
+  },
+  {
+    "seedKey": "hh-moreau-025",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-21d",
+    "annualIncome": 40000,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Julien Moreau", "email": "julien.moreau@example.com", "phone": "(503) 555-0381", "isPrimary": true },
+      { "name": "Chloe Moreau", "email": "chloe.moreau@example.com", "phone": "(503) 555-0382", "isPrimary": false }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2026-0912", "completedDate": "today-8d", "counselorOrganization": "Riverton Housing Counseling" }
+  },
+  {
+    "seedKey": "hh-singh-026",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-5d",
+    "annualIncome": 37000,
+    "requiresAccessibility": true,
+    "members": [
+      { "name": "Harpreet Singh", "email": "harpreet.singh@example.com", "phone": "(503) 555-0391", "isPrimary": true },
+      { "name": "Gurpreet Singh", "email": "gurpreet.singh@example.com", "phone": "(503) 555-0392", "isPrimary": false },
+      { "name": "Simran Singh", "email": "simran.singh@example.com", "phone": "(503) 555-0393", "isPrimary": false },
+      { "name": "Arjun Singh", "email": "arjun.singh@example.com", "phone": "(503) 555-0394", "isPrimary": false }
+    ]
   }
 ]
