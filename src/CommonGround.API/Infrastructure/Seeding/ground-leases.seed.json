@@ -5,7 +5,9 @@
     "direct": {
       "landParcelSeedKey": "lp-cedar-lane-013",
       "homeSeedKey": "home-cedar-lane-013b",
+      "homeowner": { "fullName": "Tomasz Kowalczyk", "email": "tomasz.kowalczyk@example.com", "phone": "(503) 555-0187" },
       "leaseStartDate": "today-6y",
+      "recordedOn": "today-2y",
       "termYears": 75,
       "covenantTerms": "Owner-occupancy as primary residence required. Resale only to income-eligible buyers at or below the formula price. Signed on paper before the trust adopted lease templates.",
       "resalePolicy": { "formulaKind": "AppraisalBased", "appreciationShare": 0.30 }

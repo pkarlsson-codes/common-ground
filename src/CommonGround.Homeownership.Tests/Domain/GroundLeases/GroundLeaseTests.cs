@@ -22,10 +22,12 @@ public class GroundLeaseTests
 
         public GroundLeaseId LeaseId { get; } = GroundLeaseId.Generate();
 
+        public Homeowner Homeowner { get; } = Homeowner.From("Dana Whitfield", "dana@example.com", "(503) 555-0123");
+
         public GroundLeaseCreated Established(ResalePolicyTerms? terms = null) =>
             GroundLease.Establish(
-                LeaseId, ParcelId, HomeId, new DateOnly(2025, 1, 1), 99, "Standard affordability covenant",
-                terms ?? ResalePolicyTerms.AppraisalBased(0.25m), StaffUser);
+                LeaseId, ParcelId, HomeId, Homeowner, new DateOnly(2025, 1, 1), 99, "Standard affordability covenant",
+                terms ?? ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, StaffUser);
 
         public GroundLease Lease(ResalePolicyTerms? terms = null) => EventReplay.Replay<GroundLease>(Established(terms));
 
@@ -53,7 +55,7 @@ public class GroundLeaseTests
         private readonly TestBed _testBed = new();
 
         [Fact]
-        public void GivenValidInputs_WhenEstablished_ThenStartsAnActiveLeaseWithNoHomeownerOrTemplate()
+        public void GivenValidInputs_WhenEstablished_ThenStartsAnActiveLeaseForTheHomeownerWithNoTemplate()
         {
             var established = _testBed.Established();
 
@@ -64,10 +66,26 @@ public class GroundLeaseTests
                 LeaseStartDate = new DateOnly(2025, 1, 1),
                 TermYears = 99,
                 Status = GroundLeaseStatus.Active,
-                CurrentHomeowner = (Homeowner?)null,
+                CurrentHomeowner = _testBed.Homeowner,
                 TemplateId = (GroundLeaseTemplateId?)null,
+                PurchaseWorkflowId = (PurchaseWorkflowId?)null,
                 CreatedBy = _testBed.StaffUser,
             });
+        }
+
+        [Theory]
+        [InlineData("groundlease-1", null, null, "homeownership.ground_lease.create.home_has_active_lease")]
+        [InlineData(null, "purchaseworkflow-1", null, "homeownership.ground_lease.create.home_has_open_purchase")]
+        [InlineData(null, null, "homeselection-1", "homeownership.ground_lease.create.home_in_selection")]
+        public void GivenHomeAlreadyCommitted_WhenEstablished_ThenThrowsBusinessRuleViolation(
+            string? activeLeaseId, string? openPurchaseWorkflowId, string? openHomeSelectionId, string expectedCode)
+        {
+            var act = () => GroundLease.Establish(
+                _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, _testBed.Homeowner, new DateOnly(2025, 1, 1),
+                99, "Terms", ResalePolicyTerms.AppraisalBased(0.25m),
+                HomeCommitments.Create(activeLeaseId, openPurchaseWorkflowId, openHomeSelectionId), _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }
 
         [Theory]
@@ -76,8 +94,8 @@ public class GroundLeaseTests
         public void GivenInvalidInputs_WhenEstablished_ThenThrowsBusinessRuleViolation(int termYears, string covenantTerms)
         {
             var act = () => GroundLease.Establish(
-                _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, new DateOnly(2025, 1, 1),
-                termYears, covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), _testBed.StaffUser);
+                _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, _testBed.Homeowner, new DateOnly(2025, 1, 1),
+                termYears, covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>();
         }

@@ -26,6 +26,7 @@ public static class HomeownershipMartenConfiguration
         options.Schema.For<GroundLeaseView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<GroundLeaseListItemView>()
             .DatabaseSchemaName(SchemaName)
+            .Index(x => x.HomeId)
             .Index(x => x.HomeownerFullName)
             .Index(x => x.HomeownerEmail);
         options.Schema.For<PurchaseWorkflowView>().DatabaseSchemaName(SchemaName);
@@ -35,6 +36,10 @@ public static class HomeownershipMartenConfiguration
             .Index(x => x.HomeId)
             .Index(x => x.HouseholdId);
         options.Schema.For<HomeLabelView>().DatabaseSchemaName(SchemaName);
+        options.Schema.For<HomeSelectionView>()
+            .DatabaseSchemaName(SchemaName)
+            .UseOptimisticConcurrency(true)
+            .Index(x => x.HomeId);
         options.Schema.For<GroundLeaseTemplateListItemView>()
             .DatabaseSchemaName(SchemaName)
             .Index(x => x.TemplateName);

@@ -7292,7 +7292,7 @@
       },
       "CreateGroundLeaseRequest": {
         "type": "object",
-        "description": "Request to create a new ground lease.",
+        "description": "Request to create a ground lease directly, rather than from a purchase closing.",
         "additionalProperties": false,
         "properties": {
           "landParcelId": {
@@ -7300,6 +7300,16 @@
           },
           "homeId": {
             "type": "string"
+          },
+          "homeownerFullName": {
+            "type": "string"
+          },
+          "homeownerEmail": {
+            "type": "string"
+          },
+          "homeownerPhone": {
+            "type": "string",
+            "nullable": true
           },
           "leaseStartDate": {
             "type": "string",
@@ -7425,6 +7435,10 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "recordedOn": {
+            "type": "string",
+            "format": "date"
           },
           "createdBy": {
             "type": "string"

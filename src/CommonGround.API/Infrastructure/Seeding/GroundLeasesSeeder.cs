@@ -18,7 +18,8 @@ namespace CommonGround.API.Infrastructure.Seeding;
 /// <summary>
 /// Seeds ground leases from JSON: what happened on the leases that closed purchases created
 /// (stewardship check-ins, a resale's purchase or a termination, which propagates to close the
-/// lease's stewardship case), and leases created directly, without a template or a purchase.
+/// lease's stewardship case), and leases created directly, without a template or a purchase, which
+/// propagate like those from a purchase: the lease opens a stewardship case and marks its home leased.
 /// </summary>
 public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter propagation) : IDevelopmentSeeder
 {
@@ -113,8 +114,10 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
             ?? throw new InvalidOperationException(
                 $"Missing home seed mapping for ground lease seed key '{entry.SeedKey}' (homeSeedKey='{direct.HomeSeedKey}').");
 
+        // Recorded later than it started, like a lease signed before the trust used CommonGround; its
+        // stewardship case opens on the day it was recorded.
         var leaseStartDate = direct.LeaseStartDate.Resolve(today);
-        clock.MoveTo(leaseStartDate);
+        clock.MoveTo(direct.RecordedOn.Resolve(today));
 
         var resale = direct.ResalePolicy;
         var leaseId = GroundLeaseId.Generate();
@@ -122,6 +125,7 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
             leaseId,
             parcelLookup.LandParcelId,
             homeLookup.UnitId,
+            Homeowner.From(direct.Homeowner.FullName, direct.Homeowner.Email, direct.Homeowner.Phone),
             leaseStartDate,
             direct.TermYears,
             direct.CovenantTerms,
@@ -132,6 +136,7 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
                 resale.BaselineIndexValue,
                 resale.AnnualPercentage,
                 resale.ImprovementsCap),
+            HomeCommitments.None,
             SeederUserId);
         session.Events.StartStream<GroundLease>(leaseId.Value, created);
 
@@ -279,7 +284,11 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
 
         public string HomeSeedKey { get; set; } = string.Empty;
 
+        public ContactSeedEntry Homeowner { get; set; } = new();
+
         public SeedDate LeaseStartDate { get; set; }
+
+        public SeedDate RecordedOn { get; set; }
 
         public int TermYears { get; set; }
 
@@ -315,12 +324,12 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
 
     private sealed class ResaleSeedEntry : DatedSeedEntry
     {
-        public BuyerSeedEntry Buyer { get; set; } = new();
+        public ContactSeedEntry Buyer { get; set; } = new();
 
         public decimal PurchasePrice { get; set; }
     }
 
-    private sealed class BuyerSeedEntry
+    private sealed class ContactSeedEntry
     {
         public string FullName { get; set; } = string.Empty;
 

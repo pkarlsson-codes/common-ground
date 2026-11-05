@@ -8,7 +8,9 @@ using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
 using CommonGround.API.Contracts.Today.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
+using CommonGround.Stewardship.Infrastructure.Persistence;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using Wolverine.Marten;
 using Wolverine.Tracking;
 
@@ -170,6 +172,76 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
             .Journey.Should().BeEquivalentTo(new { Stage = "Homeowner", PurchasedDate = ClosingDate, SelectedHomeId = purchase.HomeId });
     }
 
+    [Fact]
+    public async Task CreatingALeaseDirectly_OpensAStewardshipCaseAndLeasesTheHome()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var landParcelId = await CreateLandParcelAsync(client);
+        var homeId = await TrackAsync(() => RegisterHomeAsync(client, landParcelId));
+        var leaseStart = new DateOnly(2019, 3, 1);
+
+        var leaseId = await TrackAsync(async () =>
+        {
+            var response = await CreateLeaseAsync(client, landParcelId, homeId, leaseStart);
+            response.StatusCode.Should().Be(HttpStatusCode.Created);
+            return (await response.Content.ReadFromJsonAsync<CreateGroundLeaseResponse>())!.GroundLeaseId;
+        });
+
+        var today = await GetTodayAsync(client);
+        var cases = await client.GetFromJsonAsync<PaginatedResponse<StewardshipCaseView>>($"/api/stewardship/cases?groundLeaseId={leaseId}");
+        cases!.Items.Should().ContainSingle().Which.Should().BeEquivalentTo(new { Status = "Active", OpenedDate = today.Today },
+            "the case opens on the day the lease was recorded, not on its start date");
+        (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}"))!
+            .Should().BeEquivalentTo(new { Status = "Leased", LeasedDate = leaseStart });
+        today.Items.Should().NotContain(i => i.RecordId == homeId, "a leased home isn't waiting for a selection");
+    }
+
+    [Fact]
+    public async Task CreatingALeaseDirectly_OnAHomeInSelection_IsRefused()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var landParcelId = await CreateLandParcelAsync(client);
+        var homeId = await TrackAsync(() => RegisterHomeAsync(client, landParcelId));
+        await CreateApprovedApplicationAsync(client);
+        await TrackAsync(() => StartSelectionAsync(client, homeId));
+
+        var response = await CreateLeaseAsync(client, landParcelId, homeId, new DateOnly(2019, 3, 1));
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await response.Content.ReadFromJsonAsync<ProblemDetails>())!.Detail
+            .Should().Be("This home is in a home selection. Cancel the selection before leasing it by hand.");
+    }
+
+    [Fact]
+    public async Task CreatingALeaseDirectly_OnAHomeUnderContract_IsRefused()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var purchase = await SelectHouseholdAsync(client);
+
+        var response = await CreateLeaseAsync(client, purchase.LandParcelId, purchase.HomeId, new DateOnly(2019, 3, 1));
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await response.Content.ReadFromJsonAsync<ProblemDetails>())!.Detail
+            .Should().Be("This home has a purchase in progress. Lease it by closing that purchase, or end the purchase first.");
+    }
+
+    [Fact]
+    public async Task CreatingALeaseDirectly_AfterTheHomesSelectionIsCancelled_IsAllowed()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var landParcelId = await CreateLandParcelAsync(client);
+        var homeId = await TrackAsync(() => RegisterHomeAsync(client, landParcelId));
+        await CreateApprovedApplicationAsync(client);
+        var selectionId = await TrackAsync(() => StartSelectionAsync(client, homeId));
+        await TrackAsync(async () =>
+            (await client.PostAsJsonAsync($"/api/home-selections/{selectionId}/cancel", new CancelHomeSelectionRequest("Recording an existing lease")))
+                .StatusCode.Should().Be(HttpStatusCode.NoContent));
+
+        var response = await CreateLeaseAsync(client, landParcelId, homeId, new DateOnly(2019, 3, 1));
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
+
     /// <summary>
     /// Runs <paramref name="action"/>, then waits for the events it leads to to reach every handler. A
     /// catch-up forwards only the events stored so far, and handlers append more (a fallen-through
@@ -241,6 +313,12 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
 
         return new Purchase(landParcelId, homeId, templateId, applicant, workflowId);
     }
+
+    private static Task<HttpResponseMessage> CreateLeaseAsync(HttpClient client, string landParcelId, string homeId, DateOnly leaseStart) =>
+        client.PostAsJsonAsync("/api/ground-leases",
+            new CreateGroundLeaseRequest(
+                landParcelId, homeId, "Dana Whitfield", "dana@example.com", null, leaseStart, 99, "Signed on paper",
+                "AppraisalBased", 0.25m, null, null, null, null));
 
     private static async Task<TodayResponse> GetTodayAsync(HttpClient client) =>
         (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!;

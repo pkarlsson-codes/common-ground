@@ -94,6 +94,30 @@ public static class BusinessRuleViolation
             public static BusinessRuleViolationException CovenantTermsRequired()
                 => new(
                     "homeownership.ground_lease.create.covenant_terms_required");
+
+            public static BusinessRuleViolationException HomeHasActiveLease(string groundLeaseId)
+                => new(
+                    "homeownership.ground_lease.create.home_has_active_lease",
+                    new Dictionary<string, object?>
+                    {
+                        ["groundLeaseId"] = groundLeaseId,
+                    });
+
+            public static BusinessRuleViolationException HomeHasOpenPurchase(string purchaseWorkflowId)
+                => new(
+                    "homeownership.ground_lease.create.home_has_open_purchase",
+                    new Dictionary<string, object?>
+                    {
+                        ["purchaseWorkflowId"] = purchaseWorkflowId,
+                    });
+
+            public static BusinessRuleViolationException HomeInSelection(string homeSelectionId)
+                => new(
+                    "homeownership.ground_lease.create.home_in_selection",
+                    new Dictionary<string, object?>
+                    {
+                        ["homeSelectionId"] = homeSelectionId,
+                    });
         }
 
         public static class CreateFromTemplate

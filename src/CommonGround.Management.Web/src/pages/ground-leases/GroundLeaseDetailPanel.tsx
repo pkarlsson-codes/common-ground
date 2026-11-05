@@ -135,10 +135,8 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
               </div>
             )}
             <div className="detail-field">
-              <div className="detail-field__label">Created</div>
-              <div className="detail-field__value mono">
-                {new Date(detail.createdAt!).toLocaleString()}
-              </div>
+              <div className="detail-field__label">Recorded On</div>
+              <div className="detail-field__value mono">{detail.recordedOn}</div>
             </div>
           </div>
 

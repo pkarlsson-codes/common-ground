@@ -3,7 +3,7 @@ using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.Homeownership.Domain.GroundLeases.Events;
 
-/// <summary>Raised when a new ground lease is created.</summary>
+/// <summary>Raised when a ground lease is created directly, rather than from a purchase closing.</summary>
 /// <param name="AggregateId">The ID of the new ground lease.</param>
 /// <param name="LandParcelId">The land parcel being leased.</param>
 /// <param name="HomeId">The home on the parcel.</param>
@@ -17,6 +17,9 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.Events;
 /// <param name="AnnualPercentage">Annual growth rate (FixedPercentage only).</param>
 /// <param name="ImprovementsCap">Maximum improvements credit, if any.</param>
 /// <param name="RegisteredBy">The user who created this lease.</param>
+/// <param name="HomeownerFullName">The homeowner's full name.</param>
+/// <param name="HomeownerEmail">The homeowner's email.</param>
+/// <param name="HomeownerPhone">The homeowner's phone number, if given.</param>
 public sealed record GroundLeaseCreated(
     string AggregateId,
     string LandParcelId,
@@ -30,4 +33,7 @@ public sealed record GroundLeaseCreated(
     decimal? BaselineIndexValue,
     decimal? AnnualPercentage,
     decimal? ImprovementsCap,
-    string RegisteredBy) : DomainEvent(AggregateId);
+    string RegisteredBy,
+    string HomeownerFullName,
+    string HomeownerEmail,
+    string? HomeownerPhone) : DomainEvent(AggregateId);

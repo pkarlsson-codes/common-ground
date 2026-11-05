@@ -42,6 +42,9 @@ internal static class BusinessRuleErrorMessageMap
 
             ["homeownership.ground_lease.change_homeowner.current_homeowner_missing"] = "Current homeowner information is missing, so ownership cannot be changed.",
             ["homeownership.ground_lease.create.covenant_terms_required"] = "Covenant terms are required to create a ground lease.",
+            ["homeownership.ground_lease.create.home_has_active_lease"] = "This home already has an active ground lease.",
+            ["homeownership.ground_lease.create.home_has_open_purchase"] = "This home has a purchase in progress. Lease it by closing that purchase, or end the purchase first.",
+            ["homeownership.ground_lease.create.home_in_selection"] = "This home is in a home selection. Cancel the selection before leasing it by hand.",
             ["homeownership.ground_lease.create_from_template.template_not_active"] = "Selected ground lease template must be active.",
             ["homeownership.ground_lease.create.term_years_non_positive"] = "Lease term must be greater than zero years.",
             ["homeownership.ground_lease.onboard_homeowner.already_onboarded"] = "A homeowner has already been onboarded for this lease.",

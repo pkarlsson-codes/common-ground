@@ -2,7 +2,7 @@ namespace CommonGround.PropertyRegistry.Application.ReadModels;
 
 /// <summary>
 /// Where a home stands in being sold, pieced together from HomeBuyers' selections and Homeownership's
-/// purchases. Those contexts decide; this only shows what they decided, so it takes their news in whatever
+/// purchases and leases. Those contexts decide; this only shows what they decided, so it takes their news in whatever
 /// order it arrives and never refuses any of it. A home without one is available.
 /// </summary>
 public class HomeAvailabilityView
@@ -22,7 +22,7 @@ public class HomeAvailabilityView
     /// <summary>Gets or sets the date the home went under contract, while it is under contract or later.</summary>
     public DateOnly? UnderContractDate { get; set; }
 
-    /// <summary>Gets or sets the date the home's purchase closed and it was leased.</summary>
+    /// <summary>Gets or sets the start date of the home's ground lease, once it has one.</summary>
     public DateOnly? LeasedDate { get; set; }
 
     /// <summary>Gets or sets the home's selections, as far as news of them has arrived.</summary>
@@ -80,10 +80,10 @@ public class HomeAvailabilityView
         Refresh();
     }
 
-    /// <summary>Records that the home's purchase closed, leasing it to its homeowner.</summary>
-    public void RecordPurchaseClosed(DateOnly closingDate)
+    /// <summary>Records that a ground lease was created for the home, from its purchase closing or directly.</summary>
+    public void RecordLeased(DateOnly leaseStartDate)
     {
-        LeasedDate = closingDate;
+        LeasedDate = leaseStartDate;
         Refresh();
     }
 

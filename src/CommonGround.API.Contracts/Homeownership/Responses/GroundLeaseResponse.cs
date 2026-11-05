@@ -22,6 +22,7 @@ public sealed record GroundLeaseResponse(
     string? HomeownerPhone,
     IReadOnlyList<StewardshipCheckInDto> StewardshipCheckIns,
     DateTimeOffset CreatedAt,
+    DateOnly RecordedOn,
     string CreatedBy);
 
 /// <summary>DTO for a stewardship check-in entry.</summary>

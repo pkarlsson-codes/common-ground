@@ -61,7 +61,7 @@ internal static class DevelopmentSeeder
         }
 
         using var scope = app.Services.CreateScope();
-        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("DevelopmentSeeder");
+        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("CommonGround.DevelopmentSeeder");
         var store = scope.ServiceProvider.GetRequiredService<IDocumentStore>();
         var propagation = scope.ServiceProvider.GetRequiredService<PropagationWaiter>();
 

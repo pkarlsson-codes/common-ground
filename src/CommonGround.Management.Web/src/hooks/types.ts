@@ -57,6 +57,9 @@ export const WORKFLOW_PHASES = [
 export interface CreateGroundLeaseForm {
   landParcelId: string
   homeId: string
+  homeownerFullName: string
+  homeownerEmail: string
+  homeownerPhone: string
   leaseStartDate: CalendarDate
   termYears: number
   covenantTerms: string

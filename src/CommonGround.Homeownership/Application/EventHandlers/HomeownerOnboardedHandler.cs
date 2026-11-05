@@ -34,6 +34,8 @@ public static class HomeownerOnboardedHandler
         return (
             new GroundLeaseCreatedIntegration(
                 @event.AggregateId,
+                @event.HomeId,
+                @event.LeaseStartDate,
                 @event.BuyerFullName,
                 @event.BuyerEmail,
                 @event.BuyerPhone,

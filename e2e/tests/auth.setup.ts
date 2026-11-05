@@ -12,10 +12,14 @@ setup('authenticate', async ({ page }) => {
   await page.locator('#password').fill('e2e')
   await page.locator('#kc-login').click()
 
-  await page.waitForURL(/localhost:3000\/(onboarding)?$/)
+  // The app lands on / and only then redirects a user without a trust to /onboarding, so wait for
+  // whichever page it settles on rather than for the URL.
+  const today = page.getByRole('heading', { name: 'Today', level: 1 })
+  const createTrust = page.getByRole('link', { name: 'Create a trust' })
+  await expect(today.or(createTrust)).toBeVisible()
 
-  if (page.url().includes('/onboarding')) {
-    await page.getByRole('link', { name: 'Create a trust' }).click()
+  if (await createTrust.isVisible()) {
+    await createTrust.click()
     await page.getByPlaceholder('Example Community Land Trust').fill('E2E Community Land Trust')
     await page.getByRole('button', { name: 'Create trust and continue' }).click()
   }

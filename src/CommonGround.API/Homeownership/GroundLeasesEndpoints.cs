@@ -40,6 +40,7 @@ public static class GroundLeasesEndpoints
             id,
             request.LandParcelId,
             request.HomeId,
+            Homeowner.From(request.HomeownerFullName, request.HomeownerEmail, request.HomeownerPhone),
             request.LeaseStartDate,
             request.TermYears,
             request.CovenantTerms,
@@ -88,7 +89,7 @@ public static class GroundLeasesEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
 
-        var view = await bus.InvokeForTenantAsync<GroundLeaseView>(bus.TenantId!,
+        var (view, recordedOn) = await bus.InvokeForTenantAsync<GroundLeaseDetails>(bus.TenantId!,
             new GetGroundLease(GroundLeaseId.Create(groundLeaseId)),
             cancellationToken);
 
@@ -117,6 +118,7 @@ public static class GroundLeasesEndpoints
                 c.RecordedBy,
                 c.OccurredAt)).ToList().AsReadOnly(),
             view.CreatedAt,
+            recordedOn,
             view.CreatedBy);
 
         return Results.Ok(response);

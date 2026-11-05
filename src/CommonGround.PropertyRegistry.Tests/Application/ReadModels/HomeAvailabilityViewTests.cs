@@ -193,26 +193,37 @@ public class HomeAvailabilityViewTests
         }
     }
 
-    public class TheRecordPurchaseClosedMethod
+    public class TheRecordLeasedMethod
     {
         private readonly TestBed _testBed = new();
 
         [Fact]
-        public void GivenHomeUnderContract_WhenPurchaseClosed_ThenHomeIsLeasedFromThatDate()
+        public void GivenHomeUnderContract_WhenLeased_ThenHomeIsLeasedFromTheLeaseStart()
         {
             var sut = _testBed.UnderContract();
 
-            sut.RecordPurchaseClosed(_testBed.Today.AddDays(60));
+            sut.RecordLeased(_testBed.Today.AddDays(60));
 
             sut.Status.Should().Be(HomeStatus.Leased.DisplayName);
             sut.LeasedDate.Should().Be(_testBed.Today.AddDays(60));
         }
 
         [Fact]
+        public void GivenAvailableHome_WhenLeasedDirectly_ThenHomeIsLeasedFromTheLeaseStart()
+        {
+            var sut = _testBed.Sut;
+
+            sut.RecordLeased(_testBed.Today.AddYears(-6));
+
+            sut.Status.Should().Be(HomeStatus.Leased.DisplayName);
+            sut.LeasedDate.Should().Be(_testBed.Today.AddYears(-6));
+        }
+
+        [Fact]
         public void GivenLeasedHome_WhenALateSelectionStarts_ThenHomeStaysLeased()
         {
             var sut = _testBed.UnderContract();
-            sut.RecordPurchaseClosed(_testBed.Today.AddDays(60));
+            sut.RecordLeased(_testBed.Today.AddDays(60));
 
             sut.RecordSelectionStarted("selection-2", _testBed.FirstStartedAt.AddDays(90), _testBed.Today.AddDays(90));
 

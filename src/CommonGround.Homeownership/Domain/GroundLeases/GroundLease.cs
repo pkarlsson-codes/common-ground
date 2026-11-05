@@ -57,20 +57,36 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <summary>Gets the source purchase workflow ID when this lease was created from a purchase workflow.</summary>
     public PurchaseWorkflowId? PurchaseWorkflowId { get; private set; } 
 
-    /// <summary>Creates a new ground lease.</summary>
+    /// <summary>
+    /// Creates a ground lease that didn't come from a purchase, such as one signed before the trust used
+    /// CommonGround. Refused while the home is already leased, being sold, or in a home selection.
+    /// </summary>
     public static GroundLeaseCreated Establish(
         GroundLeaseId id,
         string landParcelId,
         string unitId,
+        Homeowner homeowner,
         DateOnly leaseStartDate,
         int termYears,
         string covenantTerms,
         ResalePolicyTerms resalePolicyTerms,
+        HomeCommitments homeCommitments,
         UserId createdBy)
     {
         ArgumentNullException.ThrowIfNull(landParcelId);
         ArgumentNullException.ThrowIfNull(unitId);
+        ArgumentNullException.ThrowIfNull(homeowner);
         ArgumentNullException.ThrowIfNull(resalePolicyTerms);
+        ArgumentNullException.ThrowIfNull(homeCommitments);
+
+        if (homeCommitments.ActiveLeaseId is { } activeLeaseId)
+            throw BusinessRuleViolation.GroundLease.Create.HomeHasActiveLease(activeLeaseId);
+
+        if (homeCommitments.OpenPurchaseWorkflowId is { } openPurchaseWorkflowId)
+            throw BusinessRuleViolation.GroundLease.Create.HomeHasOpenPurchase(openPurchaseWorkflowId);
+
+        if (homeCommitments.OpenHomeSelectionId is { } openHomeSelectionId)
+            throw BusinessRuleViolation.GroundLease.Create.HomeInSelection(openHomeSelectionId);
 
         if (termYears <= 0)
             throw BusinessRuleViolation.GroundLease.Create.TermYearsNonPositive(termYears);
@@ -91,7 +107,10 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             resalePolicyTerms.BaselineIndexValue,
             resalePolicyTerms.AnnualPercentage,
             resalePolicyTerms.ImprovementsCap,
-            createdBy.Value);
+            createdBy.Value,
+            homeowner.FullName.Value,
+            homeowner.Email.Value,
+            homeowner.Phone?.Value);
     }
 
     /// <summary>Creates a new ground lease from an active template.</summary>
@@ -200,6 +219,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         CreatedBy = UserId.Create(e.RegisteredBy);
         CreatedAt = e.OccurredAt;
         TemplateId = null;
+        CurrentHomeowner = Homeowner.From(e.HomeownerFullName, e.HomeownerEmail, e.HomeownerPhone);
     }
 
     /// <summary>Starts a ground lease from its first event.</summary>

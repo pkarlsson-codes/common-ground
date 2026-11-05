@@ -14,6 +14,7 @@ import { apiConfig } from '../../lib/apiConfig'
 import { getErrorMessage } from '../../lib/getErrorMessage'
 import { trustToday } from '../../lib/calendarDate'
 import { DateInput } from '../../components/DateInput'
+import { formatPhoneInput, isValidPhone } from '../../lib/phone'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
 const homesApi = new HomesApi(apiConfig)
@@ -21,6 +22,9 @@ const homesApi = new HomesApi(apiConfig)
 const emptyCreate = (): CreateGroundLeaseForm => ({
   landParcelId: '',
   homeId: '',
+  homeownerFullName: '',
+  homeownerEmail: '',
+  homeownerPhone: '',
   leaseStartDate: trustToday(),
   termYears: 99,
   covenantTerms: '',
@@ -46,6 +50,10 @@ export default function GroundLeaseCreatePanel({ onClose }: Props) {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
     setCreateError(null)
+    if (createForm.homeownerPhone && !isValidPhone(createForm.homeownerPhone)) {
+      setCreateError('Enter a valid phone number, or leave it blank.')
+      return
+    }
     try {
       await createMutation.mutateAsync(createForm)
       onClose()
@@ -110,6 +118,38 @@ export default function GroundLeaseCreatePanel({ onClose }: Props) {
               }}
               placeholder={createForm.landParcelId ? 'Search homes on this parcel…' : 'Select a parcel first'}
               disabled={!createForm.landParcelId}
+            />
+          </div>
+          <div className="form-field full">
+            <label className="form-label">Homeowner Full Name</label>
+            <input
+              className="form-input"
+              value={createForm.homeownerFullName}
+              onChange={e => setCreateForm(f => ({ ...f, homeownerFullName: e.target.value }))}
+              required
+            />
+          </div>
+          <div className="form-field">
+            <label className="form-label">Homeowner Email</label>
+            <input
+              className="form-input"
+              type="email"
+              value={createForm.homeownerEmail}
+              onChange={e => setCreateForm(f => ({ ...f, homeownerEmail: e.target.value }))}
+              required
+            />
+          </div>
+          <div className="form-field">
+            <label className="form-label">Homeowner Phone (optional)</label>
+            <input
+              className="form-input"
+              type="tel"
+              placeholder="(202) 555-1234"
+              value={createForm.homeownerPhone}
+              onChange={e => {
+                const next = formatPhoneInput(e.target.value, createForm.homeownerPhone)
+                setCreateForm(f => ({ ...f, homeownerPhone: next }))
+              }}
             />
           </div>
           <div className="form-field">

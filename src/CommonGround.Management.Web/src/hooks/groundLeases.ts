@@ -48,6 +48,9 @@ export function useCreateGroundLease() {
         createGroundLeaseRequest: {
           landParcelId: form.landParcelId,
           homeId: form.homeId,
+          homeownerFullName: form.homeownerFullName,
+          homeownerEmail: form.homeownerEmail,
+          homeownerPhone: form.homeownerPhone || undefined,
           leaseStartDate: form.leaseStartDate,
           termYears: form.termYears,
           covenantTerms: form.covenantTerms || undefined,

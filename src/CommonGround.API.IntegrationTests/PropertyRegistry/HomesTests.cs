@@ -3,10 +3,11 @@ using System.Net.Http.Json;
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
 using CommonGround.HomeBuyers.Contracts.Events;
+using CommonGround.PropertyRegistry.Application.EventHandlers;
 using CommonGround.SharedKernel.Infrastructure.API;
 using FluentAssertions;
+using Marten;
 using Microsoft.Extensions.DependencyInjection;
-using Wolverine;
 
 namespace CommonGround.API.IntegrationTests.PropertyRegistry;
 
@@ -220,8 +221,14 @@ public class HomesTests(ApiFactory factory)
         var inSelectionHomeId = await RegisterHomeAsync(client, parcelId);
         using (var scope = factory.Services.CreateScope())
         {
-            await scope.ServiceProvider.GetRequiredService<IMessageBus>().InvokeForTenantAsync(
-                ApiFactory.TestTrustId, new HomeSelectionStarted("homeselection-filter", inSelectionHomeId, DateTimeOffset.UtcNow));
+            // HomeSelectionStarted has a handler in Homeownership too, so it can't be invoked through the bus.
+            await using var session = scope.ServiceProvider.GetRequiredService<IDocumentStore>().LightweightSession(ApiFactory.TestTrustId);
+            HomeSelectionStartedHandler.Handle(
+                    new HomeSelectionStarted("homeselection-filter", inSelectionHomeId, DateTimeOffset.UtcNow),
+                    availability: null,
+                    openedDate: new DateOnly(2026, 10, 1))
+                .Execute(session);
+            await session.SaveChangesAsync();
         }
 
         var available = await client.GetFromJsonAsync<PaginatedResponse<HomeListItemResponse>>(

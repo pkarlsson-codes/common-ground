@@ -5,10 +5,7 @@ import { detailValue, expectToast, field, isoDate, panel, uniqueId } from '../su
 // Journeys: docs/journeys/ground-leases/
 //   create-ground-lease, view-ground-lease-detail, record-stewardship-check-in, start-resale-workflow-from-lease
 
-/**
- * A lease created directly has no homeowner to search by, so it's found by its home: the table lists newest leases
- * first, and the Home cell carries the full home ID as its title.
- */
+/** Finds a lease by its home: the Home cell carries the full home ID as its title. */
 const leaseRowByHome = (page: Page, homeId: string) =>
   page.locator('tbody tr', { has: page.locator(`[title="${homeId}"]`) })
 
@@ -20,7 +17,34 @@ async function searchLeases(page: Page, term: string) {
 
 const checkIns = (page: Page) => page.locator('.detail-section', { hasText: 'Stewardship Check-Ins' })
 
-test('creating a lease on a parcel\'s home lists it first and shows its terms in the detail panel', async ({ page }) => {
+/** Opens Create Lease and picks the parcel and its home. */
+async function openCreateLease(page: Page, apn: string) {
+  await page.getByRole('button', { name: 'Create Lease' }).click()
+  const form = panel(page, 'Create Ground Lease')
+  await field(form, 'Land Parcel').click()
+  await page.getByPlaceholder('Search parcels…').fill(apn)
+  await page.getByRole('listbox').getByRole('option', { name: `${apn} — ${apn} Elm St` }).click()
+  await field(form, 'Home').click()
+  await page.getByRole('listbox').getByRole('option', { name: 'SingleFamily, 3bd/2ba, 1200 sqft' }).click()
+  return form
+}
+
+const createLeaseDirectly = (page: Page, landParcelId: string, homeId: string, homeownerFullName: string) =>
+  post<{ groundLeaseId: string }>(page, '/api/v1/ground-leases', {
+    landParcelId,
+    homeId,
+    homeownerFullName,
+    homeownerEmail: `${homeownerFullName.toLowerCase().replace(/\s+/g, '-')}@example.com`,
+    homeownerPhone: null,
+    leaseStartDate: '2020-01-01',
+    termYears: 99,
+    covenantTerms: 'Standard covenant terms',
+    formulaKind: 'IndexBased',
+    indexType: 'CPI',
+    baselineIndexValue: 100,
+  })
+
+test('creating a lease on a parcel\'s home lists it first, shows its homeowner and terms, and leases the home', async ({ page }) => {
   await page.goto('/ground-leases')
   const { parcelId, apn } = await createLandParcel(page)
   const homeId = await createHome(page, parcelId)
@@ -41,6 +65,11 @@ test('creating a lease on a parcel\'s home lists it first and shows its terms in
   await page.getByRole('listbox').getByRole('option', { name: 'SingleFamily, 3bd/2ba, 1200 sqft' }).click()
   await expect(create).toBeEnabled()
 
+  const homeowner = `Owner ${uniqueId()}`
+  await field(form, 'Homeowner Full Name').fill(homeowner)
+  await field(form, 'Homeowner Email').fill(`${homeowner.replace(' ', '.').toLowerCase()}@example.com`)
+  await field(form, 'Homeowner Phone (optional)').fill('5035550123')
+  await expect(field(form, 'Homeowner Phone (optional)')).toHaveValue('(503) 555-0123')
   await field(form, 'Lease Start Date').fill('2023-06-01')
   await field(form, 'Term (years)').fill('50')
   await field(form, 'Covenant Terms').fill('Owner-occupied, permanently affordable')
@@ -53,27 +82,57 @@ test('creating a lease on a parcel\'s home lists it first and shows its terms in
   await expectToast(page, 'Ground lease created')
   await expect(form).toBeHidden()
 
-  // Created directly, so there's no homeowner yet.
   const row = leaseRowByHome(page, homeId)
-  await expect(row).toContainText('—')
+  await expect(row).toContainText(homeowner)
   await expect(row).toContainText('2023-06-01')
   await expect(row).toContainText('50 yr')
   await expect(row).toContainText('Active')
 
   await row.click()
-  const detail = panel(page, 'Ground Lease')
+  const detail = panel(page, homeowner)
   await expect(detail.locator('.slideover-header')).toContainText('2023-06-01 · 50 yr · Active')
+  await expect(detailValue(detail, 'Start Date')).toHaveText('2023-06-01')
+  await expect(detailValue(detail, 'Recorded On')).toHaveText(isoDate())
+  await expect(detailValue(detail, 'Email')).toHaveText(`${homeowner.replace(' ', '.').toLowerCase()}@example.com`)
+  await expect(detailValue(detail, 'Phone')).toHaveText('(503) 555-0123')
   await expect(detailValue(detail, 'Formula')).toHaveText('Fixed Percentage')
   await expect(detailValue(detail, 'Annual %')).toHaveText('2.0%')
   await expect(detailValue(detail, 'Improvements Cap')).toHaveText('$10,000')
   await expect(detailValue(detail, 'Term')).toHaveText('50 years')
   await expect(detailValue(detail, 'Covenant Terms')).toHaveText('Owner-occupied, permanently affordable')
-  await expect(detail.locator('.detail-field__label').filter({ hasText: /^(Email|Phone|Appreciation Share)$/ })).toHaveCount(0)
+  await expect(detail.locator('.detail-field__label').filter({ hasText: /^Appreciation Share$/ })).toHaveCount(0)
   await expect(checkIns(page)).not.toContainText('by ')
 
   await detail.getByRole('button', { name: 'Open Land Parcel' }).click()
   await expect(page).toHaveURL(/\/land-parcels$/)
   await expect(panel(page, apn)).toBeVisible()
+
+  // PropertyRegistry hears of the lease through an integration event, so reload until the home shows it.
+  await expect(async () => {
+    await page.goto('/homes')
+    await page.getByRole('combobox').filter({ hasText: 'Filter by parcel…' }).click()
+    await page.getByPlaceholder('Filter by parcel…').fill(apn)
+    await page.getByRole('listbox').getByRole('option', { name: new RegExp(apn) }).click()
+    await expect(page.locator('tbody tr')).toContainText('Leased', { timeout: 1000 })
+  }).toPass()
+})
+
+test('creating a lease on a home that already has one is refused and keeps the panel open', async ({ page }) => {
+  await page.goto('/ground-leases')
+  const { parcelId, apn } = await createLandParcel(page)
+  const homeId = await createHome(page, parcelId)
+  await createLeaseDirectly(page, parcelId, homeId, `Owner ${uniqueId()}`)
+
+  const form = await openCreateLease(page, apn)
+  await field(form, 'Homeowner Full Name').fill(`Second ${uniqueId()}`)
+  await field(form, 'Homeowner Email').fill('second@example.com')
+  await field(form, 'Covenant Terms').fill('Standard covenant terms')
+  await form.getByRole('button', { name: 'Create Lease' }).click()
+
+  await expect(form.locator('.form-error')).toHaveText('This home already has an active ground lease.')
+  await expect(form).toBeVisible()
+  await page.reload()
+  await expect(leaseRowByHome(page, homeId)).toHaveCount(1)
 })
 
 test('a lease created from a closed purchase shows its homeowner and records check-ins newest first', async ({ page }) => {
@@ -128,25 +187,17 @@ test('a lease created directly can be estimated but not resold through a purchas
   await page.goto('/ground-leases')
   const { parcelId } = await createLandParcel(page)
   const homeId = await createHome(page, parcelId)
-  const { groundLeaseId } = await post<{ groundLeaseId: string }>(page, '/api/v1/ground-leases', {
-    landParcelId: parcelId,
-    homeId,
-    leaseStartDate: '2020-01-01',
-    termYears: 99,
-    covenantTerms: 'Standard covenant terms',
-    formulaKind: 'IndexBased',
-    indexType: 'CPI',
-    baselineIndexValue: 100,
-  })
+  const homeowner = `Owner ${uniqueId()}`
+  const { groundLeaseId } = await createLeaseDirectly(page, parcelId, homeId, homeowner)
 
   await page.reload()
   await leaseRowByHome(page, homeId).click()
-  const detail = panel(page, 'Ground Lease')
+  const detail = panel(page, homeowner)
   await expect(detailValue(detail, 'Index Type')).toHaveText('CPI')
   await expect(detailValue(detail, 'Baseline Index')).toHaveText('100')
   await detail.getByRole('button', { name: 'Start Resale Workflow' }).click()
 
-  const resale = panel(page, `Resale — ${groundLeaseId.slice(0, 8)}…`)
+  const resale = panel(page, `Resale — ${homeowner}`)
   await expect(detailValue(resale, 'Formula')).toHaveText('Index Based')
   await expect(detailValue(resale, 'Ground Lease ID')).toHaveText(groundLeaseId)
   await resale.getByRole('button', { name: 'Calculate Resale Price →' }).click()

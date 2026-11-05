@@ -25,7 +25,7 @@ public class HomeAvailabilityUpdateTests
         {
             var existing = new HomeAvailabilityView { Id = "home-1" };
 
-            var op = HomeAvailabilityUpdate.Record("home-1", existing, view => view.RecordPurchaseClosed(new DateOnly(2026, 12, 1)));
+            var op = HomeAvailabilityUpdate.Record("home-1", existing, view => view.RecordLeased(new DateOnly(2026, 12, 1)));
 
             op.Should().BeOfType<UpdateDoc<HomeAvailabilityView>>().Which.Document.Should().BeSameAs(existing);
             existing.Status.Should().Be(HomeStatus.Leased.DisplayName);

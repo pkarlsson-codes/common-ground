@@ -23,7 +23,7 @@ import {
 } from './CalendarDate';
 
 /**
- * Request to create a new ground lease.
+ * Request to create a ground lease directly, rather than from a purchase closing.
  * @export
  * @interface CreateGroundLeaseRequest
  */
@@ -40,6 +40,24 @@ export interface CreateGroundLeaseRequest {
      * @memberof CreateGroundLeaseRequest
      */
     homeId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateGroundLeaseRequest
+     */
+    homeownerFullName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateGroundLeaseRequest
+     */
+    homeownerEmail?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateGroundLeaseRequest
+     */
+    homeownerPhone?: string | null;
     /**
      * 
      * @type {CalendarDate}
@@ -115,6 +133,9 @@ export function CreateGroundLeaseRequestFromJSONTyped(json: any, ignoreDiscrimin
         
         'landParcelId': json['landParcelId'] == null ? undefined : json['landParcelId'],
         'homeId': json['homeId'] == null ? undefined : json['homeId'],
+        'homeownerFullName': json['homeownerFullName'] == null ? undefined : json['homeownerFullName'],
+        'homeownerEmail': json['homeownerEmail'] == null ? undefined : json['homeownerEmail'],
+        'homeownerPhone': json['homeownerPhone'] == null ? undefined : json['homeownerPhone'],
         'leaseStartDate': json['leaseStartDate'] == null ? undefined : CalendarDateFromJSON(json['leaseStartDate']),
         'termYears': json['termYears'] == null ? undefined : json['termYears'],
         'covenantTerms': json['covenantTerms'] == null ? undefined : json['covenantTerms'],
@@ -140,6 +161,9 @@ export function CreateGroundLeaseRequestToJSONTyped(value?: CreateGroundLeaseReq
         
         'landParcelId': value['landParcelId'],
         'homeId': value['homeId'],
+        'homeownerFullName': value['homeownerFullName'],
+        'homeownerEmail': value['homeownerEmail'],
+        'homeownerPhone': value['homeownerPhone'],
         'leaseStartDate': CalendarDateToJSON(value['leaseStartDate']),
         'termYears': value['termYears'],
         'covenantTerms': value['covenantTerms'],

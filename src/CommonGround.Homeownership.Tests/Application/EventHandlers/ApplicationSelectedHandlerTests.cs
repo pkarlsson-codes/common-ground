@@ -17,17 +17,38 @@ public class ApplicationSelectedHandlerTests
         [Fact]
         public void GivenNoOpenWorkflow_WhenApplicationSelected_ThenStartsAPurchaseWorkflow()
         {
-            var op = ApplicationSelectedHandler.Handle(Selected, existingOpenWorkflow: null);
+            var (purchase, _) = ApplicationSelectedHandler.Handle(Selected, existingOpenWorkflow: null, selection: null);
 
-            op.Should().BeAssignableTo<IStartStream>();
+            purchase.Should().BeAssignableTo<IStartStream>();
         }
 
         [Fact]
         public void GivenOpenWorkflow_WhenApplicationSelectedAgain_ThenStartsNothing()
         {
-            var op = ApplicationSelectedHandler.Handle(Selected, new PurchaseWorkflowView { Id = "purchase-1" });
+            var (purchase, _) = ApplicationSelectedHandler.Handle(Selected, new PurchaseWorkflowView { Id = "purchase-1" }, selection: null);
 
-            op.Should().NotBeAssignableTo<IStartStream>();
+            purchase.Should().NotBeAssignableTo<IStartStream>();
+        }
+
+        [Fact]
+        public void GivenOpenSelection_WhenApplicationSelected_ThenEndsTheSelection()
+        {
+            var selection = new HomeSelectionView { Id = "homeselection-1", HomeId = "home-1" };
+            selection.RecordStarted();
+
+            var (_, selectionOp) = ApplicationSelectedHandler.Handle(Selected, existingOpenWorkflow: null, selection);
+
+            selectionOp.Should().BeOfType<UpdateDoc<HomeSelectionView>>();
+            selection.Open.Should().BeFalse();
+        }
+
+        [Fact]
+        public void GivenNoNewsOfTheSelectionYet_WhenApplicationSelected_ThenRecordsItEnded()
+        {
+            var (_, selectionOp) = ApplicationSelectedHandler.Handle(Selected, existingOpenWorkflow: null, selection: null);
+
+            var inserted = selectionOp.Should().BeOfType<InsertDoc<HomeSelectionView>>().Which.Document.Should().BeOfType<HomeSelectionView>().Subject;
+            inserted.Should().BeEquivalentTo(new { Id = "homeselection-1", HomeId = "home-1", Ended = true, Open = false });
         }
     }
 }
