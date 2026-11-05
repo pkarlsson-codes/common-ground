@@ -10,7 +10,7 @@
 5. Detail panel opens titled with the buyer's full name, showing purchase price and phase in the subtitle
 6. If the workflow is Stalled, a Stalled banner shows the stalled reason and resolution target date (if set)
 7. Panel shows Phase, Purchase Price, buyer Email and Phone (if present), Scheduled Closing (once scheduled), Failure Reason (if failed), Withdrawal Reason (if withdrawn), Closing Notes (if closed), and Created (date/time)
-8. A Connected Records section links to the home (by its label), land parcel, lease template, and, once the purchase has closed, the ground lease created from it. If the workflow was initiated by selecting an applicant for a home (rather than a resale), it also links to the application and household
+8. A Connected Records section links to the home (by its label), land parcel, lease template, and, once the purchase has closed, the ground lease created from it. If the workflow was initiated by selecting an applicant for a home, it also links to the application and household
 9. Unless the workflow is Closed, Failed, or Withdrawn, panel shows Purchase Tracks (Eligibility, Financing, Inspection, Title, Lease Execution, and Closing), each marked complete or pending, and an Exception Actions section
 10. User closes the panel
 

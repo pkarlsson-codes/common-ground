@@ -10,7 +10,7 @@ test('choosing a focus puts its pages under My work and is remembered', async ({
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'Today', level: 1 })).toBeVisible()
   await expect(sidebar(page).getByText('Work', { exact: true })).toBeVisible()
-  await expect(navLink(page, 'Resales')).toBeVisible()
+  await expect(navLink(page, 'Stewardship')).toBeVisible()
 
   await page.getByRole('combobox', { name: 'My focus' }).selectOption('Sales')
 
@@ -18,7 +18,6 @@ test('choosing a focus puts its pages under My work and is remembered', async ({
   await expect(sidebar(page).getByText('My work', { exact: true })).toBeVisible()
   await expect(navLink(page, 'Home selections')).toBeVisible()
   await expect(navLink(page, 'Purchases')).toBeVisible()
-  await expect(navLink(page, 'Resales')).toBeVisible()
   await expect(navLink(page, 'Households')).toBeHidden()
   // Records and Settings are unaffected.
   await expect(navLink(page, 'Land parcels')).toBeVisible()

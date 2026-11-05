@@ -3,7 +3,7 @@ import { createHome, createLandParcel, createLeaseFromPurchase, post } from '../
 import { detailValue, expectToast, field, isoDate, panel, uniqueId } from '../support/ui'
 
 // Journeys: docs/journeys/ground-leases/
-//   create-ground-lease, view-ground-lease-detail, record-stewardship-check-in, start-resale-workflow-from-lease
+//   create-ground-lease, view-ground-lease-detail, record-stewardship-check-in
 
 /** Finds a lease by its home: the Home cell carries the full home ID as its title. */
 const leaseRowByHome = (page: Page, homeId: string) =>
@@ -174,49 +174,18 @@ test('a lease created from a closed purchase shows its homeowner and records che
   await expect(entries.nth(0)).toContainText('Roof looks good')
   await expect(entries.nth(1)).toContainText(isoDate(-60))
   await expect(entries.nth(1)).toContainText('Annual walkthrough')
-
-  await detail.getByRole('button', { name: 'Start Resale Workflow' }).click()
-  await expect(page).toHaveURL(/\/resale-workflows$/)
-  const resale = panel(page, `Resale — ${buyer}`)
-  await expect(resale.locator('.slideover-header')).toContainText('Step 1 of 3: Intent')
-  await expect(detailValue(resale, 'Homeowner')).toHaveText(buyer)
-  await expect(detailValue(resale, 'Formula')).toHaveText('Appraisal Based')
 })
 
-test('a lease created directly can be estimated but not resold through a purchase workflow', async ({ page }) => {
+test('a lease created directly shows its index terms', async ({ page }) => {
   await page.goto('/ground-leases')
   const { parcelId } = await createLandParcel(page)
   const homeId = await createHome(page, parcelId)
   const homeowner = `Owner ${uniqueId()}`
-  const { groundLeaseId } = await createLeaseDirectly(page, parcelId, homeId, homeowner)
+  await createLeaseDirectly(page, parcelId, homeId, homeowner)
 
   await page.reload()
   await leaseRowByHome(page, homeId).click()
   const detail = panel(page, homeowner)
   await expect(detailValue(detail, 'Index Type')).toHaveText('CPI')
   await expect(detailValue(detail, 'Baseline Index')).toHaveText('100')
-  await detail.getByRole('button', { name: 'Start Resale Workflow' }).click()
-
-  const resale = panel(page, `Resale — ${homeowner}`)
-  await expect(detailValue(resale, 'Formula')).toHaveText('Index Based')
-  await expect(detailValue(resale, 'Ground Lease ID')).toHaveText(groundLeaseId)
-  await resale.getByRole('button', { name: 'Calculate Resale Price →' }).click()
-
-  await field(resale, 'Original Purchase Price ($)').fill('200000')
-  await field(resale, 'Current Appraisal Value ($)').fill('260000')
-  await field(resale, 'Original Appraisal Value ($)').fill('210000')
-  await field(resale, 'Ownership Years').fill('4')
-  await resale.getByRole('button', { name: 'Initiate Purchase Workflow →' }).click()
-  // Index-based leases need the current index value.
-  await expect(resale.locator('.form-error')).toHaveText(
-    'Current index value is required to estimate an index-based resale price.')
-  await expect(resale.locator('.slideover-header')).toContainText('Step 2 of 3: Estimate')
-
-  await field(resale, 'Current Index Value').fill('150')
-  await resale.getByRole('button', { name: 'Initiate Purchase Workflow →' }).click()
-  await expect(resale.locator('.slideover-header')).toContainText('Step 3 of 3: Initiate')
-  await expect(field(resale, 'Purchase Price ($)')).toHaveValue('300000')
-  await expect(resale.locator('.form-error')).toHaveText(
-    'This ground lease has no lease template, so a purchase workflow cannot be initiated from it.')
-  await expect(resale.getByRole('button', { name: 'Initiate Workflow' })).toBeDisabled()
 })

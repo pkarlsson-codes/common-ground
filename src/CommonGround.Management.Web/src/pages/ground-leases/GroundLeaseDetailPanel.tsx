@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useGroundLease, useRecordStewardshipCheckIn } from '../../hooks/groundLeases'
 import { FORMULA_KIND_LABELS, statusLabel, type RecordCheckInForm } from '../../hooks/types'
 import ConnectedRecords, { type ConnectedRecord } from '../../components/lifecycle/ConnectedRecords'
@@ -38,7 +37,6 @@ interface Props {
 }
 
 export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props) {
-  const navigate = useNavigate()
   const { data: detail, isLoading: detailLoading } = useGroundLease(groundLeaseId)
   const checkInMutation = useRecordStewardshipCheckIn()
   const [checkInForm, setCheckInForm] = useState<RecordCheckInForm>(emptyCheckIn)
@@ -201,16 +199,6 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
                 <div className="form-error">{checkInError}</div>
               )}
             </form>
-          </div>
-
-          <div className="detail-section">
-            <div className="detail-section__title">Resale</div>
-            <button
-              className="btn btn-secondary"
-              onClick={() => navigate('/resale-workflows', { state: { openLeaseId: groundLeaseId } })}
-            >
-              Start Resale Workflow
-            </button>
           </div>
         </>
       )}

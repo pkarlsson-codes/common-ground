@@ -4,7 +4,6 @@ import { apiConfig } from '../lib/apiConfig'
 import type {
   CreateGroundLeaseForm,
   RecordCheckInForm,
-  ResaleEstimateForm,
 } from './types'
 
 const api = new GroundLeasesApi(apiConfig)
@@ -78,22 +77,5 @@ export function useRecordStewardshipCheckIn() {
         },
       }),
     onSuccess: (_d, v) => qc.invalidateQueries({ queryKey: ['ground-lease', v.groundLeaseId] }),
-  })
-}
-
-export function useCalculateResaleEstimate() {
-  return useMutation({
-    mutationFn: ({ groundLeaseId, form }: { groundLeaseId: string; form: ResaleEstimateForm }) =>
-      api.calculateResaleEstimate({
-        groundLeaseId,
-        calculateResaleEstimateRequest: {
-          originalPurchasePrice: form.originalPurchasePrice,
-          currentAppraisalValue: form.currentAppraisalValue,
-          originalAppraisalValue: form.originalAppraisalValue,
-          ownershipYears: form.ownershipYears,
-          approvedImprovements: form.approvedImprovements || undefined,
-          currentIndexValue: form.currentIndexValue || undefined,
-        },
-      }),
   })
 }

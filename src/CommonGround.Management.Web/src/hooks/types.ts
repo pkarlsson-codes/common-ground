@@ -83,25 +83,6 @@ export interface RecordCheckInForm {
   notes: string
 }
 
-export interface ResaleEstimateForm {
-  originalPurchasePrice: number
-  currentAppraisalValue: number
-  originalAppraisalValue: number
-  ownershipYears: number
-  approvedImprovements: number
-  currentIndexValue: number
-}
-
-export interface InitiateWorkflowForm {
-  groundLeaseTemplateId: string
-  landParcelId: string
-  homeId: string
-  buyerFullName: string
-  buyerEmail: string
-  buyerPhone: string
-  purchasePrice: number
-}
-
 export interface RecordEligibilityForm {
   verifiedDate: CalendarDate
   notes: string

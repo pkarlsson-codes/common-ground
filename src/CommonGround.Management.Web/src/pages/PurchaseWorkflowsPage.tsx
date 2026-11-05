@@ -159,7 +159,7 @@ export default function PurchaseWorkflowsPage() {
           <div className="empty-state">
             <div className="empty-state__glyph">⊡</div>
             <div className="empty-state__title">No workflows found</div>
-            <div className="empty-state__sub">Workflows start from selecting an applicant on a home, or from a resale listing.</div>
+            <div className="empty-state__sub">Workflows start from selecting an applicant on a home.</div>
           </div>
         )}
 

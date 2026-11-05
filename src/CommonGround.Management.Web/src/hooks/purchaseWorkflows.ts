@@ -3,7 +3,6 @@ import { PurchaseWorkflowsApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
 import type {
   FailWorkflowForm,
-  InitiateWorkflowForm,
   RecordClosedForm,
   RecordEligibilityForm,
   RecordFinancingForm,
@@ -77,25 +76,6 @@ export function usePurchaseWorkflow(id: string | null) {
     queryKey: ['purchase-workflow', id],
     queryFn: () => api.getPurchaseWorkflow({ workflowId: id! }),
     enabled: !!id,
-  })
-}
-
-export function useInitiatePurchaseWorkflow() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (form: InitiateWorkflowForm) =>
-      api.initiatePurchaseWorkflow({
-        initiatePurchaseWorkflowRequest: {
-          groundLeaseTemplateId: form.groundLeaseTemplateId,
-          landParcelId: form.landParcelId,
-          homeId: form.homeId,
-          buyerFullName: form.buyerFullName,
-          buyerEmail: form.buyerEmail,
-          buyerPhone: form.buyerPhone || undefined,
-          purchasePrice: form.purchasePrice,
-        },
-      }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-workflows'] }),
   })
 }
 
