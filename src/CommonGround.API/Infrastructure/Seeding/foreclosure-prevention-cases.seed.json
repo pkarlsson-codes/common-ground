@@ -1,0 +1,62 @@
+[
+  {
+    "seedKey": "fpc-cedar-lane-013b",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-cedar-lane-013b",
+    "trigger": "LeaseFeeArrears",
+    "opened": "today-330d",
+    "counselingReferrals": [
+      { "date": "today-326d", "agencyName": "Portland Housing Center", "outcome": { "date": "today-301d", "outcome": "CounselingCompleted" } }
+    ],
+    "resolved": { "date": "today-280d", "outcome": "InterventionSuccessful" }
+  },
+  {
+    "seedKey": "fpc-downtown-civic-001",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-downtown-civic-001",
+    "trigger": "ServicerDelinquency",
+    "opened": "today-64d",
+    "delinquencies": [
+      { "date": "today-64d", "servicerName": "Umpqua Home Lending", "delinquentMonths": 2 }
+    ],
+    "counselingReferrals": [
+      { "date": "today-60d", "agencyName": "Portland Housing Center", "outcome": { "date": "today-38d", "outcome": "CounselingCompleted" } }
+    ],
+    "forbearanceRequests": [
+      { "date": "today-55d", "lenderName": "Umpqua Home Lending", "outcome": { "date": "today-44d", "outcome": "Granted", "notes": "Payments paused for three months while the homeowner sells the home through the trust." } }
+    ],
+    "resolved": { "date": "today-12d", "outcome": "HomeownerSold" }
+  },
+  {
+    "seedKey": "fpc-harbor-view-201",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-harbor-view-201",
+    "trigger": "ServicerDelinquency",
+    "opened": "today-70d",
+    "delinquencies": [
+      { "date": "today-70d", "servicerName": "Columbia Bank Mortgage Servicing", "delinquentMonths": 2 },
+      { "date": "today-40d", "servicerName": "Columbia Bank Mortgage Servicing", "delinquentMonths": 3 }
+    ],
+    "counselingReferrals": [
+      { "date": "today-66d", "agencyName": "Portland Housing Center", "outcome": { "date": "today-45d", "outcome": "CounselingCompleted" } },
+      { "date": "today-18d", "agencyName": "Oregon Law Center" }
+    ],
+    "forbearanceRequests": [
+      { "date": "today-62d", "lenderName": "Columbia Bank", "outcome": { "date": "today-50d", "outcome": "Denied", "notes": "The loan is under twelve months old; the bank offers forbearance only on seasoned loans." } },
+      { "date": "today-15d", "lenderName": "Columbia Bank" }
+    ],
+    "curePeriods": [
+      { "date": "today-38d", "lraId": "LRA-HV-201", "curePeriodDays": 90 }
+    ]
+  },
+  {
+    "seedKey": "fpc-willow-007a",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-willow-007a",
+    "trigger": "ServicerDelinquency",
+    "opened": "today-6d",
+    "delinquencies": [
+      { "date": "today-6d", "servicerName": "Rose City Home Loans", "delinquentMonths": 2 }
+    ]
+  }
+]

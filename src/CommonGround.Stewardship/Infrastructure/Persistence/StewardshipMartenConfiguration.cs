@@ -21,6 +21,9 @@ public static class StewardshipMartenConfiguration
         options.Schema.For<StewardshipCaseSeedLookup>()
             .DatabaseSchemaName(SeedSchemaName)
             .Index(x => x.SeedKey);
+        options.Schema.For<ForeclosurePreventionCaseSeedLookup>()
+            .DatabaseSchemaName(SeedSchemaName)
+            .Index(x => x.SeedKey);
 
         options.Projections.Add<StewardshipCaseProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<ForeclosurePreventionCaseProjection>(ProjectionLifecycle.Inline);
