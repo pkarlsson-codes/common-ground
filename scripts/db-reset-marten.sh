@@ -27,6 +27,7 @@ SCHEMAS=(
     property_registry
     property_registry_seed
     stewardship
+    stewardship_seed
     trust_management_seed
 )
 

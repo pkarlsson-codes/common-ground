@@ -1,0 +1,128 @@
+[
+  {
+    "seedKey": "sc-cedar-lane-013b",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-cedar-lane-013b",
+    "verifications": [
+      {
+        "periodYearsAgo": 1,
+        "initiated": "today-400d",
+        "surveyDeadline": "today-370d",
+        "submitted": { "date": "today-380d", "isPrimaryResident": true, "subletDisclosed": true, "majorChanges": "Renting the basement room to a lodger since the spring." },
+        "failed": { "date": "today-376d", "reason": "Sublets the basement room without the trust's approval." }
+      },
+      {
+        "periodYearsAgo": 0,
+        "initiated": "today-50d",
+        "surveyDeadline": "today-10d",
+        "markedOverdue": "today-9d"
+      }
+    ],
+    "inspections": [
+      {
+        "scheduled": "today-440d",
+        "scheduledFor": "today-425d",
+        "inspectorName": "Dana Whitfield",
+        "completed": { "date": "today-425d", "occupancyConfirmed": true, "conditionNotes": "Good repair. New back deck, built to code; receipts kept for an improvements credit." }
+      },
+      {
+        "scheduled": "today-75d",
+        "scheduledFor": "today-60d",
+        "inspectorName": "Dana Whitfield",
+        "completed": { "date": "today-60d", "occupancyConfirmed": true, "conditionNotes": "No concerns. Basement room empty again." }
+      }
+    ],
+    "violations": [
+      {
+        "type": "Occupancy",
+        "description": "Basement room let to a lodger without approval, disclosed on the occupancy survey.",
+        "identified": "today-376d",
+        "notice": { "date": "today-372d", "cureDeadline": "today-342d" },
+        "cured": "today-345d"
+      },
+      {
+        "type": "LeaseTermViolation",
+        "description": "Home listed for short-term rental on a vacation rental site.",
+        "identified": "today-40d",
+        "notice": { "date": "today-36d", "cureDeadline": "today-14d" },
+        "escalated": { "date": "today-7d", "reason": "Listing still active after the cure deadline. Referred to the trust's counsel." }
+      }
+    ]
+  },
+  {
+    "seedKey": "sc-harbor-view-201",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-harbor-view-201",
+    "verifications": [
+      {
+        "periodYearsAgo": 0,
+        "initiated": "today-45d",
+        "surveyDeadline": "today+20d",
+        "submitted": { "date": "today-6d", "isPrimaryResident": true, "subletDisclosed": false, "majorChanges": "Partner moved in in August." }
+      }
+    ],
+    "inspections": [
+      {
+        "scheduled": "today-10d",
+        "scheduledFor": "today+9d",
+        "inspectorName": "Marcus Lindqvist"
+      }
+    ],
+    "violations": [
+      {
+        "type": "PhysicalCondition",
+        "description": "Blocked gutters letting water into the shared wall, reported by the condo association.",
+        "identified": "today-30d",
+        "notice": { "date": "today-25d", "cureDeadline": "today+35d" }
+      }
+    ]
+  },
+  {
+    "seedKey": "sc-downtown-civic-003",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-downtown-civic-003",
+    "verifications": [
+      {
+        "periodYearsAgo": 0,
+        "initiated": "today-30d",
+        "surveyDeadline": "today+15d"
+      }
+    ],
+    "inspections": [
+      {
+        "scheduled": "today-40d",
+        "scheduledFor": "today-5d",
+        "inspectorName": "Marcus Lindqvist"
+      }
+    ],
+    "violations": [
+      {
+        "type": "UnpermittedAlteration",
+        "description": "Wall between the second bathroom and the hall moved without the trust's prior approval, while adding a grab bar.",
+        "identified": "today-8d"
+      }
+    ]
+  },
+  {
+    "seedKey": "sc-downtown-civic-001",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-downtown-civic-001",
+    "verifications": [
+      {
+        "periodYearsAgo": 0,
+        "initiated": "today-60d",
+        "surveyDeadline": "today-30d",
+        "submitted": { "date": "today-45d", "isPrimaryResident": true, "subletDisclosed": false },
+        "verified": "today-40d"
+      }
+    ],
+    "inspections": [
+      {
+        "scheduled": "today-120d",
+        "scheduledFor": "today-102d",
+        "inspectorName": "Dana Whitfield",
+        "cancelled": { "date": "today-104d", "reason": "Inspector unavailable. The home's condition was reviewed at the first stewardship check-in instead." }
+      }
+    ]
+  }
+]

@@ -66,7 +66,7 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
             await SeedClock.RunAsync(timeZone, async clock =>
             {
                 var leaseId = entry.Direct is { } direct
-                    ? await EstablishAsync(trustSession, entry, direct, clock, today, cancellation).ConfigureAwait(false)
+                    ? await EstablishAsync(trustSession, propagation, entry, direct, clock, today, cancellation).ConfigureAwait(false)
                     : await FindLeaseFromPurchaseAsync(trustSession, entry, cancellation).ConfigureAwait(false);
 
                 var stream = await trustSession.Events
@@ -97,6 +97,7 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
 
     private static async Task<string> EstablishAsync(
         IDocumentSession session,
+        PropagationWaiter propagation,
         GroundLeaseSeedEntry entry,
         DirectLeaseSeedEntry direct,
         SeedClock clock,
@@ -140,8 +141,10 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
             SeederUserId);
         session.Events.StartStream<GroundLease>(leaseId.Value, created);
 
-        // Saved now so the lease can be fetched for writing like one a purchase created.
+        // Saved now so the lease can be fetched for writing like one a purchase created, and propagated
+        // before the clock moves on, so its stewardship case opens on the day it was recorded.
         await session.SaveChangesAsync(cancellation).ConfigureAwait(false);
+        await propagation.WaitForIdleAsync(cancellation).ConfigureAwait(false);
 
         return leaseId.Value;
     }
