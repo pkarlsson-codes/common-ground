@@ -35,6 +35,10 @@ public static class HomeownershipMartenConfiguration
             .Index(x => x.BuyerFullName)
             .Index(x => x.HomeId)
             .Index(x => x.HouseholdId);
+        options.Schema.For<ResaleView>()
+            .DatabaseSchemaName(SchemaName)
+            .Index(x => x.GroundLeaseId)
+            .Index(x => x.Status);
         options.Schema.For<HomeLabelView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<HomeSelectionView>()
             .DatabaseSchemaName(SchemaName)
@@ -53,6 +57,9 @@ public static class HomeownershipMartenConfiguration
         options.Schema.For<GroundLeaseSeedLookup>()
             .DatabaseSchemaName(SeedSchemaName)
             .Index(x => x.SeedKey);
+        options.Schema.For<ResaleSeedLookup>()
+            .DatabaseSchemaName(SeedSchemaName)
+            .Index(x => x.SeedKey);
     }
 
     private static void ConfigureProjections(StoreOptions options)
@@ -63,5 +70,6 @@ public static class HomeownershipMartenConfiguration
         options.Projections.Add<PurchaseWorkflowListItemViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<GroundLeaseTemplateListItemViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<GroundLeaseTemplateDetailViewProjection>(ProjectionLifecycle.Inline);
+        options.Projections.Add<ResaleViewProjection>(ProjectionLifecycle.Inline);
     }
 }

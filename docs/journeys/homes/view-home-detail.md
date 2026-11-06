@@ -6,12 +6,13 @@
    - Development is done from the day the home was registered
    - Selection is current while a home selection is open; Purchasing is current from the day a household is selected until the purchase closes, fails, or is withdrawn
    - A purchase that fails or is withdrawn returns the home to Selection (a new selection is opened for it automatically), and the steps after it are no longer marked done
-   - Leased is current from the day the purchase closes; Resale is shown but never reached yet
+   - Leased is current from the day the purchase closes or the lease is created; Resale is current while the homeowner's notice of intent to sell is open, dated with the notice
 4. A Next Step card under the stepper says in one sentence what the home is waiting on, with one primary button:
    - Available: "Start Selection"
    - Selection: "Open Selection"
    - Purchasing: the purchase's current step (e.g. "Waiting on the inspection"), with "Open Purchase"
    - Leased: who the home is leased to and since when, with "Open Ground Lease"
+   - Resale: who gave notice to sell and when, with "Open Ground Lease"
 5. "More actions" opens a menu with the home's other actions: "Add New Assessment" and "Upload Document"
 6. "Details" tab shows status, whether the home is accessible, year built, assessed value, last assessed date, condition notes (if any), and registered at
 7. A Connected Records section links to the home's land parcel, its home selections, its purchases (newest first, each with buyer and phase), the households that bought or are buying it, and its ground lease, each showing the record's status

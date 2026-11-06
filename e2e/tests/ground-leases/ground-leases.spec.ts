@@ -38,6 +38,7 @@ const createLeaseDirectly = (page: Page, landParcelId: string, homeId: string, h
     homeownerPhone: null,
     leaseStartDate: '2020-01-01',
     termYears: 99,
+    optionWindowDays: 60,
     covenantTerms: 'Standard covenant terms',
     formulaKind: 'IndexBased',
     indexType: 'CPI',
@@ -56,6 +57,7 @@ test('creating a lease on a parcel\'s home lists it first, shows its homeowner a
   await expect(field(form, 'Home')).toBeDisabled()
   await expect(field(form, 'Lease Start Date')).toHaveValue(isoDate())
   await expect(field(form, 'Term (years)')).toHaveValue('99')
+  await expect(field(form, 'Option Window (days)')).toHaveValue('60')
 
   await field(form, 'Land Parcel').click()
   await page.getByPlaceholder('Search parcels…').fill(apn)
@@ -72,6 +74,7 @@ test('creating a lease on a parcel\'s home lists it first, shows its homeowner a
   await expect(field(form, 'Homeowner Phone (optional)')).toHaveValue('(503) 555-0123')
   await field(form, 'Lease Start Date').fill('2023-06-01')
   await field(form, 'Term (years)').fill('50')
+  await field(form, 'Option Window (days)').fill('45')
   await field(form, 'Covenant Terms').fill('Owner-occupied, permanently affordable')
   await field(form, 'Resale Formula').selectOption('FixedPercentage')
   await expect(field(form, 'Annual Percentage')).toHaveValue('0.01')
@@ -99,6 +102,7 @@ test('creating a lease on a parcel\'s home lists it first, shows its homeowner a
   await expect(detailValue(detail, 'Annual %')).toHaveText('2.0%')
   await expect(detailValue(detail, 'Improvements Cap')).toHaveText('$10,000')
   await expect(detailValue(detail, 'Term')).toHaveText('50 years')
+  await expect(detailValue(detail, 'Option Window')).toHaveText('45 days')
   await expect(detailValue(detail, 'Covenant Terms')).toHaveText('Owner-occupied, permanently affordable')
   await expect(detail.locator('.detail-field__label').filter({ hasText: /^Appreciation Share$/ })).toHaveCount(0)
   await expect(checkIns(page)).not.toContainText('by ')

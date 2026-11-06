@@ -13,6 +13,7 @@ import { getErrorMessage } from '../../lib/getErrorMessage'
 const emptyCreate = (): CreateGroundLeaseTemplateForm => ({
   templateName: '',
   termYears: 99,
+  optionWindowDays: 60,
   covenantTerms: '',
   formulaKind: 'AppraisalBased',
   appreciationShare: 0.25,
@@ -86,6 +87,18 @@ export default function CreateGroundLeaseTemplatePanel({ onClose }: Props) {
               max="999"
               value={form.termYears}
               onChange={e => setForm(f => ({ ...f, termYears: parseInt(e.target.value) || 99 }))}
+              required
+            />
+          </div>
+          <div className="form-field">
+            <label className="form-label">Option Window (days)</label>
+            <input
+              className="form-input"
+              type="number"
+              min="1"
+              max="999"
+              value={form.optionWindowDays}
+              onChange={e => setForm(f => ({ ...f, optionWindowDays: parseInt(e.target.value) || 60 }))}
               required
             />
           </div>

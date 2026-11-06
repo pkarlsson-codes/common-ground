@@ -52,7 +52,7 @@ public class GroundLeaseTemplatesTests(ApiFactory factory)
     private static async Task<string> CreateTemplate(HttpClient client, string name)
     {
         var response = await client.PostAsJsonAsync("/api/ground-lease-templates",
-            new CreateGroundLeaseTemplateRequest(name, 99, "Standard covenant", "AppraisalBased", 0.25m, null, null, null, null));
+            new CreateGroundLeaseTemplateRequest(name, 99, 60, "Standard covenant", "AppraisalBased", 0.25m, null, null, null, null));
         response.EnsureSuccessStatusCode();
         var created = await response.Content.ReadFromJsonAsync<CreateGroundLeaseTemplateResponse>();
         return created!.GroundLeaseTemplateId;

@@ -18,6 +18,7 @@ internal sealed class GroundLeaseTemplateDetailViewProjection : SingleStreamProj
             Id = e.AggregateId,
             TemplateName = e.TemplateName,
             TermYears = e.TermYears,
+            OptionWindowDays = e.OptionWindowDays,
             CovenantTerms = e.CovenantTerms,
             Status = "Active",
             FormulaKind = e.FormulaKind.ToString(),

@@ -5,6 +5,7 @@ using CommonGround.Homeownership.Application.Errors;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
+using CommonGround.Homeownership.Domain.Resales;
 
 namespace CommonGround.Homeownership.Domain.GroundLeases;
 
@@ -29,6 +30,12 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
 
     /// <summary>Gets the term of the lease in years.</summary>
     public int TermYears { get; private set; }
+
+    /// <summary>
+    /// Gets the days the trust has to buy the home, or assign its option, after the homeowner gives notice to
+    /// sell. Copied from the template when the lease was created, so editing the template later doesn't change it.
+    /// </summary>
+    public int OptionWindowDays { get; private set; }
 
     /// <summary>Gets the covenant terms for this lease.</summary>
     public string CovenantTerms { get; private set; }
@@ -55,7 +62,10 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     public GroundLeaseTemplateId? TemplateId { get; private set; }
 
     /// <summary>Gets the source purchase workflow ID when this lease was created from a purchase workflow.</summary>
-    public PurchaseWorkflowId? PurchaseWorkflowId { get; private set; } 
+    public PurchaseWorkflowId? PurchaseWorkflowId { get; private set; }
+
+    /// <summary>Gets the resale in progress on this lease, if its homeowner has given notice to sell.</summary>
+    public ResaleId? OpenResaleId { get; private set; }
 
     /// <summary>
     /// Creates a ground lease that didn't come from a purchase, such as one signed before the trust used
@@ -68,6 +78,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         Homeowner homeowner,
         DateOnly leaseStartDate,
         int termYears,
+        int optionWindowDays,
         string covenantTerms,
         ResalePolicyTerms resalePolicyTerms,
         HomeCommitments homeCommitments,
@@ -91,6 +102,9 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         if (termYears <= 0)
             throw BusinessRuleViolation.GroundLease.Create.TermYearsNonPositive(termYears);
 
+        if (optionWindowDays <= 0)
+            throw BusinessRuleViolation.GroundLease.Create.OptionWindowDaysNonPositive(optionWindowDays);
+
         if (string.IsNullOrWhiteSpace(covenantTerms))
             throw BusinessRuleViolation.GroundLease.Create.CovenantTermsRequired();
 
@@ -100,6 +114,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             unitId,
             leaseStartDate,
             termYears,
+            optionWindowDays,
             covenantTerms,
             resalePolicyTerms.FormulaKind,
             resalePolicyTerms.AppreciationShare,
@@ -137,6 +152,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             purchaseWorkflow.HomeId,
             leaseStartDate,
             template.TermYears,
+            template.OptionWindowDays,
             template.CovenantTerms,
             template.ResalePolicyTerms.FormulaKind,
             template.ResalePolicyTerms.AppreciationShare,
@@ -187,6 +203,25 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             recordedBy.Value);
     }
 
+    /// <summary>
+    /// Starts a resale on this lease when its homeowner gives notice to sell. Refused unless the lease is
+    /// active, and while another resale is open on it.
+    /// </summary>
+    public ResaleStarted StartResale(ResaleId resaleId)
+    {
+        if (Status != GroundLeaseStatus.Active)
+            throw BusinessRuleViolation.GroundLease.StartResale.StatusNotActive(Status);
+
+        if (OpenResaleId is { } openResaleId)
+            throw BusinessRuleViolation.GroundLease.StartResale.ResaleAlreadyOpen(openResaleId.Value);
+
+        return new ResaleStarted(Id.Value, resaleId.Value);
+    }
+
+    /// <summary>Closes the lease's open resale, so its homeowner can give notice again. Nothing to do if it isn't open.</summary>
+    public ResaleClosed? CloseResale(ResaleId resaleId) =>
+        OpenResaleId == resaleId ? new ResaleClosed(Id.Value, resaleId.Value) : null;
+
     /// <summary>Starts a ground lease from its first event.</summary>
     public static GroundLease Create(GroundLeaseCreated e)
     {
@@ -204,6 +239,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         UnitId = e.HomeId;
         LeaseStartDate = e.LeaseStartDate;
         TermYears = e.TermYears;
+        OptionWindowDays = e.OptionWindowDays;
         CovenantTerms = e.CovenantTerms;
         ResalePolicyTerms = e.FormulaKind switch
         {
@@ -241,6 +277,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         UnitId = e.HomeId;
         LeaseStartDate = e.LeaseStartDate;
         TermYears = e.TermYears;
+        OptionWindowDays = e.OptionWindowDays;
         CovenantTerms = e.CovenantTerms;
         ResalePolicyTerms = e.FormulaKind switch
         {
@@ -257,6 +294,12 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         CreatedAt = e.OccurredAt;
         CurrentHomeowner = Homeowner.From(e.BuyerFullName, e.BuyerEmail, e.BuyerPhone);
     }
+
+    /// <summary>Applies <see cref="ResaleStarted"/>.</summary>
+    public void Apply(ResaleStarted e) => OpenResaleId = ResaleId.Create(e.ResaleId);
+
+    /// <summary>Applies <see cref="ResaleClosed"/>.</summary>
+    public void Apply(ResaleClosed _) => OpenResaleId = null;
 
     /// <summary>Applies <see cref="GroundLeaseTerminated"/>.</summary>
     public void Apply(GroundLeaseTerminated _)

@@ -9,6 +9,7 @@ public sealed record GroundLeaseResponse(
     string HomeId,
     DateOnly LeaseStartDate,
     int TermYears,
+    int OptionWindowDays,
     string CovenantTerms,
     string Status,
     string FormulaKind,

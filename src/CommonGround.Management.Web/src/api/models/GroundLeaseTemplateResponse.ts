@@ -39,6 +39,12 @@ export interface GroundLeaseTemplateResponse {
      */
     termYears?: number;
     /**
+     * Days the trust has to buy a home after its homeowner gives notice to sell.
+     * @type {number}
+     * @memberof GroundLeaseTemplateResponse
+     */
+    optionWindowDays?: number;
+    /**
      * Covenant terms text.
      * @type {string}
      * @memberof GroundLeaseTemplateResponse
@@ -120,6 +126,7 @@ export function GroundLeaseTemplateResponseFromJSONTyped(json: any, ignoreDiscri
         'id': json['id'] == null ? undefined : json['id'],
         'templateName': json['templateName'] == null ? undefined : json['templateName'],
         'termYears': json['termYears'] == null ? undefined : json['termYears'],
+        'optionWindowDays': json['optionWindowDays'] == null ? undefined : json['optionWindowDays'],
         'covenantTerms': json['covenantTerms'] == null ? undefined : json['covenantTerms'],
         'status': json['status'] == null ? undefined : json['status'],
         'formulaKind': json['formulaKind'] == null ? undefined : json['formulaKind'],
@@ -147,6 +154,7 @@ export function GroundLeaseTemplateResponseToJSONTyped(value?: GroundLeaseTempla
         'id': value['id'],
         'templateName': value['templateName'],
         'termYears': value['termYears'],
+        'optionWindowDays': value['optionWindowDays'],
         'covenantTerms': value['covenantTerms'],
         'status': value['status'],
         'formulaKind': value['formulaKind'],

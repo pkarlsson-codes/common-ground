@@ -17,7 +17,7 @@ public class GroundLeaseTemplateTests
         public GroundLeaseTemplateId TemplateId { get; } = GroundLeaseTemplateId.Generate();
 
         public GroundLeaseTemplateCreated Defined() =>
-            GroundLeaseTemplate.Define(TemplateId, "Template", 50, "Terms", ResalePolicyTerms.FixedPercentage(0.03m), StaffUser);
+            GroundLeaseTemplate.Define(TemplateId, "Template", 50, 60, "Terms", ResalePolicyTerms.FixedPercentage(0.03m), StaffUser);
 
         public GroundLeaseTemplate ActiveTemplate() => EventReplay.Replay<GroundLeaseTemplate>(Defined());
 
@@ -33,12 +33,13 @@ public class GroundLeaseTemplateTests
         public void GivenValidInputs_WhenDefined_ThenStartsAnActiveTemplate()
         {
             var defined = GroundLeaseTemplate.Define(
-                _testBed.TemplateId, "Standard 99-Year", 99, "Standard covenant terms", ResalePolicyTerms.AppraisalBased(0.25m, 10000m), _testBed.StaffUser);
+                _testBed.TemplateId, "Standard 99-Year", 99, 45, "Standard covenant terms", ResalePolicyTerms.AppraisalBased(0.25m, 10000m), _testBed.StaffUser);
 
             EventReplay.Replay<GroundLeaseTemplate>(defined).Should().BeEquivalentTo(new
             {
                 TemplateName = "Standard 99-Year",
                 TermYears = 99,
+                OptionWindowDays = 45,
                 CovenantTerms = "Standard covenant terms",
                 Status = GroundLeaseTemplateStatus.Active,
                 CreatedBy = _testBed.StaffUser,
@@ -46,15 +47,27 @@ public class GroundLeaseTemplateTests
         }
 
         [Theory]
-        [InlineData("", 99, "Terms")]
-        [InlineData("Template", 0, "Terms")]
-        [InlineData("Template", 99, "  ")]
-        public void GivenInvalidInputs_WhenDefined_ThenThrowsBusinessRuleViolation(string name, int termYears, string covenantTerms)
+        [InlineData("", 99, 60, "Terms")]
+        [InlineData("Template", 0, 60, "Terms")]
+        [InlineData("Template", 99, 60, "  ")]
+        public void GivenInvalidInputs_WhenDefined_ThenThrowsBusinessRuleViolation(string name, int termYears, int optionWindowDays, string covenantTerms)
         {
             var act = () => GroundLeaseTemplate.Define(
-                _testBed.TemplateId, name, termYears, covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), _testBed.StaffUser);
+                _testBed.TemplateId, name, termYears, optionWindowDays, covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>();
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-30)]
+        public void GivenNonPositiveOptionWindow_WhenDefined_ThenThrowsBusinessRuleViolation(int optionWindowDays)
+        {
+            var act = () => GroundLeaseTemplate.Define(
+                _testBed.TemplateId, "Template", 99, optionWindowDays, "Terms", ResalePolicyTerms.AppraisalBased(0.25m), _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease_template.create.option_window_days_non_positive");
         }
     }
 

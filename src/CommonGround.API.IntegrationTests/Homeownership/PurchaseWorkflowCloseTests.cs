@@ -105,6 +105,7 @@ public class PurchaseWorkflowCloseTests(ApiFactory factory)
             new CreateGroundLeaseTemplateRequest(
                 $"Standard 99-Year {Guid.NewGuid():N}",
                 99,
+                60,
                 "Standard covenant terms",
                 "AppraisalBased",
                 0.25m,

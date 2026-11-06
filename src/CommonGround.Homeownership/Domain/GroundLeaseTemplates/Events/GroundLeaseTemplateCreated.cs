@@ -8,6 +8,7 @@ public sealed record GroundLeaseTemplateCreated(
     string AggregateId,
     string TemplateName,
     int TermYears,
+    int OptionWindowDays,
     string CovenantTerms,
     FormulaKind FormulaKind,
     decimal? AppreciationShare,

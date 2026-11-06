@@ -61,6 +61,7 @@ public sealed class GroundLeaseTemplatesSeeder : IDevelopmentSeeder
                 templateId,
                 entry.TemplateName,
                 entry.TermYears,
+                entry.OptionWindowDays,
                 entry.CovenantTerms,
                 ToResalePolicyTerms(entry),
                 SeederUserId);
@@ -137,6 +138,8 @@ public sealed class GroundLeaseTemplatesSeeder : IDevelopmentSeeder
         public string TemplateName { get; set; } = string.Empty;
 
         public int TermYears { get; set; }
+
+        public int OptionWindowDays { get; set; }
 
         public string CovenantTerms { get; set; } = string.Empty;
 

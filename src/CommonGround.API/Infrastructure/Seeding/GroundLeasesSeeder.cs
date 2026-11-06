@@ -129,6 +129,7 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
             Homeowner.From(direct.Homeowner.FullName, direct.Homeowner.Email, direct.Homeowner.Phone),
             leaseStartDate,
             direct.TermYears,
+            direct.OptionWindowDays,
             direct.CovenantTerms,
             ResalePolicyTerms.FromString(
                 resale.FormulaKind,
@@ -294,6 +295,8 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
         public SeedDate RecordedOn { get; set; }
 
         public int TermYears { get; set; }
+
+        public int OptionWindowDays { get; set; }
 
         public string CovenantTerms { get; set; } = string.Empty;
 

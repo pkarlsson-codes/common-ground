@@ -24,6 +24,9 @@ public class GroundLeaseView
     /// <summary>Gets or sets the lease term in years.</summary>
     public int TermYears { get; set; }
 
+    /// <summary>Gets or sets the days the trust has to buy the home after its homeowner gives notice to sell.</summary>
+    public int OptionWindowDays { get; set; }
+
     /// <summary>Gets or sets the covenant terms.</summary>
     public string CovenantTerms { get; set; } = string.Empty;
 

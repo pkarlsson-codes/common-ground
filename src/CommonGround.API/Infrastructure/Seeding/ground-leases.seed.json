@@ -9,6 +9,7 @@
       "leaseStartDate": "today-6y",
       "recordedOn": "today-2y",
       "termYears": 75,
+      "optionWindowDays": 90,
       "covenantTerms": "Owner-occupancy as primary residence required. Resale only to income-eligible buyers at or below the formula price. Signed on paper before the trust adopted lease templates.",
       "resalePolicy": { "formulaKind": "AppraisalBased", "appreciationShare": 0.30 }
     },

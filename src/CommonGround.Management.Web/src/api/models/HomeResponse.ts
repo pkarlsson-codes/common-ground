@@ -142,6 +142,12 @@ export interface HomeResponse {
      * @memberof HomeResponse
      */
     leasedDate?: CalendarDate | null;
+    /**
+     * 
+     * @type {CalendarDate}
+     * @memberof HomeResponse
+     */
+    resaleNoticeDate?: CalendarDate | null;
 }
 
 /**
@@ -180,6 +186,7 @@ export function HomeResponseFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'selectionOpenedDate': json['selectionOpenedDate'] == null ? undefined : CalendarDateFromJSON(json['selectionOpenedDate']),
         'underContractDate': json['underContractDate'] == null ? undefined : CalendarDateFromJSON(json['underContractDate']),
         'leasedDate': json['leasedDate'] == null ? undefined : CalendarDateFromJSON(json['leasedDate']),
+        'resaleNoticeDate': json['resaleNoticeDate'] == null ? undefined : CalendarDateFromJSON(json['resaleNoticeDate']),
     };
 }
 
@@ -213,6 +220,7 @@ export function HomeResponseToJSONTyped(value?: HomeResponse | null, ignoreDiscr
         'selectionOpenedDate': CalendarDateToJSON(value['selectionOpenedDate']),
         'underContractDate': CalendarDateToJSON(value['underContractDate']),
         'leasedDate': CalendarDateToJSON(value['leasedDate']),
+        'resaleNoticeDate': CalendarDateToJSON(value['resaleNoticeDate']),
     };
 }
 

@@ -52,6 +52,7 @@ export function useCreateGroundLease() {
           homeownerPhone: form.homeownerPhone || undefined,
           leaseStartDate: form.leaseStartDate,
           termYears: form.termYears,
+          optionWindowDays: form.optionWindowDays,
           covenantTerms: form.covenantTerms || undefined,
           formulaKind: form.formulaKind,
           appreciationShare: form.formulaKind === 'AppraisalBased' ? form.appreciationShare : undefined,

@@ -27,6 +27,7 @@ internal static class DevelopmentSeeder
     /// <item>Ground leases: activity on the leases closed purchases created, and leases created directly.</item>
     /// <item>Stewardship cases: inspections, occupancy verifications and lease violations on the cases those leases opened.</item>
     /// <item>Foreclosure prevention cases on those leases, and the interventions recorded on them.</item>
+    /// <item>Resales: homeowners' notices of intent to sell on those leases, and their withdrawals.</item>
     /// </list>
     /// </summary>
     /// <param name="services">The service collection.</param>
@@ -48,6 +49,7 @@ internal static class DevelopmentSeeder
         services.AddTransient<IDevelopmentSeeder, GroundLeasesSeeder>();
         services.AddTransient<IDevelopmentSeeder, StewardshipCasesSeeder>();
         services.AddTransient<IDevelopmentSeeder, ForeclosurePreventionCasesSeeder>();
+        services.AddTransient<IDevelopmentSeeder, ResalesSeeder>();
         return services;
     }
 

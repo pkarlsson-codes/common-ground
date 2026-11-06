@@ -4,6 +4,7 @@ namespace CommonGround.API.Contracts.Homeownership.Requests;
 public sealed record CreateGroundLeaseTemplateRequest(
     string TemplateName,
     int TermYears,
+    int OptionWindowDays,
     string CovenantTerms,
     string FormulaKind,
     decimal? AppreciationShare,

@@ -72,6 +72,12 @@ export interface CreateGroundLeaseRequest {
     termYears?: number;
     /**
      * 
+     * @type {number}
+     * @memberof CreateGroundLeaseRequest
+     */
+    optionWindowDays?: number;
+    /**
+     * 
      * @type {string}
      * @memberof CreateGroundLeaseRequest
      */
@@ -138,6 +144,7 @@ export function CreateGroundLeaseRequestFromJSONTyped(json: any, ignoreDiscrimin
         'homeownerPhone': json['homeownerPhone'] == null ? undefined : json['homeownerPhone'],
         'leaseStartDate': json['leaseStartDate'] == null ? undefined : CalendarDateFromJSON(json['leaseStartDate']),
         'termYears': json['termYears'] == null ? undefined : json['termYears'],
+        'optionWindowDays': json['optionWindowDays'] == null ? undefined : json['optionWindowDays'],
         'covenantTerms': json['covenantTerms'] == null ? undefined : json['covenantTerms'],
         'formulaKind': json['formulaKind'] == null ? undefined : json['formulaKind'],
         'appreciationShare': json['appreciationShare'] == null ? undefined : json['appreciationShare'],
@@ -166,6 +173,7 @@ export function CreateGroundLeaseRequestToJSONTyped(value?: CreateGroundLeaseReq
         'homeownerPhone': value['homeownerPhone'],
         'leaseStartDate': CalendarDateToJSON(value['leaseStartDate']),
         'termYears': value['termYears'],
+        'optionWindowDays': value['optionWindowDays'],
         'covenantTerms': value['covenantTerms'],
         'formulaKind': value['formulaKind'],
         'appreciationShare': value['appreciationShare'],

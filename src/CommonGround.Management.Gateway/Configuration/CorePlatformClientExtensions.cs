@@ -56,6 +56,9 @@ internal static class CorePlatformClientExtensions
         services.AddApiClient<IGroundLeasesApiClient, GroundLeasesApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
+        services.AddApiClient<IResalesApiClient, ResalesApiClient>(corePlatformUri)
+            .AddHttpMessageHandler<InternalGatewayAuthHandler>();
+
         services.AddApiClient<IPurchaseWorkflowsApiClient, PurchaseWorkflowsApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 

@@ -41,6 +41,7 @@ export function HomeLifecycle({ home, moreActions }: Props) {
     Selection: formatStepDate(home.selectionOpenedDate),
     Purchasing: home.underContractDate ? `Since ${formatStepDate(home.underContractDate)}` : undefined,
     Leased: formatStepDate(home.leasedDate),
+    Resale: home.resaleNoticeDate ? `Notice ${formatStepDate(home.resaleNoticeDate)}` : undefined,
   })
 
   const handleStart = async () => {
@@ -79,7 +80,12 @@ export function HomeLifecycle({ home, moreActions }: Props) {
         : undefined
       break
     case 'Resale':
-      title = 'The home is being resold.'
+      title = activeLease && home.resaleNoticeDate
+        ? `${activeLease.homeownerFullName ?? 'The homeowner'} gave notice to sell on ${formatStepDate(home.resaleNoticeDate)}.`
+        : 'The home is being resold.'
+      primary = activeLease
+        ? { label: 'Open Ground Lease', onClick: () => navigate('/ground-leases', { state: { openId: activeLease.id } }) }
+        : undefined
       break
     default:
       title = 'Choose a household from the waiting list for this home.'

@@ -76,7 +76,7 @@ public static class HomesEndpoints
             view.YearBuilt, view.AssessedValue, view.LastAssessedDate,
             view.ConditionNotes, availability.Status, view.RegisteredAt,
             availability.AvailableAgainDate, availability.SelectionOpenedDate, availability.UnderContractDate,
-            availability.LeasedDate);
+            availability.LeasedDate, availability.ResaleNoticeDate);
 
         return Results.Ok(response);
     }

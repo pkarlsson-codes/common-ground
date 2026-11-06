@@ -1,6 +1,7 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
+using CommonGround.Homeownership.Domain.Resales;
 using CommonGround.SharedKernel.Domain.Exceptions;
 
 namespace CommonGround.Homeownership.Application.Errors;
@@ -91,6 +92,14 @@ public static class BusinessRuleViolation
                         ["termYears"] = termYears,
                     });
 
+            public static BusinessRuleViolationException OptionWindowDaysNonPositive(int optionWindowDays)
+                => new(
+                    "homeownership.ground_lease.create.option_window_days_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["optionWindowDays"] = optionWindowDays,
+                    });
+
             public static BusinessRuleViolationException CovenantTermsRequired()
                 => new(
                     "homeownership.ground_lease.create.covenant_terms_required");
@@ -168,6 +177,26 @@ public static class BusinessRuleViolation
                 => new(
                     "homeownership.ground_lease.record_stewardship_checkin.notes_required");
         }
+
+        public static class StartResale
+        {
+            public static BusinessRuleViolationException StatusNotActive(GroundLeaseStatus status)
+                => new(
+                    "homeownership.ground_lease.start_resale.status_not_active",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                        ["requiredStatus"] = GroundLeaseStatus.Active.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException ResaleAlreadyOpen(string resaleId)
+                => new(
+                    "homeownership.ground_lease.start_resale.resale_already_open",
+                    new Dictionary<string, object?>
+                    {
+                        ["resaleId"] = resaleId,
+                    });
+        }
     }
 
     public static class GroundLeaseTemplate
@@ -184,6 +213,14 @@ public static class BusinessRuleViolation
                     new Dictionary<string, object?>
                     {
                         ["termYears"] = termYears,
+                    });
+
+            public static BusinessRuleViolationException OptionWindowDaysNonPositive(int optionWindowDays)
+                => new(
+                    "homeownership.ground_lease_template.create.option_window_days_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["optionWindowDays"] = optionWindowDays,
                     });
 
             public static BusinessRuleViolationException CovenantTermsRequired()
@@ -203,6 +240,55 @@ public static class BusinessRuleViolation
             public static BusinessRuleViolationException AlreadyInactive()
                 => new(
                     "homeownership.ground_lease_template.archive.already_inactive");
+        }
+    }
+
+    public static class Resale
+    {
+        public static class RecordIntentToSell
+        {
+            public static BusinessRuleViolationException NoticeDateInFuture(DateOnly noticeDate, DateOnly today)
+                => new(
+                    "homeownership.resale.record_intent_to_sell.notice_date_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["noticeDate"] = noticeDate,
+                        ["today"] = today,
+                    });
+        }
+
+        public static class Withdraw
+        {
+            public static BusinessRuleViolationException NotOpen(ResaleStatus status)
+                => new(
+                    "homeownership.resale.withdraw.not_open",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                        ["requiredStatus"] = ResaleStatus.Open.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException ReasonRequired()
+                => new(
+                    "homeownership.resale.withdraw.reason_required");
+
+            public static BusinessRuleViolationException WithdrawnDateBeforeNotice(DateOnly withdrawnDate, DateOnly noticeDate)
+                => new(
+                    "homeownership.resale.withdraw.withdrawn_date_before_notice",
+                    new Dictionary<string, object?>
+                    {
+                        ["withdrawnDate"] = withdrawnDate,
+                        ["noticeDate"] = noticeDate,
+                    });
+
+            public static BusinessRuleViolationException WithdrawnDateInFuture(DateOnly withdrawnDate, DateOnly today)
+                => new(
+                    "homeownership.resale.withdraw.withdrawn_date_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["withdrawnDate"] = withdrawnDate,
+                        ["today"] = today,
+                    });
         }
     }
 

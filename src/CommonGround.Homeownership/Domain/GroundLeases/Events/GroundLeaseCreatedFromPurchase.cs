@@ -12,6 +12,7 @@ public sealed record GroundLeaseCreatedFromPurchase(
     string HomeId,
     DateOnly LeaseStartDate,
     int TermYears,
+    int OptionWindowDays,
     string CovenantTerms,
     FormulaKind FormulaKind,
     decimal? AppreciationShare,

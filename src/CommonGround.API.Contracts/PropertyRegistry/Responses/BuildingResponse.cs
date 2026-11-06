@@ -20,4 +20,5 @@ public sealed record HomeResponse(
     DateOnly? AvailableAgainDate,
     DateOnly? SelectionOpenedDate,
     DateOnly? UnderContractDate,
-    DateOnly? LeasedDate);
+    DateOnly? LeasedDate,
+    DateOnly? ResaleNoticeDate);

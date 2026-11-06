@@ -43,6 +43,7 @@ public static class GroundLeasesEndpoints
             Homeowner.From(request.HomeownerFullName, request.HomeownerEmail, request.HomeownerPhone),
             request.LeaseStartDate,
             request.TermYears,
+            request.OptionWindowDays,
             request.CovenantTerms,
             resalePolicyTerms,
             userId);
@@ -101,6 +102,7 @@ public static class GroundLeasesEndpoints
             view.HomeId,
             view.LeaseStartDate,
             view.TermYears,
+            view.OptionWindowDays,
             view.CovenantTerms,
             view.Status,
             view.FormulaKind,

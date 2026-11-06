@@ -16,6 +16,7 @@ public sealed record CreateGroundLease(
     Homeowner Homeowner,
     DateOnly LeaseStartDate,
     int TermYears,
+    int OptionWindowDays,
     string CovenantTerms,
     ResalePolicyTerms ResalePolicyTerms,
     UserId CreatedBy);
@@ -65,6 +66,7 @@ public static class CreateGroundLeaseHandler
             command.Homeowner,
             command.LeaseStartDate,
             command.TermYears,
+            command.OptionWindowDays,
             command.CovenantTerms,
             command.ResalePolicyTerms,
             homeCommitments,

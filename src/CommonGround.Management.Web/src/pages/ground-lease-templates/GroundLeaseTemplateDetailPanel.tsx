@@ -94,6 +94,10 @@ export default function GroundLeaseTemplateDetailPanel({ templateId, onClose }: 
             <div className="detail-field__label">Term</div>
             <div className="detail-field__value mono">{detail.termYears} years</div>
           </div>
+          <div className="detail-field">
+            <div className="detail-field__label">Option Window</div>
+            <div className="detail-field__value mono">{detail.optionWindowDays} days</div>
+          </div>
           {detail.appreciationShare != null && (
             <div className="detail-field">
               <div className="detail-field__label">Appreciation Share</div>

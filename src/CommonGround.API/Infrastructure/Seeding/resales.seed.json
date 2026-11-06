@@ -1,0 +1,26 @@
+[
+  {
+    "seedKey": "resale-downtown-civic-001",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-downtown-civic-001",
+    "noticeDate": "today-50d",
+    "channel": "Phone",
+    "notes": "Behind on the mortgage and wants to sell through the trust rather than risk foreclosure. Would like to close before the forbearance ends."
+  },
+  {
+    "seedKey": "resale-downtown-civic-003",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-downtown-civic-003",
+    "noticeDate": "today-70d",
+    "channel": "Letter",
+    "notes": "Moving closer to family in Spokane. Flexible on timing."
+  },
+  {
+    "seedKey": "resale-cedar-lane-013b",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-cedar-lane-013b",
+    "noticeDate": "today-5m",
+    "channel": "Email",
+    "withdrawn": { "date": "today-4m", "reason": "The job offer in Seattle fell through; the family is staying." }
+  }
+]

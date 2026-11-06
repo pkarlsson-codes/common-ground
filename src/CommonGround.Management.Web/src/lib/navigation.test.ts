@@ -7,14 +7,14 @@ describe('splitWork', () => {
   it('puts every Work item under My work for Everything', () => {
     const { mine, other } = splitWork(NAV_ITEMS, 'everything')
 
-    expect(labels(mine)).toEqual(['Households', 'Applications', 'Waiting list', 'Home selections', 'Purchases', 'Stewardship'])
+    expect(labels(mine)).toEqual(['Households', 'Applications', 'Waiting list', 'Home selections', 'Purchases', 'Stewardship', 'Resales'])
     expect(other).toEqual([])
   })
 
   it.each<[Focus, string[], string[]]>([
-    ['intake', ['Households', 'Applications', 'Waiting list'], ['Home selections', 'Purchases', 'Stewardship']],
-    ['sales', ['Home selections', 'Purchases'], ['Households', 'Applications', 'Waiting list', 'Stewardship']],
-    ['stewardship', ['Stewardship'], ['Households', 'Applications', 'Waiting list', 'Home selections', 'Purchases']],
+    ['intake', ['Households', 'Applications', 'Waiting list'], ['Home selections', 'Purchases', 'Stewardship', 'Resales']],
+    ['sales', ['Home selections', 'Purchases', 'Resales'], ['Households', 'Applications', 'Waiting list', 'Stewardship']],
+    ['stewardship', ['Stewardship'], ['Households', 'Applications', 'Waiting list', 'Home selections', 'Purchases', 'Resales']],
   ])('splits Work for %s, keeping process order', (focus, mine, other) => {
     const split = splitWork(NAV_ITEMS, focus)
 

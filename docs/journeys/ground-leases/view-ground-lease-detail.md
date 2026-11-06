@@ -5,11 +5,14 @@
 3. User clicks a row in the Ground Leases table
 4. Detail panel opens titled with the homeowner's name (the buyer, for a lease created from a purchase closing; the homeowner entered, for one created from Create Lease), showing status (Active or Inactive), resale formula, and term (years)
 5. Depending on the formula, the panel shows Appreciation Share, Index Type, Baseline Index, and/or Annual %
-6. Panel shows Improvements Cap if one is set, Start Date, Term, homeowner Email and Phone (if present), and Covenant Terms (if present)
+6. Panel shows Improvements Cap if one is set, Start Date, Term, Option Window (days), homeowner Email and Phone (if present), and Covenant Terms (if present)
 7. Panel shows Recorded On (the day the lease was recorded in CommonGround, which for a lease that predates CommonGround is later than its Start Date), and a Connected Records section linking to the home (by its label), its land parcel, and, for leases created from a purchase closing, the purchase and the household
-8. User closes the panel
+8. Panel shows a Resale section: for an Active lease, the resale in progress (notice date, how it came in, notes, Option Window End and days left, or "Window passed") or "No resale in progress"
+9. User closes the panel
 
 Continues in: [View Home Detail](../homes/view-home-detail.md)
 Continues in: [View Land Parcel Detail](../land-parcels/view-land-parcel-detail.md)
 Continues in: [View Purchase Workflow Detail](../purchase-workflows/view-purchase-workflow-detail.md)
 Continues in: [View Household Detail](../households/view-household-detail.md)
+Continues in: [Record Intent to Sell](record-intent-to-sell.md)
+Continues in: [Withdraw Intent to Sell](withdraw-intent-to-sell.md)

@@ -4582,6 +4582,219 @@
         }
       }
     },
+    "/api/v1/ground-leases/{groundLeaseId}/intent-to-sell": {
+      "post": {
+        "tags": [
+          "Resales"
+        ],
+        "operationId": "RecordIntentToSell",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordIntentToSellRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordIntentToSellRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordIntentToSellResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resales/{resaleId}/withdraw": {
+      "post": {
+        "tags": [
+          "Resales"
+        ],
+        "operationId": "WithdrawIntentToSell",
+        "parameters": [
+          {
+            "name": "resaleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "WithdrawIntentToSellRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawIntentToSellRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resales": {
+      "get": {
+        "tags": [
+          "Resales"
+        ],
+        "operationId": "GetResales",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 3
+          },
+          {
+            "name": "groundLeaseId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 4
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfResaleResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/stewardship/cases": {
       "get": {
         "tags": [
@@ -7319,6 +7532,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "optionWindowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
           "covenantTerms": {
             "type": "string"
           },
@@ -7378,6 +7595,10 @@
             "format": "date"
           },
           "termYears": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "optionWindowDays": {
             "type": "integer",
             "format": "int32"
           },
@@ -7636,6 +7857,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "optionWindowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
           "covenantTerms": {
             "type": "string"
           },
@@ -7747,6 +7972,11 @@
           "termYears": {
             "type": "integer",
             "description": "Lease term in years.",
+            "format": "int32"
+          },
+          "optionWindowDays": {
+            "type": "integer",
+            "description": "Days the trust has to buy a home after its homeowner gives notice to sell.",
             "format": "int32"
           },
           "covenantTerms": {
@@ -8643,6 +8873,11 @@
             "nullable": true
           },
           "leasedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "resaleNoticeDate": {
             "type": "string",
             "format": "date",
             "nullable": true
@@ -9980,6 +10215,170 @@
           "resolutionTargetDate": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "RecordIntentToSellResponse": {
+        "type": "object",
+        "description": "Response after recording an intent to sell.",
+        "additionalProperties": false,
+        "properties": {
+          "resaleId": {
+            "type": "string",
+            "description": "The resale the notice opened."
+          }
+        }
+      },
+      "RecordIntentToSellRequest": {
+        "type": "object",
+        "description": "Request to record that a homeowner has given notice they intend to sell.",
+        "additionalProperties": false,
+        "properties": {
+          "noticeDate": {
+            "type": "string",
+            "description": "The day the homeowner gave notice.",
+            "format": "date"
+          },
+          "channel": {
+            "type": "string",
+            "description": "How the notice reached the trust: Phone, Email, Letter or InPerson."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Anything staff want to note about the notice.",
+            "nullable": true
+          }
+        }
+      },
+      "WithdrawIntentToSellRequest": {
+        "type": "object",
+        "description": "Request to record that a homeowner who gave notice to sell has decided not to.",
+        "additionalProperties": false,
+        "properties": {
+          "withdrawnDate": {
+            "type": "string",
+            "description": "The day the homeowner withdrew.",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the homeowner withdrew."
+          }
+        }
+      },
+      "PaginatedResponseOfResaleResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/ResaleResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "ResaleResponse": {
+        "type": "object",
+        "description": "A resale, from the homeowner's notice of intent to sell.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The resale ID."
+          },
+          "groundLeaseId": {
+            "type": "string",
+            "description": "The lease of the homeowner selling."
+          },
+          "landParcelId": {
+            "type": "string",
+            "description": "The leased land parcel."
+          },
+          "homeId": {
+            "type": "string",
+            "description": "The home being sold."
+          },
+          "homeLabel": {
+            "type": "string",
+            "description": "The label staff know the home by, once known.",
+            "nullable": true
+          },
+          "homeownerFullName": {
+            "type": "string",
+            "description": "The selling homeowner's full name.",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "description": "Open or Withdrawn."
+          },
+          "noticeDate": {
+            "type": "string",
+            "description": "The day the homeowner gave notice.",
+            "format": "date"
+          },
+          "noticeChannel": {
+            "type": "string",
+            "description": "How the notice reached the trust."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Anything staff noted about the notice.",
+            "nullable": true
+          },
+          "optionWindowEndsOn": {
+            "type": "string",
+            "description": "The last day of the trust's purchase option.",
+            "format": "date"
+          },
+          "withdrawnDate": {
+            "type": "string",
+            "description": "The day the homeowner withdrew, if they did.",
+            "format": "date",
+            "nullable": true
+          },
+          "withdrawnReason": {
+            "type": "string",
+            "description": "Why the homeowner withdrew, if they did.",
+            "nullable": true
+          },
+          "recordedAt": {
+            "type": "string",
+            "description": "When the notice was recorded.",
+            "format": "date-time"
           }
         }
       },

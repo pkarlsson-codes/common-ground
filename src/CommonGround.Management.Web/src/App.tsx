@@ -14,6 +14,7 @@ import WaitingListPage from './pages/WaitingListPage'
 import LandParcelsPage from './pages/LandParcelsPage'
 import OnboardingPage from './pages/OnboardingPage'
 import PurchaseWorkflowsPage from './pages/PurchaseWorkflowsPage'
+import ResalesPage from './pages/ResalesPage'
 import SignupPage from './pages/SignupPage'
 import TodayPage from './pages/TodayPage'
 import StewardshipPage from './pages/stewardship/StewardshipPage'
@@ -96,6 +97,7 @@ export default function App() {
                 <Route path="/households"   element={<HouseholdsPage />} />
                 <Route path="/waiting-list" element={<WaitingListPage />} />
                 <Route path="/purchase-workflows"  element={<PurchaseWorkflowsPage />} />
+                <Route path="/resales"             element={<ResalesPage />} />
                 <Route path="/documents"           element={<DocumentsPage />} />
                 <Route path="/stewardship"          element={<StewardshipPage />} />
               </Route>

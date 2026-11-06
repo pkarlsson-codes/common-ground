@@ -4,6 +4,7 @@
     "trustSeedKey": "dev-default",
     "templateName": "Standard 99-Year Lease (Appraisal-Based)",
     "termYears": 99,
+    "optionWindowDays": 60,
     "covenantTerms": "Owner-occupancy as primary residence required. Subletting limited to 12 months with trust approval. Resale only to income-eligible buyers at or below the formula price; the trust holds a right of first refusal. Monthly ground lease fee of $45, adjusted every five years.",
     "resalePolicy": { "formulaKind": "AppraisalBased", "appreciationShare": 0.25, "improvementsCap": 15000 }
   },
@@ -12,6 +13,7 @@
     "trustSeedKey": "dev-default",
     "templateName": "Index-Linked Lease (CPI)",
     "termYears": 99,
+    "optionWindowDays": 60,
     "covenantTerms": "Owner-occupancy as primary residence required. Resale price follows the change in CPI from the purchase date; capital improvements are credited up to the cap with trust pre-approval. The trust holds a right of first refusal. Monthly ground lease fee of $40.",
     "resalePolicy": { "formulaKind": "IndexBased", "indexType": "CPI", "baselineIndexValue": 312.33, "improvementsCap": 10000 }
   },
@@ -20,6 +22,7 @@
     "trustSeedKey": "dev-default",
     "templateName": "Area Median Income Lease",
     "termYears": 99,
+    "optionWindowDays": 60,
     "covenantTerms": "Owner-occupancy as primary residence required. Resale price follows the change in area median income, keeping homes affordable to the same income band. The trust holds a right of first refusal. Monthly ground lease fee of $35.",
     "resalePolicy": { "formulaKind": "IndexBased", "indexType": "AMI", "baselineIndexValue": 98400 }
   },
@@ -28,6 +31,7 @@
     "trustSeedKey": "dev-default",
     "templateName": "Fixed 2% Appreciation Lease",
     "termYears": 99,
+    "optionWindowDays": 60,
     "covenantTerms": "Owner-occupancy as primary residence required. Resale price grows by a fixed 2% of the original purchase price per year of ownership. The trust holds a right of first refusal. Monthly ground lease fee of $45.",
     "resalePolicy": { "formulaKind": "FixedPercentage", "annualPercentage": 0.02, "improvementsCap": 12000 }
   },
@@ -36,6 +40,7 @@
     "trustSeedKey": "dev-default",
     "templateName": "Legacy 75-Year Lease",
     "termYears": 75,
+    "optionWindowDays": 60,
     "covenantTerms": "Owner-occupancy as primary residence required. Resale only to income-eligible buyers at or below the formula price. Superseded by the standard 99-year lease; kept for leases signed before 2024.",
     "resalePolicy": { "formulaKind": "AppraisalBased", "appreciationShare": 0.30 },
     "archived": true

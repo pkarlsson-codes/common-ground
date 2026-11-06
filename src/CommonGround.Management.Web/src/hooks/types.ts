@@ -62,6 +62,7 @@ export interface CreateGroundLeaseForm {
   homeownerPhone: string
   leaseStartDate: CalendarDate
   termYears: number
+  optionWindowDays: number
   covenantTerms: string
   formulaKind: string
   appreciationShare: number
@@ -134,6 +135,7 @@ export interface StallWorkflowForm {
 export interface CreateGroundLeaseTemplateForm {
   templateName: string
   termYears: number
+  optionWindowDays: number
   covenantTerms: string
   formulaKind: string
   appreciationShare: number | null

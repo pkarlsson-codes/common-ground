@@ -27,6 +27,7 @@ const emptyCreate = (): CreateGroundLeaseForm => ({
   homeownerPhone: '',
   leaseStartDate: trustToday(),
   termYears: 99,
+  optionWindowDays: 60,
   covenantTerms: '',
   formulaKind: 'AppraisalBased',
   appreciationShare: 0.25,
@@ -170,6 +171,18 @@ export default function GroundLeaseCreatePanel({ onClose }: Props) {
               max="999"
               value={createForm.termYears}
               onChange={e => setCreateForm(f => ({ ...f, termYears: parseInt(e.target.value) || 99 }))}
+              required
+            />
+          </div>
+          <div className="form-field">
+            <label className="form-label">Option Window (days)</label>
+            <input
+              className="form-input"
+              type="number"
+              min="1"
+              max="999"
+              value={createForm.optionWindowDays}
+              onChange={e => setCreateForm(f => ({ ...f, optionWindowDays: parseInt(e.target.value) || 60 }))}
               required
             />
           </div>

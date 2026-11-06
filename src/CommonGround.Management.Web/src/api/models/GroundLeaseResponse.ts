@@ -79,6 +79,12 @@ export interface GroundLeaseResponse {
     termYears?: number;
     /**
      * 
+     * @type {number}
+     * @memberof GroundLeaseResponse
+     */
+    optionWindowDays?: number;
+    /**
+     * 
      * @type {string}
      * @memberof GroundLeaseResponse
      */
@@ -193,6 +199,7 @@ export function GroundLeaseResponseFromJSONTyped(json: any, ignoreDiscriminator:
         'homeId': json['homeId'] == null ? undefined : json['homeId'],
         'leaseStartDate': json['leaseStartDate'] == null ? undefined : CalendarDateFromJSON(json['leaseStartDate']),
         'termYears': json['termYears'] == null ? undefined : json['termYears'],
+        'optionWindowDays': json['optionWindowDays'] == null ? undefined : json['optionWindowDays'],
         'covenantTerms': json['covenantTerms'] == null ? undefined : json['covenantTerms'],
         'status': json['status'] == null ? undefined : json['status'],
         'formulaKind': json['formulaKind'] == null ? undefined : json['formulaKind'],
@@ -229,6 +236,7 @@ export function GroundLeaseResponseToJSONTyped(value?: GroundLeaseResponse | nul
         'homeId': value['homeId'],
         'leaseStartDate': CalendarDateToJSON(value['leaseStartDate']),
         'termYears': value['termYears'],
+        'optionWindowDays': value['optionWindowDays'],
         'covenantTerms': value['covenantTerms'],
         'status': value['status'],
         'formulaKind': value['formulaKind'],

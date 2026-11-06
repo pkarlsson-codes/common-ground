@@ -12,6 +12,7 @@ import { formatPhoneDisplay } from '../../lib/phone'
 import { useToast } from '../../hooks/useToast'
 import { trustToday } from '../../lib/calendarDate'
 import { DateInput } from '../../components/DateInput'
+import LeaseResaleSection from './LeaseResaleSection'
 
 function SkeletonRows() {
   return (
@@ -114,6 +115,10 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
               <div className="detail-field__label">Term</div>
               <div className="detail-field__value mono">{detail.termYears} years</div>
             </div>
+            <div className="detail-field">
+              <div className="detail-field__label">Option Window</div>
+              <div className="detail-field__value mono">{detail.optionWindowDays} days</div>
+            </div>
             {detail.homeownerEmail && (
               <div className="detail-field">
                 <div className="detail-field__label">Email</div>
@@ -139,6 +144,8 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
           </div>
 
           <LeaseConnectedRecords lease={detail} />
+
+          <LeaseResaleSection groundLeaseId={groundLeaseId} leaseActive={detail.status === 'Active'} />
 
           <div className="detail-section">
             <div className="detail-section__title">Stewardship Check-Ins</div>

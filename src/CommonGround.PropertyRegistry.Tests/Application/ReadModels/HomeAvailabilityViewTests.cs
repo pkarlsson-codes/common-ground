@@ -230,4 +230,75 @@ public class HomeAvailabilityViewTests
             sut.Status.Should().Be(HomeStatus.Leased.DisplayName);
         }
     }
+
+    public class TheRecordResaleOpenedMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenLeasedHome_WhenResaleOpened_ThenHomeIsInResaleFromTheNoticeDate()
+        {
+            var sut = _testBed.Sut;
+            sut.RecordLeased(_testBed.Today.AddYears(-3));
+
+            sut.RecordResaleOpened("resale-1", _testBed.Today);
+
+            sut.Status.Should().Be(HomeStatus.Resale.DisplayName);
+            sut.ResaleNoticeDate.Should().Be(_testBed.Today);
+        }
+
+        [Fact]
+        public void GivenResaleOpenedBeforeNewsOfTheLease_WhenLeased_ThenHomeStaysInResale()
+        {
+            var sut = _testBed.Sut;
+            sut.RecordResaleOpened("resale-1", _testBed.Today);
+
+            sut.RecordLeased(_testBed.Today.AddYears(-3));
+
+            sut.Status.Should().Be(HomeStatus.Resale.DisplayName);
+        }
+    }
+
+    public class TheRecordResaleWithdrawnMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenHomeInResale_WhenResaleWithdrawn_ThenHomeIsLeasedAgain()
+        {
+            var sut = _testBed.Sut;
+            sut.RecordLeased(_testBed.Today.AddYears(-3));
+            sut.RecordResaleOpened("resale-1", _testBed.Today);
+
+            sut.RecordResaleWithdrawn("resale-1");
+
+            sut.Status.Should().Be(HomeStatus.Leased.DisplayName);
+            sut.ResaleNoticeDate.Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenWithdrawalArrivesFirst_WhenItsOpeningArrives_ThenHomeStaysLeased()
+        {
+            var sut = _testBed.Sut;
+            sut.RecordLeased(_testBed.Today.AddYears(-3));
+            sut.RecordResaleWithdrawn("resale-1");
+
+            sut.RecordResaleOpened("resale-1", _testBed.Today);
+
+            sut.Status.Should().Be(HomeStatus.Leased.DisplayName);
+        }
+
+        [Fact]
+        public void GivenEarlierResaleWithdrawn_WhenAnotherOpens_ThenHomeIsInResaleFromTheNewNotice()
+        {
+            var sut = _testBed.Sut;
+            sut.RecordLeased(_testBed.Today.AddYears(-3));
+            sut.RecordResaleOpened("resale-1", _testBed.Today.AddDays(-40));
+            sut.RecordResaleWithdrawn("resale-1");
+
+            sut.RecordResaleOpened("resale-2", _testBed.Today);
+
+            sut.ResaleNoticeDate.Should().Be(_testBed.Today);
+        }
+    }
 }

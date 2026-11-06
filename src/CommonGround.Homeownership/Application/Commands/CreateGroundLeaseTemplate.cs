@@ -10,6 +10,7 @@ public sealed record CreateGroundLeaseTemplate(
     GroundLeaseTemplateId TemplateId,
     string TemplateName,
     int TermYears,
+    int OptionWindowDays,
     string CovenantTerms,
     ResalePolicyTerms ResalePolicyTerms,
     UserId CreatedBy);
@@ -26,6 +27,7 @@ public static class CreateGroundLeaseTemplateHandler
             command.TemplateId,
             command.TemplateName,
             command.TermYears,
+            command.OptionWindowDays,
             command.CovenantTerms,
             command.ResalePolicyTerms,
             command.CreatedBy);

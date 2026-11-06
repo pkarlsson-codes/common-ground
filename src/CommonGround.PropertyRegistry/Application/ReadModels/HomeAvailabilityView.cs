@@ -2,7 +2,7 @@ namespace CommonGround.PropertyRegistry.Application.ReadModels;
 
 /// <summary>
 /// Where a home stands in being sold, pieced together from HomeBuyers' selections and Homeownership's
-/// purchases and leases. Those contexts decide; this only shows what they decided, so it takes their news in whatever
+/// purchases, leases and resales. Those contexts decide; this only shows what they decided, so it takes their news in whatever
 /// order it arrives and never refuses any of it. A home without one is available.
 /// </summary>
 public class HomeAvailabilityView
@@ -25,8 +25,14 @@ public class HomeAvailabilityView
     /// <summary>Gets or sets the start date of the home's ground lease, once it has one.</summary>
     public DateOnly? LeasedDate { get; set; }
 
+    /// <summary>Gets or sets the day the homeowner gave notice to sell, while a resale of the home is open.</summary>
+    public DateOnly? ResaleNoticeDate { get; set; }
+
     /// <summary>Gets or sets the home's selections, as far as news of them has arrived.</summary>
     public List<HomeAvailabilitySelection> Selections { get; set; } = [];
+
+    /// <summary>Gets or sets the home's resales, as far as news of them has arrived.</summary>
+    public List<HomeAvailabilityResale> Resales { get; set; } = [];
 
     /// <summary>
     /// Gets or sets purchases that fell through before news arrived of the selection that led to them,
@@ -87,6 +93,32 @@ public class HomeAvailabilityView
         Refresh();
     }
 
+    /// <summary>Records that the homeowner gave notice to sell, opening a resale of the home.</summary>
+    public void RecordResaleOpened(string resaleId, DateOnly noticeDate)
+    {
+        ResaleFor(resaleId).NoticeDate = noticeDate;
+        Refresh();
+    }
+
+    /// <summary>Records that the homeowner withdrew their notice to sell.</summary>
+    public void RecordResaleWithdrawn(string resaleId)
+    {
+        ResaleFor(resaleId).Withdrawn = true;
+        Refresh();
+    }
+
+    private HomeAvailabilityResale ResaleFor(string resaleId)
+    {
+        var resale = Resales.Find(r => r.Id == resaleId);
+        if (resale is null)
+        {
+            resale = new HomeAvailabilityResale { Id = resaleId };
+            Resales.Add(resale);
+        }
+
+        return resale;
+    }
+
     private HomeAvailabilitySelection SelectionFor(string selectionId)
     {
         var selection = Selections.Find(s => s.Id == selectionId);
@@ -100,14 +132,17 @@ public class HomeAvailabilityView
     }
 
     // HomeBuyers runs one selection per home at a time, so the latest to start is the one that counts;
-    // a selection heard of only through its outcome counts once news of its start arrives.
+    // a selection heard of only through its outcome counts once news of its start arrives. A lease has one
+    // open resale at a time, so one heard of and not withdrawn is it, whether or not news of the lease came first.
     private void Refresh()
     {
         var latest = Selections.Where(s => s.StartedAt is not null).MaxBy(s => s.StartedAt);
         var active = latest is { Cancelled: false, FellThroughDate: null } ? latest : null;
+        var openResale = Resales.Find(r => r is { NoticeDate: not null, Withdrawn: false });
 
         Status = (LeasedDate, active) switch
         {
+            _ when openResale is not null => HomeStatus.Resale.DisplayName,
             ({ }, _) => HomeStatus.Leased.DisplayName,
             (null, null) => HomeStatus.Available.DisplayName,
             (null, { ApplicationId: null }) => HomeStatus.InSelection.DisplayName,
@@ -116,7 +151,21 @@ public class HomeAvailabilityView
         SelectionOpenedDate = active?.OpenedDate;
         UnderContractDate = active?.SelectedDate;
         AvailableAgainDate = Selections.Max(s => s.FellThroughDate);
+        ResaleNoticeDate = openResale?.NoticeDate;
     }
+}
+
+/// <summary>What a <see cref="HomeAvailabilityView"/> has heard of one of the home's resales.</summary>
+public class HomeAvailabilityResale
+{
+    /// <summary>Gets or sets the resale ID.</summary>
+    public string Id { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the day the homeowner gave notice, once news of the resale opening has arrived.</summary>
+    public DateOnly? NoticeDate { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether the homeowner withdrew their notice.</summary>
+    public bool Withdrawn { get; set; }
 }
 
 /// <summary>What a <see cref="HomeAvailabilityView"/> has heard of one of the home's selections.</summary>

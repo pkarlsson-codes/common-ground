@@ -21,6 +21,9 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
     /// <summary>Gets the lease term in years.</summary>
     public int TermYears { get; private set; }
 
+    /// <summary>Gets the days the trust has to buy a home, or assign its option, after its homeowner gives notice to sell.</summary>
+    public int OptionWindowDays { get; private set; }
+
     /// <summary>Gets the covenant terms.</summary>
     public string CovenantTerms { get; private set; }
 
@@ -41,6 +44,7 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
         GroundLeaseTemplateId id,
         string templateName,
         int termYears,
+        int optionWindowDays,
         string covenantTerms,
         ResalePolicyTerms resalePolicyTerms,
         UserId createdBy)
@@ -57,6 +61,11 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
             throw BusinessRuleViolation.GroundLeaseTemplate.Create.TermYearsNonPositive(termYears);
         }
 
+        if (optionWindowDays <= 0)
+        {
+            throw BusinessRuleViolation.GroundLeaseTemplate.Create.OptionWindowDaysNonPositive(optionWindowDays);
+        }
+
         if (string.IsNullOrWhiteSpace(covenantTerms))
         {
             throw BusinessRuleViolation.GroundLeaseTemplate.Create.CovenantTermsRequired();
@@ -66,6 +75,7 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
             id.Value,
             templateName,
             termYears,
+            optionWindowDays,
             covenantTerms,
             resalePolicyTerms.FormulaKind,
             resalePolicyTerms.AppreciationShare,
@@ -117,6 +127,7 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
         Id = GroundLeaseTemplateId.Create(e.AggregateId);
         TemplateName = e.TemplateName;
         TermYears = e.TermYears;
+        OptionWindowDays = e.OptionWindowDays;
         CovenantTerms = e.CovenantTerms;
         ResalePolicyTerms = e.FormulaKind switch
         {

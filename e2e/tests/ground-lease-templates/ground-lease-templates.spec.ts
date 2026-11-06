@@ -43,12 +43,14 @@ test('creating an appraisal-based template with an improvements cap shows its te
   const form = await openNewTemplate(page)
 
   await expect(field(form, 'Term (years)')).toHaveValue('99')
+  await expect(field(form, 'Option Window (days)')).toHaveValue('60')
   await expect(field(form, 'Resale Formula')).toHaveValue('AppraisalBased')
   await expect(field(form, 'Appreciation Share')).toHaveValue('0.25')
   await expect(field(form, 'Improvements Cap ($)')).toHaveCount(0)
 
   const name = await fillCommonFields(form)
   await field(form, 'Term (years)').fill('75')
+  await field(form, 'Option Window (days)').fill('90')
   await field(form, 'Appreciation Share').fill('0.3')
   await form.getByRole('checkbox', { name: 'Set improvements cap' }).check()
   await expect(field(form, 'Improvements Cap ($)')).toHaveValue('25000')
@@ -59,6 +61,7 @@ test('creating an appraisal-based template with an improvements cap shows its te
   await expect(detailValue(detail, 'Status')).toHaveText('Active')
   await expect(detailValue(detail, 'Formula')).toHaveText('Appraisal Based')
   await expect(detailValue(detail, 'Term')).toHaveText('75 years')
+  await expect(detailValue(detail, 'Option Window')).toHaveText('90 days')
   await expect(detailValue(detail, 'Appreciation Share')).toHaveText('30.0%')
   await expect(detailValue(detail, 'Improvements Cap')).toHaveText('$30,000')
   await expect(detailValue(detail, 'Covenant Terms')).toHaveText('Owner-occupied, permanently affordable')

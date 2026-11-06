@@ -34,6 +34,12 @@ export interface CreateGroundLeaseTemplateRequest {
     termYears?: number;
     /**
      * 
+     * @type {number}
+     * @memberof CreateGroundLeaseTemplateRequest
+     */
+    optionWindowDays?: number;
+    /**
+     * 
      * @type {string}
      * @memberof CreateGroundLeaseTemplateRequest
      */
@@ -95,6 +101,7 @@ export function CreateGroundLeaseTemplateRequestFromJSONTyped(json: any, ignoreD
         
         'templateName': json['templateName'] == null ? undefined : json['templateName'],
         'termYears': json['termYears'] == null ? undefined : json['termYears'],
+        'optionWindowDays': json['optionWindowDays'] == null ? undefined : json['optionWindowDays'],
         'covenantTerms': json['covenantTerms'] == null ? undefined : json['covenantTerms'],
         'formulaKind': json['formulaKind'] == null ? undefined : json['formulaKind'],
         'appreciationShare': json['appreciationShare'] == null ? undefined : json['appreciationShare'],
@@ -118,6 +125,7 @@ export function CreateGroundLeaseTemplateRequestToJSONTyped(value?: CreateGround
         
         'templateName': value['templateName'],
         'termYears': value['termYears'],
+        'optionWindowDays': value['optionWindowDays'],
         'covenantTerms': value['covenantTerms'],
         'formulaKind': value['formulaKind'],
         'appreciationShare': value['appreciationShare'],

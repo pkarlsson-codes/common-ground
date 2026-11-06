@@ -4,6 +4,7 @@ using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates.Events;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
+using CommonGround.Homeownership.Domain.Resales;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using CommonGround.Testing;
@@ -26,14 +27,14 @@ public class GroundLeaseTests
 
         public GroundLeaseCreated Established(ResalePolicyTerms? terms = null) =>
             GroundLease.Establish(
-                LeaseId, ParcelId, HomeId, Homeowner, new DateOnly(2025, 1, 1), 99, "Standard affordability covenant",
+                LeaseId, ParcelId, HomeId, Homeowner, new DateOnly(2025, 1, 1), 99, 60, "Standard affordability covenant",
                 terms ?? ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, StaffUser);
 
         public GroundLease Lease(ResalePolicyTerms? terms = null) => EventReplay.Replay<GroundLease>(Established(terms));
 
         public GroundLeaseTemplate ActiveTemplate(string covenantTerms, int termYears, ResalePolicyTerms terms) =>
             EventReplay.Replay<GroundLeaseTemplate>(
-                GroundLeaseTemplate.Define(GroundLeaseTemplateId.Generate(), "Template", termYears, covenantTerms, terms, StaffUser));
+                GroundLeaseTemplate.Define(GroundLeaseTemplateId.Generate(), "Template", termYears, 45, covenantTerms, terms, StaffUser));
 
         public GroundLeaseTemplate InactiveTemplate()
         {
@@ -65,6 +66,7 @@ public class GroundLeaseTests
                 UnitId = TestBed.HomeId,
                 LeaseStartDate = new DateOnly(2025, 1, 1),
                 TermYears = 99,
+                OptionWindowDays = 60,
                 Status = GroundLeaseStatus.Active,
                 CurrentHomeowner = _testBed.Homeowner,
                 TemplateId = (GroundLeaseTemplateId?)null,
@@ -82,22 +84,24 @@ public class GroundLeaseTests
         {
             var act = () => GroundLease.Establish(
                 _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, _testBed.Homeowner, new DateOnly(2025, 1, 1),
-                99, "Terms", ResalePolicyTerms.AppraisalBased(0.25m),
+                99, 60, "Terms", ResalePolicyTerms.AppraisalBased(0.25m),
                 HomeCommitments.Create(activeLeaseId, openPurchaseWorkflowId, openHomeSelectionId), _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }
 
         [Theory]
-        [InlineData(0, "Terms")]
-        [InlineData(99, "")]
-        public void GivenInvalidInputs_WhenEstablished_ThenThrowsBusinessRuleViolation(int termYears, string covenantTerms)
+        [InlineData(0, 60, "Terms", "homeownership.ground_lease.create.term_years_non_positive")]
+        [InlineData(99, 0, "Terms", "homeownership.ground_lease.create.option_window_days_non_positive")]
+        [InlineData(99, 60, "", "homeownership.ground_lease.create.covenant_terms_required")]
+        public void GivenInvalidInputs_WhenEstablished_ThenThrowsBusinessRuleViolation(
+            int termYears, int optionWindowDays, string covenantTerms, string expectedCode)
         {
             var act = () => GroundLease.Establish(
                 _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, _testBed.Homeowner, new DateOnly(2025, 1, 1),
-                termYears, covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser);
+                termYears, optionWindowDays, covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser);
 
-            act.Should().Throw<BusinessRuleViolationException>();
+            act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }
 
         [Theory]
@@ -194,6 +198,7 @@ public class GroundLeaseTests
             {
                 TemplateId = template.Id,
                 TermYears = 99,
+                OptionWindowDays = 45,
                 CovenantTerms = "Template covenant terms",
                 ResalePolicyTerms = new { FormulaKind = FormulaKind.IndexBased, IndexType = "CPI" },
                 CurrentHomeowner = new { FullName = new { Value = "Buyer Name" }, Email = new { Value = "buyer@example.com" } },
@@ -245,5 +250,84 @@ public class GroundLeaseTests
             ResalePolicyTerms.IndexBased("CPI", 210m, null),
             ResalePolicyTerms.FixedPercentage(0.015m, 5000m),
         };
+    }
+
+    public class TheStartResaleMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenActiveLeaseWithNoResale_WhenStarted_ThenTheLeaseHoldsTheOpenResale()
+        {
+            var sut = _testBed.Lease();
+            var resaleId = ResaleId.Generate();
+
+            var (started, _) = sut.Decide(l => l.StartResale(resaleId));
+
+            started.OpenResaleId.Should().Be(resaleId);
+        }
+
+        [Fact]
+        public void GivenOpenResale_WhenStarted_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = _testBed.Lease().Evolve(new ResaleStarted(_testBed.LeaseId.Value, ResaleId.Generate().Value))!;
+
+            var act = () => sut.StartResale(ResaleId.Generate());
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.start_resale.resale_already_open");
+        }
+
+        [Fact]
+        public void GivenClosedResale_WhenStarted_ThenStartsTheNewOne()
+        {
+            var closedId = ResaleId.Generate();
+            var sut = _testBed.Lease().Evolve(
+                new ResaleStarted(_testBed.LeaseId.Value, closedId.Value),
+                new ResaleClosed(_testBed.LeaseId.Value, closedId.Value))!;
+            var resaleId = ResaleId.Generate();
+
+            var started = sut.StartResale(resaleId);
+
+            started.ResaleId.Should().Be(resaleId.Value);
+        }
+
+        [Fact]
+        public void GivenTerminatedLease_WhenStarted_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = _testBed.Lease().Evolve(
+                new GroundLeaseTerminated(_testBed.LeaseId.Value, "Moved", new DateOnly(2026, 1, 1), _testBed.StaffUser.Value))!;
+
+            var act = () => sut.StartResale(ResaleId.Generate());
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.start_resale.status_not_active");
+        }
+    }
+
+    public class TheCloseResaleMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenTheOpenResale_WhenClosed_ThenTheLeaseHasNoOpenResale()
+        {
+            var resaleId = ResaleId.Generate();
+            var sut = _testBed.Lease().Evolve(new ResaleStarted(_testBed.LeaseId.Value, resaleId.Value))!;
+
+            var (closed, _) = sut.Decide(l => l.CloseResale(resaleId));
+
+            closed.OpenResaleId.Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenAnotherResale_WhenClosed_ThenDecidesNothing()
+        {
+            var sut = _testBed.Lease().Evolve(new ResaleStarted(_testBed.LeaseId.Value, ResaleId.Generate().Value))!;
+
+            var closed = sut.CloseResale(ResaleId.Generate());
+
+            closed.Should().BeNull();
+        }
     }
 }

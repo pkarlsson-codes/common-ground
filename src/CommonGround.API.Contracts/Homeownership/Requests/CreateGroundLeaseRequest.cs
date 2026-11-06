@@ -9,6 +9,7 @@ public sealed record CreateGroundLeaseRequest(
     string? HomeownerPhone,
     DateOnly LeaseStartDate,
     int TermYears,
+    int OptionWindowDays,
     string CovenantTerms,
     string FormulaKind,
     decimal? AppreciationShare,

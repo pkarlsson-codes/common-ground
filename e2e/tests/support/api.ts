@@ -65,6 +65,7 @@ export async function createGroundLeaseTemplate(page: Page) {
   const { groundLeaseTemplateId } = await post<{ groundLeaseTemplateId: string }>(page, '/api/v1/ground-lease-templates', {
     templateName,
     termYears: 99,
+    optionWindowDays: 60,
     covenantTerms: 'Standard covenant terms',
     formulaKind: 'AppraisalBased',
     appreciationShare: 0.25,

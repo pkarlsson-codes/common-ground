@@ -242,6 +242,54 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.Created);
     }
 
+    [Fact]
+    public async Task RecordingAnIntentToSell_PutsTheHomeInResaleUntilItIsWithdrawn()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var landParcelId = await CreateLandParcelAsync(client);
+        var homeId = await TrackAsync(() => RegisterHomeAsync(client, landParcelId));
+        var leaseId = await TrackAsync(async () =>
+            (await (await CreateLeaseAsync(client, landParcelId, homeId, new DateOnly(2019, 3, 1)))
+                .Content.ReadFromJsonAsync<CreateGroundLeaseResponse>())!.GroundLeaseId);
+        var today = (await GetTodayAsync(client)).Today;
+
+        var resaleId = await TrackAsync(async () =>
+        {
+            var response = await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/intent-to-sell",
+                new RecordIntentToSellRequest(today, "Phone", "Moving for work"));
+            response.StatusCode.Should().Be(HttpStatusCode.Created);
+            return (await response.Content.ReadFromJsonAsync<RecordIntentToSellResponse>())!.ResaleId;
+        });
+
+        (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}"))!
+            .Should().BeEquivalentTo(new { Status = "Resale", ResaleNoticeDate = today });
+        (await client.GetFromJsonAsync<PaginatedResponse<ResaleResponse>>($"/api/resales?status=Open&groundLeaseId={leaseId}"))!
+            .Items.Should().ContainSingle().Which.Should().BeEquivalentTo(new
+            {
+                Id = resaleId,
+                HomeId = homeId,
+                HomeownerFullName = "Dana Whitfield",
+                OptionWindowEndsOn = today.AddDays(60),
+            });
+
+        var second = await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/intent-to-sell",
+            new RecordIntentToSellRequest(today, "Email", null));
+        second.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await second.Content.ReadFromJsonAsync<ProblemDetails>())!.Detail
+            .Should().Be("This lease already has a resale in progress.");
+
+        await TrackAsync(async () =>
+            (await client.PostAsJsonAsync($"/api/resales/{resaleId}/withdraw", new WithdrawIntentToSellRequest(today, "Staying put")))
+                .StatusCode.Should().Be(HttpStatusCode.NoContent));
+
+        (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}"))!
+            .Should().BeEquivalentTo(new { Status = "Leased", ResaleNoticeDate = (DateOnly?)null });
+        (await client.GetFromJsonAsync<PaginatedResponse<ResaleResponse>>($"/api/resales?status=Open&groundLeaseId={leaseId}"))!
+            .Items.Should().BeEmpty();
+        (await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/intent-to-sell", new RecordIntentToSellRequest(today, "Letter", null)))
+            .StatusCode.Should().Be(HttpStatusCode.Created, "a withdrawn resale frees the lease for another notice");
+    }
+
     /// <summary>
     /// Runs <paramref name="action"/>, then waits for the events it leads to to reach every handler. A
     /// catch-up forwards only the events stored so far, and handlers append more (a fallen-through
@@ -317,7 +365,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
     private static Task<HttpResponseMessage> CreateLeaseAsync(HttpClient client, string landParcelId, string homeId, DateOnly leaseStart) =>
         client.PostAsJsonAsync("/api/ground-leases",
             new CreateGroundLeaseRequest(
-                landParcelId, homeId, "Dana Whitfield", "dana@example.com", null, leaseStart, 99, "Signed on paper",
+                landParcelId, homeId, "Dana Whitfield", "dana@example.com", null, leaseStart, 99, 60, "Signed on paper",
                 "AppraisalBased", 0.25m, null, null, null, null));
 
     private static async Task<TodayResponse> GetTodayAsync(HttpClient client) =>
@@ -344,7 +392,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
     {
         var response = await client.PostAsJsonAsync("/api/ground-lease-templates",
             new CreateGroundLeaseTemplateRequest(
-                $"Standard 99-Year {Guid.NewGuid():N}", 99, "Standard covenant terms", "AppraisalBased", 0.25m, null, null, null, null));
+                $"Standard 99-Year {Guid.NewGuid():N}", 99, 60, "Standard covenant terms", "AppraisalBased", 0.25m, null, null, null, null));
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         return (await response.Content.ReadFromJsonAsync<CreateGroundLeaseTemplateResponse>())!.GroundLeaseTemplateId;
     }

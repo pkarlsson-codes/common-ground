@@ -11,6 +11,7 @@ apis/HouseholdApi.ts
 apis/LandParcelsApi.ts
 apis/OidcApi.ts
 apis/PurchaseWorkflowsApi.ts
+apis/ResalesApi.ts
 apis/StewardshipApi.ts
 apis/TodayApi.ts
 apis/TrustsApi.ts
@@ -105,6 +106,7 @@ models/PaginatedResponseOfHomeownerApplicationListItemResponse.ts
 models/PaginatedResponseOfHouseholdListItemResponse.ts
 models/PaginatedResponseOfLandParcelListItemResponse.ts
 models/PaginatedResponseOfPurchaseWorkflowListItemResponse.ts
+models/PaginatedResponseOfResaleResponse.ts
 models/PaginatedResponseOfStewardshipCaseResponse.ts
 models/PaginatedResponseOfWaitingListEntryResponse.ts
 models/PassOverDto.ts
@@ -123,6 +125,8 @@ models/RecordForbearanceOutcomeRequest.ts
 models/RecordHomeAssessmentRequest.ts
 models/RecordHousingCounselingRequest.ts
 models/RecordInspectionCompletedRequest.ts
+models/RecordIntentToSellRequest.ts
+models/RecordIntentToSellResponse.ts
 models/RecordLeaseExecutedRequest.ts
 models/RecordMortgagePrequalificationRequest.ts
 models/RecordPurchaseClosedRequest.ts
@@ -137,6 +141,7 @@ models/RegisterLandParcelRequest.ts
 models/RegisterLandParcelResponse.ts
 models/RequestForbearanceRequest.ts
 models/ResaleEstimateResponse.ts
+models/ResaleResponse.ts
 models/ResolveForeclosurePreventionCaseRequest.ts
 models/ScheduleClosingRequest.ts
 models/SchedulePropertyInspectionRequest.ts
@@ -162,6 +167,7 @@ models/UploadDocumentResponse.ts
 models/VerifyOccupancyRequest.ts
 models/WaitingListEntryResponse.ts
 models/WithdrawApplicationRequest.ts
+models/WithdrawIntentToSellRequest.ts
 models/WithdrawPurchaseRequest.ts
 models/WorkCountResponse.ts
 models/WorkItemResponse.ts

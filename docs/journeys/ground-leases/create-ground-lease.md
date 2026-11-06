@@ -8,7 +8,7 @@ For recording a lease that didn't come from a purchase, such as one signed befor
 4. User searches and selects a Land Parcel
 5. User searches and selects a Home on that parcel (disabled until a parcel is chosen)
 6. User enters the Homeowner's Full Name and Email (both required) and optionally a Phone number
-7. User enters Lease Start Date (default today; may be years back for a lease that predates CommonGround) and Term (years, default 99)
+7. User enters Lease Start Date (default today; may be years back for a lease that predates CommonGround) Term (years, default 99) and Option Window (days the trust has to buy the home after the homeowner gives notice to sell, default 60)
 8. User enters Covenant Terms (required)
 9. User selects a Resale Formula: Appraisal Based, Index Based, or Fixed Percentage (default Appraisal Based)
 10. If Appraisal Based, user enters Appreciation Share (decimal fraction, e.g. 0.25 = 25%, default 0.25)

@@ -13,6 +13,7 @@ export * from './HouseholdApi';
 export * from './LandParcelsApi';
 export * from './OidcApi';
 export * from './PurchaseWorkflowsApi';
+export * from './ResalesApi';
 export * from './StewardshipApi';
 export * from './TodayApi';
 export * from './TrustsApi';

@@ -40,6 +40,7 @@ public static class GroundLeaseTemplatesEndpoints
             id,
             request.TemplateName,
             request.TermYears,
+            request.OptionWindowDays,
             request.CovenantTerms,
             resalePolicyTerms,
             userId);
@@ -80,7 +81,7 @@ public static class GroundLeaseTemplatesEndpoints
         var view = await bus.InvokeForTenantAsync<GroundLeaseTemplateDetailView>(
             bus.TenantId!, new GetGroundLeaseTemplate(templateId), cancellationToken);
         return Results.Ok(new GroundLeaseTemplateResponse(
-            view.Id, view.TemplateName, view.TermYears, view.CovenantTerms, view.Status,
+            view.Id, view.TemplateName, view.TermYears, view.OptionWindowDays, view.CovenantTerms, view.Status,
             view.FormulaKind, view.AppreciationShare, view.IndexType, view.BaselineIndexValue,
             view.AnnualPercentage, view.ImprovementsCap,
             view.CreatedAt, view.CreatedBy));
