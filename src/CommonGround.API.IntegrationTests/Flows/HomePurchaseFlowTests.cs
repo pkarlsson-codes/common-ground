@@ -11,8 +11,6 @@ using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.Stewardship.Infrastructure.Persistence;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Wolverine.Marten;
-using Wolverine.Tracking;
 
 namespace CommonGround.API.IntegrationTests.Flows;
 
@@ -29,9 +27,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
     private static readonly DateOnly SelectedDate = new(2026, 7, 20);
     private static readonly DateOnly ClosingDate = new(2026, 9, 1);
 
-    private static readonly string FailingHandlerQueue = nameof(FailingApplicationSelectedHandler).ToLowerInvariant();
-
-    private readonly List<string> _deadLettered = [];
+    private readonly FlowTracker _tracker = new(factory);
 
     [Fact]
     public async Task RegisteringAHome_LetsHomeBuyersSelectForItAndHomeownershipNameIt()
@@ -113,7 +109,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
     {
         var client = factory.CreateClient().WithAuthToken();
         var purchase = await SelectHouseholdAsync(client, failingTheSelection: true);
-        _deadLettered.Should().ContainSingle("the failing reaction ran, and only once, with no retries");
+        _tracker.FailedOnPurpose.Should().ContainSingle("the failing reaction ran, and only once, with no retries");
 
         (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{purchase.HomeId}"))!
             .Status.Should().Be("UnderContract");
@@ -290,46 +286,9 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
             .StatusCode.Should().Be(HttpStatusCode.Created, "a withdrawn resale frees the lease for another notice");
     }
 
-    /// <summary>
-    /// Runs <paramref name="action"/>, then waits for the events it leads to to reach every handler. A
-    /// catch-up forwards only the events stored so far, and handlers append more (a fallen-through
-    /// purchase starts a new selection), so it catches up again until a round forwards nothing. Fails
-    /// if a handler dead-letters a message, other than <see cref="FailingApplicationSelectedHandler"/>,
-    /// whose failures are kept in <see cref="_deadLettered"/>.
-    /// </summary>
-    private async Task TrackAsync(Func<Task> action)
-    {
-        var session = await TrackRoundAsync(action);
-        for (var round = 0; session.AllRecordsInOrder().Any(r => r.MessageEventType == MessageEventType.Sent); round++)
-        {
-            round.Should().BeLessThan(10, "the events a step leads to should settle");
-            session = await TrackRoundAsync(() => Task.CompletedTask);
-        }
-    }
+    private Task TrackAsync(Func<Task> action) => _tracker.TrackAsync(action);
 
-    private async Task<ITrackedSession> TrackRoundAsync(Func<Task> action)
-    {
-        var session = await factory.Services.TrackActivity(TimeSpan.FromSeconds(30))
-            .PauseThenCatchUpOnMartenDaemonActivity()
-            .ExecuteAndWaitAsync(_ => action());
-
-        var deadLettered = session.AllRecordsInOrder()
-            .Where(r => r.MessageEventType == MessageEventType.MovedToErrorQueue)
-            .Select(r => r.Envelope!.Destination!.ToString())
-            .ToList();
-        var failedOnPurpose = deadLettered.Where(d => d.Contains(FailingHandlerQueue, StringComparison.Ordinal)).ToList();
-        deadLettered.Except(failedOnPurpose).Should().BeEmpty("no handler should fail");
-        _deadLettered.AddRange(failedOnPurpose);
-
-        return session;
-    }
-
-    private async Task<T> TrackAsync<T>(Func<Task<T>> action)
-    {
-        T result = default!;
-        await TrackAsync(async () => { result = await action(); });
-        return result;
-    }
+    private Task<T> TrackAsync<T>(Func<Task<T>> action) => _tracker.TrackAsync(action);
 
     private sealed record Applicant(string ApplicationId, string HouseholdId);
 

@@ -2,6 +2,7 @@ using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Extensions;
+using JasperFx.Events;
 using Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
@@ -23,29 +24,40 @@ public sealed record SelectHouseholdByPriority(
 /// <summary>Handles <see cref="SelectHouseholdByPriority"/>.</summary>
 public static class SelectHouseholdByPriorityHandler
 {
-    /// <summary>Fetches the selection and its candidates' applications for writing.</summary>
-    public static Task<SelectionCompletion> LoadAsync(
+    /// <summary>Fetches the selection for writing.</summary>
+    public static Task<IEventStream<HomeSelection>> LoadAsync(
         SelectHouseholdByPriority command,
         IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        return HomeSelectionCompletion.LoadAsync(session, command.SelectionId, cancellationToken);
+        return HomeSelectionCompletion.FetchSelectionAsync(session, command.SelectionId, cancellationToken);
     }
 
-    /// <summary>Records the choice, selects the chosen application, and passes over the others.</summary>
-    public static void Handle(SelectHouseholdByPriority command, SelectionCompletion completion)
+    /// <summary>
+    /// Records the choice, then fetches the chosen application for writing and selects it.
+    /// The other candidates are passed over afterwards.
+    /// </summary>
+    public static async Task Handle(
+        SelectHouseholdByPriority command,
+        IEventStream<HomeSelection> selection,
+        IDocumentSession session,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
-        ArgumentNullException.ThrowIfNull(completion);
+        ArgumentNullException.ThrowIfNull(selection);
 
-        completion.Selection.Decide(selection =>
-            selection.SelectByPriority(command.ApplicationId, command.Priorities, command.Reason, command.SelectedBy));
+        var current = selection.Aggregate!;
+        selection.Decide(s =>
+            s.SelectByPriority(command.ApplicationId, command.Priorities, command.Reason, command.SelectedBy));
 
+        var chosen = await HomeSelectionCompletion
+            .FetchChosenAsync(session, current, command.ApplicationId, cancellationToken)
+            .ConfigureAwait(false);
         HomeSelectionCompletion.Complete(
-            completion,
-            command.ApplicationId,
+            current,
+            chosen,
             command.GroundLeaseTemplateId,
             command.PurchasePrice,
             command.SelectedDate,

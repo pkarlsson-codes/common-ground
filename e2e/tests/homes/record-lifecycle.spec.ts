@@ -46,16 +46,21 @@ test('a household selected for a home is purchasing it, and the two detail pages
 
 test('a failed purchase returns the household to the waiting list and the home to selection', async ({ page }) => {
   const buyer = `Fallen ${uniqueId()}`
-  const { apn, workflowId, householdId } = await createPurchaseWorkflow(page, buyer, { fromApplication: true })
+  const { apn, workflowId, householdId, homeId } = await createPurchaseWorkflow(page, buyer, { fromApplication: true })
   const email = `${buyer.toLowerCase().replace(/\s+/g, '-')}@example.com`
   const homeLabel = `${apn} Elm St`
   // Someone else is waiting, so the home gets a new selection.
   await createApplication(page, `Next ${uniqueId()}`)
 
   await post(page, `/api/v1/purchase-workflows/${workflowId}/fail`, { failureReason: 'Financing fell through', failedDate: isoDate() })
-  // HomeBuyers and PropertyRegistry hear about it from an integration event, so wait for both.
+  // HomeBuyers and PropertyRegistry hear about it from an integration event, so wait for both, and
+  // for the new selection HomeBuyers starts once the home is available again.
   await expect.poll(async () =>
     (await get<{ journey: { stage: string } }>(page, `/api/v1/households/${householdId}`)).journey.stage).toBe('Waiting')
+  await expect.poll(async () => (await get<{ status: string }>(page, `/api/v1/homes/${homeId}`)).status).toBe('InSelection')
+  await expect.poll(async () =>
+    (await get<{ status: string }[]>(page, `/api/v1/homes/${homeId}/home-selections`)).map(s => s.status).sort())
+    .toEqual(['FellThrough', 'Open'])
 
   const household = await openHousehold(page, email, buyer)
   await expect(currentStep(household)).toContainText('Waiting')
@@ -64,10 +69,7 @@ test('a failed purchase returns the household to the waiting list and the home t
 
   await household.getByRole('button', { name: `Open Home: ${homeLabel}` }).click()
   const home = panel(page, homeLabel)
-  await expect(async () => {
-    await page.reload()
-    await expect(currentStep(home)).toContainText('Selection', { timeout: 2_000 })
-  }).toPass()
+  await expect(currentStep(home)).toContainText('Selection')
   await expect(nextStep(home).getByRole('button', { name: 'Open Selection' })).toBeVisible()
   await expect(home.getByRole('button', { name: /^Open Selection:/ }).filter({ hasText: 'Fell Through' })).toHaveCount(1)
 })

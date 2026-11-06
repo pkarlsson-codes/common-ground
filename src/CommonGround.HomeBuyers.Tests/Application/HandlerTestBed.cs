@@ -57,9 +57,9 @@ public class HandlerTestBed
             null,
             StaffUser));
 
-    public SelectionCompletion Completion(HomeSelection selection, params (HomeownerApplication Application, Household Household)[] candidates) =>
+    public ChosenApplication Chosen(HomeownerApplication application, Household household) =>
         new(
-            new StubEventStream<HomeSelection>(selection),
-            [.. candidates.Select(c => new CandidateApplication(new StubEventStream<HomeownerApplication>(c.Application), c.Household))],
+            new StubEventStream<HomeownerApplication>(application),
+            household,
             new HomeFactsView { Id = HomeId, LandParcelId = "land-parcel-1" });
 }

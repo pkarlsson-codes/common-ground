@@ -120,13 +120,15 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
                     var applicationId = await LoadApplicationIdAsync(trustSession, priority.HouseholdSeedKey, entry.SeedKey, cancellation).ConfigureAwait(false);
                     var templateId = await LoadTemplateIdAsync(trustSession, priority.GroundLeaseTemplateSeedKey, entry.SeedKey, cancellation).ConfigureAwait(false);
 
-                    var completion = await HomeSelectionCompletion.LoadAsync(trustSession, selectionId, cancellation).ConfigureAwait(false);
-                    completion.Selection.Decide(selection => selection.SelectByPriority(
+                    var selection = await HomeSelectionCompletion.FetchSelectionAsync(trustSession, selectionId, cancellation).ConfigureAwait(false);
+                    var current = selection.Aggregate!;
+                    selection.Decide(s => s.SelectByPriority(
                         applicationId,
                         [.. priority.Priorities.Select(SelectionPriority.FromDisplayName)],
                         priority.Reason,
                         SeederUserId));
-                    HomeSelectionCompletion.Complete(completion, applicationId, templateId, priority.PurchasePrice, selectedDate, SeederUserId);
+                    var chosen = await HomeSelectionCompletion.FetchChosenAsync(trustSession, current, applicationId, cancellation).ConfigureAwait(false);
+                    HomeSelectionCompletion.Complete(current, chosen, templateId, priority.PurchasePrice, selectedDate, SeederUserId);
                     selectedApplicationId = applicationId.Value;
                 }
                 else if (entry.Lottery is { } lottery)
@@ -141,16 +143,19 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
 
                     var templateId = await LoadTemplateIdAsync(trustSession, lottery.GroundLeaseTemplateSeedKey, entry.SeedKey, cancellation).ConfigureAwait(false);
 
-                    var completion = await HomeSelectionCompletion.LoadAsync(trustSession, selectionId, cancellation).ConfigureAwait(false);
-                    var eligibleApplicationIds = completion.Candidates
-                        .Where(c => c.Application.Aggregate!.CanBeSelected(c.Household, selectedDate))
-                        .Select(c => c.Application.Aggregate!.Id)
-                        .ToHashSet();
-                    var drawn = completion.CurrentSelection.DrawLottery(tiedApplicationIds, eligibleApplicationIds, lottery.LotterySeed, SeederUserId);
-                    completion.Selection.AppendOne(drawn);
+                    // The handler draws with a fresh random seed; the seeder draws with the entry's seed so
+                    // the winner is repeatable, so it reuses only the handler's read of who is eligible.
+                    var pool = await DrawSelectionLotteryHandler.LoadAsync(
+                        new DrawSelectionLottery(selectionId, tiedApplicationIds, templateId, lottery.PurchasePrice, selectedDate, SeederUserId),
+                        trustSession,
+                        cancellation).ConfigureAwait(false);
+                    var current = pool.Selection.Aggregate!;
+                    var drawn = current.DrawLottery(tiedApplicationIds, pool.EligibleApplicationIds, lottery.LotterySeed, SeederUserId);
+                    pool.Selection.AppendOne(drawn);
 
                     var winnerId = HomeownerApplicationId.Create(drawn.ApplicationId);
-                    HomeSelectionCompletion.Complete(completion, winnerId, templateId, lottery.PurchasePrice, selectedDate, SeederUserId);
+                    var chosen = await HomeSelectionCompletion.FetchChosenAsync(trustSession, current, winnerId, cancellation).ConfigureAwait(false);
+                    HomeSelectionCompletion.Complete(current, chosen, templateId, lottery.PurchasePrice, selectedDate, SeederUserId);
                     selectedApplicationId = winnerId.Value;
                 }
                 else if (entry.Cancellation is { } cancellationEntry)

@@ -3,6 +3,8 @@ using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Extensions;
+using CommonGround.HomeBuyers.Domain.Households;
+using JasperFx.Events;
 using Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
@@ -20,41 +22,74 @@ public sealed record DrawSelectionLottery(
     DateOnly SelectedDate,
     UserId DrawnBy);
 
+/// <summary>The selection, fetched for writing, and the candidates who can be selected on the selected date.</summary>
+/// <param name="Selection">The selection's stream.</param>
+/// <param name="EligibleApplicationIds">The candidates' applications that can be selected.</param>
+public sealed record LotteryPool(
+    IEventStream<HomeSelection> Selection,
+    IReadOnlySet<HomeownerApplicationId> EligibleApplicationIds);
+
 /// <summary>Handles <see cref="DrawSelectionLottery"/>.</summary>
 public static class DrawSelectionLotteryHandler
 {
-    /// <summary>Fetches the selection and its candidates' applications for writing.</summary>
-    public static Task<SelectionCompletion> LoadAsync(
+    /// <summary>
+    /// Fetches the selection for writing and reads, without locking, which candidates can be
+    /// selected on the selected date. Only the winner's application is fetched for writing.
+    /// </summary>
+    public static async Task<LotteryPool> LoadAsync(
         DrawSelectionLottery command,
         IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(session);
 
-        return HomeSelectionCompletion.LoadAsync(session, command.SelectionId, cancellationToken);
+        var selection = await HomeSelectionCompletion
+            .FetchSelectionAsync(session, command.SelectionId, cancellationToken)
+            .ConfigureAwait(false);
+
+        var eligible = new HashSet<HomeownerApplicationId>();
+        foreach (var candidate in selection.Aggregate!.Candidates)
+        {
+            var application = await session
+                .LoadAggregateAsync<HomeownerApplication>(candidate.ApplicationId, cancellationToken)
+                .ConfigureAwait(false);
+            var household = await session
+                .LoadAggregateAsync<Household>(candidate.HouseholdId, cancellationToken)
+                .ConfigureAwait(false);
+            if (application.CanBeSelected(household, command.SelectedDate))
+            {
+                eligible.Add(candidate.ApplicationId);
+            }
+        }
+
+        return new LotteryPool(selection, eligible);
     }
 
     /// <summary>
-    /// Draws with a fresh random seed among the candidates who can be selected on the selected
-    /// date, selects the winner's application, and passes over the others.
+    /// Draws with a fresh random seed among the eligible candidates, then fetches the winner's
+    /// application for writing and selects it. The other candidates are passed over afterwards.
     /// </summary>
-    public static void Handle(DrawSelectionLottery command, SelectionCompletion completion)
+    public static async Task Handle(
+        DrawSelectionLottery command,
+        LotteryPool pool,
+        IDocumentSession session,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
-        ArgumentNullException.ThrowIfNull(completion);
+        ArgumentNullException.ThrowIfNull(pool);
 
-        var eligibleApplicationIds = completion.Candidates
-            .Where(c => c.Application.Aggregate!.CanBeSelected(c.Household, command.SelectedDate))
-            .Select(c => c.Application.Aggregate!.Id)
-            .ToHashSet();
+        var current = pool.Selection.Aggregate!;
         var seed = RandomNumberGenerator.GetInt32(int.MaxValue);
+        var drawn = current.DrawLottery(command.TiedApplicationIds, pool.EligibleApplicationIds, seed, command.DrawnBy);
+        pool.Selection.AppendOne(drawn);
 
-        var drawn = completion.CurrentSelection.DrawLottery(command.TiedApplicationIds, eligibleApplicationIds, seed, command.DrawnBy);
-        completion.Selection.AppendOne(drawn);
-
+        var chosen = await HomeSelectionCompletion
+            .FetchChosenAsync(session, current, HomeownerApplicationId.Create(drawn.ApplicationId), cancellationToken)
+            .ConfigureAwait(false);
         HomeSelectionCompletion.Complete(
-            completion,
-            HomeownerApplicationId.Create(drawn.ApplicationId),
+            current,
+            chosen,
             command.GroundLeaseTemplateId,
             command.PurchasePrice,
             command.SelectedDate,

@@ -303,6 +303,31 @@ public class HomeownerApplicationTests
             events.OfType<ApplicationPassedOver>().Should().ContainSingle()
                 .Which.HouseholdId.Should().Be(_testBed.Household.Id.Value);
         }
+
+        [Fact]
+        public void GivenApplicationAlreadyPassedOverInTheSelection_WhenPassedOverAgain_ThenDecidesNothing()
+        {
+            _testBed.WithReadiness();
+            var sut = _testBed.ApprovedApplication();
+            sut = sut.Decide(a => a.PassOver(_testBed.SelectionId, "home-1", _testBed.Household, _testBed.SelectedDate)).Aggregate;
+
+            var passedOver = sut.PassOver(_testBed.SelectionId, "home-1", _testBed.Household, _testBed.SelectedDate);
+
+            passedOver.Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenApplicationPassedOverInAnotherSelection_WhenPassedOver_ThenRecordsThisSelection()
+        {
+            _testBed.WithReadiness();
+            var sut = _testBed.ApprovedApplication();
+            sut = sut.Decide(a => a.PassOver(HomeSelectionId.Generate(), "home-2", _testBed.Household, _testBed.SelectedDate)).Aggregate;
+
+            var passedOver = sut.PassOver(_testBed.SelectionId, "home-1", _testBed.Household, _testBed.SelectedDate);
+
+            passedOver.Should().NotBeNull()
+                .And.Subject.As<ApplicationPassedOver>().SelectionId.Should().Be(_testBed.SelectionId.Value);
+        }
     }
 
     public class TheReturnToWaitingListMethod

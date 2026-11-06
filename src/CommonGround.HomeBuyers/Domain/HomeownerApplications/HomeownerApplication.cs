@@ -26,6 +26,11 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     public string? DenialReason { get; private set; }
     public string? WithdrawalReason { get; private set; }
 
+    private readonly HashSet<HomeSelectionId> _passedOverIn = [];
+
+    /// <summary>The home selections that completed with another household chosen while this application could have been.</summary>
+    public IReadOnlySet<HomeSelectionId> PassedOverIn => _passedOverIn;
+
     public bool IsTerminal => Phase.IsTerminal;
 
     /// <summary>
@@ -131,12 +136,15 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     /// An application that couldn't have been selected on <paramref name="selectedDate"/>, because it withdrew
     /// or its household's readiness lapsed, was never really in the running, so it isn't passed over.
     /// </summary>
-    /// <returns>The passing over, or <see langword="null"/> when the application couldn't have been selected.</returns>
+    /// <returns>
+    /// The passing over, or <see langword="null"/> when the application couldn't have been selected or was
+    /// already passed over in <paramref name="selectionId"/>.
+    /// </returns>
     public ApplicationPassedOver? PassOver(HomeSelectionId selectionId, string homeId, Household household, DateOnly selectedDate)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
 
-        if (!CanBeSelected(household, selectedDate))
+        if (_passedOverIn.Contains(selectionId) || !CanBeSelected(household, selectedDate))
             return null;
 
         return new ApplicationPassedOver(Id.Value, HouseholdId.Value, selectionId.Value, homeId);
@@ -227,6 +235,12 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     public void Apply(ApplicationReturnedToWaitingList _)
     {
         Phase = ApplicationPhase.Approved;
+    }
+
+    /// <summary>Applies <see cref="ApplicationPassedOver"/>.</summary>
+    public void Apply(ApplicationPassedOver e)
+    {
+        _passedOverIn.Add(HomeSelectionId.Create(e.SelectionId));
     }
 
     /// <summary>Applies <see cref="ApplicationPurchaseClosed"/>.</summary>

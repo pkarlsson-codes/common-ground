@@ -1,3 +1,4 @@
+using CommonGround.HomeBuyers.Application.Errors;
 using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
@@ -10,30 +11,25 @@ using Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
-/// <summary>A home selection candidate's application, fetched for writing, and their household.</summary>
-/// <param name="Application">The candidate's application stream.</param>
-/// <param name="Household">The candidate's household, read-only.</param>
-public sealed record CandidateApplication(IEventStream<HomeownerApplication> Application, Household Household);
-
-/// <summary>What choosing a household in a home selection reads and writes.</summary>
-/// <param name="Selection">The selection's stream.</param>
-/// <param name="Candidates">Every candidate's application stream and household.</param>
+/// <summary>The chosen candidate's application, fetched for writing, with their household and the home.</summary>
+/// <param name="Application">The chosen candidate's application stream.</param>
+/// <param name="Household">The chosen candidate's household, read-only.</param>
 /// <param name="Home">The home being selected for.</param>
-public sealed record SelectionCompletion(
-    IEventStream<HomeSelection> Selection,
-    IReadOnlyList<CandidateApplication> Candidates,
-    HomeFactsView Home)
-{
-    /// <summary>Gets the selection as it was loaded.</summary>
-    public HomeSelection CurrentSelection =>
-        Selection.Aggregate ?? throw new AggregateNotFoundException(typeof(HomeSelection), Selection.Key!);
-}
+public sealed record ChosenApplication(
+    IEventStream<HomeownerApplication> Application,
+    Household Household,
+    HomeFactsView Home);
 
-/// <summary>Shared steps for the commands that choose a household in a home selection.</summary>
+/// <summary>
+/// Shared steps for the commands that choose a household in a home selection. Completing a
+/// selection writes only the selection and the chosen application; the other candidates are
+/// passed over afterwards, one message each, by <c>PassOverCandidatesHandler</c>. Selections
+/// that share candidates can then complete at the same time without conflicting.
+/// </summary>
 public static class HomeSelectionCompletion
 {
-    /// <summary>Fetches the selection and every candidate's application for writing, with their households and the home.</summary>
-    public static async Task<SelectionCompletion> LoadAsync(
+    /// <summary>Fetches the selection for writing.</summary>
+    public static async Task<IEventStream<HomeSelection>> FetchSelectionAsync(
         IDocumentSession session,
         HomeSelectionId selectionId,
         CancellationToken cancellationToken)
@@ -43,63 +39,57 @@ public static class HomeSelectionCompletion
         var selection = await session.Events
             .FetchForWriting<HomeSelection>(selectionId.Value, cancellationToken)
             .ConfigureAwait(false);
-        var current = selection.Aggregate ?? throw new AggregateNotFoundException(typeof(HomeSelection), selectionId.Value);
-
-        var candidates = new List<CandidateApplication>(current.Candidates.Count);
-        foreach (var candidate in current.Candidates)
-        {
-            var application = await session.Events
-                .FetchForWriting<HomeownerApplication>(candidate.ApplicationId.Value, cancellationToken)
-                .ConfigureAwait(false);
-            var household = await session
-                .LoadAggregateAsync<Household>(candidate.HouseholdId, cancellationToken)
-                .ConfigureAwait(false);
-            candidates.Add(new CandidateApplication(application, household));
-        }
-
-        var home = await session
-            .LoadAsync<HomeFactsView>(current.HomeId, cancellationToken)
-            .ConfigureAwait(false)
-            ?? throw new AggregateNotFoundException(current.HomeId);
-
-        return new SelectionCompletion(selection, candidates, home);
+        _ = selection.Aggregate ?? throw new AggregateNotFoundException(typeof(HomeSelection), selectionId.Value);
+        return selection;
     }
 
-    /// <summary>
-    /// Selects the chosen candidate's application for the home and passes over every other
-    /// candidate who could still have been selected on <paramref name="selectedDate"/>. Candidates
-    /// who withdrew or whose readiness lapsed were never really in the running, so they are not passed over.
-    /// </summary>
+    /// <summary>Fetches the chosen candidate's application for writing, with their household and the home.</summary>
+    public static async Task<ChosenApplication> FetchChosenAsync(
+        IDocumentSession session,
+        HomeSelection selection,
+        HomeownerApplicationId applicationId,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(selection);
+
+        var candidate = selection.Candidates.FirstOrDefault(c => c.ApplicationId == applicationId)
+            ?? throw BusinessRuleViolation.HomeSelection.Modify.NotACandidate(applicationId);
+
+        var application = await session.Events
+            .FetchForWriting<HomeownerApplication>(applicationId.Value, cancellationToken)
+            .ConfigureAwait(false);
+        var household = await session
+            .LoadAggregateAsync<Household>(candidate.HouseholdId, cancellationToken)
+            .ConfigureAwait(false);
+        var home = await session
+            .LoadAsync<HomeFactsView>(selection.HomeId, cancellationToken)
+            .ConfigureAwait(false)
+            ?? throw new AggregateNotFoundException(selection.HomeId);
+
+        return new ChosenApplication(application, household, home);
+    }
+
+    /// <summary>Selects the chosen candidate's application for the home.</summary>
     public static void Complete(
-        SelectionCompletion completion,
-        HomeownerApplicationId selectedApplicationId,
+        HomeSelection selection,
+        ChosenApplication chosen,
         string groundLeaseTemplateId,
         decimal purchasePrice,
         DateOnly selectedDate,
         UserId selectedBy)
     {
-        ArgumentNullException.ThrowIfNull(completion);
+        ArgumentNullException.ThrowIfNull(selection);
+        ArgumentNullException.ThrowIfNull(chosen);
 
-        var selection = completion.CurrentSelection;
-        foreach (var (application, household) in completion.Candidates)
-        {
-            application.Decide(candidate =>
-            {
-                if (candidate.Id == selectedApplicationId)
-                {
-                    return candidate.SelectForHome(
-                        household,
-                        selection.Id,
-                        selection.HomeId,
-                        completion.Home.LandParcelId,
-                        groundLeaseTemplateId,
-                        purchasePrice,
-                        selectedDate,
-                        selectedBy);
-                }
-
-                return candidate.PassOver(selection.Id, selection.HomeId, household, selectedDate);
-            });
-        }
+        chosen.Application.Decide(application => application.SelectForHome(
+            chosen.Household,
+            selection.Id,
+            selection.HomeId,
+            chosen.Home.LandParcelId,
+            groundLeaseTemplateId,
+            purchasePrice,
+            selectedDate,
+            selectedBy));
     }
 }

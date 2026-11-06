@@ -24,8 +24,7 @@ namespace CommonGround.API.IntegrationTests.HomeBuyers;
 
 /// <summary>
 /// Covers home selections end to end: starting one from the waiting list, choosing a household by
-/// priority or lottery, cancelling, the pass-overs recorded for the other candidates, and the
-/// hand-off to a purchase workflow.
+/// priority or lottery, and cancelling.
 ///
 /// The test database is shared across the collection, so every selection snapshots the approved
 /// applications other tests left behind as well. Assertions are therefore limited to the
@@ -34,8 +33,9 @@ namespace CommonGround.API.IntegrationTests.HomeBuyers;
 ///
 /// As in <see cref="Homeownership.PurchaseWorkflowCloseTests"/>, the test host runs Wolverine in
 /// MediatorOnly mode, so domain events are not forwarded as integration events. HomeBuyers's
-/// HomeFactsView is seeded by calling its HomeRegistered handler directly; the hand-off to
-/// Homeownership and PropertyRegistry is covered by <see cref="Flows.HomePurchaseFlowTests"/>.
+/// HomeFactsView is seeded by calling its HomeRegistered handler directly. The pass-overs that follow
+/// a completed selection are covered by <see cref="Flows.HomeSelectionPassOverFlowTests"/>, and the
+/// hand-off to Homeownership and PropertyRegistry by <see cref="Flows.HomePurchaseFlowTests"/>.
 /// </summary>
 [Collection(IntegrationCollection.Name)]
 public class HomeSelectionTests(ApiFactory factory)
@@ -154,21 +154,16 @@ public class HomeSelectionTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task SelectByPriority_SelectsTheChosenHouseholdAndPassesOverOnlyCandidatesStillEligible()
+    public async Task SelectByPriority_SelectsTheChosenHousehold()
     {
         var client = factory.CreateClient().WithAuthToken();
         var homeId = await CreateHomeAsync(client);
         var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
 
         var chosen = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
-        var eligible = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
-        var notReady = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1), ready: false);
-        var withdrawn = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
+        await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
 
         var selectionId = await StartSelectionAsync(client, homeId);
-        (await client.PostAsJsonAsync($"/api/homeowner-applications/{withdrawn.ApplicationId}/withdraw",
-            new WithdrawApplicationRequest(new DateOnly(2026, 7, 1), null)))
-            .StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var response = await client.PostAsJsonAsync($"/api/home-selections/{selectionId}/select-by-priority",
             new SelectHouseholdByPriorityRequest(
@@ -202,23 +197,7 @@ public class HomeSelectionTests(ApiFactory factory)
         });
         chosenApplication.PassOvers.Should().BeEmpty();
 
-        var eligibleApplication = await GetApplicationAsync(client, eligible.ApplicationId);
-        eligibleApplication.Phase.Should().Be("Approved");
-        eligibleApplication.PassOvers.Should().ContainSingle().Which.Should().BeEquivalentTo(new
-        {
-            eligible.ApplicationId,
-            SelectionId = selectionId,
-            HomeId = homeId,
-            SelectionMethod = "Priority",
-        });
-
-        (await GetApplicationAsync(client, notReady.ApplicationId)).PassOvers.Should().BeEmpty();
-        (await GetApplicationAsync(client, withdrawn.ApplicationId)).PassOvers.Should().BeEmpty();
-
-        var waitingList = (await GetWholeWaitingListAsync(client)).ToDictionary(e => e.ApplicationId);
-        waitingList.Should().NotContainKey(chosen.ApplicationId);
-        waitingList[eligible.ApplicationId].PassOverCount.Should().Be(1);
-        waitingList[notReady.ApplicationId].PassOverCount.Should().Be(0);
+        (await GetWholeWaitingListAsync(client)).Should().NotContain(e => e.ApplicationId == chosen.ApplicationId);
     }
 
     [Fact]
@@ -247,7 +226,7 @@ public class HomeSelectionTests(ApiFactory factory)
         var tiedA = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
         var tiedB = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
         var tiedNotReady = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1), ready: false);
-        var untied = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
+        await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
 
         var selectionId = await StartSelectionAsync(client, homeId);
 
@@ -271,14 +250,53 @@ public class HomeSelectionTests(ApiFactory factory)
             [HomeownerApplicationId.Create(tiedA.ApplicationId), HomeownerApplicationId.Create(tiedB.ApplicationId)],
             selection.LotterySeed!.Value);
         selection.SelectedApplicationId.Should().Be(expectedWinner.Value);
-
-        var loser = expectedWinner.Value == tiedA.ApplicationId ? tiedB : tiedA;
         (await GetApplicationAsync(client, expectedWinner.Value)).Phase.Should().Be("Selected");
-        (await GetApplicationAsync(client, loser.ApplicationId)).PassOvers
-            .Should().ContainSingle().Which.SelectionMethod.Should().Be("Lottery");
-        (await GetApplicationAsync(client, untied.ApplicationId)).PassOvers
-            .Should().ContainSingle("every eligible candidate is passed over, tied or not");
-        (await GetApplicationAsync(client, tiedNotReady.ApplicationId)).PassOvers.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task SelectByPriority_WhenSelectionsSharingCandidatesCompleteAtOnce_BothSucceed()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var firstHomeId = await CreateHomeAsync(client);
+        var secondHomeId = await CreateHomeAsync(client);
+        var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
+
+        var firstChoice = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
+        var secondChoice = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
+
+        // Both selections have both households as candidates.
+        var firstSelectionId = await StartSelectionAsync(client, firstHomeId);
+        var secondSelectionId = await StartSelectionAsync(client, secondHomeId);
+
+        using var scope = factory.Services.CreateScope();
+        var store = scope.ServiceProvider.GetRequiredService<IDocumentStore>();
+        await using var first = store.LightweightSession(ApiFactory.TestTrustId);
+        await using var second = store.LightweightSession(ApiFactory.TestTrustId);
+
+        SelectHouseholdByPriority Command(string selectionId, string applicationId) => new(
+            HomeSelectionId.Create(selectionId),
+            HomeownerApplicationId.Create(applicationId),
+            [SelectionPriority.LowerIncome],
+            "Lowest income",
+            templateId,
+            200000m,
+            SelectedDate,
+            UserId.Generate());
+
+        // Both completions read their streams before either is saved.
+        var firstCommand = Command(firstSelectionId, firstChoice.ApplicationId);
+        var secondCommand = Command(secondSelectionId, secondChoice.ApplicationId);
+        var firstSelection = await SelectHouseholdByPriorityHandler.LoadAsync(firstCommand, first, CancellationToken.None);
+        var secondSelection = await SelectHouseholdByPriorityHandler.LoadAsync(secondCommand, second, CancellationToken.None);
+        await SelectHouseholdByPriorityHandler.Handle(firstCommand, firstSelection, first, CancellationToken.None);
+        await SelectHouseholdByPriorityHandler.Handle(secondCommand, secondSelection, second, CancellationToken.None);
+        await first.SaveChangesAsync();
+        await second.SaveChangesAsync();
+
+        (await GetSelectionAsync(client, firstSelectionId)).SelectedApplicationId.Should().Be(firstChoice.ApplicationId);
+        (await GetSelectionAsync(client, secondSelectionId)).SelectedApplicationId.Should().Be(secondChoice.ApplicationId);
+        (await GetApplicationAsync(client, firstChoice.ApplicationId)).SelectedHomeId.Should().Be(firstHomeId);
+        (await GetApplicationAsync(client, secondChoice.ApplicationId)).SelectedHomeId.Should().Be(secondHomeId);
     }
 
     [Fact]
@@ -320,32 +338,6 @@ public class HomeSelectionTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task PassOvers_FollowTheHouseholdToItsLaterApplications()
-    {
-        var client = factory.CreateClient().WithAuthToken();
-        var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
-        var passedOver = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
-
-        var firstSelectionId = await SelectSomeoneElseAsync(client, templateId);
-
-        (await client.PostAsJsonAsync($"/api/homeowner-applications/{passedOver.ApplicationId}/withdraw",
-            new WithdrawApplicationRequest(new DateOnly(2026, 7, 21), null)))
-            .StatusCode.Should().Be(HttpStatusCode.NoContent);
-        var reapplicationId = await SubmitAsync(client, passedOver.HouseholdId);
-        await ApproveAsync(client, reapplicationId, new DateOnly(2026, 8, 1));
-
-        var secondSelectionId = await SelectSomeoneElseAsync(client, templateId);
-
-        var reapplication = await GetApplicationAsync(client, reapplicationId);
-        reapplication.PassOvers.Select(p => (p.ApplicationId, p.SelectionId)).Should().Equal(
-            (passedOver.ApplicationId, firstSelectionId),
-            (reapplicationId, secondSelectionId));
-
-        var waitingList = (await GetWholeWaitingListAsync(client)).ToDictionary(e => e.ApplicationId);
-        waitingList[reapplicationId].PassOverCount.Should().Be(2);
-    }
-
-    [Fact]
     public async Task GetHomeSelections_FiltersByStatusAcrossHomes()
     {
         var client = factory.CreateClient().WithAuthToken();
@@ -362,24 +354,6 @@ public class HomeSelectionTests(ApiFactory factory)
         var cancelled = await client.GetFromJsonAsync<PaginatedResponse<HomeSelectionListItemResponse>>(
             "/api/home-selections?status=Cancelled");
         cancelled!.Items.Should().NotContain(s => s.Id == selectionId);
-    }
-
-    /// <summary>Starts a selection for a new home and chooses a new applicant, passing over everyone else eligible.</summary>
-    private async Task<string> SelectSomeoneElseAsync(HttpClient client, string templateId)
-    {
-        var homeId = await CreateHomeAsync(client);
-        var chosen = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
-        var selectionId = await StartSelectionAsync(client, homeId);
-        await SelectByPriorityAsync(client, selectionId, chosen.ApplicationId, templateId);
-        return selectionId;
-    }
-
-    private static async Task SelectByPriorityAsync(HttpClient client, string selectionId, string applicationId, string templateId)
-    {
-        (await client.PostAsJsonAsync($"/api/home-selections/{selectionId}/select-by-priority",
-            new SelectHouseholdByPriorityRequest(
-                applicationId, ["WaitingListTenure"], "Longest on the waiting list", templateId, 200000m, SelectedDate)))
-            .StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     /// <summary>Runs <paramref name="exception"/> through the API's exception handlers, as the middleware does, and returns the status code written.</summary>

@@ -13,7 +13,7 @@
 When the selection completes:
 - the chosen application moves to Selected and leaves the waiting list, and the home moves to UnderContract
 - a purchase workflow is created for the household, the home and the terms entered (see [Initiate Purchase Workflow](../purchase-workflows/initiate-purchase-workflow.md))
-- every other candidate who could still be selected is recorded as passed over and stays on the waiting list. Candidates who couldn't be selected at that moment (not ready, withdrawn, denied) are not passed over
+- every other candidate who could still be selected is recorded as passed over and stays on the waiting list. Candidates who couldn't be selected at that moment (not ready, withdrawn, denied) are not passed over. Pass-overs are recorded just after the selection completes, so a candidate's Passed Over count can take a moment to catch up
 
 The selection is rejected if the household can no longer be selected when the user submits, for example because its readiness is incomplete or its prequalification expires before the Selected Date.
 

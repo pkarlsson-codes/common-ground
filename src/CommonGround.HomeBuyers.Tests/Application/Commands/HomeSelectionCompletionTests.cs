@@ -1,7 +1,6 @@
 using CommonGround.HomeBuyers.Application.Commands;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications.Events;
-using CommonGround.HomeBuyers.Domain.Households;
 using FluentAssertions;
 using JasperFx.Events;
 
@@ -14,24 +13,21 @@ public class HomeSelectionCompletionTests
         private readonly HandlerTestBed _testBed = new();
 
         [Fact]
-        public void GivenChosenEligibleAndNotReadyCandidates_WhenCompleted_ThenSelectsTheChosenAndPassesOverOnlyTheEligible()
+        public void GivenChosenCandidate_WhenCompleted_ThenSelectsTheirApplicationForTheHome()
         {
             var chosenHousehold = _testBed.ReadyHousehold();
-            var eligibleHousehold = _testBed.ReadyHousehold();
-            var notReadyHousehold = _testBed.NewHousehold(ready: false);
-            (HomeownerApplication, Household)[] candidates =
-            [
-                (_testBed.ApprovedApplication(chosenHousehold), chosenHousehold),
-                (_testBed.ApprovedApplication(eligibleHousehold), eligibleHousehold),
-                (_testBed.ApprovedApplication(notReadyHousehold), notReadyHousehold),
-            ];
-            var completion = _testBed.Completion(_testBed.OpenSelection(candidates), candidates);
+            var otherHousehold = _testBed.ReadyHousehold();
+            var chosenApplication = _testBed.ApprovedApplication(chosenHousehold);
+            var selection = _testBed.OpenSelection(
+                (chosenApplication, chosenHousehold),
+                (_testBed.ApprovedApplication(otherHousehold), otherHousehold));
+            var chosen = _testBed.Chosen(chosenApplication, chosenHousehold);
 
-            HomeSelectionCompletion.Complete(
-                completion, candidates[0].Item1.Id, "template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser);
+            HomeSelectionCompletion.Complete(selection, chosen, "template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser);
 
-            completion.Candidates.Select(c => ((StubEventStream<HomeownerApplication>)c.Application).EventsAppended.SingleOrDefault()?.GetType())
-                .Should().Equal(typeof(ApplicationSelectedForHome), typeof(ApplicationPassedOver), null);
+            ((StubEventStream<HomeownerApplication>)chosen.Application).EventsAppended.Should().ContainSingle()
+                .Which.Should().BeOfType<ApplicationSelectedForHome>()
+                .Which.HomeSelectionId.Should().Be(selection.Id.Value);
         }
     }
 }
