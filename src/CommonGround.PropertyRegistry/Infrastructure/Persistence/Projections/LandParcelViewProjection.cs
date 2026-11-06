@@ -17,7 +17,7 @@ internal sealed class LandParcelViewProjection : SingleStreamProjection<LandParc
             Address = e.Data.Address,
             AreaAcres = e.Data.AreaAcres,
             AcquisitionDate = e.Data.AcquisitionDate,
-            AcquisitionMethod = e.Data.AcquisitionMethod,
+            AcquisitionMethod = e.Data.AcquisitionMethod.DisplayName,
             CovenantTerms = e.Data.CovenantTerms,
             RegisteredAt = e.Data.OccurredAt,
             RegisteredBy = e.Data.RegisteredBy,

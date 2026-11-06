@@ -19,7 +19,7 @@ internal sealed class DevelopmentProjectListItemViewProjection : SingleStreamPro
             Name = @event.Name,
             Description = @event.Description,
             Status = "Initiated",
-            ProjectType = @event.ProjectType == 2 ? "Rehabilitation" : "NewConstruction",
+            ProjectType = @event.ProjectType.DisplayName,
             CreatedAt = @event.OccurredAt,
         };
     }

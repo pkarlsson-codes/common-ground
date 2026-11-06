@@ -62,7 +62,7 @@ public sealed class DevelopmentProject : AggregateRoot<DevelopmentProjectId>
             [],
             name,
             description,
-            ProjectType.NewConstruction.Value,
+            ProjectType.NewConstruction,
             initiatedBy.Value);
     }
 
@@ -96,7 +96,7 @@ public sealed class DevelopmentProject : AggregateRoot<DevelopmentProjectId>
             [.. homeIds.Select(h => h.Value)],
             name,
             description,
-            ProjectType.Rehabilitation.Value,
+            ProjectType.Rehabilitation,
             initiatedBy.Value);
     }
 
@@ -118,6 +118,6 @@ public sealed class DevelopmentProject : AggregateRoot<DevelopmentProjectId>
         Name = e.Name;
         Description = e.Description;
         ProjectStatus = ProjectStatus.Initiated;
-        ProjectType = ProjectType.FromValue(e.ProjectType);
+        ProjectType = e.ProjectType;
     }
 }

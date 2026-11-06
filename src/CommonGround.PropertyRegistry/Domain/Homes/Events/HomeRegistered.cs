@@ -7,7 +7,7 @@ public sealed record HomeRegistered(
     string AggregateId,
     string LandParcelId,
     string? UnitDesignation,
-    string UnitType,
+    HomeType UnitType,
     int Bedrooms,
     decimal Bathrooms,
     bool IsAccessible,

@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using CommonGround.SharedKernel.Domain;
 
 namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
@@ -11,7 +10,5 @@ public sealed class ForbearanceOutcome : Enumeration<ForbearanceOutcome>
 
     /// <summary>The lender denied the forbearance request.</summary>
     public static readonly ForbearanceOutcome Denied = new(1, "Denied");
-
-    [JsonConstructor]
     private ForbearanceOutcome(int value, string displayName) : base(value, displayName) { }
 }

@@ -57,7 +57,7 @@ public sealed class Resale : AggregateRoot<ResaleId>
             lease.UnitId,
             lease.CurrentHomeowner?.FullName.Value,
             noticeDate,
-            channel.DisplayName,
+            channel,
             string.IsNullOrWhiteSpace(notes) ? null : notes.Trim(),
             noticeDate.AddDays(lease.OptionWindowDays),
             recordedBy.Value);

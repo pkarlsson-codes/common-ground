@@ -83,7 +83,7 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
         return new HouseholdSelectedByPriority(
             Id.Value,
             applicationId.Value,
-            [.. priorities.Distinct().Select(p => p.DisplayName)],
+            [.. priorities.Distinct()],
             reason,
             selectedBy.Value);
     }

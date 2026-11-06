@@ -67,7 +67,7 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
             address,
             areaAcres,
             acquisitionDate,
-            acquisitionMethod.DisplayName,
+            acquisitionMethod,
             covenantTerms,
             registeredBy.Value);
     }
@@ -125,7 +125,7 @@ public sealed class LandParcel : AggregateRoot<LandParcelId>
         Address = e.Address;
         AreaAcres = e.AreaAcres;
         AcquisitionDate = e.AcquisitionDate;
-        AcquisitionMethod = AcquisitionMethod.FromDisplayName(e.AcquisitionMethod);
+        AcquisitionMethod = e.AcquisitionMethod;
         CovenantTerms = e.CovenantTerms;
         RegisteredBy = UserId.Create(e.RegisteredBy);
     }

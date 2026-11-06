@@ -9,5 +9,5 @@ public sealed record DevelopmentProjectInitiated(
     IReadOnlyCollection<string> HomeIds,
     string Name,
     string? Description,
-    int ProjectType,
+    ProjectType ProjectType,
     string InitiatedBy) : DomainEvent(AggregateId);

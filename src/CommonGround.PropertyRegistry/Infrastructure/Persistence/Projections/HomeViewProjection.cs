@@ -15,7 +15,7 @@ internal sealed class HomeViewProjection : SingleStreamProjection<HomeView, stri
             Id = e.Data.AggregateId,
             LandParcelId = e.Data.LandParcelId,
             UnitDesignation = e.Data.UnitDesignation,
-            UnitType = e.Data.UnitType,
+            UnitType = e.Data.UnitType.DisplayName,
             Bedrooms = e.Data.Bedrooms,
             Bathrooms = e.Data.Bathrooms,
             IsAccessible = e.Data.IsAccessible,

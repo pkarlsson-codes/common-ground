@@ -9,6 +9,6 @@ public sealed record LandParcelRegistered(
     string Address,
     decimal AreaAcres,
     DateOnly AcquisitionDate,
-    string AcquisitionMethod,
+    AcquisitionMethod AcquisitionMethod,
     string? CovenantTerms,
     string RegisteredBy) : DomainEvent(AggregateId);

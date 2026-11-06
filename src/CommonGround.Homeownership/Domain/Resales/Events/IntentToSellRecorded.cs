@@ -9,7 +9,7 @@ namespace CommonGround.Homeownership.Domain.Resales.Events;
 /// <param name="HomeId">The home being sold.</param>
 /// <param name="HomeownerFullName">The selling homeowner's full name.</param>
 /// <param name="NoticeDate">The day the homeowner gave notice.</param>
-/// <param name="Channel">How the notice reached the trust, as a <see cref="NoticeChannel"/> display name.</param>
+/// <param name="Channel">How the notice reached the trust.</param>
 /// <param name="Notes">Anything staff noted about the notice.</param>
 /// <param name="OptionWindowEndsOn">The last day of the trust's purchase option: the notice date plus the lease's option window.</param>
 /// <param name="RecordedBy">The user who recorded the notice.</param>
@@ -20,7 +20,7 @@ public sealed record IntentToSellRecorded(
     string HomeId,
     string? HomeownerFullName,
     DateOnly NoticeDate,
-    string Channel,
+    NoticeChannel Channel,
     string? Notes,
     DateOnly OptionWindowEndsOn,
     string RecordedBy) : DomainEvent(AggregateId);

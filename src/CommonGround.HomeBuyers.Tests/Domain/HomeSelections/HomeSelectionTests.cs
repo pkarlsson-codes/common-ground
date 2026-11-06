@@ -159,7 +159,7 @@ public class HomeSelectionTests
             sut.Status.Should().Be(HomeSelectionStatus.Completed);
             sut.SelectedApplicationId.Should().Be(_testBed.B);
             events.OfType<HouseholdSelectedByPriority>().Should().ContainSingle()
-                .Which.Priorities.Should().Equal("AccessibilityNeed", "LowerIncome");
+                .Which.Priorities.Should().Equal(SelectionPriority.AccessibilityNeed, SelectionPriority.LowerIncome);
         }
     }
 

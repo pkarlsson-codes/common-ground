@@ -85,8 +85,8 @@ public sealed class Document : AggregateRoot<DocumentId>
             documentId.Value,
             versionId.Value,
             title,
-            sensitivity.DisplayName,
-            retention.DisplayName,
+            sensitivity,
+            retention,
             blobKey,
             fileName,
             contentType,
@@ -217,11 +217,11 @@ public sealed class Document : AggregateRoot<DocumentId>
             throw BusinessRuleViolation.Document.UpdateMetadata.TitleBlank();
 
         var newTitle = title ?? Title;
-        var newSensitivity = sensitivity?.DisplayName ?? Sensitivity.DisplayName;
+        var newSensitivity = sensitivity ?? Sensitivity;
         var newExpiresOn = clearExpiresOn ? (DateOnly?)null : (expiresOn ?? ExpiresOn);
 
         if (newTitle == Title
-            && newSensitivity == Sensitivity.DisplayName
+            && newSensitivity == Sensitivity
             && newExpiresOn == ExpiresOn)
         {
             return null;
@@ -282,8 +282,8 @@ public sealed class Document : AggregateRoot<DocumentId>
     {
         Id = DocumentId.Create(e.AggregateId);
         Title = e.Title;
-        Sensitivity = SensitivityLevel.FromDisplayName(e.Sensitivity);
-        Retention = RetentionClass.FromDisplayName(e.Retention);
+        Sensitivity = e.Sensitivity;
+        Retention = e.Retention;
         UploadedBy = UserId.Create(e.UploadedBy);
         UploadedAt = e.OccurredAt;
         IsDeleted = false;
@@ -336,7 +336,7 @@ public sealed class Document : AggregateRoot<DocumentId>
     public void Apply(DocumentMetadataUpdated e)
     {
         Title = e.Title;
-        Sensitivity = SensitivityLevel.FromDisplayName(e.Sensitivity);
+        Sensitivity = e.Sensitivity;
         ExpiresOn = e.ClearExpiresOn ? null : e.ExpiresOn;
     }
 

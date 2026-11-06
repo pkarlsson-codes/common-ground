@@ -84,7 +84,7 @@ public sealed class Home : AggregateRoot<HomeId>
             id.Value,
             landParcelId.Value,
             string.IsNullOrWhiteSpace(unitDesignation) ? null : unitDesignation.Trim(),
-            unitType.DisplayName,
+            unitType,
             bedrooms,
             bathrooms,
             isAccessible,
@@ -120,7 +120,7 @@ public sealed class Home : AggregateRoot<HomeId>
         Id = HomeId.Create(e.AggregateId);
         LandParcelId = LandParcels.LandParcelId.Create(e.LandParcelId);
         UnitDesignation = e.UnitDesignation;
-        UnitType = HomeType.FromDisplayName(e.UnitType);
+        UnitType = e.UnitType;
         Bedrooms = e.Bedrooms;
         Bathrooms = e.Bathrooms;
         IsAccessible = e.IsAccessible;

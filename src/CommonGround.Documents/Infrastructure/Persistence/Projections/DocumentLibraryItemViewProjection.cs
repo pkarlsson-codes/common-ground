@@ -14,8 +14,8 @@ internal sealed class DocumentLibraryItemViewProjection : SingleStreamProjection
         {
             Id = e.Data.AggregateId,
             Title = e.Data.Title,
-            Sensitivity = e.Data.Sensitivity,
-            Retention = e.Data.Retention,
+            Sensitivity = e.Data.Sensitivity.DisplayName,
+            Retention = e.Data.Retention.DisplayName,
             CurrentFileName = e.Data.FileName,
             CurrentContentType = e.Data.ContentType,
             CurrentSizeBytes = e.Data.SizeBytes,
@@ -42,7 +42,7 @@ internal sealed class DocumentLibraryItemViewProjection : SingleStreamProjection
     public static void Apply(DocumentLibraryItemView view, DocumentMetadataUpdated e)
     {
         view.Title = e.Title;
-        view.Sensitivity = e.Sensitivity;
+        view.Sensitivity = e.Sensitivity.DisplayName;
         view.ExpiresOn = e.ClearExpiresOn ? null : e.ExpiresOn;
         view.LastModifiedAt = e.OccurredAt;
     }

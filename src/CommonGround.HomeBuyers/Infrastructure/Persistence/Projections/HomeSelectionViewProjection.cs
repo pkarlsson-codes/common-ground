@@ -33,7 +33,7 @@ internal sealed class HomeSelectionViewProjection : SingleStreamProjection<HomeS
         view.Status = HomeSelectionStatus.Completed.DisplayName;
         view.SelectedApplicationId = e.ApplicationId;
         view.SelectionMethod = "Priority";
-        view.Priorities = [.. e.Priorities];
+        view.Priorities = [.. e.Priorities.Select(p => p.DisplayName)];
         view.SelectionReason = e.Reason;
         view.ClosedBy = e.SelectedBy;
         view.ClosedAt = e.OccurredAt;

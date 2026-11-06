@@ -6,7 +6,7 @@ namespace CommonGround.Documents.Domain.Documents.Events;
 public sealed record DocumentMetadataUpdated(
     string AggregateId,
     string Title,
-    string Sensitivity,
+    SensitivityLevel Sensitivity,
     DateOnly? ExpiresOn,
     bool ClearExpiresOn,
     string UpdatedBy) : DomainEvent(AggregateId);

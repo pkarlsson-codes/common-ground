@@ -1,3 +1,4 @@
+using CommonGround.SharedKernel.Domain;
 using JasperFx.Events;
 using JasperFx.Events.Daemon;
 using JasperFx.MultiTenancy;
@@ -37,6 +38,7 @@ public static class MartenServiceCollectionExtensions
         var marten = services.AddMarten(opts =>
         {
             opts.Connection(connectionString);
+            opts.UseSystemTextJsonForSerialization(configure: json => json.Converters.Add(new EnumerationJsonConverter()));
             opts.Events.StreamIdentity = StreamIdentity.AsString;
             opts.Events.DatabaseSchemaName = "commonground_events";
             opts.Policies.AllDocumentsAreMultiTenanted();
