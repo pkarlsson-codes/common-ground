@@ -37,6 +37,7 @@ internal static class DevelopmentSeeder
         services.AddSingleton<IPropagationProbe, MartenWolverinePropagationProbe>();
         services.AddSingleton<PropagationWaiter>(sp => new PropagationWaiter(sp.GetRequiredService<IPropagationProbe>()));
 
+        services.AddSingleton<SeedingGate>();
         services.AddTransient<IDevelopmentSeeder, TrustsSeeder>();
         services.AddTransient<IDevelopmentSeeder, LandParcelsSeeder>();
         services.AddTransient<IDevelopmentSeeder, HomesSeeder>();
@@ -66,6 +67,18 @@ internal static class DevelopmentSeeder
             return;
         }
 
+        try
+        {
+            await SeedAsync(app, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            app.Services.GetRequiredService<SeedingGate>().Open();
+        }
+    }
+
+    private static async Task SeedAsync(WebApplication app, CancellationToken cancellationToken)
+    {
         using var scope = app.Services.CreateScope();
         var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("CommonGround.DevelopmentSeeder");
         var store = scope.ServiceProvider.GetRequiredService<IDocumentStore>();

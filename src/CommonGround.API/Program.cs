@@ -99,6 +99,7 @@ try
 
     var app = builder.Build();
 
+    SeedingGate.Use(app);
     app.ConfigureDevelopmentPipeline();
     app.ConfigureStandardPipeline();
     app.ConfigureEndpoints();
