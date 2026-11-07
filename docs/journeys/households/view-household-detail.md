@@ -12,7 +12,7 @@
    - Ready: "Start Application", or "Open Application" while one is awaiting a decision; a failed start shows the error on the card
    - Waiting: since when it has been on the waiting list, with "Open Waiting List"
    - Purchasing: the home and the purchase's current step, with "Open Purchase"
-   - Homeowner: the home and since when, with "Open Ground Lease"
+   - Homeowner: the home and since when, with "Record Intent to Sell" and "Open Ground Lease" (see [Record Intent to Sell](record-intent-to-sell.md)). Once the household has given notice, the card says so instead, with the Notice Date, the Option Window End and days left, and "Open Resale"
 5. "More actions" opens a menu with the household's other actions: "Start Application" (at Intake, when it has no open application), "Edit Circumstances", and "Record" for each readiness item still missing (or "Update Mortgage Prequalification" once a current one is recorded)
 6. Panel shows the household's current Household Size, Registered date, Annual Income and Accessibility Need, with "Edit Circumstances"
 7. "Household Members" lists every member with name, email and phone; the primary contact is labelled "Primary Contact". Each member has "Edit", every member but the primary contact has "Remove", and "Add Member" adds one
@@ -21,4 +21,4 @@
 
 Continues in: [Start Application](start-application.md), [Edit Household](edit-household.md), [Record Housing Counseling](record-housing-counseling.md), [Record CLT Orientation](record-clt-orientation.md), [Record Mortgage Prequalification](record-mortgage-prequalification.md)
 Continues in: [View Application Detail](../applications/view-application-detail.md), [View Waiting List](../waiting-list/view-waiting-list.md)
-Continues in: [View Home Detail](../homes/view-home-detail.md), [View Purchase Workflow Detail](../purchase-workflows/view-purchase-workflow-detail.md), [View Ground Lease Detail](../ground-leases/view-ground-lease-detail.md)
+Continues in: [View Home Detail](../homes/view-home-detail.md), [View Purchase Workflow Detail](../purchase-workflows/view-purchase-workflow-detail.md), [View Ground Lease Detail](../ground-leases/view-ground-lease-detail.md), [Record Intent to Sell](record-intent-to-sell.md)

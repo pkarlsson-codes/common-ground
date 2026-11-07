@@ -5,7 +5,7 @@
 3. "Select by Priority" panel opens with the candidate's name as subtitle
 4. User ticks one or more Priorities That Justify This Choice: Lower income, Household size fit, Accessibility need, Waiting-list tenure
 5. User enters a Reason explaining why this household over the other candidates
-6. User searches for and selects an active Ground Lease Template, enters a Purchase Price, and optionally adjusts Selected Date (defaults to today)
+6. User searches for and selects an active Ground Lease Template, enters a Purchase Price (for a home in resale, prefilled with the Purchase Option Price and not higher), and optionally adjusts Selected Date (defaults to today)
 7. User clicks "Select Household" (disabled until at least one priority, a reason, a template, a price and a date are set)
 8. Toast: "Household selected"
 9. Panel closes and the selection becomes Completed, showing the outcome with the cited priorities and reason

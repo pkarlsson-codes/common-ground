@@ -2,16 +2,16 @@
 
 1. User navigates to Purchases, or clicks a purchase row on [Today](../today/work-through-today.md) to go straight to its detail panel (skipping steps 2–4)
 2. A Board / List toggle in the page header switches between the two views; the choice is remembered in this browser
-3. On the Board, open purchases (not Closed, Failed or Withdrawn) sit in one column per step they are waiting on: Eligibility, Financing, Inspection, Title, Lease signing, and Closing. A purchase waits on the first step, in that order, that it hasn't recorded; once all five are recorded it waits on Closing
+3. On the Board, open purchases (not Closed, Failed or Withdrawn) sit in one column per step they are waiting on: Eligibility, Appraisal, Financing, Inspection, Title, Lease signing, and Closing. A purchase waits on the first step, in that order, that it hasn't recorded; once all six are recorded it waits on Closing
    - Each column header shows its count; an empty column says Nothing waiting
    - Each card shows the home label, the buyer, and how long the purchase has been on this step (since it last moved on), longest first; cards in Closing show the scheduled closing date once set; stalled purchases are flagged Stalled
    - On a narrow screen the board scrolls sideways
 4. In the List, the user optionally filters the table by phase (All Phases, Initiated, In Progress, Closing Scheduled, Closed, Failed, Withdrawn, Stalled) or by lease template; each open purchase's row shows the step it is waiting on. The user clicks a card on the Board, or a row in the List
 5. Detail panel opens titled with the buyer's full name, showing purchase price and phase in the subtitle
 6. If the workflow is Stalled, a Stalled banner shows the stalled reason and resolution target date (if set)
-7. Panel shows Phase, Purchase Price, buyer Email and Phone (if present), Scheduled Closing (once scheduled), Failure Reason (if failed), Withdrawal Reason (if withdrawn), Closing Notes (if closed), and Created (date/time)
+7. Panel shows Phase, Purchase Price, Appraised Value (once the appraisal is recorded), buyer Email and Phone (if present), Scheduled Closing (once scheduled), Failure Reason (if failed), Withdrawal Reason (if withdrawn), Closing Notes (if closed), and Created (date/time)
 8. A Connected Records section links to the home (by its label), land parcel, lease template, and, once the purchase has closed, the ground lease created from it. If the workflow was initiated by selecting an applicant for a home, it also links to the application and household
-9. Unless the workflow is Closed, Failed, or Withdrawn, panel shows Purchase Tracks (Eligibility, Financing, Inspection, Title, Lease Execution, and Closing), each marked complete or pending, and an Exception Actions section
+9. Unless the workflow is Closed, Failed, or Withdrawn, panel shows Purchase Tracks (Eligibility, Appraisal, Financing, Inspection, Title, Lease Execution, and Closing), each marked complete or pending, and an Exception Actions section
 10. User closes the panel
 
 Continues in: [View Ground Lease Detail](../ground-leases/view-ground-lease-detail.md)

@@ -4,7 +4,7 @@
 2. To break a tie, user ticks "Tied" on two or more candidates; to draw from everyone, user leaves them all unticked
 3. User clicks "Draw Lottery From All" or "Draw Lottery Between N Tied"
 4. "Draw Lottery" panel opens, saying whether it draws from all candidates or between the tied ones, and that candidates who can no longer be selected are left out and the seed is recorded so the draw can be checked
-5. User searches for and selects an active Ground Lease Template, enters a Purchase Price, and optionally adjusts Selected Date (defaults to today)
+5. User searches for and selects an active Ground Lease Template, enters a Purchase Price (for a home in resale, prefilled with the Purchase Option Price and not higher), and optionally adjusts Selected Date (defaults to today)
 6. User clicks "Draw Lottery" (disabled until a template, a price and a date are set)
 7. Toast: "Lottery drawn"
 8. Panel closes and the selection becomes Completed, showing the method, the seed, how many candidates were drawn from and how many were left out; the drawn household's row is marked "Selected"

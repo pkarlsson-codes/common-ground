@@ -15,7 +15,7 @@
    - **Prequalification expiring**: Record prequalification
    - **Home available**: Start selection
    - **Selection open**: Choose household
-   - **Purchase waiting or stalled**: one button per step not yet recorded (Record eligibility, financing, inspection, title, lease signing), or Schedule closing once every step is in; **Closing coming up**: Record closing
+   - **Purchase waiting or stalled**: one button per step not yet recorded (Record eligibility, appraisal, financing, inspection, title, lease signing), or Schedule closing once every step is in; **Closing coming up**: Record closing
    - **Document expiring**: none; the row itself opens the document
 7. An action opens its panel over Today; on success Today refreshes and the item leaves or changes. Start selection, Choose household and the purchase steps open the record's detail for now, where the action is
 8. Clicking anywhere else on a row opens the record's detail

@@ -1,6 +1,6 @@
 # Start Home Selection
 
-1. User navigates to Homes and opens the detail panel of a home at the Available stage
+1. User navigates to Homes and opens the detail panel of a home at the Available stage, or at the Resale stage once the trust has declined to buy it
 2. The Next Step card reads "Choose a household from the waiting list for this home.", followed by how many earlier selections were cancelled (if any)
 3. User clicks "Start Selection" on the card
 4. The selection page opens at Homes › Home Selection with every household on the [Waiting List](../waiting-list/view-waiting-list.md) as a candidate, their priority facts snapshotted as they were when the selection started
