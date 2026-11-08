@@ -236,8 +236,10 @@ public class HomesTests(ApiFactory factory)
         var inSelection = await client.GetFromJsonAsync<PaginatedResponse<HomeListItemResponse>>(
             $"/api/homes?landParcelIds={parcelId}&statuses=InSelection&statuses=UnderContract");
 
-        available!.Items.Select(h => (h.Id, h.Status)).Should().Equal((availableHomeId, "Available"));
-        inSelection!.Items.Select(h => (h.Id, h.Status)).Should().Equal((inSelectionHomeId, "InSelection"));
+        available!.Items.Select(h => (h.Id, h.Status, h.Occupancy, h.SaleStage))
+            .Should().Equal((availableHomeId, "Available", "Vacant", "Offered"));
+        inSelection!.Items.Select(h => (h.Id, h.Status, h.Occupancy, h.SaleStage))
+            .Should().Equal((inSelectionHomeId, "InSelection", "Vacant", "InSelection"));
     }
 
     private static async Task<string> RegisterHomeAsync(HttpClient client, string parcelId)

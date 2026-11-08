@@ -38,6 +38,105 @@ public class HomeAvailabilityViewTests
         }
     }
 
+    public class TheOccupancyAndSaleStage
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenNoNews_WhenCreated_ThenVacantAndOffered()
+        {
+            var sut = new HomeAvailabilityView();
+
+            sut.Occupancy.Should().Be(HomeOccupancy.Vacant.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.Offered.DisplayName);
+        }
+
+        [Fact]
+        public void GivenSelectionStarted_WhenRefreshed_ThenVacantAndInSelection()
+        {
+            var sut = _testBed.InSelection();
+
+            sut.Occupancy.Should().Be(HomeOccupancy.Vacant.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.InSelection.DisplayName);
+        }
+
+        [Fact]
+        public void GivenApplicationSelected_WhenRefreshed_ThenVacantAndUnderContract()
+        {
+            var sut = _testBed.UnderContract();
+
+            sut.Occupancy.Should().Be(HomeOccupancy.Vacant.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.UnderContract.DisplayName);
+        }
+
+        [Fact]
+        public void GivenApplicationSelectedBeforeItsSelectionStarted_WhenStartArrives_ThenVacantAndUnderContract()
+        {
+            _testBed.Sut.RecordApplicationSelected("selection-1", "application-1", _testBed.Today.AddDays(7));
+
+            _testBed.Sut.RecordSelectionStarted("selection-1", _testBed.FirstStartedAt, _testBed.Today);
+
+            _testBed.Sut.Occupancy.Should().Be(HomeOccupancy.Vacant.DisplayName);
+            _testBed.Sut.SaleStage.Should().Be(HomeSaleStage.UnderContract.DisplayName);
+        }
+
+        [Fact]
+        public void GivenPurchaseFellThrough_WhenRefreshed_ThenVacantAndOffered()
+        {
+            var sut = _testBed.UnderContract();
+
+            sut.RecordPurchaseFellThrough("application-1", _testBed.Today.AddDays(20));
+
+            sut.Occupancy.Should().Be(HomeOccupancy.Vacant.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.Offered.DisplayName);
+        }
+
+        [Fact]
+        public void GivenHomeUnderContract_WhenLeased_ThenOccupiedAndNotForSale()
+        {
+            var sut = _testBed.UnderContract();
+
+            sut.RecordLeased(_testBed.Today.AddDays(60));
+
+            sut.Occupancy.Should().Be(HomeOccupancy.Occupied.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.NotForSale.DisplayName);
+        }
+
+        [Fact]
+        public void GivenLeasedHome_WhenResaleOpened_ThenOccupiedAndAwaitingTrustDecision()
+        {
+            _testBed.Sut.RecordLeased(_testBed.Today.AddYears(-3));
+
+            _testBed.Sut.RecordResaleOpened("resale-1", _testBed.Today);
+
+            _testBed.Sut.Occupancy.Should().Be(HomeOccupancy.Occupied.DisplayName);
+            _testBed.Sut.SaleStage.Should().Be(HomeSaleStage.AwaitingTrustDecision.DisplayName);
+        }
+
+        [Fact]
+        public void GivenResaleOpenedBeforeNewsOfTheLease_WhenLeased_ThenOccupiedAndAwaitingTrustDecision()
+        {
+            _testBed.Sut.RecordResaleOpened("resale-1", _testBed.Today);
+
+            _testBed.Sut.RecordLeased(_testBed.Today.AddYears(-3));
+
+            _testBed.Sut.Occupancy.Should().Be(HomeOccupancy.Occupied.DisplayName);
+            _testBed.Sut.SaleStage.Should().Be(HomeSaleStage.AwaitingTrustDecision.DisplayName);
+        }
+
+        [Fact]
+        public void GivenResaleWithdrawn_WhenRefreshed_ThenOccupiedAndNotForSale()
+        {
+            _testBed.Sut.RecordLeased(_testBed.Today.AddYears(-3));
+            _testBed.Sut.RecordResaleOpened("resale-1", _testBed.Today);
+
+            _testBed.Sut.RecordResaleWithdrawn("resale-1");
+
+            _testBed.Sut.Occupancy.Should().Be(HomeOccupancy.Occupied.DisplayName);
+            _testBed.Sut.SaleStage.Should().Be(HomeSaleStage.NotForSale.DisplayName);
+        }
+    }
+
     public class TheRecordSelectionStartedMethod
     {
         private readonly TestBed _testBed = new();

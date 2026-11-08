@@ -18,7 +18,7 @@ public sealed record GetHomes(
     IReadOnlyList<HomeStatus>? Statuses = null);
 
 /// <summary>A home list item, the label staff know the home by, and its status display name.</summary>
-public sealed record HomeListItem(HomeListItemView Home, string Label, string Status);
+public sealed record HomeListItem(HomeListItemView Home, string Label, string Status, string Occupancy, string SaleStage);
 
 /// <summary>Handles <see cref="GetHomes"/>.</summary>
 public static class GetHomesHandler
@@ -42,15 +42,17 @@ public static class GetHomesHandler
         if (request.Statuses is { Count: > 0 })
         {
             // A home with no availability yet is available, so "available" is every home not known to be otherwise.
-            var available = HomeStatus.Available.DisplayName;
+            // "Available" is a vacant home that is offered for selection.
+            var offered = HomeSaleStage.Offered.DisplayName;
+            var vacant = HomeOccupancy.Vacant.DisplayName;
             var statusNames = request.Statuses.Select(s => s.DisplayName).ToList();
             var otherwise = await session.Query<HomeAvailabilityView>()
-                .Where(v => v.Status != available)
+                .Where(v => v.SaleStage != offered || v.Occupancy != vacant)
                 .Select(v => new { v.Id, v.Status })
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            if (statusNames.Contains(available))
+            if (statusNames.Contains(HomeStatus.Available.DisplayName))
             {
                 var excluded = otherwise.Where(v => !statusNames.Contains(v.Status)).Select(v => v.Id).ToList();
                 query = query.Where(h => !excluded.Contains(h.Id));
@@ -70,14 +72,21 @@ public static class GetHomesHandler
         var parcels = await session.LoadManyAsync<LandParcelView>(cancellationToken, parcelIds).ConfigureAwait(false);
         var addresses = parcels.ToDictionary(p => p.Id, p => p.Address);
         var availabilities = await session.LoadManyAsync<HomeAvailabilityView>(cancellationToken, page.Select(h => h.Id)).ConfigureAwait(false);
-        var statuses = availabilities.ToDictionary(a => a.Id, a => a.Status);
+        var byId = availabilities.ToDictionary(a => a.Id);
 
         return new PaginatedResponse<HomeListItem>
         {
-            Items = [.. page.Select(h => new HomeListItem(
-                h,
-                HomeLabel.Format(addresses.GetValueOrDefault(h.LandParcelId, string.Empty), h.UnitDesignation),
-                statuses.GetValueOrDefault(h.Id, HomeStatus.Available.DisplayName)))],
+            Items = [.. page.Select(h =>
+            {
+                // A home with no availability yet is available: vacant and offered.
+                var availability = byId.GetValueOrDefault(h.Id) ?? new HomeAvailabilityView { Id = h.Id };
+                return new HomeListItem(
+                    h,
+                    HomeLabel.Format(addresses.GetValueOrDefault(h.LandParcelId, string.Empty), h.UnitDesignation),
+                    availability.Status,
+                    availability.Occupancy,
+                    availability.SaleStage);
+            })],
             TotalCount = (int)page.TotalItemCount,
             PageSize = (int)page.PageSize,
             PageNumber = (int)page.PageNumber,

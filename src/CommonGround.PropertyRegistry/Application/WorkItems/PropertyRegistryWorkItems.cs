@@ -27,7 +27,7 @@ public static class PropertyRegistryWorkItems
         ArgumentNullException.ThrowIfNull(home);
         ArgumentNullException.ThrowIfNull(zone);
 
-        if (availability is not null && availability.Status != HomeStatus.Available.DisplayName)
+        if (availability is not null && availability.SaleStage != HomeSaleStage.Offered.DisplayName)
             return null;
 
         return availability?.AvailableAgainDate is { } availableAgain

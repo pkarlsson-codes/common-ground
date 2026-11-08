@@ -25,9 +25,9 @@ public static class GetPropertyRegistryWorkItemsHandler
         var zone = await trustClock.GetTimeZoneAsync(session.TenantId, cancellationToken).ConfigureAwait(false);
 
         // A home with no availability yet is available, so look past the ones known to be otherwise.
-        var available = HomeStatus.Available.DisplayName;
+        var offered = HomeSaleStage.Offered.DisplayName;
         var otherwise = await session.Query<HomeAvailabilityView>()
-            .Where(v => v.Status != available)
+            .Where(v => v.SaleStage != offered)
             .Select(v => v.Id)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);

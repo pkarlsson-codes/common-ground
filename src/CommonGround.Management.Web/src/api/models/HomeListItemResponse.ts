@@ -80,6 +80,18 @@ export interface HomeListItemResponse {
      * @memberof HomeListItemResponse
      */
     status?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof HomeListItemResponse
+     */
+    occupancy?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof HomeListItemResponse
+     */
+    saleStage?: string;
 }
 
 /**
@@ -109,6 +121,8 @@ export function HomeListItemResponseFromJSONTyped(json: any, ignoreDiscriminator
         'squareFootage': json['squareFootage'] == null ? undefined : json['squareFootage'],
         'assessedValue': json['assessedValue'] == null ? undefined : json['assessedValue'],
         'status': json['status'] == null ? undefined : json['status'],
+        'occupancy': json['occupancy'] == null ? undefined : json['occupancy'],
+        'saleStage': json['saleStage'] == null ? undefined : json['saleStage'],
     };
 }
 
@@ -133,6 +147,8 @@ export function HomeListItemResponseToJSONTyped(value?: HomeListItemResponse | n
         'squareFootage': value['squareFootage'],
         'assessedValue': value['assessedValue'],
         'status': value['status'],
+        'occupancy': value['occupancy'],
+        'saleStage': value['saleStage'],
     };
 }
 

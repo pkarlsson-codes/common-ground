@@ -76,7 +76,7 @@ public static class HomesEndpoints
             view.YearBuilt, view.AssessedValue, view.LastAssessedDate,
             view.ConditionNotes, availability.Status, view.RegisteredAt,
             availability.AvailableAgainDate, availability.SelectionOpenedDate, availability.UnderContractDate,
-            availability.LeasedDate, availability.ResaleNoticeDate);
+            availability.LeasedDate, availability.ResaleNoticeDate, availability.Occupancy, availability.SaleStage);
 
         return Results.Ok(response);
     }
@@ -100,7 +100,7 @@ public static class HomesEndpoints
 
         var response = result.MapItems(i => new HomeListItemResponse(
             i.Home.Id, i.Home.LandParcelId, i.Label, i.Home.UnitDesignation, i.Home.UnitType, i.Home.Bedrooms,
-            i.Home.Bathrooms, i.Home.SquareFootage, i.Home.AssessedValue, i.Status));
+            i.Home.Bathrooms, i.Home.SquareFootage, i.Home.AssessedValue, i.Status, i.Occupancy, i.SaleStage));
 
         return Results.Ok(response);
     }

@@ -47,14 +47,28 @@ public class PropertyRegistryWorkItemsTests
             item!.WaitingSince.Should().Be(new DateOnly(2026, 10, 15));
         }
 
-        [Fact]
-        public void GivenHomeInSelection_WhenDerived_ThenNothingIsWaiting()
+        [Theory]
+        [InlineData("NotForSale")]
+        [InlineData("AwaitingTrustDecision")]
+        [InlineData("InSelection")]
+        [InlineData("UnderContract")]
+        public void GivenHomeNotOffered_WhenDerived_ThenNothingIsWaiting(string saleStage)
         {
-            var availability = new HomeAvailabilityView { Id = "home-1", Status = HomeStatus.InSelection.DisplayName };
+            var availability = new HomeAvailabilityView { Id = "home-1", SaleStage = saleStage };
 
             var item = PropertyRegistryWorkItems.ForHome(_testBed.Home, availability, "14 Alder Lane", _testBed.Zone);
 
             item.Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenHomeOffered_WhenDerived_ThenAvailableToStartASelection()
+        {
+            var availability = new HomeAvailabilityView { Id = "home-1", SaleStage = HomeSaleStage.Offered.DisplayName };
+
+            var item = PropertyRegistryWorkItems.ForHome(_testBed.Home, availability, "14 Alder Lane", _testBed.Zone);
+
+            item!.Kind.Should().Be(PropertyRegistryWorkItems.HomeAvailable);
         }
     }
 }

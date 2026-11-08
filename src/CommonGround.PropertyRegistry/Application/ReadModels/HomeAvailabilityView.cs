@@ -13,6 +13,12 @@ public class HomeAvailabilityView
     /// <summary>Gets or sets the home's status display name.</summary>
     public string Status { get; set; } = HomeStatus.Available.DisplayName;
 
+    /// <summary>Gets or sets who has the home now: the trust (vacant) or a homeowner (occupied), as a <see cref="HomeOccupancy"/> display name.</summary>
+    public string Occupancy { get; set; } = HomeOccupancy.Vacant.DisplayName;
+
+    /// <summary>Gets or sets where the home is in being sold, as a <see cref="HomeSaleStage"/> display name.</summary>
+    public string SaleStage { get; set; } = HomeSaleStage.Offered.DisplayName;
+
     /// <summary>Gets or sets the date the home last became available again after its purchase fell through, if it has.</summary>
     public DateOnly? AvailableAgainDate { get; set; }
 
@@ -131,6 +137,17 @@ public class HomeAvailabilityView
         return selection;
     }
 
+    // Status is the one label the list, filters and stepper still read; each sale stage maps to one status today.
+    private static string StatusFor(string saleStage)
+        => HomeSaleStage.FromDisplayName(saleStage) switch
+        {
+            var s when s == HomeSaleStage.AwaitingTrustDecision => HomeStatus.Resale.DisplayName,
+            var s when s == HomeSaleStage.NotForSale => HomeStatus.Leased.DisplayName,
+            var s when s == HomeSaleStage.InSelection => HomeStatus.InSelection.DisplayName,
+            var s when s == HomeSaleStage.UnderContract => HomeStatus.UnderContract.DisplayName,
+            _ => HomeStatus.Available.DisplayName,
+        };
+
     // HomeBuyers runs one selection per home at a time, so the latest to start is the one that counts;
     // a selection heard of only through its outcome counts once news of its start arrives. A lease has one
     // open resale at a time, so one heard of and not withdrawn is it, whether or not news of the lease came first.
@@ -140,14 +157,17 @@ public class HomeAvailabilityView
         var active = latest is { Cancelled: false, FellThroughDate: null } ? latest : null;
         var openResale = Resales.Find(r => r is { NoticeDate: not null, Withdrawn: false });
 
-        Status = (LeasedDate, active) switch
+        Occupancy = (LeasedDate is null ? HomeOccupancy.Vacant : HomeOccupancy.Occupied).DisplayName;
+        var saleStage = (LeasedDate, active) switch
         {
-            _ when openResale is not null => HomeStatus.Resale.DisplayName,
-            ({ }, _) => HomeStatus.Leased.DisplayName,
-            (null, null) => HomeStatus.Available.DisplayName,
-            (null, { ApplicationId: null }) => HomeStatus.InSelection.DisplayName,
-            _ => HomeStatus.UnderContract.DisplayName,
+            _ when openResale is not null => HomeSaleStage.AwaitingTrustDecision,
+            ({ }, _) => HomeSaleStage.NotForSale,
+            (null, null) => HomeSaleStage.Offered,
+            (null, { ApplicationId: null }) => HomeSaleStage.InSelection,
+            _ => HomeSaleStage.UnderContract,
         };
+        SaleStage = saleStage.DisplayName;
+        Status = StatusFor(SaleStage);
         SelectionOpenedDate = active?.OpenedDate;
         UnderContractDate = active?.SelectedDate;
         AvailableAgainDate = Selections.Max(s => s.FellThroughDate);

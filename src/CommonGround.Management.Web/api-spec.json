@@ -8881,6 +8881,12 @@
             "type": "string",
             "format": "date",
             "nullable": true
+          },
+          "occupancy": {
+            "type": "string"
+          },
+          "saleStage": {
+            "type": "string"
           }
         }
       },
@@ -8966,6 +8972,12 @@
             "format": "decimal"
           },
           "status": {
+            "type": "string"
+          },
+          "occupancy": {
+            "type": "string"
+          },
+          "saleStage": {
             "type": "string"
           }
         }

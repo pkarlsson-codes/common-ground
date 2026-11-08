@@ -21,4 +21,6 @@ public sealed record HomeResponse(
     DateOnly? SelectionOpenedDate,
     DateOnly? UnderContractDate,
     DateOnly? LeasedDate,
-    DateOnly? ResaleNoticeDate);
+    DateOnly? ResaleNoticeDate,
+    string Occupancy,
+    string SaleStage);
