@@ -121,6 +121,13 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
             steps.Add((verified, w => w.RecordEligibilityVerified(verified, eligibility.Notes, SeederUserId)));
         }
 
+        if (entry.Appraisal is { } appraisal)
+        {
+            var appraised = appraisal.Date.Resolve(today);
+            steps.Add((appraised, w => w.RecordAppraisalCompleted(
+                appraisal.AppraisedValue, appraised, appraisal.AppraiserName, appraisal.Notes, SeederUserId)));
+        }
+
         if (entry.Financing is { } financing)
         {
             steps.Add((financing.Date.Resolve(today), w => w.RecordFinancingCommitted(
@@ -233,6 +240,8 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
 
         public EligibilitySeedEntry? Eligibility { get; set; }
 
+        public AppraisalSeedEntry? Appraisal { get; set; }
+
         public FinancingSeedEntry? Financing { get; set; }
 
         public InspectionSeedEntry? Inspection { get; set; }
@@ -259,6 +268,15 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
 
     private sealed class EligibilitySeedEntry : DatedSeedEntry
     {
+        public string? Notes { get; set; }
+    }
+
+    private sealed class AppraisalSeedEntry : DatedSeedEntry
+    {
+        public decimal AppraisedValue { get; set; }
+
+        public string AppraiserName { get; set; } = string.Empty;
+
         public string? Notes { get; set; }
     }
 

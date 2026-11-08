@@ -164,6 +164,7 @@ export async function createLeaseFromPurchase(page: Page, buyerName: string) {
   const workflow = await createPurchaseWorkflow(page, buyerName)
   const path = `/api/v1/purchase-workflows/${workflow.workflowId}`
   await post(page, `${path}/eligibility`, { verifiedDate: isoDate(-10), notes: null })
+  await post(page, `${path}/appraisal`, { appraisedValue: 250000, appraisalDate: isoDate(-10), appraiserName: 'E2E Appraiser', notes: null })
   await post(page, `${path}/financing`, { lenderName: 'E2E Lender', committedAmount: 180000, preapprovalLetterDate: isoDate(-9) })
   await post(page, `${path}/inspection`, { inspectionDate: isoDate(-8), inspectorName: 'E2E Inspector', notes: null })
   await post(page, `${path}/title`, { clearedDate: isoDate(-7), titleCompanyName: null })

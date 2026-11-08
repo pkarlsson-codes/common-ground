@@ -18,7 +18,7 @@ public class PurchaseBoardTests(ApiFactory factory)
 
         var before = await GetBoardAsync(client);
 
-        before.Columns.Select(c => c.Step).Should().Equal("Eligibility", "Financing", "Inspection", "Title", "LeaseSigning", "Closing");
+        before.Columns.Select(c => c.Step).Should().Equal("Eligibility", "Appraisal", "Financing", "Inspection", "Title", "LeaseSigning", "Closing");
         StepOf(before, workflowId).Should().Be("Eligibility");
 
         (await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/eligibility",
@@ -27,7 +27,7 @@ public class PurchaseBoardTests(ApiFactory factory)
 
         var after = await GetBoardAsync(client);
 
-        StepOf(after, workflowId).Should().Be("Financing");
+        StepOf(after, workflowId).Should().Be("Appraisal");
         after.Columns.SelectMany(c => c.Cards).Should().ContainSingle(c => c.Id == workflowId)
             .Which.Should().BeEquivalentTo(new { BuyerFullName = "Board Buyer", Phase = "InProgress", StepEnteredOn = after.Today });
     }

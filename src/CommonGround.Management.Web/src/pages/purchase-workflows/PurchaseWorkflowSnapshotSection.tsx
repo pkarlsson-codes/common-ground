@@ -49,6 +49,12 @@ export default function PurchaseWorkflowSnapshotSection({ detail }: PurchaseWork
           <div className="detail-field__label">Purchase Price</div>
           <div className="detail-field__value mono">{fmtCurrency(Number(detail.purchasePrice))}</div>
         </div>
+        {detail.appraisalDetails && (
+          <div className="detail-field">
+            <div className="detail-field__label">Appraised Value</div>
+            <div className="detail-field__value mono">{fmtCurrency(Number(detail.appraisalDetails.appraisedValue))}</div>
+          </div>
+        )}
         <div className="detail-field">
           <div className="detail-field__label">Email</div>
           <div className="detail-field__value">{detail.buyerEmail}</div>

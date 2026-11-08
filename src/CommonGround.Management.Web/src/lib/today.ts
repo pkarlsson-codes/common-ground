@@ -79,6 +79,7 @@ const ACTION_LABELS: Record<string, string> = {
   'start-selection': 'Start selection',
   'choose-household': 'Choose household',
   'record-eligibility': 'Record eligibility',
+  'record-appraisal': 'Record appraisal',
   'record-financing': 'Record financing',
   'record-inspection': 'Record inspection',
   'record-title': 'Record title',

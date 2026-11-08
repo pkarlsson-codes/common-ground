@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
-import { createApplication, createHome, createLandParcel, setDocumentExpiry, uploadDocument } from '../support/api'
-import { expectToast, isoDate, panel, uniqueId } from '../support/ui'
+import { createApplication, createHome, createLandParcel, createPurchaseWorkflow, post, setDocumentExpiry, uploadDocument } from '../support/api'
+import { expectToast, field, isoDate, panel, uniqueId } from '../support/ui'
 
 // Journeys (docs/journeys/today/):
 //   work-through-today — items grouped by area, a row's actions fix it on Today, a row opens its record, focus narrows the areas
@@ -85,4 +85,25 @@ test('with a focus, Today shows only its areas plus Records until All areas is c
   await page.getByRole('button', { name: 'All areas' }).click()
   await expect(section(page, 'Applicants').getByRole('row', { name: new RegExp(name) })).toBeVisible()
   await expect(page.locator('.today-hidden-note')).toBeHidden()
+})
+
+test('a purchase with eligibility recorded waits on its appraisal, and Today opens the purchase to record it', async ({ page }) => {
+  const buyer = `Today appraisal ${uniqueId()}`
+  const { workflowId, apn } = await createPurchaseWorkflow(page, buyer)
+  await post(page, `/api/v1/purchase-workflows/${workflowId}/eligibility`, { verifiedDate: isoDate(), notes: null })
+
+  await page.goto('/')
+  const row = section(page, 'Purchases').getByRole('row', { name: new RegExp(apn) })
+  await expect(row).toContainText(`${buyer}: waiting on appraisal`)
+  await expect(row.getByRole('button', { name: new RegExp(`^Record appraisal: `) })).toBeVisible()
+  await expect(row.getByRole('button', { name: /^Record eligibility: / })).toHaveCount(0)
+
+  await row.getByRole('button', { name: /^Record appraisal: / }).click()
+  await expect(page).toHaveURL(/\/purchase-workflows$/)
+  const detail = panel(page, buyer)
+  await detail.getByText(/^Appraisal$/).locator('xpath=../..').getByRole('button', { name: 'Expand' }).click()
+  await field(detail, 'Appraiser Name').fill('Today Appraiser')
+  await field(detail, 'Appraised Value ($)').fill('240000')
+  await detail.getByRole('button', { name: 'Record Appraisal' }).click()
+  await expectToast(page, 'Appraisal recorded')
 })

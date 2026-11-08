@@ -35,13 +35,14 @@ public class HomeownershipWorkItemsTests
             {
                 Kind = HomeownershipWorkItems.PurchaseStepWaiting,
                 Label = "14 Alder Lane",
-                Detail = "Alice Johnson: waiting on financing, inspection, title, lease signing",
+                Detail = "Alice Johnson: waiting on appraisal, financing, inspection, title, lease signing",
                 DueDate = (DateOnly?)null,
                 WaitingSince = new DateOnly(2026, 10, 9),
                 Actions = new[]
                 {
-                    HomeownershipWorkItems.RecordFinancing, HomeownershipWorkItems.RecordInspection,
-                    HomeownershipWorkItems.RecordTitle, HomeownershipWorkItems.RecordLeaseExecution,
+                    HomeownershipWorkItems.RecordAppraisal, HomeownershipWorkItems.RecordFinancing,
+                    HomeownershipWorkItems.RecordInspection, HomeownershipWorkItems.RecordTitle,
+                    HomeownershipWorkItems.RecordLeaseExecution,
                 },
             }, o => o.WithStrictOrdering());
         }
@@ -51,6 +52,7 @@ public class HomeownershipWorkItemsTests
         {
             var workflow = _testBed.Workflow("InProgress");
             workflow.EligibilityDetails = new EligibilityDetailsEntry();
+            workflow.AppraisalDetails = new AppraisalDetailsEntry();
             workflow.FinancingDetails = new FinancingDetailsEntry();
             workflow.InspectionResult = new InspectionResultEntry();
             workflow.TitleDetails = new TitleDetailsEntry();
@@ -83,9 +85,9 @@ public class HomeownershipWorkItemsTests
                 WaitingSince = new DateOnly(2026, 10, 20),
                 Actions = new[]
                 {
-                    HomeownershipWorkItems.RecordEligibility, HomeownershipWorkItems.RecordFinancing,
-                    HomeownershipWorkItems.RecordInspection, HomeownershipWorkItems.RecordTitle,
-                    HomeownershipWorkItems.RecordLeaseExecution,
+                    HomeownershipWorkItems.RecordEligibility, HomeownershipWorkItems.RecordAppraisal,
+                    HomeownershipWorkItems.RecordFinancing, HomeownershipWorkItems.RecordInspection,
+                    HomeownershipWorkItems.RecordTitle, HomeownershipWorkItems.RecordLeaseExecution,
                 },
             });
         }

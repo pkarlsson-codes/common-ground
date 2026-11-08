@@ -127,6 +127,32 @@ public static class PurchaseWorkflowsEndpoints
         return Results.NoContent();
     }
 
+    [WolverinePost("/api/purchase-workflows/{workflowId}/appraisal")]
+    public static async Task<IResult> RecordAppraisalCompleted(
+        string workflowId,
+        RecordAppraisalCompletedRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        var userId = httpContext.GetUserId();
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new RecordAppraisalCompleted(
+                PurchaseWorkflowId.Create(workflowId),
+                request.AppraisedValue,
+                request.AppraisalDate,
+                request.AppraiserName,
+                request.Notes,
+                userId),
+            cancellationToken);
+
+        return Results.NoContent();
+    }
+
     [WolverinePost("/api/purchase-workflows/{workflowId}/financing")]
     public static async Task<IResult> RecordFinancingCommitted(
         string workflowId,
@@ -361,6 +387,8 @@ public static class PurchaseWorkflowsEndpoints
     {
         var eligibility = view.EligibilityDetails is null ? null
             : new EligibilityDetailsDto(view.EligibilityDetails.VerifiedDate, view.EligibilityDetails.Notes);
+        var appraisal = view.AppraisalDetails is null ? null
+            : new AppraisalDetailsDto(view.AppraisalDetails.AppraisedValue, view.AppraisalDetails.AppraisalDate, view.AppraisalDetails.AppraiserName, view.AppraisalDetails.Notes);
         var financing = view.FinancingDetails is null ? null
             : new FinancingDetailsDto(view.FinancingDetails.LenderName, view.FinancingDetails.CommittedAmount, view.FinancingDetails.PreapprovalLetterDate);
         var inspection = view.InspectionResult is null ? null
@@ -386,6 +414,7 @@ public static class PurchaseWorkflowsEndpoints
             view.PurchasePrice,
             view.CreatedAt,
             eligibility,
+            appraisal,
             financing,
             inspection,
             title,

@@ -37,6 +37,13 @@ public interface IPurchaseWorkflowsApiClient
     /// <returns>A task representing the asynchronous operation.</returns>
     Task RecordEligibilityVerifiedAsync(string workflowId, RecordEligibilityVerifiedRequest request, CancellationToken cancellationToken);
 
+    /// <summary>Records the appraisal completed.</summary>
+    /// <param name="workflowId">The ID of the purchase workflow.</param>
+    /// <param name="request">The appraisal details.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task RecordAppraisalCompletedAsync(string workflowId, RecordAppraisalCompletedRequest request, CancellationToken cancellationToken);
+
     /// <summary>Records financing committed.</summary>
     /// <param name="workflowId">The ID of the purchase workflow.</param>
     /// <param name="request">The financing commitment details.</param>

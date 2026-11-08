@@ -85,6 +85,43 @@ public class PurchaseWorkflowCloseTests(ApiFactory factory)
         lease.Should().BeNull("an inactive template must not produce a ground lease");
     }
 
+    [Fact]
+    public async Task ScheduleClosing_WithoutAppraisal_IsRejectedUntilTheAppraisalIsRecorded()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var templateId = await CreateTemplateAsync(client);
+        var workflowId = await InitiateWorkflowAsync(client, templateId, $"landparc-{Guid.NewGuid():N}", $"home-{Guid.NewGuid():N}");
+        await SatisfyAllTracksAsync(client, workflowId, includeAppraisal: false);
+
+        var rejected = await client.PostAsJsonAsync(
+            $"/api/purchase-workflows/{workflowId}/closing/schedule", new ScheduleClosingRequest(ClosingDate));
+
+        rejected.IsSuccessStatusCode.Should().BeFalse("a purchase with no appraisal cannot schedule closing");
+
+        var appraisal = await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/appraisal",
+            new RecordAppraisalCompletedRequest(200000m, new DateOnly(2026, 6, 2), "Test Appraiser", "Fair"));
+        appraisal.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        await ScheduleClosingAsync(client, workflowId);
+
+        var workflow = await client.GetFromJsonAsync<PurchaseWorkflowResponse>($"/api/purchase-workflows/{workflowId}");
+        workflow!.AppraisalDetails.Should().BeEquivalentTo(
+            new AppraisalDetailsDto(200000m, new DateOnly(2026, 6, 2), "Test Appraiser", "Fair"));
+        workflow.Phase.Should().Be("ClosingScheduled");
+    }
+
+    [Fact]
+    public async Task RecordAppraisal_ValueNotAboveZero_IsRejected()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var templateId = await CreateTemplateAsync(client);
+        var workflowId = await InitiateWorkflowAsync(client, templateId, $"landparc-{Guid.NewGuid():N}", $"home-{Guid.NewGuid():N}");
+
+        var response = await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/appraisal",
+            new RecordAppraisalCompletedRequest(0m, new DateOnly(2026, 6, 2), "Test Appraiser", null));
+
+        response.IsSuccessStatusCode.Should().BeFalse();
+    }
+
     private async Task InvokePurchaseClosedHandlerAsync(string workflowId)
     {
         using var scope = factory.Services.CreateScope();
@@ -137,7 +174,7 @@ public class PurchaseWorkflowCloseTests(ApiFactory factory)
         return created!.PurchaseWorkflowId;
     }
 
-    private static async Task SatisfyAllTracksAsync(HttpClient client, string workflowId)
+    private static async Task SatisfyAllTracksAsync(HttpClient client, string workflowId, bool includeAppraisal = true)
     {
         var responses = new List<HttpResponseMessage>
         {
@@ -152,6 +189,12 @@ public class PurchaseWorkflowCloseTests(ApiFactory factory)
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/lease-execution",
                 new RecordLeaseExecutedRequest(new DateOnly(2026, 6, 5))),
         };
+
+        if (includeAppraisal)
+        {
+            responses.Add(await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/appraisal",
+                new RecordAppraisalCompletedRequest(200000m, new DateOnly(2026, 6, 2), "Test Appraiser", null)));
+        }
 
         responses.Should().AllSatisfy(r => r.StatusCode.Should().Be(HttpStatusCode.NoContent));
     }

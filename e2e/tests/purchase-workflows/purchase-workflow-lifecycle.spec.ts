@@ -3,7 +3,7 @@ import { createPurchaseWorkflow, get } from '../support/api'
 import { detailValue, expectToast, field, isoDate, panel, uniqueId } from '../support/ui'
 
 // Journeys: docs/journeys/purchase-workflows/
-//   view-purchase-workflow-detail, record-eligibility-verified, record-financing-committed,
+//   view-purchase-workflow-detail, record-eligibility-verified, record-appraisal-completed, record-financing-committed,
 //   record-inspection-completed, record-title-cleared, record-lease-executed, schedule-closing,
 //   record-purchase-closed, fail-purchase-workflow, withdraw-purchase-workflow
 
@@ -54,10 +54,10 @@ test('recording every track, scheduling, and closing a purchase creates the grou
   // Initiated directly rather than from an application, so there's nothing to link back to.
   await expect(detail.getByRole('button', { name: 'Open Application' })).toHaveCount(0)
   await expect(detail.getByRole('button', { name: 'Open Household' })).toHaveCount(0)
-  for (const label of ['Eligibility', 'Financing', 'Inspection', 'Title', 'Lease Execution']) {
+  for (const label of ['Eligibility', 'Appraisal', 'Financing', 'Inspection', 'Title', 'Lease Execution']) {
     await expect(track(detail, label)).toContainText('Pending')
   }
-  // Closing can't be scheduled until the five tracks are complete.
+  // Closing can't be scheduled until the six tracks are complete.
   await expect(trackLabel(detail, 'Closing')).toHaveCount(0)
 
   const eligibilityDate = isoDate(-10)
@@ -66,6 +66,13 @@ test('recording every track, scheduling, and closing a purchase creates the grou
   await expect(trackLabel(detail, 'Eligibility')).toHaveText('✓ Eligibility')
   await expect(detail.getByText(`Verified ${eligibilityDate}`)).toBeVisible()
   await expect(detailValue(detail, 'Phase')).toHaveText('In Progress')
+
+  const appraisalDate = isoDate(-9)
+  await recordTrack(detail, 'Appraisal',
+    { 'Appraised Value ($)': '250000', 'Appraisal Date': appraisalDate, 'Appraiser Name': 'Apple Raiser', 'Notes (optional)': 'Fair condition' },
+    'Record Appraisal', 'Appraisal recorded')
+  await expect(detail.getByText(`$250,000 · appraised ${appraisalDate} by Apple Raiser`)).toBeVisible()
+  await expect(detailValue(detail, 'Appraised Value')).toHaveText('$250,000')
 
   await recordTrack(detail, 'Financing',
     { 'Lender Name': 'E2E Credit Union', 'Committed Amount ($)': '180000', 'Pre-Approval Letter Date': isoDate(-9) },
@@ -86,7 +93,7 @@ test('recording every track, scheduling, and closing a purchase creates the grou
   await recordTrack(detail, 'Lease Execution', { 'Signed Date': signedDate }, 'Record Lease Executed', 'Lease executed')
   await expect(detail.getByText(`Signed ${signedDate}`)).toBeVisible()
 
-  for (const label of ['Eligibility', 'Financing', 'Inspection', 'Title', 'Lease Execution']) {
+  for (const label of ['Eligibility', 'Appraisal', 'Financing', 'Inspection', 'Title', 'Lease Execution']) {
     await expect(trackLabel(detail, label)).toHaveText(`✓ ${label}`)
     // Completed tracks can't be re-opened.
     await expect(track(detail, label).getByRole('button')).toHaveCount(0)

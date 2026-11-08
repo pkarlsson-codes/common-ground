@@ -1,11 +1,13 @@
 import { statusLabel } from '../../hooks/types'
 import { usePurchaseWorkflow } from '../../hooks/purchaseWorkflows'
+import { useHomeAssessments } from '../../hooks/homes'
 import SlideOver from '../../components/SlideOver'
 import PurchaseTrackSection from './PurchaseTrackSection'
 import PurchaseWorkflowSnapshotSection from './PurchaseWorkflowSnapshotSection'
 import PurchaseExceptionActionsSection from './PurchaseExceptionActionsSection'
 import { usePurchaseWorkflowDetailController } from './usePurchaseWorkflowDetailController'
 import { DateInput } from '../../components/DateInput'
+import { useEffect } from 'react'
 
 const fmtCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
@@ -38,6 +40,16 @@ export default function PurchaseWorkflowDetailPanel({
     isDetailOpen: true,
   })
 
+  // Appraised Value starts from the home's latest assessment; staff confirm or correct it.
+  const { data: assessments } = useHomeAssessments(detail?.homeId ?? null, 1, 1)
+  const latestAssessedValue = assessments?.items?.[0]?.assessedValue
+  const { setAppraisalForm } = s
+  useEffect(() => {
+    if (latestAssessedValue) {
+      setAppraisalForm(f => (f.appraisedValue ? f : { ...f, appraisedValue: Number(latestAssessedValue) }))
+    }
+  }, [latestAssessedValue, selectedId, setAppraisalForm])
+
   return (
     <SlideOver
       title={detail?.buyerFullName ?? 'Purchase Workflow'}
@@ -52,7 +64,7 @@ export default function PurchaseWorkflowDetailPanel({
             <div className="detail-section">
               <div className="detail-section__title">Purchase Tracks</div>
               <div style={{ marginBottom: 12, fontSize: 12, color: 'var(--text-secondary)' }}>
-                All five tracks must be complete before closing can be scheduled.
+                All six tracks must be complete before closing can be scheduled.
               </div>
 
               <PurchaseTrackSection
@@ -89,6 +101,65 @@ export default function PurchaseWorkflowDetailPanel({
                   </div>
                   <button type="submit" className="btn btn-secondary btn-sm" disabled={s.eligPending}>
                     {s.eligPending ? 'Saving…' : 'Record Eligibility'}
+                  </button>
+                </form>
+              </PurchaseTrackSection>
+
+              <PurchaseTrackSection
+                label="Appraisal"
+                summary={
+                  detail.appraisalDetails
+                    ? `${fmtCurrency(Number(detail.appraisalDetails.appraisedValue ?? 0))} · appraised ${detail.appraisalDetails.appraisalDate ?? ''} by ${detail.appraisalDetails.appraiserName ?? ''}`
+                    : 'Pending'
+                }
+                complete={!!detail.appraisalDetails}
+                expandable={!detail.appraisalDetails}
+                expanded={s.expandedTracks.has('appraisal')}
+                onToggle={() => s.toggleTrack('appraisal')}
+              >
+                <form onSubmit={e => s.handleAppraisal(e, s.appraisalForm)}>
+                  <div className="form-grid" style={{ marginBottom: 10 }}>
+                    <div className="form-field">
+                      <label className="form-label">Appraised Value ($)</label>
+                      <input
+                        className="form-input"
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={s.appraisalForm.appraisedValue || ''}
+                        onChange={e => s.setAppraisalForm(f => ({ ...f, appraisedValue: parseFloat(e.target.value) || 0 }))}
+                        required
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label className="form-label">Appraisal Date</label>
+                      <DateInput
+                        className="form-input"
+                        value={s.appraisalForm.appraisalDate}
+                        onChange={v => s.setAppraisalForm(f => ({ ...f, appraisalDate: v }))}
+                        required
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label className="form-label">Appraiser Name</label>
+                      <input
+                        className="form-input"
+                        value={s.appraisalForm.appraiserName}
+                        onChange={e => s.setAppraisalForm(f => ({ ...f, appraiserName: e.target.value }))}
+                        required
+                      />
+                    </div>
+                    <div className="form-field full">
+                      <label className="form-label">Notes (optional)</label>
+                      <input
+                        className="form-input"
+                        value={s.appraisalForm.notes}
+                        onChange={e => s.setAppraisalForm(f => ({ ...f, notes: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <button type="submit" className="btn btn-secondary btn-sm" disabled={s.appraisalPending}>
+                    {s.appraisalPending ? 'Saving…' : 'Record Appraisal'}
                   </button>
                 </form>
               </PurchaseTrackSection>

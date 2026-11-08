@@ -90,6 +90,13 @@ export interface RecordEligibilityForm {
   notes: string
 }
 
+export interface RecordAppraisalForm {
+  appraisedValue: number
+  appraisalDate: CalendarDate
+  appraiserName: string
+  notes: string
+}
+
 export interface RecordFinancingForm {
   lenderName: string
   committedAmount: number

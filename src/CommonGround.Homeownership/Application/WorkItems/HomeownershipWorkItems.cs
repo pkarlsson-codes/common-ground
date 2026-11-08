@@ -23,6 +23,9 @@ public static class HomeownershipWorkItems
     /// <summary>Record the buyer's eligibility.</summary>
     public const string RecordEligibility = "record-eligibility";
 
+    /// <summary>Record the home's appraisal.</summary>
+    public const string RecordAppraisal = "record-appraisal";
+
     /// <summary>Record the buyer's financing commitment.</summary>
     public const string RecordFinancing = "record-financing";
 
@@ -108,6 +111,8 @@ public static class HomeownershipWorkItems
         var missing = new List<(string Step, string Action)>();
         if (workflow.EligibilityDetails is null)
             missing.Add(("eligibility", RecordEligibility));
+        if (workflow.AppraisalDetails is null)
+            missing.Add(("appraisal", RecordAppraisal));
         if (workflow.FinancingDetails is null)
             missing.Add(("financing", RecordFinancing));
         if (workflow.InspectionResult is null)

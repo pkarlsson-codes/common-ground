@@ -45,6 +45,13 @@ public sealed class PurchaseWorkflowsApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task RecordAppraisalCompletedAsync(string workflowId, RecordAppraisalCompletedRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
+        await PostAsync($"api/purchase-workflows/{workflowId}/appraisal", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task RecordFinancingCommittedAsync(string workflowId, RecordFinancingCommittedRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);

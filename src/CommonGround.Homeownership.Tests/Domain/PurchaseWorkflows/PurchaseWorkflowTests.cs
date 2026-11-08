@@ -2,6 +2,7 @@ using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
+using CommonGround.Homeownership.Domain.PurchaseWorkflows.TrackDetails;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using CommonGround.Testing;
@@ -25,6 +26,7 @@ public class PurchaseWorkflowTests
     private static PurchaseWorkflow SatisfyAllTracks(PurchaseWorkflow workflow)
     {
         workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), "Income verified", StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordAppraisalCompleted(300_000m, new DateOnly(2025, 3, 3), "Jane Appraiser", null, StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.RecordFinancingCommitted("First National", 240_000m, new DateOnly(2025, 3, 5), StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.RecordInspectionCompleted(new DateOnly(2025, 3, 10), "Bob Inspector", "All clear", StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.RecordTitleCleared(new DateOnly(2025, 3, 12), "Acme Title Co", StaffUser)).Aggregate;
@@ -74,6 +76,59 @@ public class PurchaseWorkflowTests
         workflow.Phase.Should().Be(WorkflowPhase.InProgress);
         workflow.IsEligibilityVerified.Should().BeTrue();
         workflow.EligibilityDetails!.VerifiedDate.Should().Be(new DateOnly(2025, 3, 1));
+    }
+
+    [Fact]
+    public void RecordAppraisalCompleted_SetsDetails()
+    {
+        var workflow = CreateWorkflow();
+
+        workflow = workflow.Decide(a => a.RecordAppraisalCompleted(310_000m, new DateOnly(2025, 3, 3), "Jane Appraiser", "Good condition", StaffUser)).Aggregate;
+
+        workflow.IsAppraisalCompleted.Should().BeTrue();
+        workflow.AppraisalDetails.Should().Be(new AppraisalDetails(310_000m, new DateOnly(2025, 3, 3), "Jane Appraiser", "Good condition"));
+        workflow.Phase.Should().Be(WorkflowPhase.InProgress);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void RecordAppraisalCompleted_ValueNotAboveZero_Throws(int value)
+    {
+        var workflow = CreateWorkflow();
+
+        var act = () => workflow.RecordAppraisalCompleted(value, new DateOnly(2025, 3, 3), "Jane Appraiser", null, StaffUser);
+
+        act.Should().Throw<BusinessRuleViolationException>()
+            .WithMessage("homeownership.purchase_workflow.record_appraisal_completed.appraised_value_non_positive");
+    }
+
+    [Fact]
+    public void RecordAppraisalCompleted_Twice_IsIdempotent()
+    {
+        var workflow = CreateWorkflow();
+        workflow = workflow.Decide(a => a.RecordAppraisalCompleted(310_000m, new DateOnly(2025, 3, 3), "First", null, StaffUser)).Aggregate;
+
+        var (after, events) = workflow.Decide(a => a.RecordAppraisalCompleted(999_000m, new DateOnly(2025, 4, 3), "Second", null, StaffUser));
+
+        events.Should().BeEmpty();
+        after.AppraisalDetails!.AppraiserName.Should().Be("First");
+    }
+
+    [Fact]
+    public void ScheduleClosing_WhenOnlyTheAppraisalIsMissing_Throws()
+    {
+        var workflow = CreateWorkflow();
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordFinancingCommitted("Bank", 240_000m, new DateOnly(2025, 3, 5), StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordInspectionCompleted(new DateOnly(2025, 3, 10), "Inspector", null, StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordTitleCleared(new DateOnly(2025, 3, 12), null, StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordLeaseExecuted(new DateOnly(2025, 3, 15), StaffUser)).Aggregate;
+
+        var act = () => workflow.ScheduleClosing(new DateOnly(2025, 4, 1), StaffUser);
+
+        act.Should().Throw<BusinessRuleViolationException>()
+            .WithMessage("homeownership.purchase_workflow.schedule_closing.mandatory_tracks_incomplete");
     }
 
     [Fact]
@@ -134,6 +189,7 @@ public class PurchaseWorkflowTests
         workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.RecordInspectionCompleted(new DateOnly(2025, 3, 10), "Inspector", null, StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.RecordFinancingCommitted("Bank", 240_000m, new DateOnly(2025, 3, 5), StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordAppraisalCompleted(300_000m, new DateOnly(2025, 3, 3), "Appraiser", null, StaffUser)).Aggregate;
 
         workflow.AllMandatoryTracksSatisfied.Should().BeTrue();
         workflow.Phase.Should().Be(WorkflowPhase.InProgress);

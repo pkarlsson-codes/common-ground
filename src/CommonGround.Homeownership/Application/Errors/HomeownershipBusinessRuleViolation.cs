@@ -21,6 +21,17 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class RecordAppraisalCompleted
+        {
+            public static BusinessRuleViolationException AppraisedValueNonPositive(decimal appraisedValue)
+                => new(
+                    "homeownership.purchase_workflow.record_appraisal_completed.appraised_value_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["appraisedValue"] = appraisedValue,
+                    });
+        }
+
         public static class ScheduleClosing
         {
             public static BusinessRuleViolationException MandatoryTracksIncomplete()

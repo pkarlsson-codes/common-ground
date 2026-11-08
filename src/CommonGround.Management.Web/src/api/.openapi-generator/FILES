@@ -21,6 +21,7 @@ models/ActivateCurePeriodRequest.ts
 models/AddDocumentVersionResponse.ts
 models/AddHouseholdMemberRequest.ts
 models/AddHouseholdMemberResponse.ts
+models/AppraisalDetailsDto.ts
 models/ApproveApplicationRequest.ts
 models/AttachDocumentRequest.ts
 models/CalculateResaleEstimateRequest.ts
@@ -117,6 +118,7 @@ models/PurchaseBoardColumnResponse.ts
 models/PurchaseBoardResponse.ts
 models/PurchaseWorkflowListItemResponse.ts
 models/PurchaseWorkflowResponse.ts
+models/RecordAppraisalCompletedRequest.ts
 models/RecordCltOrientationRequest.ts
 models/RecordCounselingOutcomeRequest.ts
 models/RecordEligibilityVerifiedRequest.ts

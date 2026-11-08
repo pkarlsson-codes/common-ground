@@ -68,6 +68,20 @@ public static class PurchaseWorkflowsEndpoints
         return Results.NoContent();
     }
 
+    [WolverinePost("/api/v1/purchase-workflows/{workflowId}/appraisal")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> RecordAppraisalCompleted(
+        string workflowId,
+        RecordAppraisalCompletedRequest request,
+        IPurchaseWorkflowsApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.RecordAppraisalCompletedAsync(workflowId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
     [WolverinePost("/api/v1/purchase-workflows/{workflowId}/financing")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> RecordFinancingCommitted(

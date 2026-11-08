@@ -45,6 +45,9 @@ public class PurchaseWorkflowView
     /// <summary>Gets or sets the eligibility verification details.</summary>
     public EligibilityDetailsEntry? EligibilityDetails { get; set; }
 
+    /// <summary>Gets or sets the appraisal details.</summary>
+    public AppraisalDetailsEntry? AppraisalDetails { get; set; }
+
     /// <summary>Gets or sets the financing commitment details.</summary>
     public FinancingDetailsEntry? FinancingDetails { get; set; }
 
@@ -87,6 +90,22 @@ public class EligibilityDetailsEntry
 {
     /// <summary>Gets or sets the date eligibility was verified.</summary>
     public DateOnly VerifiedDate { get; set; }
+
+    /// <summary>Gets or sets optional notes.</summary>
+    public string? Notes { get; set; }
+}
+
+/// <summary>Appraisal details.</summary>
+public class AppraisalDetailsEntry
+{
+    /// <summary>Gets or sets the appraised value.</summary>
+    public decimal AppraisedValue { get; set; }
+
+    /// <summary>Gets or sets the appraisal date.</summary>
+    public DateOnly AppraisalDate { get; set; }
+
+    /// <summary>Gets or sets the appraiser name.</summary>
+    public string AppraiserName { get; set; } = string.Empty;
 
     /// <summary>Gets or sets optional notes.</summary>
     public string? Notes { get; set; }

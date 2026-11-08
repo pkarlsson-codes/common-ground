@@ -17,6 +17,7 @@ public sealed record PurchaseWorkflowResponse(
     decimal PurchasePrice,
     DateTimeOffset CreatedAt,
     EligibilityDetailsDto? EligibilityDetails,
+    AppraisalDetailsDto? AppraisalDetails,
     FinancingDetailsDto? FinancingDetails,
     InspectionResultDto? InspectionResult,
     TitleDetailsDto? TitleDetails,
@@ -34,6 +35,13 @@ public sealed record PurchaseWorkflowResponse(
 /// <param name="VerifiedDate">Date eligibility was verified.</param>
 /// <param name="Notes">Optional notes.</param>
 public sealed record EligibilityDetailsDto(DateOnly VerifiedDate, string? Notes);
+
+/// <summary>Appraisal details.</summary>
+/// <param name="AppraisedValue">The home's market value without the lease's restrictions.</param>
+/// <param name="AppraisalDate">Date of the appraisal.</param>
+/// <param name="AppraiserName">Name of the appraiser.</param>
+/// <param name="Notes">Optional notes.</param>
+public sealed record AppraisalDetailsDto(decimal AppraisedValue, DateOnly AppraisalDate, string AppraiserName, string? Notes);
 
 /// <summary>Financing commitment details.</summary>
 /// <param name="LenderName">Name of the lender.</param>

@@ -3,6 +3,7 @@ import type { PurchaseWorkflowResponse } from '../../api'
 import type {
   FailWorkflowForm,
   RecordClosedForm,
+  RecordAppraisalForm,
   RecordEligibilityForm,
   RecordFinancingForm,
   RecordInspectionForm,
@@ -24,6 +25,7 @@ interface UsePurchaseWorkflowActionsParams {
   detail: PurchaseWorkflowResponse | undefined
   showToast: (msg: string, kind?: 'success' | 'error') => void
   eligMutation: TrackMutation<RecordEligibilityForm>
+  appraisalMutation: TrackMutation<RecordAppraisalForm>
   finMutation: TrackMutation<RecordFinancingForm>
   inspMutation: TrackMutation<RecordInspectionForm>
   titleMutation: TrackMutation<RecordTitleForm>
@@ -40,6 +42,7 @@ const isTerminal = (phase?: string) =>
 
 const allTracksComplete = (wf: PurchaseWorkflowResponse) =>
   !!wf.eligibilityDetails &&
+  !!wf.appraisalDetails &&
   !!wf.financingDetails &&
   !!wf.inspectionResult &&
   !!wf.titleDetails &&
@@ -50,6 +53,7 @@ export function usePurchaseWorkflowActions({
   detail,
   showToast,
   eligMutation,
+  appraisalMutation,
   finMutation,
   inspMutation,
   titleMutation,
@@ -110,6 +114,7 @@ export function usePurchaseWorkflowActions({
   }
 
   const handleElig = makeTrackHandler(eligMutation.mutateAsync, 'workflow:record-eligibility', 'Eligibility recorded', { toState: 'InProgress', trackKey: 'eligibility' })
+  const handleAppraisal = makeTrackHandler(appraisalMutation.mutateAsync, 'workflow:record-appraisal', 'Appraisal recorded', { toState: 'InProgress', trackKey: 'appraisal' })
   const handleFin = makeTrackHandler(finMutation.mutateAsync, 'workflow:record-financing', 'Financing committed', { toState: 'InProgress', trackKey: 'financing' })
   const handleInsp = makeTrackHandler(inspMutation.mutateAsync, 'workflow:record-inspection', 'Inspection recorded', { toState: 'InProgress', trackKey: 'inspection' })
   const handleTitle = makeTrackHandler(titleMutation.mutateAsync, 'workflow:record-title', 'Title cleared', { toState: 'InProgress', trackKey: 'title' })
@@ -127,6 +132,7 @@ export function usePurchaseWorkflowActions({
 
   return {
     handleElig,
+    handleAppraisal,
     handleFin,
     handleInsp,
     handleTitle,

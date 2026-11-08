@@ -49,6 +49,13 @@ import {
     TitleDetailsDtoToJSON,
     TitleDetailsDtoToJSONTyped,
 } from './TitleDetailsDto';
+import type { AppraisalDetailsDto } from './AppraisalDetailsDto';
+import {
+    AppraisalDetailsDtoFromJSON,
+    AppraisalDetailsDtoFromJSONTyped,
+    AppraisalDetailsDtoToJSON,
+    AppraisalDetailsDtoToJSONTyped,
+} from './AppraisalDetailsDto';
 import type { EligibilityDetailsDto } from './EligibilityDetailsDto';
 import {
     EligibilityDetailsDtoFromJSON,
@@ -155,6 +162,12 @@ export interface PurchaseWorkflowResponse {
     eligibilityDetails?: EligibilityDetailsDto | null;
     /**
      * 
+     * @type {AppraisalDetailsDto}
+     * @memberof PurchaseWorkflowResponse
+     */
+    appraisalDetails?: AppraisalDetailsDto | null;
+    /**
+     * 
      * @type {FinancingDetailsDto}
      * @memberof PurchaseWorkflowResponse
      */
@@ -259,6 +272,7 @@ export function PurchaseWorkflowResponseFromJSONTyped(json: any, ignoreDiscrimin
         'purchasePrice': json['purchasePrice'] == null ? undefined : json['purchasePrice'],
         'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
         'eligibilityDetails': json['eligibilityDetails'] == null ? undefined : EligibilityDetailsDtoFromJSON(json['eligibilityDetails']),
+        'appraisalDetails': json['appraisalDetails'] == null ? undefined : AppraisalDetailsDtoFromJSON(json['appraisalDetails']),
         'financingDetails': json['financingDetails'] == null ? undefined : FinancingDetailsDtoFromJSON(json['financingDetails']),
         'inspectionResult': json['inspectionResult'] == null ? undefined : InspectionResultDtoFromJSON(json['inspectionResult']),
         'titleDetails': json['titleDetails'] == null ? undefined : TitleDetailsDtoFromJSON(json['titleDetails']),
@@ -300,6 +314,7 @@ export function PurchaseWorkflowResponseToJSONTyped(value?: PurchaseWorkflowResp
         'purchasePrice': value['purchasePrice'],
         'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
         'eligibilityDetails': EligibilityDetailsDtoToJSON(value['eligibilityDetails']),
+        'appraisalDetails': AppraisalDetailsDtoToJSON(value['appraisalDetails']),
         'financingDetails': FinancingDetailsDtoToJSON(value['financingDetails']),
         'inspectionResult': InspectionResultDtoToJSON(value['inspectionResult']),
         'titleDetails': TitleDetailsDtoToJSON(value['titleDetails']),

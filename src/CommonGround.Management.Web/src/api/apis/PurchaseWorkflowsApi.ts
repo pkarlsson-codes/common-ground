@@ -23,6 +23,7 @@ import type {
   ProblemDetails,
   PurchaseBoardResponse,
   PurchaseWorkflowResponse,
+  RecordAppraisalCompletedRequest,
   RecordEligibilityVerifiedRequest,
   RecordFinancingCommittedRequest,
   RecordInspectionCompletedRequest,
@@ -48,6 +49,8 @@ import {
     PurchaseBoardResponseToJSON,
     PurchaseWorkflowResponseFromJSON,
     PurchaseWorkflowResponseToJSON,
+    RecordAppraisalCompletedRequestFromJSON,
+    RecordAppraisalCompletedRequestToJSON,
     RecordEligibilityVerifiedRequestFromJSON,
     RecordEligibilityVerifiedRequestToJSON,
     RecordFinancingCommittedRequestFromJSON,
@@ -89,6 +92,11 @@ export interface GetPurchaseWorkflowsRequest {
 
 export interface InitiatePurchaseWorkflowOperationRequest {
     initiatePurchaseWorkflowRequest: InitiatePurchaseWorkflowRequest;
+}
+
+export interface RecordAppraisalCompletedOperationRequest {
+    workflowId: string;
+    recordAppraisalCompletedRequest: RecordAppraisalCompletedRequest;
 }
 
 export interface RecordEligibilityVerifiedOperationRequest {
@@ -213,6 +221,20 @@ export interface PurchaseWorkflowsApiInterface {
     /**
      */
     initiatePurchaseWorkflow(requestParameters: InitiatePurchaseWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {string} workflowId 
+     * @param {RecordAppraisalCompletedRequest} recordAppraisalCompletedRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PurchaseWorkflowsApiInterface
+     */
+    recordAppraisalCompletedRaw(requestParameters: RecordAppraisalCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    recordAppraisalCompleted(requestParameters: RecordAppraisalCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -551,6 +573,58 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
     async initiatePurchaseWorkflow(requestParameters: InitiatePurchaseWorkflowOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.initiatePurchaseWorkflowRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async recordAppraisalCompletedRaw(requestParameters: RecordAppraisalCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['workflowId'] == null) {
+            throw new runtime.RequiredError(
+                'workflowId',
+                'Required parameter "workflowId" was null or undefined when calling recordAppraisalCompleted().'
+            );
+        }
+
+        if (requestParameters['recordAppraisalCompletedRequest'] == null) {
+            throw new runtime.RequiredError(
+                'recordAppraisalCompletedRequest',
+                'Required parameter "recordAppraisalCompletedRequest" was null or undefined when calling recordAppraisalCompleted().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/purchase-workflows/{workflowId}/appraisal`;
+        urlPath = urlPath.replace(`{${"workflowId"}}`, encodeURIComponent(String(requestParameters['workflowId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RecordAppraisalCompletedRequestToJSON(requestParameters['recordAppraisalCompletedRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async recordAppraisalCompleted(requestParameters: RecordAppraisalCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordAppraisalCompletedRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**

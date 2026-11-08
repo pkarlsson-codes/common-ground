@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { PurchaseWorkflowResponse } from '../../api'
 import {
   useFailPurchase,
+  useRecordAppraisalCompleted,
   useRecordEligibilityVerified,
   useRecordFinancingCommitted,
   useRecordInspectionCompleted,
@@ -14,6 +15,7 @@ import {
 import type {
   FailWorkflowForm,
   RecordClosedForm,
+  RecordAppraisalForm,
   RecordEligibilityForm,
   RecordFinancingForm,
   RecordInspectionForm,
@@ -25,11 +27,12 @@ import type {
 import { usePurchaseWorkflowActions } from './usePurchaseWorkflowActions'
 import { trustToday } from '../../lib/calendarDate'
 
-export type TrackKey = 'eligibility' | 'financing' | 'inspection' | 'title' | 'leaseExecution' | 'closing'
+export type TrackKey = 'eligibility' | 'appraisal' | 'financing' | 'inspection' | 'title' | 'leaseExecution' | 'closing'
 
 const today = () => trustToday()
 
 const emptyEligibility = (): RecordEligibilityForm => ({ verifiedDate: today(), notes: '' })
+const emptyAppraisal = (): RecordAppraisalForm => ({ appraisedValue: 0, appraisalDate: today(), appraiserName: '', notes: '' })
 const emptyFinancing = (): RecordFinancingForm => ({ lenderName: '', committedAmount: 0, preapprovalLetterDate: today() })
 const emptyInspection = (): RecordInspectionForm => ({ inspectionDate: today(), inspectorName: '', notes: '' })
 const emptyTitle = (): RecordTitleForm => ({ clearedDate: today(), titleCompanyName: '' })
@@ -53,6 +56,7 @@ export function usePurchaseWorkflowDetailController({
   isDetailOpen,
 }: UsePurchaseWorkflowDetailControllerParams) {
   const [eligForm, setEligForm] = useState<RecordEligibilityForm>(emptyEligibility)
+  const [appraisalForm, setAppraisalForm] = useState<RecordAppraisalForm>(emptyAppraisal)
   const [finForm, setFinForm] = useState<RecordFinancingForm>(emptyFinancing)
   const [inspForm, setInspForm] = useState<RecordInspectionForm>(emptyInspection)
   const [titleForm, setTitleForm] = useState<RecordTitleForm>(emptyTitle)
@@ -64,6 +68,7 @@ export function usePurchaseWorkflowDetailController({
   const [expandedTracks, setExpandedTracks] = useState<Set<TrackKey>>(() => new Set())
 
   const eligMutation = useRecordEligibilityVerified()
+  const appraisalMutation = useRecordAppraisalCompleted()
   const finMutation = useRecordFinancingCommitted()
   const inspMutation = useRecordInspectionCompleted()
   const titleMutation = useRecordTitleCleared()
@@ -79,6 +84,7 @@ export function usePurchaseWorkflowDetailController({
     }
 
     setEligForm(emptyEligibility())
+    setAppraisalForm(emptyAppraisal())
     setFinForm(emptyFinancing())
     setInspForm(emptyInspection())
     setTitleForm(emptyTitle())
@@ -116,6 +122,7 @@ export function usePurchaseWorkflowDetailController({
     detail,
     showToast,
     eligMutation,
+    appraisalMutation,
     finMutation,
     inspMutation,
     titleMutation,
@@ -137,6 +144,8 @@ export function usePurchaseWorkflowDetailController({
     collapseTrack,
     eligForm,
     setEligForm,
+    appraisalForm,
+    setAppraisalForm,
     finForm,
     setFinForm,
     inspForm,
@@ -154,6 +163,7 @@ export function usePurchaseWorkflowDetailController({
     withdrawForm,
     setWithdrawForm,
     handleElig: actions.handleElig,
+    handleAppraisal: actions.handleAppraisal,
     handleFin: actions.handleFin,
     handleInsp: actions.handleInsp,
     handleTitle: actions.handleTitle,
@@ -163,6 +173,7 @@ export function usePurchaseWorkflowDetailController({
     handleFail: actions.handleFail,
     handleWithdraw: actions.handleWithdraw,
     eligPending: eligMutation.isPending,
+    appraisalPending: appraisalMutation.isPending,
     finPending: finMutation.isPending,
     inspPending: inspMutation.isPending,
     titlePending: titleMutation.isPending,

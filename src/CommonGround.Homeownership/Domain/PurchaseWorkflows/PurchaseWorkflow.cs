@@ -52,6 +52,9 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <summary>Gets eligibility track details, or null if not yet verified.</summary>
     public EligibilityDetails? EligibilityDetails { get; private set; }
 
+    /// <summary>Gets appraisal track details, or null if not yet completed.</summary>
+    public AppraisalDetails? AppraisalDetails { get; private set; }
+
     /// <summary>Gets financing track details, or null if not yet committed.</summary>
     public FinancingDetails? FinancingDetails { get; private set; }
 
@@ -88,6 +91,9 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <summary>Gets whether eligibility has been verified.</summary>
     public bool IsEligibilityVerified => EligibilityDetails is not null;
 
+    /// <summary>Gets whether the appraisal has been completed.</summary>
+    public bool IsAppraisalCompleted => AppraisalDetails is not null;
+
     /// <summary>Gets whether financing has been committed.</summary>
     public bool IsFinancingCommitted => FinancingDetails is not null;
 
@@ -100,9 +106,9 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <summary>Gets whether the lease has been executed.</summary>
     public bool IsLeaseExecuted => LeaseExecutionDetails is not null;
 
-    /// <summary>Gets whether all five mandatory tracks are satisfied.</summary>
+    /// <summary>Gets whether all six mandatory tracks are satisfied.</summary>
     public bool AllMandatoryTracksSatisfied =>
-        IsEligibilityVerified && IsFinancingCommitted &&
+        IsEligibilityVerified && IsAppraisalCompleted && IsFinancingCommitted &&
         IsInspectionCompleted && IsTitleCleared && IsLeaseExecuted;
 
     /// <summary>Gets whether the workflow is in a terminal phase.</summary>
@@ -165,6 +171,29 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
 
         return new BuyerEligibilityVerified(
             Id.Value, verifiedDate, notes,
+            recordedBy.Value);
+    }
+
+    /// <summary>Records that the home's appraisal has been completed. Idempotent.</summary>
+    /// <param name="appraisedValue">The home's market value without the lease's restrictions. Must be above zero.</param>
+    /// <param name="appraisalDate">Date of the appraisal.</param>
+    /// <param name="appraiserName">Name of the appraiser.</param>
+    /// <param name="notes">Optional notes.</param>
+    /// <param name="recordedBy">The user recording this fact.</param>
+    public AppraisalCompleted? RecordAppraisalCompleted(
+        decimal appraisedValue, DateOnly appraisalDate, string appraiserName,
+        string? notes, UserId recordedBy)
+    {
+        GuardNotTerminal();
+        if (IsAppraisalCompleted) return null;
+
+        if (appraisedValue <= 0)
+        {
+            throw BusinessRuleViolation.PurchaseWorkflow.RecordAppraisalCompleted.AppraisedValueNonPositive(appraisedValue);
+        }
+
+        return new AppraisalCompleted(
+            Id.Value, appraisedValue, appraisalDate, appraiserName, notes,
             recordedBy.Value);
     }
 
@@ -359,6 +388,14 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     public void Apply(BuyerEligibilityVerified e)
     {
         EligibilityDetails = new EligibilityDetails(e.VerifiedDate, e.EligibilityNotes);
+        AdvancePhaseIfNeeded();
+    }
+
+    /// <summary>Applies <see cref="AppraisalCompleted"/>.</summary>
+    public void Apply(AppraisalCompleted e)
+    {
+        AppraisalDetails = new AppraisalDetails(
+            e.AppraisedValue, e.AppraisalDate, e.AppraiserName, e.AppraisalNotes);
         AdvancePhaseIfNeeded();
     }
 

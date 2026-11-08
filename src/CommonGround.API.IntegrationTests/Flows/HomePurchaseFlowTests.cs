@@ -401,6 +401,8 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
         {
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/eligibility",
                 new RecordEligibilityVerifiedRequest(new DateOnly(2026, 8, 1), null)),
+            await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/appraisal",
+                new RecordAppraisalCompletedRequest(200000m, new DateOnly(2026, 8, 2), "Test Appraiser", null)),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/financing",
                 new RecordFinancingCommittedRequest("Test Lender", 140000m, new DateOnly(2026, 8, 2))),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/inspection",

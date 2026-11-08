@@ -25,6 +25,7 @@ internal sealed class PurchaseWorkflowListItemViewProjection : SingleStreamProje
         };
 
     public static void Apply(PurchaseWorkflowListItemView view, BuyerEligibilityVerified e) => Record(view, PurchaseStep.Eligibility, e.OccurredAt);
+    public static void Apply(PurchaseWorkflowListItemView view, AppraisalCompleted e) => Record(view, PurchaseStep.Appraisal, e.OccurredAt);
     public static void Apply(PurchaseWorkflowListItemView view, FinancingCommitted e) => Record(view, PurchaseStep.Financing, e.OccurredAt);
     public static void Apply(PurchaseWorkflowListItemView view, InspectionCompleted e) => Record(view, PurchaseStep.Inspection, e.OccurredAt);
     public static void Apply(PurchaseWorkflowListItemView view, TitleCleared e) => Record(view, PurchaseStep.Title, e.OccurredAt);
@@ -50,6 +51,7 @@ internal sealed class PurchaseWorkflowListItemViewProjection : SingleStreamProje
         bool Recorded(PurchaseStep s) => view.RecordedSteps.Contains(s.DisplayName);
         view.NextStep = PurchaseStep.WaitingOn(
             Recorded(PurchaseStep.Eligibility),
+            Recorded(PurchaseStep.Appraisal),
             Recorded(PurchaseStep.Financing),
             Recorded(PurchaseStep.Inspection),
             Recorded(PurchaseStep.Title),

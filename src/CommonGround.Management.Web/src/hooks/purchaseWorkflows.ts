@@ -5,6 +5,7 @@ import type {
   FailWorkflowForm,
   RecordClosedForm,
   RecordEligibilityForm,
+  RecordAppraisalForm,
   RecordFinancingForm,
   RecordInspectionForm,
   RecordLeaseExecutedForm,
@@ -47,6 +48,7 @@ export function useConnectedPurchaseWorkflows(filter: { homeId?: string; househo
 /** What staff call each step a purchase can wait on, by the API's step name. */
 export const PURCHASE_STEP_LABELS: Record<string, string> = {
   Eligibility: 'Eligibility',
+  Appraisal: 'Appraisal',
   Financing: 'Financing',
   Inspection: 'Inspection',
   Title: 'Title',
@@ -63,6 +65,7 @@ export const isOpenPurchasePhase = (phase?: string | null) => !!phase && !TERMIN
 export function purchaseWaitingOn(workflow: PurchaseWorkflowResponse): string {
   if (workflow.phase === 'Stalled') return 'resolving the stall'
   if (!workflow.eligibilityDetails) return 'eligibility verification'
+  if (!workflow.appraisalDetails) return 'the appraisal'
   if (!workflow.financingDetails) return 'the financing commitment'
   if (!workflow.inspectionResult) return 'the inspection'
   if (!workflow.titleDetails) return 'title clearance'
@@ -167,6 +170,40 @@ export function useRecordEligibilityVerified() {
       const context = applyOptimisticTrackDetails(qc, workflowId, {
         eligibilityDetails: {
           verifiedDate: form.verifiedDate,
+          notes: form.notes || undefined,
+        },
+      })
+      return { workflowId, ...context }
+    },
+    onError: (_e, vars, context) => {
+      rollbackOptimisticTrackDetails(qc, vars.workflowId, context)
+    },
+    onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
+  })
+}
+
+export function useRecordAppraisalCompleted() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ workflowId, form }: { workflowId: string; form: RecordAppraisalForm }) =>
+      api.recordAppraisalCompleted({
+        workflowId,
+        recordAppraisalCompletedRequest: {
+          appraisedValue: form.appraisedValue,
+          appraisalDate: form.appraisalDate,
+          appraiserName: form.appraiserName,
+          notes: form.notes || undefined,
+        },
+      }),
+    onMutate: async ({ workflowId, form }) => {
+      await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
+      await qc.cancelQueries({ queryKey: ['purchase-workflows'] })
+
+      const context = applyOptimisticTrackDetails(qc, workflowId, {
+        appraisalDetails: {
+          appraisedValue: form.appraisedValue,
+          appraisalDate: form.appraisalDate,
+          appraiserName: form.appraiserName,
           notes: form.notes || undefined,
         },
       })

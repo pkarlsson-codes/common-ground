@@ -36,6 +36,18 @@ internal sealed class PurchaseWorkflowViewProjection : SingleStreamProjection<Pu
         };
     }
 
+    public static void Apply(PurchaseWorkflowView view, AppraisalCompleted e)
+    {
+        view.Phase = "InProgress";
+        view.AppraisalDetails = new AppraisalDetailsEntry
+        {
+            AppraisedValue = e.AppraisedValue,
+            AppraisalDate = e.AppraisalDate,
+            AppraiserName = e.AppraiserName,
+            Notes = e.AppraisalNotes,
+        };
+    }
+
     public static void Apply(PurchaseWorkflowView view, FinancingCommitted e)
     {
         view.Phase = "InProgress";

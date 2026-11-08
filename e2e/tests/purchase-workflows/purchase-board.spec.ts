@@ -15,7 +15,7 @@ test('the board puts a purchase in the column of the step it waits on, and moves
 
   await page.goto('/purchase-workflows')
   await expect(page.getByRole('button', { name: 'Board', exact: true })).toHaveAttribute('aria-pressed', 'true')
-  for (const step of ['Eligibility', 'Financing', 'Inspection', 'Title', 'Lease signing', 'Closing']) {
+  for (const step of ['Eligibility', 'Appraisal', 'Financing', 'Inspection', 'Title', 'Lease signing', 'Closing']) {
     await expect(column(page, step)).toBeVisible()
   }
   const card = column(page, 'Eligibility').getByRole('button', { name: new RegExp(buyer) })
@@ -29,7 +29,7 @@ test('the board puts a purchase in the column of the step it waits on, and moves
   await detail.getByRole('button', { name: 'Record Eligibility' }).click()
   await expectToast(page, 'Eligibility recorded')
 
-  await expect(column(page, 'Financing').getByRole('button', { name: new RegExp(buyer) })).toBeVisible()
+  await expect(column(page, 'Appraisal').getByRole('button', { name: new RegExp(buyer) })).toBeVisible()
   await expect(column(page, 'Eligibility').getByRole('button', { name: new RegExp(buyer) })).toHaveCount(0)
 })
 
