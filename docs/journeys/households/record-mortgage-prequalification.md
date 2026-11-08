@@ -9,3 +9,5 @@ Readiness belongs to the household, so it can be recorded whether or not the hou
 5. User clicks "Record Prequalification" (disabled until all three fields are set)
 6. Toast: "Mortgage prequalification recorded"
 7. Panel closes, the household's Mortgage Prequalification checklist item is marked done showing lender name, prequalified amount and expiry date
+
+Pressing Escape (or Close or Cancel) with typed input asks "Discard changes?" before closing. See [Close an overlay](../navigation/close-an-overlay.md).

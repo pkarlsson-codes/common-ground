@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
 import SlideOver from '../../components/SlideOver'
+import SlideOverCancelButton from '../../components/SlideOverCancelButton'
 import { useWithdrawApplication } from '../../hooks/applications'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
@@ -52,9 +53,10 @@ export default function WithdrawApplicationPanel({ applicationId, onClose }: Pro
       title="Withdraw Application"
       subtitle="Withdraw this application from the pipeline"
       onClose={onClose}
+      isDirty={!!form.reason || form.withdrawnDate !== emptyForm().withdrawnDate}
       footer={
         <>
-          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <SlideOverCancelButton />
           <button
             className="btn btn-primary"
             type="submit"

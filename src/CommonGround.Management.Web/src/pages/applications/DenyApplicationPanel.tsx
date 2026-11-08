@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
 import SlideOver from '../../components/SlideOver'
+import SlideOverCancelButton from '../../components/SlideOverCancelButton'
 import { useDenyApplication } from '../../hooks/applications'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
@@ -52,9 +53,10 @@ export default function DenyApplicationPanel({ applicationId, onClose }: Props) 
       title="Deny Application"
       subtitle="Record final application denial"
       onClose={onClose}
+      isDirty={!!form.reason || form.deniedDate !== emptyForm().deniedDate}
       footer={
         <>
-          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <SlideOverCancelButton />
           <button
             className="btn btn-primary"
             type="submit"

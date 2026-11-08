@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import type { FailWorkflowForm, WithdrawWorkflowForm } from '../../hooks/types'
-import ConfirmActionModal from './ConfirmActionModal'
+import ConfirmActionModal from '../../components/ConfirmActionModal'
 
 type ConfirmKind = 'fail' | 'withdraw' | null
 

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
 import SlideOver from '../../components/SlideOver'
+import SlideOverCancelButton from '../../components/SlideOverCancelButton'
 import { useRecordMortgagePrequalification } from '../../hooks/households'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
@@ -52,9 +53,10 @@ export default function RecordMortgagePrequalificationPanel({ householdId, onClo
       title="Record Mortgage Prequalification"
       subtitle="Capture lender prequalification details"
       onClose={onClose}
+      isDirty={!!form.lenderName || form.approvedAmount !== 0 || form.expiryDate !== null}
       footer={
         <>
-          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <SlideOverCancelButton />
           <button
             className="btn btn-primary"
             type="submit"

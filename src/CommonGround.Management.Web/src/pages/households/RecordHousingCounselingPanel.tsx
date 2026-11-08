@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
 import SlideOver from '../../components/SlideOver'
+import SlideOverCancelButton from '../../components/SlideOverCancelButton'
 import { useRecordHousingCounseling } from '../../hooks/households'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
@@ -52,9 +53,10 @@ export default function RecordHousingCounselingPanel({ householdId, onClose }: P
       title="Record Housing Counseling"
       subtitle="Capture counseling completion details"
       onClose={onClose}
+      isDirty={!!(form.certificationNumber || form.counselorOrganization) || form.completedDate !== emptyForm().completedDate}
       footer={
         <>
-          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <SlideOverCancelButton />
           <button
             className="btn btn-primary"
             type="submit"

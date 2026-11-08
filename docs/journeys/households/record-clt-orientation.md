@@ -9,3 +9,5 @@ Readiness belongs to the household, so it can be recorded whether or not the hou
 5. User clicks "Record Orientation" (disabled until Completed Date is set)
 6. Toast: "CLT orientation recorded"
 7. Panel closes, the household's CLT Orientation checklist item is marked done
+
+Pressing Escape (or Close or Cancel) with typed input asks "Discard changes?" before closing. See [Close an overlay](../navigation/close-an-overlay.md).

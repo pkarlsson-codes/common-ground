@@ -10,4 +10,6 @@
 8. Panel shows Withdrawal Reason; the workflow moves to the Withdrawn phase and Purchase Tracks and Exception Actions are no longer shown
 9. If the workflow was initiated by selecting an applicant for a home, in the background the home goes back to the Selection stage with a new home selection started for it, the completed selection is marked Fell Through, and the household's application returns to the waiting list with its original approved date
 
+Closing the purchase panel with a reason typed asks "Discard changes?" first. See [Close an overlay](../navigation/close-an-overlay.md).
+
 Continues in: [View Home Selection](../home-selections/view-home-selection.md)

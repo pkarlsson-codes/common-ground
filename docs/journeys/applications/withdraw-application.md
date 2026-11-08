@@ -8,3 +8,5 @@
 6. User clicks "Withdraw" (disabled until Withdrawn Date is set)
 7. Toast: "Application withdrawn"
 8. Panel closes, application moves to the Withdrawn phase and no further workflow actions are available
+
+Pressing Escape (or Close or Cancel) with typed input asks "Discard changes?" before closing. See [Close an overlay](../navigation/close-an-overlay.md).

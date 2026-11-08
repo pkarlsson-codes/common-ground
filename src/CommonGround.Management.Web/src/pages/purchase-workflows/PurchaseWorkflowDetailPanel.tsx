@@ -55,6 +55,7 @@ export default function PurchaseWorkflowDetailPanel({
       title={detail?.buyerFullName ?? 'Purchase Workflow'}
       subtitle={detail ? `${fmtCurrency(Number(detail.purchasePrice))} · ${statusLabel(detail.phase ?? '')}` : undefined}
       onClose={onClose}
+      isDirty={s.canAct && !!(s.failForm.reason || s.withdrawForm.reason)}
     >
       {detailLoading || !detail ? <SkeletonRows /> : (
         <>

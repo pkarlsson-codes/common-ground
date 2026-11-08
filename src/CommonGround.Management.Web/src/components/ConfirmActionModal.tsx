@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useOverlayEscape } from '../lib/overlayStack'
 
 interface ConfirmActionModalProps {
   open: boolean
@@ -19,12 +19,7 @@ export default function ConfirmActionModal({
   onConfirm,
   onCancel,
 }: ConfirmActionModalProps) {
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel() }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onCancel])
+  useOverlayEscape(open, onCancel)
 
   if (!open) return null
 

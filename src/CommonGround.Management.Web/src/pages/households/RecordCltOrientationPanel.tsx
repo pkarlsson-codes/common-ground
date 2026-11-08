@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
 import SlideOver from '../../components/SlideOver'
+import SlideOverCancelButton from '../../components/SlideOverCancelButton'
 import { useRecordCltOrientation } from '../../hooks/households'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
@@ -13,7 +14,8 @@ type Props = {
 }
 
 export default function RecordCltOrientationPanel({ householdId, onClose }: Props) {
-  const [completedDate, setCompletedDate] = useState(trustToday())
+  const [initialDate] = useState(trustToday)
+  const [completedDate, setCompletedDate] = useState(initialDate)
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   const mutation = useRecordCltOrientation(householdId)
   const { success } = useToast()
@@ -36,9 +38,10 @@ export default function RecordCltOrientationPanel({ householdId, onClose }: Prop
       title="Record CLT Orientation"
       subtitle="Capture orientation completion date"
       onClose={onClose}
+      isDirty={completedDate !== initialDate}
       footer={
         <>
-          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <SlideOverCancelButton />
           <button
             className="btn btn-primary"
             type="submit"
