@@ -79,12 +79,6 @@ export interface HomeListItemResponse {
      * @type {string}
      * @memberof HomeListItemResponse
      */
-    status?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof HomeListItemResponse
-     */
     occupancy?: string;
     /**
      * 
@@ -120,7 +114,6 @@ export function HomeListItemResponseFromJSONTyped(json: any, ignoreDiscriminator
         'bathrooms': json['bathrooms'] == null ? undefined : json['bathrooms'],
         'squareFootage': json['squareFootage'] == null ? undefined : json['squareFootage'],
         'assessedValue': json['assessedValue'] == null ? undefined : json['assessedValue'],
-        'status': json['status'] == null ? undefined : json['status'],
         'occupancy': json['occupancy'] == null ? undefined : json['occupancy'],
         'saleStage': json['saleStage'] == null ? undefined : json['saleStage'],
     };
@@ -146,7 +139,6 @@ export function HomeListItemResponseToJSONTyped(value?: HomeListItemResponse | n
         'bathrooms': value['bathrooms'],
         'squareFootage': value['squareFootage'],
         'assessedValue': value['assessedValue'],
-        'status': value['status'],
         'occupancy': value['occupancy'],
         'saleStage': value['saleStage'],
     };

@@ -15,7 +15,6 @@ public sealed record HomeResponse(
     decimal AssessedValue,
     DateOnly? LastAssessedDate,
     string? ConditionNotes,
-    string Status,
     DateTimeOffset RegisteredAt,
     DateOnly? AvailableAgainDate,
     DateOnly? SelectionOpenedDate,

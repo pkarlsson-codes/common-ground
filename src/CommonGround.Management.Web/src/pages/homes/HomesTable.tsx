@@ -1,6 +1,7 @@
 import type { useHomes } from '../../hooks/homes'
 import Pagination from '../../components/Pagination'
 import StatusBadge from '../../components/StatusBadge'
+import { homeLabel } from '../../lib/lifecycle'
 import { HOME_TYPE_LABELS } from '../../hooks/types'
 
 type Home = NonNullable<NonNullable<ReturnType<typeof useHomes>['data']>['items']>[number]
@@ -94,7 +95,7 @@ export default function HomesTable({
                   </td>
                   <td><span className="cell-mono">{fmtNumber(Number(h.squareFootage))}</span></td>
                   <td><span className="cell-mono">{fmtCurrency(Number(h.assessedValue))}</span></td>
-                  <td><StatusBadge status={h.status ?? ''} /></td>
+                  <td><StatusBadge status={homeLabel(h.occupancy, h.saleStage)} /></td>
                   <td>
                     <span className="cell-id" title={h.landParcelId ?? ''}>
                       {(h.landParcelId ?? '').slice(0, 8)}…

@@ -33,7 +33,15 @@ export function formatStepDate(value?: CalendarDate | Date | null): string | und
 
 export const HOME_STAGES = ['Development', 'Available', 'Selection', 'Purchasing', 'Leased', 'Resale'] as const
 
-const HOME_STAGE_OF_STATUS: Record<string, string> = {
+const HOME_LABELS: Record<string, string> = {
+  'Vacant|Offered': 'Available',
+  'Vacant|InSelection': 'InSelection',
+  'Vacant|UnderContract': 'UnderContract',
+  'Occupied|NotForSale': 'Leased',
+  'Occupied|AwaitingTrustDecision': 'Resale',
+}
+
+const HOME_STAGE_OF_LABEL: Record<string, string> = {
   Available: 'Available',
   InSelection: 'Selection',
   UnderContract: 'Purchasing',
@@ -41,8 +49,16 @@ const HOME_STAGE_OF_STATUS: Record<string, string> = {
   Resale: 'Resale',
 }
 
-/** The home's lifecycle stage, from its status. */
-export const homeStage = (status?: string | null) => HOME_STAGE_OF_STATUS[status ?? ''] ?? 'Available'
+/** The label staff know a home's state by, e.g. "Leased", from its occupancy and sale stage. */
+export function homeLabel(occupancy?: string | null, saleStage?: string | null): string {
+  const o = occupancy ?? ''
+  const s = saleStage ?? ''
+  return HOME_LABELS[`${o}|${s}`] ?? `${o} · ${s}`
+}
+
+/** The home's lifecycle stage, from its occupancy and sale stage. */
+export const homeStage = (occupancy?: string | null, saleStage?: string | null) =>
+  HOME_STAGE_OF_LABEL[homeLabel(occupancy, saleStage)] ?? 'Available'
 
 // ── Households ────────────────────────────────────────────────────────────
 

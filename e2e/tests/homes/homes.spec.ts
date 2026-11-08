@@ -86,11 +86,14 @@ test('registering a home adds it to the registry with its details and initial as
 
   await expect(row).toContainText(`${apn} Elm St, Unit B`)
 
-  // The status filter finds it under Available, not under Leased.
-  const statusFilter = page.locator('.filter-bar select')
-  await statusFilter.selectOption('Leased')
+  // The filters find it as Vacant and Offered, not as Occupied and Not For Sale (Leased).
+  const occupancyFilter = page.getByLabel('Occupancy')
+  const saleStageFilter = page.getByLabel('Sale stage')
+  await occupancyFilter.selectOption('Occupied')
+  await saleStageFilter.selectOption('NotForSale')
   await expect(page.locator('.empty-state')).toBeVisible()
-  await statusFilter.selectOption('Available')
+  await occupancyFilter.selectOption('Vacant')
+  await saleStageFilter.selectOption('Offered')
   await expect(page.locator('tbody tr')).toHaveCount(1)
 
   await row.click()

@@ -50,7 +50,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
         var purchase = await SelectHouseholdAsync(client);
 
         (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{purchase.HomeId}"))!
-            .Should().BeEquivalentTo(new { Status = "UnderContract", UnderContractDate = SelectedDate });
+            .Should().BeEquivalentTo(new { SaleStage = "UnderContract", UnderContractDate = SelectedDate });
 
         var workflow = await client.GetFromJsonAsync<PurchaseWorkflowResponse>($"/api/purchase-workflows/{purchase.WorkflowId}");
         workflow.Should().BeEquivalentTo(new
@@ -112,7 +112,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
         _tracker.FailedOnPurpose.Should().ContainSingle("the failing reaction ran, and only once, with no retries");
 
         (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{purchase.HomeId}"))!
-            .Status.Should().Be("UnderContract");
+            .SaleStage.Should().Be("UnderContract");
         (await client.GetFromJsonAsync<PurchaseWorkflowResponse>($"/api/purchase-workflows/{purchase.WorkflowId}"))!
             .ApplicationId.Should().Be(purchase.Applicant.ApplicationId);
     }
@@ -141,7 +141,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
             .Candidates.Should().NotContain(c => c.ApplicationId == purchase.Applicant.ApplicationId,
                 "the household isn't a candidate for the home its purchase just fell through on");
         (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{purchase.HomeId}"))!
-            .Should().BeEquivalentTo(new { Status = "InSelection", UnderContractDate = (DateOnly?)null, AvailableAgainDate = failedDate });
+            .Should().BeEquivalentTo(new { SaleStage = "InSelection", UnderContractDate = (DateOnly?)null, AvailableAgainDate = failedDate });
     }
 
     [Fact]
@@ -163,7 +163,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
             $"/api/ground-leases?landParcelId={purchase.LandParcelId}");
         leases!.Items.Should().ContainSingle();
         (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{purchase.HomeId}"))!
-            .Should().BeEquivalentTo(new { Status = "Leased", LeasedDate = ClosingDate });
+            .Should().BeEquivalentTo(new { SaleStage = "NotForSale", LeasedDate = ClosingDate });
         (await client.GetFromJsonAsync<HouseholdResponse>($"/api/households/{purchase.Applicant.HouseholdId}"))!
             .Journey.Should().BeEquivalentTo(new { Stage = "Homeowner", PurchasedDate = ClosingDate, SelectedHomeId = purchase.HomeId });
     }
@@ -188,7 +188,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
         cases!.Items.Should().ContainSingle().Which.Should().BeEquivalentTo(new { Status = "Active", OpenedDate = today.Today },
             "the case opens on the day the lease was recorded, not on its start date");
         (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}"))!
-            .Should().BeEquivalentTo(new { Status = "Leased", LeasedDate = leaseStart });
+            .Should().BeEquivalentTo(new { SaleStage = "NotForSale", LeasedDate = leaseStart });
         today.Items.Should().NotContain(i => i.RecordId == homeId, "a leased home isn't waiting for a selection");
     }
 
@@ -258,7 +258,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
         });
 
         (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}"))!
-            .Should().BeEquivalentTo(new { Status = "Resale", ResaleNoticeDate = today });
+            .Should().BeEquivalentTo(new { SaleStage = "AwaitingTrustDecision", ResaleNoticeDate = today });
         (await client.GetFromJsonAsync<PaginatedResponse<ResaleResponse>>($"/api/resales?status=Open&groundLeaseId={leaseId}"))!
             .Items.Should().ContainSingle().Which.Should().BeEquivalentTo(new
             {
@@ -279,7 +279,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
                 .StatusCode.Should().Be(HttpStatusCode.NoContent));
 
         (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}"))!
-            .Should().BeEquivalentTo(new { Status = "Leased", ResaleNoticeDate = (DateOnly?)null });
+            .Should().BeEquivalentTo(new { SaleStage = "NotForSale", ResaleNoticeDate = (DateOnly?)null });
         (await client.GetFromJsonAsync<PaginatedResponse<ResaleResponse>>($"/api/resales?status=Open&groundLeaseId={leaseId}"))!
             .Items.Should().BeEmpty();
         (await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/intent-to-sell", new RecordIntentToSellRequest(today, "Letter", null)))

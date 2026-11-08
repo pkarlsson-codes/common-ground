@@ -2505,7 +2505,7 @@
             "x-position": 3
           },
           {
-            "name": "statuses",
+            "name": "occupancy",
             "in": "query",
             "style": "form",
             "explode": true,
@@ -2517,6 +2517,20 @@
               }
             },
             "x-position": 4
+          },
+          {
+            "name": "saleStages",
+            "in": "query",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "x-position": 5
           }
         ],
         "responses": {
@@ -8850,9 +8864,6 @@
             "type": "string",
             "nullable": true
           },
-          "status": {
-            "type": "string"
-          },
           "registeredAt": {
             "type": "string",
             "format": "date-time"
@@ -8970,9 +8981,6 @@
           "assessedValue": {
             "type": "number",
             "format": "decimal"
-          },
-          "status": {
-            "type": "string"
           },
           "occupancy": {
             "type": "string"

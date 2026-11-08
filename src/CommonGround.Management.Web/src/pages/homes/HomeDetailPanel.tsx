@@ -3,6 +3,7 @@ import { useHome, useHomeAssessments, useRecordHomeAssessment } from '../../hook
 import { HOME_TYPE_LABELS, type RecordHomeAssessmentRequest } from '../../hooks/types'
 import SlideOver from '../../components/SlideOver'
 import StatusBadge from '../../components/StatusBadge'
+import { homeLabel } from '../../lib/lifecycle'
 import DocumentList from '../../components/DocumentList'
 import { useToast } from '../../hooks/useToast'
 import DevelopmentProjectsSection from '../land-parcels/DevelopmentProjectsSection'
@@ -122,7 +123,7 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
               <div className="detail-grid">
                 <div className="detail-field">
                   <div className="detail-field__label">Status</div>
-                  <div className="detail-field__value"><StatusBadge status={detail.status ?? ''} /></div>
+                  <div className="detail-field__value"><StatusBadge status={homeLabel(detail.occupancy, detail.saleStage)} /></div>
                 </div>
                 <div className="detail-field">
                   <div className="detail-field__label">Accessible</div>

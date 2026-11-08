@@ -55,7 +55,8 @@ export interface GetHomesRequest {
     pageNumber?: number;
     pageSize?: number;
     landParcelIds?: Array<string> | null;
-    statuses?: Array<string> | null;
+    occupancy?: Array<string> | null;
+    saleStages?: Array<string> | null;
 }
 
 export interface RecordHomeAssessmentOperationRequest {
@@ -107,7 +108,8 @@ export interface HomesApiInterface {
      * @param {number} [pageNumber] 
      * @param {number} [pageSize] 
      * @param {Array<string>} [landParcelIds] 
-     * @param {Array<string>} [statuses] 
+     * @param {Array<string>} [occupancy] 
+     * @param {Array<string>} [saleStages] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HomesApiInterface
@@ -247,8 +249,12 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
             queryParameters['landParcelIds'] = requestParameters['landParcelIds'];
         }
 
-        if (requestParameters['statuses'] != null) {
-            queryParameters['statuses'] = requestParameters['statuses'];
+        if (requestParameters['occupancy'] != null) {
+            queryParameters['occupancy'] = requestParameters['occupancy'];
+        }
+
+        if (requestParameters['saleStages'] != null) {
+            queryParameters['saleStages'] = requestParameters['saleStages'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

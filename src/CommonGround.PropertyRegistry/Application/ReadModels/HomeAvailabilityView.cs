@@ -10,9 +10,6 @@ public class HomeAvailabilityView
     /// <summary>Gets or sets the home ID (the identity of this view).</summary>
     public string Id { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the home's status display name.</summary>
-    public string Status { get; set; } = HomeStatus.Available.DisplayName;
-
     /// <summary>Gets or sets who has the home now: the trust (vacant) or a homeowner (occupied), as a <see cref="HomeOccupancy"/> display name.</summary>
     public string Occupancy { get; set; } = HomeOccupancy.Vacant.DisplayName;
 
@@ -137,17 +134,6 @@ public class HomeAvailabilityView
         return selection;
     }
 
-    // Status is the one label the list, filters and stepper still read; each sale stage maps to one status today.
-    private static string StatusFor(string saleStage)
-        => HomeSaleStage.FromDisplayName(saleStage) switch
-        {
-            var s when s == HomeSaleStage.AwaitingTrustDecision => HomeStatus.Resale.DisplayName,
-            var s when s == HomeSaleStage.NotForSale => HomeStatus.Leased.DisplayName,
-            var s when s == HomeSaleStage.InSelection => HomeStatus.InSelection.DisplayName,
-            var s when s == HomeSaleStage.UnderContract => HomeStatus.UnderContract.DisplayName,
-            _ => HomeStatus.Available.DisplayName,
-        };
-
     // HomeBuyers runs one selection per home at a time, so the latest to start is the one that counts;
     // a selection heard of only through its outcome counts once news of its start arrives. A lease has one
     // open resale at a time, so one heard of and not withdrawn is it, whether or not news of the lease came first.
@@ -167,7 +153,6 @@ public class HomeAvailabilityView
             _ => HomeSaleStage.UnderContract,
         };
         SaleStage = saleStage.DisplayName;
-        Status = StatusFor(SaleStage);
         SelectionOpenedDate = active?.OpenedDate;
         UnderContractDate = active?.SelectedDate;
         AvailableAgainDate = Selections.Max(s => s.FellThroughDate);

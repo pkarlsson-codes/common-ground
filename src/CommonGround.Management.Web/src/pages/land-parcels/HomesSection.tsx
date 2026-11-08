@@ -4,6 +4,7 @@ import { useHomes } from '../../hooks/homes'
 import type { HomeListItemResponse } from '../../api'
 import { HOME_TYPE_LABELS } from '../../hooks/types'
 import StatusBadge from '../../components/StatusBadge'
+import { homeLabel } from '../../lib/lifecycle'
 import HomeRegisterPanel from '../homes/HomeRegisterPanel'
 
 interface Props {
@@ -77,7 +78,7 @@ export default function HomesSection({ parcelId }: Props) {
                   {' · '}
                   <span className="cell-mono">{h.bedrooms} bd / {Number(h.bathrooms).toFixed(1)} ba</span>
                 </span>
-                <StatusBadge status={h.status ?? ''} />
+                <StatusBadge status={homeLabel(h.occupancy, h.saleStage)} />
               </button>
             ))}
           </div>

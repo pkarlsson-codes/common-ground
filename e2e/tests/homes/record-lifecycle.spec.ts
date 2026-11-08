@@ -57,7 +57,7 @@ test('a failed purchase returns the household to the waiting list and the home t
   // for the new selection HomeBuyers starts once the home is available again.
   await expect.poll(async () =>
     (await get<{ journey: { stage: string } }>(page, `/api/v1/households/${householdId}`)).journey.stage).toBe('Waiting')
-  await expect.poll(async () => (await get<{ status: string }>(page, `/api/v1/homes/${homeId}`)).status).toBe('InSelection')
+  await expect.poll(async () => (await get<{ saleStage: string }>(page, `/api/v1/homes/${homeId}`)).saleStage).toBe('InSelection')
   await expect.poll(async () =>
     (await get<{ status: string }[]>(page, `/api/v1/homes/${homeId}/home-selections`)).map(s => s.status).sort())
     .toEqual(['FellThrough', 'Open'])

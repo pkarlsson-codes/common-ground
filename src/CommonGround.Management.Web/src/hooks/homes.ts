@@ -6,14 +6,15 @@ import type { PaginatedResponseOfHomeAssessmentItemResponse } from '../api'
 
 const api = new HomesApi(apiConfig)
 
-export function useHomes(params: { pageNumber: number; pageSize?: number; landParcelId?: string; status?: string; enabled?: boolean }) {
+export function useHomes(params: { pageNumber: number; pageSize?: number; landParcelId?: string; occupancy?: string; saleStage?: string; enabled?: boolean }) {
   return useQuery({
-    queryKey: ['homes', params.pageNumber, params.pageSize, params.landParcelId, params.status],
+    queryKey: ['homes', params.pageNumber, params.pageSize, params.landParcelId, params.occupancy, params.saleStage],
     queryFn: () => api.getHomes({
       pageNumber: params.pageNumber,
       pageSize: params.pageSize ?? 20,
       landParcelIds: params.landParcelId ? [params.landParcelId] : undefined,
-      statuses: params.status ? [params.status] : undefined,
+      occupancy: params.occupancy ? [params.occupancy] : undefined,
+      saleStages: params.saleStage ? [params.saleStage] : undefined,
     }),
     enabled: params.enabled ?? true,
   })

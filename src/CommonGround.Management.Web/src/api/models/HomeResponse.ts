@@ -108,12 +108,6 @@ export interface HomeResponse {
     conditionNotes?: string | null;
     /**
      * 
-     * @type {string}
-     * @memberof HomeResponse
-     */
-    status?: string;
-    /**
-     * 
      * @type {Date}
      * @memberof HomeResponse
      */
@@ -192,7 +186,6 @@ export function HomeResponseFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'assessedValue': json['assessedValue'] == null ? undefined : json['assessedValue'],
         'lastAssessedDate': json['lastAssessedDate'] == null ? undefined : CalendarDateFromJSON(json['lastAssessedDate']),
         'conditionNotes': json['conditionNotes'] == null ? undefined : json['conditionNotes'],
-        'status': json['status'] == null ? undefined : json['status'],
         'registeredAt': json['registeredAt'] == null ? undefined : (new Date(json['registeredAt'])),
         'availableAgainDate': json['availableAgainDate'] == null ? undefined : CalendarDateFromJSON(json['availableAgainDate']),
         'selectionOpenedDate': json['selectionOpenedDate'] == null ? undefined : CalendarDateFromJSON(json['selectionOpenedDate']),
@@ -228,7 +221,6 @@ export function HomeResponseToJSONTyped(value?: HomeResponse | null, ignoreDiscr
         'assessedValue': value['assessedValue'],
         'lastAssessedDate': CalendarDateToJSON(value['lastAssessedDate']),
         'conditionNotes': value['conditionNotes'],
-        'status': value['status'],
         'registeredAt': value['registeredAt'] == null ? undefined : ((value['registeredAt']).toISOString()),
         'availableAgainDate': CalendarDateToJSON(value['availableAgainDate']),
         'selectionOpenedDate': CalendarDateToJSON(value['selectionOpenedDate']),

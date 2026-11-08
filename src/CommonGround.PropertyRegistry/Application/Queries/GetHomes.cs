@@ -11,19 +11,21 @@ namespace CommonGround.PropertyRegistry.Application.Queries;
 /// <summary>Returns a paginated list of homes with optional filters.</summary>
 /// <param name="Page">Pagination spec.</param>
 /// <param name="LandParcelIds">Optional land parcels to filter by.</param>
-/// <param name="Statuses">Optional statuses to filter by.</param>
+/// <param name="Occupancy">Optional occupancies to filter by.</param>
+/// <param name="SaleStages">Optional sale stages to filter by.</param>
 public sealed record GetHomes(
     PageSpec Page,
     IReadOnlyList<LandParcelId>? LandParcelIds = null,
-    IReadOnlyList<HomeStatus>? Statuses = null);
+    IReadOnlyList<HomeOccupancy>? Occupancy = null,
+    IReadOnlyList<HomeSaleStage>? SaleStages = null);
 
-/// <summary>A home list item, the label staff know the home by, and its status display name.</summary>
-public sealed record HomeListItem(HomeListItemView Home, string Label, string Status, string Occupancy, string SaleStage);
+/// <summary>A home list item, the label staff know the home by, and its occupancy and sale stage display names.</summary>
+public sealed record HomeListItem(HomeListItemView Home, string Label, string Occupancy, string SaleStage);
 
 /// <summary>Handles <see cref="GetHomes"/>.</summary>
 public static class GetHomesHandler
 {
-    /// <summary>Returns a paginated list of homes, each labelled with its parcel's address and showing its status.</summary>
+    /// <summary>Returns a paginated list of homes, each labelled with its parcel's address and showing its occupancy and sale stage.</summary>
     public static async Task<PaginatedResponse<HomeListItem>> Handle(
         GetHomes request,
         IQuerySession session,
@@ -39,27 +41,34 @@ public static class GetHomesHandler
             query = query.Where(s => ids.Contains(s.LandParcelId));
         }
 
-        if (request.Statuses is { Count: > 0 })
+        if (request.Occupancy is { Count: > 0 } || request.SaleStages is { Count: > 0 })
         {
-            // A home with no availability yet is available, so "available" is every home not known to be otherwise.
-            // "Available" is a vacant home that is offered for selection.
-            var offered = HomeSaleStage.Offered.DisplayName;
-            var vacant = HomeOccupancy.Vacant.DisplayName;
-            var statusNames = request.Statuses.Select(s => s.DisplayName).ToList();
-            var otherwise = await session.Query<HomeAvailabilityView>()
-                .Where(v => v.SaleStage != offered || v.Occupancy != vacant)
-                .Select(v => new { v.Id, v.Status })
-                .ToListAsync(cancellationToken)
-                .ConfigureAwait(false);
+            // A home with no availability yet is vacant and offered, so the homes to keep are found by
+            // excluding every home whose availability does not match.
+            var occupancy = (request.Occupancy ?? []).Select(o => o.DisplayName).ToList();
+            var saleStages = (request.SaleStages ?? []).Select(s => s.DisplayName).ToList();
+            var defaultMatches = (occupancy.Count == 0 || occupancy.Contains(HomeOccupancy.Vacant.DisplayName))
+                && (saleStages.Count == 0 || saleStages.Contains(HomeSaleStage.Offered.DisplayName));
 
-            if (statusNames.Contains(HomeStatus.Available.DisplayName))
+            var matching = session.Query<HomeAvailabilityView>();
+            if (defaultMatches)
             {
-                var excluded = otherwise.Where(v => !statusNames.Contains(v.Status)).Select(v => v.Id).ToList();
+                var excluded = await matching
+                    .Where(v => (occupancy.Count > 0 && !occupancy.Contains(v.Occupancy))
+                        || (saleStages.Count > 0 && !saleStages.Contains(v.SaleStage)))
+                    .Select(v => v.Id)
+                    .ToListAsync(cancellationToken)
+                    .ConfigureAwait(false);
                 query = query.Where(h => !excluded.Contains(h.Id));
             }
             else
             {
-                var included = otherwise.Where(v => statusNames.Contains(v.Status)).Select(v => v.Id).ToList();
+                var included = await matching
+                    .Where(v => (occupancy.Count == 0 || occupancy.Contains(v.Occupancy))
+                        && (saleStages.Count == 0 || saleStages.Contains(v.SaleStage)))
+                    .Select(v => v.Id)
+                    .ToListAsync(cancellationToken)
+                    .ConfigureAwait(false);
                 query = query.Where(h => included.Contains(h.Id));
             }
         }
@@ -83,7 +92,6 @@ public static class GetHomesHandler
                 return new HomeListItem(
                     h,
                     HomeLabel.Format(addresses.GetValueOrDefault(h.LandParcelId, string.Empty), h.UnitDesignation),
-                    availability.Status,
                     availability.Occupancy,
                     availability.SaleStage);
             })],

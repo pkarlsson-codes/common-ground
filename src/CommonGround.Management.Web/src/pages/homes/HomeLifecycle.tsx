@@ -22,7 +22,7 @@ interface Props {
 export function HomeLifecycle({ home, moreActions }: Props) {
   const navigate = useNavigate()
   const homeId = home.id!
-  const stage = homeStage(home.status)
+  const stage = homeStage(home.occupancy, home.saleStage)
   const { data: selections } = useHomeSelectionsForHome(homeId)
   const { data: purchases } = useConnectedPurchaseWorkflows({ homeId })
   const { data: leases } = useConnectedGroundLeases({ homeId })

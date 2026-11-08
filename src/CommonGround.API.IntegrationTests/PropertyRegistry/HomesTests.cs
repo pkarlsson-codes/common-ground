@@ -213,7 +213,7 @@ public class HomesTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task GetHomes_FilteredByStatus_ReturnsHomesInThoseStatuses()
+    public async Task GetHomes_FilteredByOccupancyAndSaleStage_ReturnsHomesMatchingBoth()
     {
         var parcelId = await CreateLandParcelAsync();
         var client = factory.CreateClient().WithAuthToken();
@@ -232,14 +232,18 @@ public class HomesTests(ApiFactory factory)
         }
 
         var available = await client.GetFromJsonAsync<PaginatedResponse<HomeListItemResponse>>(
-            $"/api/homes?landParcelIds={parcelId}&statuses=Available");
+            $"/api/homes?landParcelIds={parcelId}&occupancy=Vacant&saleStages=Offered");
         var inSelection = await client.GetFromJsonAsync<PaginatedResponse<HomeListItemResponse>>(
-            $"/api/homes?landParcelIds={parcelId}&statuses=InSelection&statuses=UnderContract");
+            $"/api/homes?landParcelIds={parcelId}&saleStages=InSelection&saleStages=UnderContract");
 
-        available!.Items.Select(h => (h.Id, h.Status, h.Occupancy, h.SaleStage))
-            .Should().Equal((availableHomeId, "Available", "Vacant", "Offered"));
-        inSelection!.Items.Select(h => (h.Id, h.Status, h.Occupancy, h.SaleStage))
-            .Should().Equal((inSelectionHomeId, "InSelection", "Vacant", "InSelection"));
+        var notOffered = await client.GetFromJsonAsync<PaginatedResponse<HomeListItemResponse>>(
+            $"/api/homes?landParcelIds={parcelId}&occupancy=Occupied");
+
+        available!.Items.Select(h => (h.Id, h.Occupancy, h.SaleStage))
+            .Should().Equal((availableHomeId, "Vacant", "Offered"));
+        inSelection!.Items.Select(h => (h.Id, h.Occupancy, h.SaleStage))
+            .Should().Equal((inSelectionHomeId, "Vacant", "InSelection"));
+        notOffered!.Items.Should().BeEmpty();
     }
 
     private static async Task<string> RegisterHomeAsync(HttpClient client, string parcelId)

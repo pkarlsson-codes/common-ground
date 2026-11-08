@@ -74,7 +74,7 @@ public static class HomesEndpoints
         var response = new HomeResponse(view.Id, view.LandParcelId, label, view.UnitDesignation,
             view.UnitType, view.Bedrooms, view.Bathrooms, view.IsAccessible, view.SquareFootage,
             view.YearBuilt, view.AssessedValue, view.LastAssessedDate,
-            view.ConditionNotes, availability.Status, view.RegisteredAt,
+            view.ConditionNotes, view.RegisteredAt,
             availability.AvailableAgainDate, availability.SelectionOpenedDate, availability.UnderContractDate,
             availability.LeasedDate, availability.ResaleNoticeDate, availability.Occupancy, availability.SaleStage);
 
@@ -90,9 +90,11 @@ public static class HomesEndpoints
     {
         var landParcelFilter = request.LandParcelIds?
             .Select(LandParcelId.Create).ToList().AsReadOnly();
-        var statusFilter = request.Statuses?
-            .Select(HomeStatus.FromDisplayName).ToList().AsReadOnly();
-        var query = new GetHomes(request.Page, landParcelFilter, statusFilter);
+        var occupancyFilter = request.Occupancy?
+            .Select(HomeOccupancy.FromDisplayName).ToList().AsReadOnly();
+        var saleStageFilter = request.SaleStages?
+            .Select(HomeSaleStage.FromDisplayName).ToList().AsReadOnly();
+        var query = new GetHomes(request.Page, landParcelFilter, occupancyFilter, saleStageFilter);
 
         var result = await bus
             .InvokeForTenantAsync<PaginatedResponse<HomeListItem>>(
@@ -100,7 +102,7 @@ public static class HomesEndpoints
 
         var response = result.MapItems(i => new HomeListItemResponse(
             i.Home.Id, i.Home.LandParcelId, i.Label, i.Home.UnitDesignation, i.Home.UnitType, i.Home.Bedrooms,
-            i.Home.Bathrooms, i.Home.SquareFootage, i.Home.AssessedValue, i.Status, i.Occupancy, i.SaleStage));
+            i.Home.Bathrooms, i.Home.SquareFootage, i.Home.AssessedValue, i.Occupancy, i.SaleStage));
 
         return Results.Ok(response);
     }

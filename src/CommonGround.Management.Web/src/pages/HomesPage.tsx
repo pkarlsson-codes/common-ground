@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useHomes } from '../hooks/homes'
-import { HOME_STATUSES, statusLabel } from '../hooks/types'
+import { HOME_OCCUPANCIES, HOME_SALE_STAGES, statusLabel } from '../hooks/types'
 import EntityCombobox from '../components/EntityCombobox'
 import { LandParcelsApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
@@ -18,7 +18,8 @@ export default function HomesPage() {
   const navigate = useNavigate()
 
   const [page,         setPage]         = useState(1)
-  const [statusFilter, setStatusFilter] = useState('')
+  const [occupancyFilter, setOccupancyFilter] = useState('')
+  const [saleStageFilter, setSaleStageFilter] = useState('')
   const [parcelFilter, setParcelFilter] = useState('')
   const [selectedId,   setSelectedId]   = useState<string | null>(null)
   const [panel,        setPanel]        = useState<Panel>(null)
@@ -26,7 +27,8 @@ export default function HomesPage() {
   const { data, isLoading, isError } = useHomes({
     pageNumber: page,
     landParcelId: parcelFilter || undefined,
-    status: statusFilter || undefined,
+    occupancy: occupancyFilter || undefined,
+    saleStage: saleStageFilter || undefined,
   })
 
   const openDetail = (id: string) => {
@@ -79,11 +81,24 @@ export default function HomesPage() {
       <div className="filter-bar">
         <select
           className="select"
-          value={statusFilter}
-          onChange={e => { setStatusFilter(e.target.value); setPage(1) }}
+          aria-label="Occupancy"
+          value={occupancyFilter}
+          onChange={e => { setOccupancyFilter(e.target.value); setPage(1) }}
         >
-          <option value="">All Statuses</option>
-          {HOME_STATUSES.map(s => (
+          <option value="">All Occupancies</option>
+          {HOME_OCCUPANCIES.map(o => (
+            <option key={o} value={o}>{statusLabel(o)}</option>
+          ))}
+        </select>
+
+        <select
+          className="select"
+          aria-label="Sale stage"
+          value={saleStageFilter}
+          onChange={e => { setSaleStageFilter(e.target.value); setPage(1) }}
+        >
+          <option value="">All Sale Stages</option>
+          {HOME_SALE_STAGES.map(s => (
             <option key={s} value={s}>{statusLabel(s)}</option>
           ))}
         </select>

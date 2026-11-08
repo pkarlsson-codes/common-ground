@@ -34,7 +34,7 @@ public class HomeAvailabilityViewTests
         {
             var sut = new HomeAvailabilityView();
 
-            sut.Status.Should().Be(HomeStatus.Available.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.Offered.DisplayName);
         }
     }
 
@@ -146,7 +146,7 @@ public class HomeAvailabilityViewTests
         {
             _testBed.Sut.RecordSelectionStarted("selection-1", _testBed.FirstStartedAt, _testBed.Today);
 
-            _testBed.Sut.Status.Should().Be(HomeStatus.InSelection.DisplayName);
+            _testBed.Sut.SaleStage.Should().Be(HomeSaleStage.InSelection.DisplayName);
             _testBed.Sut.SelectionOpenedDate.Should().Be(_testBed.Today);
         }
 
@@ -157,7 +157,7 @@ public class HomeAvailabilityViewTests
 
             sut.RecordSelectionStarted("selection-2", _testBed.FirstStartedAt.AddDays(30), _testBed.Today.AddDays(30));
 
-            sut.Status.Should().Be(HomeStatus.InSelection.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.InSelection.DisplayName);
             sut.SelectionOpenedDate.Should().Be(_testBed.Today.AddDays(30));
             sut.UnderContractDate.Should().BeNull();
         }
@@ -169,7 +169,7 @@ public class HomeAvailabilityViewTests
 
             _testBed.Sut.RecordSelectionStarted("selection-1", _testBed.FirstStartedAt, _testBed.Today);
 
-            _testBed.Sut.Status.Should().Be(HomeStatus.UnderContract.DisplayName);
+            _testBed.Sut.SaleStage.Should().Be(HomeSaleStage.UnderContract.DisplayName);
             _testBed.Sut.SelectionOpenedDate.Should().Be(_testBed.Today);
             _testBed.Sut.UnderContractDate.Should().Be(_testBed.Today.AddDays(7));
         }
@@ -181,7 +181,7 @@ public class HomeAvailabilityViewTests
 
             _testBed.Sut.RecordSelectionStarted("selection-1", _testBed.FirstStartedAt, _testBed.Today);
 
-            _testBed.Sut.Status.Should().Be(HomeStatus.Available.DisplayName);
+            _testBed.Sut.SaleStage.Should().Be(HomeSaleStage.Offered.DisplayName);
         }
 
         [Fact]
@@ -206,7 +206,7 @@ public class HomeAvailabilityViewTests
 
             sut.RecordSelectionCancelled("selection-1");
 
-            sut.Status.Should().Be(HomeStatus.Available.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.Offered.DisplayName);
             sut.SelectionOpenedDate.Should().BeNull();
         }
 
@@ -218,7 +218,7 @@ public class HomeAvailabilityViewTests
 
             sut.RecordSelectionCancelled("selection-1");
 
-            sut.Status.Should().Be(HomeStatus.InSelection.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.InSelection.DisplayName);
         }
     }
 
@@ -233,7 +233,7 @@ public class HomeAvailabilityViewTests
 
             sut.RecordApplicationSelected("selection-1", "application-1", _testBed.Today.AddDays(7));
 
-            sut.Status.Should().Be(HomeStatus.UnderContract.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.UnderContract.DisplayName);
             sut.UnderContractDate.Should().Be(_testBed.Today.AddDays(7));
         }
 
@@ -245,7 +245,7 @@ public class HomeAvailabilityViewTests
 
             sut.RecordApplicationSelected("selection-1", "application-1", _testBed.Today.AddDays(7));
 
-            sut.Status.Should().Be(HomeStatus.Available.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.Offered.DisplayName);
             sut.AvailableAgainDate.Should().Be(_testBed.Today.AddDays(30));
             sut.FellThroughBeforeSelected.Should().BeEmpty();
         }
@@ -262,7 +262,7 @@ public class HomeAvailabilityViewTests
 
             sut.RecordPurchaseFellThrough("application-1", _testBed.Today.AddDays(30));
 
-            sut.Status.Should().Be(HomeStatus.Available.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.Offered.DisplayName);
             sut.AvailableAgainDate.Should().Be(_testBed.Today.AddDays(30));
             sut.SelectionOpenedDate.Should().BeNull();
             sut.UnderContractDate.Should().BeNull();
@@ -276,7 +276,7 @@ public class HomeAvailabilityViewTests
 
             sut.RecordPurchaseFellThrough("application-1", _testBed.Today.AddDays(30));
 
-            sut.Status.Should().Be(HomeStatus.InSelection.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.InSelection.DisplayName);
             sut.AvailableAgainDate.Should().Be(_testBed.Today.AddDays(30));
         }
 
@@ -287,7 +287,7 @@ public class HomeAvailabilityViewTests
 
             sut.RecordPurchaseFellThrough(applicationId: null, _testBed.Today);
 
-            sut.Status.Should().Be(HomeStatus.InSelection.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.InSelection.DisplayName);
             sut.AvailableAgainDate.Should().BeNull();
         }
     }
@@ -303,7 +303,7 @@ public class HomeAvailabilityViewTests
 
             sut.RecordLeased(_testBed.Today.AddDays(60));
 
-            sut.Status.Should().Be(HomeStatus.Leased.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.NotForSale.DisplayName);
             sut.LeasedDate.Should().Be(_testBed.Today.AddDays(60));
         }
 
@@ -314,7 +314,7 @@ public class HomeAvailabilityViewTests
 
             sut.RecordLeased(_testBed.Today.AddYears(-6));
 
-            sut.Status.Should().Be(HomeStatus.Leased.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.NotForSale.DisplayName);
             sut.LeasedDate.Should().Be(_testBed.Today.AddYears(-6));
         }
 
@@ -326,7 +326,7 @@ public class HomeAvailabilityViewTests
 
             sut.RecordSelectionStarted("selection-2", _testBed.FirstStartedAt.AddDays(90), _testBed.Today.AddDays(90));
 
-            sut.Status.Should().Be(HomeStatus.Leased.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.NotForSale.DisplayName);
         }
     }
 
@@ -342,7 +342,7 @@ public class HomeAvailabilityViewTests
 
             sut.RecordResaleOpened("resale-1", _testBed.Today);
 
-            sut.Status.Should().Be(HomeStatus.Resale.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.AwaitingTrustDecision.DisplayName);
             sut.ResaleNoticeDate.Should().Be(_testBed.Today);
         }
 
@@ -354,7 +354,7 @@ public class HomeAvailabilityViewTests
 
             sut.RecordLeased(_testBed.Today.AddYears(-3));
 
-            sut.Status.Should().Be(HomeStatus.Resale.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.AwaitingTrustDecision.DisplayName);
         }
     }
 
@@ -371,7 +371,7 @@ public class HomeAvailabilityViewTests
 
             sut.RecordResaleWithdrawn("resale-1");
 
-            sut.Status.Should().Be(HomeStatus.Leased.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.NotForSale.DisplayName);
             sut.ResaleNoticeDate.Should().BeNull();
         }
 
@@ -384,7 +384,7 @@ public class HomeAvailabilityViewTests
 
             sut.RecordResaleOpened("resale-1", _testBed.Today);
 
-            sut.Status.Should().Be(HomeStatus.Leased.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.NotForSale.DisplayName);
         }
 
         [Fact]

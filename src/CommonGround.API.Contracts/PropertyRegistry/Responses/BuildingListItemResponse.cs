@@ -11,6 +11,5 @@ public sealed record HomeListItemResponse(
     decimal Bathrooms,
     decimal SquareFootage,
     decimal AssessedValue,
-    string Status,
     string Occupancy,
     string SaleStage);
