@@ -30,7 +30,7 @@ export const HOME_TYPE_LABELS: Record<string, string> = {
   Townhouse: 'Townhouse',
 }
 export const HOME_OCCUPANCIES = ['Vacant', 'Occupied'] as const
-export const HOME_SALE_STAGES = ['NotForSale', 'AwaitingTrustDecision', 'Offered', 'InSelection', 'UnderContract'] as const
+export const HOME_SALE_STAGES = ['NotForSale', 'AwaitingTrustDecision', 'Offered', 'InSelection', 'UnderContract', 'HeldByTrust'] as const
 export const DEVELOPMENT_PROJECT_STATUSES = ['Initiated', 'Active', 'Completed', 'Abandoned'] as const
 export const PROJECT_TYPE_LABELS: Record<string, string> = {
   NewConstruction: 'New Construction',
@@ -64,6 +64,8 @@ export interface CreateGroundLeaseForm {
   leaseStartDate: CalendarDate
   termYears: number
   optionWindowDays: number
+  basePrice: number
+  originalAppraisedValue: number
   covenantTerms: string
   formulaKind: string
   appreciationShare: number

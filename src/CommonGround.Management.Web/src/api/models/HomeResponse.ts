@@ -154,6 +154,24 @@ export interface HomeResponse {
      * @memberof HomeResponse
      */
     saleStage?: string;
+    /**
+     * 
+     * @type {CalendarDate}
+     * @memberof HomeResponse
+     */
+    heldSinceDate?: CalendarDate | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof HomeResponse
+     */
+    holdReason?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof HomeResponse
+     */
+    availableAgainCause?: string | null;
 }
 
 /**
@@ -194,6 +212,9 @@ export function HomeResponseFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'resaleNoticeDate': json['resaleNoticeDate'] == null ? undefined : CalendarDateFromJSON(json['resaleNoticeDate']),
         'occupancy': json['occupancy'] == null ? undefined : json['occupancy'],
         'saleStage': json['saleStage'] == null ? undefined : json['saleStage'],
+        'heldSinceDate': json['heldSinceDate'] == null ? undefined : CalendarDateFromJSON(json['heldSinceDate']),
+        'holdReason': json['holdReason'] == null ? undefined : json['holdReason'],
+        'availableAgainCause': json['availableAgainCause'] == null ? undefined : json['availableAgainCause'],
     };
 }
 
@@ -229,6 +250,9 @@ export function HomeResponseToJSONTyped(value?: HomeResponse | null, ignoreDiscr
         'resaleNoticeDate': CalendarDateToJSON(value['resaleNoticeDate']),
         'occupancy': value['occupancy'],
         'saleStage': value['saleStage'],
+        'heldSinceDate': CalendarDateToJSON(value['heldSinceDate']),
+        'holdReason': value['holdReason'],
+        'availableAgainCause': value['availableAgainCause'],
     };
 }
 

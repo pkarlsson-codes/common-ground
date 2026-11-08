@@ -6,10 +6,13 @@ import ConnectedRecords, { type ConnectedRecord } from '../../components/lifecyc
 import LifecycleStepper from '../../components/lifecycle/LifecycleStepper'
 import NextStepCard, { type NextStepAction } from '../../components/lifecycle/NextStepCard'
 import { useConnectedGroundLeases } from '../../hooks/groundLeases'
+import { useReleaseHomeForSale } from '../../hooks/homes'
+import { resaleStep, useOpenResaleForLease } from '../../hooks/resales'
+import { useToast } from '../../hooks/useToast'
 import { homeSelectionPath, useHomeSelectionsForHome, useStartHomeSelection } from '../../hooks/homeSelections'
 import { isOpenPurchasePhase, purchaseWaitingOn, useConnectedPurchaseWorkflows, usePurchaseWorkflow } from '../../hooks/purchaseWorkflows'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
-import { formatStepDate, HOME_STAGES, homeStage, lifecycleSteps } from '../../lib/lifecycle'
+import { formatStepDate, homeStage, homeStages, lifecycleSteps } from '../../lib/lifecycle'
 
 type Home = Omit<HomeResponse, 'registeredAt'> & { registeredAt: string }
 
@@ -29,19 +32,23 @@ export function HomeLifecycle({ home, moreActions }: Props) {
   const openPurchaseId = purchases?.items?.find(p => isOpenPurchasePhase(p.phase))?.id ?? null
   const { data: openPurchase } = usePurchaseWorkflow(openPurchaseId)
   const startMutation = useStartHomeSelection()
+  const releaseMutation = useReleaseHomeForSale()
+  const { success } = useToast()
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
 
   const openSelection = selections?.find(s => s.status === 'Open')
   const endedCount = (selections ?? []).filter(s => s.status === 'Cancelled' || s.status === 'FellThrough').length
   const activeLease = leases?.items?.find(l => l.status === 'Active')
+  const { data: openResale } = useOpenResaleForLease(activeLease?.id ?? '')
 
-  const steps = lifecycleSteps(HOME_STAGES, stage, {
+  const steps = lifecycleSteps(homeStages(stage), stage, {
     Development: formatStepDate(new Date(home.registeredAt)),
     Available: formatStepDate(home.availableAgainDate) ?? formatStepDate(new Date(home.registeredAt)),
     Selection: formatStepDate(home.selectionOpenedDate),
     Purchasing: home.underContractDate ? `Since ${formatStepDate(home.underContractDate)}` : undefined,
     Leased: formatStepDate(home.leasedDate),
     Resale: home.resaleNoticeDate ? `Notice ${formatStepDate(home.resaleNoticeDate)}` : undefined,
+    'Held by Trust': formatStepDate(home.heldSinceDate),
   })
 
   const handleStart = async () => {
@@ -51,6 +58,16 @@ export function HomeLifecycle({ home, moreActions }: Props) {
       navigate(homeSelectionPath(selectionId!))
     } catch (err) {
       setProblem(await getApiProblem(err, 'Failed to start the selection.'))
+    }
+  }
+
+  const handleRelease = async () => {
+    setProblem(null)
+    try {
+      await releaseMutation.mutateAsync(homeId)
+      success('Home released for sale')
+    } catch (err) {
+      setProblem(await getApiProblem(err, 'Failed to release the home for sale.'))
     }
   }
 
@@ -83,9 +100,13 @@ export function HomeLifecycle({ home, moreActions }: Props) {
       title = activeLease && home.resaleNoticeDate
         ? `${activeLease.homeownerFullName ?? 'The homeowner'} gave notice to sell on ${formatStepDate(home.resaleNoticeDate)}.`
         : 'The home is being resold.'
-      primary = activeLease
-        ? { label: 'Open Ground Lease', onClick: () => navigate('/ground-leases', { state: { openId: activeLease.id } }) }
+      primary = openResale
+        ? { label: 'Open Resale', onClick: () => navigate('/resales', { state: { openId: openResale.id } }) }
         : undefined
+      break
+    case 'Held by Trust':
+      title = `The trust bought this home on ${formatStepDate(home.heldSinceDate)} and is holding it: ${home.holdReason}.`
+      primary = { label: releaseMutation.isPending ? 'Releasing…' : 'Release for Sale', onClick: () => { void handleRelease() }, disabled: releaseMutation.isPending }
       break
     default:
       title = 'Choose a household from the waiting list for this home.'
@@ -99,7 +120,9 @@ export function HomeLifecycle({ home, moreActions }: Props) {
         title={title}
         body={stage === 'Available' && endedCount > 0
           ? `${endedCount} earlier selection${endedCount !== 1 ? 's' : ''} ended without a sale.`
-          : undefined}
+          : stage === 'Resale' && openResale
+            ? `The resale is at the ${resaleStep(openResale)} step.`
+            : undefined}
         primary={primary}
         moreActions={moreActions}
       >

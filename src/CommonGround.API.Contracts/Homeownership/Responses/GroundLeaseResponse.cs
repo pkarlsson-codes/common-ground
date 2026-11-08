@@ -10,6 +10,8 @@ public sealed record GroundLeaseResponse(
     DateOnly LeaseStartDate,
     int TermYears,
     int OptionWindowDays,
+    decimal BasePrice,
+    decimal? OriginalAppraisedValue,
     string CovenantTerms,
     string Status,
     string FormulaKind,

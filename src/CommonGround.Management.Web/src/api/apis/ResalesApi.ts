@@ -16,24 +16,51 @@
 
 import * as runtime from '../runtime';
 import type {
+  ExercisePurchaseOptionRequest,
   PaginatedResponseOfResaleResponse,
+  PreviewResalePriceRequest,
   ProblemDetails,
+  RecordBuybackClosedRequest,
   RecordIntentToSellRequest,
   RecordIntentToSellResponse,
+  RecordResaleAppraisalRequest,
+  ResalePriceResponse,
+  ResaleResponse,
   WithdrawIntentToSellRequest,
 } from '../models/index';
 import {
+    ExercisePurchaseOptionRequestFromJSON,
+    ExercisePurchaseOptionRequestToJSON,
     PaginatedResponseOfResaleResponseFromJSON,
     PaginatedResponseOfResaleResponseToJSON,
+    PreviewResalePriceRequestFromJSON,
+    PreviewResalePriceRequestToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
+    RecordBuybackClosedRequestFromJSON,
+    RecordBuybackClosedRequestToJSON,
     RecordIntentToSellRequestFromJSON,
     RecordIntentToSellRequestToJSON,
     RecordIntentToSellResponseFromJSON,
     RecordIntentToSellResponseToJSON,
+    RecordResaleAppraisalRequestFromJSON,
+    RecordResaleAppraisalRequestToJSON,
+    ResalePriceResponseFromJSON,
+    ResalePriceResponseToJSON,
+    ResaleResponseFromJSON,
+    ResaleResponseToJSON,
     WithdrawIntentToSellRequestFromJSON,
     WithdrawIntentToSellRequestToJSON,
 } from '../models/index';
+
+export interface ExercisePurchaseOptionOperationRequest {
+    resaleId: string;
+    exercisePurchaseOptionRequest: ExercisePurchaseOptionRequest;
+}
+
+export interface GetResaleRequest {
+    resaleId: string;
+}
 
 export interface GetResalesRequest {
     pageNumber?: number;
@@ -42,9 +69,24 @@ export interface GetResalesRequest {
     groundLeaseId?: string | null;
 }
 
+export interface PreviewResalePriceOperationRequest {
+    resaleId: string;
+    previewResalePriceRequest: PreviewResalePriceRequest;
+}
+
+export interface RecordBuybackClosedOperationRequest {
+    resaleId: string;
+    recordBuybackClosedRequest: RecordBuybackClosedRequest;
+}
+
 export interface RecordIntentToSellOperationRequest {
     groundLeaseId: string;
     recordIntentToSellRequest: RecordIntentToSellRequest;
+}
+
+export interface RecordResaleAppraisalOperationRequest {
+    resaleId: string;
+    recordResaleAppraisalRequest: RecordResaleAppraisalRequest;
 }
 
 export interface WithdrawIntentToSellOperationRequest {
@@ -59,6 +101,33 @@ export interface WithdrawIntentToSellOperationRequest {
  * @interface ResalesApiInterface
  */
 export interface ResalesApiInterface {
+    /**
+     * 
+     * @param {string} resaleId 
+     * @param {ExercisePurchaseOptionRequest} exercisePurchaseOptionRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResalesApiInterface
+     */
+    exercisePurchaseOptionRaw(requestParameters: ExercisePurchaseOptionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    exercisePurchaseOption(requestParameters: ExercisePurchaseOptionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {string} resaleId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResalesApiInterface
+     */
+    getResaleRaw(requestParameters: GetResaleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResaleResponse>>;
+
+    /**
+     */
+    getResale(requestParameters: GetResaleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResaleResponse>;
+
     /**
      * 
      * @param {number} [pageNumber] 
@@ -77,6 +146,34 @@ export interface ResalesApiInterface {
 
     /**
      * 
+     * @param {string} resaleId 
+     * @param {PreviewResalePriceRequest} previewResalePriceRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResalesApiInterface
+     */
+    previewResalePriceRaw(requestParameters: PreviewResalePriceOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResalePriceResponse>>;
+
+    /**
+     */
+    previewResalePrice(requestParameters: PreviewResalePriceOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResalePriceResponse>;
+
+    /**
+     * 
+     * @param {string} resaleId 
+     * @param {RecordBuybackClosedRequest} recordBuybackClosedRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResalesApiInterface
+     */
+    recordBuybackClosedRaw(requestParameters: RecordBuybackClosedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    recordBuybackClosed(requestParameters: RecordBuybackClosedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
      * @param {string} groundLeaseId 
      * @param {RecordIntentToSellRequest} recordIntentToSellRequest 
      * @param {*} [options] Override http request option.
@@ -88,6 +185,20 @@ export interface ResalesApiInterface {
     /**
      */
     recordIntentToSell(requestParameters: RecordIntentToSellOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {string} resaleId 
+     * @param {RecordResaleAppraisalRequest} recordResaleAppraisalRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResalesApiInterface
+     */
+    recordResaleAppraisalRaw(requestParameters: RecordResaleAppraisalOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    recordResaleAppraisal(requestParameters: RecordResaleAppraisalOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -109,6 +220,93 @@ export interface ResalesApiInterface {
  * 
  */
 export class ResalesApi extends runtime.BaseAPI implements ResalesApiInterface {
+
+    /**
+     */
+    async exercisePurchaseOptionRaw(requestParameters: ExercisePurchaseOptionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['resaleId'] == null) {
+            throw new runtime.RequiredError(
+                'resaleId',
+                'Required parameter "resaleId" was null or undefined when calling exercisePurchaseOption().'
+            );
+        }
+
+        if (requestParameters['exercisePurchaseOptionRequest'] == null) {
+            throw new runtime.RequiredError(
+                'exercisePurchaseOptionRequest',
+                'Required parameter "exercisePurchaseOptionRequest" was null or undefined when calling exercisePurchaseOption().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/resales/{resaleId}/exercise-option`;
+        urlPath = urlPath.replace(`{${"resaleId"}}`, encodeURIComponent(String(requestParameters['resaleId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ExercisePurchaseOptionRequestToJSON(requestParameters['exercisePurchaseOptionRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async exercisePurchaseOption(requestParameters: ExercisePurchaseOptionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.exercisePurchaseOptionRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
+    async getResaleRaw(requestParameters: GetResaleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResaleResponse>> {
+        if (requestParameters['resaleId'] == null) {
+            throw new runtime.RequiredError(
+                'resaleId',
+                'Required parameter "resaleId" was null or undefined when calling getResale().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/resales/{resaleId}`;
+        urlPath = urlPath.replace(`{${"resaleId"}}`, encodeURIComponent(String(requestParameters['resaleId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ResaleResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getResale(requestParameters: GetResaleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResaleResponse> {
+        const response = await this.getResaleRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      */
@@ -155,6 +353,103 @@ export class ResalesApi extends runtime.BaseAPI implements ResalesApiInterface {
 
     /**
      */
+    async previewResalePriceRaw(requestParameters: PreviewResalePriceOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResalePriceResponse>> {
+        if (requestParameters['resaleId'] == null) {
+            throw new runtime.RequiredError(
+                'resaleId',
+                'Required parameter "resaleId" was null or undefined when calling previewResalePrice().'
+            );
+        }
+
+        if (requestParameters['previewResalePriceRequest'] == null) {
+            throw new runtime.RequiredError(
+                'previewResalePriceRequest',
+                'Required parameter "previewResalePriceRequest" was null or undefined when calling previewResalePrice().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/resales/{resaleId}/price-preview`;
+        urlPath = urlPath.replace(`{${"resaleId"}}`, encodeURIComponent(String(requestParameters['resaleId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: PreviewResalePriceRequestToJSON(requestParameters['previewResalePriceRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ResalePriceResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async previewResalePrice(requestParameters: PreviewResalePriceOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResalePriceResponse> {
+        const response = await this.previewResalePriceRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async recordBuybackClosedRaw(requestParameters: RecordBuybackClosedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['resaleId'] == null) {
+            throw new runtime.RequiredError(
+                'resaleId',
+                'Required parameter "resaleId" was null or undefined when calling recordBuybackClosed().'
+            );
+        }
+
+        if (requestParameters['recordBuybackClosedRequest'] == null) {
+            throw new runtime.RequiredError(
+                'recordBuybackClosedRequest',
+                'Required parameter "recordBuybackClosedRequest" was null or undefined when calling recordBuybackClosed().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/resales/{resaleId}/buyback-closing`;
+        urlPath = urlPath.replace(`{${"resaleId"}}`, encodeURIComponent(String(requestParameters['resaleId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RecordBuybackClosedRequestToJSON(requestParameters['recordBuybackClosedRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async recordBuybackClosed(requestParameters: RecordBuybackClosedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordBuybackClosedRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
     async recordIntentToSellRaw(requestParameters: RecordIntentToSellOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['groundLeaseId'] == null) {
             throw new runtime.RequiredError(
@@ -196,6 +491,58 @@ export class ResalesApi extends runtime.BaseAPI implements ResalesApiInterface {
     async recordIntentToSell(requestParameters: RecordIntentToSellOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.recordIntentToSellRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async recordResaleAppraisalRaw(requestParameters: RecordResaleAppraisalOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['resaleId'] == null) {
+            throw new runtime.RequiredError(
+                'resaleId',
+                'Required parameter "resaleId" was null or undefined when calling recordResaleAppraisal().'
+            );
+        }
+
+        if (requestParameters['recordResaleAppraisalRequest'] == null) {
+            throw new runtime.RequiredError(
+                'recordResaleAppraisalRequest',
+                'Required parameter "recordResaleAppraisalRequest" was null or undefined when calling recordResaleAppraisal().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/resales/{resaleId}/appraisal`;
+        urlPath = urlPath.replace(`{${"resaleId"}}`, encodeURIComponent(String(requestParameters['resaleId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RecordResaleAppraisalRequestToJSON(requestParameters['recordResaleAppraisalRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async recordResaleAppraisal(requestParameters: RecordResaleAppraisalOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordResaleAppraisalRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**

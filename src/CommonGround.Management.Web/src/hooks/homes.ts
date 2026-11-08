@@ -75,3 +75,15 @@ export function useRecordHomeAssessment() {
     },
   })
 }
+
+export function useReleaseHomeForSale() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (homeId: string) => api.releaseHomeForSale({ homeId }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['homes'] })
+      void qc.invalidateQueries({ queryKey: ['home'] })
+      void qc.invalidateQueries({ queryKey: ['today'] })
+    },
+  })
+}

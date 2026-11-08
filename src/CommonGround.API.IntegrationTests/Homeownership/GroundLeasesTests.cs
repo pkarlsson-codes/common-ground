@@ -124,6 +124,6 @@ public class GroundLeasesTests(ApiFactory factory)
         client.PostAsJsonAsync("/api/ground-leases",
             new CreateGroundLeaseRequest(
                 landParcelId, homeId, "Dana Whitfield", "dana@example.com", "(503) 555-0123",
-                new DateOnly(2018, 1, 1), 99, 60, "Standard covenant", formulaKind,
+                new DateOnly(2018, 1, 1), 99, 60, 200_000m, 250_000m, "Standard covenant", formulaKind,
                 appreciationShare, indexType, baselineIndexValue, null, null));
 }

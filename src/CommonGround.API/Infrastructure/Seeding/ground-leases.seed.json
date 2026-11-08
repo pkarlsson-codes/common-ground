@@ -10,6 +10,8 @@
       "recordedOn": "today-2y",
       "termYears": 75,
       "optionWindowDays": 90,
+      "basePrice": 168000,
+      "originalAppraisedValue": 240000,
       "covenantTerms": "Owner-occupancy as primary residence required. Resale only to income-eligible buyers at or below the formula price. Signed on paper before the trust adopted lease templates.",
       "resalePolicy": { "formulaKind": "AppraisalBased", "appreciationShare": 0.30 }
     },
@@ -58,10 +60,6 @@
     "purchaseWorkflowSeedKey": "pw-cedar-lane-013a",
     "checkIns": [
       { "date": "today-75d", "notes": "First visit after move-in. Mentioned Lars may be offered a job in Denver." }
-    ],
-    "termination": {
-      "date": "today-21d",
-      "reason": "The homeowners moved out of state for work and sold the home back to the trust under its purchase option."
-    }
+    ]
   }
 ]

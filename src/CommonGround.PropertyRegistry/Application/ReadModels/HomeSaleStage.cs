@@ -20,5 +20,8 @@ public sealed class HomeSaleStage : Enumeration<HomeSaleStage>
     /// <summary>A selection chose a household and the sale is pending.</summary>
     public static readonly HomeSaleStage UnderContract = new(5, "UnderContract");
 
+    /// <summary>The trust bought the home back and is holding it rather than offering it.</summary>
+    public static readonly HomeSaleStage HeldByTrust = new(6, "HeldByTrust");
+
     private HomeSaleStage(int value, string displayName) : base(value, displayName) { }
 }

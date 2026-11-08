@@ -27,7 +27,7 @@ public class GroundLeaseTests
 
         public GroundLeaseCreated Established(ResalePolicyTerms? terms = null) =>
             GroundLease.Establish(
-                LeaseId, ParcelId, HomeId, Homeowner, new DateOnly(2025, 1, 1), 99, 60, "Standard affordability covenant",
+                LeaseId, ParcelId, HomeId, Homeowner, new DateOnly(2025, 1, 1), 99, 60, 200_000m, 250_000m, "Standard affordability covenant",
                 terms ?? ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, StaffUser);
 
         public GroundLease Lease(ResalePolicyTerms? terms = null) => EventReplay.Replay<GroundLease>(Established(terms));
@@ -84,7 +84,7 @@ public class GroundLeaseTests
         {
             var act = () => GroundLease.Establish(
                 _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, _testBed.Homeowner, new DateOnly(2025, 1, 1),
-                99, 60, "Terms", ResalePolicyTerms.AppraisalBased(0.25m),
+                99, 60, 200_000m, 250_000m, "Terms", ResalePolicyTerms.AppraisalBased(0.25m),
                 HomeCommitments.Create(activeLeaseId, openPurchaseWorkflowId, openHomeSelectionId), _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
@@ -94,12 +94,14 @@ public class GroundLeaseTests
         [InlineData(0, 60, "Terms", "homeownership.ground_lease.create.term_years_non_positive")]
         [InlineData(99, 0, "Terms", "homeownership.ground_lease.create.option_window_days_non_positive")]
         [InlineData(99, 60, "", "homeownership.ground_lease.create.covenant_terms_required")]
+        [InlineData(99, 60, "Terms", "homeownership.ground_lease.create.base_price_non_positive", 0, 250_000)]
+        [InlineData(99, 60, "Terms", "homeownership.ground_lease.create.original_appraised_value_non_positive", 200_000, 0)]
         public void GivenInvalidInputs_WhenEstablished_ThenThrowsBusinessRuleViolation(
-            int termYears, int optionWindowDays, string covenantTerms, string expectedCode)
+            int termYears, int optionWindowDays, string covenantTerms, string expectedCode, int basePrice = 200_000, int originalAppraisedValue = 250_000)
         {
             var act = () => GroundLease.Establish(
                 _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, _testBed.Homeowner, new DateOnly(2025, 1, 1),
-                termYears, optionWindowDays, covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser);
+                termYears, optionWindowDays, basePrice, originalAppraisedValue, covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }

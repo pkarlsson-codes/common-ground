@@ -22,4 +22,7 @@ public sealed record HomeResponse(
     DateOnly? LeasedDate,
     DateOnly? ResaleNoticeDate,
     string Occupancy,
-    string SaleStage);
+    string SaleStage,
+    DateOnly? HeldSinceDate,
+    string? HoldReason,
+    string? AvailableAgainCause);

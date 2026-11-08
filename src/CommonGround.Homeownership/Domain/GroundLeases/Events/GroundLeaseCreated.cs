@@ -10,6 +10,8 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.Events;
 /// <param name="LeaseStartDate">When the lease starts.</param>
 /// <param name="TermYears">Lease duration in years.</param>
 /// <param name="OptionWindowDays">Days the trust has to buy the home after its homeowner gives notice to sell.</param>
+/// <param name="BasePrice">What the homeowner paid for the home.</param>
+/// <param name="OriginalAppraisedValue">The home's appraised value at that purchase.</param>
 /// <param name="CovenantTerms">Free-text covenant terms.</param>
 /// <param name="FormulaKind">Which resale formula applies.</param>
 /// <param name="AppreciationShare">Appreciation share (AppraisalBased only).</param>
@@ -28,6 +30,8 @@ public sealed record GroundLeaseCreated(
     DateOnly LeaseStartDate,
     int TermYears,
     int OptionWindowDays,
+    decimal BasePrice,
+    decimal OriginalAppraisedValue,
     string CovenantTerms,
     FormulaKind FormulaKind,
     decimal? AppreciationShare,

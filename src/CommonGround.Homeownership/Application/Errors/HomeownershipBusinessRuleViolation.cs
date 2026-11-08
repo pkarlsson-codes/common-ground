@@ -111,6 +111,22 @@ public static class BusinessRuleViolation
                         ["optionWindowDays"] = optionWindowDays,
                     });
 
+            public static BusinessRuleViolationException BasePriceNonPositive(decimal basePrice)
+                => new(
+                    "homeownership.ground_lease.create.base_price_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["basePrice"] = basePrice,
+                    });
+
+            public static BusinessRuleViolationException OriginalAppraisedValueNonPositive(decimal originalAppraisedValue)
+                => new(
+                    "homeownership.ground_lease.create.original_appraised_value_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["originalAppraisedValue"] = originalAppraisedValue,
+                    });
+
             public static BusinessRuleViolationException CovenantTermsRequired()
                 => new(
                     "homeownership.ground_lease.create.covenant_terms_required");
@@ -300,6 +316,177 @@ public static class BusinessRuleViolation
                         ["withdrawnDate"] = withdrawnDate,
                         ["today"] = today,
                     });
+
+            public static BusinessRuleViolationException OptionExercised()
+                => new(
+                    "homeownership.resale.withdraw.option_exercised");
+        }
+
+        public static class RecordAppraisal
+        {
+            public static BusinessRuleViolationException NotOpen(ResaleStatus status)
+                => new(
+                    "homeownership.resale.record_appraisal.not_open",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                        ["requiredStatus"] = ResaleStatus.Open.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException OptionExercised()
+                => new(
+                    "homeownership.resale.record_appraisal.option_exercised");
+
+            public static BusinessRuleViolationException LeaseFiguresMissing()
+                => new(
+                    "homeownership.resale.record_appraisal.lease_figures_missing");
+
+            public static BusinessRuleViolationException AppraisedValueNonPositive(decimal appraisedValue)
+                => new(
+                    "homeownership.resale.record_appraisal.appraised_value_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["appraisedValue"] = appraisedValue,
+                    });
+
+            public static BusinessRuleViolationException AppraiserRequired()
+                => new(
+                    "homeownership.resale.record_appraisal.appraiser_required");
+
+            public static BusinessRuleViolationException AppraisalDateBeforeNotice(DateOnly appraisalDate, DateOnly noticeDate)
+                => new(
+                    "homeownership.resale.record_appraisal.appraisal_date_before_notice",
+                    new Dictionary<string, object?>
+                    {
+                        ["appraisalDate"] = appraisalDate,
+                        ["noticeDate"] = noticeDate,
+                    });
+
+            public static BusinessRuleViolationException AppraisalDateInFuture(DateOnly appraisalDate, DateOnly today)
+                => new(
+                    "homeownership.resale.record_appraisal.appraisal_date_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["appraisalDate"] = appraisalDate,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException ApprovedImprovementsNegative(decimal approvedImprovements)
+                => new(
+                    "homeownership.resale.record_appraisal.approved_improvements_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["approvedImprovements"] = approvedImprovements,
+                    });
+
+            public static BusinessRuleViolationException CurrentIndexValueNonPositive(decimal currentIndexValue)
+                => new(
+                    "homeownership.resale.record_appraisal.current_index_value_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["currentIndexValue"] = currentIndexValue,
+                    });
+        }
+
+        public static class ExerciseOption
+        {
+            public static BusinessRuleViolationException NotOpen(ResaleStatus status)
+                => new(
+                    "homeownership.resale.exercise_option.not_open",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                        ["requiredStatus"] = ResaleStatus.Open.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException AppraisalRequired()
+                => new(
+                    "homeownership.resale.exercise_option.appraisal_required");
+
+            public static BusinessRuleViolationException AlreadyExercised()
+                => new(
+                    "homeownership.resale.exercise_option.already_exercised");
+
+            public static BusinessRuleViolationException ExercisedDateBeforeAppraisal(DateOnly exercisedDate, DateOnly appraisalDate)
+                => new(
+                    "homeownership.resale.exercise_option.exercised_date_before_appraisal",
+                    new Dictionary<string, object?>
+                    {
+                        ["exercisedDate"] = exercisedDate,
+                        ["appraisalDate"] = appraisalDate,
+                    });
+
+            public static BusinessRuleViolationException ExercisedDateInFuture(DateOnly exercisedDate, DateOnly today)
+                => new(
+                    "homeownership.resale.exercise_option.exercised_date_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["exercisedDate"] = exercisedDate,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException OptionWindowEnded(DateOnly optionWindowEndsOn)
+                => new(
+                    "homeownership.resale.exercise_option.option_window_ended",
+                    new Dictionary<string, object?>
+                    {
+                        ["optionWindowEndsOn"] = optionWindowEndsOn,
+                    });
+        }
+
+        public static class CloseBuyback
+        {
+            public static BusinessRuleViolationException NotOpen(ResaleStatus status)
+                => new(
+                    "homeownership.resale.close_buyback.not_open",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                        ["requiredStatus"] = ResaleStatus.Open.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException OptionNotExercised()
+                => new(
+                    "homeownership.resale.close_buyback.option_not_exercised");
+
+            public static BusinessRuleViolationException ClosingDateBeforeExercised(DateOnly closingDate, DateOnly exercisedDate)
+                => new(
+                    "homeownership.resale.close_buyback.closing_date_before_exercised",
+                    new Dictionary<string, object?>
+                    {
+                        ["closingDate"] = closingDate,
+                        ["exercisedDate"] = exercisedDate,
+                    });
+
+            public static BusinessRuleViolationException ClosingDateInFuture(DateOnly closingDate, DateOnly today)
+                => new(
+                    "homeownership.resale.close_buyback.closing_date_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["closingDate"] = closingDate,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException PricePaidNonPositive(decimal pricePaid)
+                => new(
+                    "homeownership.resale.close_buyback.price_paid_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["pricePaid"] = pricePaid,
+                    });
+
+            public static BusinessRuleViolationException PricePaidAboveOptionPrice(decimal pricePaid, decimal purchaseOptionPrice)
+                => new(
+                    "homeownership.resale.close_buyback.price_paid_above_option_price",
+                    new Dictionary<string, object?>
+                    {
+                        ["pricePaid"] = pricePaid,
+                        ["purchaseOptionPrice"] = purchaseOptionPrice,
+                    });
+
+            public static BusinessRuleViolationException HoldReasonRequired()
+                => new(
+                    "homeownership.resale.close_buyback.hold_reason_required");
         }
     }
 

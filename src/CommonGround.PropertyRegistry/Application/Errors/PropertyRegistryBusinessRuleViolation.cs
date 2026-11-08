@@ -80,6 +80,13 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class ReleaseForSale
+        {
+            public static BusinessRuleViolationException NotHeld()
+                => new(
+                    "property_registry.home.release_for_sale.not_held");
+        }
+
         public static class RecordAssessment
         {
             public static BusinessRuleViolationException AssessedValueNegative(decimal assessedValue)

@@ -2,6 +2,8 @@
 
 For when a homeowner tells the trust, by phone, email, letter or in person, that they want to sell their home. Recording it opens a resale and starts the trust's purchase option window.
 
+Not built yet: until it is, "Record Intent to Sell" is in the Resale section of the homeowner's ground lease (Ground Leases › lease detail), with the same form.
+
 1. User navigates to Households and searches for the homeowner by member name or email (see [Find Household](find-household.md))
 2. User clicks the row to open the household detail; a household that owns a home is at the Homeowner stage
 3. The Next Step card names the home and says since when the household has owned it, with "Record Intent to Sell" and "Open Ground Lease"

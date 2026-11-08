@@ -37,6 +37,12 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// </summary>
     public int OptionWindowDays { get; private set; }
 
+    /// <summary>Gets what the homeowner paid for the home, which the resale formula starts from.</summary>
+    public decimal BasePrice { get; private set; }
+
+    /// <summary>Gets the home's appraised value when the homeowner bought it, if known.</summary>
+    public decimal? OriginalAppraisedValue { get; private set; }
+
     /// <summary>Gets the covenant terms for this lease.</summary>
     public string CovenantTerms { get; private set; }
 
@@ -79,6 +85,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         DateOnly leaseStartDate,
         int termYears,
         int optionWindowDays,
+        decimal basePrice,
+        decimal originalAppraisedValue,
         string covenantTerms,
         ResalePolicyTerms resalePolicyTerms,
         HomeCommitments homeCommitments,
@@ -105,6 +113,12 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         if (optionWindowDays <= 0)
             throw BusinessRuleViolation.GroundLease.Create.OptionWindowDaysNonPositive(optionWindowDays);
 
+        if (basePrice <= 0)
+            throw BusinessRuleViolation.GroundLease.Create.BasePriceNonPositive(basePrice);
+
+        if (originalAppraisedValue <= 0)
+            throw BusinessRuleViolation.GroundLease.Create.OriginalAppraisedValueNonPositive(originalAppraisedValue);
+
         if (string.IsNullOrWhiteSpace(covenantTerms))
             throw BusinessRuleViolation.GroundLease.Create.CovenantTermsRequired();
 
@@ -115,6 +129,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             leaseStartDate,
             termYears,
             optionWindowDays,
+            basePrice,
+            originalAppraisedValue,
             covenantTerms,
             resalePolicyTerms.FormulaKind,
             resalePolicyTerms.AppreciationShare,
@@ -153,6 +169,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             leaseStartDate,
             template.TermYears,
             template.OptionWindowDays,
+            purchaseWorkflow.PurchasePrice,
+            purchaseWorkflow.AppraisalDetails?.AppraisedValue,
             template.CovenantTerms,
             template.ResalePolicyTerms.FormulaKind,
             template.ResalePolicyTerms.AppreciationShare,
@@ -240,6 +258,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         LeaseStartDate = e.LeaseStartDate;
         TermYears = e.TermYears;
         OptionWindowDays = e.OptionWindowDays;
+        BasePrice = e.BasePrice;
+        OriginalAppraisedValue = e.OriginalAppraisedValue;
         CovenantTerms = e.CovenantTerms;
         ResalePolicyTerms = e.FormulaKind switch
         {
@@ -278,6 +298,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         LeaseStartDate = e.LeaseStartDate;
         TermYears = e.TermYears;
         OptionWindowDays = e.OptionWindowDays;
+        BasePrice = e.BasePrice;
+        OriginalAppraisedValue = e.OriginalAppraisedValue;
         CovenantTerms = e.CovenantTerms;
         ResalePolicyTerms = e.FormulaKind switch
         {

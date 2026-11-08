@@ -17,6 +17,8 @@ public sealed record CreateGroundLease(
     DateOnly LeaseStartDate,
     int TermYears,
     int OptionWindowDays,
+    decimal BasePrice,
+    decimal OriginalAppraisedValue,
     string CovenantTerms,
     ResalePolicyTerms ResalePolicyTerms,
     UserId CreatedBy);
@@ -67,6 +69,8 @@ public static class CreateGroundLeaseHandler
             command.LeaseStartDate,
             command.TermYears,
             command.OptionWindowDays,
+            command.BasePrice,
+            command.OriginalAppraisedValue,
             command.CovenantTerms,
             command.ResalePolicyTerms,
             homeCommitments,

@@ -1,3 +1,5 @@
+using CommonGround.PropertyRegistry.Application.Errors;
+
 namespace CommonGround.PropertyRegistry.Application.ReadModels;
 
 /// <summary>
@@ -30,6 +32,15 @@ public class HomeAvailabilityView
 
     /// <summary>Gets or sets the day the homeowner gave notice to sell, while a resale of the home is open.</summary>
     public DateOnly? ResaleNoticeDate { get; set; }
+
+    /// <summary>Gets or sets the day the trust bought the home, while it holds it.</summary>
+    public DateOnly? HeldSinceDate { get; set; }
+
+    /// <summary>Gets or sets why the trust is holding the home, while it does.</summary>
+    public string? HoldReason { get; set; }
+
+    /// <summary>Gets or sets the date the home last became available again, and why, as "PurchaseFellThrough", "TrustBoughtBack" or "TrustReleased".</summary>
+    public string? AvailableAgainCause { get; set; }
 
     /// <summary>Gets or sets the home's selections, as far as news of them has arrived.</summary>
     public List<HomeAvailabilitySelection> Selections { get; set; } = [];
@@ -110,6 +121,30 @@ public class HomeAvailabilityView
         Refresh();
     }
 
+    /// <summary>
+    /// Records that the trust bought the home back, ending its homeowner's lease: offered to the waiting list, or
+    /// held by the trust for the reason given.
+    /// </summary>
+    public void RecordResaleBoughtBack(string resaleId, DateOnly closingDate, bool offeredForSale, string? holdReason)
+    {
+        var resale = ResaleFor(resaleId);
+        resale.BoughtBackDate = closingDate;
+        resale.HoldReason = offeredForSale ? null : holdReason;
+        Refresh();
+    }
+
+    /// <summary>Releases a home the trust is holding, offering it to the waiting list.</summary>
+    public void Release(DateOnly releasedDate)
+    {
+        var held = HeldResale() ?? throw BusinessRuleViolation.Home.ReleaseForSale.NotHeld();
+        held.ReleasedDate = releasedDate;
+        Refresh();
+    }
+
+    private HomeAvailabilityResale? HeldResale() =>
+        Resales.Where(r => r is { BoughtBackDate: not null, HoldReason: not null, ReleasedDate: null })
+            .MaxBy(r => r.BoughtBackDate);
+
     private HomeAvailabilityResale ResaleFor(string resaleId)
     {
         var resale = Resales.Find(r => r.Id == resaleId);
@@ -136,27 +171,49 @@ public class HomeAvailabilityView
 
     // HomeBuyers runs one selection per home at a time, so the latest to start is the one that counts;
     // a selection heard of only through its outcome counts once news of its start arrives. A lease has one
-    // open resale at a time, so one heard of and not withdrawn is it, whether or not news of the lease came first.
+    // open resale at a time, so one heard of and not withdrawn or bought back is it, whether or not news of the
+    // lease came first. A buyback ends the lease and the selections before it: the home is vacant again, and
+    // only a lease or selection from the buyback on counts.
     private void Refresh()
     {
-        var latest = Selections.Where(s => s.StartedAt is not null).MaxBy(s => s.StartedAt);
+        var endedDate = Resales.Max(r => r.BoughtBackDate);
+        var current = Selections.Where(s => endedDate is null || s.OpenedDate >= endedDate).ToList();
+        var latest = current.Where(s => s.StartedAt is not null).MaxBy(s => s.StartedAt);
         var active = latest is { Cancelled: false, FellThroughDate: null } ? latest : null;
-        var openResale = Resales.Find(r => r is { NoticeDate: not null, Withdrawn: false });
+        var openResale = Resales.Find(r => r is { NoticeDate: not null, Withdrawn: false, BoughtBackDate: null });
+        var leased = LeasedDate is not null && (endedDate is null || LeasedDate > endedDate);
+        var held = leased ? null : HeldResale();
 
-        Occupancy = (LeasedDate is null ? HomeOccupancy.Vacant : HomeOccupancy.Occupied).DisplayName;
-        var saleStage = (LeasedDate, active) switch
+        Occupancy = (leased ? HomeOccupancy.Occupied : HomeOccupancy.Vacant).DisplayName;
+        var saleStage = (leased, active) switch
         {
             _ when openResale is not null => HomeSaleStage.AwaitingTrustDecision,
-            ({ }, _) => HomeSaleStage.NotForSale,
-            (null, null) => HomeSaleStage.Offered,
-            (null, { ApplicationId: null }) => HomeSaleStage.InSelection,
+            (true, _) => HomeSaleStage.NotForSale,
+            _ when held is not null => HomeSaleStage.HeldByTrust,
+            (false, null) => HomeSaleStage.Offered,
+            (false, { ApplicationId: null }) => HomeSaleStage.InSelection,
             _ => HomeSaleStage.UnderContract,
         };
         SaleStage = saleStage.DisplayName;
         SelectionOpenedDate = active?.OpenedDate;
         UnderContractDate = active?.SelectedDate;
-        AvailableAgainDate = Selections.Max(s => s.FellThroughDate);
         ResaleNoticeDate = openResale?.NoticeDate;
+        HeldSinceDate = held?.BoughtBackDate;
+        HoldReason = held?.HoldReason;
+
+        // The home became available again when the latest of these happened.
+        var fellThrough = current.Max(s => s.FellThroughDate);
+        var offered = Resales.Where(r => r.BoughtBackDate is not null && r.HoldReason is null).Max(r => r.BoughtBackDate);
+        var released = Resales.Max(r => r.ReleasedDate);
+        var candidates = new (DateOnly? Date, string Cause)[]
+        {
+            (fellThrough, "PurchaseFellThrough"),
+            (offered, "TrustBoughtBack"),
+            (released, "TrustReleased"),
+        };
+        var again = candidates.Where(c => c.Date is not null).OrderByDescending(c => c.Date).Cast<(DateOnly? Date, string Cause)?>().FirstOrDefault();
+        AvailableAgainDate = again?.Date;
+        AvailableAgainCause = again?.Cause;
     }
 }
 
@@ -171,6 +228,15 @@ public class HomeAvailabilityResale
 
     /// <summary>Gets or sets a value indicating whether the homeowner withdrew their notice.</summary>
     public bool Withdrawn { get; set; }
+
+    /// <summary>Gets or sets the day the trust bought the home back, once it has.</summary>
+    public DateOnly? BoughtBackDate { get; set; }
+
+    /// <summary>Gets or sets why the trust is holding the home it bought, if it chose to hold it.</summary>
+    public string? HoldReason { get; set; }
+
+    /// <summary>Gets or sets the day the trust released the home it was holding.</summary>
+    public DateOnly? ReleasedDate { get; set; }
 }
 
 /// <summary>What a <see cref="HomeAvailabilityView"/> has heard of one of the home's selections.</summary>

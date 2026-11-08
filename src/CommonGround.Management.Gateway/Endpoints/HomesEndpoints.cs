@@ -44,6 +44,18 @@ public static class HomesEndpoints
         return Results.Ok(result);
     }
 
+    [WolverinePost("/api/v1/homes/{homeId}/release-for-sale")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> ReleaseHomeForSale(
+        string homeId,
+        IHomesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+        await client.ReleaseHomeForSaleAsync(homeId, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
     [WolverinePost("/api/v1/homes/{homeId}/assessments")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public static async Task<IResult> RecordHomeAssessment(

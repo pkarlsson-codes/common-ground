@@ -68,6 +68,10 @@ export interface RegisterHomeOperationRequest {
     registerHomeRequest: RegisterHomeRequest;
 }
 
+export interface ReleaseHomeForSaleRequest {
+    homeId: string;
+}
+
 /**
  * HomesApi - interface
  * 
@@ -146,6 +150,19 @@ export interface HomesApiInterface {
     /**
      */
     registerHome(requestParameters: RegisterHomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {string} homeId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof HomesApiInterface
+     */
+    releaseHomeForSaleRaw(requestParameters: ReleaseHomeForSaleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    releaseHomeForSale(requestParameters: ReleaseHomeForSaleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
 }
 
@@ -366,6 +383,48 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
     async registerHome(requestParameters: RegisterHomeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.registerHomeRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async releaseHomeForSaleRaw(requestParameters: ReleaseHomeForSaleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['homeId'] == null) {
+            throw new runtime.RequiredError(
+                'homeId',
+                'Required parameter "homeId" was null or undefined when calling releaseHomeForSale().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/homes/{homeId}/release-for-sale`;
+        urlPath = urlPath.replace(`{${"homeId"}}`, encodeURIComponent(String(requestParameters['homeId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async releaseHomeForSale(requestParameters: ReleaseHomeForSaleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.releaseHomeForSaleRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
 }

@@ -2614,6 +2614,58 @@
         }
       }
     },
+    "/api/v1/homes/{homeId}/release-for-sale": {
+      "post": {
+        "tags": [
+          "Homes"
+        ],
+        "operationId": "ReleaseHomeForSale",
+        "parameters": [
+          {
+            "name": "homeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/homes/{homeId}/assessments": {
       "post": {
         "tags": [
@@ -4849,6 +4901,312 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PaginatedResponseOfResaleResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resales/{resaleId}": {
+      "get": {
+        "tags": [
+          "Resales"
+        ],
+        "operationId": "GetResale",
+        "parameters": [
+          {
+            "name": "resaleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResaleResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resales/{resaleId}/price-preview": {
+      "post": {
+        "tags": [
+          "Resales"
+        ],
+        "operationId": "PreviewResalePrice",
+        "parameters": [
+          {
+            "name": "resaleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "PreviewResalePriceRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewResalePriceRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResalePriceResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resales/{resaleId}/appraisal": {
+      "post": {
+        "tags": [
+          "Resales"
+        ],
+        "operationId": "RecordResaleAppraisal",
+        "parameters": [
+          {
+            "name": "resaleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordResaleAppraisalRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordResaleAppraisalRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resales/{resaleId}/exercise-option": {
+      "post": {
+        "tags": [
+          "Resales"
+        ],
+        "operationId": "ExercisePurchaseOption",
+        "parameters": [
+          {
+            "name": "resaleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "ExercisePurchaseOptionRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExercisePurchaseOptionRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resales/{resaleId}/buyback-closing": {
+      "post": {
+        "tags": [
+          "Resales"
+        ],
+        "operationId": "RecordBuybackClosed",
+        "parameters": [
+          {
+            "name": "resaleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordBuybackClosedRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordBuybackClosedRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
                 }
               }
             }
@@ -7615,6 +7973,14 @@
             "type": "integer",
             "format": "int32"
           },
+          "basePrice": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "originalAppraisedValue": {
+            "type": "number",
+            "format": "decimal"
+          },
           "covenantTerms": {
             "type": "string"
           },
@@ -7680,6 +8046,15 @@
           "optionWindowDays": {
             "type": "integer",
             "format": "int32"
+          },
+          "basePrice": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "originalAppraisedValue": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
           },
           "covenantTerms": {
             "type": "string"
@@ -8963,6 +9338,19 @@
           },
           "saleStage": {
             "type": "string"
+          },
+          "heldSinceDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "holdReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "availableAgainCause": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -10484,7 +10872,7 @@
           },
           "status": {
             "type": "string",
-            "description": "Open or Withdrawn."
+            "description": "Open, Withdrawn or Closed."
           },
           "noticeDate": {
             "type": "string",
@@ -10520,6 +10908,212 @@
             "type": "string",
             "description": "When the notice was recorded.",
             "format": "date-time"
+          },
+          "appraisedValue": {
+            "type": "number",
+            "description": "The latest appraisal's value, once one is recorded.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "appraisalDate": {
+            "type": "string",
+            "description": "The day of the latest appraisal.",
+            "format": "date",
+            "nullable": true
+          },
+          "appraiserName": {
+            "type": "string",
+            "description": "Who made the latest appraisal.",
+            "nullable": true
+          },
+          "approvedImprovements": {
+            "type": "number",
+            "description": "The approved improvements the latest appraisal credited, if any.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "currentIndexValue": {
+            "type": "number",
+            "description": "The current index value the latest appraisal used, if any.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "formulaPrice": {
+            "type": "number",
+            "description": "The most the lease's formula allows the home to sell for.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "purchaseOptionPrice": {
+            "type": "number",
+            "description": "What the trust pays to buy the home.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "optionExercisedDate": {
+            "type": "string",
+            "description": "The day the trust decided to buy the home, if it has.",
+            "format": "date",
+            "nullable": true
+          },
+          "optionExercisedNotes": {
+            "type": "string",
+            "description": "Anything staff noted about the decision.",
+            "nullable": true
+          },
+          "closingDate": {
+            "type": "string",
+            "description": "The day the buyback closed, if it has.",
+            "format": "date",
+            "nullable": true
+          },
+          "pricePaid": {
+            "type": "number",
+            "description": "What the trust paid at the closing.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "closingNotes": {
+            "type": "string",
+            "description": "Anything staff noted about the closing.",
+            "nullable": true
+          },
+          "offeredForSale": {
+            "type": "boolean",
+            "description": "Whether the home was offered to the waiting list at the closing, rather than held.",
+            "nullable": true
+          },
+          "holdReason": {
+            "type": "string",
+            "description": "Why the trust is holding the home, if it is.",
+            "nullable": true
+          }
+        }
+      },
+      "ResalePriceResponse": {
+        "type": "object",
+        "description": "What a home may sell for after an appraisal, and what the trust pays to buy it.",
+        "additionalProperties": false,
+        "properties": {
+          "formulaPrice": {
+            "type": "number",
+            "description": "The most the lease's formula allows the home to sell for.",
+            "format": "decimal"
+          },
+          "purchaseOptionPrice": {
+            "type": "number",
+            "description": "The lesser of the formula price and the appraised value.",
+            "format": "decimal"
+          }
+        }
+      },
+      "PreviewResalePriceRequest": {
+        "type": "object",
+        "description": "Request for the prices an appraisal would set, without recording it.",
+        "additionalProperties": false,
+        "properties": {
+          "appraisedValue": {
+            "type": "number",
+            "description": "The home's appraised market value.",
+            "format": "decimal"
+          },
+          "appraisalDate": {
+            "type": "string",
+            "description": "The day of the appraisal.",
+            "format": "date"
+          },
+          "approvedImprovements": {
+            "type": "number",
+            "description": "The approved improvements the lease's formula credits, if it credits any.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "currentIndexValue": {
+            "type": "number",
+            "description": "The current index value, when the lease's formula is index based.",
+            "format": "decimal",
+            "nullable": true
+          }
+        }
+      },
+      "RecordResaleAppraisalRequest": {
+        "type": "object",
+        "description": "Request to record the appraisal the lease requires after a homeowner's notice to sell.",
+        "additionalProperties": false,
+        "properties": {
+          "appraisedValue": {
+            "type": "number",
+            "description": "The home's appraised market value.",
+            "format": "decimal"
+          },
+          "appraisalDate": {
+            "type": "string",
+            "description": "The day of the appraisal.",
+            "format": "date"
+          },
+          "appraiserName": {
+            "type": "string",
+            "description": "Who appraised the home."
+          },
+          "approvedImprovements": {
+            "type": "number",
+            "description": "The approved improvements the lease's formula credits, if it credits any.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "currentIndexValue": {
+            "type": "number",
+            "description": "The current index value, when the lease's formula is index based.",
+            "format": "decimal",
+            "nullable": true
+          }
+        }
+      },
+      "ExercisePurchaseOptionRequest": {
+        "type": "object",
+        "description": "Request to record that the trust will buy a home at the purchase option price.",
+        "additionalProperties": false,
+        "properties": {
+          "exercisedDate": {
+            "type": "string",
+            "description": "The day the trust decided.",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Anything staff want to note about the decision.",
+            "nullable": true
+          }
+        }
+      },
+      "RecordBuybackClosedRequest": {
+        "type": "object",
+        "description": "Request to record that the trust paid for and took a home it bought back.",
+        "additionalProperties": false,
+        "properties": {
+          "closingDate": {
+            "type": "string",
+            "description": "The day the buyback closed.",
+            "format": "date"
+          },
+          "pricePaid": {
+            "type": "number",
+            "description": "What the trust paid.",
+            "format": "decimal"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Anything staff want to note about the closing.",
+            "nullable": true
+          },
+          "offerForSale": {
+            "type": "boolean",
+            "description": "Whether the home goes to the waiting list now, rather than being held."
+          },
+          "holdReason": {
+            "type": "string",
+            "description": "Why the trust is holding the home; required when it is held.",
+            "nullable": true
           }
         }
       },

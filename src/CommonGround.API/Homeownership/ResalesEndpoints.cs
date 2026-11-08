@@ -89,20 +89,139 @@ public static class ResalesEndpoints
 
         var result = await bus.InvokeForTenantAsync<PaginatedResponse<ResaleListItem>>(bus.TenantId!, query, cancellationToken);
 
-        return Results.Ok(result.MapItems(item => new ResaleResponse(
-            item.Resale.Id,
-            item.Resale.GroundLeaseId,
-            item.Resale.LandParcelId,
-            item.Resale.HomeId,
-            item.HomeLabel,
-            item.Resale.HomeownerFullName,
-            item.Resale.Status,
-            item.Resale.NoticeDate,
-            item.Resale.NoticeChannel,
-            item.Resale.Notes,
-            item.Resale.OptionWindowEndsOn,
-            item.Resale.WithdrawnDate,
-            item.Resale.WithdrawnReason,
-            item.Resale.RecordedAt)));
+        return Results.Ok(result.MapItems(ToResponse));
     }
+
+    [WolverineGet("/api/resales/{resaleId}")]
+    public static async Task<IResult> GetResale(
+        string resaleId,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+
+        var item = await bus.InvokeForTenantAsync<ResaleListItem>(bus.TenantId!, new GetResale(ResaleId.Create(resaleId)), cancellationToken);
+
+        return Results.Ok(ToResponse(item));
+    }
+
+    [WolverinePost("/api/resales/{resaleId}/price-preview")]
+    public static async Task<IResult> PreviewResalePrice(
+        string resaleId,
+        PreviewResalePriceRequest request,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        var price = await bus.InvokeForTenantAsync<ResalePrice>(bus.TenantId!,
+            new GetResalePricePreview(
+                ResaleId.Create(resaleId),
+                request.AppraisedValue,
+                request.AppraisalDate,
+                request.ApprovedImprovements,
+                request.CurrentIndexValue),
+            cancellationToken);
+
+        return Results.Ok(new ResalePriceResponse(price.FormulaPrice, price.PurchaseOptionPrice));
+    }
+
+    [WolverinePost("/api/resales/{resaleId}/appraisal")]
+    public static async Task<IResult> RecordResaleAppraisal(
+        string resaleId,
+        RecordResaleAppraisalRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new RecordResaleAppraisal(
+                ResaleId.Create(resaleId),
+                request.AppraisedValue,
+                request.AppraisalDate,
+                request.AppraiserName,
+                request.ApprovedImprovements,
+                request.CurrentIndexValue,
+                httpContext.GetUserId()),
+            cancellationToken);
+
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/resales/{resaleId}/exercise-option")]
+    public static async Task<IResult> ExercisePurchaseOption(
+        string resaleId,
+        ExercisePurchaseOptionRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new ExercisePurchaseOption(ResaleId.Create(resaleId), request.ExercisedDate, request.Notes, httpContext.GetUserId()),
+            cancellationToken);
+
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/resales/{resaleId}/buyback-closing")]
+    public static async Task<IResult> RecordBuybackClosed(
+        string resaleId,
+        RecordBuybackClosedRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new RecordBuybackClosed(
+                ResaleId.Create(resaleId),
+                request.ClosingDate,
+                request.PricePaid,
+                request.Notes,
+                request.OfferForSale,
+                request.HoldReason,
+                httpContext.GetUserId()),
+            cancellationToken);
+
+        return Results.NoContent();
+    }
+
+    private static ResaleResponse ToResponse(ResaleListItem item) => new(
+        item.Resale.Id,
+        item.Resale.GroundLeaseId,
+        item.Resale.LandParcelId,
+        item.Resale.HomeId,
+        item.HomeLabel,
+        item.Resale.HomeownerFullName,
+        item.Resale.Status,
+        item.Resale.NoticeDate,
+        item.Resale.NoticeChannel,
+        item.Resale.Notes,
+        item.Resale.OptionWindowEndsOn,
+        item.Resale.WithdrawnDate,
+        item.Resale.WithdrawnReason,
+        item.Resale.RecordedAt,
+        item.Resale.AppraisedValue,
+        item.Resale.AppraisalDate,
+        item.Resale.AppraiserName,
+        item.Resale.ApprovedImprovements,
+        item.Resale.CurrentIndexValue,
+        item.Resale.FormulaPrice,
+        item.Resale.PurchaseOptionPrice,
+        item.Resale.OptionExercisedDate,
+        item.Resale.OptionExercisedNotes,
+        item.Resale.ClosingDate,
+        item.Resale.PricePaid,
+        item.Resale.ClosingNotes,
+        item.Resale.OfferedForSale,
+        item.Resale.HoldReason);
 }

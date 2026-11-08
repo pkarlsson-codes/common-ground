@@ -130,6 +130,8 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
             leaseStartDate,
             direct.TermYears,
             direct.OptionWindowDays,
+            direct.BasePrice,
+            direct.OriginalAppraisedValue,
             direct.CovenantTerms,
             ResalePolicyTerms.FromString(
                 resale.FormulaKind,
@@ -297,6 +299,10 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
         public int TermYears { get; set; }
 
         public int OptionWindowDays { get; set; }
+
+        public decimal BasePrice { get; set; }
+
+        public decimal OriginalAppraisedValue { get; set; }
 
         public string CovenantTerms { get; set; } = string.Empty;
 

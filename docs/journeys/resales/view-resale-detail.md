@@ -19,6 +19,8 @@
 10. "Withdraw" is available in the panel's actions until the trust exercises the option or a household is selected as the buyer
 11. User closes the panel
 
+Not built yet: "Decline to Buy" and the Buyer step. Until [Decline Purchase Option](decline-purchase-option.md) is built, the Decision step offers only "Buy the Home", and the tracker ends at Closing for the trust's purchase.
+
 Continues in: [Record Resale Appraisal](record-resale-appraisal.md)
 Continues in: [Exercise Purchase Option](exercise-purchase-option.md)
 Continues in: [Decline Purchase Option](decline-purchase-option.md)

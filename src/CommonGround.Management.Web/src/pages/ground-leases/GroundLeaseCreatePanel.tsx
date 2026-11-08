@@ -28,6 +28,8 @@ const emptyCreate = (): CreateGroundLeaseForm => ({
   leaseStartDate: trustToday(),
   termYears: 99,
   optionWindowDays: 60,
+  basePrice: 0,
+  originalAppraisedValue: 0,
   covenantTerms: '',
   formulaKind: 'AppraisalBased',
   appreciationShare: 0.25,
@@ -183,6 +185,34 @@ export default function GroundLeaseCreatePanel({ onClose }: Props) {
               max="999"
               value={createForm.optionWindowDays}
               onChange={e => setCreateForm(f => ({ ...f, optionWindowDays: parseInt(e.target.value) || 60 }))}
+              required
+            />
+          </div>
+          <div className="form-field">
+            <label className="form-label" htmlFor="lease-base-price">Base Price ($)</label>
+            <input
+              id="lease-base-price"
+              className="form-input"
+              type="number"
+              min="1"
+              step="1"
+              value={createForm.basePrice || ''}
+              onChange={e => setCreateForm(f => ({ ...f, basePrice: parseFloat(e.target.value) || 0 }))}
+              placeholder="What the homeowner paid"
+              required
+            />
+          </div>
+          <div className="form-field">
+            <label className="form-label" htmlFor="lease-original-appraised-value">Original Appraised Value ($)</label>
+            <input
+              id="lease-original-appraised-value"
+              className="form-input"
+              type="number"
+              min="1"
+              step="1"
+              value={createForm.originalAppraisedValue || ''}
+              onChange={e => setCreateForm(f => ({ ...f, originalAppraisedValue: parseFloat(e.target.value) || 0 }))}
+              placeholder="Appraised at that purchase"
               required
             />
           </div>

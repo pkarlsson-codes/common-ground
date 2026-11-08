@@ -30,6 +30,12 @@ public sealed class Resale : AggregateRoot<ResaleId>
     /// <summary>Gets where the resale stands.</summary>
     public ResaleStatus Status { get; private set; }
 
+    /// <summary>Gets the latest appraisal, if one has been recorded.</summary>
+    public ResaleAppraisal? Appraisal { get; private set; }
+
+    /// <summary>Gets the day the trust decided to buy the home, if it has.</summary>
+    public DateOnly? OptionExercisedOn { get; private set; }
+
     /// <summary>
     /// Opens a resale from a homeowner's notice of intent to sell. The trust's option window runs for the
     /// lease's option window days from the notice date. The lease decides whether a resale may open; see
@@ -63,11 +69,149 @@ public sealed class Resale : AggregateRoot<ResaleId>
             recordedBy.Value);
     }
 
+    /// <summary>
+    /// Records the appraisal the lease requires, working out the formula price and the purchase option price from
+    /// the lease's terms. A later appraisal replaces it, until the trust has decided.
+    /// </summary>
+    public ResaleAppraisalRecorded RecordAppraisal(
+        GroundLease lease,
+        decimal appraisedValue,
+        DateOnly appraisalDate,
+        string appraiserName,
+        decimal? approvedImprovements,
+        decimal? currentIndexValue,
+        DateOnly today,
+        UserId recordedBy)
+    {
+        ArgumentNullException.ThrowIfNull(lease);
+
+        if (Status != ResaleStatus.Open)
+            throw BusinessRuleViolation.Resale.RecordAppraisal.NotOpen(Status);
+
+        if (OptionExercisedOn is not null)
+            throw BusinessRuleViolation.Resale.RecordAppraisal.OptionExercised();
+
+        if (lease.OriginalAppraisedValue is not { } originalAppraisedValue)
+            throw BusinessRuleViolation.Resale.RecordAppraisal.LeaseFiguresMissing();
+
+        if (appraisedValue <= 0)
+            throw BusinessRuleViolation.Resale.RecordAppraisal.AppraisedValueNonPositive(appraisedValue);
+
+        if (string.IsNullOrWhiteSpace(appraiserName))
+            throw BusinessRuleViolation.Resale.RecordAppraisal.AppraiserRequired();
+
+        if (appraisalDate < NoticeDate)
+            throw BusinessRuleViolation.Resale.RecordAppraisal.AppraisalDateBeforeNotice(appraisalDate, NoticeDate);
+
+        if (appraisalDate > today)
+            throw BusinessRuleViolation.Resale.RecordAppraisal.AppraisalDateInFuture(appraisalDate, today);
+
+        if (approvedImprovements < 0)
+            throw BusinessRuleViolation.Resale.RecordAppraisal.ApprovedImprovementsNegative(approvedImprovements.Value);
+
+        if (currentIndexValue <= 0)
+            throw BusinessRuleViolation.Resale.RecordAppraisal.CurrentIndexValueNonPositive(currentIndexValue.Value);
+
+        var price = ResalePrice.Calculate(
+            lease.ResalePolicyTerms,
+            lease.BasePrice,
+            originalAppraisedValue,
+            lease.LeaseStartDate,
+            appraisedValue,
+            appraisalDate,
+            approvedImprovements,
+            currentIndexValue);
+
+        return new ResaleAppraisalRecorded(
+            Id.Value,
+            appraisedValue,
+            appraisalDate,
+            appraiserName.Trim(),
+            approvedImprovements,
+            currentIndexValue,
+            price.FormulaPrice,
+            price.PurchaseOptionPrice,
+            recordedBy.Value);
+    }
+
+    /// <summary>Records that the trust will buy the home at the purchase option price.</summary>
+    public PurchaseOptionExercised ExerciseOption(DateOnly exercisedDate, string? notes, DateOnly today, UserId exercisedBy)
+    {
+        if (Status != ResaleStatus.Open)
+            throw BusinessRuleViolation.Resale.ExerciseOption.NotOpen(Status);
+
+        if (OptionExercisedOn is not null)
+            throw BusinessRuleViolation.Resale.ExerciseOption.AlreadyExercised();
+
+        if (Appraisal is null)
+            throw BusinessRuleViolation.Resale.ExerciseOption.AppraisalRequired();
+
+        if (exercisedDate < Appraisal.AppraisalDate)
+            throw BusinessRuleViolation.Resale.ExerciseOption.ExercisedDateBeforeAppraisal(exercisedDate, Appraisal.AppraisalDate);
+
+        if (exercisedDate > today)
+            throw BusinessRuleViolation.Resale.ExerciseOption.ExercisedDateInFuture(exercisedDate, today);
+
+        if (exercisedDate > OptionWindowEndsOn)
+            throw BusinessRuleViolation.Resale.ExerciseOption.OptionWindowEnded(OptionWindowEndsOn);
+
+        return new PurchaseOptionExercised(Id.Value, exercisedDate, string.IsNullOrWhiteSpace(notes) ? null : notes.Trim(), exercisedBy.Value);
+    }
+
+    /// <summary>
+    /// Records that the trust paid for and took the home. The caller ends the seller's lease with it.
+    /// The home goes to the waiting list, or the trust holds it with a reason.
+    /// </summary>
+    public BuybackClosed CloseBuyback(
+        DateOnly closingDate,
+        decimal pricePaid,
+        string? notes,
+        bool offerForSale,
+        string? holdReason,
+        DateOnly today,
+        UserId closedBy)
+    {
+        if (Status != ResaleStatus.Open)
+            throw BusinessRuleViolation.Resale.CloseBuyback.NotOpen(Status);
+
+        if (OptionExercisedOn is not { } exercisedOn || Appraisal is null)
+            throw BusinessRuleViolation.Resale.CloseBuyback.OptionNotExercised();
+
+        if (closingDate < exercisedOn)
+            throw BusinessRuleViolation.Resale.CloseBuyback.ClosingDateBeforeExercised(closingDate, exercisedOn);
+
+        if (closingDate > today)
+            throw BusinessRuleViolation.Resale.CloseBuyback.ClosingDateInFuture(closingDate, today);
+
+        if (pricePaid <= 0)
+            throw BusinessRuleViolation.Resale.CloseBuyback.PricePaidNonPositive(pricePaid);
+
+        if (pricePaid > Appraisal.PurchaseOptionPrice)
+            throw BusinessRuleViolation.Resale.CloseBuyback.PricePaidAboveOptionPrice(pricePaid, Appraisal.PurchaseOptionPrice);
+
+        if (!offerForSale && string.IsNullOrWhiteSpace(holdReason))
+            throw BusinessRuleViolation.Resale.CloseBuyback.HoldReasonRequired();
+
+        return new BuybackClosed(
+            Id.Value,
+            GroundLeaseId.Value,
+            HomeId,
+            closingDate,
+            pricePaid,
+            string.IsNullOrWhiteSpace(notes) ? null : notes.Trim(),
+            offerForSale,
+            offerForSale ? null : holdReason!.Trim(),
+            closedBy.Value);
+    }
+
     /// <summary>Withdraws the resale because the homeowner decided not to sell.</summary>
     public ResaleWithdrawn Withdraw(DateOnly withdrawnDate, string reason, DateOnly today, UserId withdrawnBy)
     {
         if (Status != ResaleStatus.Open)
             throw BusinessRuleViolation.Resale.Withdraw.NotOpen(Status);
+
+        if (OptionExercisedOn is not null)
+            throw BusinessRuleViolation.Resale.Withdraw.OptionExercised();
 
         if (string.IsNullOrWhiteSpace(reason))
             throw BusinessRuleViolation.Resale.Withdraw.ReasonRequired();
@@ -96,6 +240,16 @@ public sealed class Resale : AggregateRoot<ResaleId>
             Status = ResaleStatus.Open,
         };
     }
+
+    /// <summary>Applies <see cref="ResaleAppraisalRecorded"/>.</summary>
+    public void Apply(ResaleAppraisalRecorded e) =>
+        Appraisal = new ResaleAppraisal(e.AppraisedValue, e.AppraisalDate, e.FormulaPrice, e.PurchaseOptionPrice);
+
+    /// <summary>Applies <see cref="PurchaseOptionExercised"/>.</summary>
+    public void Apply(PurchaseOptionExercised e) => OptionExercisedOn = e.ExercisedDate;
+
+    /// <summary>Applies <see cref="BuybackClosed"/>.</summary>
+    public void Apply(BuybackClosed _) => Status = ResaleStatus.Closed;
 
     /// <summary>Applies <see cref="ResaleWithdrawn"/>.</summary>
     public void Apply(ResaleWithdrawn _) => Status = ResaleStatus.Withdrawn;

@@ -65,7 +65,7 @@ export interface ResaleResponse {
      */
     homeownerFullName?: string | null;
     /**
-     * Open or Withdrawn.
+     * Open, Withdrawn or Closed.
      * @type {string}
      * @memberof ResaleResponse
      */
@@ -112,6 +112,90 @@ export interface ResaleResponse {
      * @memberof ResaleResponse
      */
     recordedAt?: Date;
+    /**
+     * The latest appraisal's value, once one is recorded.
+     * @type {number}
+     * @memberof ResaleResponse
+     */
+    appraisedValue?: number | null;
+    /**
+     * The day of the latest appraisal.
+     * @type {CalendarDate}
+     * @memberof ResaleResponse
+     */
+    appraisalDate?: CalendarDate | null;
+    /**
+     * Who made the latest appraisal.
+     * @type {string}
+     * @memberof ResaleResponse
+     */
+    appraiserName?: string | null;
+    /**
+     * The approved improvements the latest appraisal credited, if any.
+     * @type {number}
+     * @memberof ResaleResponse
+     */
+    approvedImprovements?: number | null;
+    /**
+     * The current index value the latest appraisal used, if any.
+     * @type {number}
+     * @memberof ResaleResponse
+     */
+    currentIndexValue?: number | null;
+    /**
+     * The most the lease's formula allows the home to sell for.
+     * @type {number}
+     * @memberof ResaleResponse
+     */
+    formulaPrice?: number | null;
+    /**
+     * What the trust pays to buy the home.
+     * @type {number}
+     * @memberof ResaleResponse
+     */
+    purchaseOptionPrice?: number | null;
+    /**
+     * The day the trust decided to buy the home, if it has.
+     * @type {CalendarDate}
+     * @memberof ResaleResponse
+     */
+    optionExercisedDate?: CalendarDate | null;
+    /**
+     * Anything staff noted about the decision.
+     * @type {string}
+     * @memberof ResaleResponse
+     */
+    optionExercisedNotes?: string | null;
+    /**
+     * The day the buyback closed, if it has.
+     * @type {CalendarDate}
+     * @memberof ResaleResponse
+     */
+    closingDate?: CalendarDate | null;
+    /**
+     * What the trust paid at the closing.
+     * @type {number}
+     * @memberof ResaleResponse
+     */
+    pricePaid?: number | null;
+    /**
+     * Anything staff noted about the closing.
+     * @type {string}
+     * @memberof ResaleResponse
+     */
+    closingNotes?: string | null;
+    /**
+     * Whether the home was offered to the waiting list at the closing, rather than held.
+     * @type {boolean}
+     * @memberof ResaleResponse
+     */
+    offeredForSale?: boolean | null;
+    /**
+     * Why the trust is holding the home, if it is.
+     * @type {string}
+     * @memberof ResaleResponse
+     */
+    holdReason?: string | null;
 }
 
 /**
@@ -145,6 +229,20 @@ export function ResaleResponseFromJSONTyped(json: any, ignoreDiscriminator: bool
         'withdrawnDate': json['withdrawnDate'] == null ? undefined : CalendarDateFromJSON(json['withdrawnDate']),
         'withdrawnReason': json['withdrawnReason'] == null ? undefined : json['withdrawnReason'],
         'recordedAt': json['recordedAt'] == null ? undefined : (new Date(json['recordedAt'])),
+        'appraisedValue': json['appraisedValue'] == null ? undefined : json['appraisedValue'],
+        'appraisalDate': json['appraisalDate'] == null ? undefined : CalendarDateFromJSON(json['appraisalDate']),
+        'appraiserName': json['appraiserName'] == null ? undefined : json['appraiserName'],
+        'approvedImprovements': json['approvedImprovements'] == null ? undefined : json['approvedImprovements'],
+        'currentIndexValue': json['currentIndexValue'] == null ? undefined : json['currentIndexValue'],
+        'formulaPrice': json['formulaPrice'] == null ? undefined : json['formulaPrice'],
+        'purchaseOptionPrice': json['purchaseOptionPrice'] == null ? undefined : json['purchaseOptionPrice'],
+        'optionExercisedDate': json['optionExercisedDate'] == null ? undefined : CalendarDateFromJSON(json['optionExercisedDate']),
+        'optionExercisedNotes': json['optionExercisedNotes'] == null ? undefined : json['optionExercisedNotes'],
+        'closingDate': json['closingDate'] == null ? undefined : CalendarDateFromJSON(json['closingDate']),
+        'pricePaid': json['pricePaid'] == null ? undefined : json['pricePaid'],
+        'closingNotes': json['closingNotes'] == null ? undefined : json['closingNotes'],
+        'offeredForSale': json['offeredForSale'] == null ? undefined : json['offeredForSale'],
+        'holdReason': json['holdReason'] == null ? undefined : json['holdReason'],
     };
 }
 
@@ -173,6 +271,20 @@ export function ResaleResponseToJSONTyped(value?: ResaleResponse | null, ignoreD
         'withdrawnDate': CalendarDateToJSON(value['withdrawnDate']),
         'withdrawnReason': value['withdrawnReason'],
         'recordedAt': value['recordedAt'] == null ? undefined : ((value['recordedAt']).toISOString()),
+        'appraisedValue': value['appraisedValue'],
+        'appraisalDate': CalendarDateToJSON(value['appraisalDate']),
+        'appraiserName': value['appraiserName'],
+        'approvedImprovements': value['approvedImprovements'],
+        'currentIndexValue': value['currentIndexValue'],
+        'formulaPrice': value['formulaPrice'],
+        'purchaseOptionPrice': value['purchaseOptionPrice'],
+        'optionExercisedDate': CalendarDateToJSON(value['optionExercisedDate']),
+        'optionExercisedNotes': value['optionExercisedNotes'],
+        'closingDate': CalendarDateToJSON(value['closingDate']),
+        'pricePaid': value['pricePaid'],
+        'closingNotes': value['closingNotes'],
+        'offeredForSale': value['offeredForSale'],
+        'holdReason': value['holdReason'],
     };
 }
 

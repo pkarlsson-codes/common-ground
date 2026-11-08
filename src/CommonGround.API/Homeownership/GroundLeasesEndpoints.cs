@@ -44,6 +44,8 @@ public static class GroundLeasesEndpoints
             request.LeaseStartDate,
             request.TermYears,
             request.OptionWindowDays,
+            request.BasePrice,
+            request.OriginalAppraisedValue,
             request.CovenantTerms,
             resalePolicyTerms,
             userId);
@@ -103,6 +105,8 @@ public static class GroundLeasesEndpoints
             view.LeaseStartDate,
             view.TermYears,
             view.OptionWindowDays,
+            view.BasePrice,
+            view.OriginalAppraisedValue,
             view.CovenantTerms,
             view.Status,
             view.FormulaKind,

@@ -32,4 +32,43 @@ public sealed class ResalesApiClient(
         ArgumentNullException.ThrowIfNull(querySpec);
         return await GetAsync<PaginatedResponse<ResaleResponse>>($"api/resales{querySpec.ToQueryString()}", cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task<ResaleResponse> GetResaleAsync(string resaleId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        return await GetAsync<ResaleResponse>($"api/resales/{resaleId}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<ResalePriceResponse> PreviewResalePriceAsync(string resaleId, PreviewResalePriceRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        ArgumentNullException.ThrowIfNull(request);
+        return await PostAsync<PreviewResalePriceRequest, ResalePriceResponse>($"api/resales/{resaleId}/price-preview", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task RecordResaleAppraisalAsync(string resaleId, RecordResaleAppraisalRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/resales/{resaleId}/appraisal", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task ExercisePurchaseOptionAsync(string resaleId, ExercisePurchaseOptionRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/resales/{resaleId}/exercise-option", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task RecordBuybackClosedAsync(string resaleId, RecordBuybackClosedRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/resales/{resaleId}/buyback-closing", request, cancellationToken).ConfigureAwait(false);
+    }
 }

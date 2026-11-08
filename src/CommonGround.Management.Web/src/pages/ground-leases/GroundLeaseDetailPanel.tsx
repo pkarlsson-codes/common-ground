@@ -101,6 +101,14 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
                 <div className="detail-field__value mono">{fmtPct(detail.annualPercentage)}</div>
               </div>
             )}
+            <div className="detail-field">
+              <div className="detail-field__label">Base Price</div>
+              <div className="detail-field__value mono">{fmtCurrency(detail.basePrice ?? 0)}</div>
+            </div>
+            <div className="detail-field">
+              <div className="detail-field__label">Original Appraised Value</div>
+              <div className="detail-field__value mono">{detail.originalAppraisedValue != null ? fmtCurrency(detail.originalAppraisedValue) : '—'}</div>
+            </div>
             {detail.improvementsCap != null && (
               <div className="detail-field">
                 <div className="detail-field__label">Improvements Cap</div>

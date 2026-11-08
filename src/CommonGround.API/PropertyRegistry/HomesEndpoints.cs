@@ -76,7 +76,8 @@ public static class HomesEndpoints
             view.YearBuilt, view.AssessedValue, view.LastAssessedDate,
             view.ConditionNotes, view.RegisteredAt,
             availability.AvailableAgainDate, availability.SelectionOpenedDate, availability.UnderContractDate,
-            availability.LeasedDate, availability.ResaleNoticeDate, availability.Occupancy, availability.SaleStage);
+            availability.LeasedDate, availability.ResaleNoticeDate, availability.Occupancy, availability.SaleStage,
+            availability.HeldSinceDate, availability.HoldReason, availability.AvailableAgainCause);
 
         return Results.Ok(response);
     }
@@ -105,6 +106,19 @@ public static class HomesEndpoints
             i.Home.Bathrooms, i.Home.SquareFootage, i.Home.AssessedValue, i.Occupancy, i.SaleStage));
 
         return Results.Ok(response);
+    }
+
+    [WolverinePost("/api/homes/{homeId}/release-for-sale")]
+    public static async Task<IResult> ReleaseHomeForSale(
+        string homeId,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+
+        await bus.InvokeForTenantAsync(bus.TenantId!, new ReleaseHomeForSale(HomeId.Create(homeId)), cancellationToken);
+
+        return Results.NoContent();
     }
 
     [WolverinePost("/api/homes/{homeId}/assessments")]

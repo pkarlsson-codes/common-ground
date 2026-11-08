@@ -25,6 +25,12 @@ public interface IHomesApiClient
     /// <returns>A paginated list of home summaries.</returns>
     Task<PaginatedResponse<HomeListItemResponse>> GetHomesAsync(GetHomesQuerySpec querySpec, CancellationToken cancellationToken);
 
+    /// <summary>Offers a home the trust bought back and chose to hold to the waiting list.</summary>
+    /// <param name="homeId">The ID of the held home.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task ReleaseHomeForSaleAsync(string homeId, CancellationToken cancellationToken);
+
     /// <summary>Records an assessment for a home.</summary>
     /// <param name="homeId">The ID of the home to assess.</param>
     /// <param name="request">The assessment details.</param>

@@ -33,12 +33,17 @@ export function formatStepDate(value?: CalendarDate | Date | null): string | und
 
 export const HOME_STAGES = ['Development', 'Available', 'Selection', 'Purchasing', 'Leased', 'Resale'] as const
 
+/** The stages a home is shown moving through; "Held by Trust" only joins them for a home the trust is holding. */
+export const homeStages = (stage: string): readonly string[] =>
+  stage === 'Held by Trust' ? [...HOME_STAGES, stage] : HOME_STAGES
+
 const HOME_LABELS: Record<string, string> = {
   'Vacant|Offered': 'Available',
   'Vacant|InSelection': 'InSelection',
   'Vacant|UnderContract': 'UnderContract',
   'Occupied|NotForSale': 'Leased',
   'Occupied|AwaitingTrustDecision': 'Resale',
+  'Vacant|HeldByTrust': 'HeldByTrust',
 }
 
 const HOME_STAGE_OF_LABEL: Record<string, string> = {
@@ -47,6 +52,7 @@ const HOME_STAGE_OF_LABEL: Record<string, string> = {
   UnderContract: 'Purchasing',
   Leased: 'Leased',
   Resale: 'Resale',
+  HeldByTrust: 'Held by Trust',
 }
 
 /** The label staff know a home's state by, e.g. "Leased", from its occupancy and sale stage. */

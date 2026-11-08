@@ -38,6 +38,13 @@ public sealed class HomesApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task ReleaseHomeForSaleAsync(string homeId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+        await PostAsync($"api/homes/{homeId}/release-for-sale", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task RecordHomeAssessmentAsync(string homeId, RecordHomeAssessmentRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);

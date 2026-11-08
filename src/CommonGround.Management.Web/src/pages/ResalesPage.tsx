@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { optionWindowLeft, useOpenResales } from '../hooks/resales'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { optionWindowLeft, resaleStep, useOpenResales } from '../hooks/resales'
 import Pagination from '../components/Pagination'
+import ResaleDetailPanel from './resales/ResaleDetailPanel'
 
 const PAGE_SIZE = 20
 
@@ -15,10 +16,20 @@ function SkeletonRows() {
 
 /** Resales in progress, each opened by a homeowner's notice of intent to sell on their lease. */
 export default function ResalesPage() {
+  const location = useLocation()
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const { data, isLoading, isError } = useOpenResales(page)
   const resales = data?.items ?? []
+
+  useEffect(() => {
+    const openId = (location.state as { openId?: string } | null)?.openId
+    if (!openId) return
+
+    setSelectedId(openId)
+    navigate({ pathname: location.pathname, search: location.search, hash: location.hash }, { replace: true, state: null })
+  }, [location, navigate])
 
   return (
     <div className="page">
@@ -60,18 +71,20 @@ export default function ResalesPage() {
                   <th>Home</th>
                   <th>Homeowner</th>
                   <th>Notice Date</th>
+                  <th>Step</th>
                   <th>Option Window End</th>
                   <th>Window</th>
                 </tr>
               </thead>
               <tbody>
                 {resales.map(r => (
-                  <tr key={r.id} onClick={() => navigate('/ground-leases', { state: { openId: r.groundLeaseId } })}>
+                  <tr key={r.id} onClick={() => setSelectedId(r.id!)}>
                     <td>{r.homeLabel ?? <span style={{ color: 'var(--text-dim)' }}>—</span>}</td>
                     <td>{r.homeownerFullName ?? <span style={{ color: 'var(--text-dim)' }}>—</span>}</td>
                     <td><span className="cell-mono">{r.noticeDate}</span></td>
+                    <td>{resaleStep(r)}</td>
                     <td><span className="cell-mono">{r.optionWindowEndsOn}</span></td>
-                    <td>{optionWindowLeft(r.optionWindowEndsOn!)}</td>
+                    <td>{r.optionExercisedDate ? '' : optionWindowLeft(r.optionWindowEndsOn!)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -88,6 +101,8 @@ export default function ResalesPage() {
           </>
         )}
       </div>
+
+      {selectedId && <ResaleDetailPanel resaleId={selectedId} onClose={() => setSelectedId(null)} />}
     </div>
   )
 }

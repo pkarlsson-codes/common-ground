@@ -11,5 +11,8 @@ public sealed class ResaleStatus : Enumeration<ResaleStatus>
     /// <summary>The homeowner decided not to sell after all.</summary>
     public static readonly ResaleStatus Withdrawn = new(2, "Withdrawn");
 
+    /// <summary>The trust bought the home and the resale is done.</summary>
+    public static readonly ResaleStatus Closed = new(3, "Closed");
+
     private ResaleStatus(int value, string displayName) : base(value, displayName) { }
 }

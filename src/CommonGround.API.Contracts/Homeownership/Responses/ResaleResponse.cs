@@ -7,7 +7,7 @@ namespace CommonGround.API.Contracts.Homeownership.Responses;
 /// <param name="HomeId">The home being sold.</param>
 /// <param name="HomeLabel">The label staff know the home by, once known.</param>
 /// <param name="HomeownerFullName">The selling homeowner's full name.</param>
-/// <param name="Status">Open or Withdrawn.</param>
+/// <param name="Status">Open, Withdrawn or Closed.</param>
 /// <param name="NoticeDate">The day the homeowner gave notice.</param>
 /// <param name="NoticeChannel">How the notice reached the trust.</param>
 /// <param name="Notes">Anything staff noted about the notice.</param>
@@ -15,6 +15,20 @@ namespace CommonGround.API.Contracts.Homeownership.Responses;
 /// <param name="WithdrawnDate">The day the homeowner withdrew, if they did.</param>
 /// <param name="WithdrawnReason">Why the homeowner withdrew, if they did.</param>
 /// <param name="RecordedAt">When the notice was recorded.</param>
+/// <param name="AppraisedValue">The latest appraisal's value, once one is recorded.</param>
+/// <param name="AppraisalDate">The day of the latest appraisal.</param>
+/// <param name="AppraiserName">Who made the latest appraisal.</param>
+/// <param name="ApprovedImprovements">The approved improvements the latest appraisal credited, if any.</param>
+/// <param name="CurrentIndexValue">The current index value the latest appraisal used, if any.</param>
+/// <param name="FormulaPrice">The most the lease's formula allows the home to sell for.</param>
+/// <param name="PurchaseOptionPrice">What the trust pays to buy the home.</param>
+/// <param name="OptionExercisedDate">The day the trust decided to buy the home, if it has.</param>
+/// <param name="OptionExercisedNotes">Anything staff noted about the decision.</param>
+/// <param name="ClosingDate">The day the buyback closed, if it has.</param>
+/// <param name="PricePaid">What the trust paid at the closing.</param>
+/// <param name="ClosingNotes">Anything staff noted about the closing.</param>
+/// <param name="OfferedForSale">Whether the home was offered to the waiting list at the closing, rather than held.</param>
+/// <param name="HoldReason">Why the trust is holding the home, if it is.</param>
 public sealed record ResaleResponse(
     string Id,
     string GroundLeaseId,
@@ -29,4 +43,18 @@ public sealed record ResaleResponse(
     DateOnly OptionWindowEndsOn,
     DateOnly? WithdrawnDate,
     string? WithdrawnReason,
-    DateTimeOffset RecordedAt);
+    DateTimeOffset RecordedAt,
+    decimal? AppraisedValue,
+    DateOnly? AppraisalDate,
+    string? AppraiserName,
+    decimal? ApprovedImprovements,
+    decimal? CurrentIndexValue,
+    decimal? FormulaPrice,
+    decimal? PurchaseOptionPrice,
+    DateOnly? OptionExercisedDate,
+    string? OptionExercisedNotes,
+    DateOnly? ClosingDate,
+    decimal? PricePaid,
+    string? ClosingNotes,
+    bool? OfferedForSale,
+    string? HoldReason);

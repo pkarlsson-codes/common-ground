@@ -39,6 +39,8 @@ const createLeaseDirectly = (page: Page, landParcelId: string, homeId: string, h
     leaseStartDate: '2020-01-01',
     termYears: 99,
     optionWindowDays: 60,
+    basePrice: 200000,
+    originalAppraisedValue: 250000,
     covenantTerms: 'Standard covenant terms',
     formulaKind: 'IndexBased',
     indexType: 'CPI',
@@ -75,6 +77,8 @@ test('creating a lease on a parcel\'s home lists it first, shows its homeowner a
   await field(form, 'Lease Start Date').fill('2023-06-01')
   await field(form, 'Term (years)').fill('50')
   await field(form, 'Option Window (days)').fill('45')
+  await field(form, 'Base Price ($)').fill('180000')
+  await field(form, 'Original Appraised Value ($)').fill('240000')
   await field(form, 'Covenant Terms').fill('Owner-occupied, permanently affordable')
   await field(form, 'Resale Formula').selectOption('FixedPercentage')
   await expect(field(form, 'Annual Percentage')).toHaveValue('0.01')
@@ -103,6 +107,8 @@ test('creating a lease on a parcel\'s home lists it first, shows its homeowner a
   await expect(detailValue(detail, 'Improvements Cap')).toHaveText('$10,000')
   await expect(detailValue(detail, 'Term')).toHaveText('50 years')
   await expect(detailValue(detail, 'Option Window')).toHaveText('45 days')
+  await expect(detailValue(detail, 'Base Price')).toHaveText('$180,000')
+  await expect(detailValue(detail, 'Original Appraised Value')).toHaveText('$240,000')
   await expect(detailValue(detail, 'Covenant Terms')).toHaveText('Owner-occupied, permanently affordable')
   await expect(detail.locator('.detail-field__label').filter({ hasText: /^Appreciation Share$/ })).toHaveCount(0)
   await expect(checkIns(page)).not.toContainText('by ')
@@ -130,6 +136,8 @@ test('creating a lease on a home that already has one is refused and keeps the p
   const form = await openCreateLease(page, apn)
   await field(form, 'Homeowner Full Name').fill(`Second ${uniqueId()}`)
   await field(form, 'Homeowner Email').fill('second@example.com')
+  await field(form, 'Base Price ($)').fill('180000')
+  await field(form, 'Original Appraised Value ($)').fill('240000')
   await field(form, 'Covenant Terms').fill('Standard covenant terms')
   await form.getByRole('button', { name: 'Create Lease' }).click()
 

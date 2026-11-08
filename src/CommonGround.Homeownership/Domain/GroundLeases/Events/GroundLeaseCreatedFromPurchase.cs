@@ -3,7 +3,10 @@ using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.Homeownership.Domain.GroundLeases.Events;
 
-/// <summary>Raised when a new ground lease is created from a purchase workflow closing.</summary>
+/// <summary>
+/// Raised when a new ground lease is created from a purchase workflow closing. The base price is the purchase price;
+/// the original appraised value is the purchase's appraisal, if it recorded one.
+/// </summary>
 public sealed record GroundLeaseCreatedFromPurchase(
     string AggregateId,
     string PurchaseWorkflowId,
@@ -13,6 +16,8 @@ public sealed record GroundLeaseCreatedFromPurchase(
     DateOnly LeaseStartDate,
     int TermYears,
     int OptionWindowDays,
+    decimal BasePrice,
+    decimal? OriginalAppraisedValue,
     string CovenantTerms,
     FormulaKind FormulaKind,
     decimal? AppreciationShare,

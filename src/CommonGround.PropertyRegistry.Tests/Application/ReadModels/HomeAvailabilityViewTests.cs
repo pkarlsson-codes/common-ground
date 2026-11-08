@@ -400,4 +400,95 @@ public class HomeAvailabilityViewTests
             sut.ResaleNoticeDate.Should().Be(_testBed.Today);
         }
     }
+
+    public class TheRecordResaleBoughtBackMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        private HomeAvailabilityView ResoldHome()
+        {
+            _testBed.Sut.RecordSelectionStarted("selection-old", _testBed.FirstStartedAt.AddYears(-3), _testBed.Today.AddYears(-3));
+            _testBed.Sut.RecordApplicationSelected("selection-old", "application-old", _testBed.Today.AddYears(-3).AddDays(5));
+            _testBed.Sut.RecordLeased(_testBed.Today.AddYears(-3).AddDays(40));
+            _testBed.Sut.RecordResaleOpened("resale-1", _testBed.Today.AddDays(-30));
+            return _testBed.Sut;
+        }
+
+        [Fact]
+        public void GivenOfferedForSale_WhenBoughtBack_ThenVacantAndOfferedWithNoStaleSelection()
+        {
+            var sut = ResoldHome();
+
+            sut.RecordResaleBoughtBack("resale-1", _testBed.Today, true, null);
+
+            sut.Occupancy.Should().Be(HomeOccupancy.Vacant.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.Offered.DisplayName);
+            sut.UnderContractDate.Should().BeNull();
+            sut.AvailableAgainDate.Should().Be(_testBed.Today);
+            sut.AvailableAgainCause.Should().Be("TrustBoughtBack");
+        }
+
+        [Fact]
+        public void GivenHeld_WhenBoughtBack_ThenVacantAndHeldByTrust()
+        {
+            var sut = ResoldHome();
+
+            sut.RecordResaleBoughtBack("resale-1", _testBed.Today, false, "Roof work");
+
+            sut.Occupancy.Should().Be(HomeOccupancy.Vacant.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.HeldByTrust.DisplayName);
+            sut.HeldSinceDate.Should().Be(_testBed.Today);
+            sut.HoldReason.Should().Be("Roof work");
+        }
+
+        [Fact]
+        public void GivenBuybackNewsBeforeNewsOfTheNotice_WhenOpenedAndLeased_ThenStillVacantAndHeld()
+        {
+            _testBed.Sut.RecordResaleBoughtBack("resale-1", _testBed.Today, false, "Roof work");
+            _testBed.Sut.RecordResaleOpened("resale-1", _testBed.Today.AddDays(-30));
+            _testBed.Sut.RecordLeased(_testBed.Today.AddYears(-3));
+
+            _testBed.Sut.Occupancy.Should().Be(HomeOccupancy.Vacant.DisplayName);
+            _testBed.Sut.SaleStage.Should().Be(HomeSaleStage.HeldByTrust.DisplayName);
+        }
+
+        [Fact]
+        public void GivenHeldHome_WhenReleased_ThenOffered()
+        {
+            var sut = ResoldHome();
+            sut.RecordResaleBoughtBack("resale-1", _testBed.Today, false, "Roof work");
+
+            sut.Release(_testBed.Today.AddDays(10));
+
+            sut.SaleStage.Should().Be(HomeSaleStage.Offered.DisplayName);
+            sut.HeldSinceDate.Should().BeNull();
+            sut.AvailableAgainDate.Should().Be(_testBed.Today.AddDays(10));
+            sut.AvailableAgainCause.Should().Be("TrustReleased");
+        }
+
+        [Fact]
+        public void GivenHomeNotHeld_WhenReleased_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = ResoldHome();
+
+            var act = () => sut.Release(_testBed.Today);
+
+            act.Should().Throw<CommonGround.SharedKernel.Domain.Exceptions.BusinessRuleViolationException>()
+                .Which.Code.Should().Be("property_registry.home.release_for_sale.not_held");
+        }
+
+        [Fact]
+        public void GivenBoughtBackHome_WhenANewSelectionAndLeaseFollow_ThenTheNewOnesCount()
+        {
+            var sut = ResoldHome();
+            sut.RecordResaleBoughtBack("resale-1", _testBed.Today, true, null);
+
+            sut.RecordSelectionStarted("selection-new", _testBed.FirstStartedAt.AddDays(1), _testBed.Today.AddDays(1));
+            sut.SaleStage.Should().Be(HomeSaleStage.InSelection.DisplayName);
+
+            sut.RecordLeased(_testBed.Today.AddDays(60));
+            sut.Occupancy.Should().Be(HomeOccupancy.Occupied.DisplayName);
+            sut.SaleStage.Should().Be(HomeSaleStage.NotForSale.DisplayName);
+        }
+    }
 }

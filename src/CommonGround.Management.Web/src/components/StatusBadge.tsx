@@ -7,6 +7,7 @@ const CSS_CLASS: Record<string, string> = {
   UnderContract:    'badge-closingscheduled',
   Leased:           'badge-occupied',
   Resale:           'badge-stalled',
+  HeldByTrust:      'badge-inactive',
   Abandoned:        'badge-failed',
   Predevelopment:   'badge-underdevelopment',
   UnderConstruction:'badge-underdevelopment',

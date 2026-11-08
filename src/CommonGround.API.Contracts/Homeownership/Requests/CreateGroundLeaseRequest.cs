@@ -10,6 +10,8 @@ public sealed record CreateGroundLeaseRequest(
     DateOnly LeaseStartDate,
     int TermYears,
     int OptionWindowDays,
+    decimal BasePrice,
+    decimal OriginalAppraisedValue,
     string CovenantTerms,
     string FormulaKind,
     decimal? AppreciationShare,

@@ -90,6 +90,39 @@ public sealed class ResalesSeeder(ITrustClock trustClock, PropagationWaiter prop
                         resaleId, lease.Aggregate!, noticeDate, NoticeChannel.FromDisplayName(entry.Channel), entry.Notes, noticeDate, SeederUserId));
                 await trustSession.SaveChangesAsync(cancellation).ConfigureAwait(false);
 
+                if (entry.Appraisal is { } appraisal)
+                {
+                    var appraised = appraisal.Date.Resolve(today);
+                    clock.MoveTo(appraised);
+                    var resale = await trustSession.Events.FetchForWriting<Resale>(resaleId.Value, cancellation).ConfigureAwait(false);
+                    lease = await trustSession.Events.FetchForWriting<GroundLease>(leaseLookup.GroundLeaseId, cancellation).ConfigureAwait(false);
+                    resale.Decide(r => r.RecordAppraisal(
+                        lease.Aggregate!, appraisal.AppraisedValue, appraised, appraisal.AppraiserName,
+                        appraisal.ApprovedImprovements, appraisal.CurrentIndexValue, appraised, SeederUserId));
+                    await trustSession.SaveChangesAsync(cancellation).ConfigureAwait(false);
+                }
+
+                if (entry.OptionExercised is { } exercised)
+                {
+                    var exercisedDate = exercised.Date.Resolve(today);
+                    clock.MoveTo(exercisedDate);
+                    var resale = await trustSession.Events.FetchForWriting<Resale>(resaleId.Value, cancellation).ConfigureAwait(false);
+                    resale.Decide(r => r.ExerciseOption(exercisedDate, exercised.Notes, exercisedDate, SeederUserId));
+                    await trustSession.SaveChangesAsync(cancellation).ConfigureAwait(false);
+                }
+
+                if (entry.BuybackClosed is { } closed)
+                {
+                    var closingDate = closed.Date.Resolve(today);
+                    clock.MoveTo(closingDate);
+                    var resale = await trustSession.Events.FetchForWriting<Resale>(resaleId.Value, cancellation).ConfigureAwait(false);
+                    lease = await trustSession.Events.FetchForWriting<GroundLease>(leaseLookup.GroundLeaseId, cancellation).ConfigureAwait(false);
+                    resale.Decide(r => r.CloseBuyback(
+                        closingDate, closed.PricePaid, closed.Notes, closed.HoldReason is null, closed.HoldReason, closingDate, SeederUserId));
+                    lease.Decide(l => l.Terminate("Bought by the trust", closingDate, SeederUserId));
+                    lease.Decide(l => l.CloseResale(resaleId));
+                }
+
                 if (entry.Withdrawn is { } withdrawn)
                 {
                     clock.MoveTo(withdrawnDate!.Value);
@@ -161,7 +194,44 @@ public sealed class ResalesSeeder(ITrustClock trustClock, PropagationWaiter prop
 
         public string? Notes { get; set; }
 
+        public AppraisalSeedEntry? Appraisal { get; set; }
+
+        public OptionExercisedSeedEntry? OptionExercised { get; set; }
+
+        public BuybackClosedSeedEntry? BuybackClosed { get; set; }
+
         public WithdrawnSeedEntry? Withdrawn { get; set; }
+    }
+
+    private sealed class AppraisalSeedEntry
+    {
+        public SeedDate Date { get; set; }
+
+        public decimal AppraisedValue { get; set; }
+
+        public string AppraiserName { get; set; } = string.Empty;
+
+        public decimal? ApprovedImprovements { get; set; }
+
+        public decimal? CurrentIndexValue { get; set; }
+    }
+
+    private sealed class OptionExercisedSeedEntry
+    {
+        public SeedDate Date { get; set; }
+
+        public string? Notes { get; set; }
+    }
+
+    private sealed class BuybackClosedSeedEntry
+    {
+        public SeedDate Date { get; set; }
+
+        public decimal PricePaid { get; set; }
+
+        public string? Notes { get; set; }
+
+        public string? HoldReason { get; set; }
     }
 
     private sealed class WithdrawnSeedEntry

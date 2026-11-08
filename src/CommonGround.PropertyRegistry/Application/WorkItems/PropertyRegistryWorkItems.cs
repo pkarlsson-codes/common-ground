@@ -30,9 +30,16 @@ public static class PropertyRegistryWorkItems
         if (availability is not null && availability.SaleStage != HomeSaleStage.Offered.DisplayName)
             return null;
 
+        var availableAgainReason = availability?.AvailableAgainCause switch
+        {
+            "TrustBoughtBack" => "Available again after the trust bought it back",
+            "TrustReleased" => "Available again after the trust released it",
+            _ => "Available again after a purchase fell through",
+        };
+
         return availability?.AvailableAgainDate is { } availableAgain
             ? new WorkItem(WorkArea.Selections, HomeAvailable, "home", home.Id, label,
-                "Available again after a purchase fell through", null, availableAgain, [StartSelection])
+                availableAgainReason, null, availableAgain, [StartSelection])
             : new WorkItem(WorkArea.Selections, HomeAvailable, "home", home.Id, label,
                 "Available, no selection started", null, zone.ToDate(home.RegisteredAt), [StartSelection]);
     }

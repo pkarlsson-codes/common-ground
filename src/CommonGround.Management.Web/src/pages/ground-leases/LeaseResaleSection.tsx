@@ -1,20 +1,22 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { ResaleResponse } from '../../api'
 import {
   NOTICE_CHANNEL_LABELS,
   NOTICE_CHANNELS,
   optionWindowLeft,
+  resaleStep,
+  useClosedResaleForLease,
   useOpenResaleForLease,
   useRecordIntentToSell,
-  useWithdrawIntentToSell,
   type NoticeChannel,
   type RecordIntentToSellForm,
-  type WithdrawIntentToSellForm,
 } from '../../hooks/resales'
 import { useToast } from '../../hooks/useToast'
 import { DateInput } from '../../components/DateInput'
 import { trustToday } from '../../lib/calendarDate'
 import { getErrorMessage } from '../../lib/getErrorMessage'
+import { formatStepDate } from '../../lib/lifecycle'
 
 interface Props {
   groundLeaseId: string
@@ -24,8 +26,16 @@ interface Props {
 /** The lease's resale in progress, or the way to record the homeowner's notice to sell. */
 export default function LeaseResaleSection({ groundLeaseId, leaseActive }: Props) {
   const { data: resale, isLoading } = useOpenResaleForLease(groundLeaseId)
+  const { data: closed } = useClosedResaleForLease(groundLeaseId, !leaseActive)
 
-  if (!leaseActive) return null
+  if (!leaseActive) {
+    return closed ? (
+      <div className="detail-section">
+        <div className="detail-section__title">Resale</div>
+        <ClosedResale resale={closed} />
+      </div>
+    ) : null
+  }
 
   return (
     <div className="detail-section">
@@ -114,26 +124,8 @@ function NoResale({ groundLeaseId }: { groundLeaseId: string }) {
   )
 }
 
-const emptyWithdrawal = (): WithdrawIntentToSellForm => ({ withdrawnDate: trustToday(), reason: '' })
-
 function OpenResale({ resale }: { resale: ResaleResponse }) {
-  const mutation = useWithdrawIntentToSell()
-  const { success } = useToast()
-  const [form, setForm] = useState<WithdrawIntentToSellForm | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!form) return
-    setError(null)
-    try {
-      await mutation.mutateAsync({ resaleId: resale.id!, form })
-      setForm(null)
-      success('Intent to sell withdrawn')
-    } catch (err) {
-      setError(await getErrorMessage(err, 'Failed to withdraw the intent to sell.'))
-    }
-  }
+  const navigate = useNavigate()
 
   return (
     <>
@@ -152,53 +144,32 @@ function OpenResale({ resale }: { resale: ResaleResponse }) {
         </div>
         <div className="detail-field">
           <div className="detail-field__label">Option Window</div>
-          <div className="detail-field__value">{optionWindowLeft(resale.optionWindowEndsOn!)}</div>
+          <div className="detail-field__value">{resale.optionExercisedDate ? '' : optionWindowLeft(resale.optionWindowEndsOn!)}</div>
         </div>
-        {resale.notes && (
-          <div className="detail-field full-span">
-            <div className="detail-field__label">Notes</div>
-            <div className="detail-field__value">{resale.notes}</div>
-          </div>
-        )}
+        <div className="detail-field">
+          <div className="detail-field__label">Step</div>
+          <div className="detail-field__value">{resaleStep(resale)}</div>
+        </div>
       </div>
-      {!form ? (
-        <button type="button" className="btn btn-secondary" onClick={() => setForm(emptyWithdrawal())}>Withdraw</button>
-      ) : (
-        <form onSubmit={handleSubmit}>
-          <div className="form-grid" style={{ marginBottom: 12 }}>
-            <div className="form-field">
-              <label className="form-label" htmlFor="resale-withdrawn-date">Withdrawn Date</label>
-              <DateInput
-                id="resale-withdrawn-date"
-                className="form-input"
-                value={form.withdrawnDate}
-                min={resale.noticeDate}
-                max={trustToday()}
-                onChange={v => setForm(f => f && { ...f, withdrawnDate: v })}
-                required
-              />
-            </div>
-            <div className="form-field full">
-              <label className="form-label" htmlFor="resale-withdraw-reason">Reason</label>
-              <textarea
-                id="resale-withdraw-reason"
-                className="form-textarea"
-                value={form.reason}
-                onChange={e => setForm(f => f && { ...f, reason: e.target.value })}
-                placeholder="Why the homeowner decided not to sell…"
-                required
-              />
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button type="submit" className="btn btn-primary" disabled={mutation.isPending}>
-              {mutation.isPending ? 'Withdrawing…' : 'Withdraw Intent'}
-            </button>
-            <button type="button" className="btn btn-ghost" onClick={() => { setForm(null); setError(null) }}>Cancel</button>
-          </div>
-          {error && <div className="form-error">{error}</div>}
-        </form>
-      )}
+      <button type="button" className="btn btn-secondary" onClick={() => navigate('/resales', { state: { openId: resale.id } })}>
+        Open Resale
+      </button>
+    </>
+  )
+}
+
+/** The resale that ended the lease, once the trust has bought the home back. */
+function ClosedResale({ resale }: { resale: ResaleResponse }) {
+  const navigate = useNavigate()
+
+  return (
+    <>
+      <p style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 12 }}>
+        The trust bought this home on {formatStepDate(resale.closingDate)}.
+      </p>
+      <button type="button" className="btn btn-secondary" onClick={() => navigate('/resales', { state: { openId: resale.id } })}>
+        Open Resale
+      </button>
     </>
   )
 }

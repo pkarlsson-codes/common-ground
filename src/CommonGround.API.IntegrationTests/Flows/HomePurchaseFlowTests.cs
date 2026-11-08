@@ -286,6 +286,52 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
             .StatusCode.Should().Be(HttpStatusCode.Created, "a withdrawn resale frees the lease for another notice");
     }
 
+    [Fact]
+    public async Task BuyingTheHomeBack_EndsTheLeaseAndHoldsTheHomeUntilItIsReleased()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var landParcelId = await CreateLandParcelAsync(client);
+        var homeId = await TrackAsync(() => RegisterHomeAsync(client, landParcelId));
+        var leaseId = await TrackAsync(async () =>
+            (await (await CreateLeaseAsync(client, landParcelId, homeId, new DateOnly(2019, 3, 1)))
+                .Content.ReadFromJsonAsync<CreateGroundLeaseResponse>())!.GroundLeaseId);
+        var today = (await GetTodayAsync(client)).Today;
+        var resaleId = await TrackAsync(async () =>
+            (await (await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/intent-to-sell",
+                new RecordIntentToSellRequest(today, "Phone", null))).Content.ReadFromJsonAsync<RecordIntentToSellResponse>())!.ResaleId);
+
+        var preview = await client.PostAsJsonAsync($"/api/resales/{resaleId}/price-preview",
+            new PreviewResalePriceRequest(270_000m, today, null, null));
+        (await preview.Content.ReadFromJsonAsync<ResalePriceResponse>())!
+            .Should().Be(new ResalePriceResponse(205_000m, 205_000m));
+
+        await TrackAsync(async () =>
+            (await client.PostAsJsonAsync($"/api/resales/{resaleId}/appraisal",
+                new RecordResaleAppraisalRequest(270_000m, today, "Hollis", null, null))).StatusCode.Should().Be(HttpStatusCode.NoContent));
+        await TrackAsync(async () =>
+            (await client.PostAsJsonAsync($"/api/resales/{resaleId}/exercise-option",
+                new ExercisePurchaseOptionRequest(today, null))).StatusCode.Should().Be(HttpStatusCode.NoContent));
+
+        (await client.PostAsJsonAsync($"/api/resales/{resaleId}/withdraw", new WithdrawIntentToSellRequest(today, "Changed mind")))
+            .StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity, "the trust has bought the home");
+
+        await TrackAsync(async () =>
+            (await client.PostAsJsonAsync($"/api/resales/{resaleId}/buyback-closing",
+                new RecordBuybackClosedRequest(today, 205_000m, null, false, "Roof work"))).StatusCode.Should().Be(HttpStatusCode.NoContent));
+
+        (await client.GetFromJsonAsync<ResaleResponse>($"/api/resales/{resaleId}"))!
+            .Should().BeEquivalentTo(new { Status = "Closed", PurchaseOptionPrice = 205_000m, PricePaid = 205_000m, HoldReason = "Roof work" });
+        (await client.GetFromJsonAsync<GroundLeaseResponse>($"/api/ground-leases/{leaseId}"))!.Status.Should().Be("Inactive");
+        (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}"))!
+            .Should().BeEquivalentTo(new { Occupancy = "Vacant", SaleStage = "HeldByTrust", HoldReason = "Roof work" });
+
+        await TrackAsync(async () =>
+            (await client.PostAsync($"/api/homes/{homeId}/release-for-sale", null)).StatusCode.Should().Be(HttpStatusCode.NoContent));
+
+        (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}"))!
+            .Should().BeEquivalentTo(new { Occupancy = "Vacant", SaleStage = "Offered", AvailableAgainCause = "TrustReleased" });
+    }
+
     private Task TrackAsync(Func<Task> action) => _tracker.TrackAsync(action);
 
     private Task<T> TrackAsync<T>(Func<Task<T>> action) => _tracker.TrackAsync(action);
@@ -324,7 +370,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
     private static Task<HttpResponseMessage> CreateLeaseAsync(HttpClient client, string landParcelId, string homeId, DateOnly leaseStart) =>
         client.PostAsJsonAsync("/api/ground-leases",
             new CreateGroundLeaseRequest(
-                landParcelId, homeId, "Dana Whitfield", "dana@example.com", null, leaseStart, 99, 60, "Signed on paper",
+                landParcelId, homeId, "Dana Whitfield", "dana@example.com", null, leaseStart, 99, 60, 200_000m, 250_000m, "Signed on paper",
                 "AppraisalBased", 0.25m, null, null, null, null));
 
     private static async Task<TodayResponse> GetTodayAsync(HttpClient client) =>

@@ -47,4 +47,72 @@ public static class ResalesEndpoints
         var result = await client.GetResalesAsync(querySpec, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
+
+    [WolverineGet("/api/v1/resales/{resaleId}")]
+    [ProducesResponseType<ResaleResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetResale(
+        string resaleId,
+        IResalesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        var result = await client.GetResaleAsync(resaleId, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+
+    [WolverinePost("/api/v1/resales/{resaleId}/price-preview")]
+    [ProducesResponseType<ResalePriceResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> PreviewResalePrice(
+        string resaleId,
+        PreviewResalePriceRequest request,
+        IResalesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        ArgumentNullException.ThrowIfNull(request);
+        var result = await client.PreviewResalePriceAsync(resaleId, request, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+
+    [WolverinePost("/api/v1/resales/{resaleId}/appraisal")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> RecordResaleAppraisal(
+        string resaleId,
+        RecordResaleAppraisalRequest request,
+        IResalesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.RecordResaleAppraisalAsync(resaleId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/v1/resales/{resaleId}/exercise-option")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> ExercisePurchaseOption(
+        string resaleId,
+        ExercisePurchaseOptionRequest request,
+        IResalesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.ExercisePurchaseOptionAsync(resaleId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/v1/resales/{resaleId}/buyback-closing")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> RecordBuybackClosed(
+        string resaleId,
+        RecordBuybackClosedRequest request,
+        IResalesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.RecordBuybackClosedAsync(resaleId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
 }

@@ -3,6 +3,7 @@ using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.Resales;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
+using CommonGround.SharedKernel.Domain.Exceptions;
 using Marten;
 using Marten.Pagination;
 
@@ -61,5 +62,25 @@ public static class GetResalesHandler
             PageNumber = (int)page.PageNumber,
             TotalPages = (int)page.PageCount,
         };
+    }
+}
+
+/// <summary>Returns one resale and the label of the home being sold.</summary>
+public sealed record GetResale(ResaleId ResaleId);
+
+/// <summary>Handles <see cref="GetResale"/>.</summary>
+public static class GetResaleHandler
+{
+    /// <summary>Loads the resale and its home's label.</summary>
+    public static async Task<ResaleListItem> Handle(GetResale request, IQuerySession session, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(session);
+
+        var view = await session.LoadAsync<ResaleView>(request.ResaleId.Value, cancellationToken).ConfigureAwait(false)
+            ?? throw new AggregateNotFoundException(typeof(ResaleView), request.ResaleId.Value);
+        var label = await session.LoadAsync<HomeLabelView>(view.HomeId, cancellationToken).ConfigureAwait(false);
+
+        return new ResaleListItem(view, label?.Label);
     }
 }

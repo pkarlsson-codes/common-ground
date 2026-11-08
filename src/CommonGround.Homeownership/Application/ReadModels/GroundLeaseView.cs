@@ -27,6 +27,12 @@ public class GroundLeaseView
     /// <summary>Gets or sets the days the trust has to buy the home after its homeowner gives notice to sell.</summary>
     public int OptionWindowDays { get; set; }
 
+    /// <summary>Gets or sets what the homeowner paid for the home, which the resale formula starts from.</summary>
+    public decimal BasePrice { get; set; }
+
+    /// <summary>Gets or sets the home's appraised value when the homeowner bought it, if known.</summary>
+    public decimal? OriginalAppraisedValue { get; set; }
+
     /// <summary>Gets or sets the covenant terms.</summary>
     public string CovenantTerms { get; set; } = string.Empty;
 

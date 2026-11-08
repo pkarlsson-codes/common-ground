@@ -3,7 +3,8 @@ import { createHome, createLandParcel, post } from '../support/api'
 import { detailValue, expectToast, field, isoDate, panel, uniqueId } from '../support/ui'
 
 // Journeys: docs/journeys/ground-leases/record-intent-to-sell, docs/journeys/ground-leases/withdraw-intent-to-sell,
-//   docs/journeys/resales/view-open-resales
+//   docs/journeys/resales/view-open-resales, view-resale-detail, record-resale-appraisal, exercise-purchase-option,
+//   record-buyback-closed, docs/journeys/homes/release-home-for-sale
 
 const resaleSection = (page: Page) => page.locator('.detail-section', { hasText: /^Resale/ })
 
@@ -21,6 +22,8 @@ async function createLease(page: Page) {
     leaseStartDate: '2020-01-01',
     termYears: 99,
     optionWindowDays: 60,
+    basePrice: 200000,
+    originalAppraisedValue: 250000,
     covenantTerms: 'Standard covenant terms',
     formulaKind: 'AppraisalBased',
     appreciationShare: 0.25,
@@ -65,7 +68,8 @@ test('recording an intent to sell opens a resale on the lease, lists it on Resal
   await expect(detailValue(section, 'Notice Came By')).toHaveText('Email')
   await expect(detailValue(section, 'Option Window End')).toHaveText(isoDate(57))
   await expect(detailValue(section, 'Option Window')).toHaveText('57 days left')
-  await expect(detailValue(section, 'Notes')).toHaveText('Relocating for work in the spring')
+  await expect(detailValue(section, 'Step')).toHaveText('Notice')
+  await expect(section.getByRole('button', { name: 'Open Resale' })).toBeVisible()
   await expect(section.getByRole('button', { name: 'Record Intent to Sell' })).toHaveCount(0)
 
   await expectHomeStatus(page, apn, 'Resale')
@@ -74,22 +78,28 @@ test('recording an intent to sell opens a resale on the lease, lists it on Resal
   const row = page.locator('tbody tr', { hasText: homeowner })
   await expect(row).toContainText(`${apn} Elm St`)
   await expect(row).toContainText(isoDate(-3))
+  await expect(row).toContainText('Notice')
   await expect(row).toContainText('57 days left')
   await row.click()
-  await expect(page).toHaveURL(/\/ground-leases$/)
-  detail = panel(page, homeowner)
-  await expect(detail).toBeVisible()
+  await expect(page).toHaveURL(/\/resales$/)
+  const resale = panel(page, `${apn} Elm St`)
+  await expect(resale).toBeVisible()
+  await expect(resale.locator('.next-step-card')).toContainText('Record the appraisal.')
 
-  await resaleSection(page).getByRole('button', { name: 'Withdraw' }).click()
-  await field(resaleSection(page), 'Reason').fill('Decided to stay')
-  await resaleSection(page).getByRole('button', { name: 'Withdraw Intent' }).click()
+  await resale.getByRole('button', { name: 'More actions' }).click()
+  await resale.getByRole('menuitem', { name: 'Withdraw' }).click()
+  const withdraw = panel(page, 'Withdraw Intent to Sell')
+  await field(withdraw, 'Reason').fill('Decided to stay')
+  await withdraw.getByRole('button', { name: 'Withdraw Intent' }).click()
   await expectToast(page, 'Intent to sell withdrawn')
-  await expect(resaleSection(page)).toContainText('No resale in progress')
-  await expect(resaleSection(page).getByRole('button', { name: 'Record Intent to Sell' })).toBeVisible()
 
   await expectHomeStatus(page, apn, 'Leased')
   await page.goto('/resales')
   await expect(page.locator('tbody tr', { hasText: homeowner })).toHaveCount(0)
+
+  detail = await openLease(page, homeowner)
+  await expect(resaleSection(page)).toContainText('No resale in progress')
+  await expect(detail).toBeVisible()
 })
 
 test('a resale whose option window has ended says the window passed', async ({ page }) => {
@@ -115,4 +125,59 @@ test('a notice dated in the future is refused and the form stays open', async ({
 
   await expect(section.locator('.form-error')).toHaveText("Notice date can't be in the future.")
   await expect(section.getByRole('button', { name: 'Record Intent' })).toBeVisible()
+})
+
+test('the trust appraises, buys the home back, holds it and releases it for sale', async ({ page }) => {
+  const { apn, homeowner, groundLeaseId } = await createLease(page)
+  await post(page, `/api/v1/ground-leases/${groundLeaseId}/intent-to-sell`, { noticeDate: isoDate(-5), channel: 'Phone', notes: null })
+
+  await page.goto('/resales')
+  await page.locator('tbody tr', { hasText: homeowner }).click()
+  const resale = panel(page, `${apn} Elm St`)
+  await resale.getByRole('button', { name: 'Record Appraisal' }).click()
+
+  const appraisal = panel(page, 'Record Appraisal')
+  await expect(appraisal.getByRole('button', { name: 'Record Appraisal' })).toBeDisabled()
+  await field(appraisal, 'Appraised Value ($)').fill('270000')
+  await field(appraisal, 'Appraiser').fill('Hollis Appraisal Group')
+  await expect(detailValue(appraisal, 'Formula Price')).toHaveText('$205,000.00')
+  await expect(detailValue(appraisal, 'Purchase Option Price')).toHaveText('$205,000.00')
+  await appraisal.getByRole('button', { name: 'Record Appraisal' }).click()
+  await expectToast(page, 'Appraisal recorded')
+
+  await expect(detailValue(resale, 'Appraiser')).toHaveText('Hollis Appraisal Group')
+  await expect(resale.locator('.next-step-card')).toContainText('Decide whether the trust buys this home by')
+  await resale.getByRole('button', { name: 'Buy the Home' }).click()
+
+  const exercise = panel(page, 'Buy the Home')
+  await expect(detailValue(exercise, 'Purchase Option Price')).toHaveText('$205,000.00')
+  await exercise.getByRole('button', { name: 'Exercise Option' }).click()
+  await expectToast(page, 'Purchase option exercised')
+
+  await expect(resale.locator('.next-step-card')).toContainText('Record the closing')
+  await expect(resale.getByRole('button', { name: 'More actions' })).toHaveCount(0)
+  await resale.getByRole('button', { name: 'Record Closing' }).click()
+
+  const closing = panel(page, 'Record Closing')
+  await expect(field(closing, 'Purchase Price Paid ($)')).toHaveValue('205000')
+  await field(closing, 'What Happens Next').selectOption('hold')
+  await expect(closing.getByRole('button', { name: 'Record Closing' })).toBeDisabled()
+  await field(closing, 'Hold Reason').fill('Roof replacement before it is offered again')
+  await closing.getByRole('button', { name: 'Record Closing' }).click()
+  await expectToast(page, 'Buyback closed')
+
+  await expect(resale.locator('.next-step-card')).toContainText('The trust bought this home on')
+  await expect(detailValue(resale, 'Purchase Price Paid')).toHaveText('$205,000.00')
+
+  await expectHomeStatus(page, apn, 'Held by Trust')
+  await page.locator('tbody tr').click()
+  const home = page.getByRole('dialog').last()
+  await expect(home.locator('.next-step-card')).toContainText('is holding it: Roof replacement before it is offered again.')
+  await home.getByRole('button', { name: 'Release for Sale' }).click()
+  await expectToast(page, 'Home released for sale')
+  await expect(home.locator('.next-step-card')).toContainText('Choose a household from the waiting list')
+
+  const lease = await openLease(page, homeowner)
+  await expect(lease.locator('.slideover-header')).toContainText('Inactive')
+  await expect(resaleSection(page)).toContainText('The trust bought this home on')
 })

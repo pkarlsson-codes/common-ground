@@ -50,6 +50,7 @@ models/DrawSelectionLotteryRequest.ts
 models/EligibilityDetailsDto.ts
 models/EntityDocumentItemResponse.ts
 models/EscalateViolationRequest.ts
+models/ExercisePurchaseOptionRequest.ts
 models/FailOccupancyRequest.ts
 models/FailPurchaseRequest.ts
 models/FinancingDetailsDto.ts
@@ -111,6 +112,7 @@ models/PaginatedResponseOfResaleResponse.ts
 models/PaginatedResponseOfStewardshipCaseResponse.ts
 models/PaginatedResponseOfWaitingListEntryResponse.ts
 models/PassOverDto.ts
+models/PreviewResalePriceRequest.ts
 models/ProblemDetails.ts
 models/PropertyInspectionResponse.ts
 models/PurchaseBoardCardResponse.ts
@@ -119,6 +121,7 @@ models/PurchaseBoardResponse.ts
 models/PurchaseWorkflowListItemResponse.ts
 models/PurchaseWorkflowResponse.ts
 models/RecordAppraisalCompletedRequest.ts
+models/RecordBuybackClosedRequest.ts
 models/RecordCltOrientationRequest.ts
 models/RecordCounselingOutcomeRequest.ts
 models/RecordEligibilityVerifiedRequest.ts
@@ -132,6 +135,7 @@ models/RecordIntentToSellResponse.ts
 models/RecordLeaseExecutedRequest.ts
 models/RecordMortgagePrequalificationRequest.ts
 models/RecordPurchaseClosedRequest.ts
+models/RecordResaleAppraisalRequest.ts
 models/RecordServicerDelinquencyRequest.ts
 models/RecordStewardshipCheckInRequest.ts
 models/RecordTitleClearedRequest.ts
@@ -143,6 +147,7 @@ models/RegisterLandParcelRequest.ts
 models/RegisterLandParcelResponse.ts
 models/RequestForbearanceRequest.ts
 models/ResaleEstimateResponse.ts
+models/ResalePriceResponse.ts
 models/ResaleResponse.ts
 models/ResolveForeclosurePreventionCaseRequest.ts
 models/ScheduleClosingRequest.ts

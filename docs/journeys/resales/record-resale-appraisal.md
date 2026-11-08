@@ -11,7 +11,7 @@ For when the trust has the appraisal the lease requires after a notice of intent
 7. Toast: "Appraisal recorded"
 8. The resale's Appraisal and Price sections appear, and the Next Step card asks for the decision
 
-An appraisal can be corrected until the option is exercised or declined; recording a new one replaces the earlier one in the Price section and keeps it in the resale's history.
+An appraisal can be corrected until the option is exercised or declined: "Correct Appraisal" in the resale's Appraisal section opens this panel again. Recording a new one replaces the earlier one in the Price section and keeps it in the resale's history.
 
 The Formula Price needs the lease's Base Price and Original Appraised Value, which every lease has from [Create Ground Lease](../ground-leases/create-ground-lease.md). If a lease somehow lacks them, the panel says so and "Record Appraisal" stays disabled.
 
