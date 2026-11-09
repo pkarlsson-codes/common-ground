@@ -45,3 +45,19 @@ test('choosing a focus puts its pages under My work and is remembered', async ({
   await expect(otherWork).toBeHidden()
   await expect(navLink(page, 'Households')).toBeVisible()
 })
+
+test('a page eyebrow is the name of its sidebar group', async ({ page }) => {
+  const eyebrow = page.locator('.page-header__eyebrow')
+  const expected: [string, string][] = [
+    ['/households', 'Work'],
+    ['/resales', 'Work'],
+    ['/homes', 'Records'],
+    ['/ground-leases', 'Records'],
+    ['/documents', 'Records'],
+    ['/ground-lease-templates', 'Settings'],
+  ]
+  for (const [path, group] of expected) {
+    await page.goto(path)
+    await expect(eyebrow, path).toHaveText(group)
+  }
+})

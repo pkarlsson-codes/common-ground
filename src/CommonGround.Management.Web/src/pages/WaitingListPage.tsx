@@ -1,3 +1,4 @@
+import PageEyebrow from '../components/PageEyebrow'
 import { useEffect, useState } from 'react'
 import { useWaitingList } from '../hooks/applications'
 import HouseholdDetailPanel from './households/HouseholdDetailPanel'
@@ -29,7 +30,7 @@ export default function WaitingListPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="page-header__eyebrow">Homeownership</div>
+          <PageEyebrow />
           <h1 className="page-header__title">Waiting List</h1>
           {data && (
             <div className="page-header__count">

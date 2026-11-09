@@ -1,3 +1,4 @@
+import PageEyebrow from '../components/PageEyebrow'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useLandParcels } from '../hooks/landParcels'
@@ -57,7 +58,7 @@ export default function LandParcelsPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="page-header__eyebrow">Property Registry</div>
+          <PageEyebrow />
           <h1 className="page-header__title">Land Parcels</h1>
           {data && (
             <div className="page-header__count">

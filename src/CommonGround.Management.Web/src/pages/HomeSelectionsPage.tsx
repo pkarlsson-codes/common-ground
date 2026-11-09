@@ -1,3 +1,4 @@
+import PageEyebrow from '../components/PageEyebrow'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Pagination from '../components/Pagination'
@@ -30,7 +31,7 @@ export default function HomeSelectionsPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="page-header__eyebrow">Homeownership</div>
+          <PageEyebrow />
           <h1 className="page-header__title">Home Selections</h1>
           {data && (
             <div className="page-header__count">

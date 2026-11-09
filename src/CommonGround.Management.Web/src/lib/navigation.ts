@@ -75,3 +75,15 @@ export function splitWork(items: readonly NavItem[], focus: Focus): { mine: NavI
     other: work.filter(i => i.area === undefined || !areas.includes(i.area)),
   }
 }
+
+export const NAV_GROUP_LABELS: Record<NavGroup, string> = {
+  work: 'Work',
+  records: 'Records',
+  settings: 'Settings',
+}
+
+/** The sidebar group name for the page at this path, or undefined when no sidebar item matches. */
+export function navGroupForPath(pathname: string): string | undefined {
+  const item = NAV_ITEMS.find(i => pathname === i.to || pathname.startsWith(`${i.to}/`))
+  return item ? NAV_GROUP_LABELS[item.group] : undefined
+}

@@ -1,3 +1,4 @@
+import PageEyebrow from '../components/PageEyebrow'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { isOpenPurchasePhase, usePurchaseWorkflows, PURCHASE_STEP_LABELS } from '../hooks/purchaseWorkflows'
@@ -94,7 +95,7 @@ export default function PurchaseWorkflowsPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="page-header__eyebrow">Homeownership</div>
+          <PageEyebrow />
           <h1 className="page-header__title">Purchases</h1>
           {view === 'list' && data && (
             <div className="page-header__count">

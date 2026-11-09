@@ -11,5 +11,6 @@
    - The collapsed **Other work** toggle shows the sum of its pages' counts; expanded, each page shows its own
 5. The focus and whether Other work is open are remembered in this browser; if they can't be read, the focus is Everything
 6. Opening the app at its root lands on [Today](../today/work-through-today.md), which shows the focus's areas
+7. The small label above each page's title is the name of its sidebar group (Work, Records or Settings), so Ground leases says "Records" and Households says "Work". Today shows the date there, and a single home selection keeps "Home Selection"
 
 Focus only orders the sidebar; every page stays reachable.

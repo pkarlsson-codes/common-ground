@@ -1,3 +1,4 @@
+import PageEyebrow from '../../components/PageEyebrow'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import type { DocumentLibraryItemResponse } from '../../api'
@@ -72,8 +73,8 @@ export default function DocumentsPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <h1 className="page-title">Documents</h1>
-          <p className="page-subtitle">All documents across the CLT portfolio</p>
+          <PageEyebrow />
+          <h1 className="page-header__title">Documents</h1>
         </div>
       </div>
 

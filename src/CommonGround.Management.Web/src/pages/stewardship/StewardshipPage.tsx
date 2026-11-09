@@ -1,3 +1,4 @@
+import PageEyebrow from '../../components/PageEyebrow'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import StewardshipCasesTab from './StewardshipCasesTab'
@@ -71,7 +72,7 @@ export default function StewardshipPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="page-header__eyebrow">Homeownership</div>
+          <PageEyebrow />
           <h1 className="page-header__title">Stewardship</h1>
         </div>
       </div>

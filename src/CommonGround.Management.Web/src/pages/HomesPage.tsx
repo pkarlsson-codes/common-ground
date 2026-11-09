@@ -1,3 +1,4 @@
+import PageEyebrow from '../components/PageEyebrow'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useHomes } from '../hooks/homes'
@@ -62,7 +63,7 @@ export default function HomesPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="page-header__eyebrow">Property Registry</div>
+          <PageEyebrow />
           <h1 className="page-header__title">Homes</h1>
           {data && (
             <div className="page-header__count">

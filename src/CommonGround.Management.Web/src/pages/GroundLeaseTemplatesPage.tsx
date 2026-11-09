@@ -1,3 +1,4 @@
+import PageEyebrow from '../components/PageEyebrow'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useGroundLeaseTemplates } from '../hooks/groundLeaseTemplates'
@@ -48,7 +49,7 @@ export default function GroundLeaseTemplatesPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="page-header__eyebrow">Homeownership</div>
+          <PageEyebrow />
           <h1 className="page-header__title">Ground Lease Templates</h1>
           {data && (
             <div className="page-header__count">
