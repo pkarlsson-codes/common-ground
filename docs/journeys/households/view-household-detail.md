@@ -13,7 +13,7 @@
    - Waiting: since when it has been on the waiting list, with "Open Waiting List"
    - Purchasing: the home and the purchase's current step, with "Open Purchase"
    - Homeowner: the home and since when, with "Record Intent to Sell" and "Open Ground Lease" (see [Record Intent to Sell](record-intent-to-sell.md)). Once the household has given notice, the card says so instead, with the Notice Date, the Option Window End and days left, and "Open Resale"
-5. "More actions" opens a menu with the household's other actions: "Start Application" (at Intake, when it has no open application), "Edit Circumstances", and "Record" for each readiness item still missing (or "Update Mortgage Prequalification" once a current one is recorded)
+5. "More actions" holds only "Start Application", at Intake when the household has no open application, so staff can apply before readiness is complete. Every other action lives in one place: "Edit Circumstances" under the details (step 6), and the readiness actions on the checklist rows (step 8)
 6. Panel shows the household's current Household Size, Registered date, Annual Income and Accessibility Need, with "Edit Circumstances"
 7. "Household Members" lists every member with name, email and phone; the primary contact is labelled "Primary Contact". Each member has "Edit", every member but the primary contact has "Remove", and "Add Member" adds one
 8. "Buyer Preparation Checklist" shows Housing Counseling, CLT Orientation and Mortgage Prequalification as done or pending; pending items offer "Record", and Mortgage Prequalification offers "Update" once recorded

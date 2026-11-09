@@ -11,7 +11,7 @@ import HouseholdMembersSection from './HouseholdMembersSection'
 import RecordCltOrientationPanel from './RecordCltOrientationPanel'
 import RecordHousingCounselingPanel from './RecordHousingCounselingPanel'
 import RecordMortgagePrequalificationPanel from './RecordMortgagePrequalificationPanel'
-import { missingReadiness, READINESS_LABELS, type ReadinessItem } from '../../lib/lifecycle'
+import type { ReadinessItem } from '../../lib/lifecycle'
 import { HouseholdConnectedRecords, HouseholdLifecycle } from './HouseholdLifecycle'
 
 type Props = {
@@ -59,9 +59,8 @@ function ReadinessItem({ label, done, status, actionLabel, onAction }: {
   )
 }
 
-function CircumstancesSection({ householdId, household, editRequest }: { householdId: string; household: HouseholdResponse; editRequest: number }) {
+function CircumstancesSection({ householdId, household }: { householdId: string; household: HouseholdResponse }) {
   const [editing, setEditing] = useState(false)
-  const [handledEditRequest, setHandledEditRequest] = useState(editRequest)
   const [form, setForm] = useState({ annualIncome: 0, requiresAccessibility: false })
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   const update = useUpdateHouseholdCircumstances(householdId)
@@ -74,12 +73,6 @@ function CircumstancesSection({ householdId, household, editRequest }: { househo
     })
     setProblem(null)
     setEditing(true)
-  }
-
-  // "Edit Circumstances" under More actions asks for the form by bumping editRequest.
-  if (editRequest !== handledEditRequest) {
-    setHandledEditRequest(editRequest)
-    startEditing()
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -173,7 +166,6 @@ export default function HouseholdDetailPanel({ householdId, onClose }: Props) {
   const { success } = useToast()
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   const [readinessPanel, setReadinessPanel] = useState<ReadinessPanel | null>(null)
-  const [editCircumstancesRequest, setEditCircumstancesRequest] = useState(0)
 
   const status = getResponseStatus(error)
   const primary = household?.members?.find(m => m.isPrimary)
@@ -219,24 +211,16 @@ export default function HouseholdDetailPanel({ householdId, onClose }: Props) {
             onRecordReadiness={setReadinessPanel}
             onStartApplication={() => { void handleStartApplication() }}
             startingApplication={startApplication.isPending}
-            moreActions={[
-              ...(household.journey?.stage === 'Intake' && !household.journey.currentApplicationId
+            moreActions={
+              household.journey?.stage === 'Intake' && !household.journey.currentApplicationId
                 ? [{ label: 'Start Application', onClick: () => { void handleStartApplication() }, disabled: startApplication.isPending }]
-                : []),
-              { label: 'Edit Circumstances', onClick: () => setEditCircumstancesRequest(r => r + 1) },
-              ...missingReadiness(household).map(item => ({
-                label: `Record ${READINESS_LABELS[item]}`,
-                onClick: () => setReadinessPanel(item),
-              })),
-              ...(prequalification && !missingReadiness(household).includes('mortgage-prequalification')
-                ? [{ label: 'Update Mortgage Prequalification', onClick: () => setReadinessPanel('mortgage-prequalification') }]
-                : []),
-            ]}
+                : []
+            }
           >
             <ApiProblemAlert problem={problem} />
           </HouseholdLifecycle>
 
-          <CircumstancesSection householdId={householdId} household={household} editRequest={editCircumstancesRequest} />
+          <CircumstancesSection householdId={householdId} household={household} />
 
           <HouseholdMembersSection householdId={householdId} members={household.members ?? []} />
 

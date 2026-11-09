@@ -44,13 +44,13 @@ test('search matches any member, and detail shows members, circumstances and rea
   await expect(detail.locator('.checklist .checklist-item--done')).toHaveCount(0)
   await expect(detail.getByText('No connected records yet.')).toBeVisible()
 
-  // At Intake the next step is readiness; applying is under More actions.
+  // At Intake the next step is readiness; applying early is the only entry under More actions.
   await expect(detail.locator('[aria-current="step"]')).toContainText('Intake')
   const nextStep = detail.getByRole('region', { name: 'Next step' })
   await expect(nextStep).toContainText('Still to record: Housing Counseling, CLT Orientation, Mortgage Prequalification.')
   await expect(nextStep.getByRole('button', { name: 'Record Housing Counseling' })).toBeVisible()
   await nextStep.getByRole('button', { name: 'More actions' }).click()
-  await expect(nextStep.getByRole('menuitem', { name: 'Start Application' })).toBeVisible()
+  await expect(nextStep.getByRole('menuitem')).toHaveText(['Start Application'])
 })
 
 test('household with an open application links to it instead of offering a new one', async ({ page }) => {
