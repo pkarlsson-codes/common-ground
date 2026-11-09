@@ -70,6 +70,12 @@ test('submitted application shows its declared snapshot, phase-appropriate actio
   await expect(detailValue(detail, 'Declared Annual Income')).toHaveText('$65,000')
   await expect(detailValue(detail, 'Declared Accessibility Need')).toHaveText('No')
 
+  // Fields for later phases and an empty Passed Over section are not shown.
+  for (const label of ['Approved Date', 'Selected Date', 'Denial Reason', 'Withdrawal Reason']) {
+    await expect(detail.locator('.detail-field__label', { hasText: label })).toHaveCount(0)
+  }
+  await expect(detail.locator('.detail-section', { hasText: 'Passed Over' })).toHaveCount(0)
+
   // Members and readiness live on the household, not the application.
   await expect(detail.locator('.checklist')).toHaveCount(0)
   await expect(detail.locator('.detail-section', { hasText: 'Household Members' })).toHaveCount(0)
@@ -118,6 +124,8 @@ test('denying a submitted application ends it', async ({ page }) => {
 
   await expect(detailValue(detail, 'Phase')).toHaveText('Denied')
   await expect(detailValue(detail, 'Denial Reason')).toHaveText('Income above limit')
+  await expect(detail.locator('.detail-field__label', { hasText: 'Withdrawal Reason' })).toHaveCount(0)
+  await expect(detail.locator('.detail-field__label', { hasText: 'Approved Date' })).toHaveCount(0)
   await expect(detail.getByText('No actions available for this phase.')).toBeVisible()
   await expect(detail.locator('.checklist').getByRole('button')).toHaveCount(0)
 })

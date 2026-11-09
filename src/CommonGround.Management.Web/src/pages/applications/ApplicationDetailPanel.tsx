@@ -46,6 +46,8 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
   const isSubmittedPhase = phase === 'submitted'
   const isApprovedPhase = phase === 'approved'
   const isOpen = isSubmittedPhase || isApprovedPhase
+  const isSelectedPhase = phase === 'selected'
+  const passOvers = detail?.passOvers ?? []
 
   return (
     <SlideOver
@@ -112,22 +114,30 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
               <div className="detail-field__label">Declared Accessibility Need</div>
               <div className="detail-field__value">{detail.accessibilityRequired ? 'Yes' : 'No'}</div>
             </div>
-            <div className="detail-field">
-              <div className="detail-field__label">Approved Date</div>
-              <div className="detail-field__value mono">{fmtDate(detail.approvedDate)}</div>
-            </div>
-            <div className="detail-field">
-              <div className="detail-field__label">Selected Date</div>
-              <div className="detail-field__value mono">{fmtDate(detail.selectedDate)}</div>
-            </div>
-            <div className="detail-field full-span">
-              <div className="detail-field__label">Denial Reason</div>
-              <div className="detail-field__value">{detail.denialReason ?? '—'}</div>
-            </div>
-            <div className="detail-field full-span">
-              <div className="detail-field__label">Withdrawal Reason</div>
-              <div className="detail-field__value">{detail.withdrawalReason ?? '—'}</div>
-            </div>
+            {(isApprovedPhase || isSelectedPhase) && (
+              <div className="detail-field">
+                <div className="detail-field__label">Approved Date</div>
+                <div className="detail-field__value mono">{fmtDate(detail.approvedDate)}</div>
+              </div>
+            )}
+            {isSelectedPhase && (
+              <div className="detail-field">
+                <div className="detail-field__label">Selected Date</div>
+                <div className="detail-field__value mono">{fmtDate(detail.selectedDate)}</div>
+              </div>
+            )}
+            {phase === 'denied' && (
+              <div className="detail-field full-span">
+                <div className="detail-field__label">Denial Reason</div>
+                <div className="detail-field__value">{detail.denialReason ?? '—'}</div>
+              </div>
+            )}
+            {phase === 'withdrawn' && (
+              <div className="detail-field full-span">
+                <div className="detail-field__label">Withdrawal Reason</div>
+                <div className="detail-field__value">{detail.withdrawalReason ?? '—'}</div>
+              </div>
+            )}
             <div className="detail-field full-span">
               <div className="detail-field__value">
                 <NavIdLink id={detail.householdId} to="/households" label="Open Household" />
@@ -149,12 +159,9 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
             )}
           </div>
 
-          <div className="detail-section" style={{ marginTop: 16 }}>
-            <div className="detail-section__title">Passed Over</div>
-            {(detail.passOvers ?? []).length === 0 && (
-              <div className="detail-field__value">This household has not been passed over for a home.</div>
-            )}
-            {(detail.passOvers ?? []).length > 0 && (
+          {passOvers.length > 0 && (
+            <div className="detail-section" style={{ marginTop: 16 }}>
+              <div className="detail-section__title">Passed Over</div>
               <table className="registry-table" style={{ marginTop: 10 }}>
                 <thead>
                   <tr>
@@ -164,7 +171,7 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
                   </tr>
                 </thead>
                 <tbody>
-                  {detail.passOvers!.map(passOver => (
+                  {passOvers.map(passOver => (
                     <tr key={passOver.selectionId}>
                       <td><span className="cell-mono">{fmtDateTime(passOver.passedOverAt)}</span></td>
                       <td>{passOver.selectionMethod ?? '—'}</td>
@@ -177,8 +184,8 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
                   ))}
                 </tbody>
               </table>
-            )}
-          </div>
+            </div>
+          )}
 
           <div className="detail-section" style={{ marginTop: 16 }}>
             <div className="detail-section__title">Workflow Actions</div>
