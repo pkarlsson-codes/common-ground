@@ -47,27 +47,38 @@ export function recordLink(item: Pick<WorkItemResponse, 'recordType' | 'recordId
   return to ? { to, state: { openId: id } } : null
 }
 
-/** The sidebar page each kind of item is worked from. */
-const KIND_PAGES: Record<string, string> = {
-  'application-awaiting-decision': '/applications',
-  'readiness-step-missing': '/households',
-  'prequalification-expiring': '/households',
-  'selection-open': '/home-selections',
-  'home-available': '/homes',
-  'purchase-step-waiting': '/purchase-workflows',
-  'purchase-stalled': '/purchase-workflows',
-  'closing-scheduled': '/purchase-workflows',
-  'document-expiring': '/documents',
+/** The sidebar page each kind of item is worked from, and the Today section it appears in. */
+const KINDS: Record<string, { page: string; area: TodayArea }> = {
+  'application-awaiting-decision': { page: '/applications', area: 'applicants' },
+  'readiness-step-missing': { page: '/households', area: 'applicants' },
+  'prequalification-expiring': { page: '/households', area: 'applicants' },
+  'selection-open': { page: '/home-selections', area: 'selections' },
+  'home-available': { page: '/homes', area: 'selections' },
+  'purchase-step-waiting': { page: '/purchase-workflows', area: 'purchases' },
+  'purchase-stalled': { page: '/purchase-workflows', area: 'purchases' },
+  'closing-scheduled': { page: '/purchase-workflows', area: 'purchases' },
+  'document-expiring': { page: '/documents', area: 'records' },
 }
 
 /** How many items are waiting on each sidebar page, by its path. */
 export function countsByPage(kindCounts: readonly WorkCountResponse[]): Record<string, number> {
   const counts: Record<string, number> = {}
   for (const { key, count } of kindCounts) {
-    const page = KIND_PAGES[key ?? '']
+    const page = KINDS[key ?? '']?.page
     if (page && count) counts[page] = (counts[page] ?? 0) + count
   }
   return counts
+}
+
+/** How many items the Today page shows under "My areas" for a focus. */
+export function countForFocus(kindCounts: readonly WorkCountResponse[], focus: Focus): number {
+  const areas = areasForFocus(focus)
+  let total = 0
+  for (const { key, count } of kindCounts) {
+    const area = KINDS[key ?? '']?.area
+    if (area && areas.includes(area)) total += count ?? 0
+  }
+  return total
 }
 
 const ACTION_LABELS: Record<string, string> = {

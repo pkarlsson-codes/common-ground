@@ -82,6 +82,13 @@ test('with a focus, Today shows only its areas plus Records until All areas is c
   await expect(page.locator('.today-hidden-note')).toContainText('in other areas')
   await expect(page.getByRole('button', { name: 'My areas' })).toHaveAttribute('aria-pressed', 'true')
 
+  // The sidebar's Today badge counts what My areas shows; the collapsed Other work toggle counts the pages inside it.
+  const todayBadge = page.locator('.sidebar').getByRole('link', { name: 'Today', exact: true }).locator('.nav-item__count')
+  const rows = page.locator('main tbody tr')
+  await expect.poll(async () => Number(await todayBadge.textContent()) === await rows.count()).toBe(true)
+  const otherWorkBadge = page.locator('.sidebar').getByRole('button', { name: 'Other work' }).locator('.nav-item__count')
+  await expect(otherWorkBadge).toBeVisible()
+
   await page.getByRole('button', { name: 'All areas' }).click()
   await expect(section(page, 'Applicants').getByRole('row', { name: new RegExp(name) })).toBeVisible()
   await expect(page.locator('.today-hidden-note')).toBeHidden()

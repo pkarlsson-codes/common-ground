@@ -203,6 +203,7 @@ body {
   transition: color var(--transition);
 }
 .sidebar-nav__toggle:hover { color: var(--text-secondary); }
+.sidebar-nav__toggle .nav-item__count { letter-spacing: 0; }
 .sidebar-nav__toggle-chevron { transition: transform var(--transition); }
 .sidebar-nav__toggle[aria-expanded="true"] .sidebar-nav__toggle-chevron { transform: rotate(90deg); }
 

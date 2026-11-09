@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useToday } from '../hooks/today'
 import { useNavPreferences } from '../hooks/useNavPreferences'
 import { FOCUSES, NAV_ITEMS, isFocus, splitWork, type Focus, type NavItem } from '../lib/navigation'
-import { countsByPage } from '../lib/today'
+import { countForFocus, countsByPage } from '../lib/today'
 
 // The count is left out of the link's accessible name, so the link keeps its label's name.
 function NavItemLink({ item, count }: { item: Pick<NavItem, 'to' | 'icon' | 'label'>; count?: number }) {
@@ -35,6 +35,8 @@ export default function Layout() {
   const settings = NAV_ITEMS.filter(i => i.group === 'settings')
   const { data: today } = useToday()
   const counts = countsByPage(today?.kindCounts ?? [])
+  const todayCount = focus === 'everything' ? today?.totalCount : countForFocus(today?.kindCounts ?? [], focus)
+  const otherWorkCount = other.reduce((sum, item) => sum + (counts[item.to] ?? 0), 0)
   const link = (item: NavItem) => <NavItemLink key={item.to} item={item} count={counts[item.to]} />
 
   return (
@@ -46,7 +48,7 @@ export default function Layout() {
           <div className="sidebar-brand__sub">Property Register</div>
         </div>
         <nav className="sidebar-nav">
-          <NavItemLink item={{ to: '/', icon: CalendarCheck, label: 'Today' }} count={today?.totalCount} />
+          <NavItemLink item={{ to: '/', icon: CalendarCheck, label: 'Today' }} count={todayCount} />
           {focus === 'everything' ? (
             <>
               <div className="sidebar-nav__section">Work</div>
@@ -64,6 +66,9 @@ export default function Layout() {
               >
                 <ChevronRight size={12} className="sidebar-nav__toggle-chevron" />
                 Other work
+                {!otherWorkOpen && otherWorkCount > 0 && (
+                  <span className="nav-item__count" aria-hidden="true">{otherWorkCount}</span>
+                )}
               </button>
               {otherWorkOpen && other.map(link)}
             </>

@@ -20,7 +20,7 @@
 7. An action opens its panel over Today; on success Today refreshes and the item leaves or changes. Start selection, Choose household and the purchase steps open the record's detail for now, where the action is
 8. Clicking anywhere else on a row opens the record's detail
 9. With a focus other than Everything, only the focus's areas and Records are shown, with a note saying how many items are hidden; the **My areas / All areas** toggle shows the rest. Stewardship has no items yet, so the Stewardship focus shows Records only
-10. Sidebar items show how many items are waiting on their page
+10. Sidebar items show how many items are waiting on their page. The Today item shows the count the page shows under My areas (every item with Everything). See [Choose a Focus](../navigation/choose-a-focus.md)
 11. An item leaves Today once the record no longer needs attention (for example, an application is approved or denied)
 
 Continues in: [Approve Application](../applications/approve-application.md)

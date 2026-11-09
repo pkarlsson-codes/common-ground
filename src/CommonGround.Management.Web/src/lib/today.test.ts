@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Focus } from './navigation'
-import { areasForFocus, countsByPage, recordLink, rowActions, type TodayArea } from './today'
+import { areasForFocus, countForFocus, countsByPage, recordLink, rowActions, type TodayArea } from './today'
 
 describe('areasForFocus', () => {
   it.each<[Focus, TodayArea[]]>([
@@ -36,6 +36,25 @@ describe('countsByPage', () => {
       { key: 'closing-scheduled', count: 3 },
       { key: 'mystery', count: 9 },
     ])).toEqual({ '/households': 3, '/purchase-workflows': 3 })
+  })
+})
+
+describe('countForFocus', () => {
+  const kindCounts = [
+    { key: 'readiness-step-missing', count: 2 },
+    { key: 'home-available', count: 4 },
+    { key: 'purchase-stalled', count: 3 },
+    { key: 'document-expiring', count: 1 },
+    { key: 'mystery', count: 9 },
+  ]
+
+  it.each<[Focus, number]>([
+    ['everything', 10],
+    ['intake', 3],
+    ['sales', 8],
+    ['stewardship', 1],
+  ])('counts the kinds %s shows, plus Records', (focus, expected) => {
+    expect(countForFocus(kindCounts, focus)).toBe(expected)
   })
 })
 
