@@ -125,6 +125,11 @@ test('denying a submitted application ends it', async ({ page }) => {
   const deny = panel(page, 'Deny Application')
   await field(deny, 'Reason').fill('Income above limit')
   await deny.getByRole('button', { name: 'Deny Application' }).click()
+  const confirmDeny = page.getByRole('dialog').filter({ hasText: 'This action cannot be undone' }).last()
+  await confirmDeny.getByRole('button', { name: 'Cancel' }).click()
+  await expect(detailValue(detail, 'Phase')).toHaveText('Submitted')
+  await deny.getByRole('button', { name: 'Deny Application' }).click()
+  await confirmDeny.getByRole('button', { name: 'Deny Application' }).click()
   await expectToast(page, 'Application denied')
 
   await expect(detailValue(detail, 'Phase')).toHaveText('Denied')
@@ -144,6 +149,7 @@ test('withdrawing a submitted application ends it', async ({ page }) => {
   const withdraw = panel(page, 'Withdraw Application')
   await field(withdraw, 'Reason').fill('Moving away')
   await withdraw.getByRole('button', { name: 'Withdraw', exact: true }).click()
+  await page.getByRole('dialog').filter({ hasText: 'This action cannot be undone' }).last().getByRole('button', { name: 'Withdraw', exact: true }).click()
   await expectToast(page, 'Application withdrawn')
 
   await expect(detailValue(detail, 'Phase')).toHaveText('Withdrawn')

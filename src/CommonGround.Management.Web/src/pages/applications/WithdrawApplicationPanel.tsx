@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
+import ConfirmActionModal from '../../components/ConfirmActionModal'
 import SlideOver from '../../components/SlideOver'
 import SlideOverCancelButton from '../../components/SlideOverCancelButton'
 import { useWithdrawApplication } from '../../hooks/applications'
@@ -26,11 +27,17 @@ type Props = {
 export default function WithdrawApplicationPanel({ applicationId, onClose }: Props) {
   const [form, setForm] = useState<FormState>(emptyForm)
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
+  const [confirming, setConfirming] = useState(false)
   const mutation = useWithdrawApplication()
   const { success } = useToast()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setConfirming(true)
+  }
+
+  const handleConfirm = async () => {
+    setConfirming(false)
     setProblem(null)
 
     try {
@@ -92,6 +99,16 @@ export default function WithdrawApplicationPanel({ applicationId, onClose }: Pro
 
         <ApiProblemAlert problem={problem} />
       </form>
+
+      <ConfirmActionModal
+        open={confirming}
+        title="Withdraw Application"
+        message="Withdraw this application? This action cannot be undone."
+        confirmLabel="Withdraw"
+        confirmTone="danger"
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirming(false)}
+      />
     </SlideOver>
   )
 }
