@@ -86,7 +86,7 @@ test('starting an application for a household whose last one was withdrawn', asy
   // Withdrawing took the household back to Ready, whose next step is applying again.
   await expect(detail.locator('[aria-current="step"]')).toContainText('Ready')
   await detail.getByRole('button', { name: 'Start Application' }).click()
-  await expectToast(page, 'Application submitted')
+  await expectToast(page, 'Application started')
 
   await expect(history).toHaveCount(2)
   await expect(history.filter({ has: page.locator('.badge', { hasText: 'Submitted' }) })).toHaveCount(1)

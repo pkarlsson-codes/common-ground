@@ -183,7 +183,7 @@ export default function HouseholdDetailPanel({ householdId, onClose }: Props) {
     setProblem(null)
     try {
       await startApplication.mutateAsync(householdId)
-      success('Application submitted')
+      success('Application started')
     } catch (err) {
       setProblem(await getApiProblem(err, 'Failed to start application.'))
     }

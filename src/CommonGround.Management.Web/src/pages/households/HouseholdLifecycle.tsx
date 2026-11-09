@@ -49,7 +49,7 @@ export function HouseholdLifecycle({ household, onRecordReadiness, onStartApplic
         primary = { label: 'Open Application', onClick: () => navigate('/applications', { state: { openId: applicationId } }) }
       } else {
         title = 'Readiness is complete, so the household can apply.'
-        primary = { label: startingApplication ? 'Submitting…' : 'Start Application', onClick: onStartApplication, disabled: startingApplication }
+        primary = { label: startingApplication ? 'Starting…' : 'Start Application', onClick: onStartApplication, disabled: startingApplication }
       }
       break
     case 'Waiting':
