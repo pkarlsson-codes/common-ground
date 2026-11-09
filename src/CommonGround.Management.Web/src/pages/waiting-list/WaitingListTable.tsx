@@ -63,7 +63,7 @@ export default function WaitingListTable({
         <div className="error-state">
           <div className="error-state__title">Could not load the waiting list</div>
           <div className="error-state__sub">
-            {status === 404 ? 'The waiting list endpoint was not found.' : 'Ensure the API and gateway are running.'}
+            {status === 404 ? 'The waiting list endpoint was not found.' : 'Try again in a moment. If it keeps failing, contact support.'}
           </div>
           <div style={{ marginTop: 10 }}>
             <button className="btn btn-ghost btn-sm" type="button" onClick={onRetry}>Retry</button>

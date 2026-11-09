@@ -57,7 +57,7 @@ export default function ApplicationsTable({
       ? 'A conflict occurred while loading applications.'
       : status === 422
         ? 'The current filters are invalid. Adjust and try again.'
-        : 'Ensure the API and gateway are running.'
+        : 'Try again in a moment. If it keeps failing, contact support.'
 
   return (
     <div className="registry-table-wrap">

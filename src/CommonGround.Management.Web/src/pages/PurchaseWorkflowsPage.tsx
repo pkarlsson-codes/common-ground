@@ -49,7 +49,7 @@ export default function PurchaseWorkflowsPage() {
 
   const { success, error } = useToast()
 
-  const { data, isLoading, isError } = usePurchaseWorkflows(page, templateFilter || undefined, phaseFilter || undefined, undefined, view === 'list')
+  const { data, isLoading, isError, refetch } = usePurchaseWorkflows(page, templateFilter || undefined, phaseFilter || undefined, undefined, view === 'list')
 
   const showToast = (msg: string, kind: 'success' | 'error' = 'success') => {
     if (kind === 'error') {
@@ -151,7 +151,10 @@ export default function PurchaseWorkflowsPage() {
         {isError && (
           <div className="error-state">
             <div className="error-state__title">Could not load purchase workflows</div>
-            <div className="error-state__sub">Ensure the API and gateway are running.</div>
+            <div className="error-state__sub">Try again in a moment. If it keeps failing, contact support.</div>
+            <div style={{ marginTop: 10 }}>
+              <button className="btn btn-ghost btn-sm" type="button" onClick={() => { void refetch() }}>Retry</button>
+            </div>
           </div>
         )}
 

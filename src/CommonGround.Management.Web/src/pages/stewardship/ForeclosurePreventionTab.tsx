@@ -65,7 +65,7 @@ export default function ForeclosurePreventionTab() {
     return (
       <div className="error-state">
         <div className="error-state__title">Could not load foreclosure prevention cases</div>
-        <div className="error-state__sub">Ensure the API and gateway are running.</div>
+        <div className="error-state__sub">Try again in a moment. If it keeps failing, contact support.</div>
       </div>
     )
   }

@@ -59,7 +59,7 @@ export default function HomeSelectionsPage() {
         {isError && (
           <div className="error-state">
             <div className="error-state__title">Could not load home selections</div>
-            <div className="error-state__sub">Ensure the API and gateway are running.</div>
+            <div className="error-state__sub">Try again in a moment. If it keeps failing, contact support.</div>
             <div style={{ marginTop: 10 }}>
               <button className="btn btn-ghost btn-sm" type="button" onClick={() => { void refetch() }}>Retry</button>
             </div>
