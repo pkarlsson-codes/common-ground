@@ -176,7 +176,7 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
                       <td><span className="cell-mono">{fmtDateTime(passOver.passedOverAt)}</span></td>
                       <td>{passOver.selectionMethod ?? '—'}</td>
                       <td style={{ textAlign: 'right' }}>
-                        <Link className="btn btn-secondary btn-sm" to={homeSelectionPath(passOver.selectionId!)}>
+                        <Link className="btn btn-link btn-sm" to={homeSelectionPath(passOver.selectionId!)}>
                           Open Selection
                         </Link>
                       </td>
@@ -191,26 +191,25 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
             <div className="detail-section__title">Workflow Actions</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {isSubmittedPhase && (
-                <button className="btn btn-secondary btn-sm" onClick={() => setActionPanel('approve-application')}>
+                <button className="btn btn-primary btn-sm" onClick={() => setActionPanel('approve-application')}>
                   Approve Application
                 </button>
-              )}
-
-              {isOpen && (
-                <>
-                  <button className="btn btn-ghost btn-sm" onClick={() => setActionPanel('deny-application')}>
-                    Deny Application
-                  </button>
-                  <button className="btn btn-ghost btn-sm" onClick={() => setActionPanel('withdraw-application')}>
-                    Withdraw Application
-                  </button>
-                </>
               )}
 
               {!isOpen && (
                 <div className="detail-field__value">No actions available for this phase.</div>
               )}
             </div>
+            {isOpen && (
+              <div className="workflow-actions__danger">
+                <button className="btn btn-danger-ghost btn-sm" onClick={() => setActionPanel('deny-application')}>
+                  Deny Application
+                </button>
+                <button className="btn btn-danger-ghost btn-sm" onClick={() => setActionPanel('withdraw-application')}>
+                  Withdraw Application
+                </button>
+              </div>
+            )}
           </div>
         </>
       )}

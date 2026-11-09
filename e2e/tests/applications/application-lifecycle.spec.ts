@@ -86,6 +86,11 @@ test('submitted application shows its declared snapshot, phase-appropriate actio
     'Deny Application',
     'Withdraw Application',
   ])
+  await expect(actions.locator('.btn-primary')).toHaveText(['Approve Application'])
+  await expect(actions.locator('.workflow-actions__danger .btn-danger-ghost')).toHaveText([
+    'Deny Application',
+    'Withdraw Application',
+  ])
 
   await detail.getByRole('button', { name: 'Open Household' }).click()
   await expect(page).toHaveURL(/\/households$/)

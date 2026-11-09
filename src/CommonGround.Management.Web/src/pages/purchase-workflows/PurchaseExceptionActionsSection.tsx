@@ -77,8 +77,7 @@ export default function PurchaseExceptionActionsSection({
           </div>
           <button
             type="submit"
-            className="btn btn-ghost"
-            style={{ color: 'var(--red)', borderColor: 'var(--danger-surface)' }}
+            className="btn btn-danger-ghost"
             disabled={failPending}
           >
             {failPending ? 'Failing…' : 'Mark as Failed'}
@@ -102,7 +101,7 @@ export default function PurchaseExceptionActionsSection({
           </div>
           <button
             type="submit"
-            className="btn btn-ghost"
+            className="btn btn-danger-ghost"
             disabled={withdrawPending}
           >
             {withdrawPending ? 'Withdrawing…' : 'Withdraw Purchase'}

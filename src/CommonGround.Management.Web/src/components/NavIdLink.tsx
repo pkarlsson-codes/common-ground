@@ -16,7 +16,7 @@ export default function NavIdLink({ id, label, to }: Props) {
   return (
     <button
       type="button"
-      className="btn btn-secondary btn-sm"
+      className="btn btn-link btn-sm"
       onClick={() => navigate(to, { state: { openId: id } })}
       aria-label={label}
     >

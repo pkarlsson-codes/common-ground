@@ -1,7 +1,7 @@
 # Approve Application
 
 1. User navigates to Applications and clicks a row for an application in the Submitted phase, or clicks its "Application to decide" row on [Today](../today/work-through-today.md); the detail panel opens
-2. In Workflow Actions, user clicks "Approve Application"
+2. In Workflow Actions, user clicks "Approve Application", the one primary button
 3. "Approve Application" panel opens with Approved Date defaulted to today
 4. User optionally adjusts Approved Date and enters optional Notes
 5. User clicks "Approve" (disabled until Approved Date is set)
