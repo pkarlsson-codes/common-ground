@@ -52,7 +52,13 @@ export default function PurchaseTrackSection({
           <div style={{ fontSize: 13, color: 'var(--text-primary)' }}>{summary}</div>
         </div>
         {expandable && onToggle && (
-          <button type="button" className="btn btn-ghost btn-sm" onClick={onToggle}>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={onToggle}
+            aria-expanded={expanded}
+            aria-label={`${expanded ? 'Collapse' : 'Expand'} ${label}`}
+          >
             {expanded ? 'Collapse' : 'Expand'}
           </button>
         )}
