@@ -86,28 +86,11 @@ export default function Layout() {
             {FOCUSES.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
           </select>
         </div>
-        <div style={{ borderTop: '1px solid var(--border)', padding: '12px 20px' }}>
-          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div className="sidebar__account">
+          <div className="sidebar__user">
             {user?.username}
           </div>
-          <button
-            onClick={logout}
-            style={{
-              width: '100%',
-              padding: '6px 10px',
-              background: 'transparent',
-              color: 'var(--text-dim)',
-              border: '1px solid var(--border)',
-              borderRadius: '6px',
-              fontFamily: 'var(--font-body)',
-              fontSize: '12px',
-              cursor: 'pointer',
-              textAlign: 'left',
-              transition: 'color var(--transition), border-color var(--transition)',
-            }}
-            onMouseEnter={e => { (e.target as HTMLButtonElement).style.color = 'var(--text-primary)'; (e.target as HTMLButtonElement).style.borderColor = 'var(--border-bright)' }}
-            onMouseLeave={e => { (e.target as HTMLButtonElement).style.color = 'var(--text-dim)'; (e.target as HTMLButtonElement).style.borderColor = 'var(--border)' }}
-          >
+          <button className="btn btn-ghost btn-sm sidebar__logout" onClick={logout}>
             Log out
           </button>
         </div>

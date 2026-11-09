@@ -24,21 +24,19 @@ import { setTrustTimeZone } from './lib/calendarDate'
 
 function Loading() {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', fontSize: '12px', letterSpacing: '0.1em' }}>
-        Loading…
-      </span>
+    <div className="skeleton-rows" role="status" aria-label="Loading">
+      <div className="skeleton-row" />
+      <div className="skeleton-row" />
+      <div className="skeleton-row" />
     </div>
   )
 }
 
 function ConnectionError({ error }: { error: string }) {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
-      <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--error-bright)', fontSize: '12px', letterSpacing: '0.1em' }}>
-        Connection error
-      </span>
-      <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{error}</span>
+    <div className="error-state">
+      <div className="error-state__title">Connection error</div>
+      <div className="error-state__sub">{error}</div>
     </div>
   )
 }

@@ -266,6 +266,23 @@ body {
   letter-spacing: 0.04em;
 }
 
+.sidebar__account {
+  border-top: 1px solid var(--border);
+  padding: 12px 20px;
+}
+.sidebar__user {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sidebar__logout {
+  width: 100%;
+  justify-content: flex-start;
+}
+
 /* ── Main content ─────────────────────────────────── */
 .main-content {
   margin-left: var(--sidebar-w);
