@@ -22,7 +22,7 @@ public sealed class PropagationWaiter
     /// <summary>Initializes a new instance of the <see cref="PropagationWaiter"/> class.</summary>
     /// <param name="probe">Checks whether propagation is still pending.</param>
     public PropagationWaiter(IPropagationProbe probe)
-        : this(probe, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(30))
+        : this(probe, TimeSpan.FromMilliseconds(20), TimeSpan.FromSeconds(30))
     {
     }
 

@@ -86,6 +86,11 @@ internal static class CommonGroundServiceCollectionExtensions
             TrustManagementMartenConfiguration.Configure(opts);
             StewardshipMartenConfiguration.Configure(opts);
             DocumentsMartenConfiguration.Configure(opts);
+
+            // Seeding waits for the daemon after every seed entry; the defaults (1 s slow, 250 ms fast)
+            // make each wait about 1 s.
+            opts.Projections.SlowPollingTime = TimeSpan.FromMilliseconds(50);
+            opts.Projections.FastPollingTime = TimeSpan.FromMilliseconds(50);
         });
 
         services.AddDevelopmentSeeders();
