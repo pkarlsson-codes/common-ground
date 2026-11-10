@@ -6,7 +6,7 @@ using Marten;
 namespace CommonGround.API.Infrastructure.Seeding;
 
 /// <summary>
-/// Runs the development seeders after the application has started, once the event subscription
+/// Registers and runs the development seeders for <see cref="SeedCommand"/>, once the event subscription
 /// and Wolverine are running.
 /// </summary>
 internal static class DevelopmentSeeder
@@ -38,7 +38,6 @@ internal static class DevelopmentSeeder
         services.AddSingleton<IPropagationProbe, MartenWolverinePropagationProbe>();
         services.AddSingleton<PropagationWaiter>(sp => new PropagationWaiter(sp.GetRequiredService<IPropagationProbe>()));
 
-        services.AddSingleton<SeedingGate>();
         services.AddTransient<IDevelopmentSeeder, TrustsSeeder>();
         services.AddTransient<IDevelopmentSeeder, LandParcelsSeeder>();
         services.AddTransient<IDevelopmentSeeder, HomesSeeder>();
@@ -56,32 +55,13 @@ internal static class DevelopmentSeeder
         return services;
     }
 
-    /// <summary>Runs the registered <see cref="IDevelopmentSeeder"/>s in development.</summary>
-    /// <param name="app">The web application instance.</param>
+    /// <summary>Runs the registered <see cref="IDevelopmentSeeder"/>s in order.</summary>
+    /// <param name="services">The started host's services.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A task that completes when all development seeders have finished.</returns>
-    public static async Task RunAsync(WebApplication app, CancellationToken cancellationToken = default)
+    public static async Task SeedAsync(IServiceProvider services, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(app);
-
-        if (!app.Environment.IsDevelopment())
-        {
-            return;
-        }
-
-        try
-        {
-            await SeedAsync(app, cancellationToken).ConfigureAwait(false);
-        }
-        finally
-        {
-            app.Services.GetRequiredService<SeedingGate>().Open();
-        }
-    }
-
-    private static async Task SeedAsync(WebApplication app, CancellationToken cancellationToken)
-    {
-        using var scope = app.Services.CreateScope();
+        using var scope = services.CreateScope();
         var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("CommonGround.DevelopmentSeeder");
         var store = scope.ServiceProvider.GetRequiredService<IDocumentStore>();
         var propagation = scope.ServiceProvider.GetRequiredService<PropagationWaiter>();

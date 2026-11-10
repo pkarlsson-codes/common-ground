@@ -46,6 +46,8 @@ export default defineConfig({
       command: [
         `curl -sf http://localhost:7080/realms/commonground-dev >/dev/null || { echo "Keycloak is not reachable on :7080. Run: npm run infra:start" >&2; exit 1; }`,
         'dotnet build src/CommonGround.slnx',
+        // Seeds a fresh database in full; on a seeded one the seeders skip what exists and it takes ~3 s.
+        'dotnet run --no-build --project src/CommonGround.API --launch-profile http -- seed',
         'dotnet run --no-build --project src/CommonGround.API --launch-profile http',
       ].join(' && '),
       cwd: repoRoot,

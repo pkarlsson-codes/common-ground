@@ -38,6 +38,12 @@ try
     builder.Services.AddCommonGroundServices(builder.Configuration, builder.Environment);
     builder.Services.AddWolverineHttp();
 
+    var seeding = SeedCommand.IsRequested(args);
+    if (seeding)
+    {
+        SeedCommand.Configure(builder);
+    }
+
     var rabbitMqOptions = builder.Configuration.GetSection("RabbitMq").Get<RabbitMqOptions>() ?? new RabbitMqOptions();
     var useRabbitMq = !builder.Environment.IsEnvironment("Testing");
 
@@ -99,7 +105,11 @@ try
 
     var app = builder.Build();
 
-    SeedingGate.Use(app);
+    if (seeding)
+    {
+        return await SeedCommand.RunAsync(app).ConfigureAwait(false);
+    }
+
     app.ConfigureDevelopmentPipeline();
     app.ConfigureStandardPipeline();
     app.ConfigureEndpoints();
@@ -111,9 +121,7 @@ try
         return await app.RunJasperFxCommands(args).ConfigureAwait(false);
     }
 
-    await app.StartAsync().ConfigureAwait(false);
-    await DevelopmentSeeder.RunAsync(app).ConfigureAwait(false);
-    await app.WaitForShutdownAsync().ConfigureAwait(false);
+    await app.RunAsync().ConfigureAwait(false);
     return 0;
 }
 catch (Exception ex) when (ex is not OperationCanceledException)

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Drops all Marten-managed schemas, wiping all application data, and clears the gateways'
 # Redis sessions, which name users and trusts that no longer exist once the data is gone.
+# `npm run db:reset` runs this and then `npm run db:seed`, which recreates the schemas and seeds them.
 set -euo pipefail
 
 POSTGRES_CONTAINER="${POSTGRES_CONTAINER:-commonground_postgres}"
@@ -44,4 +45,4 @@ psql_exec "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;"
 echo "[db-reset-marten] Clearing gateway sessions from Redis..."
 docker exec "$REDIS_CONTAINER" redis-cli FLUSHDB
 
-echo "[db-reset-marten] Done. Restart the API to recreate schemas, then log in again."
+echo "[db-reset-marten] Done. Run npm run db:seed to recreate the schemas and seed them (npm run db:reset does), then log in again."

@@ -13,8 +13,9 @@ npm run e2e           # or e2e:ui for the interactive runner, e2e:report for the
 To watch a run as a demo, `npm run e2e:demo` runs headed, one test at a time, pausing 400 ms before each action.
 Set `SLOWMO` to change the pause, and pass a path to run one area: `SLOWMO=800 npm run e2e:demo -- tests/purchase-workflows`.
 
-Playwright builds the solution and starts the API (:5000), Management gateway (:4000), and web app (:3000) itself,
-then stops them when the run ends. **Stop your own dev servers first** — a run fails fast with
+Playwright builds the solution, runs the seed command (`npm run db:seed`), and starts the API (:5000), Management
+gateway (:4000), and web app (:3000) itself, then stops them when the run ends. The seed command seeds a fresh database
+in full (about 15 s) and skips what is already seeded (about 3 s), so a run right after `npm run db:reset` works. **Stop your own dev servers first** — a run fails fast with
 `http://localhost:<port> is already used` rather than testing against a server that may be running stale code.
 
 ## Login
