@@ -1,3 +1,4 @@
+import { formatInstantDate } from '../lib/calendarDate'
 import { useState } from 'react'
 import {
   useDocument,
@@ -17,7 +18,7 @@ const fmtSize = (bytes: number): string => {
 
 const fmtDate = (d: Date | string) => {
   const date = d instanceof Date ? d : new Date(d as string)
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  return formatInstantDate(date)
 }
 
 const SENSITIVITY_OPTIONS = ['Public', 'Internal', 'Confidential', 'Restricted']

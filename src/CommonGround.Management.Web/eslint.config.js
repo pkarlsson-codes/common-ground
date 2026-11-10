@@ -226,6 +226,10 @@ export default defineConfig([
           selector: "TSAsExpression > TSTypeReference > Identifier[name='CalendarDate']",
           message: 'Make a CalendarDate with parseCalendarDate() or the helpers in lib/calendarDate.ts, not a cast.',
         },
+        {
+          selector: "CallExpression[callee.property.name=/^toLocale(Date|Time)String$/]",
+          message: 'Show dates with formatCalendarDate, formatInstantDate or formatInstant from lib/calendarDate.ts, not toLocaleDateString() or toLocaleTimeString().',
+        },
       ],
     },
     languageOptions: {

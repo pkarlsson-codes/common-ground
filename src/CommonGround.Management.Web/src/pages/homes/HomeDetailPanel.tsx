@@ -8,7 +8,7 @@ import DocumentList from '../../components/DocumentList'
 import { useToast } from '../../hooks/useToast'
 import DevelopmentProjectsSection from '../land-parcels/DevelopmentProjectsSection'
 import { HomeConnectedRecords, HomeLifecycle } from './HomeLifecycle'
-import { trustToday } from '../../lib/calendarDate'
+import { formatInstant, trustToday } from '../../lib/calendarDate'
 import { DateInput } from '../../components/DateInput'
 
 type Tab = 'details' | 'documents'
@@ -150,7 +150,7 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
                 <div className="detail-field full-span">
                   <div className="detail-field__label">Registered At</div>
                   <div className="detail-field__value mono">
-                    {new Date(detail.registeredAt).toLocaleString()}
+                    {formatInstant(new Date(detail.registeredAt))}
                   </div>
                 </div>
               </div>

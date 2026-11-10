@@ -71,3 +71,15 @@ export const formatCalendarDate = (
   date: CalendarDate,
   options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' },
 ) => toUtcDate(date).toLocaleDateString('en-US', { ...options, timeZone: 'UTC' })
+
+const activeTimeZone = () => trustTimeZone ?? browserTimeZone()
+
+/** An instant's date in the trust's time zone, e.g. "Oct 28, 2026". */
+export const formatInstantDate = (instant: Date) =>
+  instant.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: activeTimeZone() })
+
+/** An instant's date and time in the trust's time zone, e.g. "Oct 28, 2026, 10:31 AM". */
+export const formatInstant = (instant: Date) =>
+  instant.toLocaleString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: activeTimeZone(),
+  })

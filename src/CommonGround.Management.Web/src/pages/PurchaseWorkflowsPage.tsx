@@ -1,3 +1,4 @@
+import { formatInstantDate } from '../lib/calendarDate'
 import PageEyebrow from '../components/PageEyebrow'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -196,7 +197,7 @@ export default function PurchaseWorkflowsPage() {
                         {w.groundLeaseTemplateId?.slice(0, 8)}…
                       </span>
                     </td>
-                    <td><span className="cell-mono">{new Date(w.createdAt!).toLocaleDateString()}</span></td>
+                    <td><span className="cell-mono">{formatInstantDate(w.createdAt!)}</span></td>
                   </tr>
                 ))}
               </tbody>

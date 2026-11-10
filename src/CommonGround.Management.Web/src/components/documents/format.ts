@@ -1,4 +1,4 @@
-import { formatCalendarDate, trustToday, type CalendarDate } from '../../lib/calendarDate'
+import { formatCalendarDate, formatInstantDate, trustToday, type CalendarDate } from '../../lib/calendarDate'
 
 export const fmtSize = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`
@@ -9,7 +9,7 @@ export const fmtSize = (bytes: number): string => {
 const toDate = (d: Date | string) => (d instanceof Date ? d : new Date(d))
 
 export const fmtDate = (d: Date | string | null | undefined) =>
-  d ? toDate(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'
+  d ? formatInstantDate(toDate(d)) : '—'
 
 export const fmtExpiry = (d: CalendarDate) => formatCalendarDate(d)
 

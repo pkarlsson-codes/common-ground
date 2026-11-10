@@ -1,3 +1,4 @@
+import { formatInstant } from '../../lib/calendarDate'
 import type { PurchaseWorkflowResponse } from '../../api'
 import { formatStepDate } from '../../lib/lifecycle'
 import ConnectedRecords, { type ConnectedRecord } from '../../components/lifecycle/ConnectedRecords'
@@ -92,7 +93,7 @@ export default function PurchaseWorkflowSnapshotSection({ detail }: PurchaseWork
         <div className="detail-field">
           <div className="detail-field__label">Created</div>
           <div className="detail-field__value mono">
-            {new Date(detail.createdAt!).toLocaleString()}
+            {formatInstant(detail.createdAt!)}
           </div>
         </div>
       </div>

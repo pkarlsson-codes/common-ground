@@ -1,3 +1,4 @@
+import { formatInstant } from '../../lib/calendarDate'
 import { useState } from 'react'
 import { useGroundLeaseTemplate, useArchiveGroundLeaseTemplate, useRestoreGroundLeaseTemplate } from '../../hooks/groundLeaseTemplates'
 import { FORMULA_KIND_LABELS, statusLabel } from '../../hooks/types'
@@ -137,7 +138,7 @@ export default function GroundLeaseTemplateDetailPanel({ templateId, onClose }: 
           <div className="detail-field">
             <div className="detail-field__label">Created</div>
             <div className="detail-field__value mono">
-              {new Date(detail.createdAt!).toLocaleString()}
+              {formatInstant(detail.createdAt!)}
             </div>
           </div>
         </div>

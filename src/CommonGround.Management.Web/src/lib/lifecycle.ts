@@ -1,4 +1,4 @@
-import { formatCalendarDate, trustToday, type CalendarDate } from './calendarDate'
+import { formatCalendarDate, formatInstantDate, trustToday, type CalendarDate } from './calendarDate'
 import type { HouseholdResponse } from '../api'
 
 export type LifecycleStepState = 'done' | 'current' | 'todo'
@@ -25,7 +25,7 @@ export function lifecycleSteps(stages: readonly string[], current: string, dates
 /** Formats a step's date, whether a calendar date or an instant, as e.g. "Oct 28, 2026". */
 export function formatStepDate(value?: CalendarDate | Date | null): string | undefined {
   if (!value) return undefined
-  if (value instanceof Date) return value.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  if (value instanceof Date) return formatInstantDate(value)
   return formatCalendarDate(value)
 }
 

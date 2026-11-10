@@ -1,3 +1,4 @@
+import { formatInstant } from '../../lib/calendarDate'
 import type { useHomeownerApplications } from '../../hooks/applications'
 import Pagination from '../../components/Pagination'
 import ApplicationPhaseBadge from './ApplicationPhaseBadge'
@@ -21,7 +22,7 @@ type Props = {
   onRetry: () => void
 }
 
-const fmtDateTime = (value?: Date | null) => (value ? value.toLocaleString() : '—')
+const fmtDateTime = (value?: Date | null) => (value ? formatInstant(value) : '—')
 
 function SkeletonRows() {
   return (

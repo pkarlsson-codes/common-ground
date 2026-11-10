@@ -1,3 +1,4 @@
+import { formatInstant } from '../../lib/calendarDate'
 import { useState } from 'react'
 import { useLandParcel, useDecommissionParcel, useRecommissionParcel } from '../../hooks/landParcels'
 import SlideOver from '../../components/SlideOver'
@@ -179,7 +180,7 @@ export default function LandParcelDetailPanel({ parcelId, onClose }: Props) {
             <div className="detail-field full-span">
               <div className="detail-field__label">Registered At</div>
               <div className="detail-field__value mono">
-                {new Date(detail.registeredAt).toLocaleString()}
+                {formatInstant(new Date(detail.registeredAt))}
               </div>
             </div>
           </div>

@@ -1,3 +1,4 @@
+import { formatInstantDate } from '../../lib/calendarDate'
 import type { useLandParcels } from '../../hooks/landParcels'
 import Pagination from '../../components/Pagination'
 
@@ -87,7 +88,7 @@ export default function LandParcelsTable({
                   <td>{p.address}</td>
                   <td><span className="cell-mono">{Number(p.areaAcres).toFixed(2)}</span></td>
                   <td><ParcelStatusBadge isDecommissioned={p.isDecommissioned} /></td>
-                  <td><span className="cell-mono">{new Date(p.registeredAt!).toLocaleDateString()}</span></td>
+                  <td><span className="cell-mono">{formatInstantDate(new Date(p.registeredAt!))}</span></td>
                 </tr>
               ))}
             </tbody>

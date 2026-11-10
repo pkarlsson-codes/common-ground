@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { formatCalendarDate, numericDate, type CalendarDate } from '../../lib/calendarDate'
+import { formatCalendarDate, formatInstantDate, numericDate, type CalendarDate } from '../../lib/calendarDate'
 import type { HouseholdResponse } from '../../api'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
 import SlideOver from '../../components/SlideOver'
@@ -22,7 +22,7 @@ type Props = {
 const fmtCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 
-const fmtDate = (value?: Date | null) => (value ? value.toLocaleDateString() : '—')
+const fmtDate = (value?: Date | null) => (value ? formatInstantDate(value) : '—')
 
 const fmtCalendarDate = (value?: CalendarDate | null) => (value ? formatCalendarDate(value, numericDate) : '—')
 

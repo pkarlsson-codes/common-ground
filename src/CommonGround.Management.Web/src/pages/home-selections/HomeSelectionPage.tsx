@@ -5,7 +5,7 @@ import type { HomeSelectionCandidateDto, HomeSelectionResponse } from '../../api
 import NavIdLink from '../../components/NavIdLink'
 import StatusBadge from '../../components/StatusBadge'
 import { selectionPriorityLabel, useHomeSelection } from '../../hooks/homeSelections'
-import { formatCalendarDate, numericDate, type CalendarDate } from '../../lib/calendarDate'
+import { formatCalendarDate, formatInstant, numericDate, type CalendarDate } from '../../lib/calendarDate'
 import { getResponseStatus } from '../../lib/getErrorMessage'
 import ApplicationPhaseBadge from '../applications/ApplicationPhaseBadge'
 import CancelSelectionPanel from './CancelSelectionPanel'
@@ -15,7 +15,7 @@ import SelectByPriorityPanel from './SelectByPriorityPanel'
 const fmtCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 
-const fmtDateTime = (value?: Date | null) => (value ? value.toLocaleString() : '—')
+const fmtDateTime = (value?: Date | null) => (value ? formatInstant(value) : '—')
 
 const fmtDate = (value?: CalendarDate | null) => (value ? formatCalendarDate(value, numericDate) : '—')
 

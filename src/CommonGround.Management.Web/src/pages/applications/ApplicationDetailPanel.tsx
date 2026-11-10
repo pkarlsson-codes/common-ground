@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { formatCalendarDate, numericDate, type CalendarDate } from '../../lib/calendarDate'
+import { formatCalendarDate, formatInstant, numericDate, type CalendarDate } from '../../lib/calendarDate'
 import SlideOver from '../../components/SlideOver'
 import NavIdLink from '../../components/NavIdLink'
 import { useHomeownerApplication } from '../../hooks/applications'
@@ -20,7 +20,7 @@ type Props = {
 const fmtCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 
-const fmtDateTime = (value?: Date | null) => (value ? value.toLocaleString() : '—')
+const fmtDateTime = (value?: Date | null) => (value ? formatInstant(value) : '—')
 
 const fmtDate = (value?: CalendarDate | null) => (value ? formatCalendarDate(value, numericDate) : '—')
 

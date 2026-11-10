@@ -4,6 +4,8 @@ import {
   daysBetween,
   calendarDateOrNull,
   formatCalendarDate,
+  formatInstant,
+  formatInstantDate,
   isCalendarDate,
   parseCalendarDate,
   setTrustTimeZone,
@@ -74,5 +76,23 @@ describe('formatCalendarDate', () => {
 describe('daysBetween', () => {
   it('counts whole days across a daylight saving change', () => {
     expect(daysBetween(parseCalendarDate('2026-10-28'), parseCalendarDate('2026-11-04'))).toBe(7)
+  })
+})
+
+describe('formatInstant and formatInstantDate', () => {
+  afterEach(() => setTrustTimeZone(undefined))
+
+  // 05:30 UTC on Oct 29 is 23:30 on Oct 28 in Denver.
+  const lateEveningInDenver = new Date('2026-10-29T05:30:00Z')
+
+  it('shows the trust-zone date for an instant, whatever the browser zone is', () => {
+    setTrustTimeZone('America/Denver')
+    expect(formatInstantDate(lateEveningInDenver)).toBe('Oct 28, 2026')
+    expect(formatInstant(lateEveningInDenver)).toBe('Oct 28, 2026, 11:30 PM')
+  })
+
+  it('shows the next day in a zone east of it', () => {
+    setTrustTimeZone('Europe/Stockholm')
+    expect(formatInstantDate(lateEveningInDenver)).toBe('Oct 29, 2026')
   })
 })
