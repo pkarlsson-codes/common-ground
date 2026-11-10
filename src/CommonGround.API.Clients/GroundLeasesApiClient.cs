@@ -48,4 +48,28 @@ public sealed class GroundLeasesApiClient(
         ArgumentNullException.ThrowIfNull(request);
         return await PostAsync<CalculateResaleEstimateRequest, ResaleEstimateResponse>($"api/ground-leases/{groundLeaseId}/resale-estimate", request, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task<RecordLeaseFeePaymentResponse> RecordLeaseFeePaymentAsync(string groundLeaseId, RecordLeaseFeePaymentRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        return await PostAsync<RecordLeaseFeePaymentRequest, RecordLeaseFeePaymentResponse>($"api/ground-leases/{groundLeaseId}/lease-fee-payments", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task VoidLeaseFeePaymentAsync(string groundLeaseId, string paymentId, VoidLeaseFeePaymentRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(paymentId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/ground-leases/{groundLeaseId}/lease-fee-payments/{paymentId}/void", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<PaginatedResponse<LeaseFeeBalanceResponse>> GetLeaseFeeBalancesAsync(GetLeaseFeeBalancesQuerySpec querySpec, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(querySpec);
+        return await GetAsync<PaginatedResponse<LeaseFeeBalanceResponse>>($"api/lease-fee-balances{querySpec.ToQueryString()}", cancellationToken).ConfigureAwait(false);
+    }
 }

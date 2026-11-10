@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Infrastructure.Seeding;
@@ -64,6 +65,7 @@ public sealed class GroundLeaseTemplatesSeeder : IDevelopmentSeeder
                 entry.OptionWindowDays,
                 entry.CovenantTerms,
                 ToResalePolicyTerms(entry),
+                LeaseFeeTerms.Create(entry.LandUseFee, entry.RepairReserveFee),
                 SeederUserId);
 
             object[] events = entry.Archived
@@ -140,6 +142,10 @@ public sealed class GroundLeaseTemplatesSeeder : IDevelopmentSeeder
         public int TermYears { get; set; }
 
         public int OptionWindowDays { get; set; }
+
+        public decimal LandUseFee { get; set; }
+
+        public decimal RepairReserveFee { get; set; }
 
         public string CovenantTerms { get; set; } = string.Empty;
 

@@ -5,6 +5,8 @@ namespace CommonGround.API.Contracts.Homeownership.Responses;
 /// <param name="TemplateName">Display name of the template.</param>
 /// <param name="TermYears">Lease term in years.</param>
 /// <param name="OptionWindowDays">Days the trust has to buy a home after its homeowner gives notice to sell.</param>
+/// <param name="LandUseFee">Monthly land use fee.</param>
+/// <param name="RepairReserveFee">Monthly repair reserve fee.</param>
 /// <param name="CovenantTerms">Covenant terms text.</param>
 /// <param name="Status">Current status (e.g. Active, Inactive).</param>
 /// <param name="FormulaKind">Resale formula kind.</param>
@@ -20,6 +22,8 @@ public sealed record GroundLeaseTemplateResponse(
     string TemplateName,
     int TermYears,
     int OptionWindowDays,
+    decimal LandUseFee,
+    decimal RepairReserveFee,
     string CovenantTerms,
     string Status,
     string FormulaKind,

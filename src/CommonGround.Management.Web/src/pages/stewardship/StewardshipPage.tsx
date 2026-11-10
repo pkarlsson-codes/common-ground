@@ -3,8 +3,9 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import StewardshipCasesTab from './StewardshipCasesTab'
 import ForeclosurePreventionTab from './ForeclosurePreventionTab'
+import LeaseFeesTab from './LeaseFeesTab'
 
-type TabId = 'leases' | 'fpc'
+type TabId = 'leases' | 'fpc' | 'fees'
 
 interface Tab {
   id: TabId
@@ -14,6 +15,7 @@ interface Tab {
 const TABS: Tab[] = [
   { id: 'leases', label: 'Lease Stewardship' },
   { id: 'fpc', label: 'Foreclosure Prevention' },
+  { id: 'fees', label: 'Lease Fees' },
 ]
 
 function TabBar({
@@ -66,6 +68,7 @@ export default function StewardshipPage() {
   const tabContent: Record<TabId, ReactNode> = {
     leases: <StewardshipCasesTab />,
     fpc: <ForeclosurePreventionTab />,
+    fees: <LeaseFeesTab />,
   }
 
   return (

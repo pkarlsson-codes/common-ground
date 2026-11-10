@@ -14,6 +14,7 @@ import { apiConfig } from '../../lib/apiConfig'
 import { getErrorMessage } from '../../lib/getErrorMessage'
 import { trustToday } from '../../lib/calendarDate'
 import { DateInput } from '../../components/DateInput'
+import LeaseFeeFields from './LeaseFeeFields'
 import { formatPhoneInput, isValidPhone } from '../../lib/phone'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
@@ -28,6 +29,8 @@ const emptyCreate = (): CreateGroundLeaseForm => ({
   leaseStartDate: trustToday(),
   termYears: 99,
   optionWindowDays: 60,
+  landUseFee: 0,
+  repairReserveFee: 0,
   basePrice: 0,
   originalAppraisedValue: 0,
   covenantTerms: '',
@@ -188,6 +191,11 @@ export default function GroundLeaseCreatePanel({ onClose }: Props) {
               required
             />
           </div>
+          <LeaseFeeFields
+            landUseFee={createForm.landUseFee}
+            repairReserveFee={createForm.repairReserveFee}
+            onChange={fees => setCreateForm(f => ({ ...f, ...fees }))}
+          />
           <div className="form-field">
             <label className="form-label" htmlFor="lease-base-price">Base Price ($)</label>
             <input

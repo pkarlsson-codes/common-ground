@@ -1,3 +1,5 @@
+using System.Globalization;
+using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
@@ -25,16 +27,23 @@ public class GroundLeaseTests
 
         public Homeowner Homeowner { get; } = Homeowner.From("Dana Whitfield", "dana@example.com", "(503) 555-0123");
 
+        public static readonly DateOnly LeaseStart = new(2025, 1, 1);
+
+        public LeaseFeeTerms Fees { get; } = LeaseFeeTerms.Create(45m, 15m);
+
         public GroundLeaseCreated Established(ResalePolicyTerms? terms = null) =>
             GroundLease.Establish(
-                LeaseId, ParcelId, HomeId, Homeowner, new DateOnly(2025, 1, 1), 99, 60, 200_000m, 250_000m, "Standard affordability covenant",
+                LeaseId, ParcelId, HomeId, Homeowner, LeaseStart, 99, 60, Fees, 200_000m, 250_000m, "Standard affordability covenant",
                 terms ?? ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, StaffUser);
 
         public GroundLease Lease(ResalePolicyTerms? terms = null) => EventReplay.Replay<GroundLease>(Established(terms));
 
         public GroundLeaseTemplate ActiveTemplate(string covenantTerms, int termYears, ResalePolicyTerms terms) =>
             EventReplay.Replay<GroundLeaseTemplate>(
-                GroundLeaseTemplate.Define(GroundLeaseTemplateId.Generate(), "Template", termYears, 45, covenantTerms, terms, StaffUser));
+                GroundLeaseTemplate.Define(GroundLeaseTemplateId.Generate(), "Template", termYears, 45, covenantTerms, terms, Fees, StaffUser));
+
+        public LeaseFeePaymentRecorded Payment(GroundLease lease, decimal amount, DateOnly received) =>
+            lease.RecordLeaseFeePayment(LeaseFeePaymentId.Generate(), received, amount, PaymentMethod.Check, null, received, StaffUser);
 
         public GroundLeaseTemplate InactiveTemplate()
         {
@@ -84,7 +93,7 @@ public class GroundLeaseTests
         {
             var act = () => GroundLease.Establish(
                 _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, _testBed.Homeowner, new DateOnly(2025, 1, 1),
-                99, 60, 200_000m, 250_000m, "Terms", ResalePolicyTerms.AppraisalBased(0.25m),
+                99, 60, LeaseFeeTerms.None, 200_000m, 250_000m, "Terms", ResalePolicyTerms.AppraisalBased(0.25m),
                 HomeCommitments.Create(activeLeaseId, openPurchaseWorkflowId, openHomeSelectionId), _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
@@ -101,7 +110,7 @@ public class GroundLeaseTests
         {
             var act = () => GroundLease.Establish(
                 _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, _testBed.Homeowner, new DateOnly(2025, 1, 1),
-                termYears, optionWindowDays, basePrice, originalAppraisedValue, covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser);
+                termYears, optionWindowDays, LeaseFeeTerms.None, basePrice, originalAppraisedValue, covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }
@@ -330,6 +339,142 @@ public class GroundLeaseTests
             var closed = sut.CloseResale(ResaleId.Generate());
 
             closed.Should().BeNull();
+        }
+    }
+
+    public class TheRecordLeaseFeePaymentMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Theory]
+        [InlineData(0, "2025-03-01", "homeownership.ground_lease.record_lease_fee_payment.amount_non_positive")]
+        [InlineData(60, "2025-03-11", "homeownership.ground_lease.record_lease_fee_payment.received_date_in_future")]
+        [InlineData(60, "2024-12-31", "homeownership.ground_lease.record_lease_fee_payment.received_date_before_lease_start")]
+        public void GivenInvalidPayment_WhenRecorded_ThenThrowsBusinessRuleViolation(int amount, string received, string expectedCode)
+        {
+            var sut = _testBed.Lease();
+
+            var act = () => sut.RecordLeaseFeePayment(
+                LeaseFeePaymentId.Generate(), DateOnly.Parse(received, CultureInfo.InvariantCulture), amount, PaymentMethod.Check, null,
+                new DateOnly(2025, 3, 10), _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
+        }
+
+        [Fact]
+        public void GivenPayment_WhenRecorded_ThenItCountsTowardTheBalance()
+        {
+            var sut = _testBed.Lease();
+
+            var (paid, _) = sut.Decide(l => _testBed.Payment(l, 60m, new DateOnly(2025, 1, 3)));
+
+            paid.LeaseFeeStatementAsOf(new DateOnly(2025, 2, 10)).Should().BeEquivalentTo(new
+            {
+                Balance = 60m,
+                OldestUnpaidDueDate = (DateOnly?)new DateOnly(2025, 2, 1),
+            });
+        }
+
+        [Fact]
+        public void GivenEndedLease_WhenRecorded_ThenStillTakesThePaymentSoArrearsCanBeCollected()
+        {
+            var sut = _testBed.Lease().Decide(l => l.Terminate("Sold", new DateOnly(2025, 2, 15), _testBed.StaffUser)).Aggregate;
+
+            var (paid, _) = sut.Decide(l => _testBed.Payment(l, 120m, new DateOnly(2025, 6, 1)));
+
+            paid.LeaseFeeStatementAsOf(new DateOnly(2025, 6, 1)).Balance.Should().Be(0m);
+        }
+
+        [Fact]
+        public void GivenBlankReference_WhenRecorded_ThenRecordsNoReference()
+        {
+            var sut = _testBed.Lease();
+
+            var recorded = sut.RecordLeaseFeePayment(
+                LeaseFeePaymentId.Generate(), new DateOnly(2025, 1, 3), 60m, PaymentMethod.Cash, "  ", new DateOnly(2025, 1, 3), _testBed.StaffUser);
+
+            recorded.Reference.Should().BeNull();
+        }
+    }
+
+    public class TheVoidLeaseFeePaymentMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        public (GroundLease Lease, LeaseFeePaymentId PaymentId) LeaseWithPayment()
+        {
+            var (lease, events) = _testBed.Lease().Decide(l => _testBed.Payment(l, 60m, new DateOnly(2025, 1, 3)));
+            return (lease, LeaseFeePaymentId.Create(((LeaseFeePaymentRecorded)events.Single()).PaymentId));
+        }
+
+        [Fact]
+        public void GivenPayment_WhenVoided_ThenItNoLongerCountsTowardTheBalance()
+        {
+            var (sut, paymentId) = LeaseWithPayment();
+
+            var (voided, _) = sut.Decide(l => l.VoidLeaseFeePayment(paymentId, "Check bounced", _testBed.StaffUser));
+
+            voided.LeaseFeeStatementAsOf(new DateOnly(2025, 1, 10)).Balance.Should().Be(60m);
+        }
+
+        [Fact]
+        public void GivenNoReason_WhenVoided_ThenThrowsBusinessRuleViolation()
+        {
+            var (sut, paymentId) = LeaseWithPayment();
+
+            var act = () => sut.VoidLeaseFeePayment(paymentId, " ", _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.void_lease_fee_payment.reason_required");
+        }
+
+        [Fact]
+        public void GivenPaymentNotOnTheLease_WhenVoided_ThenThrowsBusinessRuleViolation()
+        {
+            var (sut, _) = LeaseWithPayment();
+
+            var act = () => sut.VoidLeaseFeePayment(LeaseFeePaymentId.Generate(), "Wrong lease", _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.void_lease_fee_payment.payment_not_found");
+        }
+
+        [Fact]
+        public void GivenVoidedPayment_WhenVoidedAgain_ThenThrowsBusinessRuleViolation()
+        {
+            var (lease, paymentId) = LeaseWithPayment();
+            var sut = lease.Decide(l => l.VoidLeaseFeePayment(paymentId, "Check bounced", _testBed.StaffUser)).Aggregate;
+
+            var act = () => sut.VoidLeaseFeePayment(paymentId, "Again", _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.void_lease_fee_payment.already_voided");
+        }
+    }
+
+    public class TheLeaseFeeStatementAsOfMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenTerminatedLease_WhenAsked_ThenStopsChargingAfterTheTerminationDate()
+        {
+            var sut = _testBed.Lease().Decide(l => l.Terminate("Sold", new DateOnly(2025, 3, 20), _testBed.StaffUser)).Aggregate;
+
+            var statement = sut.LeaseFeeStatementAsOf(new DateOnly(2025, 12, 1));
+
+            statement.TotalCharged.Should().Be(180m);
+        }
+
+        [Fact]
+        public void GivenLeaseFromPurchase_WhenAsked_ThenChargesTheTemplatesFee()
+        {
+            var template = _testBed.ActiveTemplate("Covenants", 99, ResalePolicyTerms.AppraisalBased(0.25m));
+            var sut = EventReplay.Replay<GroundLease>(_testBed.FromPurchase(template));
+
+            var statement = sut.LeaseFeeStatementAsOf(new DateOnly(2026, 1, 1));
+
+            statement.MonthlyFee.Should().Be(60m);
         }
     }
 }

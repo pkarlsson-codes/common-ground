@@ -1,0 +1,18 @@
+[
+  {
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-downtown-civic-001",
+    "monthsBehind": 3
+  },
+  {
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-harbor-view-201",
+    "monthsBehind": 1
+  },
+  {
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-cedar-lane-013a",
+    "monthsBehind": 1,
+    "partialPayment": 30
+  }
+]

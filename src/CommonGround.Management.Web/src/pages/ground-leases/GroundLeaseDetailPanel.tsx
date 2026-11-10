@@ -13,6 +13,7 @@ import { useToast } from '../../hooks/useToast'
 import { trustToday } from '../../lib/calendarDate'
 import { DateInput } from '../../components/DateInput'
 import LeaseResaleSection from './LeaseResaleSection'
+import LeaseFeesSection from './LeaseFeesSection'
 
 function SkeletonRows() {
   return (
@@ -154,6 +155,8 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
           <LeaseConnectedRecords lease={detail} />
 
           <LeaseResaleSection groundLeaseId={groundLeaseId} leaseActive={detail.status === 'Active'} />
+
+          <LeaseFeesSection lease={detail} />
 
           <div className="detail-section">
             <div className="detail-section__title">Stewardship Check-Ins</div>

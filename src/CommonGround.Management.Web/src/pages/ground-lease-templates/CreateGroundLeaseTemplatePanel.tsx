@@ -8,12 +8,15 @@ import {
   type CreateGroundLeaseTemplateForm,
 } from '../../hooks/types'
 import { useToast } from '../../hooks/useToast'
+import LeaseFeeFields from '../ground-leases/LeaseFeeFields'
 import { getErrorMessage } from '../../lib/getErrorMessage'
 
 const emptyCreate = (): CreateGroundLeaseTemplateForm => ({
   templateName: '',
   termYears: 99,
   optionWindowDays: 60,
+  landUseFee: 0,
+  repairReserveFee: 0,
   covenantTerms: '',
   formulaKind: 'AppraisalBased',
   appreciationShare: 0.25,
@@ -102,6 +105,11 @@ export default function CreateGroundLeaseTemplatePanel({ onClose }: Props) {
               required
             />
           </div>
+          <LeaseFeeFields
+            landUseFee={form.landUseFee}
+            repairReserveFee={form.repairReserveFee}
+            onChange={fees => setForm(f => ({ ...f, ...fees }))}
+          />
 
           <div className="form-field full">
             <label className="form-label">Covenant Terms</label>

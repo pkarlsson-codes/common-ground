@@ -10,6 +10,8 @@ public sealed record CreateGroundLeaseRequest(
     DateOnly LeaseStartDate,
     int TermYears,
     int OptionWindowDays,
+    decimal LandUseFee,
+    decimal RepairReserveFee,
     decimal BasePrice,
     decimal OriginalAppraisedValue,
     string CovenantTerms,

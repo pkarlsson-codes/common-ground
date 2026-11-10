@@ -28,6 +28,7 @@ internal static class DevelopmentSeeder
     /// <item>Stewardship cases: inspections, occupancy verifications and lease violations on the cases those leases opened.</item>
     /// <item>Foreclosure prevention cases on those leases, and the interventions recorded on them.</item>
     /// <item>Resales: homeowners' notices of intent to sell on those leases, and their withdrawals.</item>
+    /// <item>Lease fee payments on every lease, with a few leases left behind.</item>
     /// </list>
     /// </summary>
     /// <param name="services">The service collection.</param>
@@ -51,6 +52,7 @@ internal static class DevelopmentSeeder
         services.AddTransient<IDevelopmentSeeder, StewardshipCasesSeeder>();
         services.AddTransient<IDevelopmentSeeder, ForeclosurePreventionCasesSeeder>();
         services.AddTransient<IDevelopmentSeeder, ResalesSeeder>();
+        services.AddTransient<IDevelopmentSeeder, LeaseFeesSeeder>();
         return services;
     }
 

@@ -4,6 +4,7 @@ using CommonGround.API.Infrastructure.Auth;
 using CommonGround.Homeownership.Application.Commands;
 using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Application.ReadModels;
+using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.SharedKernel.Infrastructure.API;
@@ -43,6 +44,7 @@ public static class GroundLeaseTemplatesEndpoints
             request.OptionWindowDays,
             request.CovenantTerms,
             resalePolicyTerms,
+            LeaseFeeTerms.Create(request.LandUseFee, request.RepairReserveFee),
             userId);
 
         await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);
@@ -81,7 +83,8 @@ public static class GroundLeaseTemplatesEndpoints
         var view = await bus.InvokeForTenantAsync<GroundLeaseTemplateDetailView>(
             bus.TenantId!, new GetGroundLeaseTemplate(templateId), cancellationToken);
         return Results.Ok(new GroundLeaseTemplateResponse(
-            view.Id, view.TemplateName, view.TermYears, view.OptionWindowDays, view.CovenantTerms, view.Status,
+            view.Id, view.TemplateName, view.TermYears, view.OptionWindowDays, view.LandUseFee, view.RepairReserveFee,
+            view.CovenantTerms, view.Status,
             view.FormulaKind, view.AppreciationShare, view.IndexType, view.BaselineIndexValue,
             view.AnnualPercentage, view.ImprovementsCap,
             view.CreatedAt, view.CreatedBy));

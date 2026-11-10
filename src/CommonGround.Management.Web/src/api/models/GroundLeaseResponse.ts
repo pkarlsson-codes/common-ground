@@ -28,6 +28,13 @@ import {
     StewardshipCheckInDtoToJSON,
     StewardshipCheckInDtoToJSONTyped,
 } from './StewardshipCheckInDto';
+import type { LeaseFeesDto } from './LeaseFeesDto';
+import {
+    LeaseFeesDtoFromJSON,
+    LeaseFeesDtoFromJSONTyped,
+    LeaseFeesDtoToJSON,
+    LeaseFeesDtoToJSONTyped,
+} from './LeaseFeesDto';
 
 /**
  * Detail response for a ground lease.
@@ -169,6 +176,12 @@ export interface GroundLeaseResponse {
     stewardshipCheckIns?: Array<StewardshipCheckInDto>;
     /**
      * 
+     * @type {LeaseFeesDto}
+     * @memberof GroundLeaseResponse
+     */
+    leaseFees?: LeaseFeesDto;
+    /**
+     * 
      * @type {Date}
      * @memberof GroundLeaseResponse
      */
@@ -226,6 +239,7 @@ export function GroundLeaseResponseFromJSONTyped(json: any, ignoreDiscriminator:
         'homeownerEmail': json['homeownerEmail'] == null ? undefined : json['homeownerEmail'],
         'homeownerPhone': json['homeownerPhone'] == null ? undefined : json['homeownerPhone'],
         'stewardshipCheckIns': json['stewardshipCheckIns'] == null ? undefined : ((json['stewardshipCheckIns'] as Array<any>).map(StewardshipCheckInDtoFromJSON)),
+        'leaseFees': json['leaseFees'] == null ? undefined : LeaseFeesDtoFromJSON(json['leaseFees']),
         'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
         'recordedOn': json['recordedOn'] == null ? undefined : CalendarDateFromJSON(json['recordedOn']),
         'createdBy': json['createdBy'] == null ? undefined : json['createdBy'],
@@ -265,6 +279,7 @@ export function GroundLeaseResponseToJSONTyped(value?: GroundLeaseResponse | nul
         'homeownerEmail': value['homeownerEmail'],
         'homeownerPhone': value['homeownerPhone'],
         'stewardshipCheckIns': value['stewardshipCheckIns'] == null ? undefined : ((value['stewardshipCheckIns'] as Array<any>).map(StewardshipCheckInDtoToJSON)),
+        'leaseFees': LeaseFeesDtoToJSON(value['leaseFees']),
         'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
         'recordedOn': CalendarDateToJSON(value['recordedOn']),
         'createdBy': value['createdBy'],

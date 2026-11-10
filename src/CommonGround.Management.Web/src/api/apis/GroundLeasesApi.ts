@@ -21,9 +21,13 @@ import type {
   CreateGroundLeaseResponse,
   GroundLeaseResponse,
   PaginatedResponseOfGroundLeaseListItemResponse,
+  PaginatedResponseOfLeaseFeeBalanceResponse,
   ProblemDetails,
+  RecordLeaseFeePaymentRequest,
+  RecordLeaseFeePaymentResponse,
   RecordStewardshipCheckInRequest,
   ResaleEstimateResponse,
+  VoidLeaseFeePaymentRequest,
 } from '../models/index';
 import {
     CalculateResaleEstimateRequestFromJSON,
@@ -36,12 +40,20 @@ import {
     GroundLeaseResponseToJSON,
     PaginatedResponseOfGroundLeaseListItemResponseFromJSON,
     PaginatedResponseOfGroundLeaseListItemResponseToJSON,
+    PaginatedResponseOfLeaseFeeBalanceResponseFromJSON,
+    PaginatedResponseOfLeaseFeeBalanceResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
+    RecordLeaseFeePaymentRequestFromJSON,
+    RecordLeaseFeePaymentRequestToJSON,
+    RecordLeaseFeePaymentResponseFromJSON,
+    RecordLeaseFeePaymentResponseToJSON,
     RecordStewardshipCheckInRequestFromJSON,
     RecordStewardshipCheckInRequestToJSON,
     ResaleEstimateResponseFromJSON,
     ResaleEstimateResponseToJSON,
+    VoidLeaseFeePaymentRequestFromJSON,
+    VoidLeaseFeePaymentRequestToJSON,
 } from '../models/index';
 
 export interface CalculateResaleEstimateOperationRequest {
@@ -66,9 +78,27 @@ export interface GetGroundLeasesRequest {
     search?: string | null;
 }
 
+export interface GetLeaseFeeBalancesRequest {
+    pageNumber?: number;
+    pageSize?: number;
+    includeAll?: boolean;
+    search?: string | null;
+}
+
+export interface RecordLeaseFeePaymentOperationRequest {
+    groundLeaseId: string;
+    recordLeaseFeePaymentRequest: RecordLeaseFeePaymentRequest;
+}
+
 export interface RecordStewardshipCheckInOperationRequest {
     groundLeaseId: string;
     recordStewardshipCheckInRequest: RecordStewardshipCheckInRequest;
+}
+
+export interface VoidLeaseFeePaymentOperationRequest {
+    groundLeaseId: string;
+    paymentId: string;
+    voidLeaseFeePaymentRequest: VoidLeaseFeePaymentRequest;
 }
 
 /**
@@ -138,6 +168,36 @@ export interface GroundLeasesApiInterface {
 
     /**
      * 
+     * @param {number} [pageNumber] 
+     * @param {number} [pageSize] 
+     * @param {boolean} [includeAll] 
+     * @param {string} [search] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    getLeaseFeeBalancesRaw(requestParameters: GetLeaseFeeBalancesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfLeaseFeeBalanceResponse>>;
+
+    /**
+     */
+    getLeaseFeeBalances(requestParameters: GetLeaseFeeBalancesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfLeaseFeeBalanceResponse>;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
+     * @param {RecordLeaseFeePaymentRequest} recordLeaseFeePaymentRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    recordLeaseFeePaymentRaw(requestParameters: RecordLeaseFeePaymentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    recordLeaseFeePayment(requestParameters: RecordLeaseFeePaymentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
      * @param {string} groundLeaseId 
      * @param {RecordStewardshipCheckInRequest} recordStewardshipCheckInRequest 
      * @param {*} [options] Override http request option.
@@ -149,6 +209,21 @@ export interface GroundLeasesApiInterface {
     /**
      */
     recordStewardshipCheckIn(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
+     * @param {string} paymentId 
+     * @param {VoidLeaseFeePaymentRequest} voidLeaseFeePaymentRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    voidLeaseFeePaymentRaw(requestParameters: VoidLeaseFeePaymentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    voidLeaseFeePayment(requestParameters: VoidLeaseFeePaymentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
 }
 
@@ -327,6 +402,94 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
 
     /**
      */
+    async getLeaseFeeBalancesRaw(requestParameters: GetLeaseFeeBalancesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedResponseOfLeaseFeeBalanceResponse>> {
+        const queryParameters: any = {};
+
+        if (requestParameters['pageNumber'] != null) {
+            queryParameters['pageNumber'] = requestParameters['pageNumber'];
+        }
+
+        if (requestParameters['pageSize'] != null) {
+            queryParameters['pageSize'] = requestParameters['pageSize'];
+        }
+
+        if (requestParameters['includeAll'] != null) {
+            queryParameters['includeAll'] = requestParameters['includeAll'];
+        }
+
+        if (requestParameters['search'] != null) {
+            queryParameters['search'] = requestParameters['search'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/lease-fee-balances`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedResponseOfLeaseFeeBalanceResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getLeaseFeeBalances(requestParameters: GetLeaseFeeBalancesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfLeaseFeeBalanceResponse> {
+        const response = await this.getLeaseFeeBalancesRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async recordLeaseFeePaymentRaw(requestParameters: RecordLeaseFeePaymentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling recordLeaseFeePayment().'
+            );
+        }
+
+        if (requestParameters['recordLeaseFeePaymentRequest'] == null) {
+            throw new runtime.RequiredError(
+                'recordLeaseFeePaymentRequest',
+                'Required parameter "recordLeaseFeePaymentRequest" was null or undefined when calling recordLeaseFeePayment().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/lease-fee-payments`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RecordLeaseFeePaymentRequestToJSON(requestParameters['recordLeaseFeePaymentRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async recordLeaseFeePayment(requestParameters: RecordLeaseFeePaymentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.recordLeaseFeePaymentRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
     async recordStewardshipCheckInRaw(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['groundLeaseId'] == null) {
             throw new runtime.RequiredError(
@@ -367,6 +530,66 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
      */
     async recordStewardshipCheckIn(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
         const response = await this.recordStewardshipCheckInRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
+    async voidLeaseFeePaymentRaw(requestParameters: VoidLeaseFeePaymentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling voidLeaseFeePayment().'
+            );
+        }
+
+        if (requestParameters['paymentId'] == null) {
+            throw new runtime.RequiredError(
+                'paymentId',
+                'Required parameter "paymentId" was null or undefined when calling voidLeaseFeePayment().'
+            );
+        }
+
+        if (requestParameters['voidLeaseFeePaymentRequest'] == null) {
+            throw new runtime.RequiredError(
+                'voidLeaseFeePaymentRequest',
+                'Required parameter "voidLeaseFeePaymentRequest" was null or undefined when calling voidLeaseFeePayment().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/lease-fee-payments/{paymentId}/void`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+        urlPath = urlPath.replace(`{${"paymentId"}}`, encodeURIComponent(String(requestParameters['paymentId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: VoidLeaseFeePaymentRequestToJSON(requestParameters['voidLeaseFeePaymentRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async voidLeaseFeePayment(requestParameters: VoidLeaseFeePaymentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.voidLeaseFeePaymentRaw(requestParameters, initOverrides);
         switch (response.raw.status) {
             case 204:
                 return null;

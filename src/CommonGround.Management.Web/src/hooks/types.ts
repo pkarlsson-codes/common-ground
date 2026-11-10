@@ -64,6 +64,8 @@ export interface CreateGroundLeaseForm {
   leaseStartDate: CalendarDate
   termYears: number
   optionWindowDays: number
+  landUseFee: number
+  repairReserveFee: number
   basePrice: number
   originalAppraisedValue: number
   covenantTerms: string
@@ -146,6 +148,8 @@ export interface CreateGroundLeaseTemplateForm {
   templateName: string
   termYears: number
   optionWindowDays: number
+  landUseFee: number
+  repairReserveFee: number
   covenantTerms: string
   formulaKind: string
   appreciationShare: number | null

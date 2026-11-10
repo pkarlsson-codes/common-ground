@@ -184,7 +184,7 @@ public class HomeSelectionPassOverFlowTests(DurableApiFactory factory)
     {
         var response = await client.PostAsJsonAsync("/api/ground-lease-templates",
             new CreateGroundLeaseTemplateRequest(
-                $"Standard 99-Year {Guid.NewGuid():N}", 99, 60, "Standard covenant terms", "AppraisalBased", 0.25m, null, null, null, null));
+                $"Standard 99-Year {Guid.NewGuid():N}", 99, 60, 45m, 15m, "Standard covenant terms", "AppraisalBased", 0.25m, null, null, null, null));
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         return (await response.Content.ReadFromJsonAsync<CreateGroundLeaseTemplateResponse>())!.GroundLeaseTemplateId;
     }

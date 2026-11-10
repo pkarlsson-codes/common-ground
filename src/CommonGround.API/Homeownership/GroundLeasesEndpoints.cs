@@ -5,6 +5,7 @@ using CommonGround.Homeownership.Application.Commands;
 using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.AspNetCore.Mvc;
@@ -44,6 +45,7 @@ public static class GroundLeasesEndpoints
             request.LeaseStartDate,
             request.TermYears,
             request.OptionWindowDays,
+            LeaseFeeTerms.Create(request.LandUseFee, request.RepairReserveFee),
             request.BasePrice,
             request.OriginalAppraisedValue,
             request.CovenantTerms,
@@ -92,7 +94,7 @@ public static class GroundLeasesEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
 
-        var (view, recordedOn) = await bus.InvokeForTenantAsync<GroundLeaseDetails>(bus.TenantId!,
+        var (view, recordedOn, leaseFees) = await bus.InvokeForTenantAsync<GroundLeaseDetails>(bus.TenantId!,
             new GetGroundLease(GroundLeaseId.Create(groundLeaseId)),
             cancellationToken);
 
@@ -123,6 +125,32 @@ public static class GroundLeasesEndpoints
                 c.Notes,
                 c.RecordedBy,
                 c.OccurredAt)).ToList().AsReadOnly(),
+            new LeaseFeesDto(
+                view.LandUseFee,
+                view.RepairReserveFee,
+                leaseFees.MonthlyFee,
+                new LeaseFeeStatementDto(
+                    leaseFees.AsOf,
+                    leaseFees.TotalCharged,
+                    leaseFees.TotalPaid,
+                    leaseFees.Balance,
+                    leaseFees.OldestUnpaidDueDate,
+                    leaseFees.DaysOverdue),
+                view.LeaseFeePayments
+                    .OrderByDescending(p => p.ReceivedDate)
+                    .ThenByDescending(p => p.RecordedAt)
+                    .Select(p => new LeaseFeePaymentDto(
+                        p.PaymentId,
+                        p.ReceivedDate,
+                        p.Amount,
+                        p.Method,
+                        p.Reference,
+                        p.RecordedBy,
+                        p.RecordedAt,
+                        p.VoidReason,
+                        p.VoidedAt))
+                    .ToList()
+                    .AsReadOnly()),
             view.CreatedAt,
             recordedOn,
             view.CreatedBy);

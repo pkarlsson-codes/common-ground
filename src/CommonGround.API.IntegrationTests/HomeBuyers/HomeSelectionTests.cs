@@ -457,6 +457,8 @@ public class HomeSelectionTests(ApiFactory factory)
                 $"Standard 99-Year {Guid.NewGuid():N}",
                 99,
                 60,
+                45m,
+                15m,
                 "Standard covenant terms",
                 "AppraisalBased",
                 0.25m,

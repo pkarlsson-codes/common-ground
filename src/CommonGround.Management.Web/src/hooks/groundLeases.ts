@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { GroundLeasesApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
+import type { CalendarDate } from '../lib/calendarDate'
 import type {
   CreateGroundLeaseForm,
   RecordCheckInForm,
@@ -53,6 +54,8 @@ export function useCreateGroundLease() {
           leaseStartDate: form.leaseStartDate,
           termYears: form.termYears,
           optionWindowDays: form.optionWindowDays,
+          landUseFee: form.landUseFee,
+          repairReserveFee: form.repairReserveFee,
           basePrice: form.basePrice,
           originalAppraisedValue: form.originalAppraisedValue,
           covenantTerms: form.covenantTerms || undefined,
@@ -80,5 +83,64 @@ export function useRecordStewardshipCheckIn() {
         },
       }),
     onSuccess: (_d, v) => qc.invalidateQueries({ queryKey: ['ground-lease', v.groundLeaseId] }),
+  })
+}
+
+export const PAYMENT_METHODS = ['Check', 'BankTransfer', 'Cash', 'MoneyOrder', 'Card', 'Other'] as const
+export type PaymentMethod = typeof PAYMENT_METHODS[number]
+
+export const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  Check: 'Check',
+  BankTransfer: 'Bank Transfer',
+  Cash: 'Cash',
+  MoneyOrder: 'Money Order',
+  Card: 'Card',
+  Other: 'Other',
+}
+
+export interface RecordLeaseFeePaymentForm {
+  receivedDate: CalendarDate
+  amount: number
+  method: PaymentMethod
+  reference: string
+}
+
+/** Leases with what they owe in lease fees, most days overdue first. */
+export function useLeaseFeeBalances(pageNumber: number, includeAll: boolean, search?: string) {
+  return useQuery({
+    queryKey: ['lease-fee-balances', pageNumber, includeAll, search],
+    queryFn: () => api.getLeaseFeeBalances({ pageNumber, pageSize: 20, includeAll, search: search || undefined }),
+  })
+}
+
+export function useRecordLeaseFeePayment() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ groundLeaseId, form }: { groundLeaseId: string; form: RecordLeaseFeePaymentForm }) =>
+      api.recordLeaseFeePayment({
+        groundLeaseId,
+        recordLeaseFeePaymentRequest: {
+          receivedDate: form.receivedDate,
+          amount: form.amount,
+          method: form.method,
+          reference: form.reference.trim() || undefined,
+        },
+      }),
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ['ground-lease', v.groundLeaseId] })
+      qc.invalidateQueries({ queryKey: ['lease-fee-balances'] })
+    },
+  })
+}
+
+export function useVoidLeaseFeePayment() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ groundLeaseId, paymentId, reason }: { groundLeaseId: string; paymentId: string; reason: string }) =>
+      api.voidLeaseFeePayment({ groundLeaseId, paymentId, voidLeaseFeePaymentRequest: { reason } }),
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ['ground-lease', v.groundLeaseId] })
+      qc.invalidateQueries({ queryKey: ['lease-fee-balances'] })
+    },
   })
 }

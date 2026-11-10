@@ -5,6 +5,8 @@ public sealed record CreateGroundLeaseTemplateRequest(
     string TemplateName,
     int TermYears,
     int OptionWindowDays,
+    decimal LandUseFee,
+    decimal RepairReserveFee,
     string CovenantTerms,
     string FormulaKind,
     decimal? AppreciationShare,

@@ -3,7 +3,7 @@
 1. User navigates to Ground Lease Templates
 2. User clicks "New Template"
 3. "New Template" panel opens with a fresh form (Cancel discards anything entered)
-4. User enters Template Name, Term (years, default 99), Option Window (days the trust has to buy the home after the homeowner gives notice to sell, default 60), and Covenant Terms
+4. User enters Template Name, Term (years, default 99), Option Window (days the trust has to buy the home after the homeowner gives notice to sell, default 60), the monthly Land Use Fee and Repair Reserve Fee ($, both required, zero or more, both default 0; the form shows their sum as the Monthly Lease Fee, due on the 1st), and Covenant Terms
 5. User selects a Resale Formula: Appraisal Based, Index Based, or Fixed Percentage (default Appraisal Based)
 6. If Appraisal Based, user enters Appreciation Share (decimal fraction, e.g. 0.25 = 25%, default 0.25)
 7. If Index Based, user selects Index Type (CPI, AMI, or Custom, default CPI) and enters Baseline Index Value (default 100)

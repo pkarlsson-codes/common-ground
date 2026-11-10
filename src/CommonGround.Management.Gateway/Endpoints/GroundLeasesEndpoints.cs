@@ -71,4 +71,45 @@ public static class GroundLeasesEndpoints
         var result = await client.CalculateResaleEstimateAsync(groundLeaseId, request, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
+
+    [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/lease-fee-payments")]
+    [ProducesResponseType<RecordLeaseFeePaymentResponse>(StatusCodes.Status201Created)]
+    public static async Task<IResult> RecordLeaseFeePayment(
+        string groundLeaseId,
+        RecordLeaseFeePaymentRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        var result = await client.RecordLeaseFeePaymentAsync(groundLeaseId, request, cancellationToken).ConfigureAwait(false);
+        return Results.Created($"/api/v1/ground-leases/{groundLeaseId}/lease-fee-payments/{result.PaymentId}", result);
+    }
+
+    [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/lease-fee-payments/{paymentId}/void")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> VoidLeaseFeePayment(
+        string groundLeaseId,
+        string paymentId,
+        VoidLeaseFeePaymentRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(paymentId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.VoidLeaseFeePaymentAsync(groundLeaseId, paymentId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
+    [WolverineGet("/api/v1/lease-fee-balances")]
+    [ProducesResponseType<PaginatedResponse<LeaseFeeBalanceResponse>>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetLeaseFeeBalances(
+        [FromQuery] GetLeaseFeeBalancesQuerySpec querySpec,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await client.GetLeaseFeeBalancesAsync(querySpec, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
 }

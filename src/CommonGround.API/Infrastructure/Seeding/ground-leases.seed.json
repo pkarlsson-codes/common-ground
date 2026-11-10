@@ -10,6 +10,8 @@
       "recordedOn": "today-2y",
       "termYears": 75,
       "optionWindowDays": 90,
+      "landUseFee": 40,
+      "repairReserveFee": 10,
       "basePrice": 168000,
       "originalAppraisedValue": 240000,
       "covenantTerms": "Owner-occupancy as primary residence required. Resale only to income-eligible buyers at or below the formula price. Signed on paper before the trust adopted lease templates.",

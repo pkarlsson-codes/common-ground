@@ -17,6 +17,8 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             LeaseStartDate = e.Data.LeaseStartDate,
             TermYears = e.Data.TermYears,
             OptionWindowDays = e.Data.OptionWindowDays,
+            LandUseFee = e.Data.LandUseFee,
+            RepairReserveFee = e.Data.RepairReserveFee,
             BasePrice = e.Data.BasePrice,
             OriginalAppraisedValue = e.Data.OriginalAppraisedValue,
             CovenantTerms = e.Data.CovenantTerms,
@@ -45,6 +47,8 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             LeaseStartDate = e.Data.LeaseStartDate,
             TermYears = e.Data.TermYears,
             OptionWindowDays = e.Data.OptionWindowDays,
+            LandUseFee = e.Data.LandUseFee,
+            RepairReserveFee = e.Data.RepairReserveFee,
             BasePrice = e.Data.BasePrice,
             OriginalAppraisedValue = e.Data.OriginalAppraisedValue,
             CovenantTerms = e.Data.CovenantTerms,
@@ -73,5 +77,32 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
         });
     }
 
-    public static void Apply(GroundLeaseView view, GroundLeaseTerminated _) => view.Status = "Inactive";
+    public static void Apply(GroundLeaseView view, GroundLeaseTerminated e)
+    {
+        view.Status = "Inactive";
+        view.EndedOn = e.TerminatedDate;
+    }
+
+    public static void Apply(GroundLeaseView view, LeaseFeePaymentRecorded e) =>
+        view.LeaseFeePayments.Add(new LeaseFeePaymentEntry
+        {
+            PaymentId = e.PaymentId,
+            ReceivedDate = e.ReceivedDate,
+            Amount = e.Amount,
+            Method = e.Method.DisplayName,
+            Reference = e.Reference,
+            RecordedBy = e.RecordedBy,
+            RecordedAt = e.OccurredAt,
+        });
+
+    public static void Apply(GroundLeaseView view, LeaseFeePaymentVoided e)
+    {
+        var payment = view.LeaseFeePayments.Find(p => p.PaymentId == e.PaymentId);
+        if (payment is null)
+            return;
+
+        payment.VoidReason = e.Reason;
+        payment.VoidedBy = e.VoidedBy;
+        payment.VoidedAt = e.OccurredAt;
+    }
 }

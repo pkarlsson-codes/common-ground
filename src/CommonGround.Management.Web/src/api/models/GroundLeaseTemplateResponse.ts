@@ -45,6 +45,18 @@ export interface GroundLeaseTemplateResponse {
      */
     optionWindowDays?: number;
     /**
+     * Monthly land use fee.
+     * @type {number}
+     * @memberof GroundLeaseTemplateResponse
+     */
+    landUseFee?: number;
+    /**
+     * Monthly repair reserve fee.
+     * @type {number}
+     * @memberof GroundLeaseTemplateResponse
+     */
+    repairReserveFee?: number;
+    /**
      * Covenant terms text.
      * @type {string}
      * @memberof GroundLeaseTemplateResponse
@@ -127,6 +139,8 @@ export function GroundLeaseTemplateResponseFromJSONTyped(json: any, ignoreDiscri
         'templateName': json['templateName'] == null ? undefined : json['templateName'],
         'termYears': json['termYears'] == null ? undefined : json['termYears'],
         'optionWindowDays': json['optionWindowDays'] == null ? undefined : json['optionWindowDays'],
+        'landUseFee': json['landUseFee'] == null ? undefined : json['landUseFee'],
+        'repairReserveFee': json['repairReserveFee'] == null ? undefined : json['repairReserveFee'],
         'covenantTerms': json['covenantTerms'] == null ? undefined : json['covenantTerms'],
         'status': json['status'] == null ? undefined : json['status'],
         'formulaKind': json['formulaKind'] == null ? undefined : json['formulaKind'],
@@ -155,6 +169,8 @@ export function GroundLeaseTemplateResponseToJSONTyped(value?: GroundLeaseTempla
         'templateName': value['templateName'],
         'termYears': value['termYears'],
         'optionWindowDays': value['optionWindowDays'],
+        'landUseFee': value['landUseFee'],
+        'repairReserveFee': value['repairReserveFee'],
         'covenantTerms': value['covenantTerms'],
         'status': value['status'],
         'formulaKind': value['formulaKind'],

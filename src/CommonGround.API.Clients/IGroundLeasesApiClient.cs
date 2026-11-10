@@ -38,4 +38,25 @@ public interface IGroundLeasesApiClient
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>The estimated maximum resale price.</returns>
     Task<ResaleEstimateResponse> CalculateResaleEstimateAsync(string groundLeaseId, CalculateResaleEstimateRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Records a lease fee payment the trust received on a lease.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="request">The payment details.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response containing the new payment ID.</returns>
+    Task<RecordLeaseFeePaymentResponse> RecordLeaseFeePaymentAsync(string groundLeaseId, RecordLeaseFeePaymentRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Voids a lease fee payment recorded by mistake.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="paymentId">The ID of the payment.</param>
+    /// <param name="request">Why it is voided.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task VoidLeaseFeePaymentAsync(string groundLeaseId, string paymentId, VoidLeaseFeePaymentRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Gets leases with what they owe in lease fees, most days overdue first.</summary>
+    /// <param name="querySpec">The query parameters for pagination and filtering.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A paginated list of lease fee balances.</returns>
+    Task<PaginatedResponse<LeaseFeeBalanceResponse>> GetLeaseFeeBalancesAsync(GetLeaseFeeBalancesQuerySpec querySpec, CancellationToken cancellationToken);
 }

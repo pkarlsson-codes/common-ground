@@ -81,6 +81,18 @@ export interface CreateGroundLeaseRequest {
      * @type {number}
      * @memberof CreateGroundLeaseRequest
      */
+    landUseFee?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateGroundLeaseRequest
+     */
+    repairReserveFee?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateGroundLeaseRequest
+     */
     basePrice?: number;
     /**
      * 
@@ -157,6 +169,8 @@ export function CreateGroundLeaseRequestFromJSONTyped(json: any, ignoreDiscrimin
         'leaseStartDate': json['leaseStartDate'] == null ? undefined : CalendarDateFromJSON(json['leaseStartDate']),
         'termYears': json['termYears'] == null ? undefined : json['termYears'],
         'optionWindowDays': json['optionWindowDays'] == null ? undefined : json['optionWindowDays'],
+        'landUseFee': json['landUseFee'] == null ? undefined : json['landUseFee'],
+        'repairReserveFee': json['repairReserveFee'] == null ? undefined : json['repairReserveFee'],
         'basePrice': json['basePrice'] == null ? undefined : json['basePrice'],
         'originalAppraisedValue': json['originalAppraisedValue'] == null ? undefined : json['originalAppraisedValue'],
         'covenantTerms': json['covenantTerms'] == null ? undefined : json['covenantTerms'],
@@ -188,6 +202,8 @@ export function CreateGroundLeaseRequestToJSONTyped(value?: CreateGroundLeaseReq
         'leaseStartDate': CalendarDateToJSON(value['leaseStartDate']),
         'termYears': value['termYears'],
         'optionWindowDays': value['optionWindowDays'],
+        'landUseFee': value['landUseFee'],
+        'repairReserveFee': value['repairReserveFee'],
         'basePrice': value['basePrice'],
         'originalAppraisedValue': value['originalAppraisedValue'],
         'covenantTerms': value['covenantTerms'],

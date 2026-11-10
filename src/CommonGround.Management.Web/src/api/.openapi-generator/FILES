@@ -88,6 +88,10 @@ models/IssueViolationNoticeRequest.ts
 models/LandParcelListItemResponse.ts
 models/LandParcelResponse.ts
 models/LeaseExecutionDetailsDto.ts
+models/LeaseFeeBalanceResponse.ts
+models/LeaseFeePaymentDto.ts
+models/LeaseFeeStatementDto.ts
+models/LeaseFeesDto.ts
 models/LeaseViolationResponse.ts
 models/MakeCounselingReferralRequest.ts
 models/MarkOccupancyVerificationOverdueRequest.ts
@@ -107,6 +111,7 @@ models/PaginatedResponseOfHomeSelectionListItemResponse.ts
 models/PaginatedResponseOfHomeownerApplicationListItemResponse.ts
 models/PaginatedResponseOfHouseholdListItemResponse.ts
 models/PaginatedResponseOfLandParcelListItemResponse.ts
+models/PaginatedResponseOfLeaseFeeBalanceResponse.ts
 models/PaginatedResponseOfPurchaseWorkflowListItemResponse.ts
 models/PaginatedResponseOfResaleResponse.ts
 models/PaginatedResponseOfStewardshipCaseResponse.ts
@@ -133,6 +138,8 @@ models/RecordInspectionCompletedRequest.ts
 models/RecordIntentToSellRequest.ts
 models/RecordIntentToSellResponse.ts
 models/RecordLeaseExecutedRequest.ts
+models/RecordLeaseFeePaymentRequest.ts
+models/RecordLeaseFeePaymentResponse.ts
 models/RecordMortgagePrequalificationRequest.ts
 models/RecordPurchaseClosedRequest.ts
 models/RecordResaleAppraisalRequest.ts
@@ -172,6 +179,7 @@ models/UpdateHouseholdCircumstancesRequest.ts
 models/UpdateHouseholdMemberRequest.ts
 models/UploadDocumentResponse.ts
 models/VerifyOccupancyRequest.ts
+models/VoidLeaseFeePaymentRequest.ts
 models/WaitingListEntryResponse.ts
 models/WithdrawApplicationRequest.ts
 models/WithdrawIntentToSellRequest.ts

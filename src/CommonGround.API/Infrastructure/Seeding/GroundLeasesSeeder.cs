@@ -1,6 +1,7 @@
 using System.Text.Json;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.Homeownership.Infrastructure.Seeding;
@@ -130,6 +131,7 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
             leaseStartDate,
             direct.TermYears,
             direct.OptionWindowDays,
+            LeaseFeeTerms.Create(direct.LandUseFee, direct.RepairReserveFee),
             direct.BasePrice,
             direct.OriginalAppraisedValue,
             direct.CovenantTerms,
@@ -299,6 +301,10 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
         public int TermYears { get; set; }
 
         public int OptionWindowDays { get; set; }
+
+        public decimal LandUseFee { get; set; }
+
+        public decimal RepairReserveFee { get; set; }
 
         public decimal BasePrice { get; set; }
 

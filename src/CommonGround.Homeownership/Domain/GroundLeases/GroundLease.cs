@@ -1,4 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
+using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Application.Errors;
@@ -74,6 +75,20 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     public ResaleId? OpenResaleId { get; private set; }
 
     /// <summary>
+    /// Gets the monthly lease fee. Copied from the template when the lease was created, so editing the template
+    /// later doesn't change it.
+    /// </summary>
+    public LeaseFeeTerms LeaseFeeTerms { get; private set; }
+
+    /// <summary>Gets the day the lease ended, or null while it is active.</summary>
+    public DateOnly? EndedOn { get; private set; }
+
+    private readonly List<LeaseFeePayment> _leaseFeePayments = [];
+
+    /// <summary>Gets every lease fee payment recorded on this lease, voided ones included, in the order recorded.</summary>
+    public IReadOnlyList<LeaseFeePayment> LeaseFeePayments => _leaseFeePayments;
+
+    /// <summary>
     /// Creates a ground lease that didn't come from a purchase, such as one signed before the trust used
     /// CommonGround. Refused while the home is already leased, being sold, or in a home selection.
     /// </summary>
@@ -85,6 +100,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         DateOnly leaseStartDate,
         int termYears,
         int optionWindowDays,
+        LeaseFeeTerms leaseFeeTerms,
         decimal basePrice,
         decimal originalAppraisedValue,
         string covenantTerms,
@@ -92,6 +108,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         HomeCommitments homeCommitments,
         UserId createdBy)
     {
+        ArgumentNullException.ThrowIfNull(leaseFeeTerms);
         ArgumentNullException.ThrowIfNull(landParcelId);
         ArgumentNullException.ThrowIfNull(unitId);
         ArgumentNullException.ThrowIfNull(homeowner);
@@ -129,6 +146,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             leaseStartDate,
             termYears,
             optionWindowDays,
+            leaseFeeTerms.LandUseFee,
+            leaseFeeTerms.RepairReserveFee,
             basePrice,
             originalAppraisedValue,
             covenantTerms,
@@ -169,6 +188,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             leaseStartDate,
             template.TermYears,
             template.OptionWindowDays,
+            template.LeaseFeeTerms.LandUseFee,
+            template.LeaseFeeTerms.RepairReserveFee,
             purchaseWorkflow.PurchasePrice,
             purchaseWorkflow.AppraisalDetails?.AppraisedValue,
             template.CovenantTerms,
@@ -240,6 +261,67 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     public ResaleClosed? CloseResale(ResaleId resaleId) =>
         OpenResaleId == resaleId ? new ResaleClosed(Id.Value, resaleId.Value) : null;
 
+    /// <summary>
+    /// Records a lease fee payment the trust received. Refused for an amount of zero or less, a received date in the
+    /// future or before the lease started. An ended lease still takes payments, so arrears can be collected.
+    /// </summary>
+    public LeaseFeePaymentRecorded RecordLeaseFeePayment(
+        LeaseFeePaymentId paymentId,
+        DateOnly receivedDate,
+        decimal amount,
+        PaymentMethod method,
+        string? reference,
+        DateOnly today,
+        UserId recordedBy)
+    {
+        ArgumentNullException.ThrowIfNull(method);
+
+        if (amount <= 0)
+            throw BusinessRuleViolation.GroundLease.RecordLeaseFeePayment.AmountNonPositive(amount);
+
+        if (receivedDate > today)
+            throw BusinessRuleViolation.GroundLease.RecordLeaseFeePayment.ReceivedDateInFuture(receivedDate, today);
+
+        if (receivedDate < LeaseStartDate)
+            throw BusinessRuleViolation.GroundLease.RecordLeaseFeePayment.ReceivedDateBeforeLeaseStart(receivedDate, LeaseStartDate);
+
+        return new LeaseFeePaymentRecorded(
+            Id.Value,
+            paymentId.Value,
+            receivedDate,
+            amount,
+            method,
+            string.IsNullOrWhiteSpace(reference) ? null : reference.Trim(),
+            recordedBy.Value);
+    }
+
+    /// <summary>
+    /// Voids a payment recorded by mistake, so it no longer counts toward the balance. Refused without a reason,
+    /// for a payment not on this lease, or one already voided.
+    /// </summary>
+    public LeaseFeePaymentVoided VoidLeaseFeePayment(LeaseFeePaymentId paymentId, string reason, UserId voidedBy)
+    {
+        if (string.IsNullOrWhiteSpace(reason))
+            throw BusinessRuleViolation.GroundLease.VoidLeaseFeePayment.ReasonRequired();
+
+        var payment = _leaseFeePayments.FirstOrDefault(p => p.Id == paymentId)
+            ?? throw BusinessRuleViolation.GroundLease.VoidLeaseFeePayment.PaymentNotFound(paymentId.Value);
+
+        if (payment.IsVoided)
+            throw BusinessRuleViolation.GroundLease.VoidLeaseFeePayment.AlreadyVoided(paymentId.Value);
+
+        return new LeaseFeePaymentVoided(Id.Value, paymentId.Value, reason.Trim(), voidedBy.Value);
+    }
+
+    /// <summary>Works out what the lease owes as of a day, usually the trust's today.</summary>
+    public LeaseFeeStatement LeaseFeeStatementAsOf(DateOnly asOf) =>
+        LeaseFeeStatement.Calculate(
+            LeaseFeeTerms,
+            LeaseStartDate,
+            EndedOn,
+            _leaseFeePayments.Where(p => !p.IsVoided).Select(p => p.Amount),
+            asOf);
+
     /// <summary>Starts a ground lease from its first event.</summary>
     public static GroundLease Create(GroundLeaseCreated e)
     {
@@ -258,6 +340,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         LeaseStartDate = e.LeaseStartDate;
         TermYears = e.TermYears;
         OptionWindowDays = e.OptionWindowDays;
+        LeaseFeeTerms = LeaseFeeTerms.Create(e.LandUseFee, e.RepairReserveFee);
         BasePrice = e.BasePrice;
         OriginalAppraisedValue = e.OriginalAppraisedValue;
         CovenantTerms = e.CovenantTerms;
@@ -298,6 +381,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         LeaseStartDate = e.LeaseStartDate;
         TermYears = e.TermYears;
         OptionWindowDays = e.OptionWindowDays;
+        LeaseFeeTerms = LeaseFeeTerms.Create(e.LandUseFee, e.RepairReserveFee);
         BasePrice = e.BasePrice;
         OriginalAppraisedValue = e.OriginalAppraisedValue;
         CovenantTerms = e.CovenantTerms;
@@ -324,9 +408,19 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     public void Apply(ResaleClosed _) => OpenResaleId = null;
 
     /// <summary>Applies <see cref="GroundLeaseTerminated"/>.</summary>
-    public void Apply(GroundLeaseTerminated _)
+    public void Apply(GroundLeaseTerminated e)
     {
         Status = GroundLeaseStatus.Inactive;
+        EndedOn = e.TerminatedDate;
     }
+
+    /// <summary>Applies <see cref="LeaseFeePaymentRecorded"/>.</summary>
+    public void Apply(LeaseFeePaymentRecorded e) =>
+        _leaseFeePayments.Add(LeaseFeePayment.Create(
+            LeaseFeePaymentId.Create(e.PaymentId), e.ReceivedDate, e.Amount, e.Method, e.Reference));
+
+    /// <summary>Applies <see cref="LeaseFeePaymentVoided"/>.</summary>
+    public void Apply(LeaseFeePaymentVoided e) =>
+        _leaseFeePayments.First(p => p.Id.Value == e.PaymentId).MarkVoided(e.Reason);
 
 }

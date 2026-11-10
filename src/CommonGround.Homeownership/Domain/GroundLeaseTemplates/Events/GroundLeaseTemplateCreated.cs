@@ -9,6 +9,8 @@ public sealed record GroundLeaseTemplateCreated(
     string TemplateName,
     int TermYears,
     int OptionWindowDays,
+    decimal LandUseFee,
+    decimal RepairReserveFee,
     string CovenantTerms,
     FormulaKind FormulaKind,
     decimal? AppreciationShare,

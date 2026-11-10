@@ -8,7 +8,7 @@ For recording a lease that didn't come from a purchase, such as one signed befor
 4. User searches and selects a Land Parcel
 5. User searches and selects a Home on that parcel (disabled until a parcel is chosen)
 6. User enters the Homeowner's Full Name and Email (both required) and optionally a Phone number
-7. User enters Lease Start Date (default today; may be years back for a lease that predates CommonGround) Term (years, default 99) and Option Window (days the trust has to buy the home after the homeowner gives notice to sell, default 60)
+7. User enters Lease Start Date (default today; may be years back for a lease that predates CommonGround) Term (years, default 99), Option Window (days the trust has to buy the home after the homeowner gives notice to sell, default 60), and the monthly Land Use Fee and Repair Reserve Fee ($, both required, zero or more, both default 0; the form shows their sum as the Monthly Lease Fee, due on the 1st). Fees are charged on the 1st of each month from the first 1st on or after the start date, so a lease that predates CommonGround starts with every month since then unpaid until its past payments are recorded
 8. User enters Covenant Terms (required), Base Price (what the homeowner paid for the home) and Original Appraised Value (the home's appraised value at that purchase). Both are required and above zero
 9. User selects a Resale Formula: Appraisal Based, Index Based, or Fixed Percentage (default Appraisal Based)
 10. If Appraisal Based, user enters Appreciation Share (decimal fraction, e.g. 0.25 = 25%, default 0.25)

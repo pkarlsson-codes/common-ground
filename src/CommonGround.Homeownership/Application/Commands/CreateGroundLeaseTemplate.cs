@@ -1,3 +1,4 @@
+using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.SharedKernel.Domain;
@@ -13,6 +14,7 @@ public sealed record CreateGroundLeaseTemplate(
     int OptionWindowDays,
     string CovenantTerms,
     ResalePolicyTerms ResalePolicyTerms,
+    LeaseFeeTerms LeaseFeeTerms,
     UserId CreatedBy);
 
 /// <summary>Handles <see cref="CreateGroundLeaseTemplate"/>.</summary>
@@ -30,6 +32,7 @@ public static class CreateGroundLeaseTemplateHandler
             command.OptionWindowDays,
             command.CovenantTerms,
             command.ResalePolicyTerms,
+            command.LeaseFeeTerms,
             command.CreatedBy);
 
         return MartenOps.StartStream<GroundLeaseTemplate>(command.TemplateId.Value, started);

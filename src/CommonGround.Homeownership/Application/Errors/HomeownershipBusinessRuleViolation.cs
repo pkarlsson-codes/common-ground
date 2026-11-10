@@ -224,6 +224,80 @@ public static class BusinessRuleViolation
                         ["resaleId"] = resaleId,
                     });
         }
+
+        public static class RecordLeaseFeePayment
+        {
+            public static BusinessRuleViolationException AmountNonPositive(decimal amount)
+                => new(
+                    "homeownership.ground_lease.record_lease_fee_payment.amount_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["amount"] = amount,
+                    });
+
+            public static BusinessRuleViolationException ReceivedDateInFuture(DateOnly receivedDate, DateOnly today)
+                => new(
+                    "homeownership.ground_lease.record_lease_fee_payment.received_date_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["receivedDate"] = receivedDate,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException ReceivedDateBeforeLeaseStart(DateOnly receivedDate, DateOnly leaseStartDate)
+                => new(
+                    "homeownership.ground_lease.record_lease_fee_payment.received_date_before_lease_start",
+                    new Dictionary<string, object?>
+                    {
+                        ["receivedDate"] = receivedDate,
+                        ["leaseStartDate"] = leaseStartDate,
+                    });
+        }
+
+        public static class VoidLeaseFeePayment
+        {
+            public static BusinessRuleViolationException ReasonRequired()
+                => new(
+                    "homeownership.ground_lease.void_lease_fee_payment.reason_required");
+
+            public static BusinessRuleViolationException PaymentNotFound(string paymentId)
+                => new(
+                    "homeownership.ground_lease.void_lease_fee_payment.payment_not_found",
+                    new Dictionary<string, object?>
+                    {
+                        ["paymentId"] = paymentId,
+                    });
+
+            public static BusinessRuleViolationException AlreadyVoided(string paymentId)
+                => new(
+                    "homeownership.ground_lease.void_lease_fee_payment.already_voided",
+                    new Dictionary<string, object?>
+                    {
+                        ["paymentId"] = paymentId,
+                    });
+        }
+    }
+
+    public static class LeaseFeeTerms
+    {
+        public static class Create
+        {
+            public static BusinessRuleViolationException LandUseFeeNegative(decimal landUseFee)
+                => new(
+                    "homeownership.lease_fee_terms.create.land_use_fee_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["landUseFee"] = landUseFee,
+                    });
+
+            public static BusinessRuleViolationException RepairReserveFeeNegative(decimal repairReserveFee)
+                => new(
+                    "homeownership.lease_fee_terms.create.repair_reserve_fee_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["repairReserveFee"] = repairReserveFee,
+                    });
+        }
     }
 
     public static class GroundLeaseTemplate

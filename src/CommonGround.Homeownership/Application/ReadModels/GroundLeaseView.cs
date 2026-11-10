@@ -74,6 +74,52 @@ public class GroundLeaseView
 
     /// <summary>Gets or sets the stewardship check-in history.</summary>
     public List<StewardshipCheckInEntry> StewardshipCheckIns { get; set; } = [];
+
+    /// <summary>Gets or sets the monthly land use fee.</summary>
+    public decimal LandUseFee { get; set; }
+
+    /// <summary>Gets or sets the monthly repair reserve fee.</summary>
+    public decimal RepairReserveFee { get; set; }
+
+    /// <summary>Gets or sets the day the lease ended, or null while it is active.</summary>
+    public DateOnly? EndedOn { get; set; }
+
+    /// <summary>Gets or sets every lease fee payment recorded, voided ones included, in the order recorded.</summary>
+    public List<LeaseFeePaymentEntry> LeaseFeePayments { get; set; } = [];
+}
+
+/// <summary>A lease fee payment in a ground lease view.</summary>
+public class LeaseFeePaymentEntry
+{
+    /// <summary>Gets or sets the payment ID.</summary>
+    public string PaymentId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the day the trust received it.</summary>
+    public DateOnly ReceivedDate { get; set; }
+
+    /// <summary>Gets or sets the amount received.</summary>
+    public decimal Amount { get; set; }
+
+    /// <summary>Gets or sets how it was paid, as the payment method's display name.</summary>
+    public string Method { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets a check number or similar, if given.</summary>
+    public string? Reference { get; set; }
+
+    /// <summary>Gets or sets the user who recorded it.</summary>
+    public string RecordedBy { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets when it was recorded.</summary>
+    public DateTimeOffset RecordedAt { get; set; }
+
+    /// <summary>Gets or sets why it was voided, or null while it counts.</summary>
+    public string? VoidReason { get; set; }
+
+    /// <summary>Gets or sets the user who voided it.</summary>
+    public string? VoidedBy { get; set; }
+
+    /// <summary>Gets or sets when it was voided.</summary>
+    public DateTimeOffset? VoidedAt { get; set; }
 }
 
 /// <summary>A single stewardship check-in entry in a ground lease view.</summary>

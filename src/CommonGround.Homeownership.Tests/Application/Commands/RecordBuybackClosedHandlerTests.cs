@@ -1,3 +1,4 @@
+using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Application.Commands;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
@@ -24,7 +25,7 @@ public class RecordBuybackClosedHandlerTests
             var resaleId = ResaleId.Generate();
             var lease = EventReplay.Replay<GroundLease>(GroundLease.Establish(
                 GroundLeaseId.Generate(), "land-parcel-1234", "home-5678", Homeowner.From("Dana Whitfield", "dana@example.com"),
-                new DateOnly(2020, 1, 1), 99, 60, 200_000m, 250_000m, "Covenants", ResalePolicyTerms.AppraisalBased(0.25m),
+                new DateOnly(2020, 1, 1), 99, 60, LeaseFeeTerms.None, 200_000m, 250_000m, "Covenants", ResalePolicyTerms.AppraisalBased(0.25m),
                 HomeCommitments.None, staff));
             var resale = EventReplay.Replay<Resale>(
                 Resale.RecordIntentToSell(resaleId, lease, Today, NoticeChannel.Phone, null, Today, staff));

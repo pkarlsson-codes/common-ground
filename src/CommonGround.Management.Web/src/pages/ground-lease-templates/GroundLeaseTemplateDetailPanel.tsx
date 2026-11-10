@@ -5,6 +5,7 @@ import { FORMULA_KIND_LABELS, statusLabel } from '../../hooks/types'
 import SlideOver from '../../components/SlideOver'
 import StatusBadge from '../../components/StatusBadge'
 import { useToast } from '../../hooks/useToast'
+import { formatPrice } from '../../lib/currency'
 import { getErrorMessage } from '../../lib/getErrorMessage'
 
 function SkeletonRows() {
@@ -98,6 +99,15 @@ export default function GroundLeaseTemplateDetailPanel({ templateId, onClose }: 
           <div className="detail-field">
             <div className="detail-field__label">Option Window</div>
             <div className="detail-field__value mono">{detail.optionWindowDays} days</div>
+          </div>
+          <div className="detail-field">
+            <div className="detail-field__label">Monthly Lease Fee</div>
+            <div className="detail-field__value mono">
+              {formatPrice((detail.landUseFee ?? 0) + (detail.repairReserveFee ?? 0))}
+              <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>
+                {formatPrice(detail.landUseFee ?? 0)} land use + {formatPrice(detail.repairReserveFee ?? 0)} repair reserve
+              </div>
+            </div>
           </div>
           {detail.appreciationShare != null && (
             <div className="detail-field">

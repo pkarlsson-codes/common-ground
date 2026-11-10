@@ -1,3 +1,4 @@
+using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Application.Errors;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates.Events;
@@ -30,6 +31,9 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
     /// <summary>Gets the resale policy terms.</summary>
     public ResalePolicyTerms ResalePolicyTerms { get; private set; }
 
+    /// <summary>Gets the monthly lease fee a lease from this template charges.</summary>
+    public LeaseFeeTerms LeaseFeeTerms { get; private set; }
+
     /// <summary>Gets whether this template is active.</summary>
     public GroundLeaseTemplateStatus Status { get; private set; }
 
@@ -47,9 +51,11 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
         int optionWindowDays,
         string covenantTerms,
         ResalePolicyTerms resalePolicyTerms,
+        LeaseFeeTerms leaseFeeTerms,
         UserId createdBy)
     {
         ArgumentNullException.ThrowIfNull(resalePolicyTerms);
+        ArgumentNullException.ThrowIfNull(leaseFeeTerms);
 
         if (string.IsNullOrWhiteSpace(templateName))
         {
@@ -76,6 +82,8 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
             templateName,
             termYears,
             optionWindowDays,
+            leaseFeeTerms.LandUseFee,
+            leaseFeeTerms.RepairReserveFee,
             covenantTerms,
             resalePolicyTerms.FormulaKind,
             resalePolicyTerms.AppreciationShare,
@@ -128,6 +136,7 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
         TemplateName = e.TemplateName;
         TermYears = e.TermYears;
         OptionWindowDays = e.OptionWindowDays;
+        LeaseFeeTerms = LeaseFeeTerms.Create(e.LandUseFee, e.RepairReserveFee);
         CovenantTerms = e.CovenantTerms;
         ResalePolicyTerms = e.FormulaKind switch
         {

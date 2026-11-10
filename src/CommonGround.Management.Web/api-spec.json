@@ -1261,6 +1261,227 @@
         }
       }
     },
+    "/api/v1/ground-leases/{groundLeaseId}/lease-fee-payments": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "RecordLeaseFeePayment",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordLeaseFeePaymentRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordLeaseFeePaymentRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordLeaseFeePaymentResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ground-leases/{groundLeaseId}/lease-fee-payments/{paymentId}/void": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "VoidLeaseFeePayment",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "paymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "VoidLeaseFeePaymentRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoidLeaseFeePaymentRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 3
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lease-fee-balances": {
+      "get": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "GetLeaseFeeBalances",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "includeAll",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "x-position": 3
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 4
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfLeaseFeeBalanceResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ground-lease-templates": {
       "post": {
         "tags": [
@@ -7973,6 +8194,14 @@
             "type": "integer",
             "format": "int32"
           },
+          "landUseFee": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "repairReserveFee": {
+            "type": "number",
+            "format": "decimal"
+          },
           "basePrice": {
             "type": "number",
             "format": "decimal"
@@ -8107,6 +8336,9 @@
               "$ref": "#/components/schemas/StewardshipCheckInDto"
             }
           },
+          "leaseFees": {
+            "$ref": "#/components/schemas/LeaseFeesDto"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -8138,6 +8370,131 @@
           "occurredAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "LeaseFeesDto": {
+        "type": "object",
+        "description": "A lease's fee terms, what it owes as of the trust's today, and its payments.",
+        "additionalProperties": false,
+        "properties": {
+          "landUseFee": {
+            "type": "number",
+            "description": "Monthly land use fee.",
+            "format": "decimal"
+          },
+          "repairReserveFee": {
+            "type": "number",
+            "description": "Monthly repair reserve fee.",
+            "format": "decimal"
+          },
+          "monthlyFee": {
+            "type": "number",
+            "description": "Their sum, charged on the 1st of each month.",
+            "format": "decimal"
+          },
+          "statement": {
+            "description": "What the lease owes today.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LeaseFeeStatementDto"
+              }
+            ]
+          },
+          "payments": {
+            "type": "array",
+            "description": "Every payment recorded, voided ones included, newest received first.",
+            "items": {
+              "$ref": "#/components/schemas/LeaseFeePaymentDto"
+            }
+          }
+        }
+      },
+      "LeaseFeeStatementDto": {
+        "type": "object",
+        "description": "What a lease owes as of a day.",
+        "additionalProperties": false,
+        "properties": {
+          "asOf": {
+            "type": "string",
+            "description": "The day it is worked out for.",
+            "format": "date"
+          },
+          "totalCharged": {
+            "type": "number",
+            "description": "Total charged so far.",
+            "format": "decimal"
+          },
+          "totalPaid": {
+            "type": "number",
+            "description": "Total of the payments that count.",
+            "format": "decimal"
+          },
+          "balance": {
+            "type": "number",
+            "description": "Above zero a balance due, below zero a credit.",
+            "format": "decimal"
+          },
+          "oldestUnpaidDueDate": {
+            "type": "string",
+            "description": "Due date of the oldest charge not fully paid, if any.",
+            "format": "date",
+            "nullable": true
+          },
+          "daysOverdue": {
+            "type": "integer",
+            "description": "Days since that charge fell due; zero when nothing is owed.",
+            "format": "int32"
+          }
+        }
+      },
+      "LeaseFeePaymentDto": {
+        "type": "object",
+        "description": "A lease fee payment.",
+        "additionalProperties": false,
+        "properties": {
+          "paymentId": {
+            "type": "string",
+            "description": "The payment's ID."
+          },
+          "receivedDate": {
+            "type": "string",
+            "description": "The day the trust received it.",
+            "format": "date"
+          },
+          "amount": {
+            "type": "number",
+            "description": "The amount received.",
+            "format": "decimal"
+          },
+          "method": {
+            "type": "string",
+            "description": "How it was paid: Check, BankTransfer, Cash, MoneyOrder, Card or Other."
+          },
+          "reference": {
+            "type": "string",
+            "description": "A check number or similar, if given.",
+            "nullable": true
+          },
+          "recordedBy": {
+            "type": "string",
+            "description": "The user who recorded it."
+          },
+          "recordedAt": {
+            "type": "string",
+            "description": "When it was recorded.",
+            "format": "date-time"
+          },
+          "voidReason": {
+            "type": "string",
+            "description": "Why it was voided, or null while it counts.",
+            "nullable": true
+          },
+          "voidedAt": {
+            "type": "string",
+            "description": "When it was voided, if it was.",
+            "format": "date-time",
+            "nullable": true
           }
         }
       },
@@ -8289,6 +8646,148 @@
           }
         }
       },
+      "RecordLeaseFeePaymentResponse": {
+        "type": "object",
+        "description": "Response after recording a lease fee payment.",
+        "additionalProperties": false,
+        "properties": {
+          "paymentId": {
+            "type": "string",
+            "description": "The new payment's ID."
+          }
+        }
+      },
+      "RecordLeaseFeePaymentRequest": {
+        "type": "object",
+        "description": "Request to record a lease fee payment the trust received.",
+        "additionalProperties": false,
+        "properties": {
+          "receivedDate": {
+            "type": "string",
+            "description": "The day the trust received it.",
+            "format": "date"
+          },
+          "amount": {
+            "type": "number",
+            "description": "The amount received.",
+            "format": "decimal"
+          },
+          "method": {
+            "type": "string",
+            "description": "How it was paid: Check, BankTransfer, Cash, MoneyOrder, Card or Other."
+          },
+          "reference": {
+            "type": "string",
+            "description": "A check number or similar, if given.",
+            "nullable": true
+          }
+        }
+      },
+      "VoidLeaseFeePaymentRequest": {
+        "type": "object",
+        "description": "Request to void a lease fee payment recorded by mistake.",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Why it is voided."
+          }
+        }
+      },
+      "PaginatedResponseOfLeaseFeeBalanceResponse": {
+        "type": "object",
+        "description": "Generic paginated response wrapper for API endpoints.",
+        "additionalProperties": false,
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "totalCount",
+          "totalPages"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/LeaseFeeBalanceResponse"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Indicates whether there is a next page of results."
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The current page number (1-based).",
+            "format": "int64"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The number of items per page.",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "The total number of items across all pages.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages.",
+            "format": "int64"
+          }
+        }
+      },
+      "LeaseFeeBalanceResponse": {
+        "type": "object",
+        "description": "A lease and what it owes in lease fees as of the trust's today.",
+        "additionalProperties": false,
+        "properties": {
+          "groundLeaseId": {
+            "type": "string",
+            "description": "The lease."
+          },
+          "homeId": {
+            "type": "string",
+            "description": "The leased home."
+          },
+          "homeLabel": {
+            "type": "string",
+            "description": "The home's label, if known.",
+            "nullable": true
+          },
+          "homeownerFullName": {
+            "type": "string",
+            "description": "The homeowner's name.",
+            "nullable": true
+          },
+          "leaseStatus": {
+            "type": "string",
+            "description": "Active or Inactive."
+          },
+          "monthlyFee": {
+            "type": "number",
+            "description": "The fee charged on the 1st of each month.",
+            "format": "decimal"
+          },
+          "balance": {
+            "type": "number",
+            "description": "Above zero a balance due, below zero a credit.",
+            "format": "decimal"
+          },
+          "oldestUnpaidDueDate": {
+            "type": "string",
+            "description": "Due date of the oldest charge not fully paid, if any.",
+            "format": "date",
+            "nullable": true
+          },
+          "daysOverdue": {
+            "type": "integer",
+            "description": "Days since that charge fell due; zero when nothing is owed.",
+            "format": "int32"
+          }
+        }
+      },
       "CreateGroundLeaseTemplateResponse": {
         "type": "object",
         "description": "Response after creating a ground lease template.",
@@ -8314,6 +8813,14 @@
           "optionWindowDays": {
             "type": "integer",
             "format": "int32"
+          },
+          "landUseFee": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "repairReserveFee": {
+            "type": "number",
+            "format": "decimal"
           },
           "covenantTerms": {
             "type": "string"
@@ -8432,6 +8939,16 @@
             "type": "integer",
             "description": "Days the trust has to buy a home after its homeowner gives notice to sell.",
             "format": "int32"
+          },
+          "landUseFee": {
+            "type": "number",
+            "description": "Monthly land use fee.",
+            "format": "decimal"
+          },
+          "repairReserveFee": {
+            "type": "number",
+            "description": "Monthly repair reserve fee.",
+            "format": "decimal"
           },
           "covenantTerms": {
             "type": "string",
