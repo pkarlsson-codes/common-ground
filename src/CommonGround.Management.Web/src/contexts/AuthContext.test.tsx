@@ -1,12 +1,15 @@
 import { render, screen, waitFor } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { AuthProvider, useAuth } from './AuthContext'
-import { AuthApi } from '../api'
 import { ResponseError } from '../api/runtime'
+
+// hooks/auth builds its AuthApi once, at import, so every test sets this one function instead.
+const { getCurrentUser } = vi.hoisted(() => ({ getCurrentUser: vi.fn() }))
 
 vi.mock('../api', async (importOriginal) => {
   const mod = await importOriginal<typeof import('../api')>()
-  return { ...mod, AuthApi: vi.fn() }
+  return { ...mod, AuthApi: vi.fn(function () { return { getCurrentUser } }) }
 })
 
 vi.mock('../lib/apiConfig', () => ({
@@ -25,28 +28,34 @@ function TestConsumer() {
   )
 }
 
+function renderAuth() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  render(
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider><TestConsumer /></AuthProvider>
+    </QueryClientProvider>
+  )
+}
+
 function makeResponse(status: number): Response {
   return { status } as Response
 }
 
 describe('AuthContext', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    getCurrentUser.mockReset()
   })
 
   it('sets isAuthenticated and user when getCurrentUser returns valid data', async () => {
-    const getCurrentUser = vi.fn().mockResolvedValue({
+    getCurrentUser.mockResolvedValue({
       id: 'user-1',
       username: 'alice',
       email: 'alice@example.com',
       trustId: 'trust-1',
       hasTrust: true,
     })
-    vi.mocked(AuthApi).mockImplementation(function () {
-      return { getCurrentUser } as never
-    })
 
-    render(<AuthProvider><TestConsumer /></AuthProvider>)
+    renderAuth()
     await waitFor(() => expect(screen.queryByText('loading')).toBeNull())
 
     expect(screen.getByTestId('authenticated').textContent).toBe('true')
@@ -55,14 +64,11 @@ describe('AuthContext', () => {
   })
 
   it('sets isAuthenticated=false and error=null on 401', async () => {
-    const getCurrentUser = vi.fn().mockRejectedValue(
+    getCurrentUser.mockRejectedValue(
       new ResponseError(makeResponse(401), 'Unauthorized')
     )
-    vi.mocked(AuthApi).mockImplementation(function () {
-      return { getCurrentUser } as never
-    })
 
-    render(<AuthProvider><TestConsumer /></AuthProvider>)
+    renderAuth()
     await waitFor(() => expect(screen.queryByText('loading')).toBeNull())
 
     expect(screen.getByTestId('authenticated').textContent).toBe('false')
@@ -71,12 +77,9 @@ describe('AuthContext', () => {
   })
 
   it('sets error message on non-401 failure', async () => {
-    const getCurrentUser = vi.fn().mockRejectedValue(new Error('Network error'))
-    vi.mocked(AuthApi).mockImplementation(function () {
-      return { getCurrentUser } as never
-    })
+    getCurrentUser.mockRejectedValue(new Error('Network error'))
 
-    render(<AuthProvider><TestConsumer /></AuthProvider>)
+    renderAuth()
     await waitFor(() => expect(screen.queryByText('loading')).toBeNull())
 
     expect(screen.getByTestId('authenticated').textContent).toBe('false')
