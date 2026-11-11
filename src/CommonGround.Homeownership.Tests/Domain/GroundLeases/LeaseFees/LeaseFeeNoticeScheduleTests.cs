@@ -26,11 +26,13 @@ public class LeaseFeeNoticeScheduleTests
     public class TheCreateMethod
     {
         [Theory]
-        [InlineData(0, 30, "homeownership.lease_fee_notice_schedule.create.first_notice_days_too_few")]
-        [InlineData(10, 10, "homeownership.lease_fee_notice_schedule.create.second_notice_not_after_first")]
-        public void GivenInvalidDays_WhenCreated_ThenThrowsBusinessRuleViolation(int first, int second, string expectedCode)
+        [InlineData(0, 30, 60, "homeownership.lease_fee_notice_schedule.create.first_notice_days_too_few")]
+        [InlineData(10, 10, 60, "homeownership.lease_fee_notice_schedule.create.second_notice_not_after_first")]
+        [InlineData(10, 30, 30, "homeownership.lease_fee_notice_schedule.create.default_notice_not_after_second")]
+        public void GivenInvalidDays_WhenCreated_ThenThrowsBusinessRuleViolation(
+            int first, int second, int defaultNotice, string expectedCode)
         {
-            var act = () => LeaseFeeNoticeSchedule.Create(first, second);
+            var act = () => LeaseFeeNoticeSchedule.Create(first, second, defaultNotice);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }
@@ -44,6 +46,8 @@ public class LeaseFeeNoticeScheduleTests
         [InlineData("2026-02-10", null)]
         [InlineData("2026-02-11", "First")]
         [InlineData("2026-03-03", "Second")]
+        [InlineData("2026-04-01", "Second")]
+        [InlineData("2026-04-02", "Default")]
         public void GivenNoNoticeSent_WhenDaysOverduePassAThreshold_ThenThatNoticeIsDue(string asOf, string? expected)
         {
             var sut = _testBed.Schedule.NoticeDue(TestBed.BehindSinceFebruary(asOf), []);
@@ -72,10 +76,19 @@ public class LeaseFeeNoticeScheduleTests
         }
 
         [Fact]
-        public void GivenSecondNoticeSentInTheseArrears_WhenStillBehind_ThenNoThirdNoticeIsDue()
+        public void GivenSecondNoticeSentInTheseArrears_WhenPastTheDefaultThreshold_ThenTheNoticeOfDefaultIsDue()
         {
             var sut = _testBed.Schedule.NoticeDue(
                 TestBed.BehindSinceFebruary("2026-05-20"), [TestBed.Sent(LeaseFeeNoticeLevel.Second, "2026-03-05")]);
+
+            sut.Should().Be(LeaseFeeNoticeLevel.Default);
+        }
+
+        [Fact]
+        public void GivenNoticeOfDefaultSentInTheseArrears_WhenStillBehind_ThenNoFurtherNoticeIsDue()
+        {
+            var sut = _testBed.Schedule.NoticeDue(
+                TestBed.BehindSinceFebruary("2026-07-20"), [TestBed.Sent(LeaseFeeNoticeLevel.Default, "2026-04-02")]);
 
             sut.Should().BeNull();
         }
@@ -92,7 +105,7 @@ public class LeaseFeeNoticeScheduleTests
         [Fact]
         public void GivenTrustScheduleOfFiveAndFifteenDays_WhenSixDaysOverdue_ThenTheFirstIsDue()
         {
-            var sut = LeaseFeeNoticeSchedule.Create(5, 15).NoticeDue(TestBed.BehindSinceFebruary("2026-02-07"), []);
+            var sut = LeaseFeeNoticeSchedule.Create(5, 15, 45).NoticeDue(TestBed.BehindSinceFebruary("2026-02-07"), []);
 
             sut.Should().Be(LeaseFeeNoticeLevel.First);
         }

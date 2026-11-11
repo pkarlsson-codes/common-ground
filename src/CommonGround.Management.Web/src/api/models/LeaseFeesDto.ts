@@ -28,6 +28,13 @@ import {
     LeaseFeePaymentDtoToJSON,
     LeaseFeePaymentDtoToJSONTyped,
 } from './LeaseFeePaymentDto';
+import type { DefaultCureDto } from './DefaultCureDto';
+import {
+    DefaultCureDtoFromJSON,
+    DefaultCureDtoFromJSONTyped,
+    DefaultCureDtoToJSON,
+    DefaultCureDtoToJSONTyped,
+} from './DefaultCureDto';
 import type { LeaseFeeNoticeDto } from './LeaseFeeNoticeDto';
 import {
     LeaseFeeNoticeDtoFromJSON,
@@ -92,7 +99,7 @@ export interface LeaseFeesDto {
      */
     payments?: Array<LeaseFeePaymentDto>;
     /**
-     * The late notice due now, First or Second, or null.
+     * The late notice due now, First, Second or Default, or null.
      * @type {string}
      * @memberof LeaseFeesDto
      */
@@ -109,6 +116,12 @@ export interface LeaseFeesDto {
      * @memberof LeaseFeesDto
      */
     interestWaivers?: Array<LeaseFeeInterestWaiverDto>;
+    /**
+     * 
+     * @type {DefaultCureDto}
+     * @memberof LeaseFeesDto
+     */
+    defaultCure?: DefaultCureDto | null;
 }
 
 /**
@@ -138,6 +151,7 @@ export function LeaseFeesDtoFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'noticeDue': json['noticeDue'] == null ? undefined : json['noticeDue'],
         'notices': json['notices'] == null ? undefined : ((json['notices'] as Array<any>).map(LeaseFeeNoticeDtoFromJSON)),
         'interestWaivers': json['interestWaivers'] == null ? undefined : ((json['interestWaivers'] as Array<any>).map(LeaseFeeInterestWaiverDtoFromJSON)),
+        'defaultCure': json['defaultCure'] == null ? undefined : DefaultCureDtoFromJSON(json['defaultCure']),
     };
 }
 
@@ -162,6 +176,7 @@ export function LeaseFeesDtoToJSONTyped(value?: LeaseFeesDto | null, ignoreDiscr
         'noticeDue': value['noticeDue'],
         'notices': value['notices'] == null ? undefined : ((value['notices'] as Array<any>).map(LeaseFeeNoticeDtoToJSON)),
         'interestWaivers': value['interestWaivers'] == null ? undefined : ((value['interestWaivers'] as Array<any>).map(LeaseFeeInterestWaiverDtoToJSON)),
+        'defaultCure': DefaultCureDtoToJSON(value['defaultCure']),
     };
 }
 

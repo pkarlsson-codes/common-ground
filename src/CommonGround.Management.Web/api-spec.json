@@ -8716,7 +8716,7 @@
           },
           "noticeDue": {
             "type": "string",
-            "description": "The late notice due now, First or Second, or null.",
+            "description": "The late notice due now, First, Second or Default, or null.",
             "nullable": true
           },
           "notices": {
@@ -8732,6 +8732,15 @@
             "items": {
               "$ref": "#/components/schemas/LeaseFeeInterestWaiverDto"
             }
+          },
+          "defaultCure": {
+            "description": "Where the last notice of default stands, or null if none was sent.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DefaultCureDto"
+              }
+            ]
           }
         }
       },
@@ -8866,7 +8875,7 @@
           },
           "level": {
             "type": "string",
-            "description": "Which notice: First or Second."
+            "description": "Which notice: First, Second or Default."
           },
           "sentOn": {
             "type": "string",
@@ -8895,6 +8904,18 @@
             "type": "string",
             "description": "When it was recorded.",
             "format": "date-time"
+          },
+          "cureDays": {
+            "type": "integer",
+            "description": "A notice of default's cure days; null for other notices.",
+            "format": "int32",
+            "nullable": true
+          },
+          "cureExtensionDays": {
+            "type": "integer",
+            "description": "A notice of default's extension days; null for other notices.",
+            "format": "int32",
+            "nullable": true
           }
         }
       },
@@ -8924,6 +8945,57 @@
           "waivedBy": {
             "type": "string",
             "description": "The user who waived it."
+          }
+        }
+      },
+      "DefaultCureDto": {
+        "type": "object",
+        "description": "Where a notice of default stands as of the trust's today (Art 12.1).",
+        "additionalProperties": false,
+        "properties": {
+          "sentOn": {
+            "type": "string",
+            "description": "The day the notice was sent.",
+            "format": "date"
+          },
+          "amountOwed": {
+            "type": "number",
+            "description": "What the notice said was owed.",
+            "format": "decimal"
+          },
+          "originalDeadline": {
+            "type": "string",
+            "description": "The cure deadline before any extension.",
+            "format": "date"
+          },
+          "cureBy": {
+            "type": "string",
+            "description": "The last day to pay, extended when two-thirds was paid by the original deadline.",
+            "format": "date"
+          },
+          "extended": {
+            "type": "boolean",
+            "description": "Whether the deadline was extended."
+          },
+          "paidSinceNotice": {
+            "type": "number",
+            "description": "The total received since the notice was sent.",
+            "format": "decimal"
+          },
+          "stillToPay": {
+            "type": "number",
+            "description": "What is still to pay of the amount owed; zero once paid.",
+            "format": "decimal"
+          },
+          "paidInFullOn": {
+            "type": "string",
+            "description": "The day payments since the notice reached the amount owed, if they have.",
+            "format": "date",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "description": "Curing, Cured, PaidAfterDeadline or Uncured."
           }
         }
       },
@@ -9217,7 +9289,7 @@
           },
           "noticeDue": {
             "type": "string",
-            "description": "The late notice due now, First or Second, or null.",
+            "description": "The late notice due now, First, Second or Default, or null.",
             "nullable": true
           },
           "lastNoticeLevel": {
@@ -9256,6 +9328,15 @@
             "description": "The last day the oldest unpaid fee can be paid without interest, if that is still ahead.",
             "format": "date",
             "nullable": true
+          },
+          "defaultCure": {
+            "description": "Where the lease's last notice of default stands, or null if none was sent.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DefaultCureDto"
+              }
+            ]
           }
         }
       },
@@ -9277,7 +9358,7 @@
         "properties": {
           "level": {
             "type": "string",
-            "description": "Which notice: First or Second."
+            "description": "Which notice: First, Second or Default."
           },
           "sentOn": {
             "type": "string",
@@ -9331,6 +9412,16 @@
             "type": "string",
             "description": "The trust's sign-off for the end of every letter; empty for none."
           },
+          "cureDays": {
+            "type": "integer",
+            "description": "Days a notice of default gives to pay, for its letter.",
+            "format": "int32"
+          },
+          "cureExtensionDays": {
+            "type": "integer",
+            "description": "Days added when two-thirds is paid within the cure days, for its letter.",
+            "format": "int32"
+          },
           "notices": {
             "type": "array",
             "description": "Each lease with a notice due, most days overdue first.",
@@ -9353,6 +9444,21 @@
           "secondNoticeDays": {
             "type": "integer",
             "description": "Days overdue before the second notice.",
+            "format": "int32"
+          },
+          "defaultNoticeDays": {
+            "type": "integer",
+            "description": "Days overdue before the notice of default.",
+            "format": "int32"
+          },
+          "cureDays": {
+            "type": "integer",
+            "description": "Days a notice of default gives to pay.",
+            "format": "int32"
+          },
+          "cureExtensionDays": {
+            "type": "integer",
+            "description": "Days added when two-thirds is paid within the cure days.",
             "format": "int32"
           },
           "letterSignOff": {
@@ -9378,6 +9484,21 @@
           "secondNoticeDays": {
             "type": "integer",
             "description": "Days overdue before the second notice; more than the first.",
+            "format": "int32"
+          },
+          "defaultNoticeDays": {
+            "type": "integer",
+            "description": "Days overdue before the notice of default; more than the second.",
+            "format": "int32"
+          },
+          "cureDays": {
+            "type": "integer",
+            "description": "Days a notice of default gives to pay; at least 1.",
+            "format": "int32"
+          },
+          "cureExtensionDays": {
+            "type": "integer",
+            "description": "Days added when two-thirds is paid within the cure days; zero for none.",
             "format": "int32"
           },
           "letterSignOff": {

@@ -18,7 +18,7 @@ namespace CommonGround.API.Infrastructure.Seeding;
 /// Seeds lease fee payments on every lease the seeders before it created: each month's fee is paid a few days
 /// after it falls due, so a lease reads as paid up. The leases in lease-fees.seed.json leave their last months
 /// unpaid, and may pay part of the oldest of them, so the Lease Fees tab has balances to show; one of them also has
-/// a first late notice sent. Each trust's notice policy keeps the default days and gets a sign-off with its name.
+/// a first late notice and a notice of default sent. Each trust's notice policy keeps the default days and gets a sign-off with its name.
 /// </summary>
 public sealed class LeaseFeesSeeder(ITrustClock trustClock) : IDevelopmentSeeder
 {
@@ -91,7 +91,18 @@ public sealed class LeaseFeesSeeder(ITrustClock trustClock) : IDevelopmentSeeder
                     {
                         clock.MoveTo(sentOn);
                         stream.Decide(l => l.RecordLeaseFeeNotice(
-                            LeaseFeeNoticeId.Generate(), LeaseFeeNoticeLevel.First, sentOn, NoticeDelivery.FirstClassMail, sentOn, SeederUserId));
+                            LeaseFeeNoticeId.Generate(), LeaseFeeNoticeLevel.First, sentOn, NoticeDelivery.FirstClassMail,
+                            DefaultCurePeriod.Default, sentOn, SeederUserId));
+                    }
+
+                    if (arrears.GetValueOrDefault(leaseId)?.DefaultNoticeAfterDays is { } defaultDays
+                        && oldestUnpaid?.AddDays(defaultDays) is { } defaultSentOn
+                        && defaultSentOn <= today)
+                    {
+                        clock.MoveTo(defaultSentOn);
+                        stream.Decide(l => l.RecordLeaseFeeNotice(
+                            LeaseFeeNoticeId.Generate(), LeaseFeeNoticeLevel.Default, defaultSentOn, NoticeDelivery.CertifiedMail,
+                            DefaultCurePeriod.Default, defaultSentOn, SeederUserId));
                     }
                 }
 
@@ -111,7 +122,7 @@ public sealed class LeaseFeesSeeder(ITrustClock trustClock) : IDevelopmentSeeder
 
         var trust = await GetTrustHandler.Handle(new GetTrust(trustId), store, cancellation).ConfigureAwait(false);
         var signOff = $"{trust?.Name ?? "Community Land Trust"}\nStewardship Team\n(503) 555-0100 · stewardship@example.org";
-        stream.AppendOne(LeaseFeeNoticePolicy.Set(id, LeaseFeeNoticeSchedule.Default, signOff, SeederUserId));
+        stream.AppendOne(LeaseFeeNoticePolicy.Set(id, LeaseFeeNoticeSchedule.Default, DefaultCurePeriod.Default, signOff, SeederUserId));
     }
 
     private static List<(DateOnly Received, decimal Amount, PaymentMethod Method, string? Reference)> Payments(
@@ -178,5 +189,7 @@ public sealed class LeaseFeesSeeder(ITrustClock trustClock) : IDevelopmentSeeder
         public decimal? PartialPayment { get; set; }
 
         public int? FirstNoticeAfterDays { get; set; }
+
+        public int? DefaultNoticeAfterDays { get; set; }
     }
 }

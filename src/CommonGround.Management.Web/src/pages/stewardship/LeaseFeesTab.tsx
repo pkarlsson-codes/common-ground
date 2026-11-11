@@ -19,10 +19,20 @@ function SkeletonRows() {
   )
 }
 
-/** "First due", "Second due", the last notice sent in these arrears, or nothing. */
+const SHORT_LEVEL: Record<string, string> = { First: 'First', Second: 'Second', Default: 'Notice of default' }
+
+/**
+ * An uncured default, "First due", "Second due", "Notice of default due", a running cure period, the last notice
+ * sent in these arrears, or nothing.
+ */
 function noticeCell(b: LeaseFeeBalanceResponse) {
-  if (b.noticeDue) return <span style={{ color: 'var(--warning)' }}>{b.noticeDue} due</span>
-  if (b.lastNoticeLevel && b.lastNoticeSentOn) return `${b.lastNoticeLevel} sent ${formatCalendarDate(b.lastNoticeSentOn)}`
+  const cure = b.defaultCure
+  if (cure?.status === 'Uncured' && b.leaseStatus === 'Active' && cure.cureBy)
+    return <span style={{ color: 'var(--red)' }}>Default not cured by {formatCalendarDate(cure.cureBy)}</span>
+  if (b.noticeDue) return <span style={{ color: 'var(--warning)' }}>{SHORT_LEVEL[b.noticeDue] ?? b.noticeDue} due</span>
+  if (cure?.status === 'Curing' && cure.cureBy) return `Notice of default: cure by ${formatCalendarDate(cure.cureBy)}`
+  if (b.lastNoticeLevel && b.lastNoticeSentOn)
+    return `${SHORT_LEVEL[b.lastNoticeLevel] ?? b.lastNoticeLevel} sent ${formatCalendarDate(b.lastNoticeSentOn)}`
   return '—'
 }
 

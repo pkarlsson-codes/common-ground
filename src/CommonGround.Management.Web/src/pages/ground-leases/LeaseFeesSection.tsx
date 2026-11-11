@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import type { GroundLeaseResponse, LeaseFeePaymentDto } from '../../api'
+import type { DefaultCureDto, GroundLeaseResponse, LeaseFeePaymentDto } from '../../api'
 import { NOTICE_DELIVERY_LABELS, NOTICE_LEVEL_LABELS, PAYMENT_METHOD_LABELS } from '../../hooks/groundLeases'
-import { formatCalendarDate } from '../../lib/calendarDate'
+import { formatCalendarDate, type CalendarDate } from '../../lib/calendarDate'
 import { formatPrice } from '../../lib/currency'
 import { formatBalance, formatDaysOverdue, formatDueMonth } from './leaseFeeFormat'
 import { lateInterestText } from './lateInterest'
@@ -10,6 +10,40 @@ import RecordLeaseFeeNoticePanel from './RecordLeaseFeeNoticePanel'
 import RecordLeaseFeePaymentPanel from './RecordLeaseFeePaymentPanel'
 import VoidLeaseFeePaymentPanel from './VoidLeaseFeePaymentPanel'
 import WaiveLeaseFeeInterestPanel from './WaiveLeaseFeeInterestPanel'
+
+const longDate = (d?: CalendarDate | null) => (d ? formatCalendarDate(d, { year: 'numeric', month: 'long', day: 'numeric' }) : '—')
+
+/** Where the lease's last notice of default stands (Art 12.1): the cure deadline, what is left to pay, or how it ended. */
+function DefaultCureStatus({ cure }: { cure: DefaultCureDto }) {
+  const sent = longDate(cure.sentOn)
+  const owed = formatPrice(cure.amountOwed ?? 0)
+  const left = formatPrice(cure.stillToPay ?? 0)
+  const extended = cure.extended
+    ? ` Extended from ${longDate(cure.originalDeadline)}: two-thirds was paid in time.`
+    : ''
+  const uncured = cure.status === 'Uncured'
+  const text = {
+    Curing: `Notice of default sent ${sent} for ${owed}. Cure by ${longDate(cure.cureBy)}: ${left} still to pay.${extended}`,
+    Cured: `Notice of default of ${sent} cured: ${owed} paid by ${longDate(cure.paidInFullOn)}.`,
+    PaidAfterDeadline: `Notice of default of ${sent}: ${owed} paid on ${longDate(cure.paidInFullOn)}, after the cure deadline of ${longDate(cure.cureBy)}.`,
+    Uncured: `Notice of default of ${sent} not cured by ${longDate(cure.cureBy)}: ${left} of ${owed} still to pay. The trust may end the lease or agree a plan with the homeowner.${extended}`,
+  }[cure.status ?? ''] ?? ''
+  const active = cure.status === 'Curing' || uncured
+
+  return (
+    <div
+      role="status"
+      aria-label="Notice of default"
+      style={{
+        marginBottom: 12, padding: '8px 12px', borderRadius: 6, fontSize: 13,
+        background: active ? (uncured ? 'var(--danger-surface)' : 'var(--warning-surface)') : 'var(--surface-2)',
+        color: uncured ? 'var(--red)' : undefined,
+      }}
+    >
+      {text}
+    </div>
+  )
+}
 
 /** The lease's monthly fee, what it owes today with late interest, the payments the trust has recorded, and its late notices. */
 export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse }) {
@@ -85,6 +119,8 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
             </p>
           )}
 
+          {fees.defaultCure && <DefaultCureStatus cure={fees.defaultCure} />}
+
           {noticeDue && (
             <div
               role="status"
@@ -93,7 +129,7 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
                 padding: '8px 12px', borderRadius: 6, background: 'var(--warning-surface)',
               }}
             >
-              <strong style={{ color: 'var(--warning)' }}>{noticeDue === 'Second' ? 'Second notice due' : 'First notice due'}</strong>
+              <strong style={{ color: 'var(--warning)' }}>{NOTICE_LEVEL_LABELS[noticeDue] ?? noticeDue} due</strong>
               <button type="button" className="btn btn-secondary btn-sm" onClick={() => openNoticeLetters(lease.id!)}>
                 Print Letter
               </button>

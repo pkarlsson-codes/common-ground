@@ -46,7 +46,10 @@ export default function LeaseFeeNoticesPrintPage() {
 
       <div className="letters">
         {today && notices.map(n => {
-          const letter = leaseFeeLetter(n, n.noticeDue ?? 'First', today, data?.letterSignOff ?? '')
+          const letter = leaseFeeLetter(n, n.noticeDue ?? 'First', today, data?.letterSignOff ?? '', {
+            cureDays: data?.cureDays ?? 30,
+            extensionDays: data?.cureExtensionDays ?? 30,
+          })
           return (
             <article key={n.groundLeaseId} className="notice-letter" aria-label={`Notice to ${n.homeownerFullName ?? 'homeowner'}`}>
               <p>{letter.date}</p>

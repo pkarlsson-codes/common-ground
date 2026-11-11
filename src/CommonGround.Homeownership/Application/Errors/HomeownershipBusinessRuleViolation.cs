@@ -1,4 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.Homeownership.Domain.Resales;
@@ -281,6 +282,22 @@ public static class BusinessRuleViolation
                     {
                         ["sentOn"] = sentOn,
                     });
+
+            public static BusinessRuleViolationException DefaultNoticeDeliveryNotAllowed(NoticeDelivery delivery)
+                => new(
+                    "homeownership.ground_lease.record_lease_fee_notice.default_notice_delivery_not_allowed",
+                    new Dictionary<string, object?>
+                    {
+                        ["delivery"] = delivery.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException DefaultNoticeAlreadyCuring(DateOnly cureBy)
+                => new(
+                    "homeownership.ground_lease.record_lease_fee_notice.default_notice_already_curing",
+                    new Dictionary<string, object?>
+                    {
+                        ["cureBy"] = cureBy,
+                    });
         }
 
         public static class WaiveLeaseFeeInterest
@@ -349,6 +366,37 @@ public static class BusinessRuleViolation
                     {
                         ["firstNoticeDays"] = firstNoticeDays,
                         ["secondNoticeDays"] = secondNoticeDays,
+                    });
+
+            public static BusinessRuleViolationException DefaultNoticeNotAfterSecond(int secondNoticeDays, int defaultNoticeDays)
+                => new(
+                    "homeownership.lease_fee_notice_schedule.create.default_notice_not_after_second",
+                    new Dictionary<string, object?>
+                    {
+                        ["secondNoticeDays"] = secondNoticeDays,
+                        ["defaultNoticeDays"] = defaultNoticeDays,
+                    });
+        }
+    }
+
+    public static class DefaultCurePeriod
+    {
+        public static class Create
+        {
+            public static BusinessRuleViolationException CureDaysTooFew(int cureDays)
+                => new(
+                    "homeownership.default_cure_period.create.cure_days_too_few",
+                    new Dictionary<string, object?>
+                    {
+                        ["cureDays"] = cureDays,
+                    });
+
+            public static BusinessRuleViolationException ExtensionDaysNegative(int extensionDays)
+                => new(
+                    "homeownership.default_cure_period.create.extension_days_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["extensionDays"] = extensionDays,
                     });
         }
     }

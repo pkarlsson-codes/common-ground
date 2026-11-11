@@ -12,6 +12,8 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.Events;
 /// <param name="BalanceDue">What the lease owed that day.</param>
 /// <param name="OldestUnpaidDueDate">The due date of the oldest unpaid charge that day.</param>
 /// <param name="RecordedBy">The staff user who recorded it.</param>
+/// <param name="CureDays">A notice of default's cure days; null for other notices.</param>
+/// <param name="CureExtensionDays">A notice of default's extension days; null for other notices.</param>
 public sealed record LeaseFeeNoticeRecorded(
     string AggregateId,
     string NoticeId,
@@ -20,4 +22,6 @@ public sealed record LeaseFeeNoticeRecorded(
     NoticeDelivery Delivery,
     decimal BalanceDue,
     DateOnly OldestUnpaidDueDate,
-    string RecordedBy) : DomainEvent(AggregateId);
+    string RecordedBy,
+    int? CureDays = null,
+    int? CureExtensionDays = null) : DomainEvent(AggregateId);

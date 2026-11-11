@@ -124,12 +124,13 @@ export function useLeaseFeeBalances(pageNumber: number, filter: LeaseFeeFilter, 
   })
 }
 
-export const NOTICE_LEVELS = ['First', 'Second'] as const
+export const NOTICE_LEVELS = ['First', 'Second', 'Default'] as const
 export type NoticeLevel = typeof NOTICE_LEVELS[number]
 
 export const NOTICE_LEVEL_LABELS: Record<string, string> = {
   First: 'First Notice',
   Second: 'Second Notice',
+  Default: 'Notice of Default',
 }
 
 export const NOTICE_DELIVERIES = ['FirstClassMail', 'CertifiedMail', 'RegisteredMail', 'HandDelivered', 'Email'] as const
@@ -141,6 +142,21 @@ export const NOTICE_DELIVERY_LABELS: Record<string, string> = {
   RegisteredMail: 'Registered Mail',
   HandDelivered: 'Hand Delivered',
   Email: 'Email',
+}
+
+/** The deliveries a notice of default may use: the lease's notice clause (Art 14.2) asks for proof it arrived. */
+export const DEFAULT_NOTICE_DELIVERIES: readonly NoticeDelivery[] = ['CertifiedMail', 'RegisteredMail', 'HandDelivered']
+
+/** The deliveries a notice of the given level may use. */
+export const deliveriesFor = (level: string): readonly NoticeDelivery[] =>
+  level === 'Default' ? DEFAULT_NOTICE_DELIVERIES : NOTICE_DELIVERIES
+
+/** What a notice of default's cure status means, for a lease's Lease Fees section. */
+export const DEFAULT_CURE_STATUS_LABELS: Record<string, string> = {
+  Curing: 'Cure period running',
+  Cured: 'Cured',
+  PaidAfterDeadline: 'Paid after the deadline',
+  Uncured: 'Not cured',
 }
 
 export interface RecordLeaseFeeNoticeForm {
@@ -196,6 +212,9 @@ export function useLeaseFeeNoticePolicy() {
 export interface LeaseFeeNoticePolicyForm {
   firstNoticeDays: number
   secondNoticeDays: number
+  defaultNoticeDays: number
+  cureDays: number
+  cureExtensionDays: number
   letterSignOff: string
 }
 

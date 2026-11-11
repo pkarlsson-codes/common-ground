@@ -39,6 +39,7 @@ models/CreateTrustResponse.ts
 models/CurePeriodActivationResponse.ts
 models/CureViolationRequest.ts
 models/CurrentUserDto.ts
+models/DefaultCureDto.ts
 models/DenyApplicationRequest.ts
 models/DevelopmentProjectListItemResponse.ts
 models/DevelopmentProjectResponse.ts

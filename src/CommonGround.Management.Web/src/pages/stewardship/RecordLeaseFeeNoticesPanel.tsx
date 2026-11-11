@@ -4,6 +4,7 @@ import { DateInput } from '../../components/DateInput'
 import SlideOver from '../../components/SlideOver'
 import SlideOverCancelButton from '../../components/SlideOverCancelButton'
 import {
+  DEFAULT_NOTICE_DELIVERIES,
   NOTICE_DELIVERIES,
   NOTICE_DELIVERY_LABELS,
   NOTICE_LEVEL_LABELS,
@@ -27,7 +28,9 @@ interface Failure {
 }
 
 /**
- * Records the notices of a print run as sent, one per ticked lease, all with the same date and delivery. A lease
+ * Records the notices of a print run as sent, one per ticked lease, all with the same date and delivery. A notice of
+ * default needs certified or registered mail, or hand delivery, so the run can't be recorded with another delivery
+ * while one is ticked. A lease
  * that fails (paid up since printing, say) is listed with why; the others are still recorded.
  */
 export default function RecordLeaseFeeNoticesPanel({ onClose }: Props) {
@@ -42,6 +45,8 @@ export default function RecordLeaseFeeNoticesPanel({ onClose }: Props) {
   const { success } = useToast()
 
   const ticked = notices.filter(n => !unticked.has(n.groundLeaseId!))
+  const defaultsTicked = ticked.some(n => n.noticeDue === 'Default')
+  const deliveryRefused = defaultsTicked && !DEFAULT_NOTICE_DELIVERIES.includes(delivery)
 
   const toggle = (id: string) => setUnticked(prev => {
     const next = new Set(prev)
@@ -91,7 +96,7 @@ export default function RecordLeaseFeeNoticesPanel({ onClose }: Props) {
             className="btn btn-primary"
             type="submit"
             form="record-lease-fee-notices-form"
-            disabled={pending || count === 0 || !sentOn}
+            disabled={pending || count === 0 || !sentOn || deliveryRefused}
           >
             {pending ? 'Recording…' : count === 1 ? 'Record 1 Notice' : `Record ${count} Notices`}
           </button>
@@ -121,6 +126,12 @@ export default function RecordLeaseFeeNoticesPanel({ onClose }: Props) {
             >
               {NOTICE_DELIVERIES.map(d => <option key={d} value={d}>{NOTICE_DELIVERY_LABELS[d]}</option>)}
             </select>
+            {deliveryRefused && (
+              <div className="form-help" style={{ color: 'var(--red)' }}>
+                Notices of default must go by certified or registered mail, or by hand. Choose one of those, or untick them
+                and record them separately.
+              </div>
+            )}
           </div>
         </div>
 

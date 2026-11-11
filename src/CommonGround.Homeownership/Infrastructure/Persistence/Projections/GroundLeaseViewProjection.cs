@@ -108,6 +108,8 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             Delivery = e.Delivery.DisplayName,
             BalanceDue = e.BalanceDue,
             OldestUnpaidDueDate = e.OldestUnpaidDueDate,
+            CureDays = e.CureDays,
+            CureExtensionDays = e.CureExtensionDays,
             RecordedBy = e.RecordedBy,
             RecordedAt = e.OccurredAt,
         });

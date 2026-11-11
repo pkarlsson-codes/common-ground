@@ -39,6 +39,25 @@ describe('leaseFeeLetter', () => {
     expect(letter.signOff).toEqual([])
   })
 
+  it('gives a notice of default the cure deadline, the two-thirds extension and what happens if it is not cured', () => {
+    const letter = leaseFeeLetter(lease, 'Default', d('2026-11-10'), '', { cureDays: 30, extensionDays: 30 })
+
+    expect(letter.heading).toBe('Notice of default: lease fee unpaid')
+    expect(letter.paragraphs).toContain(
+      'This is a formal notice of default under your ground lease. To cure the default, you must pay the $180.00 owed within 30 days of the date of this notice, by December 10, 2026.')
+    expect(letter.paragraphs).toContain(
+      'If you pay at least two-thirds of this amount ($120.00) by December 10, 2026, you will have 30 more days, until January 9, 2027, to pay the rest.')
+    expect(letter.paragraphs.join(' ')).toContain('may end your ground lease')
+    expect(letter.paragraphs.join(' ')).not.toContain('disregard this letter')
+  })
+
+  it('leaves out the extension when the trust gives none', () => {
+    const letter = leaseFeeLetter(lease, 'Default', d('2026-11-10'), '', { cureDays: 20, extensionDays: 0 })
+
+    expect(letter.paragraphs.join(' ')).toContain('within 20 days of the date of this notice, by November 30, 2026.')
+    expect(letter.paragraphs.join(' ')).not.toContain('two-thirds')
+  })
+
   it('tells a first notice the interest rate and the day it is waived until', () => {
     const letter = leaseFeeLetter(
       { ...lease, balance: 60, oldestUnpaidDueDate: d('2026-11-01'), lateInterestRate: 10, interestWaiverDays: 30, interestWaivedIfPaidBy: d('2026-12-01') },

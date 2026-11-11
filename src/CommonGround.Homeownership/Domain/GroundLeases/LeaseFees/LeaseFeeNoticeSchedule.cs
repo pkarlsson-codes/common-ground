@@ -6,6 +6,7 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 /// <summary>
 /// How many days overdue a lease fee may be before the trust sends each late notice. Ch 23 asks for a first notice
 /// "by the middle of that first month" and a second once the fee is more than a month late; each trust sets its own.
+/// The notice of default (Art 12.1) follows the second.
 /// </summary>
 public sealed class LeaseFeeNoticeSchedule : ValueObject
 {
@@ -15,20 +16,25 @@ public sealed class LeaseFeeNoticeSchedule : ValueObject
     /// <summary>The second notice's days when a trust hasn't set its own.</summary>
     public const int DefaultSecondNoticeDays = 30;
 
-    private LeaseFeeNoticeSchedule(int firstNoticeDays, int secondNoticeDays)
+    /// <summary>The notice of default's days when a trust hasn't set its own.</summary>
+    public const int DefaultDefaultNoticeDays = 60;
+
+    private LeaseFeeNoticeSchedule(int firstNoticeDays, int secondNoticeDays, int defaultNoticeDays)
     {
         FirstNoticeDays = firstNoticeDays;
         SecondNoticeDays = secondNoticeDays;
+        DefaultNoticeDays = defaultNoticeDays;
     }
 
-    /// <summary>Gets the schedule a trust has until it sets its own: 10 and 30 days.</summary>
-    public static LeaseFeeNoticeSchedule Default { get; } = new(DefaultFirstNoticeDays, DefaultSecondNoticeDays);
+    /// <summary>Gets the schedule a trust has until it sets its own: 10, 30 and 60 days.</summary>
+    public static LeaseFeeNoticeSchedule Default { get; } =
+        new(DefaultFirstNoticeDays, DefaultSecondNoticeDays, DefaultDefaultNoticeDays);
 
     /// <summary>
-    /// Creates a schedule. Refused when the first notice's days are below 1, or the second's are not more than the
-    /// first's.
+    /// Creates a schedule. Refused when the first notice's days are below 1, the second's are not more than the
+    /// first's, or the notice of default's are not more than the second's.
     /// </summary>
-    public static LeaseFeeNoticeSchedule Create(int firstNoticeDays, int secondNoticeDays)
+    public static LeaseFeeNoticeSchedule Create(int firstNoticeDays, int secondNoticeDays, int defaultNoticeDays)
     {
         if (firstNoticeDays < 1)
             throw BusinessRuleViolation.LeaseFeeNoticeSchedule.Create.FirstNoticeDaysTooFew(firstNoticeDays);
@@ -36,7 +42,10 @@ public sealed class LeaseFeeNoticeSchedule : ValueObject
         if (secondNoticeDays <= firstNoticeDays)
             throw BusinessRuleViolation.LeaseFeeNoticeSchedule.Create.SecondNoticeNotAfterFirst(firstNoticeDays, secondNoticeDays);
 
-        return new LeaseFeeNoticeSchedule(firstNoticeDays, secondNoticeDays);
+        if (defaultNoticeDays <= secondNoticeDays)
+            throw BusinessRuleViolation.LeaseFeeNoticeSchedule.Create.DefaultNoticeNotAfterSecond(secondNoticeDays, defaultNoticeDays);
+
+        return new LeaseFeeNoticeSchedule(firstNoticeDays, secondNoticeDays, defaultNoticeDays);
     }
 
     /// <summary>Gets the days overdue before the first notice.</summary>
@@ -45,10 +54,23 @@ public sealed class LeaseFeeNoticeSchedule : ValueObject
     /// <summary>Gets the days overdue before the second notice.</summary>
     public int SecondNoticeDays { get; }
 
+    /// <summary>Gets the days overdue before the notice of default.</summary>
+    public int DefaultNoticeDays { get; }
+
+    /// <summary>Gets the days overdue before a notice of the given level.</summary>
+    public int DaysFor(LeaseFeeNoticeLevel level)
+    {
+        ArgumentNullException.ThrowIfNull(level);
+
+        return level == LeaseFeeNoticeLevel.Default ? DefaultNoticeDays
+            : level == LeaseFeeNoticeLevel.Second ? SecondNoticeDays
+            : FirstNoticeDays;
+    }
+
     /// <summary>
     /// Gets the notice a lease needs now, or null. A notice is due once the oldest unpaid charge has been overdue for
-    /// its days, unless a notice of that level or higher was sent since the arrears began. Past the second notice's
-    /// days, the second is due even if the first was never sent.
+    /// its days, unless a notice of that level or higher was sent since the arrears began. Past a later notice's days,
+    /// it is due even if the earlier ones were never sent.
     /// </summary>
     /// <param name="statement">The lease's statement as of today.</param>
     /// <param name="sent">The notices sent on the lease.</param>
@@ -60,7 +82,8 @@ public sealed class LeaseFeeNoticeSchedule : ValueObject
         if (statement.Balance <= 0 || statement.ArrearsSince is not { } arrearsSince)
             return null;
 
-        var reached = statement.DaysOverdue >= SecondNoticeDays ? LeaseFeeNoticeLevel.Second
+        var reached = statement.DaysOverdue >= DefaultNoticeDays ? LeaseFeeNoticeLevel.Default
+            : statement.DaysOverdue >= SecondNoticeDays ? LeaseFeeNoticeLevel.Second
             : statement.DaysOverdue >= FirstNoticeDays ? LeaseFeeNoticeLevel.First
             : null;
         if (reached is null)
@@ -75,6 +98,7 @@ public sealed class LeaseFeeNoticeSchedule : ValueObject
     {
         yield return FirstNoticeDays;
         yield return SecondNoticeDays;
+        yield return DefaultNoticeDays;
     }
 }
 

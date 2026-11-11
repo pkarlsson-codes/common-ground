@@ -37,9 +37,10 @@ public sealed record GroundLeaseResponse(
 /// <param name="InterestWaiverDays">Days after the due date within which a payment owes no interest.</param>
 /// <param name="Statement">What the lease owes today.</param>
 /// <param name="Payments">Every payment recorded, voided ones included, newest received first.</param>
-/// <param name="NoticeDue">The late notice due now, First or Second, or null.</param>
+/// <param name="NoticeDue">The late notice due now, First, Second or Default, or null.</param>
 /// <param name="Notices">Every late notice recorded, newest sent first.</param>
 /// <param name="InterestWaivers">Every interest waiver, newest first.</param>
+/// <param name="DefaultCure">Where the last notice of default stands, or null if none was sent.</param>
 public sealed record LeaseFeesDto(
     decimal LandUseFee,
     decimal RepairReserveFee,
@@ -50,7 +51,8 @@ public sealed record LeaseFeesDto(
     IReadOnlyList<LeaseFeePaymentDto> Payments,
     string? NoticeDue,
     IReadOnlyList<LeaseFeeNoticeDto> Notices,
-    IReadOnlyList<LeaseFeeInterestWaiverDto> InterestWaivers);
+    IReadOnlyList<LeaseFeeInterestWaiverDto> InterestWaivers,
+    DefaultCureDto? DefaultCure);
 
 /// <summary>Late-fee interest the trust waived.</summary>
 /// <param name="WaiverId">The waiver's ID.</param>
@@ -67,13 +69,15 @@ public sealed record LeaseFeeInterestWaiverDto(
 
 /// <summary>A late lease fee notice the trust sent.</summary>
 /// <param name="NoticeId">The notice's ID.</param>
-/// <param name="Level">Which notice: First or Second.</param>
+/// <param name="Level">Which notice: First, Second or Default.</param>
 /// <param name="SentOn">The day it was sent.</param>
 /// <param name="Delivery">How it was sent: FirstClassMail, CertifiedMail, RegisteredMail, HandDelivered or Email.</param>
 /// <param name="BalanceDue">What the lease owed that day.</param>
 /// <param name="OldestUnpaidDueDate">The due date of the oldest unpaid charge that day.</param>
 /// <param name="RecordedBy">The user who recorded it.</param>
 /// <param name="RecordedAt">When it was recorded.</param>
+/// <param name="CureDays">A notice of default's cure days; null for other notices.</param>
+/// <param name="CureExtensionDays">A notice of default's extension days; null for other notices.</param>
 public sealed record LeaseFeeNoticeDto(
     string NoticeId,
     string Level,
@@ -82,7 +86,9 @@ public sealed record LeaseFeeNoticeDto(
     decimal BalanceDue,
     DateOnly OldestUnpaidDueDate,
     string RecordedBy,
-    DateTimeOffset RecordedAt);
+    DateTimeOffset RecordedAt,
+    int? CureDays,
+    int? CureExtensionDays);
 
 /// <summary>What a lease owes as of a day.</summary>
 /// <param name="AsOf">The day it is worked out for.</param>

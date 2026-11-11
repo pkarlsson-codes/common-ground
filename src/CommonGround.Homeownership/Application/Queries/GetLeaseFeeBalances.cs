@@ -20,10 +20,35 @@ public static class LeaseFeeStatements
             TermsOf(view),
             view.LeaseStartDate,
             view.EndedOn,
-            view.LeaseFeePayments.Where(p => p.VoidReason is null).Select(p => new ReceivedPayment(p.ReceivedDate, p.Amount)),
+            PaymentsOf(view),
             asOf,
             view.LeaseFeeInterestWaivers.Select(w => new WaivedInterest(w.WaivedOn, w.Amount)));
     }
+
+    /// <summary>
+    /// Where the lease's last notice of default stands as of a day, or null. Mirrors
+    /// <see cref="GroundLease.DefaultCureAsOf"/>.
+    /// </summary>
+    public static DefaultCure? DefaultCureOf(GroundLeaseView view, DateOnly asOf)
+    {
+        ArgumentNullException.ThrowIfNull(view);
+
+        var notice = view.LeaseFeeNotices
+            .Where(n => n.Level == LeaseFeeNoticeLevel.Default.DisplayName && n.CureDays is not null && n.SentOn <= asOf)
+            .MaxBy(n => n.SentOn);
+
+        return notice is null
+            ? null
+            : DefaultCure.Calculate(
+                notice.SentOn,
+                notice.BalanceDue,
+                DefaultCurePeriod.Create(notice.CureDays!.Value, notice.CureExtensionDays ?? 0),
+                PaymentsOf(view),
+                asOf);
+    }
+
+    private static IEnumerable<ReceivedPayment> PaymentsOf(GroundLeaseView view) =>
+        view.LeaseFeePayments.Where(p => p.VoidReason is null).Select(p => new ReceivedPayment(p.ReceivedDate, p.Amount));
 
     /// <summary>The lease's fee and interest terms.</summary>
     public static LeaseFeeTerms TermsOf(GroundLeaseView view)
@@ -78,12 +103,14 @@ public sealed record GetLeaseFeeBalances(PageSpec Page, bool IncludeAll = false,
 /// <param name="Statement">What the lease owes as of today.</param>
 /// <param name="NoticeDue">The late notice it needs now, or null.</param>
 /// <param name="LastNotice">The last notice sent since its arrears began, or null.</param>
+/// <param name="DefaultCure">Where its last notice of default stands, or null.</param>
 public sealed record LeaseFeeBalance(
     GroundLeaseView Lease,
     string? HomeLabel,
     LeaseFeeStatement Statement,
     LeaseFeeNoticeLevel? NoticeDue,
-    LeaseFeeNoticeEntry? LastNotice);
+    LeaseFeeNoticeEntry? LastNotice,
+    DefaultCure? DefaultCure);
 
 /// <summary>Works out every lease's balance and notice due.</summary>
 public static class LeaseFeeBalances
@@ -116,7 +143,8 @@ public static class LeaseFeeBalances
                     labels.GetValueOrDefault(l.HomeId),
                     statement,
                     LeaseFeeStatements.NoticeDue(l, statement, schedule),
-                    LeaseFeeStatements.LastNoticeInArrears(l, statement));
+                    LeaseFeeStatements.LastNoticeInArrears(l, statement),
+                    LeaseFeeStatements.DefaultCureOf(l, today));
             })
             .OrderByDescending(b => b.Statement.DaysOverdue)
             .ThenByDescending(b => b.Statement.Balance)

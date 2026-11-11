@@ -1,5 +1,7 @@
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Application.WorkItems;
+using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Application.WorkItems;
 using CommonGround.SharedKernel.Domain.Services;
@@ -7,7 +9,10 @@ using Marten;
 
 namespace CommonGround.Homeownership.Application.Queries;
 
-/// <summary>Returns Homeownership's work items: one for every open purchase and every lease with a late notice due.</summary>
+/// <summary>
+/// Returns Homeownership's work items: one for every open purchase, every lease with a late notice due, and every
+/// active lease with an uncured notice of default.
+/// </summary>
 /// <param name="Today">The trust's today, against which upcoming closings are judged.</param>
 public sealed record GetHomeownershipWorkItems(DateOnly Today);
 
@@ -46,8 +51,10 @@ public static class GetHomeownershipWorkItemsHandler
             .ToDictionary(v => v.Id, v => v.Label);
 
         var policy = await GetLeaseFeeNoticePolicyHandler.LoadAsync(session, cancellationToken).ConfigureAwait(false);
-        var notices = (await LeaseFeeBalances.LoadAsync(session, request.Today, policy.Schedule, cancellationToken).ConfigureAwait(false))
-            .Where(b => b.NoticeDue is not null);
+        var balances = await LeaseFeeBalances.LoadAsync(session, request.Today, policy.Schedule, cancellationToken).ConfigureAwait(false);
+        var notices = balances.Where(b => b.NoticeDue is not null);
+        var uncured = balances.Where(b => b.Lease.Status == GroundLeaseStatus.Active.DisplayName
+            && b.DefaultCure?.Status == DefaultCureStatus.Uncured);
 
         return new WorkItemList([
             .. workflows.Select(w => HomeownershipWorkItems.ForPurchase(
@@ -57,6 +64,7 @@ public static class GetHomeownershipWorkItemsHandler
                 request.Today,
                 zone)),
             .. notices.Select(b => HomeownershipWorkItems.ForLeaseFeeNotice(b, policy.Schedule)),
+            .. uncured.Select(HomeownershipWorkItems.ForUncuredDefault),
         ]);
     }
 }

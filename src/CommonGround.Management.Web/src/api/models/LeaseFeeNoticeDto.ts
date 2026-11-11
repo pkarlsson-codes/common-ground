@@ -35,7 +35,7 @@ export interface LeaseFeeNoticeDto {
      */
     noticeId?: string;
     /**
-     * Which notice: First or Second.
+     * Which notice: First, Second or Default.
      * @type {string}
      * @memberof LeaseFeeNoticeDto
      */
@@ -76,6 +76,18 @@ export interface LeaseFeeNoticeDto {
      * @memberof LeaseFeeNoticeDto
      */
     recordedAt?: Date;
+    /**
+     * A notice of default's cure days; null for other notices.
+     * @type {number}
+     * @memberof LeaseFeeNoticeDto
+     */
+    cureDays?: number | null;
+    /**
+     * A notice of default's extension days; null for other notices.
+     * @type {number}
+     * @memberof LeaseFeeNoticeDto
+     */
+    cureExtensionDays?: number | null;
 }
 
 /**
@@ -103,6 +115,8 @@ export function LeaseFeeNoticeDtoFromJSONTyped(json: any, ignoreDiscriminator: b
         'oldestUnpaidDueDate': json['oldestUnpaidDueDate'] == null ? undefined : CalendarDateFromJSON(json['oldestUnpaidDueDate']),
         'recordedBy': json['recordedBy'] == null ? undefined : json['recordedBy'],
         'recordedAt': json['recordedAt'] == null ? undefined : (new Date(json['recordedAt'])),
+        'cureDays': json['cureDays'] == null ? undefined : json['cureDays'],
+        'cureExtensionDays': json['cureExtensionDays'] == null ? undefined : json['cureExtensionDays'],
     };
 }
 
@@ -125,6 +139,8 @@ export function LeaseFeeNoticeDtoToJSONTyped(value?: LeaseFeeNoticeDto | null, i
         'oldestUnpaidDueDate': CalendarDateToJSON(value['oldestUnpaidDueDate']),
         'recordedBy': value['recordedBy'],
         'recordedAt': value['recordedAt'] == null ? undefined : ((value['recordedAt']).toISOString()),
+        'cureDays': value['cureDays'],
+        'cureExtensionDays': value['cureExtensionDays'],
     };
 }
 

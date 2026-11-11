@@ -9,12 +9,14 @@ public sealed record GetLeaseFeeNoticePolicy;
 
 /// <summary>A trust's lease fee notice policy as staff see it.</summary>
 /// <param name="Schedule">When each notice is due.</param>
+/// <param name="CurePeriod">The cure period a notice of default gives.</param>
 /// <param name="LetterSignOff">The lines printed at the end of every letter; empty for none.</param>
 /// <param name="IsDefault">Whether the trust never set a policy, so these are the defaults.</param>
-public sealed record LeaseFeeNoticePolicyDetails(LeaseFeeNoticeSchedule Schedule, string LetterSignOff, bool IsDefault)
+public sealed record LeaseFeeNoticePolicyDetails(
+    LeaseFeeNoticeSchedule Schedule, DefaultCurePeriod CurePeriod, string LetterSignOff, bool IsDefault)
 {
     /// <summary>Gets the policy a trust has before it sets one.</summary>
-    public static LeaseFeeNoticePolicyDetails Default { get; } = new(LeaseFeeNoticeSchedule.Default, string.Empty, true);
+    public static LeaseFeeNoticePolicyDetails Default { get; } = new(LeaseFeeNoticeSchedule.Default, DefaultCurePeriod.Default, string.Empty, true);
 }
 
 /// <summary>Handles <see cref="GetLeaseFeeNoticePolicy"/>.</summary>
@@ -38,6 +40,6 @@ public static class GetLeaseFeeNoticePolicyHandler
 
         return policy is null
             ? LeaseFeeNoticePolicyDetails.Default
-            : new LeaseFeeNoticePolicyDetails(policy.Schedule, policy.LetterSignOff, false);
+            : new LeaseFeeNoticePolicyDetails(policy.Schedule, policy.CurePeriod, policy.LetterSignOff, false);
     }
 }

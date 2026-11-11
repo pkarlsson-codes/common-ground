@@ -23,6 +23,7 @@ export * from './CreateTrustResponse';
 export * from './CurePeriodActivationResponse';
 export * from './CureViolationRequest';
 export * from './CurrentUserDto';
+export * from './DefaultCureDto';
 export * from './DenyApplicationRequest';
 export * from './DevelopmentProjectListItemResponse';
 export * from './DevelopmentProjectResponse';

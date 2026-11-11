@@ -87,10 +87,13 @@ public class LeaseFeesTests(ApiFactory factory)
         var client = factory.CreateClient().WithAuthToken();
         var today = (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Today;
         var homeowner = UniqueName();
-        var leaseId = await CreateLease(client, homeowner, leaseStart: new DateOnly(today.Year, today.Month, 1).AddMonths(-2));
+        var leaseStart = new DateOnly(today.Year, today.Month, 1).AddMonths(-2);
+        var leaseId = await CreateLease(client, homeowner, leaseStart: leaseStart);
 
+        // Two months behind is 59 to 62 days overdue: the notice of default is due from 60.
+        var level = today.DayNumber - leaseStart.DayNumber >= 60 ? "Default" : "Second";
         var due = await client.GetFromJsonAsync<LeaseFeeNoticesDueResponse>($"/api/lease-fee-notices/due?groundLeaseId={leaseId}");
-        due!.Notices.Should().ContainSingle().Which.Should().BeEquivalentTo(new { NoticeDue = "Second", Balance = 180m });
+        due!.Notices.Should().ContainSingle().Which.Should().BeEquivalentTo(new { NoticeDue = level, Balance = 180m });
         var listed = await client.GetFromJsonAsync<PaginatedResponse<LeaseFeeBalanceResponse>>(
             $"/api/lease-fee-balances?noticeDueOnly=true&search={Uri.EscapeDataString(homeowner)}");
         listed!.Items.Should().ContainSingle();
@@ -104,14 +107,14 @@ public class LeaseFeesTests(ApiFactory factory)
             });
 
         var recorded = await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/lease-fee-notices",
-            new RecordLeaseFeeNoticeRequest("Second", today, "CertifiedMail"));
+            new RecordLeaseFeeNoticeRequest(level, today, "CertifiedMail"));
         recorded.StatusCode.Should().Be(HttpStatusCode.Created);
 
         var lease = await client.GetFromJsonAsync<GroundLeaseResponse>($"/api/ground-leases/{leaseId}");
         lease!.LeaseFees.Should().BeEquivalentTo(new
         {
             NoticeDue = (string?)null,
-            Notices = new[] { new { Level = "Second", SentOn = today, Delivery = "CertifiedMail", BalanceDue = 180m } },
+            Notices = new[] { new { Level = level, SentOn = today, Delivery = "CertifiedMail", BalanceDue = 180m } },
         });
         (await client.GetFromJsonAsync<LeaseFeeNoticesDueResponse>($"/api/lease-fee-notices/due?groundLeaseId={leaseId}"))!
             .Notices.Should().BeEmpty();
@@ -143,22 +146,56 @@ public class LeaseFeesTests(ApiFactory factory)
 
         try
         {
-            var saved = await client.PutAsJsonAsync("/api/lease-fee-notice-policy", new SetLeaseFeeNoticePolicyRequest(100, 200, "  Riverbend CLT  "));
+            var saved = await client.PutAsJsonAsync("/api/lease-fee-notice-policy", new SetLeaseFeeNoticePolicyRequest(100, 200, 300, 20, 10, "  Riverbend CLT  "));
             saved.EnsureSuccessStatusCode();
             (await saved.Content.ReadFromJsonAsync<LeaseFeeNoticePolicyResponse>()).Should().BeEquivalentTo(
-                new LeaseFeeNoticePolicyResponse(100, 200, "Riverbend CLT", false));
+                new LeaseFeeNoticePolicyResponse(100, 200, 300, 20, 10, "Riverbend CLT", false));
             var due = await client.GetFromJsonAsync<LeaseFeeNoticesDueResponse>($"/api/lease-fee-notices/due?groundLeaseId={leaseId}");
-            due!.Should().BeEquivalentTo(new { LetterSignOff = "Riverbend CLT", Notices = Array.Empty<object>() });
+            due!.Should().BeEquivalentTo(new { LetterSignOff = "Riverbend CLT", CureDays = 20, CureExtensionDays = 10, Notices = Array.Empty<object>() });
 
-            var refused = await client.PutAsJsonAsync("/api/lease-fee-notice-policy", new SetLeaseFeeNoticePolicyRequest(10, 10, null));
+            var refused = await client.PutAsJsonAsync("/api/lease-fee-notice-policy", new SetLeaseFeeNoticePolicyRequest(10, 10, 60, 30, 30, null));
             refused.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
             (await refused.Content.ReadFromJsonAsync<ProblemDetails>())!.Detail.Should().Be("Second notice must come more days overdue than the first.");
         }
         finally
         {
             // Other tests share the trust and expect the default days.
-            (await client.PutAsJsonAsync("/api/lease-fee-notice-policy", new SetLeaseFeeNoticePolicyRequest(10, 30, null))).EnsureSuccessStatusCode();
+            (await client.PutAsJsonAsync("/api/lease-fee-notice-policy", new SetLeaseFeeNoticePolicyRequest(10, 30, 60, 30, 30, null))).EnsureSuccessStatusCode();
         }
+    }
+
+    [Fact]
+    public async Task RecordNoticeOfDefault_RefusesOrdinaryMail_StartsTheCurePeriod_AndPayingTheAmountCuresIt()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var today = (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Today;
+        var leaseId = await CreateLease(client, UniqueName(), leaseStart: new DateOnly(today.Year, today.Month, 1).AddMonths(-3));
+
+        var due = await client.GetFromJsonAsync<LeaseFeeNoticesDueResponse>($"/api/lease-fee-notices/due?groundLeaseId={leaseId}");
+        due!.Should().BeEquivalentTo(new { CureDays = 30, CureExtensionDays = 30, Notices = new[] { new { NoticeDue = "Default" } } });
+
+        var refused = await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/lease-fee-notices",
+            new RecordLeaseFeeNoticeRequest("Default", today, "FirstClassMail"));
+        refused.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await refused.Content.ReadFromJsonAsync<ProblemDetails>())!.Detail.Should().Be(
+            "A notice of default must be handed over in person or sent by certified or registered mail (Art 14.2).");
+
+        (await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/lease-fee-notices",
+            new RecordLeaseFeeNoticeRequest("Default", today, "CertifiedMail"))).StatusCode.Should().Be(HttpStatusCode.Created);
+
+        var lease = await client.GetFromJsonAsync<GroundLeaseResponse>($"/api/ground-leases/{leaseId}");
+        lease!.LeaseFees.Should().BeEquivalentTo(new
+        {
+            NoticeDue = (string?)null,
+            Notices = new[] { new { Level = "Default", CureDays = 30, CureExtensionDays = 30 } },
+            DefaultCure = new { SentOn = today, AmountOwed = 240m, CureBy = today.AddDays(30), Status = "Curing", StillToPay = 240m },
+        });
+
+        (await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/lease-fee-payments",
+            new RecordLeaseFeePaymentRequest(today, 240m, "Check", null))).EnsureSuccessStatusCode();
+
+        var cured = await client.GetFromJsonAsync<GroundLeaseResponse>($"/api/ground-leases/{leaseId}");
+        cured!.LeaseFees.DefaultCure.Should().BeEquivalentTo(new { Status = "Cured", PaidInFullOn = today, StillToPay = 0m });
     }
 
     [Fact]

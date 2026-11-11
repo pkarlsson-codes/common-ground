@@ -29,7 +29,7 @@ import {
  */
 export interface RecordLeaseFeeNoticeRequest {
     /**
-     * Which notice: First or Second.
+     * Which notice: First, Second or Default.
      * @type {string}
      * @memberof RecordLeaseFeeNoticeRequest
      */

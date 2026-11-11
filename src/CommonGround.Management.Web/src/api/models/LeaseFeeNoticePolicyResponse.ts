@@ -33,6 +33,24 @@ export interface LeaseFeeNoticePolicyResponse {
      */
     secondNoticeDays?: number;
     /**
+     * Days overdue before the notice of default.
+     * @type {number}
+     * @memberof LeaseFeeNoticePolicyResponse
+     */
+    defaultNoticeDays?: number;
+    /**
+     * Days a notice of default gives to pay.
+     * @type {number}
+     * @memberof LeaseFeeNoticePolicyResponse
+     */
+    cureDays?: number;
+    /**
+     * Days added when two-thirds is paid within the cure days.
+     * @type {number}
+     * @memberof LeaseFeeNoticePolicyResponse
+     */
+    cureExtensionDays?: number;
+    /**
      * The lines printed at the end of every letter; empty for none.
      * @type {string}
      * @memberof LeaseFeeNoticePolicyResponse
@@ -65,6 +83,9 @@ export function LeaseFeeNoticePolicyResponseFromJSONTyped(json: any, ignoreDiscr
         
         'firstNoticeDays': json['firstNoticeDays'] == null ? undefined : json['firstNoticeDays'],
         'secondNoticeDays': json['secondNoticeDays'] == null ? undefined : json['secondNoticeDays'],
+        'defaultNoticeDays': json['defaultNoticeDays'] == null ? undefined : json['defaultNoticeDays'],
+        'cureDays': json['cureDays'] == null ? undefined : json['cureDays'],
+        'cureExtensionDays': json['cureExtensionDays'] == null ? undefined : json['cureExtensionDays'],
         'letterSignOff': json['letterSignOff'] == null ? undefined : json['letterSignOff'],
         'isDefault': json['isDefault'] == null ? undefined : json['isDefault'],
     };
@@ -83,6 +104,9 @@ export function LeaseFeeNoticePolicyResponseToJSONTyped(value?: LeaseFeeNoticePo
         
         'firstNoticeDays': value['firstNoticeDays'],
         'secondNoticeDays': value['secondNoticeDays'],
+        'defaultNoticeDays': value['defaultNoticeDays'],
+        'cureDays': value['cureDays'],
+        'cureExtensionDays': value['cureExtensionDays'],
         'letterSignOff': value['letterSignOff'],
         'isDefault': value['isDefault'],
     };

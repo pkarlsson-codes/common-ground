@@ -1,4 +1,4 @@
-import { formatCalendarDate, parseCalendarDate, type CalendarDate } from '../../lib/calendarDate'
+import { addDays, formatCalendarDate, parseCalendarDate, type CalendarDate } from '../../lib/calendarDate'
 import { formatPrice } from '../../lib/currency'
 import { formatDueMonth } from './leaseFeeFormat'
 
@@ -13,6 +13,12 @@ export interface LetterLease {
   interestWaiverDays?: number
   interestDue?: number
   interestWaivedIfPaidBy?: CalendarDate | null
+}
+
+/** The cure period the trust gives in a notice of default. */
+export interface LetterCurePeriod {
+  cureDays: number
+  extensionDays: number
 }
 
 export interface LeaseFeeLetter {
@@ -35,17 +41,27 @@ export function unpaidMonths(oldestUnpaid: CalendarDate, today: CalendarDate): s
     : `${formatDueMonth(oldestUnpaid)} to ${formatDueMonth(lastDue)}`
 }
 
+const longDate = (date: CalendarDate) => formatCalendarDate(date, { year: 'numeric', month: 'long', day: 'numeric' })
+
 /**
- * The text of a late notice. The wording is the same for every trust; the sign-off is the trust's own. It names no
- * lease section, since trusts number their leases differently.
+ * The text of a late notice or notice of default. The wording is the same for every trust; the sign-off and cure
+ * period are the trust's own. It names no lease section, since trusts number their leases differently. A notice of
+ * default's deadlines run from the letter's date, so it should be sent, and recorded, that day.
  */
-export function leaseFeeLetter(lease: LetterLease, level: string, today: CalendarDate, signOff: string): LeaseFeeLetter {
+export function leaseFeeLetter(
+  lease: LetterLease,
+  level: string,
+  today: CalendarDate,
+  signOff: string,
+  cure: LetterCurePeriod = { cureDays: 30, extensionDays: 30 },
+): LeaseFeeLetter {
   const name = lease.homeownerFullName ?? 'Homeowner'
   const balance = formatPrice(lease.balance ?? 0)
   const fee = formatPrice(lease.monthlyFee ?? 0)
   const months = lease.oldestUnpaidDueDate ? unpaidMonths(lease.oldestUnpaidDueDate, today) : null
   const date = formatCalendarDate(today, { year: 'numeric', month: 'long', day: 'numeric' })
   const second = level === 'Second'
+  const notOfDefault = level !== 'Default'
 
   const rate = lease.lateInterestRate ?? 0
   const interestDue = lease.interestDue ?? 0
@@ -64,9 +80,26 @@ export function leaseFeeLetter(lease: LetterLease, level: string, today: Calenda
         + `${formatDueMonth(lease.oldestUnpaidDueDate)} fee by ${formatCalendarDate(lease.interestWaivedIfPaidBy, { year: 'numeric', month: 'long', day: 'numeric' })}, `
         + 'no interest will be charged on it.',
     )
-  paragraphs.push(
-    'Please pay the amount due as soon as you can. If you have already sent your payment, thank you, and please disregard this letter.',
-  )
+  if (notOfDefault)
+    paragraphs.push(
+      'Please pay the amount due as soon as you can. If you have already sent your payment, thank you, and please disregard this letter.',
+    )
+  else {
+    const cureBy = addDays(today, cure.cureDays)
+    paragraphs.push(
+      `This is a formal notice of default under your ground lease. To cure the default, you must pay the ${balance} owed `
+        + `within ${cure.cureDays} days of the date of this notice, by ${longDate(cureBy)}.`,
+    )
+    if (cure.extensionDays > 0)
+      paragraphs.push(
+        `If you pay at least two-thirds of this amount (${formatPrice(Math.round((lease.balance ?? 0) * 200 / 3) / 100)}) by `
+          + `${longDate(cureBy)}, you will have ${cure.extensionDays} more days, until `
+          + `${longDate(addDays(cureBy, cure.extensionDays))}, to pay the rest.`,
+      )
+    paragraphs.push(
+      'If the default is not cured in time, the trust may end your ground lease or buy your home under the terms of the lease. We would much rather avoid that.',
+    )
+  }
   if (second)
     paragraphs.push(
       'This is our second notice. Under your ground lease, continued failure to pay the lease fee can lead to a formal notice of default, and a default that is not cured in time puts your lease at risk.',
@@ -78,7 +111,7 @@ export function leaseFeeLetter(lease: LetterLease, level: string, today: Calenda
   return {
     date,
     recipient: [name, ...(lease.homeLabel ? [lease.homeLabel] : [])],
-    heading: second ? 'Second notice: lease fee past due' : 'Lease fee past due',
+    heading: !notOfDefault ? 'Notice of default: lease fee unpaid' : second ? 'Second notice: lease fee past due' : 'Lease fee past due',
     greeting: `Dear ${name},`,
     paragraphs,
     signOff: signOff.split('\n').map(l => l.trim()).filter(Boolean),

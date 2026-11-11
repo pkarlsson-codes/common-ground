@@ -60,6 +60,7 @@ const KINDS: Record<string, { page: string; area: TodayArea }> = {
   'purchase-stalled': { page: '/purchase-workflows', area: 'purchases' },
   'closing-scheduled': { page: '/purchase-workflows', area: 'purchases' },
   'lease-fee-notice-due': { page: '/stewardship', area: 'stewardship' },
+  'lease-default-uncured': { page: '/stewardship', area: 'stewardship' },
   'document-expiring': { page: '/documents', area: 'records' },
 }
 
@@ -101,6 +102,7 @@ const ACTION_LABELS: Record<string, string> = {
   'schedule-closing': 'Schedule closing',
   'record-closing': 'Record closing',
   'record-lease-fee-notice': 'Record notice',
+  'review-lease-default': 'Review default',
 }
 
 /** The actions whose panel opens over Today; the rest open the record, where the action is. */

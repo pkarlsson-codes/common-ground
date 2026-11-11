@@ -21,6 +21,7 @@ const KIND_LABELS: Record<string, string> = {
   'purchase-stalled': 'Purchase stalled',
   'closing-scheduled': 'Closing coming up',
   'lease-fee-notice-due': 'Lease fee notice due',
+  'lease-default-uncured': 'Lease default not cured',
   'document-expiring': 'Document expiring',
 }
 

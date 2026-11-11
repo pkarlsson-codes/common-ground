@@ -53,6 +53,35 @@ public static class HomeownershipWorkItems
     /// <summary>Print the late notice and record it as sent.</summary>
     public const string RecordLeaseFeeNotice = "record-lease-fee-notice";
 
+    /// <summary>An active lease whose notice of default's cure deadline passed unpaid (Art 12.1).</summary>
+    public const string LeaseDefaultUncured = "lease-default-uncured";
+
+    /// <summary>Decide what to do about the uncured default: end the lease (Art 12.4) or agree a plan.</summary>
+    public const string ReviewLeaseDefault = "review-lease-default";
+
+    /// <summary>
+    /// The item for an active lease whose notice of default wasn't cured: due the day after the cure deadline, and
+    /// gone once the amount owed is paid or the lease ends.
+    /// </summary>
+    /// <param name="balance">The lease's balance; its <see cref="LeaseFeeBalance.DefaultCure"/> must be uncured.</param>
+    /// <returns>The lease's work item.</returns>
+    public static WorkItem ForUncuredDefault(LeaseFeeBalance balance)
+    {
+        ArgumentNullException.ThrowIfNull(balance);
+
+        var cure = balance.DefaultCure ?? throw new ArgumentException("The lease has no notice of default.", nameof(balance));
+        var usd = CultureInfo.GetCultureInfo("en-US");
+
+        return new WorkItem(
+            WorkArea.Stewardship, LeaseDefaultUncured, "ground-lease", balance.Lease.Id,
+            balance.HomeLabel ?? "Home",
+            $"{balance.Lease.HomeownerFullName}: default not cured by {cure.CureBy.ToString("MMM d", usd)}, " +
+            $"{cure.StillToPay.ToString("C", usd)} of {cure.AmountOwed.ToString("C", usd)} still to pay",
+            null,
+            cure.CureBy.AddDays(1),
+            [ReviewLeaseDefault]);
+    }
+
     /// <summary>
     /// The item for a lease with a late notice due: it has waited since the day its oldest unpaid charge passed the
     /// notice's days.
@@ -67,14 +96,16 @@ public static class HomeownershipWorkItems
 
         var level = balance.NoticeDue ?? throw new ArgumentException("The lease has no notice due.", nameof(balance));
         var statement = balance.Statement;
-        var days = level == LeaseFeeNoticeLevel.Second ? schedule.SecondNoticeDays : schedule.FirstNoticeDays;
-        var levelName = level == LeaseFeeNoticeLevel.Second ? "second" : "first";
+        var days = schedule.DaysFor(level);
+        var levelName = level == LeaseFeeNoticeLevel.Default ? "notice of default"
+            : level == LeaseFeeNoticeLevel.Second ? "second notice"
+            : "first notice";
         var amount = statement.Balance.ToString("C", CultureInfo.GetCultureInfo("en-US"));
 
         return new WorkItem(
             WorkArea.Stewardship, LeaseFeeNoticeDue, "ground-lease", balance.Lease.Id,
             balance.HomeLabel ?? "Home",
-            $"{balance.Lease.HomeownerFullName}: {levelName} notice due, {amount} owed, {statement.DaysOverdue} days overdue",
+            $"{balance.Lease.HomeownerFullName}: {levelName} due, {amount} owed, {statement.DaysOverdue} days overdue",
             null,
             statement.OldestUnpaidDueDate!.Value.AddDays(days),
             [RecordLeaseFeeNotice]);

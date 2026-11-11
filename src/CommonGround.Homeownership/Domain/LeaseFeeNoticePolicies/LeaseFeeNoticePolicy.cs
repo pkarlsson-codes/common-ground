@@ -5,8 +5,9 @@ using CommonGround.SharedKernel.Domain;
 namespace CommonGround.Homeownership.Domain.LeaseFeeNoticePolicies;
 
 /// <summary>
-/// A trust's policy for late lease fee notices: when each is due, and how its letters are signed. One per trust; a
-/// trust that never set it uses <see cref="LeaseFeeNoticeSchedule.Default"/> and no sign-off.
+/// A trust's policy for late lease fee notices: when each is due, the cure period a notice of default gives, and how
+/// its letters are signed. One per trust; a trust that never set it uses <see cref="LeaseFeeNoticeSchedule.Default"/>,
+/// <see cref="DefaultCurePeriod.Default"/> and no sign-off.
 /// </summary>
 public sealed class LeaseFeeNoticePolicy : AggregateRoot<LeaseFeeNoticePolicyId>
 {
@@ -17,6 +18,9 @@ public sealed class LeaseFeeNoticePolicy : AggregateRoot<LeaseFeeNoticePolicyId>
     /// <summary>Gets when each notice is due.</summary>
     public LeaseFeeNoticeSchedule Schedule { get; private set; }
 
+    /// <summary>Gets the cure period a notice of default gives (Art 12.1).</summary>
+    public DefaultCurePeriod CurePeriod { get; private set; }
+
     /// <summary>Gets the lines printed at the end of every notice letter; empty for none.</summary>
     public string LetterSignOff { get; private set; }
 
@@ -25,14 +29,22 @@ public sealed class LeaseFeeNoticePolicy : AggregateRoot<LeaseFeeNoticePolicyId>
     /// is trimmed; line breaks inside it are kept.
     /// </summary>
     public static LeaseFeeNoticePolicySet Set(
-        LeaseFeeNoticePolicyId id, LeaseFeeNoticeSchedule schedule, string? letterSignOff, UserId setBy)
+        LeaseFeeNoticePolicyId id,
+        LeaseFeeNoticeSchedule schedule,
+        DefaultCurePeriod curePeriod,
+        string? letterSignOff,
+        UserId setBy)
     {
         ArgumentNullException.ThrowIfNull(schedule);
+        ArgumentNullException.ThrowIfNull(curePeriod);
 
         return new LeaseFeeNoticePolicySet(
             id.Value,
             schedule.FirstNoticeDays,
             schedule.SecondNoticeDays,
+            schedule.DefaultNoticeDays,
+            curePeriod.CureDays,
+            curePeriod.ExtensionDays,
             letterSignOff?.Trim() ?? string.Empty,
             setBy.Value);
     }
@@ -52,7 +64,8 @@ public sealed class LeaseFeeNoticePolicy : AggregateRoot<LeaseFeeNoticePolicyId>
     {
         ArgumentNullException.ThrowIfNull(e);
 
-        Schedule = LeaseFeeNoticeSchedule.Create(e.FirstNoticeDays, e.SecondNoticeDays);
+        Schedule = LeaseFeeNoticeSchedule.Create(e.FirstNoticeDays, e.SecondNoticeDays, e.DefaultNoticeDays);
+        CurePeriod = DefaultCurePeriod.Create(e.CureDays, e.CureExtensionDays);
         LetterSignOff = e.LetterSignOff;
     }
 }

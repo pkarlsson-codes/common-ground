@@ -48,6 +48,18 @@ export interface LeaseFeeNoticesDueResponse {
      */
     letterSignOff?: string;
     /**
+     * Days a notice of default gives to pay, for its letter.
+     * @type {number}
+     * @memberof LeaseFeeNoticesDueResponse
+     */
+    cureDays?: number;
+    /**
+     * Days added when two-thirds is paid within the cure days, for its letter.
+     * @type {number}
+     * @memberof LeaseFeeNoticesDueResponse
+     */
+    cureExtensionDays?: number;
+    /**
      * Each lease with a notice due, most days overdue first.
      * @type {Array<LeaseFeeBalanceResponse>}
      * @memberof LeaseFeeNoticesDueResponse
@@ -74,6 +86,8 @@ export function LeaseFeeNoticesDueResponseFromJSONTyped(json: any, ignoreDiscrim
         
         'today': json['today'] == null ? undefined : CalendarDateFromJSON(json['today']),
         'letterSignOff': json['letterSignOff'] == null ? undefined : json['letterSignOff'],
+        'cureDays': json['cureDays'] == null ? undefined : json['cureDays'],
+        'cureExtensionDays': json['cureExtensionDays'] == null ? undefined : json['cureExtensionDays'],
         'notices': json['notices'] == null ? undefined : ((json['notices'] as Array<any>).map(LeaseFeeBalanceResponseFromJSON)),
     };
 }
@@ -91,6 +105,8 @@ export function LeaseFeeNoticesDueResponseToJSONTyped(value?: LeaseFeeNoticesDue
         
         'today': CalendarDateToJSON(value['today']),
         'letterSignOff': value['letterSignOff'],
+        'cureDays': value['cureDays'],
+        'cureExtensionDays': value['cureExtensionDays'],
         'notices': value['notices'] == null ? undefined : ((value['notices'] as Array<any>).map(LeaseFeeBalanceResponseToJSON)),
     };
 }

@@ -140,6 +140,12 @@ public class LeaseFeeNoticeEntry
     /// <summary>Gets or sets the due date of the oldest unpaid charge that day.</summary>
     public DateOnly OldestUnpaidDueDate { get; set; }
 
+    /// <summary>Gets or sets a notice of default's cure days; null for other notices.</summary>
+    public int? CureDays { get; set; }
+
+    /// <summary>Gets or sets a notice of default's extension days; null for other notices.</summary>
+    public int? CureExtensionDays { get; set; }
+
     /// <summary>Gets or sets the user who recorded it.</summary>
     public string RecordedBy { get; set; } = string.Empty;
 

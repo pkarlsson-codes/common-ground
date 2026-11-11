@@ -94,7 +94,7 @@ public static class GroundLeasesEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
 
-        var (view, recordedOn, leaseFees, noticeDue) = await bus.InvokeForTenantAsync<GroundLeaseDetails>(bus.TenantId!,
+        var (view, recordedOn, leaseFees, noticeDue, defaultCure) = await bus.InvokeForTenantAsync<GroundLeaseDetails>(bus.TenantId!,
             new GetGroundLease(GroundLeaseId.Create(groundLeaseId)),
             cancellationToken);
 
@@ -171,7 +171,9 @@ public static class GroundLeasesEndpoints
                         n.BalanceDue,
                         n.OldestUnpaidDueDate,
                         n.RecordedBy,
-                        n.RecordedAt))
+                        n.RecordedAt,
+                        n.CureDays,
+                        n.CureExtensionDays))
                     .ToList()
                     .AsReadOnly(),
                 view.LeaseFeeInterestWaivers
@@ -179,7 +181,8 @@ public static class GroundLeasesEndpoints
                     .Reverse()
                     .Select(w => new LeaseFeeInterestWaiverDto(w.WaiverId, w.WaivedOn, w.Amount, w.Reason, w.WaivedBy))
                     .ToList()
-                    .AsReadOnly()),
+                    .AsReadOnly(),
+                LeaseFeesEndpoints.ToResponse(defaultCure)),
             view.CreatedAt,
             recordedOn,
             view.CreatedBy);

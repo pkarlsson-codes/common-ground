@@ -168,6 +168,8 @@ public static class LeaseFeesEndpoints
         return Results.Ok(new LeaseFeeNoticesDueResponse(
             result.Today,
             result.LetterSignOff,
+            result.CurePeriod.CureDays,
+            result.CurePeriod.ExtensionDays,
             [.. result.Notices.Select(ToResponse)]));
     }
 
@@ -193,7 +195,8 @@ public static class LeaseFeesEndpoints
 
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new SetLeaseFeeNoticePolicy(
-                LeaseFeeNoticeSchedule.Create(request.FirstNoticeDays, request.SecondNoticeDays),
+                LeaseFeeNoticeSchedule.Create(request.FirstNoticeDays, request.SecondNoticeDays, request.DefaultNoticeDays),
+                DefaultCurePeriod.Create(request.CureDays, request.CureExtensionDays),
                 request.LetterSignOff,
                 httpContext.GetUserId()),
             cancellationToken);
@@ -204,8 +207,32 @@ public static class LeaseFeesEndpoints
         return Results.Ok(ToResponse(policy));
     }
 
+    /// <summary>Maps where a notice of default stands to its response.</summary>
+    /// <param name="cure">Where the notice stands, or null if none was sent.</param>
+    /// <returns>The response, or null.</returns>
+    internal static DefaultCureDto? ToResponse(DefaultCure? cure) =>
+        cure is null
+            ? null
+            : new DefaultCureDto(
+                cure.SentOn,
+                cure.AmountOwed,
+                cure.OriginalDeadline,
+                cure.CureBy,
+                cure.Extended,
+                cure.PaidSinceNotice,
+                cure.StillToPay,
+                cure.PaidInFullOn,
+                cure.Status.DisplayName);
+
     private static LeaseFeeNoticePolicyResponse ToResponse(LeaseFeeNoticePolicyDetails policy) =>
-        new(policy.Schedule.FirstNoticeDays, policy.Schedule.SecondNoticeDays, policy.LetterSignOff, policy.IsDefault);
+        new(
+            policy.Schedule.FirstNoticeDays,
+            policy.Schedule.SecondNoticeDays,
+            policy.Schedule.DefaultNoticeDays,
+            policy.CurePeriod.CureDays,
+            policy.CurePeriod.ExtensionDays,
+            policy.LetterSignOff,
+            policy.IsDefault);
 
     private static LeaseFeeBalanceResponse ToResponse(LeaseFeeBalance b) =>
         new(
@@ -225,5 +252,6 @@ public static class LeaseFeesEndpoints
             b.Lease.InterestWaiverDays,
             b.Statement.InterestDue,
             b.Statement.InterestAccruing,
-            b.Statement.InterestWaivedIfPaidBy);
+            b.Statement.InterestWaivedIfPaidBy,
+            ToResponse(b.DefaultCure));
 }

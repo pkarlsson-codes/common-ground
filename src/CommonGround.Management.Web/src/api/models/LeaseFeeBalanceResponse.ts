@@ -21,6 +21,13 @@ import {
     CalendarDateToJSON,
     CalendarDateToJSONTyped,
 } from './CalendarDate';
+import type { DefaultCureDto } from './DefaultCureDto';
+import {
+    DefaultCureDtoFromJSON,
+    DefaultCureDtoFromJSONTyped,
+    DefaultCureDtoToJSON,
+    DefaultCureDtoToJSONTyped,
+} from './DefaultCureDto';
 
 /**
  * A lease and what it owes in lease fees as of the trust's today.
@@ -83,7 +90,7 @@ export interface LeaseFeeBalanceResponse {
      */
     daysOverdue?: number;
     /**
-     * The late notice due now, First or Second, or null.
+     * The late notice due now, First, Second or Default, or null.
      * @type {string}
      * @memberof LeaseFeeBalanceResponse
      */
@@ -130,6 +137,12 @@ export interface LeaseFeeBalanceResponse {
      * @memberof LeaseFeeBalanceResponse
      */
     interestWaivedIfPaidBy?: CalendarDate | null;
+    /**
+     * 
+     * @type {DefaultCureDto}
+     * @memberof LeaseFeeBalanceResponse
+     */
+    defaultCure?: DefaultCureDto | null;
 }
 
 /**
@@ -166,6 +179,7 @@ export function LeaseFeeBalanceResponseFromJSONTyped(json: any, ignoreDiscrimina
         'interestDue': json['interestDue'] == null ? undefined : json['interestDue'],
         'interestAccruing': json['interestAccruing'] == null ? undefined : json['interestAccruing'],
         'interestWaivedIfPaidBy': json['interestWaivedIfPaidBy'] == null ? undefined : CalendarDateFromJSON(json['interestWaivedIfPaidBy']),
+        'defaultCure': json['defaultCure'] == null ? undefined : DefaultCureDtoFromJSON(json['defaultCure']),
     };
 }
 
@@ -197,6 +211,7 @@ export function LeaseFeeBalanceResponseToJSONTyped(value?: LeaseFeeBalanceRespon
         'interestDue': value['interestDue'],
         'interestAccruing': value['interestAccruing'],
         'interestWaivedIfPaidBy': CalendarDateToJSON(value['interestWaivedIfPaidBy']),
+        'defaultCure': DefaultCureDtoToJSON(value['defaultCure']),
     };
 }
 

@@ -5,7 +5,7 @@ import { DateInput } from '../../components/DateInput'
 import SlideOver from '../../components/SlideOver'
 import SlideOverCancelButton from '../../components/SlideOverCancelButton'
 import {
-  NOTICE_DELIVERIES,
+  deliveriesFor,
   NOTICE_DELIVERY_LABELS,
   NOTICE_LEVEL_LABELS,
   NOTICE_LEVELS,
@@ -27,10 +27,18 @@ interface Props {
 /** Records that a late notice was sent on one lease; the level defaults to the one due. */
 export default function RecordLeaseFeeNoticePanel({ lease, onClose }: Props) {
   const due = (lease.leaseFees?.noticeDue ?? 'First') as NoticeLevel
+  const initialDelivery: NoticeDelivery = deliveriesFor(due)[0]
   const [form, setForm] = useState<RecordLeaseFeeNoticeForm>(() => ({
     level: due,
     sentOn: trustToday(),
-    delivery: 'FirstClassMail',
+    delivery: initialDelivery,
+  }))
+  const deliveries = deliveriesFor(form.level)
+
+  const changeLevel = (level: NoticeLevel) => setForm(f => ({
+    ...f,
+    level,
+    delivery: deliveriesFor(level).includes(f.delivery) ? f.delivery : deliveriesFor(level)[0],
   }))
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   const mutation = useRecordLeaseFeeNotice()
@@ -53,7 +61,7 @@ export default function RecordLeaseFeeNoticePanel({ lease, onClose }: Props) {
       title="Record Notice"
       subtitle={`${lease.homeownerFullName ?? 'Ground lease'} · ${formatBalance(lease.leaseFees?.statement?.balance ?? 0)}`}
       onClose={onClose}
-      isDirty={form.level !== due || form.sentOn !== trustToday() || form.delivery !== 'FirstClassMail'}
+      isDirty={form.level !== due || form.sentOn !== trustToday() || form.delivery !== initialDelivery}
       footer={
         <>
           <SlideOverCancelButton />
@@ -76,7 +84,7 @@ export default function RecordLeaseFeeNoticePanel({ lease, onClose }: Props) {
               id="notice-level"
               className="form-select"
               value={form.level}
-              onChange={e => setForm(f => ({ ...f, level: e.target.value as NoticeLevel }))}
+              onChange={e => changeLevel(e.target.value as NoticeLevel)}
             >
               {NOTICE_LEVELS.map(l => <option key={l} value={l}>{NOTICE_LEVEL_LABELS[l]}</option>)}
             </select>
@@ -101,8 +109,14 @@ export default function RecordLeaseFeeNoticePanel({ lease, onClose }: Props) {
               value={form.delivery}
               onChange={e => setForm(f => ({ ...f, delivery: e.target.value as NoticeDelivery }))}
             >
-              {NOTICE_DELIVERIES.map(d => <option key={d} value={d}>{NOTICE_DELIVERY_LABELS[d]}</option>)}
+              {deliveries.map(d => <option key={d} value={d}>{NOTICE_DELIVERY_LABELS[d]}</option>)}
             </select>
+            {form.level === 'Default' && (
+              <div className="form-help">
+                A notice of default must be sent by certified or registered mail, or handed over in person. The cure
+                period runs from the date sent.
+              </div>
+            )}
           </div>
         </div>
 

@@ -7,9 +7,11 @@ namespace CommonGround.Homeownership.Application.Commands;
 
 /// <summary>Sets the trust's lease fee notice policy.</summary>
 /// <param name="Schedule">When each notice is due.</param>
+/// <param name="CurePeriod">The cure period a notice of default gives.</param>
 /// <param name="LetterSignOff">The lines printed at the end of every letter; empty for none.</param>
 /// <param name="SetBy">The staff user setting it.</param>
-public sealed record SetLeaseFeeNoticePolicy(LeaseFeeNoticeSchedule Schedule, string? LetterSignOff, UserId SetBy);
+public sealed record SetLeaseFeeNoticePolicy(
+    LeaseFeeNoticeSchedule Schedule, DefaultCurePeriod CurePeriod, string? LetterSignOff, UserId SetBy);
 
 /// <summary>Handles <see cref="SetLeaseFeeNoticePolicy"/>.</summary>
 public static class SetLeaseFeeNoticePolicyHandler
@@ -28,6 +30,6 @@ public static class SetLeaseFeeNoticePolicyHandler
             .FetchForWriting<LeaseFeeNoticePolicy>(id.Value, cancellationToken)
             .ConfigureAwait(false);
 
-        stream.AppendOne(LeaseFeeNoticePolicy.Set(id, command.Schedule, command.LetterSignOff, command.SetBy));
+        stream.AppendOne(LeaseFeeNoticePolicy.Set(id, command.Schedule, command.CurePeriod, command.LetterSignOff, command.SetBy));
     }
 }

@@ -8,7 +8,7 @@
    - **Applicants**: applications waiting for a decision; households with an open application that are missing readiness steps; prequalifications expiring within 30 days
    - **Selections**: open home selections; available homes with no selection started
    - **Purchases**: every open purchase: stalled (due by its resolution target), closing within 14 days, or waiting on the steps it hasn't recorded
-   - **Stewardship**: active leases with a late fee notice due (see [Send Lease Fee Notices](../stewardship/send-lease-fee-notices.md)); the detail gives the amount due and days overdue
+   - **Stewardship**: active leases with a late fee notice or notice of default due (see [Send Lease Fee Notices](../stewardship/send-lease-fee-notices.md)); the detail gives the amount due and days overdue. Also active leases whose notice of default wasn't cured by its deadline, due the day after it; the detail gives the deadline and what is still to pay of the amount owed. The item goes once the amount is paid or the lease ends
    - **Records**: documents expiring within 30 days, or expired
 6. Each row offers the actions that fix it, one button per fix:
    - **Application to decide**: Approve, Deny
@@ -18,6 +18,7 @@
    - **Selection open**: Choose household
    - **Purchase waiting or stalled**: one button per step not yet recorded (Record eligibility, appraisal, financing, inspection, title, lease signing), or Schedule closing once every step is in; **Closing coming up**: Record closing
    - **Lease fee notice due**: Record notice, which opens the lease, where the letter is printed and the notice recorded
+   - **Lease default not cured**: Review default, which opens the lease. Ending the lease (Art 12.4) or agreeing a plan is staff's decision; nothing in the app ends it automatically
    - **Document expiring**: none; the row itself opens the document
 7. An action opens its panel over Today; on success Today refreshes and the item leaves or changes. Start selection, Choose household and the purchase steps open the record's detail for now, where the action is
 8. Clicking anywhere else on a row opens the record's detail

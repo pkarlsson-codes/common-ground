@@ -1,4 +1,5 @@
 using CommonGround.SharedKernel.Domain.Services;
+using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using Marten;
 
 namespace CommonGround.Homeownership.Application.Queries;
@@ -13,8 +14,10 @@ public sealed record GetLeaseFeeNoticesDue(string? GroundLeaseId = null);
 /// <summary>The letters to print.</summary>
 /// <param name="Today">The trust's today, the date on every letter.</param>
 /// <param name="LetterSignOff">The trust's sign-off; empty for none.</param>
+/// <param name="CurePeriod">The cure period a notice of default gives, for its letter.</param>
 /// <param name="Notices">One lease per letter, most days overdue first.</param>
-public sealed record LeaseFeeNoticesDue(DateOnly Today, string LetterSignOff, IReadOnlyList<LeaseFeeBalance> Notices);
+public sealed record LeaseFeeNoticesDue(
+    DateOnly Today, string LetterSignOff, DefaultCurePeriod CurePeriod, IReadOnlyList<LeaseFeeBalance> Notices);
 
 /// <summary>Handles <see cref="GetLeaseFeeNoticesDue"/>.</summary>
 public static class GetLeaseFeeNoticesDueHandler
@@ -37,6 +40,7 @@ public static class GetLeaseFeeNoticesDueHandler
         return new LeaseFeeNoticesDue(
             today,
             policy.LetterSignOff,
+            policy.CurePeriod,
             [.. all.Where(b => b.NoticeDue is not null
                 && (request.GroundLeaseId is null || b.Lease.Id == request.GroundLeaseId))]);
     }

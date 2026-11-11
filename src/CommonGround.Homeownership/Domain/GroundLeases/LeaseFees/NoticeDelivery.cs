@@ -20,5 +20,11 @@ public sealed class NoticeDelivery : Enumeration<NoticeDelivery>
     /// <summary>Sent by email.</summary>
     public static readonly NoticeDelivery Email = new(5, "Email");
 
+    /// <summary>
+    /// Gets whether the delivery meets the lease's notice clause (Art 14.2): handed over in person, or sent by certified
+    /// or registered mail, return receipt requested. A notice of default must be delivered this way.
+    /// </summary>
+    public bool MeetsNoticeClause => this == CertifiedMail || this == RegisteredMail || this == HandDelivered;
+
     private NoticeDelivery(int value, string displayName) : base(value, displayName) { }
 }

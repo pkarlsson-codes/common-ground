@@ -330,18 +330,22 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <summary>
     /// Records a late notice the trust sent, keeping the balance and oldest unpaid month on the day it was sent.
     /// Refused for a sent date in the future or before the lease started, or when nothing was owed that day. A
-    /// notice can be recorded before it falls due, and on an ended lease.
+    /// notice can be recorded before it falls due, and on an ended lease. A notice of default also keeps the trust's
+    /// cure period, and is refused unless delivered as the notice clause requires (Art 14.2), or while an earlier
+    /// notice of default's cure period is still running.
     /// </summary>
     public LeaseFeeNoticeRecorded RecordLeaseFeeNotice(
         LeaseFeeNoticeId noticeId,
         LeaseFeeNoticeLevel level,
         DateOnly sentOn,
         NoticeDelivery delivery,
+        DefaultCurePeriod curePeriod,
         DateOnly today,
         UserId recordedBy)
     {
         ArgumentNullException.ThrowIfNull(level);
         ArgumentNullException.ThrowIfNull(delivery);
+        ArgumentNullException.ThrowIfNull(curePeriod);
 
         if (sentOn > today)
             throw BusinessRuleViolation.GroundLease.RecordLeaseFeeNotice.SentDateInFuture(sentOn, today);
@@ -353,8 +357,21 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         if (statement.Balance <= 0 || statement.OldestUnpaidDueDate is not { } oldestUnpaid)
             throw BusinessRuleViolation.GroundLease.RecordLeaseFeeNotice.NothingOwed(sentOn);
 
+        if (level != LeaseFeeNoticeLevel.Default)
+        {
+            return new LeaseFeeNoticeRecorded(
+                Id.Value, noticeId.Value, level, sentOn, delivery, statement.Balance, oldestUnpaid, recordedBy.Value);
+        }
+
+        if (!delivery.MeetsNoticeClause)
+            throw BusinessRuleViolation.GroundLease.RecordLeaseFeeNotice.DefaultNoticeDeliveryNotAllowed(delivery);
+
+        if (DefaultCureAsOf(sentOn) is { Status: var status, CureBy: var cureBy } && status == DefaultCureStatus.Curing)
+            throw BusinessRuleViolation.GroundLease.RecordLeaseFeeNotice.DefaultNoticeAlreadyCuring(cureBy);
+
         return new LeaseFeeNoticeRecorded(
-            Id.Value, noticeId.Value, level, sentOn, delivery, statement.Balance, oldestUnpaid, recordedBy.Value);
+            Id.Value, noticeId.Value, level, sentOn, delivery, statement.Balance, oldestUnpaid, recordedBy.Value,
+            curePeriod.CureDays, curePeriod.ExtensionDays);
     }
 
     /// <summary>
@@ -387,9 +404,19 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             LeaseFeeTerms,
             LeaseStartDate,
             EndedOn,
-            _leaseFeePayments.Where(p => !p.IsVoided).Select(p => new ReceivedPayment(p.ReceivedDate, p.Amount)),
+            CountedPayments(),
             asOf,
             _leaseFeeInterestWaivers.Select(w => new WaivedInterest(w.WaivedOn, w.Amount)));
+
+    /// <summary>Gets where the lease's last notice of default sent on or before a day stands that day, or null.</summary>
+    public DefaultCure? DefaultCureAsOf(DateOnly asOf) =>
+        _leaseFeeNotices
+            .Where(n => n.Level == LeaseFeeNoticeLevel.Default && n.SentOn <= asOf)
+            .MaxBy(n => n.SentOn)
+            ?.CureAsOf(CountedPayments(), asOf);
+
+    private IEnumerable<ReceivedPayment> CountedPayments() =>
+        _leaseFeePayments.Where(p => !p.IsVoided).Select(p => new ReceivedPayment(p.ReceivedDate, p.Amount));
 
     /// <summary>
     /// Gets the late notice the lease needs as of a day, or null. Only an active lease needs one; an ended lease's
@@ -506,7 +533,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <summary>Applies <see cref="LeaseFeeNoticeRecorded"/>.</summary>
     public void Apply(LeaseFeeNoticeRecorded e) =>
         _leaseFeeNotices.Add(LeaseFeeNotice.Create(
-            LeaseFeeNoticeId.Create(e.NoticeId), e.Level, e.SentOn, e.Delivery, e.BalanceDue, e.OldestUnpaidDueDate));
+            LeaseFeeNoticeId.Create(e.NoticeId), e.Level, e.SentOn, e.Delivery, e.BalanceDue, e.OldestUnpaidDueDate,
+            e.CureDays is { } cureDays ? DefaultCurePeriod.Create(cureDays, e.CureExtensionDays ?? 0) : null));
 
     /// <summary>Applies <see cref="LeaseFeeInterestWaived"/>.</summary>
     public void Apply(LeaseFeeInterestWaived e) =>

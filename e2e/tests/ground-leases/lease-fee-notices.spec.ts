@@ -12,8 +12,25 @@ const firstOfMonth = (monthsBack: number) => {
   return d.toISOString().slice(0, 10)
 }
 
-/** A $45 + $15 lease whose oldest charge is two months old, so a second notice is due. Returns its ID. */
+const daysSince = (iso: string) => Math.round((Date.parse(`${isoDate()}T00:00:00Z`) - Date.parse(`${iso}T00:00:00Z`)) / 86_400_000)
+
+/**
+ * How many months back a lease must start for its oldest charge to be 30 to 59 days overdue, so the second notice is
+ * due and the notice of default (60 days) isn't yet. One month back on most days, two early in some months. On the
+ * 2nd of March neither fits, and this test needs the policy days changed.
+ */
+const SECOND_NOTICE_MONTHS = daysSince(firstOfMonth(1)) >= 30 ? 1 : 2
+
+/** What the lease from {@link createLeaseNeedingSecondNotice} owes: $60 for each month since it started. */
+const SECOND_NOTICE_BALANCE = `$${(60 * (SECOND_NOTICE_MONTHS + 1)).toFixed(2)}`
+
+/** A $45 + $15 lease whose oldest charge is 30 to 59 days overdue, so a second notice is due. Returns its ID. */
 async function createLeaseNeedingSecondNotice(page: Page, homeowner: string) {
+  return createLease(page, homeowner, firstOfMonth(SECOND_NOTICE_MONTHS))
+}
+
+/** A $45 + $15 lease starting on a given day, with no payments. Returns its ID. */
+async function createLease(page: Page, homeowner: string, leaseStartDate: string) {
   const { parcelId } = await createLandParcel(page)
   const homeId = await createHome(page, parcelId)
   const { groundLeaseId } = await post<{ groundLeaseId: string }>(page, '/api/v1/ground-leases', {
@@ -22,7 +39,7 @@ async function createLeaseNeedingSecondNotice(page: Page, homeowner: string) {
     homeownerFullName: homeowner,
     homeownerEmail: `${homeowner.toLowerCase().replace(/\s+/g, '.')}@example.com`,
     homeownerPhone: null,
-    leaseStartDate: firstOfMonth(2),
+    leaseStartDate,
     termYears: 99,
     optionWindowDays: 60,
     landUseFee: 45,
@@ -54,12 +71,12 @@ test('a lease with a notice due shows it on Today and the lease, prints its lett
   await page.reload()
   const todayRow = page.locator('section[aria-labelledby="today-stewardship"] tbody tr', { hasText: homeowner })
   await expect(todayRow).toContainText('Lease fee notice due')
-  await expect(todayRow).toContainText(`${homeowner}: second notice due, $180.00 owed`)
+  await expect(todayRow).toContainText(`${homeowner}: second notice due, ${SECOND_NOTICE_BALANCE} owed`)
   await todayRow.getByRole('button', { name: /^Record notice/ }).click()
 
   await expect(page).toHaveURL(/\/ground-leases$/)
   const section = leaseFees(page)
-  await expect(section.getByRole('status')).toContainText('Second notice due')
+  await expect(section.getByRole('status')).toContainText('Second Notice due')
 
   const popupPromise = page.waitForEvent('popup')
   await section.getByRole('button', { name: 'Print Letter' }).click()
@@ -67,13 +84,13 @@ test('a lease with a notice due shows it on Today and the lease, prints its lett
   const letter = letters.getByRole('article', { name: `Notice to ${homeowner}` })
   await expect(letter).toContainText('Second notice: lease fee past due')
   await expect(letter).toContainText(`Dear ${homeowner},`)
-  await expect(letter).toContainText('you owe $180.00, for the monthly lease fee of $60.00')
+  await expect(letter).toContainText(`you owe ${SECOND_NOTICE_BALANCE}, for the monthly lease fee of $60.00`)
   await expect(letter).toContainText('formal notice of default')
   await letters.close()
 
   await section.getByRole('button', { name: 'Record Notice' }).click()
   const record = panel(page, 'Record Notice')
-  await expect(record.locator('.slideover-header')).toContainText(`${homeowner} · $180.00 due`)
+  await expect(record.locator('.slideover-header')).toContainText(`${homeowner} · ${SECOND_NOTICE_BALANCE} due`)
   await expect(field(record, 'Level')).toHaveValue('Second')
   await expect(field(record, 'Date Sent')).toHaveValue(isoDate())
   await field(record, 'Delivery').selectOption('CertifiedMail')
@@ -86,7 +103,7 @@ test('a lease with a notice due shows it on Today and the lease, prints its lett
   await expect(notice).toHaveCount(1)
   await expect(notice).toContainText('Second Notice')
   await expect(notice).toContainText('Certified Mail')
-  await expect(notice).toContainText('$180.00')
+  await expect(notice).toContainText(SECOND_NOTICE_BALANCE)
 
   await page.goto('/')
   await expect(page.locator('tbody tr', { hasText: homeowner })).toHaveCount(0)
@@ -137,7 +154,7 @@ test('the Notice due filter prints every letter due and records the ticked ones 
 
 test('the trust policy page saves the letter sign-off and refuses a second notice not after the first', async ({ page }) => {
   await page.goto('/')
-  const original = await get<{ firstNoticeDays: number; secondNoticeDays: number; letterSignOff: string }>(page, '/api/v1/lease-fee-notice-policy')
+  const original = await get<{ firstNoticeDays: number; secondNoticeDays: number }>(page, '/api/v1/lease-fee-notice-policy')
   const homeowner = `Policy Owner ${uniqueId()}`
   const leaseId = await createLeaseNeedingSecondNotice(page, homeowner)
   const signOff = `Riverbend CLT ${uniqueId()}`
@@ -165,4 +182,60 @@ test('the trust policy page saves the letter sign-off and refuses a second notic
   } finally {
     await put(page, '/api/v1/lease-fee-notice-policy', original)
   }
+})
+
+test('a lease 60 days behind gets a notice of default sent by certified mail, whose cure period ends when it is paid', async ({ page }) => {
+  await page.goto('/')
+  const homeowner = `Default Owner ${uniqueId()}`
+  const leaseId = await createLease(page, homeowner, firstOfMonth(3))
+  const cureBy = new Date(`${isoDate(30)}T00:00:00Z`)
+    .toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })
+
+  await openLease(page, homeowner)
+  const section = leaseFees(page)
+  await expect(section.getByRole('status').first()).toContainText('Notice of Default due')
+
+  const popupPromise = page.waitForEvent('popup')
+  await section.getByRole('button', { name: 'Print Letter' }).click()
+  const letters = await popupPromise
+  const letter = letters.getByRole('article', { name: `Notice to ${homeowner}` })
+  await expect(letter).toContainText('Notice of default: lease fee unpaid')
+  await expect(letter).toContainText(`To cure the default, you must pay the $240.00 owed within 30 days of the date of this notice, by ${cureBy}.`)
+  await expect(letter).toContainText('If you pay at least two-thirds of this amount ($160.00)')
+  await letters.close()
+
+  await section.getByRole('button', { name: 'Record Notice' }).click()
+  const record = panel(page, 'Record Notice')
+  await expect(field(record, 'Level')).toHaveValue('Default')
+  await expect(field(record, 'Delivery')).toHaveValue('CertifiedMail')
+  await expect(field(record, 'Delivery').locator('option')).toHaveText(['Certified Mail', 'Registered Mail', 'Hand Delivered'])
+  await record.getByRole('button', { name: 'Record Notice' }).click()
+  await expectToast(page, 'Notice recorded')
+  await expect(record).toBeHidden()
+
+  const cure = section.getByRole('status', { name: 'Notice of default' })
+  await expect(cure).toContainText(`for $240.00. Cure by ${cureBy}: $240.00 still to pay.`)
+
+  await post(page, `/api/v1/ground-leases/${leaseId}/lease-fee-payments`,
+    { receivedDate: isoDate(), amount: 240, method: 'Check', reference: null })
+  await page.reload()
+  await openLease(page, homeowner)
+  await expect(leaseFees(page).getByRole('status', { name: 'Notice of default' })).toContainText('cured: $240.00 paid by')
+})
+
+test('a notice of default not cured by its deadline shows on Today and the lease', async ({ page }) => {
+  await page.goto('/')
+  const homeowner = `Uncured Owner ${uniqueId()}`
+  const leaseId = await createLease(page, homeowner, firstOfMonth(3))
+  await post(page, `/api/v1/ground-leases/${leaseId}/lease-fee-notices`,
+    { level: 'Default', sentOn: isoDate(-35), delivery: 'HandDelivered' })
+
+  await page.reload()
+  const todayRow = page.locator('section[aria-labelledby="today-stewardship"] tbody tr', { hasText: 'default not cured' })
+    .filter({ hasText: homeowner })
+  await expect(todayRow).toContainText('Lease default not cured')
+  await expect(todayRow.getByRole('button', { name: /^Review default/ })).toBeVisible()
+
+  await openLease(page, homeowner)
+  await expect(leaseFees(page).getByRole('status', { name: 'Notice of default' })).toContainText('not cured by')
 })

@@ -33,6 +33,24 @@ export interface SetLeaseFeeNoticePolicyRequest {
      */
     secondNoticeDays?: number;
     /**
+     * Days overdue before the notice of default; more than the second.
+     * @type {number}
+     * @memberof SetLeaseFeeNoticePolicyRequest
+     */
+    defaultNoticeDays?: number;
+    /**
+     * Days a notice of default gives to pay; at least 1.
+     * @type {number}
+     * @memberof SetLeaseFeeNoticePolicyRequest
+     */
+    cureDays?: number;
+    /**
+     * Days added when two-thirds is paid within the cure days; zero for none.
+     * @type {number}
+     * @memberof SetLeaseFeeNoticePolicyRequest
+     */
+    cureExtensionDays?: number;
+    /**
      * The lines printed at the end of every letter; empty or null for none.
      * @type {string}
      * @memberof SetLeaseFeeNoticePolicyRequest
@@ -59,6 +77,9 @@ export function SetLeaseFeeNoticePolicyRequestFromJSONTyped(json: any, ignoreDis
         
         'firstNoticeDays': json['firstNoticeDays'] == null ? undefined : json['firstNoticeDays'],
         'secondNoticeDays': json['secondNoticeDays'] == null ? undefined : json['secondNoticeDays'],
+        'defaultNoticeDays': json['defaultNoticeDays'] == null ? undefined : json['defaultNoticeDays'],
+        'cureDays': json['cureDays'] == null ? undefined : json['cureDays'],
+        'cureExtensionDays': json['cureExtensionDays'] == null ? undefined : json['cureExtensionDays'],
         'letterSignOff': json['letterSignOff'] == null ? undefined : json['letterSignOff'],
     };
 }
@@ -76,6 +97,9 @@ export function SetLeaseFeeNoticePolicyRequestToJSONTyped(value?: SetLeaseFeeNot
         
         'firstNoticeDays': value['firstNoticeDays'],
         'secondNoticeDays': value['secondNoticeDays'],
+        'defaultNoticeDays': value['defaultNoticeDays'],
+        'cureDays': value['cureDays'],
+        'cureExtensionDays': value['cureExtensionDays'],
         'letterSignOff': value['letterSignOff'],
     };
 }

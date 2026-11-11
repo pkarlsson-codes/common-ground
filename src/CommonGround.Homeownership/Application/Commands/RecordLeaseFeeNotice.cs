@@ -3,6 +3,8 @@ using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Services;
 using CommonGround.SharedKernel.Extensions;
+using CommonGround.Homeownership.Application.Queries;
+using JasperFx.Events;
 using Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
@@ -25,8 +27,8 @@ public sealed record RecordLeaseFeeNotice(
 /// <summary>Handles <see cref="RecordLeaseFeeNotice"/>.</summary>
 public static class RecordLeaseFeeNoticeHandler
 {
-    /// <summary>Fetches the lease for writing and the trust's today.</summary>
-    public static async Task<LeaseFeePaymentDecision> LoadAsync(
+    /// <summary>Fetches the lease for writing, the trust's today, and the cure period a notice of default gives.</summary>
+    public static async Task<LeaseFeeNoticeDecision> LoadAsync(
         RecordLeaseFeeNotice command,
         IDocumentSession session,
         ITrustClock trustClock,
@@ -40,12 +42,13 @@ public static class RecordLeaseFeeNoticeHandler
             .FetchForWriting<GroundLease>(command.GroundLeaseId.Value, cancellationToken)
             .ConfigureAwait(false);
         var today = await trustClock.TodayAsync(session.TenantId, cancellationToken).ConfigureAwait(false);
+        var policy = await GetLeaseFeeNoticePolicyHandler.LoadAsync(session, cancellationToken).ConfigureAwait(false);
 
-        return new LeaseFeePaymentDecision(lease, today);
+        return new LeaseFeeNoticeDecision(lease, today, policy.CurePeriod);
     }
 
     /// <summary>Records the notice on the lease.</summary>
-    public static void Handle(RecordLeaseFeeNotice command, LeaseFeePaymentDecision decision)
+    public static void Handle(RecordLeaseFeeNotice command, LeaseFeeNoticeDecision decision)
     {
         ArgumentNullException.ThrowIfNull(command);
         ArgumentNullException.ThrowIfNull(decision);
@@ -55,7 +58,14 @@ public static class RecordLeaseFeeNoticeHandler
             command.Level,
             command.SentOn,
             command.Delivery,
+            decision.CurePeriod,
             decision.Today,
             command.RecordedBy));
     }
 }
+
+/// <summary>What recording a late notice decides with.</summary>
+/// <param name="Lease">The lease, fetched for writing.</param>
+/// <param name="Today">The trust's today.</param>
+/// <param name="CurePeriod">The trust's cure period for a notice of default.</param>
+public sealed record LeaseFeeNoticeDecision(IEventStream<GroundLease> Lease, DateOnly Today, DefaultCurePeriod CurePeriod);
