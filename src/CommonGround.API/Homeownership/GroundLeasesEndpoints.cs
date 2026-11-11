@@ -94,7 +94,7 @@ public static class GroundLeasesEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
 
-        var (view, recordedOn, leaseFees) = await bus.InvokeForTenantAsync<GroundLeaseDetails>(bus.TenantId!,
+        var (view, recordedOn, leaseFees, noticeDue) = await bus.InvokeForTenantAsync<GroundLeaseDetails>(bus.TenantId!,
             new GetGroundLease(GroundLeaseId.Create(groundLeaseId)),
             cancellationToken);
 
@@ -135,7 +135,8 @@ public static class GroundLeasesEndpoints
                     leaseFees.TotalPaid,
                     leaseFees.Balance,
                     leaseFees.OldestUnpaidDueDate,
-                    leaseFees.DaysOverdue),
+                    leaseFees.DaysOverdue,
+                    leaseFees.ArrearsSince),
                 view.LeaseFeePayments
                     .OrderByDescending(p => p.ReceivedDate)
                     .ThenByDescending(p => p.RecordedAt)
@@ -149,6 +150,21 @@ public static class GroundLeasesEndpoints
                         p.RecordedAt,
                         p.VoidReason,
                         p.VoidedAt))
+                    .ToList()
+                    .AsReadOnly(),
+                noticeDue?.DisplayName,
+                view.LeaseFeeNotices
+                    .OrderByDescending(n => n.SentOn)
+                    .ThenByDescending(n => n.RecordedAt)
+                    .Select(n => new LeaseFeeNoticeDto(
+                        n.NoticeId,
+                        n.Level,
+                        n.SentOn,
+                        n.Delivery,
+                        n.BalanceDue,
+                        n.OldestUnpaidDueDate,
+                        n.RecordedBy,
+                        n.RecordedAt))
                     .ToList()
                     .AsReadOnly()),
             view.CreatedAt,

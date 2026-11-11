@@ -59,4 +59,28 @@ public interface IGroundLeasesApiClient
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A paginated list of lease fee balances.</returns>
     Task<PaginatedResponse<LeaseFeeBalanceResponse>> GetLeaseFeeBalancesAsync(GetLeaseFeeBalancesQuerySpec querySpec, CancellationToken cancellationToken);
+
+    /// <summary>Records that a late lease fee notice was sent on a lease.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="request">The notice details.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response containing the new notice ID.</returns>
+    Task<RecordLeaseFeeNoticeResponse> RecordLeaseFeeNoticeAsync(string groundLeaseId, RecordLeaseFeeNoticeRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Gets the late notices due, for printing; only one lease's when <paramref name="groundLeaseId"/> is given.</summary>
+    /// <param name="groundLeaseId">The ID of one ground lease, or null for all.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The notices due, with the letter date and sign-off.</returns>
+    Task<LeaseFeeNoticesDueResponse> GetLeaseFeeNoticesDueAsync(string? groundLeaseId, CancellationToken cancellationToken);
+
+    /// <summary>Gets the trust's lease fee notice policy.</summary>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The policy, or the defaults.</returns>
+    Task<LeaseFeeNoticePolicyResponse> GetLeaseFeeNoticePolicyAsync(CancellationToken cancellationToken);
+
+    /// <summary>Sets the trust's lease fee notice policy and returns it.</summary>
+    /// <param name="request">The new policy.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The policy as saved.</returns>
+    Task<LeaseFeeNoticePolicyResponse> SetLeaseFeeNoticePolicyAsync(SetLeaseFeeNoticePolicyRequest request, CancellationToken cancellationToken);
 }

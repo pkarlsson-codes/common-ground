@@ -89,6 +89,9 @@ models/LandParcelListItemResponse.ts
 models/LandParcelResponse.ts
 models/LeaseExecutionDetailsDto.ts
 models/LeaseFeeBalanceResponse.ts
+models/LeaseFeeNoticeDto.ts
+models/LeaseFeeNoticePolicyResponse.ts
+models/LeaseFeeNoticesDueResponse.ts
 models/LeaseFeePaymentDto.ts
 models/LeaseFeeStatementDto.ts
 models/LeaseFeesDto.ts
@@ -138,6 +141,8 @@ models/RecordInspectionCompletedRequest.ts
 models/RecordIntentToSellRequest.ts
 models/RecordIntentToSellResponse.ts
 models/RecordLeaseExecutedRequest.ts
+models/RecordLeaseFeeNoticeRequest.ts
+models/RecordLeaseFeeNoticeResponse.ts
 models/RecordLeaseFeePaymentRequest.ts
 models/RecordLeaseFeePaymentResponse.ts
 models/RecordMortgagePrequalificationRequest.ts
@@ -161,6 +166,7 @@ models/ScheduleClosingRequest.ts
 models/SchedulePropertyInspectionRequest.ts
 models/SelectHouseholdByPriorityRequest.ts
 models/ServicerDelinquencyResponse.ts
+models/SetLeaseFeeNoticePolicyRequest.ts
 models/SoftDeleteDocumentRequest.ts
 models/StallWorkflowRequest.ts
 models/StartHomeSelectionResponse.ts

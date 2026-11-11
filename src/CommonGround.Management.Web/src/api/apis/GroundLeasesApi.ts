@@ -20,13 +20,18 @@ import type {
   CreateGroundLeaseRequest,
   CreateGroundLeaseResponse,
   GroundLeaseResponse,
+  LeaseFeeNoticePolicyResponse,
+  LeaseFeeNoticesDueResponse,
   PaginatedResponseOfGroundLeaseListItemResponse,
   PaginatedResponseOfLeaseFeeBalanceResponse,
   ProblemDetails,
+  RecordLeaseFeeNoticeRequest,
+  RecordLeaseFeeNoticeResponse,
   RecordLeaseFeePaymentRequest,
   RecordLeaseFeePaymentResponse,
   RecordStewardshipCheckInRequest,
   ResaleEstimateResponse,
+  SetLeaseFeeNoticePolicyRequest,
   VoidLeaseFeePaymentRequest,
 } from '../models/index';
 import {
@@ -38,12 +43,20 @@ import {
     CreateGroundLeaseResponseToJSON,
     GroundLeaseResponseFromJSON,
     GroundLeaseResponseToJSON,
+    LeaseFeeNoticePolicyResponseFromJSON,
+    LeaseFeeNoticePolicyResponseToJSON,
+    LeaseFeeNoticesDueResponseFromJSON,
+    LeaseFeeNoticesDueResponseToJSON,
     PaginatedResponseOfGroundLeaseListItemResponseFromJSON,
     PaginatedResponseOfGroundLeaseListItemResponseToJSON,
     PaginatedResponseOfLeaseFeeBalanceResponseFromJSON,
     PaginatedResponseOfLeaseFeeBalanceResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
+    RecordLeaseFeeNoticeRequestFromJSON,
+    RecordLeaseFeeNoticeRequestToJSON,
+    RecordLeaseFeeNoticeResponseFromJSON,
+    RecordLeaseFeeNoticeResponseToJSON,
     RecordLeaseFeePaymentRequestFromJSON,
     RecordLeaseFeePaymentRequestToJSON,
     RecordLeaseFeePaymentResponseFromJSON,
@@ -52,6 +65,8 @@ import {
     RecordStewardshipCheckInRequestToJSON,
     ResaleEstimateResponseFromJSON,
     ResaleEstimateResponseToJSON,
+    SetLeaseFeeNoticePolicyRequestFromJSON,
+    SetLeaseFeeNoticePolicyRequestToJSON,
     VoidLeaseFeePaymentRequestFromJSON,
     VoidLeaseFeePaymentRequestToJSON,
 } from '../models/index';
@@ -83,6 +98,16 @@ export interface GetLeaseFeeBalancesRequest {
     pageSize?: number;
     includeAll?: boolean;
     search?: string | null;
+    noticeDueOnly?: boolean;
+}
+
+export interface GetLeaseFeeNoticesDueRequest {
+    groundLeaseId?: string | null;
+}
+
+export interface RecordLeaseFeeNoticeOperationRequest {
+    groundLeaseId: string;
+    recordLeaseFeeNoticeRequest: RecordLeaseFeeNoticeRequest;
 }
 
 export interface RecordLeaseFeePaymentOperationRequest {
@@ -93,6 +118,10 @@ export interface RecordLeaseFeePaymentOperationRequest {
 export interface RecordStewardshipCheckInOperationRequest {
     groundLeaseId: string;
     recordStewardshipCheckInRequest: RecordStewardshipCheckInRequest;
+}
+
+export interface SetLeaseFeeNoticePolicyOperationRequest {
+    setLeaseFeeNoticePolicyRequest: SetLeaseFeeNoticePolicyRequest;
 }
 
 export interface VoidLeaseFeePaymentOperationRequest {
@@ -172,6 +201,7 @@ export interface GroundLeasesApiInterface {
      * @param {number} [pageSize] 
      * @param {boolean} [includeAll] 
      * @param {string} [search] 
+     * @param {boolean} [noticeDueOnly] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof GroundLeasesApiInterface
@@ -181,6 +211,45 @@ export interface GroundLeasesApiInterface {
     /**
      */
     getLeaseFeeBalances(requestParameters: GetLeaseFeeBalancesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfLeaseFeeBalanceResponse>;
+
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    getLeaseFeeNoticePolicyRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<LeaseFeeNoticePolicyResponse>>;
+
+    /**
+     */
+    getLeaseFeeNoticePolicy(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<LeaseFeeNoticePolicyResponse>;
+
+    /**
+     * 
+     * @param {string} [groundLeaseId] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    getLeaseFeeNoticesDueRaw(requestParameters: GetLeaseFeeNoticesDueRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<LeaseFeeNoticesDueResponse>>;
+
+    /**
+     */
+    getLeaseFeeNoticesDue(requestParameters: GetLeaseFeeNoticesDueRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<LeaseFeeNoticesDueResponse>;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
+     * @param {RecordLeaseFeeNoticeRequest} recordLeaseFeeNoticeRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    recordLeaseFeeNoticeRaw(requestParameters: RecordLeaseFeeNoticeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    recordLeaseFeeNotice(requestParameters: RecordLeaseFeeNoticeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
     /**
      * 
@@ -209,6 +278,19 @@ export interface GroundLeasesApiInterface {
     /**
      */
     recordStewardshipCheckIn(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {SetLeaseFeeNoticePolicyRequest} setLeaseFeeNoticePolicyRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    setLeaseFeeNoticePolicyRaw(requestParameters: SetLeaseFeeNoticePolicyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<LeaseFeeNoticePolicyResponse>>;
+
+    /**
+     */
+    setLeaseFeeNoticePolicy(requestParameters: SetLeaseFeeNoticePolicyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<LeaseFeeNoticePolicyResponse>;
 
     /**
      * 
@@ -421,6 +503,10 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
             queryParameters['search'] = requestParameters['search'];
         }
 
+        if (requestParameters['noticeDueOnly'] != null) {
+            queryParameters['noticeDueOnly'] = requestParameters['noticeDueOnly'];
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
 
@@ -440,6 +526,109 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
      */
     async getLeaseFeeBalances(requestParameters: GetLeaseFeeBalancesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfLeaseFeeBalanceResponse> {
         const response = await this.getLeaseFeeBalancesRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getLeaseFeeNoticePolicyRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<LeaseFeeNoticePolicyResponse>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/lease-fee-notice-policy`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => LeaseFeeNoticePolicyResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getLeaseFeeNoticePolicy(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<LeaseFeeNoticePolicyResponse> {
+        const response = await this.getLeaseFeeNoticePolicyRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getLeaseFeeNoticesDueRaw(requestParameters: GetLeaseFeeNoticesDueRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<LeaseFeeNoticesDueResponse>> {
+        const queryParameters: any = {};
+
+        if (requestParameters['groundLeaseId'] != null) {
+            queryParameters['groundLeaseId'] = requestParameters['groundLeaseId'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/lease-fee-notices/due`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => LeaseFeeNoticesDueResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getLeaseFeeNoticesDue(requestParameters: GetLeaseFeeNoticesDueRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<LeaseFeeNoticesDueResponse> {
+        const response = await this.getLeaseFeeNoticesDueRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async recordLeaseFeeNoticeRaw(requestParameters: RecordLeaseFeeNoticeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling recordLeaseFeeNotice().'
+            );
+        }
+
+        if (requestParameters['recordLeaseFeeNoticeRequest'] == null) {
+            throw new runtime.RequiredError(
+                'recordLeaseFeeNoticeRequest',
+                'Required parameter "recordLeaseFeeNoticeRequest" was null or undefined when calling recordLeaseFeeNotice().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/lease-fee-notices`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RecordLeaseFeeNoticeRequestToJSON(requestParameters['recordLeaseFeeNoticeRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async recordLeaseFeeNotice(requestParameters: RecordLeaseFeeNoticeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.recordLeaseFeeNoticeRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -538,6 +727,43 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
             default:
                 return await response.value();
         }
+    }
+
+    /**
+     */
+    async setLeaseFeeNoticePolicyRaw(requestParameters: SetLeaseFeeNoticePolicyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<LeaseFeeNoticePolicyResponse>> {
+        if (requestParameters['setLeaseFeeNoticePolicyRequest'] == null) {
+            throw new runtime.RequiredError(
+                'setLeaseFeeNoticePolicyRequest',
+                'Required parameter "setLeaseFeeNoticePolicyRequest" was null or undefined when calling setLeaseFeeNoticePolicy().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/lease-fee-notice-policy`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: SetLeaseFeeNoticePolicyRequestToJSON(requestParameters['setLeaseFeeNoticePolicyRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => LeaseFeeNoticePolicyResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async setLeaseFeeNoticePolicy(requestParameters: SetLeaseFeeNoticePolicyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<LeaseFeeNoticePolicyResponse> {
+        const response = await this.setLeaseFeeNoticePolicyRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**

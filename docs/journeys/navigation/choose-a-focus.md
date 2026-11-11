@@ -1,6 +1,6 @@
 # Choose a Focus
 
-1. The sidebar groups pages by the work: **Work** in process order (Households, Applications, Waiting list, Home selections, Purchases, Stewardship, Resales), **Records** (Land parcels, Development, Homes, Ground leases, Documents) and **Settings** (Lease templates)
+1. The sidebar groups pages by the work: **Work** in process order (Households, Applications, Waiting list, Home selections, Purchases, Stewardship, Resales), **Records** (Land parcels, Development, Homes, Ground leases, Documents) and **Settings** (Lease templates, Trust policy)
 2. User picks a focus from "My focus" at the bottom of the sidebar: Everything (default), Intake, Sales or Stewardship
    - Intake covers Households, Applications and Waiting list
    - Sales covers Home selections, Purchases and Resales

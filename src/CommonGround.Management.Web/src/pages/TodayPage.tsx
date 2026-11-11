@@ -20,6 +20,7 @@ const KIND_LABELS: Record<string, string> = {
   'purchase-step-waiting': 'Purchase waiting',
   'purchase-stalled': 'Purchase stalled',
   'closing-scheduled': 'Closing coming up',
+  'lease-fee-notice-due': 'Lease fee notice due',
   'document-expiring': 'Document expiring',
 }
 

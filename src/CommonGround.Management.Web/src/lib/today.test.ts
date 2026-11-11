@@ -4,10 +4,10 @@ import { areasForFocus, countForFocus, countsByPage, recordLink, rowActions, typ
 
 describe('areasForFocus', () => {
   it.each<[Focus, TodayArea[]]>([
-    ['everything', ['applicants', 'selections', 'purchases', 'records']],
+    ['everything', ['applicants', 'selections', 'purchases', 'stewardship', 'records']],
     ['intake', ['applicants', 'records']],
     ['sales', ['selections', 'purchases', 'records']],
-    ['stewardship', ['records']],
+    ['stewardship', ['stewardship', 'records']],
   ])('shows %s its own areas plus Records, in work order', (focus, areas) => {
     expect(areasForFocus(focus)).toEqual(areas)
   })
@@ -17,6 +17,11 @@ describe('recordLink', () => {
   it('opens a record on its list page', () => {
     expect(recordLink({ recordType: 'application', recordId: 'a-1' }))
       .toEqual({ to: '/applications', state: { openId: 'a-1' } })
+  })
+
+  it('opens a ground lease on the Ground Leases page', () => {
+    expect(recordLink({ recordType: 'ground-lease', recordId: 'gl-1' }))
+      .toEqual({ to: '/ground-leases', state: { openId: 'gl-1' } })
   })
 
   it('opens a selection on its own page', () => {

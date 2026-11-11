@@ -21,6 +21,13 @@ import {
     LeaseFeePaymentDtoToJSON,
     LeaseFeePaymentDtoToJSONTyped,
 } from './LeaseFeePaymentDto';
+import type { LeaseFeeNoticeDto } from './LeaseFeeNoticeDto';
+import {
+    LeaseFeeNoticeDtoFromJSON,
+    LeaseFeeNoticeDtoFromJSONTyped,
+    LeaseFeeNoticeDtoToJSON,
+    LeaseFeeNoticeDtoToJSONTyped,
+} from './LeaseFeeNoticeDto';
 import type { LeaseFeeStatementDto } from './LeaseFeeStatementDto';
 import {
     LeaseFeeStatementDtoFromJSON,
@@ -65,6 +72,18 @@ export interface LeaseFeesDto {
      * @memberof LeaseFeesDto
      */
     payments?: Array<LeaseFeePaymentDto>;
+    /**
+     * The late notice due now, First or Second, or null.
+     * @type {string}
+     * @memberof LeaseFeesDto
+     */
+    noticeDue?: string | null;
+    /**
+     * Every late notice recorded, newest sent first.
+     * @type {Array<LeaseFeeNoticeDto>}
+     * @memberof LeaseFeesDto
+     */
+    notices?: Array<LeaseFeeNoticeDto>;
 }
 
 /**
@@ -89,6 +108,8 @@ export function LeaseFeesDtoFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'monthlyFee': json['monthlyFee'] == null ? undefined : json['monthlyFee'],
         'statement': json['statement'] == null ? undefined : LeaseFeeStatementDtoFromJSON(json['statement']),
         'payments': json['payments'] == null ? undefined : ((json['payments'] as Array<any>).map(LeaseFeePaymentDtoFromJSON)),
+        'noticeDue': json['noticeDue'] == null ? undefined : json['noticeDue'],
+        'notices': json['notices'] == null ? undefined : ((json['notices'] as Array<any>).map(LeaseFeeNoticeDtoFromJSON)),
     };
 }
 
@@ -108,6 +129,8 @@ export function LeaseFeesDtoToJSONTyped(value?: LeaseFeesDto | null, ignoreDiscr
         'monthlyFee': value['monthlyFee'],
         'statement': LeaseFeeStatementDtoToJSON(value['statement']),
         'payments': value['payments'] == null ? undefined : ((value['payments'] as Array<any>).map(LeaseFeePaymentDtoToJSON)),
+        'noticeDue': value['noticeDue'],
+        'notices': value['notices'] == null ? undefined : ((value['notices'] as Array<any>).map(LeaseFeeNoticeDtoToJSON)),
     };
 }
 

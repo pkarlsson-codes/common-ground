@@ -2,7 +2,7 @@ import type { WorkCountResponse, WorkItemResponse } from '../api'
 import { FOCUS_AREAS, type Focus } from './navigation'
 
 /** The areas Today groups items into, as the API names them. Records sits outside any focus. */
-export type TodayArea = 'applicants' | 'selections' | 'purchases' | 'records'
+export type TodayArea = 'applicants' | 'selections' | 'purchases' | 'stewardship' | 'records'
 
 export interface TodaySection {
   area: TodayArea
@@ -14,6 +14,7 @@ export const TODAY_SECTIONS: readonly TodaySection[] = [
   { area: 'applicants', label: 'Applicants' },
   { area: 'selections', label: 'Selections' },
   { area: 'purchases', label: 'Purchases' },
+  { area: 'stewardship', label: 'Stewardship' },
   { area: 'records', label: 'Records' },
 ]
 
@@ -36,6 +37,7 @@ const RECORD_PAGES: Record<string, string> = {
   home: '/homes',
   purchase: '/purchase-workflows',
   document: '/documents',
+  'ground-lease': '/ground-leases',
 }
 
 /** Where a row leads: the record's detail, opened on its list page (selections have a page of their own). */
@@ -57,6 +59,7 @@ const KINDS: Record<string, { page: string; area: TodayArea }> = {
   'purchase-step-waiting': { page: '/purchase-workflows', area: 'purchases' },
   'purchase-stalled': { page: '/purchase-workflows', area: 'purchases' },
   'closing-scheduled': { page: '/purchase-workflows', area: 'purchases' },
+  'lease-fee-notice-due': { page: '/stewardship', area: 'stewardship' },
   'document-expiring': { page: '/documents', area: 'records' },
 }
 
@@ -97,6 +100,7 @@ const ACTION_LABELS: Record<string, string> = {
   'record-lease-execution': 'Record lease signing',
   'schedule-closing': 'Schedule closing',
   'record-closing': 'Record closing',
+  'record-lease-fee-notice': 'Record notice',
 }
 
 /** The actions whose panel opens over Today; the rest open the record, where the action is. */

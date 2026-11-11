@@ -18,6 +18,8 @@ import ResalesPage from './pages/ResalesPage'
 import SignupPage from './pages/SignupPage'
 import TodayPage from './pages/TodayPage'
 import StewardshipPage from './pages/stewardship/StewardshipPage'
+import LeaseFeeNoticesPrintPage from './pages/lease-fee-notices/LeaseFeeNoticesPrintPage'
+import TrustPolicyPage from './pages/trust-policy/TrustPolicyPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useCurrentTrust } from './hooks/trusts'
 import { setTrustTimeZone } from './lib/calendarDate'
@@ -98,7 +100,9 @@ export default function App() {
                 <Route path="/resales"             element={<ResalesPage />} />
                 <Route path="/documents"           element={<DocumentsPage />} />
                 <Route path="/stewardship"          element={<StewardshipPage />} />
+                <Route path="/trust-policy"         element={<TrustPolicyPage />} />
               </Route>
+              <Route path="/lease-fee-notices/print" element={<LeaseFeeNoticesPrintPage />} />
             </Route>
           </Route>
         </Routes>

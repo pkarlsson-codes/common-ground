@@ -88,6 +88,11 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <summary>Gets every lease fee payment recorded on this lease, voided ones included, in the order recorded.</summary>
     public IReadOnlyList<LeaseFeePayment> LeaseFeePayments => _leaseFeePayments;
 
+    private readonly List<LeaseFeeNotice> _leaseFeeNotices = [];
+
+    /// <summary>Gets every late notice recorded on this lease, in the order recorded.</summary>
+    public IReadOnlyList<LeaseFeeNotice> LeaseFeeNotices => _leaseFeeNotices;
+
     /// <summary>
     /// Creates a ground lease that didn't come from a purchase, such as one signed before the trust used
     /// CommonGround. Refused while the home is already leased, being sold, or in a home selection.
@@ -313,14 +318,59 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         return new LeaseFeePaymentVoided(Id.Value, paymentId.Value, reason.Trim(), voidedBy.Value);
     }
 
+    /// <summary>
+    /// Records a late notice the trust sent, keeping the balance and oldest unpaid month on the day it was sent.
+    /// Refused for a sent date in the future or before the lease started, or when nothing was owed that day. A
+    /// notice can be recorded before it falls due, and on an ended lease.
+    /// </summary>
+    public LeaseFeeNoticeRecorded RecordLeaseFeeNotice(
+        LeaseFeeNoticeId noticeId,
+        LeaseFeeNoticeLevel level,
+        DateOnly sentOn,
+        NoticeDelivery delivery,
+        DateOnly today,
+        UserId recordedBy)
+    {
+        ArgumentNullException.ThrowIfNull(level);
+        ArgumentNullException.ThrowIfNull(delivery);
+
+        if (sentOn > today)
+            throw BusinessRuleViolation.GroundLease.RecordLeaseFeeNotice.SentDateInFuture(sentOn, today);
+
+        if (sentOn < LeaseStartDate)
+            throw BusinessRuleViolation.GroundLease.RecordLeaseFeeNotice.SentDateBeforeLeaseStart(sentOn, LeaseStartDate);
+
+        var statement = LeaseFeeStatementAsOf(sentOn);
+        if (statement.Balance <= 0 || statement.OldestUnpaidDueDate is not { } oldestUnpaid)
+            throw BusinessRuleViolation.GroundLease.RecordLeaseFeeNotice.NothingOwed(sentOn);
+
+        return new LeaseFeeNoticeRecorded(
+            Id.Value, noticeId.Value, level, sentOn, delivery, statement.Balance, oldestUnpaid, recordedBy.Value);
+    }
+
     /// <summary>Works out what the lease owes as of a day, usually the trust's today.</summary>
     public LeaseFeeStatement LeaseFeeStatementAsOf(DateOnly asOf) =>
         LeaseFeeStatement.Calculate(
             LeaseFeeTerms,
             LeaseStartDate,
             EndedOn,
-            _leaseFeePayments.Where(p => !p.IsVoided).Select(p => p.Amount),
+            _leaseFeePayments.Where(p => !p.IsVoided).Select(p => new ReceivedPayment(p.ReceivedDate, p.Amount)),
             asOf);
+
+    /// <summary>
+    /// Gets the late notice the lease needs as of a day, or null. Only an active lease needs one; an ended lease's
+    /// arrears are collected from the sale (Art 5.8), not by letter.
+    /// </summary>
+    public LeaseFeeNoticeLevel? LeaseFeeNoticeDueAsOf(DateOnly asOf, LeaseFeeNoticeSchedule schedule)
+    {
+        ArgumentNullException.ThrowIfNull(schedule);
+
+        return Status != GroundLeaseStatus.Active
+            ? null
+            : schedule.NoticeDue(
+                LeaseFeeStatementAsOf(asOf),
+                _leaseFeeNotices.Select(n => new LeaseFeeNoticeSent(n.Level, n.SentOn)));
+    }
 
     /// <summary>Starts a ground lease from its first event.</summary>
     public static GroundLease Create(GroundLeaseCreated e)
@@ -418,6 +468,11 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     public void Apply(LeaseFeePaymentRecorded e) =>
         _leaseFeePayments.Add(LeaseFeePayment.Create(
             LeaseFeePaymentId.Create(e.PaymentId), e.ReceivedDate, e.Amount, e.Method, e.Reference));
+
+    /// <summary>Applies <see cref="LeaseFeeNoticeRecorded"/>.</summary>
+    public void Apply(LeaseFeeNoticeRecorded e) =>
+        _leaseFeeNotices.Add(LeaseFeeNotice.Create(
+            LeaseFeeNoticeId.Create(e.NoticeId), e.Level, e.SentOn, e.Delivery, e.BalanceDue, e.OldestUnpaidDueDate));
 
     /// <summary>Applies <see cref="LeaseFeePaymentVoided"/>.</summary>
     public void Apply(LeaseFeePaymentVoided e) =>

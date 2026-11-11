@@ -69,6 +69,10 @@
   --surface-2:       #111827;
   --surface-3:       #0f1b28;
 
+  /* Printed letters: paper and ink, whatever the app's theme */
+  --paper: #ffffff;
+  --ink:   #1a1a1a;
+
   /* Typography */
   --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   --font-body:    'IBM Plex Sans', system-ui, sans-serif;
@@ -1243,3 +1247,72 @@ body {
 .board-card__buyer { font-size: 13px; color: var(--text-secondary); }
 .board-card__meta { display: flex; flex-wrap: wrap; gap: 6px 10px; font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); }
 .board-card__flag { color: var(--warning); background: var(--warning-surface); border-radius: 999px; padding: 0 6px; }
+
+/* ── Printed notice letters ─────────────────────────────── */
+.letters-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.letters {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+  padding: 24px 16px;
+}
+
+.notice-letter {
+  width: 100%;
+  max-width: 8.5in;
+  min-height: 11in;
+  padding: 1in;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 12pt;
+  line-height: 1.5;
+}
+
+.notice-letter p {
+  margin: 0 0 1em;
+}
+
+.notice-letter__heading {
+  margin: 1.5em 0 1em;
+  font-size: 14pt;
+  font-weight: bold;
+}
+
+.notice-letter__lines {
+  margin-bottom: 1em;
+}
+
+@media print {
+  @page {
+    size: letter;
+    margin: 0;
+  }
+
+  body {
+    background: var(--paper);
+  }
+
+  .letters-toolbar {
+    display: none;
+  }
+
+  .letters {
+    display: block;
+    padding: 0;
+  }
+
+  .notice-letter {
+    max-width: none;
+    min-height: auto;
+    break-after: page;
+  }
+}

@@ -72,4 +72,30 @@ public sealed class GroundLeasesApiClient(
         ArgumentNullException.ThrowIfNull(querySpec);
         return await GetAsync<PaginatedResponse<LeaseFeeBalanceResponse>>($"api/lease-fee-balances{querySpec.ToQueryString()}", cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task<RecordLeaseFeeNoticeResponse> RecordLeaseFeeNoticeAsync(string groundLeaseId, RecordLeaseFeeNoticeRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        return await PostAsync<RecordLeaseFeeNoticeRequest, RecordLeaseFeeNoticeResponse>($"api/ground-leases/{groundLeaseId}/lease-fee-notices", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<LeaseFeeNoticesDueResponse> GetLeaseFeeNoticesDueAsync(string? groundLeaseId, CancellationToken cancellationToken)
+    {
+        var query = string.IsNullOrWhiteSpace(groundLeaseId) ? string.Empty : $"?groundLeaseId={Uri.EscapeDataString(groundLeaseId)}";
+        return await GetAsync<LeaseFeeNoticesDueResponse>($"api/lease-fee-notices/due{query}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<LeaseFeeNoticePolicyResponse> GetLeaseFeeNoticePolicyAsync(CancellationToken cancellationToken) =>
+        await GetAsync<LeaseFeeNoticePolicyResponse>("api/lease-fee-notice-policy", cancellationToken).ConfigureAwait(false);
+
+    /// <inheritdoc/>
+    public async Task<LeaseFeeNoticePolicyResponse> SetLeaseFeeNoticePolicyAsync(SetLeaseFeeNoticePolicyRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return await PutAsync<SetLeaseFeeNoticePolicyRequest, LeaseFeeNoticePolicyResponse>("api/lease-fee-notice-policy", request, cancellationToken).ConfigureAwait(false);
+    }
 }

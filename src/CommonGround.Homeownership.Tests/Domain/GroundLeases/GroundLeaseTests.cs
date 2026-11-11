@@ -477,4 +477,84 @@ public class GroundLeaseTests
             statement.MonthlyFee.Should().Be(60m);
         }
     }
+
+    public class TheRecordLeaseFeeNoticeMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        private static readonly DateOnly Today = new(2025, 3, 15);
+
+        [Theory]
+        [InlineData("2025-03-16", "homeownership.ground_lease.record_lease_fee_notice.sent_date_in_future")]
+        [InlineData("2024-12-31", "homeownership.ground_lease.record_lease_fee_notice.sent_date_before_lease_start")]
+        public void GivenInvalidSentDate_WhenRecorded_ThenThrowsBusinessRuleViolation(string sentOn, string expectedCode)
+        {
+            var sut = _testBed.Lease();
+
+            var act = () => sut.RecordLeaseFeeNotice(
+                LeaseFeeNoticeId.Generate(), LeaseFeeNoticeLevel.First, DateOnly.Parse(sentOn, CultureInfo.InvariantCulture),
+                NoticeDelivery.FirstClassMail, Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
+        }
+
+        [Fact]
+        public void GivenNothingOwedOnTheSentDate_WhenRecorded_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = _testBed.Lease().Decide(l => _testBed.Payment(l, 180m, new DateOnly(2025, 1, 2))).Aggregate;
+
+            var act = () => sut.RecordLeaseFeeNotice(
+                LeaseFeeNoticeId.Generate(), LeaseFeeNoticeLevel.First, new DateOnly(2025, 3, 12),
+                NoticeDelivery.FirstClassMail, Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.record_lease_fee_notice.nothing_owed");
+        }
+
+        [Fact]
+        public void GivenBalanceDue_WhenRecorded_ThenKeepsWhatWasOwedOnTheSentDate()
+        {
+            var sut = _testBed.Lease().Decide(l => _testBed.Payment(l, 60m, new DateOnly(2025, 1, 2))).Aggregate;
+
+            var (noticed, _) = sut.Decide(l => l.RecordLeaseFeeNotice(
+                LeaseFeeNoticeId.Generate(), LeaseFeeNoticeLevel.First, new DateOnly(2025, 2, 12),
+                NoticeDelivery.CertifiedMail, Today, _testBed.StaffUser));
+
+            noticed.LeaseFeeNotices.Should().ContainSingle().Which.Should().BeEquivalentTo(new
+            {
+                Level = LeaseFeeNoticeLevel.First,
+                SentOn = new DateOnly(2025, 2, 12),
+                Delivery = NoticeDelivery.CertifiedMail,
+                BalanceDue = 60m,
+                OldestUnpaidDueDate = new DateOnly(2025, 2, 1),
+            });
+        }
+    }
+
+    public class TheLeaseFeeNoticeDueAsOfMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenActiveLeaseBehindPastTheFirstThreshold_WhenAsked_ThenTheFirstIsDueUntilRecorded()
+        {
+            var sut = _testBed.Lease().Decide(l => _testBed.Payment(l, 60m, new DateOnly(2025, 1, 2))).Aggregate;
+            var today = new DateOnly(2025, 2, 12);
+
+            sut.LeaseFeeNoticeDueAsOf(today, LeaseFeeNoticeSchedule.Default).Should().Be(LeaseFeeNoticeLevel.First);
+
+            var noticed = sut.Decide(l => l.RecordLeaseFeeNotice(
+                LeaseFeeNoticeId.Generate(), LeaseFeeNoticeLevel.First, today, NoticeDelivery.FirstClassMail, today, _testBed.StaffUser)).Aggregate;
+
+            noticed.LeaseFeeNoticeDueAsOf(today, LeaseFeeNoticeSchedule.Default).Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenEndedLeaseWithArrears_WhenAsked_ThenNoNoticeIsDue()
+        {
+            var sut = _testBed.Lease().Decide(l => l.Terminate("Sold", new DateOnly(2025, 2, 15), _testBed.StaffUser)).Aggregate;
+
+            sut.LeaseFeeNoticeDueAsOf(new DateOnly(2025, 6, 1), LeaseFeeNoticeSchedule.Default).Should().BeNull();
+        }
+    }
 }

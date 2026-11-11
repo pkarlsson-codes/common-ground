@@ -86,6 +86,37 @@ public class GroundLeaseView
 
     /// <summary>Gets or sets every lease fee payment recorded, voided ones included, in the order recorded.</summary>
     public List<LeaseFeePaymentEntry> LeaseFeePayments { get; set; } = [];
+
+    /// <summary>Gets or sets every late notice recorded, in the order recorded.</summary>
+    public List<LeaseFeeNoticeEntry> LeaseFeeNotices { get; set; } = [];
+}
+
+/// <summary>A late lease fee notice in a ground lease view.</summary>
+public class LeaseFeeNoticeEntry
+{
+    /// <summary>Gets or sets the notice ID.</summary>
+    public string NoticeId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets which notice it was, as the level's display name.</summary>
+    public string Level { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the day it was sent.</summary>
+    public DateOnly SentOn { get; set; }
+
+    /// <summary>Gets or sets how it was sent, as the delivery's display name.</summary>
+    public string Delivery { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets what the lease owed that day.</summary>
+    public decimal BalanceDue { get; set; }
+
+    /// <summary>Gets or sets the due date of the oldest unpaid charge that day.</summary>
+    public DateOnly OldestUnpaidDueDate { get; set; }
+
+    /// <summary>Gets or sets the user who recorded it.</summary>
+    public string RecordedBy { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets when it was recorded.</summary>
+    public DateTimeOffset RecordedAt { get; set; }
 }
 
 /// <summary>A lease fee payment in a ground lease view.</summary>

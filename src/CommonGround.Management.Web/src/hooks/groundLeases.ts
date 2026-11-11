@@ -106,10 +106,100 @@ export interface RecordLeaseFeePaymentForm {
 }
 
 /** Leases with what they owe in lease fees, most days overdue first. */
-export function useLeaseFeeBalances(pageNumber: number, includeAll: boolean, search?: string) {
+/** Which leases the Lease Fees tab lists. */
+export type LeaseFeeFilter = 'due' | 'notice' | 'all'
+
+export function useLeaseFeeBalances(pageNumber: number, filter: LeaseFeeFilter, search?: string) {
   return useQuery({
-    queryKey: ['lease-fee-balances', pageNumber, includeAll, search],
-    queryFn: () => api.getLeaseFeeBalances({ pageNumber, pageSize: 20, includeAll, search: search || undefined }),
+    queryKey: ['lease-fee-balances', pageNumber, filter, search],
+    queryFn: () => api.getLeaseFeeBalances({
+      pageNumber,
+      pageSize: 20,
+      includeAll: filter === 'all',
+      noticeDueOnly: filter === 'notice',
+      search: search || undefined,
+    }),
+  })
+}
+
+export const NOTICE_LEVELS = ['First', 'Second'] as const
+export type NoticeLevel = typeof NOTICE_LEVELS[number]
+
+export const NOTICE_LEVEL_LABELS: Record<string, string> = {
+  First: 'First Notice',
+  Second: 'Second Notice',
+}
+
+export const NOTICE_DELIVERIES = ['FirstClassMail', 'CertifiedMail', 'RegisteredMail', 'HandDelivered', 'Email'] as const
+export type NoticeDelivery = typeof NOTICE_DELIVERIES[number]
+
+export const NOTICE_DELIVERY_LABELS: Record<string, string> = {
+  FirstClassMail: 'First-Class Mail',
+  CertifiedMail: 'Certified Mail',
+  RegisteredMail: 'Registered Mail',
+  HandDelivered: 'Hand Delivered',
+  Email: 'Email',
+}
+
+export interface RecordLeaseFeeNoticeForm {
+  level: NoticeLevel
+  sentOn: CalendarDate
+  delivery: NoticeDelivery
+}
+
+/** Notices due, for printing: every lease's, or one lease's. */
+export function useLeaseFeeNoticesDue(groundLeaseId?: string) {
+  return useQuery({
+    queryKey: ['lease-fee-notices-due', groundLeaseId ?? null],
+    queryFn: () => api.getLeaseFeeNoticesDue({ groundLeaseId }),
+  })
+}
+
+/** Invalidates everything a lease fee change can move: the lease, the balances list, the notices due and Today. */
+function invalidateLeaseFees(qc: ReturnType<typeof useQueryClient>, groundLeaseId: string) {
+  qc.invalidateQueries({ queryKey: ['ground-lease', groundLeaseId] })
+  qc.invalidateQueries({ queryKey: ['lease-fee-balances'] })
+  qc.invalidateQueries({ queryKey: ['lease-fee-notices-due'] })
+  qc.invalidateQueries({ queryKey: ['today'] })
+}
+
+export function useRecordLeaseFeeNotice() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ groundLeaseId, form }: { groundLeaseId: string; form: RecordLeaseFeeNoticeForm }) =>
+      api.recordLeaseFeeNotice({
+        groundLeaseId,
+        recordLeaseFeeNoticeRequest: { level: form.level, sentOn: form.sentOn, delivery: form.delivery },
+      }),
+    onSuccess: (_d, v) => invalidateLeaseFees(qc, v.groundLeaseId),
+  })
+}
+
+export function useLeaseFeeNoticePolicy() {
+  return useQuery({
+    queryKey: ['lease-fee-notice-policy'],
+    queryFn: () => api.getLeaseFeeNoticePolicy(),
+  })
+}
+
+export interface LeaseFeeNoticePolicyForm {
+  firstNoticeDays: number
+  secondNoticeDays: number
+  letterSignOff: string
+}
+
+export function useSetLeaseFeeNoticePolicy() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (form: LeaseFeeNoticePolicyForm) =>
+      api.setLeaseFeeNoticePolicy({ setLeaseFeeNoticePolicyRequest: form }),
+    onSuccess: data => {
+      qc.setQueryData(['lease-fee-notice-policy'], data)
+      qc.invalidateQueries({ queryKey: ['lease-fee-balances'] })
+      qc.invalidateQueries({ queryKey: ['lease-fee-notices-due'] })
+      qc.invalidateQueries({ queryKey: ['ground-lease'] })
+      qc.invalidateQueries({ queryKey: ['today'] })
+    },
   })
 }
 
@@ -126,10 +216,7 @@ export function useRecordLeaseFeePayment() {
           reference: form.reference.trim() || undefined,
         },
       }),
-    onSuccess: (_d, v) => {
-      qc.invalidateQueries({ queryKey: ['ground-lease', v.groundLeaseId] })
-      qc.invalidateQueries({ queryKey: ['lease-fee-balances'] })
-    },
+    onSuccess: (_d, v) => invalidateLeaseFees(qc, v.groundLeaseId),
   })
 }
 
@@ -138,9 +225,6 @@ export function useVoidLeaseFeePayment() {
   return useMutation({
     mutationFn: ({ groundLeaseId, paymentId, reason }: { groundLeaseId: string; paymentId: string; reason: string }) =>
       api.voidLeaseFeePayment({ groundLeaseId, paymentId, voidLeaseFeePaymentRequest: { reason } }),
-    onSuccess: (_d, v) => {
-      qc.invalidateQueries({ queryKey: ['ground-lease', v.groundLeaseId] })
-      qc.invalidateQueries({ queryKey: ['lease-fee-balances'] })
-    },
+    onSuccess: (_d, v) => invalidateLeaseFees(qc, v.groundLeaseId),
   })
 }

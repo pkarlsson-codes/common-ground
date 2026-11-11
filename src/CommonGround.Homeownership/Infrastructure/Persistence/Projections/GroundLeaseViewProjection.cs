@@ -95,6 +95,19 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             RecordedAt = e.OccurredAt,
         });
 
+    public static void Apply(GroundLeaseView view, LeaseFeeNoticeRecorded e) =>
+        view.LeaseFeeNotices.Add(new LeaseFeeNoticeEntry
+        {
+            NoticeId = e.NoticeId,
+            Level = e.Level.DisplayName,
+            SentOn = e.SentOn,
+            Delivery = e.Delivery.DisplayName,
+            BalanceDue = e.BalanceDue,
+            OldestUnpaidDueDate = e.OldestUnpaidDueDate,
+            RecordedBy = e.RecordedBy,
+            RecordedAt = e.OccurredAt,
+        });
+
     public static void Apply(GroundLeaseView view, LeaseFeePaymentVoided e)
     {
         var payment = view.LeaseFeePayments.Find(p => p.PaymentId == e.PaymentId);

@@ -28,6 +28,11 @@ export async function patch<T = void>(page: Page, path: string, body: unknown): 
   return ok<T>(response, `PATCH ${path}`)
 }
 
+export async function put<T = void>(page: Page, path: string, body: unknown): Promise<T> {
+  const response = await page.request.put(path, { data: body, headers: await headers(page) })
+  return ok<T>(response, `PUT ${path}`)
+}
+
 export async function get<T>(page: Page, path: string): Promise<T> {
   return ok<T>(await page.request.get(path), `GET ${path}`)
 }

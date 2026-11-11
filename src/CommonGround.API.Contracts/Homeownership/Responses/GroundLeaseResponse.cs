@@ -35,12 +35,35 @@ public sealed record GroundLeaseResponse(
 /// <param name="MonthlyFee">Their sum, charged on the 1st of each month.</param>
 /// <param name="Statement">What the lease owes today.</param>
 /// <param name="Payments">Every payment recorded, voided ones included, newest received first.</param>
+/// <param name="NoticeDue">The late notice due now, First or Second, or null.</param>
+/// <param name="Notices">Every late notice recorded, newest sent first.</param>
 public sealed record LeaseFeesDto(
     decimal LandUseFee,
     decimal RepairReserveFee,
     decimal MonthlyFee,
     LeaseFeeStatementDto Statement,
-    IReadOnlyList<LeaseFeePaymentDto> Payments);
+    IReadOnlyList<LeaseFeePaymentDto> Payments,
+    string? NoticeDue,
+    IReadOnlyList<LeaseFeeNoticeDto> Notices);
+
+/// <summary>A late lease fee notice the trust sent.</summary>
+/// <param name="NoticeId">The notice's ID.</param>
+/// <param name="Level">Which notice: First or Second.</param>
+/// <param name="SentOn">The day it was sent.</param>
+/// <param name="Delivery">How it was sent: FirstClassMail, CertifiedMail, RegisteredMail, HandDelivered or Email.</param>
+/// <param name="BalanceDue">What the lease owed that day.</param>
+/// <param name="OldestUnpaidDueDate">The due date of the oldest unpaid charge that day.</param>
+/// <param name="RecordedBy">The user who recorded it.</param>
+/// <param name="RecordedAt">When it was recorded.</param>
+public sealed record LeaseFeeNoticeDto(
+    string NoticeId,
+    string Level,
+    DateOnly SentOn,
+    string Delivery,
+    decimal BalanceDue,
+    DateOnly OldestUnpaidDueDate,
+    string RecordedBy,
+    DateTimeOffset RecordedAt);
 
 /// <summary>What a lease owes as of a day.</summary>
 /// <param name="AsOf">The day it is worked out for.</param>
@@ -49,13 +72,15 @@ public sealed record LeaseFeesDto(
 /// <param name="Balance">Above zero a balance due, below zero a credit.</param>
 /// <param name="OldestUnpaidDueDate">Due date of the oldest charge not fully paid, if any.</param>
 /// <param name="DaysOverdue">Days since that charge fell due; zero when nothing is owed.</param>
+/// <param name="ArrearsSince">Due date of the first charge left unpaid since the lease was last paid up, if any.</param>
 public sealed record LeaseFeeStatementDto(
     DateOnly AsOf,
     decimal TotalCharged,
     decimal TotalPaid,
     decimal Balance,
     DateOnly? OldestUnpaidDueDate,
-    int DaysOverdue);
+    int DaysOverdue,
+    DateOnly? ArrearsSince);
 
 /// <summary>A lease fee payment.</summary>
 /// <param name="PaymentId">The payment's ID.</param>

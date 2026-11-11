@@ -112,4 +112,51 @@ public static class GroundLeasesEndpoints
         var result = await client.GetLeaseFeeBalancesAsync(querySpec, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
+
+    [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/lease-fee-notices")]
+    [ProducesResponseType<RecordLeaseFeeNoticeResponse>(StatusCodes.Status201Created)]
+    public static async Task<IResult> RecordLeaseFeeNotice(
+        string groundLeaseId,
+        RecordLeaseFeeNoticeRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        var result = await client.RecordLeaseFeeNoticeAsync(groundLeaseId, request, cancellationToken).ConfigureAwait(false);
+        return Results.Created($"/api/v1/ground-leases/{groundLeaseId}/lease-fee-notices/{result.NoticeId}", result);
+    }
+
+    [WolverineGet("/api/v1/lease-fee-notices/due")]
+    [ProducesResponseType<LeaseFeeNoticesDueResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetLeaseFeeNoticesDue(
+        [FromQuery] string? groundLeaseId,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await client.GetLeaseFeeNoticesDueAsync(groundLeaseId, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+
+    [WolverineGet("/api/v1/lease-fee-notice-policy")]
+    [ProducesResponseType<LeaseFeeNoticePolicyResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetLeaseFeeNoticePolicy(
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await client.GetLeaseFeeNoticePolicyAsync(cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+
+    [WolverinePut("/api/v1/lease-fee-notice-policy")]
+    [ProducesResponseType<LeaseFeeNoticePolicyResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> SetLeaseFeeNoticePolicy(
+        SetLeaseFeeNoticePolicyRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        var result = await client.SetLeaseFeeNoticePolicyAsync(request, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
 }

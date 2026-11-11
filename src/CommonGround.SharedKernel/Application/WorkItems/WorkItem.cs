@@ -39,11 +39,14 @@ public static class WorkArea
     /// <summary>Purchases from selection to closing.</summary>
     public const string Purchases = "purchases";
 
+    /// <summary>Homes after purchase: lease fees, occupancy, the lease's terms.</summary>
+    public const string Stewardship = "stewardship";
+
     /// <summary>Records such as documents, outside any one area.</summary>
     public const string Records = "records";
 
     /// <summary>Every area, in work order.</summary>
-    public static IReadOnlyList<string> All { get; } = [Applicants, Selections, Purchases, Records];
+    public static IReadOnlyList<string> All { get; } = [Applicants, Selections, Purchases, Stewardship, Records];
 }
 
 /// <summary>

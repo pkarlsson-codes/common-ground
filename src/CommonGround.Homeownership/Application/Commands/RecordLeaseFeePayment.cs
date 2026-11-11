@@ -25,7 +25,7 @@ public sealed record RecordLeaseFeePayment(
     string? Reference,
     UserId RecordedBy);
 
-/// <summary>What recording a payment decides from.</summary>
+/// <summary>What recording a payment or a notice on a lease decides from.</summary>
 /// <param name="Lease">The lease stream, fetched for writing.</param>
 /// <param name="Today">The trust's today.</param>
 public sealed record LeaseFeePaymentDecision(IEventStream<GroundLease> Lease, DateOnly Today);

@@ -1448,6 +1448,14 @@
               "nullable": true
             },
             "x-position": 4
+          },
+          {
+            "name": "noticeDueOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "x-position": 5
           }
         ],
         "responses": {
@@ -1457,6 +1465,214 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PaginatedResponseOfLeaseFeeBalanceResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ground-leases/{groundLeaseId}/lease-fee-notices": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "RecordLeaseFeeNotice",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordLeaseFeeNoticeRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordLeaseFeeNoticeRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordLeaseFeeNoticeResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lease-fee-notices/due": {
+      "get": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "GetLeaseFeeNoticesDue",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseFeeNoticesDueResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lease-fee-notice-policy": {
+      "get": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "GetLeaseFeeNoticePolicy",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseFeeNoticePolicyResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "SetLeaseFeeNoticePolicy",
+        "requestBody": {
+          "x-name": "SetLeaseFeeNoticePolicyRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetLeaseFeeNoticePolicyRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseFeeNoticePolicyResponse"
                 }
               }
             }
@@ -8407,6 +8623,18 @@
             "items": {
               "$ref": "#/components/schemas/LeaseFeePaymentDto"
             }
+          },
+          "noticeDue": {
+            "type": "string",
+            "description": "The late notice due now, First or Second, or null.",
+            "nullable": true
+          },
+          "notices": {
+            "type": "array",
+            "description": "Every late notice recorded, newest sent first.",
+            "items": {
+              "$ref": "#/components/schemas/LeaseFeeNoticeDto"
+            }
           }
         }
       },
@@ -8445,6 +8673,12 @@
             "type": "integer",
             "description": "Days since that charge fell due; zero when nothing is owed.",
             "format": "int32"
+          },
+          "arrearsSince": {
+            "type": "string",
+            "description": "Due date of the first charge left unpaid since the lease was last paid up, if any.",
+            "format": "date",
+            "nullable": true
           }
         }
       },
@@ -8495,6 +8729,49 @@
             "description": "When it was voided, if it was.",
             "format": "date-time",
             "nullable": true
+          }
+        }
+      },
+      "LeaseFeeNoticeDto": {
+        "type": "object",
+        "description": "A late lease fee notice the trust sent.",
+        "additionalProperties": false,
+        "properties": {
+          "noticeId": {
+            "type": "string",
+            "description": "The notice's ID."
+          },
+          "level": {
+            "type": "string",
+            "description": "Which notice: First or Second."
+          },
+          "sentOn": {
+            "type": "string",
+            "description": "The day it was sent.",
+            "format": "date"
+          },
+          "delivery": {
+            "type": "string",
+            "description": "How it was sent: FirstClassMail, CertifiedMail, RegisteredMail, HandDelivered or Email."
+          },
+          "balanceDue": {
+            "type": "number",
+            "description": "What the lease owed that day.",
+            "format": "decimal"
+          },
+          "oldestUnpaidDueDate": {
+            "type": "string",
+            "description": "The due date of the oldest unpaid charge that day.",
+            "format": "date"
+          },
+          "recordedBy": {
+            "type": "string",
+            "description": "The user who recorded it."
+          },
+          "recordedAt": {
+            "type": "string",
+            "description": "When it was recorded.",
+            "format": "date-time"
           }
         }
       },
@@ -8785,6 +9062,123 @@
             "type": "integer",
             "description": "Days since that charge fell due; zero when nothing is owed.",
             "format": "int32"
+          },
+          "noticeDue": {
+            "type": "string",
+            "description": "The late notice due now, First or Second, or null.",
+            "nullable": true
+          },
+          "lastNoticeLevel": {
+            "type": "string",
+            "description": "The level of the last notice sent since the arrears began, or null.",
+            "nullable": true
+          },
+          "lastNoticeSentOn": {
+            "type": "string",
+            "description": "The day that notice was sent, or null.",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
+      "RecordLeaseFeeNoticeResponse": {
+        "type": "object",
+        "description": "The result of recording a late notice.",
+        "additionalProperties": false,
+        "properties": {
+          "noticeId": {
+            "type": "string",
+            "description": "The new notice's ID."
+          }
+        }
+      },
+      "RecordLeaseFeeNoticeRequest": {
+        "type": "object",
+        "description": "Request to record that a late lease fee notice was sent.",
+        "additionalProperties": false,
+        "properties": {
+          "level": {
+            "type": "string",
+            "description": "Which notice: First or Second."
+          },
+          "sentOn": {
+            "type": "string",
+            "description": "The day it was sent.",
+            "format": "date"
+          },
+          "delivery": {
+            "type": "string",
+            "description": "How it was sent: FirstClassMail, CertifiedMail, RegisteredMail, HandDelivered or Email."
+          }
+        }
+      },
+      "LeaseFeeNoticesDueResponse": {
+        "type": "object",
+        "description": "The late notices to print, one letter per lease.",
+        "additionalProperties": false,
+        "properties": {
+          "today": {
+            "type": "string",
+            "description": "The trust's today, the date on every letter.",
+            "format": "date"
+          },
+          "letterSignOff": {
+            "type": "string",
+            "description": "The trust's sign-off for the end of every letter; empty for none."
+          },
+          "notices": {
+            "type": "array",
+            "description": "Each lease with a notice due, most days overdue first.",
+            "items": {
+              "$ref": "#/components/schemas/LeaseFeeBalanceResponse"
+            }
+          }
+        }
+      },
+      "LeaseFeeNoticePolicyResponse": {
+        "type": "object",
+        "description": "A trust's lease fee notice policy.",
+        "additionalProperties": false,
+        "properties": {
+          "firstNoticeDays": {
+            "type": "integer",
+            "description": "Days overdue before the first notice.",
+            "format": "int32"
+          },
+          "secondNoticeDays": {
+            "type": "integer",
+            "description": "Days overdue before the second notice.",
+            "format": "int32"
+          },
+          "letterSignOff": {
+            "type": "string",
+            "description": "The lines printed at the end of every letter; empty for none."
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "Whether the trust never set a policy, so these are the defaults."
+          }
+        }
+      },
+      "SetLeaseFeeNoticePolicyRequest": {
+        "type": "object",
+        "description": "Request to set the trust's lease fee notice policy.",
+        "additionalProperties": false,
+        "properties": {
+          "firstNoticeDays": {
+            "type": "integer",
+            "description": "Days overdue before the first notice; at least 1.",
+            "format": "int32"
+          },
+          "secondNoticeDays": {
+            "type": "integer",
+            "description": "Days overdue before the second notice; more than the first.",
+            "format": "int32"
+          },
+          "letterSignOff": {
+            "type": "string",
+            "description": "The lines printed at the end of every letter; empty or null for none.",
+            "nullable": true
           }
         }
       },

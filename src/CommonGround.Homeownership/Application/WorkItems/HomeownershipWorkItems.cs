@@ -1,11 +1,14 @@
+using System.Globalization;
+using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Application.ReadModels;
+using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Application.WorkItems;
 using CommonGround.SharedKernel.Domain;
 
 namespace CommonGround.Homeownership.Application.WorkItems;
 
-/// <summary>Derives the work items for purchases from Homeownership's read models.</summary>
+/// <summary>Derives the work items for purchases and lease fee notices from Homeownership's read models.</summary>
 public static class HomeownershipWorkItems
 {
     /// <summary>How far ahead a scheduled closing counts as coming up.</summary>
@@ -43,6 +46,39 @@ public static class HomeownershipWorkItems
 
     /// <summary>Record that the purchase closed.</summary>
     public const string RecordClosing = "record-closing";
+
+    /// <summary>An active lease with a late lease fee notice due.</summary>
+    public const string LeaseFeeNoticeDue = "lease-fee-notice-due";
+
+    /// <summary>Print the late notice and record it as sent.</summary>
+    public const string RecordLeaseFeeNotice = "record-lease-fee-notice";
+
+    /// <summary>
+    /// The item for a lease with a late notice due: it has waited since the day its oldest unpaid charge passed the
+    /// notice's days.
+    /// </summary>
+    /// <param name="balance">The lease's balance; its <see cref="LeaseFeeBalance.NoticeDue"/> must be set.</param>
+    /// <param name="schedule">The trust's notice schedule.</param>
+    /// <returns>The lease's work item.</returns>
+    public static WorkItem ForLeaseFeeNotice(LeaseFeeBalance balance, LeaseFeeNoticeSchedule schedule)
+    {
+        ArgumentNullException.ThrowIfNull(balance);
+        ArgumentNullException.ThrowIfNull(schedule);
+
+        var level = balance.NoticeDue ?? throw new ArgumentException("The lease has no notice due.", nameof(balance));
+        var statement = balance.Statement;
+        var days = level == LeaseFeeNoticeLevel.Second ? schedule.SecondNoticeDays : schedule.FirstNoticeDays;
+        var levelName = level == LeaseFeeNoticeLevel.Second ? "second" : "first";
+        var amount = statement.Balance.ToString("C", CultureInfo.GetCultureInfo("en-US"));
+
+        return new WorkItem(
+            WorkArea.Stewardship, LeaseFeeNoticeDue, "ground-lease", balance.Lease.Id,
+            balance.HomeLabel ?? "Home",
+            $"{balance.Lease.HomeownerFullName}: {levelName} notice due, {amount} owed, {statement.DaysOverdue} days overdue",
+            null,
+            statement.OldestUnpaidDueDate!.Value.AddDays(days),
+            [RecordLeaseFeeNotice]);
+    }
 
     /// <summary>
     /// The one item for an open purchase: stalled, closing within <see cref="ClosingWindowDays"/> of

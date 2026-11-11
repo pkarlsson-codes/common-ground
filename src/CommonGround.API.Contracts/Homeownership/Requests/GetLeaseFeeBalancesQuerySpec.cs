@@ -10,16 +10,22 @@ public sealed class GetLeaseFeeBalancesQuerySpec : PaginationQuerySpecV2
     /// <param name="pageSize">Number of items per page.</param>
     /// <param name="includeAll">List leases with nothing due too, not only those with a balance due.</param>
     /// <param name="search">Matches the homeowner's name or the home's label.</param>
+    /// <param name="noticeDueOnly">List only leases with a late notice due; wins over <paramref name="includeAll"/>.</param>
     public GetLeaseFeeBalancesQuerySpec(
         int pageNumber = 1,
         int pageSize = DefaultPageSize,
         bool includeAll = false,
-        string? search = null)
+        string? search = null,
+        bool noticeDueOnly = false)
         : base(pageNumber, pageSize)
     {
         IncludeAll = includeAll;
         Search = search;
+        NoticeDueOnly = noticeDueOnly;
     }
+
+    /// <summary>Gets whether only leases with a late notice due are listed.</summary>
+    public bool NoticeDueOnly { get; }
 
     /// <summary>Gets whether leases with nothing due are listed too.</summary>
     public bool IncludeAll { get; }
@@ -33,5 +39,7 @@ public sealed class GetLeaseFeeBalancesQuerySpec : PaginationQuerySpecV2
         if (IncludeAll)
             parts.Add("includeAll=true");
         AddIfNotWhiteSpace(parts, "search", Search);
+        if (NoticeDueOnly)
+            parts.Add("noticeDueOnly=true");
     }
 }

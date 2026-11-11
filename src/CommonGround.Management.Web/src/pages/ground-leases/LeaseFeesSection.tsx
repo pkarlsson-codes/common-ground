@@ -1,15 +1,18 @@
 import { useState } from 'react'
 import type { GroundLeaseResponse, LeaseFeePaymentDto } from '../../api'
-import { PAYMENT_METHOD_LABELS } from '../../hooks/groundLeases'
+import { NOTICE_DELIVERY_LABELS, NOTICE_LEVEL_LABELS, PAYMENT_METHOD_LABELS } from '../../hooks/groundLeases'
 import { formatCalendarDate } from '../../lib/calendarDate'
 import { formatPrice } from '../../lib/currency'
 import { formatBalance, formatDaysOverdue, formatDueMonth } from './leaseFeeFormat'
+import { openNoticeLetters } from './leaseFeeLetter'
+import RecordLeaseFeeNoticePanel from './RecordLeaseFeeNoticePanel'
 import RecordLeaseFeePaymentPanel from './RecordLeaseFeePaymentPanel'
 import VoidLeaseFeePaymentPanel from './VoidLeaseFeePaymentPanel'
 
-/** The lease's monthly fee, what it owes today, and the payments the trust has recorded. */
+/** The lease's monthly fee, what it owes today, the payments the trust has recorded, and its late notices. */
 export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse }) {
   const [recording, setRecording] = useState(false)
+  const [recordingNotice, setRecordingNotice] = useState(false)
   const [voiding, setVoiding] = useState<LeaseFeePaymentDto | null>(null)
   const fees = lease.leaseFees
   if (!fees) return null
@@ -18,6 +21,8 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
   const monthlyFee = fees.monthlyFee ?? 0
   const balance = statement?.balance ?? 0
   const payments = fees.payments ?? []
+  const notices = fees.notices ?? []
+  const noticeDue = fees.noticeDue
 
   return (
     <div className="detail-section">
@@ -56,9 +61,34 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
             )}
           </div>
 
-          <button type="button" className="btn btn-secondary" onClick={() => setRecording(true)} style={{ marginBottom: 12 }}>
-            Record Payment
-          </button>
+          {noticeDue && (
+            <div
+              role="status"
+              style={{
+                display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 12,
+                padding: '8px 12px', borderRadius: 6, background: 'var(--warning-surface)',
+              }}
+            >
+              <strong style={{ color: 'var(--warning)' }}>{noticeDue === 'Second' ? 'Second notice due' : 'First notice due'}</strong>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => openNoticeLetters(lease.id!)}>
+                Print Letter
+              </button>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setRecordingNotice(true)}>
+                Record Notice
+              </button>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+            <button type="button" className="btn btn-secondary" onClick={() => setRecording(true)}>
+              Record Payment
+            </button>
+            {!noticeDue && (statement?.balance ?? 0) > 0 && (
+              <button type="button" className="btn btn-ghost" onClick={() => setRecordingNotice(true)}>
+                Record Notice
+              </button>
+            )}
+          </div>
 
           {payments.length === 0 ? (
             <p style={{ fontSize: 13, color: 'var(--text-dim)' }}>No payments recorded.</p>
@@ -103,9 +133,43 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
               </table>
             </div>
           )}
+
+          {notices.length > 0 && (
+            <div className="registry-table-wrap" style={{ marginTop: 12 }}>
+              <div className="detail-field__label" style={{ marginBottom: 4 }}>Notices Sent</div>
+              <table className="registry-table" aria-label="Lease fee notices">
+                <thead>
+                  <tr>
+                    <th>Sent</th>
+                    <th>Notice</th>
+                    <th>Delivery</th>
+                    <th>Balance Then</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {notices.map(n => (
+                    <tr key={n.noticeId}>
+                      <td className="cell-mono">{n.sentOn ? formatCalendarDate(n.sentOn) : '—'}</td>
+                      <td>{NOTICE_LEVEL_LABELS[n.level ?? ''] ?? n.level}</td>
+                      <td>{NOTICE_DELIVERY_LABELS[n.delivery ?? ''] ?? n.delivery}</td>
+                      <td className="cell-mono">
+                        {formatPrice(n.balanceDue ?? 0)}
+                        {n.oldestUnpaidDueDate && (
+                          <span style={{ color: 'var(--text-dim)' }}> since {formatDueMonth(n.oldestUnpaidDueDate)}</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </>
       )}
 
+      {recordingNotice && (
+        <RecordLeaseFeeNoticePanel lease={lease} onClose={() => setRecordingNotice(false)} />
+      )}
       {recording && (
         <RecordLeaseFeePaymentPanel lease={lease} onClose={() => setRecording(false)} />
       )}

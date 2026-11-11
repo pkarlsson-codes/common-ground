@@ -82,6 +82,24 @@ export interface LeaseFeeBalanceResponse {
      * @memberof LeaseFeeBalanceResponse
      */
     daysOverdue?: number;
+    /**
+     * The late notice due now, First or Second, or null.
+     * @type {string}
+     * @memberof LeaseFeeBalanceResponse
+     */
+    noticeDue?: string | null;
+    /**
+     * The level of the last notice sent since the arrears began, or null.
+     * @type {string}
+     * @memberof LeaseFeeBalanceResponse
+     */
+    lastNoticeLevel?: string | null;
+    /**
+     * The day that notice was sent, or null.
+     * @type {CalendarDate}
+     * @memberof LeaseFeeBalanceResponse
+     */
+    lastNoticeSentOn?: CalendarDate | null;
 }
 
 /**
@@ -110,6 +128,9 @@ export function LeaseFeeBalanceResponseFromJSONTyped(json: any, ignoreDiscrimina
         'balance': json['balance'] == null ? undefined : json['balance'],
         'oldestUnpaidDueDate': json['oldestUnpaidDueDate'] == null ? undefined : CalendarDateFromJSON(json['oldestUnpaidDueDate']),
         'daysOverdue': json['daysOverdue'] == null ? undefined : json['daysOverdue'],
+        'noticeDue': json['noticeDue'] == null ? undefined : json['noticeDue'],
+        'lastNoticeLevel': json['lastNoticeLevel'] == null ? undefined : json['lastNoticeLevel'],
+        'lastNoticeSentOn': json['lastNoticeSentOn'] == null ? undefined : CalendarDateFromJSON(json['lastNoticeSentOn']),
     };
 }
 
@@ -133,6 +154,9 @@ export function LeaseFeeBalanceResponseToJSONTyped(value?: LeaseFeeBalanceRespon
         'balance': value['balance'],
         'oldestUnpaidDueDate': CalendarDateToJSON(value['oldestUnpaidDueDate']),
         'daysOverdue': value['daysOverdue'],
+        'noticeDue': value['noticeDue'],
+        'lastNoticeLevel': value['lastNoticeLevel'],
+        'lastNoticeSentOn': CalendarDateToJSON(value['lastNoticeSentOn']),
     };
 }
 

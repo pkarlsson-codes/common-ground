@@ -254,6 +254,35 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class RecordLeaseFeeNotice
+        {
+            public static BusinessRuleViolationException SentDateInFuture(DateOnly sentOn, DateOnly today)
+                => new(
+                    "homeownership.ground_lease.record_lease_fee_notice.sent_date_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["sentOn"] = sentOn,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException SentDateBeforeLeaseStart(DateOnly sentOn, DateOnly leaseStartDate)
+                => new(
+                    "homeownership.ground_lease.record_lease_fee_notice.sent_date_before_lease_start",
+                    new Dictionary<string, object?>
+                    {
+                        ["sentOn"] = sentOn,
+                        ["leaseStartDate"] = leaseStartDate,
+                    });
+
+            public static BusinessRuleViolationException NothingOwed(DateOnly sentOn)
+                => new(
+                    "homeownership.ground_lease.record_lease_fee_notice.nothing_owed",
+                    new Dictionary<string, object?>
+                    {
+                        ["sentOn"] = sentOn,
+                    });
+        }
+
         public static class VoidLeaseFeePayment
         {
             public static BusinessRuleViolationException ReasonRequired()
@@ -274,6 +303,29 @@ public static class BusinessRuleViolation
                     new Dictionary<string, object?>
                     {
                         ["paymentId"] = paymentId,
+                    });
+        }
+    }
+
+    public static class LeaseFeeNoticeSchedule
+    {
+        public static class Create
+        {
+            public static BusinessRuleViolationException FirstNoticeDaysTooFew(int firstNoticeDays)
+                => new(
+                    "homeownership.lease_fee_notice_schedule.create.first_notice_days_too_few",
+                    new Dictionary<string, object?>
+                    {
+                        ["firstNoticeDays"] = firstNoticeDays,
+                    });
+
+            public static BusinessRuleViolationException SecondNoticeNotAfterFirst(int firstNoticeDays, int secondNoticeDays)
+                => new(
+                    "homeownership.lease_fee_notice_schedule.create.second_notice_not_after_first",
+                    new Dictionary<string, object?>
+                    {
+                        ["firstNoticeDays"] = firstNoticeDays,
+                        ["secondNoticeDays"] = secondNoticeDays,
                     });
         }
     }

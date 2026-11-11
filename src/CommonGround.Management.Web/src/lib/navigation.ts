@@ -11,6 +11,7 @@ import {
   Map as MapIcon,
   Repeat,
   ScrollText,
+  SlidersHorizontal,
   Users,
   type LucideIcon,
 } from 'lucide-react'
@@ -43,6 +44,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Ground leases',   to: '/ground-leases',          icon: ScrollText,     group: 'records' },
   { label: 'Documents',       to: '/documents',              icon: FolderOpen,     group: 'records' },
   { label: 'Lease templates', to: '/ground-lease-templates', icon: FileCog,        group: 'settings' },
+  { label: 'Trust policy',    to: '/trust-policy',           icon: SlidersHorizontal, group: 'settings' },
 ]
 
 export type Focus = 'everything' | 'intake' | 'sales' | 'stewardship'

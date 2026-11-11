@@ -64,6 +64,12 @@ export interface LeaseFeeStatementDto {
      * @memberof LeaseFeeStatementDto
      */
     daysOverdue?: number;
+    /**
+     * Due date of the first charge left unpaid since the lease was last paid up, if any.
+     * @type {CalendarDate}
+     * @memberof LeaseFeeStatementDto
+     */
+    arrearsSince?: CalendarDate | null;
 }
 
 /**
@@ -89,6 +95,7 @@ export function LeaseFeeStatementDtoFromJSONTyped(json: any, ignoreDiscriminator
         'balance': json['balance'] == null ? undefined : json['balance'],
         'oldestUnpaidDueDate': json['oldestUnpaidDueDate'] == null ? undefined : CalendarDateFromJSON(json['oldestUnpaidDueDate']),
         'daysOverdue': json['daysOverdue'] == null ? undefined : json['daysOverdue'],
+        'arrearsSince': json['arrearsSince'] == null ? undefined : CalendarDateFromJSON(json['arrearsSince']),
     };
 }
 
@@ -109,6 +116,7 @@ export function LeaseFeeStatementDtoToJSONTyped(value?: LeaseFeeStatementDto | n
         'balance': value['balance'],
         'oldestUnpaidDueDate': CalendarDateToJSON(value['oldestUnpaidDueDate']),
         'daysOverdue': value['daysOverdue'],
+        'arrearsSince': CalendarDateToJSON(value['arrearsSince']),
     };
 }
 

@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import Pagination from '../../components/Pagination'
-import { useLeaseFeeBalances } from '../../hooks/groundLeases'
+import type { LeaseFeeBalanceResponse } from '../../api'
+import { useLeaseFeeBalances, type LeaseFeeFilter } from '../../hooks/groundLeases'
+import { formatCalendarDate } from '../../lib/calendarDate'
 import { formatPrice } from '../../lib/currency'
 import GroundLeaseDetailPanel from '../ground-leases/GroundLeaseDetailPanel'
+import { openNoticeLetters } from '../ground-leases/leaseFeeLetter'
 import { formatBalance, formatDaysOverdue, formatDueMonth } from '../ground-leases/leaseFeeFormat'
+import RecordLeaseFeeNoticesPanel from './RecordLeaseFeeNoticesPanel'
 
 const PAGE_SIZE = 20
 
@@ -15,14 +19,28 @@ function SkeletonRows() {
   )
 }
 
-/** Leases with a balance due, oldest debt first; or every lease. */
+/** "First due", "Second due", the last notice sent in these arrears, or nothing. */
+function noticeCell(b: LeaseFeeBalanceResponse) {
+  if (b.noticeDue) return <span style={{ color: 'var(--warning)' }}>{b.noticeDue} due</span>
+  if (b.lastNoticeLevel && b.lastNoticeSentOn) return `${b.lastNoticeLevel} sent ${formatCalendarDate(b.lastNoticeSentOn)}`
+  return '—'
+}
+
+const EMPTY: Record<LeaseFeeFilter, string> = {
+  due: 'No lease has a balance due.',
+  notice: 'No notices are due.',
+  all: 'No leases',
+}
+
+/** Leases with a balance due, oldest debt first; those with a late notice due; or every lease. */
 export default function LeaseFeesTab() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
-  const [includeAll, setIncludeAll] = useState(false)
+  const [filter, setFilter] = useState<LeaseFeeFilter>('due')
   const [openLeaseId, setOpenLeaseId] = useState<string | null>(null)
+  const [recordingNotices, setRecordingNotices] = useState(false)
 
-  const { data, isLoading, isError } = useLeaseFeeBalances(page, includeAll, search.trim())
+  const { data, isLoading, isError } = useLeaseFeeBalances(page, filter, search.trim())
   const items = data?.items ?? []
 
   return (
@@ -40,13 +58,24 @@ export default function LeaseFeesTab() {
         <select
           className="form-select"
           aria-label="Lease fee filter"
-          value={includeAll ? 'all' : 'due'}
-          onChange={e => { setIncludeAll(e.target.value === 'all'); setPage(1) }}
+          value={filter}
+          onChange={e => { setFilter(e.target.value as LeaseFeeFilter); setPage(1) }}
           style={{ maxWidth: 180 }}
         >
           <option value="due">Balance due</option>
+          <option value="notice">Notice due</option>
           <option value="all">All leases</option>
         </select>
+        {filter === 'notice' && items.length > 0 && (
+          <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
+            <button type="button" className="btn btn-secondary" onClick={() => openNoticeLetters()}>
+              Print Notices
+            </button>
+            <button type="button" className="btn btn-primary" onClick={() => setRecordingNotices(true)}>
+              Record Notices Sent
+            </button>
+          </div>
+        )}
       </div>
 
       {isLoading ? <SkeletonRows /> : isError ? (
@@ -58,7 +87,7 @@ export default function LeaseFeesTab() {
         <div className="empty-state">
           <div className="empty-state__glyph">⊡</div>
           <div className="empty-state__title">
-            {search.trim() ? 'No matching leases' : includeAll ? 'No leases' : 'No lease has a balance due.'}
+            {search.trim() ? 'No matching leases' : EMPTY[filter]}
           </div>
         </div>
       ) : (
@@ -72,6 +101,7 @@ export default function LeaseFeesTab() {
                 <th>Balance</th>
                 <th>Oldest Unpaid</th>
                 <th>Days Overdue</th>
+                <th>Notice</th>
               </tr>
             </thead>
             <tbody>
@@ -90,6 +120,7 @@ export default function LeaseFeesTab() {
                   </td>
                   <td>{b.oldestUnpaidDueDate ? formatDueMonth(b.oldestUnpaidDueDate) : '—'}</td>
                   <td className="cell-mono">{b.oldestUnpaidDueDate ? formatDaysOverdue(b.daysOverdue ?? 0) : '—'}</td>
+                  <td>{noticeCell(b)}</td>
                 </tr>
               ))}
             </tbody>
@@ -106,6 +137,7 @@ export default function LeaseFeesTab() {
         </div>
       )}
 
+      {recordingNotices && <RecordLeaseFeeNoticesPanel onClose={() => setRecordingNotices(false)} />}
       {openLeaseId && <GroundLeaseDetailPanel groundLeaseId={openLeaseId} onClose={() => setOpenLeaseId(null)} />}
     </>
   )

@@ -2,7 +2,8 @@
   {
     "trustSeedKey": "dev-default",
     "groundLeaseSeedKey": "gl-downtown-civic-001",
-    "monthsBehind": 3
+    "monthsBehind": 3,
+    "firstNoticeAfterDays": 12
   },
   {
     "trustSeedKey": "dev-default",

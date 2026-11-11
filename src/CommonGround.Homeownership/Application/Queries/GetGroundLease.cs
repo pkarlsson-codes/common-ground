@@ -12,9 +12,10 @@ public sealed record GetGroundLease(GroundLeaseId GroundLeaseId);
 
 /// <summary>
 /// A ground lease, the trust date it was recorded on (for a lease that predates CommonGround, later than its start
-/// date), and what it owes in lease fees as of the trust's today.
+/// date), what it owes in lease fees as of the trust's today, and the late notice it needs now, if any.
 /// </summary>
-public sealed record GroundLeaseDetails(GroundLeaseView Lease, DateOnly RecordedOn, LeaseFeeStatement LeaseFees);
+public sealed record GroundLeaseDetails(
+    GroundLeaseView Lease, DateOnly RecordedOn, LeaseFeeStatement LeaseFees, LeaseFeeNoticeLevel? NoticeDue);
 
 /// <summary>Handles <see cref="GetGroundLease"/>.</summary>
 public static class GetGroundLeaseHandler
@@ -36,6 +37,9 @@ public static class GetGroundLeaseHandler
         var recordedOn = await trustClock.ToTrustDateAsync(session.TenantId, view.CreatedAt, cancellationToken).ConfigureAwait(false);
         var today = await trustClock.TodayAsync(session.TenantId, cancellationToken).ConfigureAwait(false);
 
-        return new GroundLeaseDetails(view, recordedOn, LeaseFeeStatements.For(view, today));
+        var policy = await GetLeaseFeeNoticePolicyHandler.LoadAsync(session, cancellationToken).ConfigureAwait(false);
+        var statement = LeaseFeeStatements.For(view, today);
+
+        return new GroundLeaseDetails(view, recordedOn, statement, LeaseFeeStatements.NoticeDue(view, statement, policy.Schedule));
     }
 }
