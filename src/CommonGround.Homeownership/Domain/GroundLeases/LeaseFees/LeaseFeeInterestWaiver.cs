@@ -8,7 +8,7 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 /// </summary>
 public sealed class LeaseFeeInterestWaiver : Entity<LeaseFeeInterestWaiverId>
 {
-    private LeaseFeeInterestWaiver(LeaseFeeInterestWaiverId id, DateOnly waivedOn, decimal amount, string reason)
+    private LeaseFeeInterestWaiver(LeaseFeeInterestWaiverId id, DateOnly waivedOn, Money amount, string reason)
     {
         Id = id;
         WaivedOn = waivedOn;
@@ -21,14 +21,14 @@ public sealed class LeaseFeeInterestWaiver : Entity<LeaseFeeInterestWaiverId>
     /// <param name="waivedOn">The day it was waived.</param>
     /// <param name="amount">How much interest was waived.</param>
     /// <param name="reason">Why.</param>
-    public static LeaseFeeInterestWaiver Create(LeaseFeeInterestWaiverId id, DateOnly waivedOn, decimal amount, string reason) =>
+    public static LeaseFeeInterestWaiver Create(LeaseFeeInterestWaiverId id, DateOnly waivedOn, Money amount, string reason) =>
         new(id, waivedOn, amount, reason);
 
     /// <summary>Gets the day it was waived.</summary>
     public DateOnly WaivedOn { get; }
 
     /// <summary>Gets how much interest was waived.</summary>
-    public decimal Amount { get; }
+    public Money Amount { get; }
 
     /// <summary>Gets why it was waived.</summary>
     public string Reason { get; }

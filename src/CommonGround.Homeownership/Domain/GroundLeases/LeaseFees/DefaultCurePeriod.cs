@@ -16,7 +16,10 @@ public sealed class DefaultCurePeriod : ValueObject
     /// <summary>The extension days when a trust hasn't set its own, as in Art 12.1.</summary>
     public const int DefaultExtensionDays = 30;
 
-    /// <summary>The share of the amount owed that, paid within the cure days, extends them (Art 12.1: two-thirds).</summary>
+    /// <summary>
+    /// The share of the amount owed that, paid within the cure days, extends them (Art 12.1: two-thirds), rounded to
+    /// the cent by <see cref="Money.Share"/>.
+    /// </summary>
     public const decimal PartialPaymentShare = 2m / 3m;
 
     private DefaultCurePeriod(int cureDays, int extensionDays)

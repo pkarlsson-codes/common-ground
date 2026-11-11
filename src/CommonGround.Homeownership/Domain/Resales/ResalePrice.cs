@@ -1,13 +1,17 @@
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
+using CommonGround.SharedKernel.Domain;
 
 namespace CommonGround.Homeownership.Domain.Resales;
 
 /// <summary>What a home may sell for after an appraisal, and what the trust pays to buy it.</summary>
 /// <param name="FormulaPrice">The most the lease's formula allows the home to sell for.</param>
 /// <param name="PurchaseOptionPrice">The lesser of the formula price and the appraised value.</param>
-public sealed record ResalePrice(decimal FormulaPrice, decimal PurchaseOptionPrice)
+public sealed record ResalePrice(Money FormulaPrice, Money PurchaseOptionPrice)
 {
-    /// <summary>Works out the prices from a lease's terms and figures and an appraisal, rounded to cents.</summary>
+    /// <summary>
+    /// Works out the prices from a lease's terms and figures and an appraisal. The formula price is rounded to the
+    /// cent; an appraised value with a fraction of a cent is refused.
+    /// </summary>
     public static ResalePrice Calculate(
         ResalePolicyTerms terms,
         decimal basePrice,
@@ -28,9 +32,9 @@ public sealed record ResalePrice(decimal FormulaPrice, decimal PurchaseOptionPri
             approvedImprovements,
             currentIndexValue);
 
-        var formulaPrice = Math.Round(ResalePriceCalculator.Calculate(terms, input), 2, MidpointRounding.AwayFromZero);
+        var formulaPrice = Money.RoundedFrom(ResalePriceCalculator.Calculate(terms, input));
 
-        return new ResalePrice(formulaPrice, Math.Min(formulaPrice, appraisedValue));
+        return new ResalePrice(formulaPrice, Money.Min(formulaPrice, Money.Create(appraisedValue)));
     }
 
     private static int WholeYears(DateOnly from, DateOnly to)

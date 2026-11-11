@@ -7,6 +7,7 @@ using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
@@ -45,7 +46,7 @@ public static class GroundLeasesEndpoints
             request.LeaseStartDate,
             request.TermYears,
             request.OptionWindowDays,
-            LeaseFeeTerms.Create(request.LandUseFee, request.RepairReserveFee, request.LateInterestRate, request.InterestWaiverDays),
+            LeaseFeeTerms.Create(Money.Create(request.LandUseFee), Money.Create(request.RepairReserveFee), request.LateInterestRate, request.InterestWaiverDays),
             request.BasePrice,
             request.OriginalAppraisedValue,
             request.CovenantTerms,
@@ -128,21 +129,21 @@ public static class GroundLeasesEndpoints
             new LeaseFeesDto(
                 view.LandUseFee,
                 view.RepairReserveFee,
-                leaseFees.MonthlyFee,
+                leaseFees.MonthlyFee.Amount,
                 view.LateInterestRate,
                 view.InterestWaiverDays,
                 new LeaseFeeStatementDto(
                     leaseFees.AsOf,
-                    leaseFees.TotalCharged,
-                    leaseFees.TotalPaid,
-                    leaseFees.Balance,
+                    leaseFees.TotalCharged.Amount,
+                    leaseFees.TotalPaid.Amount,
+                    leaseFees.Balance.Amount,
                     leaseFees.OldestUnpaidDueDate,
                     leaseFees.DaysOverdue,
                     leaseFees.ArrearsSince,
-                    leaseFees.InterestCharged,
-                    leaseFees.InterestWaived,
-                    leaseFees.InterestDue,
-                    leaseFees.InterestAccruing,
+                    leaseFees.InterestCharged.Amount,
+                    leaseFees.InterestWaived.Amount,
+                    leaseFees.InterestDue.Amount,
+                    leaseFees.InterestAccruing.Amount,
                     leaseFees.InterestWaivedIfPaidBy),
                 view.LeaseFeePayments
                     .OrderByDescending(p => p.ReceivedDate)

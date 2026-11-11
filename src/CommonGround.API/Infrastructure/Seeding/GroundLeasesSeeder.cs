@@ -131,7 +131,7 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
             leaseStartDate,
             direct.TermYears,
             direct.OptionWindowDays,
-            LeaseFeeTerms.Create(direct.LandUseFee, direct.RepairReserveFee, direct.LateInterestRate, direct.InterestWaiverDays),
+            LeaseFeeTerms.Create(Money.Create(direct.LandUseFee), Money.Create(direct.RepairReserveFee), direct.LateInterestRate, direct.InterestWaiverDays),
             direct.BasePrice,
             direct.OriginalAppraisedValue,
             direct.CovenantTerms,

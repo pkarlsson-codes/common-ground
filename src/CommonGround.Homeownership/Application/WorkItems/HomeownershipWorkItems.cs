@@ -76,7 +76,7 @@ public static class HomeownershipWorkItems
             WorkArea.Stewardship, LeaseDefaultUncured, "ground-lease", balance.Lease.Id,
             balance.HomeLabel ?? "Home",
             $"{balance.Lease.HomeownerFullName}: default not cured by {cure.CureBy.ToString("MMM d", usd)}, " +
-            $"{cure.StillToPay.ToString("C", usd)} of {cure.AmountOwed.ToString("C", usd)} still to pay",
+            $"{cure.StillToPay} of {cure.AmountOwed} still to pay",
             null,
             cure.CureBy.AddDays(1),
             [ReviewLeaseDefault]);
@@ -100,7 +100,7 @@ public static class HomeownershipWorkItems
         var levelName = level == LeaseFeeNoticeLevel.Default ? "notice of default"
             : level == LeaseFeeNoticeLevel.Second ? "second notice"
             : "first notice";
-        var amount = statement.Balance.ToString("C", CultureInfo.GetCultureInfo("en-US"));
+        var amount = statement.Balance;
 
         return new WorkItem(
             WorkArea.Stewardship, LeaseFeeNoticeDue, "ground-lease", balance.Lease.Id,

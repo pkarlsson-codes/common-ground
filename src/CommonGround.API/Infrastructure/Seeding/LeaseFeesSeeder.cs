@@ -125,7 +125,7 @@ public sealed class LeaseFeesSeeder(ITrustClock trustClock) : IDevelopmentSeeder
         stream.AppendOne(LeaseFeeNoticePolicy.Set(id, LeaseFeeNoticeSchedule.Default, DefaultCurePeriod.Default, signOff, SeederUserId));
     }
 
-    private static List<(DateOnly Received, decimal Amount, PaymentMethod Method, string? Reference)> Payments(
+    private static List<(DateOnly Received, Money Amount, PaymentMethod Method, string? Reference)> Payments(
         GroundLease lease, LeaseFeeSeedEntry? arrears, DateOnly today)
     {
         var statement = lease.LeaseFeeStatementAsOf(today);
@@ -138,7 +138,7 @@ public sealed class LeaseFeesSeeder(ITrustClock trustClock) : IDevelopmentSeeder
         var byCheck = (lease.CurrentHomeowner?.FullName.Value.Length ?? 0) % 2 == 0;
         var lastDay = lease.EndedOn is { } ended && ended < today ? ended : today;
 
-        List<(DateOnly, decimal, PaymentMethod, string?)> payments = [];
+        List<(DateOnly, Money, PaymentMethod, string?)> payments = [];
         for (var month = 0; month < paidMonths; month++)
         {
             var due = firstDue.AddMonths(month);
@@ -151,7 +151,7 @@ public sealed class LeaseFeesSeeder(ITrustClock trustClock) : IDevelopmentSeeder
         if (arrears?.PartialPayment is { } partial && unpaid > 0)
         {
             var due = firstDue.AddMonths(paidMonths);
-            payments.Add((Min(due.AddDays(3), lastDay), partial, PaymentMethod.Cash, null));
+            payments.Add((Min(due.AddDays(3), lastDay), Money.Create(partial), PaymentMethod.Cash, null));
         }
 
         return payments;

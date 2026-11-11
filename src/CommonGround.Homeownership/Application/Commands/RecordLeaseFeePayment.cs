@@ -20,7 +20,7 @@ public sealed record RecordLeaseFeePayment(
     GroundLeaseId GroundLeaseId,
     LeaseFeePaymentId PaymentId,
     DateOnly ReceivedDate,
-    decimal Amount,
+    Money Amount,
     PaymentMethod Method,
     string? Reference,
     UserId RecordedBy);

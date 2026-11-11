@@ -1,4 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.SharedKernel.Domain;
 using FluentAssertions;
 
 namespace CommonGround.Homeownership.Tests.Domain.GroundLeases.LeaseFees;
@@ -7,19 +8,19 @@ public class LeaseFeeStatementTests
 {
     public class TestBed
     {
-        public LeaseFeeTerms Terms { get; } = LeaseFeeTerms.Create(45m, 15m);
+        public LeaseFeeTerms Terms { get; } = LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m));
 
         /// <summary>Works out a statement with every payment received on <paramref name="asOf"/>.</summary>
         public LeaseFeeStatement Calculate(
             DateOnly leaseStart, DateOnly asOf, DateOnly? endedOn = null, params decimal[] payments) =>
-            LeaseFeeStatement.Calculate(Terms, leaseStart, endedOn, payments.Select(a => new ReceivedPayment(asOf, a)), asOf);
+            LeaseFeeStatement.Calculate(Terms, leaseStart, endedOn, payments.Select(a => new ReceivedPayment(asOf, Money.Create(a))), asOf);
 
         public LeaseFeeStatement CalculateWithDatedPayments(
             DateOnly leaseStart, DateOnly asOf, params (string Received, decimal Amount)[] payments) =>
             LeaseFeeStatement.Calculate(Terms, leaseStart, null, Dated(payments), asOf);
 
         /// <summary>$60 a month at 36.5% a year: 6 cents a day of interest on an unpaid month.</summary>
-        public LeaseFeeTerms TermsWithInterest { get; } = LeaseFeeTerms.Create(45m, 15m, 36.5m);
+        public LeaseFeeTerms TermsWithInterest { get; } = LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m), 36.5m);
 
         /// <summary>A statement for a lease that started on 2026-01-01 and charges interest.</summary>
         public LeaseFeeStatement CalculateWithInterest(
@@ -33,12 +34,12 @@ public class LeaseFeeStatementTests
                 endedOn is null ? null : Day(endedOn),
                 Dated(payments ?? []),
                 Day(asOf),
-                waivers.Select(w => new WaivedInterest(Day(w.WaivedOn), w.Amount)));
+                waivers.Select(w => new WaivedInterest(Day(w.WaivedOn), Money.Create(w.Amount))));
 
         private static DateOnly Day(string day) => DateOnly.Parse(day, System.Globalization.CultureInfo.InvariantCulture);
 
         private static IEnumerable<ReceivedPayment> Dated((string Received, decimal Amount)[] payments) =>
-            payments.Select(p => new ReceivedPayment(Day(p.Received), p.Amount));
+            payments.Select(p => new ReceivedPayment(Day(p.Received), Money.Create(p.Amount)));
     }
 
     public class TheCalculateMethod
@@ -60,7 +61,7 @@ public class LeaseFeeStatementTests
         {
             var sut = _testBed.Calculate(new DateOnly(2026, 3, 5), asOf: new DateOnly(2026, 3, 20));
 
-            sut.Should().BeEquivalentTo(new { ChargeCount = 0, Balance = 0m, OldestUnpaidDueDate = (DateOnly?)null, DaysOverdue = 0 });
+            sut.Should().BeEquivalentTo(new { ChargeCount = 0, Balance = Money.Create(0m), OldestUnpaidDueDate = (DateOnly?)null, DaysOverdue = 0 });
         }
 
         [Fact]
@@ -78,8 +79,8 @@ public class LeaseFeeStatementTests
 
             sut.Should().BeEquivalentTo(new
             {
-                TotalCharged = 180m,
-                Balance = 90m,
+                TotalCharged = Money.Create(180m),
+                Balance = Money.Create(90m),
                 OldestUnpaidDueDate = (DateOnly?)new DateOnly(2026, 2, 1),
                 DaysOverdue = 38,
             });
@@ -90,7 +91,7 @@ public class LeaseFeeStatementTests
         {
             var sut = _testBed.Calculate(new DateOnly(2026, 1, 1), new DateOnly(2026, 2, 10), null, 200m);
 
-            sut.Should().BeEquivalentTo(new { Balance = -80m, OldestUnpaidDueDate = (DateOnly?)null, DaysOverdue = 0 });
+            sut.Should().BeEquivalentTo(new { Balance = Money.Create(-80m), OldestUnpaidDueDate = (DateOnly?)null, DaysOverdue = 0 });
         }
 
         [Fact]
@@ -98,7 +99,7 @@ public class LeaseFeeStatementTests
         {
             var sut = _testBed.Calculate(new DateOnly(2026, 1, 1), new DateOnly(2026, 2, 1), null, 60m);
 
-            sut.Should().BeEquivalentTo(new { Balance = 60m, OldestUnpaidDueDate = (DateOnly?)new DateOnly(2026, 2, 1), DaysOverdue = 0 });
+            sut.Should().BeEquivalentTo(new { Balance = Money.Create(60m), OldestUnpaidDueDate = (DateOnly?)new DateOnly(2026, 2, 1), DaysOverdue = 0 });
         }
 
         [Fact]
@@ -106,7 +107,7 @@ public class LeaseFeeStatementTests
         {
             var sut = LeaseFeeStatement.Calculate(LeaseFeeTerms.None, new DateOnly(2020, 1, 1), null, [], new DateOnly(2026, 1, 1));
 
-            sut.Should().BeEquivalentTo(new { ChargeCount = 0, Balance = 0m, OldestUnpaidDueDate = (DateOnly?)null });
+            sut.Should().BeEquivalentTo(new { ChargeCount = 0, Balance = Money.Create(0m), OldestUnpaidDueDate = (DateOnly?)null });
         }
     }
 
@@ -141,7 +142,7 @@ public class LeaseFeeStatementTests
             var sut = _testBed.CalculateWithDatedPayments(
                 new DateOnly(2026, 1, 1), new DateOnly(2026, 2, 20), ("2026-01-01", 60m), ("2026-02-01", 60m));
 
-            sut.Should().BeEquivalentTo(new { Balance = 0m, ArrearsSince = (DateOnly?)null });
+            sut.Should().BeEquivalentTo(new { Balance = Money.Create(0m), ArrearsSince = (DateOnly?)null });
         }
 
         [Fact]
@@ -149,7 +150,7 @@ public class LeaseFeeStatementTests
         {
             var sut = _testBed.CalculateWithDatedPayments(new DateOnly(2026, 1, 1), new DateOnly(2026, 1, 20), ("2026-01-25", 60m));
 
-            sut.Should().BeEquivalentTo(new { Balance = 60m, ArrearsSince = (DateOnly?)new DateOnly(2026, 1, 1) });
+            sut.Should().BeEquivalentTo(new { Balance = Money.Create(60m), ArrearsSince = (DateOnly?)new DateOnly(2026, 1, 1) });
         }
     }
 
@@ -162,7 +163,7 @@ public class LeaseFeeStatementTests
         {
             var sut = _testBed.CalculateWithInterest("2026-01-31", [("2026-01-31", 60m)]);
 
-            sut.Should().BeEquivalentTo(new { InterestCharged = 0m, InterestAccruing = 0m, Balance = 0m });
+            sut.Should().BeEquivalentTo(new { InterestCharged = Money.Create(0m), InterestAccruing = Money.Create(0m), Balance = Money.Create(0m) });
         }
 
         [Fact]
@@ -172,9 +173,9 @@ public class LeaseFeeStatementTests
 
             sut.Should().BeEquivalentTo(new
             {
-                InterestCharged = 0m,
-                InterestAccruing = 1.80m,
-                Balance = 60m,
+                InterestCharged = Money.Create(0m),
+                InterestAccruing = Money.Create(1.80m),
+                Balance = Money.Create(60m),
                 InterestWaivedIfPaidBy = (DateOnly?)new DateOnly(2026, 1, 31),
             });
         }
@@ -186,9 +187,9 @@ public class LeaseFeeStatementTests
 
             sut.Should().BeEquivalentTo(new
             {
-                InterestCharged = 1.86m,
-                InterestDue = 1.86m,
-                Balance = 121.86m,
+                InterestCharged = Money.Create(1.86m),
+                InterestDue = Money.Create(1.86m),
+                Balance = Money.Create(121.86m),
                 InterestWaivedIfPaidBy = (DateOnly?)null,
             });
         }
@@ -200,9 +201,9 @@ public class LeaseFeeStatementTests
 
             sut.Should().BeEquivalentTo(new
             {
-                InterestCharged = 2.40m,
-                InterestAccruing = 0.54m,
-                Balance = 62.40m,
+                InterestCharged = Money.Create(2.40m),
+                InterestAccruing = Money.Create(0.54m),
+                Balance = Money.Create(62.40m),
                 InterestWaivedIfPaidBy = (DateOnly?)new DateOnly(2026, 3, 3),
             });
         }
@@ -212,7 +213,7 @@ public class LeaseFeeStatementTests
         {
             var sut = _testBed.CalculateWithInterest("2026-02-20", [("2026-01-20", 30m), ("2026-02-20", 30m)]);
 
-            sut.InterestCharged.Should().Be(1.50m);
+            sut.InterestCharged.Amount.Should().Be(1.50m);
         }
 
         [Fact]
@@ -220,7 +221,7 @@ public class LeaseFeeStatementTests
         {
             var sut = _testBed.CalculateWithInterest("2026-02-10", [("2026-02-10", 122.40m)]);
 
-            sut.Balance.Should().Be(0m);
+            sut.Balance.Amount.Should().Be(0m);
         }
 
         [Fact]
@@ -228,7 +229,7 @@ public class LeaseFeeStatementTests
         {
             var sut = _testBed.CalculateWithInterest("2026-03-01", endedOn: "2026-01-20");
 
-            sut.InterestCharged.Should().Be(1.14m);
+            sut.InterestCharged.Amount.Should().Be(1.14m);
         }
 
         [Fact]
@@ -236,7 +237,7 @@ public class LeaseFeeStatementTests
         {
             var sut = _testBed.CalculateWithInterest("2026-02-01", null, null, ("2026-02-01", 1m), ("2026-02-02", 0.86m));
 
-            sut.Should().BeEquivalentTo(new { InterestWaived = 1m, InterestDue = 0.86m, Balance = 120.86m });
+            sut.Should().BeEquivalentTo(new { InterestWaived = Money.Create(1m), InterestDue = Money.Create(0.86m), Balance = Money.Create(120.86m) });
         }
 
         [Fact]
@@ -244,7 +245,7 @@ public class LeaseFeeStatementTests
         {
             var sut = _testBed.CalculateWithDatedPayments(new DateOnly(2026, 1, 1), new DateOnly(2026, 3, 1), ("2026-02-20", 60m));
 
-            sut.Should().BeEquivalentTo(new { InterestCharged = 0m, InterestAccruing = 0m });
+            sut.Should().BeEquivalentTo(new { InterestCharged = Money.Create(0m), InterestAccruing = Money.Create(0m) });
         }
     }
 }

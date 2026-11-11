@@ -124,7 +124,7 @@ public static class ResalesEndpoints
                 request.CurrentIndexValue),
             cancellationToken);
 
-        return Results.Ok(new ResalePriceResponse(price.FormulaPrice, price.PurchaseOptionPrice));
+        return Results.Ok(new ResalePriceResponse(price.FormulaPrice.Amount, price.PurchaseOptionPrice.Amount));
     }
 
     [WolverinePost("/api/resales/{resaleId}/appraisal")]

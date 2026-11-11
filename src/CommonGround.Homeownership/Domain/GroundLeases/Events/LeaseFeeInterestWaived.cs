@@ -1,3 +1,4 @@
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.Homeownership.Domain.GroundLeases.Events;
@@ -13,6 +14,6 @@ public sealed record LeaseFeeInterestWaived(
     string AggregateId,
     string WaiverId,
     DateOnly WaivedOn,
-    decimal Amount,
+    Money Amount,
     string Reason,
     string WaivedBy) : DomainEvent(AggregateId);

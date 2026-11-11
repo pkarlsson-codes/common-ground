@@ -79,7 +79,7 @@ public sealed class LeaseFeeNoticeSchedule : ValueObject
         ArgumentNullException.ThrowIfNull(statement);
         ArgumentNullException.ThrowIfNull(sent);
 
-        if (statement.Balance <= 0 || statement.ArrearsSince is not { } arrearsSince)
+        if (!statement.Balance.IsPositive || statement.ArrearsSince is not { } arrearsSince)
             return null;
 
         var reached = statement.DaysOverdue >= DefaultNoticeDays ? LeaseFeeNoticeLevel.Default

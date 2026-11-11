@@ -16,7 +16,7 @@ namespace CommonGround.Homeownership.Application.Commands;
 public sealed record WaiveLeaseFeeInterest(
     GroundLeaseId GroundLeaseId,
     LeaseFeeInterestWaiverId WaiverId,
-    decimal Amount,
+    Money Amount,
     string Reason,
     UserId WaivedBy);
 

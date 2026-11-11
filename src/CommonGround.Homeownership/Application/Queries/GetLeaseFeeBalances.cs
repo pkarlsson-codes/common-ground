@@ -1,6 +1,7 @@
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Services;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
@@ -22,7 +23,7 @@ public static class LeaseFeeStatements
             view.EndedOn,
             PaymentsOf(view),
             asOf,
-            view.LeaseFeeInterestWaivers.Select(w => new WaivedInterest(w.WaivedOn, w.Amount)));
+            view.LeaseFeeInterestWaivers.Select(w => new WaivedInterest(w.WaivedOn, Money.Create(w.Amount))));
     }
 
     /// <summary>
@@ -41,21 +42,21 @@ public static class LeaseFeeStatements
             ? null
             : DefaultCure.Calculate(
                 notice.SentOn,
-                notice.BalanceDue,
+                Money.Create(notice.BalanceDue),
                 DefaultCurePeriod.Create(notice.CureDays!.Value, notice.CureExtensionDays ?? 0),
                 PaymentsOf(view),
                 asOf);
     }
 
     private static IEnumerable<ReceivedPayment> PaymentsOf(GroundLeaseView view) =>
-        view.LeaseFeePayments.Where(p => p.VoidReason is null).Select(p => new ReceivedPayment(p.ReceivedDate, p.Amount));
+        view.LeaseFeePayments.Where(p => p.VoidReason is null).Select(p => new ReceivedPayment(p.ReceivedDate, Money.Create(p.Amount)));
 
     /// <summary>The lease's fee and interest terms.</summary>
     public static LeaseFeeTerms TermsOf(GroundLeaseView view)
     {
         ArgumentNullException.ThrowIfNull(view);
 
-        return LeaseFeeTerms.Create(view.LandUseFee, view.RepairReserveFee, view.LateInterestRate, view.InterestWaiverDays);
+        return LeaseFeeTerms.Create(Money.Create(view.LandUseFee), Money.Create(view.RepairReserveFee), view.LateInterestRate, view.InterestWaiverDays);
     }
 
     /// <summary>
@@ -175,8 +176,8 @@ public static class GetLeaseFeeBalancesHandler
 
         var balances = all
             .Where(b => request.NoticeDueOnly ? b.NoticeDue is not null
-                : request.IncludeAll ? b.Lease.Status == active || b.Statement.Balance > 0
-                : b.Statement.Balance > 0)
+                : request.IncludeAll ? b.Lease.Status == active || b.Statement.Balance.IsPositive
+                : b.Statement.Balance.IsPositive)
             .Where(b => string.IsNullOrEmpty(search)
                 || (b.Lease.HomeownerFullName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false)
                 || (b.HomeLabel?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false))

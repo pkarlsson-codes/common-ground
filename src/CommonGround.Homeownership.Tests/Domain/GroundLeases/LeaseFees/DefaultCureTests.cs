@@ -1,3 +1,4 @@
+using CommonGround.SharedKernel.Domain;
 using System.Globalization;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.SharedKernel.Domain.Exceptions;
@@ -12,11 +13,11 @@ public class DefaultCureTests
         /// <summary>A notice of default for $300 sent March 3; the 30-day deadline is April 2, extended to May 2.</summary>
         public static readonly DateOnly SentOn = new(2026, 3, 3);
 
-        public const decimal AmountOwed = 300m;
+        public static readonly Money AmountOwed = Money.Create(300m);
 
         public static DateOnly Day(string iso) => DateOnly.Parse(iso, CultureInfo.InvariantCulture);
 
-        public static ReceivedPayment Paid(string on, decimal amount) => new(Day(on), amount);
+        public static ReceivedPayment Paid(string on, decimal amount) => new(Day(on), Money.Create(amount));
 
         public static DefaultCure Cure(string asOf, params ReceivedPayment[] payments) =>
             DefaultCure.Calculate(SentOn, AmountOwed, DefaultCurePeriod.Default, payments, Day(asOf));
@@ -34,7 +35,7 @@ public class DefaultCureTests
                 Status = DefaultCureStatus.Curing,
                 CureBy = TestBed.Day("2026-04-02"),
                 Extended = false,
-                StillToPay = 300m,
+                StillToPay = Money.Create(300m),
             });
         }
 
@@ -58,7 +59,7 @@ public class DefaultCureTests
                 OriginalDeadline = TestBed.Day("2026-04-02"),
                 CureBy = TestBed.Day("2026-05-02"),
                 Extended = true,
-                StillToPay = 100m,
+                StillToPay = Money.Create(100m),
             });
         }
 
@@ -94,7 +95,7 @@ public class DefaultCureTests
             var sut = TestBed.Cure("2026-03-20", TestBed.Paid("2026-03-02", 300m));
 
             sut.Status.Should().Be(DefaultCureStatus.Curing);
-            sut.PaidSinceNotice.Should().Be(0m);
+            sut.PaidSinceNotice.Amount.Should().Be(0m);
         }
 
         [Fact]

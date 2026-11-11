@@ -282,16 +282,17 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     public LeaseFeePaymentRecorded RecordLeaseFeePayment(
         LeaseFeePaymentId paymentId,
         DateOnly receivedDate,
-        decimal amount,
+        Money amount,
         PaymentMethod method,
         string? reference,
         DateOnly today,
         UserId recordedBy)
     {
+        ArgumentNullException.ThrowIfNull(amount);
         ArgumentNullException.ThrowIfNull(method);
 
-        if (amount <= 0)
-            throw BusinessRuleViolation.GroundLease.RecordLeaseFeePayment.AmountNonPositive(amount);
+        if (!amount.IsPositive)
+            throw BusinessRuleViolation.GroundLease.RecordLeaseFeePayment.AmountNonPositive(amount.Amount);
 
         if (receivedDate > today)
             throw BusinessRuleViolation.GroundLease.RecordLeaseFeePayment.ReceivedDateInFuture(receivedDate, today);
@@ -354,7 +355,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             throw BusinessRuleViolation.GroundLease.RecordLeaseFeeNotice.SentDateBeforeLeaseStart(sentOn, LeaseStartDate);
 
         var statement = LeaseFeeStatementAsOf(sentOn);
-        if (statement.Balance <= 0 || statement.OldestUnpaidDueDate is not { } oldestUnpaid)
+        if (!statement.Balance.IsPositive || statement.OldestUnpaidDueDate is not { } oldestUnpaid)
             throw BusinessRuleViolation.GroundLease.RecordLeaseFeeNotice.NothingOwed(sentOn);
 
         if (level != LeaseFeeNoticeLevel.Default)
@@ -380,20 +381,22 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// </summary>
     public LeaseFeeInterestWaived WaiveLeaseFeeInterest(
         LeaseFeeInterestWaiverId waiverId,
-        decimal amount,
+        Money amount,
         string reason,
         DateOnly today,
         UserId waivedBy)
     {
+        ArgumentNullException.ThrowIfNull(amount);
+
         if (string.IsNullOrWhiteSpace(reason))
             throw BusinessRuleViolation.GroundLease.WaiveLeaseFeeInterest.ReasonRequired();
 
-        if (amount <= 0)
-            throw BusinessRuleViolation.GroundLease.WaiveLeaseFeeInterest.AmountNonPositive(amount);
+        if (!amount.IsPositive)
+            throw BusinessRuleViolation.GroundLease.WaiveLeaseFeeInterest.AmountNonPositive(amount.Amount);
 
         var interestDue = LeaseFeeStatementAsOf(today).InterestDue;
         if (amount > interestDue)
-            throw BusinessRuleViolation.GroundLease.WaiveLeaseFeeInterest.AmountAboveInterestOwed(amount, interestDue);
+            throw BusinessRuleViolation.GroundLease.WaiveLeaseFeeInterest.AmountAboveInterestOwed(amount.Amount, interestDue.Amount);
 
         return new LeaseFeeInterestWaived(Id.Value, waiverId.Value, today, amount, reason.Trim(), waivedBy.Value);
     }

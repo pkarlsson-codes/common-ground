@@ -1,4 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using FluentAssertions;
 
@@ -13,7 +14,7 @@ public class LeaseFeeTermsTests
         [InlineData(0, -1, "homeownership.lease_fee_terms.create.repair_reserve_fee_negative")]
         public void GivenNegativeFee_WhenCreated_ThenThrowsBusinessRuleViolation(int landUseFee, int repairReserveFee, string expectedCode)
         {
-            var act = () => LeaseFeeTerms.Create(landUseFee, repairReserveFee);
+            var act = () => LeaseFeeTerms.Create(Money.Create(landUseFee), Money.Create(repairReserveFee));
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }
@@ -24,7 +25,7 @@ public class LeaseFeeTermsTests
         [InlineData(10, -1, "homeownership.lease_fee_terms.create.interest_waiver_days_negative")]
         public void GivenInvalidInterestTerms_WhenCreated_ThenThrowsBusinessRuleViolation(double rate, int waiverDays, string expectedCode)
         {
-            var act = () => LeaseFeeTerms.Create(45m, 15m, (decimal)rate, waiverDays);
+            var act = () => LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m), (decimal)rate, waiverDays);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }
@@ -32,7 +33,7 @@ public class LeaseFeeTermsTests
         [Fact]
         public void GivenNoInterestTerms_WhenCreated_ThenChargesNoInterestAndWaivesWithinThirtyDays()
         {
-            var sut = LeaseFeeTerms.Create(45m, 15m);
+            var sut = LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m));
 
             sut.Should().BeEquivalentTo(new { ChargesInterest = false, InterestWaiverDays = 30 });
         }
@@ -40,9 +41,9 @@ public class LeaseFeeTermsTests
         [Fact]
         public void GivenBothFees_WhenCreated_ThenChargesTheirSumEachMonth()
         {
-            var sut = LeaseFeeTerms.Create(45m, 15m);
+            var sut = LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m));
 
-            sut.MonthlyFee.Should().Be(60m);
+            sut.MonthlyFee.Amount.Should().Be(60m);
         }
     }
 }

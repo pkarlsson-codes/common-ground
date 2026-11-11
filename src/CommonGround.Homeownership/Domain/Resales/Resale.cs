@@ -129,8 +129,8 @@ public sealed class Resale : AggregateRoot<ResaleId>
             appraiserName.Trim(),
             approvedImprovements,
             currentIndexValue,
-            price.FormulaPrice,
-            price.PurchaseOptionPrice,
+            price.FormulaPrice.Amount,
+            price.PurchaseOptionPrice.Amount,
             recordedBy.Value);
     }
 

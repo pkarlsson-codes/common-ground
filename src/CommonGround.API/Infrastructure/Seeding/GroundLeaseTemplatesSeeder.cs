@@ -65,7 +65,7 @@ public sealed class GroundLeaseTemplatesSeeder : IDevelopmentSeeder
                 entry.OptionWindowDays,
                 entry.CovenantTerms,
                 ToResalePolicyTerms(entry),
-                LeaseFeeTerms.Create(entry.LandUseFee, entry.RepairReserveFee, entry.LateInterestRate, entry.InterestWaiverDays),
+                LeaseFeeTerms.Create(Money.Create(entry.LandUseFee), Money.Create(entry.RepairReserveFee), entry.LateInterestRate, entry.InterestWaiverDays),
                 SeederUserId);
 
             object[] events = entry.Archived

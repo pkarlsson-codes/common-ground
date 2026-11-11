@@ -16,7 +16,7 @@ public sealed class LeaseFeeTerms : ValueObject
     /// <summary>The highest annual interest rate accepted, in percent. A guard against typing errors, not a legal limit.</summary>
     public const decimal MaxLateInterestRate = 100m;
 
-    private LeaseFeeTerms(decimal landUseFee, decimal repairReserveFee, decimal lateInterestRate, int interestWaiverDays)
+    private LeaseFeeTerms(Money landUseFee, Money repairReserveFee, decimal lateInterestRate, int interestWaiverDays)
     {
         LandUseFee = landUseFee;
         RepairReserveFee = repairReserveFee;
@@ -25,7 +25,7 @@ public sealed class LeaseFeeTerms : ValueObject
     }
 
     /// <summary>Gets terms with no fee, for a lease whose homeowner pays nothing.</summary>
-    public static LeaseFeeTerms None { get; } = new(0m, 0m, 0m, DefaultInterestWaiverDays);
+    public static LeaseFeeTerms None { get; } = new(Money.Zero, Money.Zero, 0m, DefaultInterestWaiverDays);
 
     /// <summary>
     /// Creates fee terms. Refused for a negative fee, an interest rate below zero or above
@@ -36,16 +36,19 @@ public sealed class LeaseFeeTerms : ValueObject
     /// <param name="lateInterestRate">The yearly interest rate on a late fee, in percent; zero charges none.</param>
     /// <param name="interestWaiverDays">The days after the due date within which a payment owes no interest.</param>
     public static LeaseFeeTerms Create(
-        decimal landUseFee,
-        decimal repairReserveFee,
+        Money landUseFee,
+        Money repairReserveFee,
         decimal lateInterestRate = 0m,
         int interestWaiverDays = DefaultInterestWaiverDays)
     {
-        if (landUseFee < 0)
-            throw BusinessRuleViolation.LeaseFeeTerms.Create.LandUseFeeNegative(landUseFee);
+        ArgumentNullException.ThrowIfNull(landUseFee);
+        ArgumentNullException.ThrowIfNull(repairReserveFee);
 
-        if (repairReserveFee < 0)
-            throw BusinessRuleViolation.LeaseFeeTerms.Create.RepairReserveFeeNegative(repairReserveFee);
+        if (landUseFee.IsNegative)
+            throw BusinessRuleViolation.LeaseFeeTerms.Create.LandUseFeeNegative(landUseFee.Amount);
+
+        if (repairReserveFee.IsNegative)
+            throw BusinessRuleViolation.LeaseFeeTerms.Create.RepairReserveFeeNegative(repairReserveFee.Amount);
 
         if (lateInterestRate is < 0 or > MaxLateInterestRate)
             throw BusinessRuleViolation.LeaseFeeTerms.Create.LateInterestRateOutOfRange(lateInterestRate);
@@ -57,13 +60,13 @@ public sealed class LeaseFeeTerms : ValueObject
     }
 
     /// <summary>Gets the monthly land use fee.</summary>
-    public decimal LandUseFee { get; }
+    public Money LandUseFee { get; }
 
     /// <summary>Gets the monthly repair reserve fee.</summary>
-    public decimal RepairReserveFee { get; }
+    public Money RepairReserveFee { get; }
 
     /// <summary>Gets the total charged each month.</summary>
-    public decimal MonthlyFee => LandUseFee + RepairReserveFee;
+    public Money MonthlyFee => LandUseFee + RepairReserveFee;
 
     /// <summary>Gets the yearly interest rate on a late fee, in percent (10 is 10% a year). Zero charges no interest.</summary>
     public decimal LateInterestRate { get; }

@@ -5,6 +5,7 @@ using CommonGround.Homeownership.Application.Commands;
 using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
@@ -37,7 +38,7 @@ public static class LeaseFeesEndpoints
                 GroundLeaseId.Create(groundLeaseId),
                 id,
                 request.ReceivedDate,
-                request.Amount,
+                Money.Create(request.Amount),
                 method,
                 request.Reference,
                 httpContext.GetUserId()),
@@ -146,7 +147,7 @@ public static class LeaseFeesEndpoints
             new WaiveLeaseFeeInterest(
                 GroundLeaseId.Create(groundLeaseId),
                 id,
-                request.Amount,
+                Money.Create(request.Amount),
                 request.Reason,
                 httpContext.GetUserId()),
             cancellationToken);
@@ -215,12 +216,12 @@ public static class LeaseFeesEndpoints
             ? null
             : new DefaultCureDto(
                 cure.SentOn,
-                cure.AmountOwed,
+                cure.AmountOwed.Amount,
                 cure.OriginalDeadline,
                 cure.CureBy,
                 cure.Extended,
-                cure.PaidSinceNotice,
-                cure.StillToPay,
+                cure.PaidSinceNotice.Amount,
+                cure.StillToPay.Amount,
                 cure.PaidInFullOn,
                 cure.Status.DisplayName);
 
@@ -241,8 +242,8 @@ public static class LeaseFeesEndpoints
             b.HomeLabel,
             b.Lease.HomeownerFullName,
             b.Lease.Status,
-            b.Statement.MonthlyFee,
-            b.Statement.Balance,
+            b.Statement.MonthlyFee.Amount,
+            b.Statement.Balance.Amount,
             b.Statement.OldestUnpaidDueDate,
             b.Statement.DaysOverdue,
             b.NoticeDue?.DisplayName,
@@ -250,8 +251,8 @@ public static class LeaseFeesEndpoints
             b.LastNotice?.SentOn,
             b.Lease.LateInterestRate,
             b.Lease.InterestWaiverDays,
-            b.Statement.InterestDue,
-            b.Statement.InterestAccruing,
+            b.Statement.InterestDue.Amount,
+            b.Statement.InterestAccruing.Amount,
             b.Statement.InterestWaivedIfPaidBy,
             ToResponse(b.DefaultCure));
 }

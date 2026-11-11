@@ -6,16 +6,16 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 /// Where a notice of default stands as of a day (Model Lease Art 12.1). The homeowner cures it by paying the amount
 /// the notice said was owed within the cure days after it was sent. Paying at least
 /// <see cref="DefaultCurePeriod.PartialPaymentShare"/> of it within the cure days extends the deadline by the
-/// extension days; that share is rounded to the cent. Every payment received on or after the day the notice was sent counts toward it.
+/// extension days. Every payment received on or after the day the notice was sent counts toward it.
 /// </summary>
 public sealed class DefaultCure : ValueObject
 {
     private DefaultCure(
         DateOnly sentOn,
-        decimal amountOwed,
+        Money amountOwed,
         DateOnly originalDeadline,
         DateOnly cureBy,
-        decimal paidSinceNotice,
+        Money paidSinceNotice,
         DateOnly? paidInFullOn,
         DefaultCureStatus status)
     {
@@ -37,11 +37,12 @@ public sealed class DefaultCure : ValueObject
     /// <param name="asOf">The day to work it out for, usually the trust's today.</param>
     public static DefaultCure Calculate(
         DateOnly sentOn,
-        decimal amountOwed,
+        Money amountOwed,
         DefaultCurePeriod period,
         IEnumerable<ReceivedPayment> payments,
         DateOnly asOf)
     {
+        ArgumentNullException.ThrowIfNull(amountOwed);
         ArgumentNullException.ThrowIfNull(period);
         ArgumentNullException.ThrowIfNull(payments);
 
@@ -54,11 +55,11 @@ public sealed class DefaultCure : ValueObject
         var paidByDeadline = received.Where(p => p.ReceivedDate <= originalDeadline).Sum(p => p.Amount);
         var extended = paidByDeadline < amountOwed
             && period.ExtensionDays > 0
-            && paidByDeadline >= Math.Round(amountOwed * DefaultCurePeriod.PartialPaymentShare, 2, MidpointRounding.AwayFromZero);
+            && paidByDeadline >= amountOwed.Share(DefaultCurePeriod.PartialPaymentShare);
         var cureBy = extended ? originalDeadline.AddDays(period.ExtensionDays) : originalDeadline;
 
         DateOnly? paidInFullOn = null;
-        var running = 0m;
+        var running = Money.Zero;
         foreach (var payment in received)
         {
             running += payment.Amount;
@@ -80,7 +81,7 @@ public sealed class DefaultCure : ValueObject
     public DateOnly SentOn { get; }
 
     /// <summary>Gets what the notice said was owed.</summary>
-    public decimal AmountOwed { get; }
+    public Money AmountOwed { get; }
 
     /// <summary>Gets the deadline before any extension: the cure days after the notice was sent.</summary>
     public DateOnly OriginalDeadline { get; }
@@ -92,10 +93,10 @@ public sealed class DefaultCure : ValueObject
     public bool Extended => CureBy > OriginalDeadline;
 
     /// <summary>Gets the total received since the notice was sent.</summary>
-    public decimal PaidSinceNotice { get; }
+    public Money PaidSinceNotice { get; }
 
     /// <summary>Gets what is still to pay of the amount owed; zero once paid.</summary>
-    public decimal StillToPay => Math.Max(0, AmountOwed - PaidSinceNotice);
+    public Money StillToPay => Money.Max(Money.Zero, AmountOwed - PaidSinceNotice);
 
     /// <summary>Gets the day the payments since the notice reached the amount owed, or null.</summary>
     public DateOnly? PaidInFullOn { get; }

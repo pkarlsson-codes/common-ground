@@ -7,6 +7,7 @@ using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
@@ -44,7 +45,7 @@ public static class GroundLeaseTemplatesEndpoints
             request.OptionWindowDays,
             request.CovenantTerms,
             resalePolicyTerms,
-            LeaseFeeTerms.Create(request.LandUseFee, request.RepairReserveFee, request.LateInterestRate, request.InterestWaiverDays),
+            LeaseFeeTerms.Create(Money.Create(request.LandUseFee), Money.Create(request.RepairReserveFee), request.LateInterestRate, request.InterestWaiverDays),
             userId);
 
         await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);

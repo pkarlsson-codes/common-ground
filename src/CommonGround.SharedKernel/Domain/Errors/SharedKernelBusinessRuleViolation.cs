@@ -85,4 +85,19 @@ public static class BusinessRuleViolation
                     ["timeZone"] = timeZone,
                 });
     }
+
+    /// <summary>Violations raised by <see cref="Domain.Money"/>.</summary>
+    public static class Money
+    {
+        /// <summary>Creates the violation for an amount with a fraction of a cent.</summary>
+        /// <param name="amount">The rejected amount.</param>
+        /// <returns>The business rule violation exception.</returns>
+        public static BusinessRuleViolationException FractionOfCent(decimal amount)
+            => new(
+                "shared.money.fraction_of_cent",
+                new Dictionary<string, object?>
+                {
+                    ["amount"] = amount,
+                });
+    }
 }

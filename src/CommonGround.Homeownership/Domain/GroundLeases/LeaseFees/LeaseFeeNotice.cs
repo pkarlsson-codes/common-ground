@@ -13,7 +13,7 @@ public sealed class LeaseFeeNotice : Entity<LeaseFeeNoticeId>
         LeaseFeeNoticeLevel level,
         DateOnly sentOn,
         NoticeDelivery delivery,
-        decimal balanceDue,
+        Money balanceDue,
         DateOnly oldestUnpaidDueDate,
         DefaultCurePeriod? curePeriod)
     {
@@ -39,7 +39,7 @@ public sealed class LeaseFeeNotice : Entity<LeaseFeeNoticeId>
         LeaseFeeNoticeLevel level,
         DateOnly sentOn,
         NoticeDelivery delivery,
-        decimal balanceDue,
+        Money balanceDue,
         DateOnly oldestUnpaidDueDate,
         DefaultCurePeriod? curePeriod = null)
     {
@@ -59,7 +59,7 @@ public sealed class LeaseFeeNotice : Entity<LeaseFeeNoticeId>
     public NoticeDelivery Delivery { get; }
 
     /// <summary>Gets what the lease owed on the day it was sent.</summary>
-    public decimal BalanceDue { get; }
+    public Money BalanceDue { get; }
 
     /// <summary>Gets the due date of the oldest unpaid charge on the day it was sent.</summary>
     public DateOnly OldestUnpaidDueDate { get; }

@@ -11,7 +11,7 @@ public sealed class LeaseFeePayment : Entity<LeaseFeePaymentId>
     private LeaseFeePayment(
         LeaseFeePaymentId id,
         DateOnly receivedDate,
-        decimal amount,
+        Money amount,
         PaymentMethod method,
         string? reference)
     {
@@ -31,7 +31,7 @@ public sealed class LeaseFeePayment : Entity<LeaseFeePaymentId>
     public static LeaseFeePayment Create(
         LeaseFeePaymentId id,
         DateOnly receivedDate,
-        decimal amount,
+        Money amount,
         PaymentMethod method,
         string? reference)
     {
@@ -44,7 +44,7 @@ public sealed class LeaseFeePayment : Entity<LeaseFeePaymentId>
     public DateOnly ReceivedDate { get; }
 
     /// <summary>Gets the amount received.</summary>
-    public decimal Amount { get; }
+    public Money Amount { get; }
 
     /// <summary>Gets how it was paid.</summary>
     public PaymentMethod Method { get; }

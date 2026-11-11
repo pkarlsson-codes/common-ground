@@ -29,10 +29,10 @@ public class GroundLeaseTests
 
         public static readonly DateOnly LeaseStart = new(2025, 1, 1);
 
-        public LeaseFeeTerms Fees { get; } = LeaseFeeTerms.Create(45m, 15m);
+        public LeaseFeeTerms Fees { get; } = LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m));
 
         /// <summary>$60 a month at 36.5% a year: 6 cents a day of interest on an unpaid month.</summary>
-        public LeaseFeeTerms FeesWithInterest { get; } = LeaseFeeTerms.Create(45m, 15m, 36.5m);
+        public LeaseFeeTerms FeesWithInterest { get; } = LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m), 36.5m);
 
         public GroundLeaseCreated Established(ResalePolicyTerms? terms = null, LeaseFeeTerms? fees = null) =>
             GroundLease.Establish(
@@ -47,7 +47,7 @@ public class GroundLeaseTests
                 GroundLeaseTemplate.Define(GroundLeaseTemplateId.Generate(), "Template", termYears, 45, covenantTerms, terms, Fees, StaffUser));
 
         public LeaseFeePaymentRecorded Payment(GroundLease lease, decimal amount, DateOnly received) =>
-            lease.RecordLeaseFeePayment(LeaseFeePaymentId.Generate(), received, amount, PaymentMethod.Check, null, received, StaffUser);
+            lease.RecordLeaseFeePayment(LeaseFeePaymentId.Generate(), received, Money.Create(amount), PaymentMethod.Check, null, received, StaffUser);
 
         public GroundLeaseTemplate InactiveTemplate()
         {
@@ -359,7 +359,7 @@ public class GroundLeaseTests
             var sut = _testBed.Lease();
 
             var act = () => sut.RecordLeaseFeePayment(
-                LeaseFeePaymentId.Generate(), DateOnly.Parse(received, CultureInfo.InvariantCulture), amount, PaymentMethod.Check, null,
+                LeaseFeePaymentId.Generate(), DateOnly.Parse(received, CultureInfo.InvariantCulture), Money.Create(amount), PaymentMethod.Check, null,
                 new DateOnly(2025, 3, 10), _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
@@ -374,7 +374,7 @@ public class GroundLeaseTests
 
             paid.LeaseFeeStatementAsOf(new DateOnly(2025, 2, 10)).Should().BeEquivalentTo(new
             {
-                Balance = 60m,
+                Balance = Money.Create(60m),
                 OldestUnpaidDueDate = (DateOnly?)new DateOnly(2025, 2, 1),
             });
         }
@@ -386,7 +386,7 @@ public class GroundLeaseTests
 
             var (paid, _) = sut.Decide(l => _testBed.Payment(l, 120m, new DateOnly(2025, 6, 1)));
 
-            paid.LeaseFeeStatementAsOf(new DateOnly(2025, 6, 1)).Balance.Should().Be(0m);
+            paid.LeaseFeeStatementAsOf(new DateOnly(2025, 6, 1)).Balance.Amount.Should().Be(0m);
         }
 
         [Fact]
@@ -395,7 +395,7 @@ public class GroundLeaseTests
             var sut = _testBed.Lease();
 
             var recorded = sut.RecordLeaseFeePayment(
-                LeaseFeePaymentId.Generate(), new DateOnly(2025, 1, 3), 60m, PaymentMethod.Cash, "  ", new DateOnly(2025, 1, 3), _testBed.StaffUser);
+                LeaseFeePaymentId.Generate(), new DateOnly(2025, 1, 3), Money.Create(60m), PaymentMethod.Cash, "  ", new DateOnly(2025, 1, 3), _testBed.StaffUser);
 
             recorded.Reference.Should().BeNull();
         }
@@ -418,7 +418,7 @@ public class GroundLeaseTests
 
             var (voided, _) = sut.Decide(l => l.VoidLeaseFeePayment(paymentId, "Check bounced", _testBed.StaffUser));
 
-            voided.LeaseFeeStatementAsOf(new DateOnly(2025, 1, 10)).Balance.Should().Be(60m);
+            voided.LeaseFeeStatementAsOf(new DateOnly(2025, 1, 10)).Balance.Amount.Should().Be(60m);
         }
 
         [Fact]
@@ -465,7 +465,7 @@ public class GroundLeaseTests
         {
             var template = EventReplay.Replay<GroundLeaseTemplate>(GroundLeaseTemplate.Define(
                 GroundLeaseTemplateId.Generate(), "Template", 99, 45, "Covenants", ResalePolicyTerms.AppraisalBased(0.25m),
-                LeaseFeeTerms.Create(45m, 15m, 12m, 20), _testBed.StaffUser));
+                LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m), 12m, 20), _testBed.StaffUser));
 
             var sut = EventReplay.Replay<GroundLease>(_testBed.FromPurchase(template));
 
@@ -476,12 +476,12 @@ public class GroundLeaseTests
         public void GivenInterestWaived_WhenAsked_ThenTheWaiverLowersTheInterestDue()
         {
             var sut = _testBed.Lease(fees: _testBed.FeesWithInterest)
-                .Decide(l => l.WaiveLeaseFeeInterest(LeaseFeeInterestWaiverId.Generate(), 1m, "Hardship", new DateOnly(2025, 2, 1), _testBed.StaffUser))
+                .Decide(l => l.WaiveLeaseFeeInterest(LeaseFeeInterestWaiverId.Generate(), Money.Create(1m), "Hardship", new DateOnly(2025, 2, 1), _testBed.StaffUser))
                 .Aggregate;
 
             var statement = sut.LeaseFeeStatementAsOf(new DateOnly(2025, 2, 1));
 
-            statement.Should().BeEquivalentTo(new { InterestCharged = 1.86m, InterestWaived = 1m, InterestDue = 0.86m });
+            statement.Should().BeEquivalentTo(new { InterestCharged = Money.Create(1.86m), InterestWaived = Money.Create(1m), InterestDue = Money.Create(0.86m) });
         }
 
         [Fact]
@@ -491,7 +491,7 @@ public class GroundLeaseTests
 
             var statement = sut.LeaseFeeStatementAsOf(new DateOnly(2025, 12, 1));
 
-            statement.TotalCharged.Should().Be(180m);
+            statement.TotalCharged.Amount.Should().Be(180m);
         }
 
         [Fact]
@@ -502,7 +502,7 @@ public class GroundLeaseTests
 
             var statement = sut.LeaseFeeStatementAsOf(new DateOnly(2026, 1, 1));
 
-            statement.MonthlyFee.Should().Be(60m);
+            statement.MonthlyFee.Amount.Should().Be(60m);
         }
     }
 
@@ -553,7 +553,7 @@ public class GroundLeaseTests
                 Level = LeaseFeeNoticeLevel.First,
                 SentOn = new DateOnly(2025, 2, 12),
                 Delivery = NoticeDelivery.CertifiedMail,
-                BalanceDue = 60m,
+                BalanceDue = Money.Create(60m),
                 OldestUnpaidDueDate = new DateOnly(2025, 2, 1),
             });
         }
@@ -592,7 +592,7 @@ public class GroundLeaseTests
             noticed.LeaseFeeNotices.Should().ContainSingle().Which.CurePeriod.Should().Be(DefaultCurePeriod.Default);
             noticed.DefaultCureAsOf(Today).Should().BeEquivalentTo(new
             {
-                AmountOwed = 180m,
+                AmountOwed = Money.Create(180m),
                 CureBy = new DateOnly(2025, 4, 2),
                 Status = DefaultCureStatus.Curing,
             });
@@ -637,7 +637,7 @@ public class GroundLeaseTests
             var sut = _testBed.Lease(fees: _testBed.FeesWithInterest);
 
             var act = () => sut.WaiveLeaseFeeInterest(
-                LeaseFeeInterestWaiverId.Generate(), (decimal)amount, reason, Today, _testBed.StaffUser);
+                LeaseFeeInterestWaiverId.Generate(), Money.Create((decimal)amount), reason, Today, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }
@@ -648,12 +648,12 @@ public class GroundLeaseTests
             var sut = _testBed.Lease(fees: _testBed.FeesWithInterest);
 
             var (waived, _) = sut.Decide(l => l.WaiveLeaseFeeInterest(
-                LeaseFeeInterestWaiverId.Generate(), 1.86m, "  Job loss  ", Today, _testBed.StaffUser));
+                LeaseFeeInterestWaiverId.Generate(), Money.Create(1.86m), "  Job loss  ", Today, _testBed.StaffUser));
 
             waived.LeaseFeeInterestWaivers.Should().ContainSingle().Which.Should().BeEquivalentTo(new
             {
                 WaivedOn = Today,
-                Amount = 1.86m,
+                Amount = Money.Create(1.86m),
                 Reason = "Job loss",
             });
         }

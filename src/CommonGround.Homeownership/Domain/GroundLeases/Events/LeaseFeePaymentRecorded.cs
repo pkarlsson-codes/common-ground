@@ -1,4 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.Homeownership.Domain.GroundLeases.Events;
@@ -15,7 +16,7 @@ public sealed record LeaseFeePaymentRecorded(
     string AggregateId,
     string PaymentId,
     DateOnly ReceivedDate,
-    decimal Amount,
+    Money Amount,
     PaymentMethod Method,
     string? Reference,
     string RecordedBy) : DomainEvent(AggregateId);

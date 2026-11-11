@@ -1,4 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.Homeownership.Domain.GroundLeases.Events;
@@ -20,7 +21,7 @@ public sealed record LeaseFeeNoticeRecorded(
     LeaseFeeNoticeLevel Level,
     DateOnly SentOn,
     NoticeDelivery Delivery,
-    decimal BalanceDue,
+    Money BalanceDue,
     DateOnly OldestUnpaidDueDate,
     string RecordedBy,
     int? CureDays = null,

@@ -146,6 +146,7 @@ internal static class BusinessRuleErrorMessageMap
 
             ["shared.email.invalid_format"] = "Enter a valid email address.",
             ["shared.email.required"] = "Email address is required.",
+            ["shared.money.fraction_of_cent"] = "Enter an amount in whole cents.",
             ["shared.person_name.required"] = "Name is required.",
             ["shared.person_name.too_long"] = "Name must be {maxLength} characters or fewer.",
             ["shared.phone.invalid_format"] = "Enter a valid phone number.",

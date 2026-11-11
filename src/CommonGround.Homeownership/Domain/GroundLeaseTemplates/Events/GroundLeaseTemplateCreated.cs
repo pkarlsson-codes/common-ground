@@ -1,4 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.Homeownership.Domain.GroundLeaseTemplates.Events;
@@ -9,8 +10,8 @@ public sealed record GroundLeaseTemplateCreated(
     string TemplateName,
     int TermYears,
     int OptionWindowDays,
-    decimal LandUseFee,
-    decimal RepairReserveFee,
+    Money LandUseFee,
+    Money RepairReserveFee,
     decimal LateInterestRate,
     int InterestWaiverDays,
     string CovenantTerms,
