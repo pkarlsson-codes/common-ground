@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { GroundLeasesApi } from '../api'
 import { apiConfig } from '../lib/apiConfig'
-import type { CalendarDate } from '../lib/calendarDate'
+import { startOfMonth, trustToday, type CalendarDate } from '../lib/calendarDate'
 import type {
   CreateGroundLeaseForm,
   RecordCheckInForm,
@@ -40,6 +40,10 @@ export function useGroundLease(id: string | null) {
   })
 }
 
+/** A lease that started before this month asks where fee tracking begins, so its past months aren't charged. */
+export const tracksFeesFromLater = (form: Pick<CreateGroundLeaseForm, 'leaseStartDate'>) =>
+  form.leaseStartDate < startOfMonth(trustToday())
+
 export function useCreateGroundLease() {
   const qc = useQueryClient()
   return useMutation({
@@ -58,6 +62,7 @@ export function useCreateGroundLease() {
           repairReserveFee: form.repairReserveFee,
           lateInterestRate: form.lateInterestRate,
           interestWaiverDays: form.interestWaiverDays,
+          ...(tracksFeesFromLater(form) && { feesTrackedFrom: form.feesTrackedFrom, openingBalance: form.openingBalance }),
           basePrice: form.basePrice,
           originalAppraisedValue: form.originalAppraisedValue,
           covenantTerms: form.covenantTerms || undefined,

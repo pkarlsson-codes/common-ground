@@ -15,6 +15,8 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.Events;
 /// <param name="RepairReserveFee">Monthly repair reserve fee.</param>
 /// <param name="LateInterestRate">Yearly interest rate on a late fee, in percent; zero charges none.</param>
 /// <param name="InterestWaiverDays">Days after the due date within which a payment owes no interest.</param>
+/// <param name="FeesTrackedFrom">The first day the trust tracks the lease's fees in CommonGround.</param>
+/// <param name="OpeningBalance">What the homeowner owed on that day.</param>
 /// <param name="BasePrice">What the homeowner paid for the home.</param>
 /// <param name="OriginalAppraisedValue">The home's appraised value at that purchase.</param>
 /// <param name="CovenantTerms">Free-text covenant terms.</param>
@@ -39,6 +41,8 @@ public sealed record GroundLeaseCreated(
     Money RepairReserveFee,
     decimal LateInterestRate,
     int InterestWaiverDays,
+    DateOnly FeesTrackedFrom,
+    Money OpeningBalance,
     decimal BasePrice,
     decimal OriginalAppraisedValue,
     string CovenantTerms,

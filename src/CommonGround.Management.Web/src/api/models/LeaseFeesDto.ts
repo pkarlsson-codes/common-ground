@@ -14,6 +14,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
 import type { LeaseFeeInterestWaiverDto } from './LeaseFeeInterestWaiverDto';
 import {
     LeaseFeeInterestWaiverDtoFromJSON,
@@ -87,6 +94,18 @@ export interface LeaseFeesDto {
      */
     interestWaiverDays?: number;
     /**
+     * The first day the trust tracks the lease's fees in CommonGround.
+     * @type {CalendarDate}
+     * @memberof LeaseFeesDto
+     */
+    feesTrackedFrom?: CalendarDate;
+    /**
+     * What the homeowner owed on that day.
+     * @type {number}
+     * @memberof LeaseFeesDto
+     */
+    openingBalance?: number;
+    /**
      * 
      * @type {LeaseFeeStatementDto}
      * @memberof LeaseFeesDto
@@ -146,6 +165,8 @@ export function LeaseFeesDtoFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'monthlyFee': json['monthlyFee'] == null ? undefined : json['monthlyFee'],
         'lateInterestRate': json['lateInterestRate'] == null ? undefined : json['lateInterestRate'],
         'interestWaiverDays': json['interestWaiverDays'] == null ? undefined : json['interestWaiverDays'],
+        'feesTrackedFrom': json['feesTrackedFrom'] == null ? undefined : CalendarDateFromJSON(json['feesTrackedFrom']),
+        'openingBalance': json['openingBalance'] == null ? undefined : json['openingBalance'],
         'statement': json['statement'] == null ? undefined : LeaseFeeStatementDtoFromJSON(json['statement']),
         'payments': json['payments'] == null ? undefined : ((json['payments'] as Array<any>).map(LeaseFeePaymentDtoFromJSON)),
         'noticeDue': json['noticeDue'] == null ? undefined : json['noticeDue'],
@@ -171,6 +192,8 @@ export function LeaseFeesDtoToJSONTyped(value?: LeaseFeesDto | null, ignoreDiscr
         'monthlyFee': value['monthlyFee'],
         'lateInterestRate': value['lateInterestRate'],
         'interestWaiverDays': value['interestWaiverDays'],
+        'feesTrackedFrom': CalendarDateToJSON(value['feesTrackedFrom']),
+        'openingBalance': value['openingBalance'],
         'statement': LeaseFeeStatementDtoToJSON(value['statement']),
         'payments': value['payments'] == null ? undefined : ((value['payments'] as Array<any>).map(LeaseFeePaymentDtoToJSON)),
         'noticeDue': value['noticeDue'],

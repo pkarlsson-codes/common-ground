@@ -13,11 +13,11 @@ public class LeaseFeeStatementTests
         /// <summary>Works out a statement with every payment received on <paramref name="asOf"/>.</summary>
         public LeaseFeeStatement Calculate(
             DateOnly leaseStart, DateOnly asOf, DateOnly? endedOn = null, params decimal[] payments) =>
-            LeaseFeeStatement.Calculate(Terms, leaseStart, endedOn, payments.Select(a => new ReceivedPayment(asOf, Money.Create(a))), asOf);
+            LeaseFeeStatement.Calculate(Terms, LeaseFeeTracking.FromLeaseStart(leaseStart), endedOn, payments.Select(a => new ReceivedPayment(asOf, Money.Create(a))), asOf);
 
         public LeaseFeeStatement CalculateWithDatedPayments(
             DateOnly leaseStart, DateOnly asOf, params (string Received, decimal Amount)[] payments) =>
-            LeaseFeeStatement.Calculate(Terms, leaseStart, null, Dated(payments), asOf);
+            LeaseFeeStatement.Calculate(Terms, LeaseFeeTracking.FromLeaseStart(leaseStart), null, Dated(payments), asOf);
 
         /// <summary>$60 a month at 36.5% a year: 6 cents a day of interest on an unpaid month.</summary>
         public LeaseFeeTerms TermsWithInterest { get; } = LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m), 36.5m);
@@ -30,11 +30,25 @@ public class LeaseFeeStatementTests
             params (string WaivedOn, decimal Amount)[] waivers) =>
             LeaseFeeStatement.Calculate(
                 TermsWithInterest,
-                new DateOnly(2026, 1, 1),
+                LeaseFeeTracking.FromLeaseStart(new DateOnly(2026, 1, 1)),
                 endedOn is null ? null : Day(endedOn),
                 Dated(payments ?? []),
                 Day(asOf),
                 waivers.Select(w => new WaivedInterest(Day(w.WaivedOn), Money.Create(w.Amount))));
+
+        /// <summary>A statement for a lease that started on 2005-03-01, tracked from a later day.</summary>
+        public LeaseFeeStatement CalculateTracked(
+            string trackedFrom,
+            decimal openingBalance,
+            string asOf,
+            LeaseFeeTerms? terms = null,
+            params (string Received, decimal Amount)[] payments) =>
+            LeaseFeeStatement.Calculate(
+                terms ?? Terms,
+                LeaseFeeTracking.Create(Day(trackedFrom), Money.Create(openingBalance), new DateOnly(2005, 3, 1)),
+                null,
+                Dated(payments),
+                Day(asOf));
 
         private static DateOnly Day(string day) => DateOnly.Parse(day, System.Globalization.CultureInfo.InvariantCulture);
 
@@ -105,7 +119,7 @@ public class LeaseFeeStatementTests
         [Fact]
         public void GivenNoFee_WhenCalculated_ThenNothingIsEverCharged()
         {
-            var sut = LeaseFeeStatement.Calculate(LeaseFeeTerms.None, new DateOnly(2020, 1, 1), null, [], new DateOnly(2026, 1, 1));
+            var sut = LeaseFeeStatement.Calculate(LeaseFeeTerms.None, LeaseFeeTracking.FromLeaseStart(new DateOnly(2020, 1, 1)), null, [], new DateOnly(2026, 1, 1));
 
             sut.Should().BeEquivalentTo(new { ChargeCount = 0, Balance = Money.Create(0m), OldestUnpaidDueDate = (DateOnly?)null });
         }
@@ -246,6 +260,68 @@ public class LeaseFeeStatementTests
             var sut = _testBed.CalculateWithDatedPayments(new DateOnly(2026, 1, 1), new DateOnly(2026, 3, 1), ("2026-02-20", 60m));
 
             sut.Should().BeEquivalentTo(new { InterestCharged = Money.Create(0m), InterestAccruing = Money.Create(0m) });
+        }
+    }
+
+    public class TheOpeningBalance
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenLeaseTrackedFromALaterDay_WhenCalculated_ThenOnlyMonthsFromThatDayAreCharged()
+        {
+            var sut = _testBed.CalculateTracked("2026-10-15", 0m, "2026-11-15");
+
+            sut.Should().BeEquivalentTo(new { ChargeCount = 1, TotalCharged = Money.Create(60m), OldestUnpaidDueDate = (DateOnly?)new DateOnly(2026, 11, 1) });
+        }
+
+        [Fact]
+        public void GivenOpeningBalance_WhenCalculated_ThenItIsOwedFromTheTrackedFromDay()
+        {
+            var sut = _testBed.CalculateTracked("2026-11-01", 300m, "2026-11-15");
+
+            sut.Should().BeEquivalentTo(new
+            {
+                OpeningBalance = Money.Create(300m),
+                ChargeCount = 1,
+                Balance = Money.Create(360m),
+                OldestUnpaidDueDate = (DateOnly?)new DateOnly(2026, 11, 1),
+                ArrearsSince = (DateOnly?)new DateOnly(2026, 11, 1),
+            });
+        }
+
+        [Fact]
+        public void GivenOpeningBalancePaid_WhenCalculated_ThenTheFirstMonthIsTheOldestUnpaid()
+        {
+            var sut = _testBed.CalculateTracked("2026-10-20", 300m, "2026-11-15", null, ("2026-10-25", 300m));
+
+            sut.Should().BeEquivalentTo(new { Balance = Money.Create(60m), OldestUnpaidDueDate = (DateOnly?)new DateOnly(2026, 11, 1), ArrearsSince = (DateOnly?)new DateOnly(2026, 11, 1) });
+        }
+
+        [Fact]
+        public void GivenDayBeforeTracking_WhenCalculated_ThenTheOpeningBalanceIsNotYetOwed()
+        {
+            var sut = _testBed.CalculateTracked("2026-11-10", 300m, "2026-11-09");
+
+            sut.Should().BeEquivalentTo(new { OpeningBalance = Money.Create(0m), Balance = Money.Create(0m), OldestUnpaidDueDate = (DateOnly?)null });
+        }
+
+        [Fact]
+        public void GivenNoFee_WhenCalculated_ThenTheOpeningBalanceIsStillOwed()
+        {
+            var sut = _testBed.CalculateTracked("2026-11-01", 300m, "2026-12-15", LeaseFeeTerms.None);
+
+            sut.Should().BeEquivalentTo(new { ChargeCount = 0, Balance = Money.Create(300m) });
+        }
+
+        [Fact]
+        public void GivenInterest_WhenOpeningBalanceStaysUnpaidPastTheWaiverDays_ThenItEarnsInterestFromTheTrackedFromDay()
+        {
+            var terms = LeaseFeeTerms.Create(Money.Zero, Money.Zero, 36.5m);
+
+            var sut = _testBed.CalculateTracked("2026-01-15", 120m, "2026-03-01", terms);
+
+            sut.InterestCharged.Amount.Should().Be(5.40m);
         }
     }
 }

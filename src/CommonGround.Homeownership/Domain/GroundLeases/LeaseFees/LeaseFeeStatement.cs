@@ -4,8 +4,9 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 
 /// <summary>
 /// What a lease owes as of a day. The monthly fee is charged on the 1st of each month (Model Lease Art 5.2), from
-/// the first 1st on or after the lease start, to the last 1st on or before the day an ended lease ended. Charges
-/// are worked out from the terms, not stored. Payments pay the oldest charges first, on the day they were received,
+/// the first 1st on or after the day fees are tracked from (usually the lease start), to the last 1st on or before
+/// the day an ended lease ended. An opening balance is a charge due on the tracked-from day, older than any monthly
+/// charge. Charges are worked out from the terms, not stored. Payments pay the oldest charges first, on the day they were received,
 /// and any left over pays interest.
 /// </summary>
 /// <remarks>
@@ -19,6 +20,7 @@ public sealed class LeaseFeeStatement : ValueObject
     private LeaseFeeStatement(
         DateOnly asOf,
         Money monthlyFee,
+        Money openingBalance,
         int chargeCount,
         Money totalPaid,
         DateOnly? oldestUnpaidDueDate,
@@ -27,6 +29,7 @@ public sealed class LeaseFeeStatement : ValueObject
     {
         AsOf = asOf;
         MonthlyFee = monthlyFee;
+        OpeningBalance = openingBalance;
         ChargeCount = chargeCount;
         TotalPaid = totalPaid;
         OldestUnpaidDueDate = oldestUnpaidDueDate;
@@ -39,7 +42,7 @@ public sealed class LeaseFeeStatement : ValueObject
 
     /// <summary>Works out the statement for a lease as of a day.</summary>
     /// <param name="terms">The lease's fee terms.</param>
-    /// <param name="leaseStartDate">The day the lease started.</param>
+    /// <param name="tracking">The day the lease's fees are tracked from and what was owed then.</param>
     /// <param name="endedOn">The day the lease ended, or null while it is active.</param>
     /// <param name="payments">Every payment that counts (voided ones left out). Those received after
     /// <paramref name="asOf"/> are ignored.</param>
@@ -47,33 +50,40 @@ public sealed class LeaseFeeStatement : ValueObject
     /// <param name="waivers">The interest the trust waived. Those after <paramref name="asOf"/> are ignored.</param>
     public static LeaseFeeStatement Calculate(
         LeaseFeeTerms terms,
-        DateOnly leaseStartDate,
+        LeaseFeeTracking tracking,
         DateOnly? endedOn,
         IEnumerable<ReceivedPayment> payments,
         DateOnly asOf,
         IEnumerable<WaivedInterest>? waivers = null)
     {
         ArgumentNullException.ThrowIfNull(terms);
+        ArgumentNullException.ThrowIfNull(tracking);
         ArgumentNullException.ThrowIfNull(payments);
 
         var received = payments.Where(p => p.ReceivedDate <= asOf).OrderBy(p => p.ReceivedDate).ToList();
         var totalPaid = received.Sum(p => p.Amount);
         var waived = (waivers ?? []).Where(w => w.WaivedOn <= asOf).Sum(w => w.Amount);
         var monthlyFee = terms.MonthlyFee;
-        if (monthlyFee.IsZero)
-            return new LeaseFeeStatement(asOf, monthlyFee, 0, totalPaid, null, null, LeaseFeeInterest.None with { Waived = waived });
-
-        var firstDue = FirstDueDateOnOrAfter(leaseStartDate);
         var lastDay = endedOn is { } ended && ended < asOf ? ended : asOf;
-        var chargeCount = lastDay < firstDue
+
+        var charges = new List<Charge>();
+        var openingBalance = tracking.OpeningBalance.IsPositive && tracking.TrackedFrom <= lastDay
+            ? tracking.OpeningBalance
+            : Money.Zero;
+        if (openingBalance.IsPositive)
+            charges.Add(new Charge(tracking.TrackedFrom, openingBalance));
+
+        var firstDue = FirstDueDateOnOrAfter(tracking.TrackedFrom);
+        var chargeCount = monthlyFee.IsZero || lastDay < firstDue
             ? 0
             : ((lastDay.Year - firstDue.Year) * 12) + lastDay.Month - firstDue.Month + 1;
+        for (var month = 0; month < chargeCount; month++)
+            charges.Add(new Charge(firstDue.AddMonths(month), monthlyFee));
 
-        var fullyPaidCharges = (int)Math.Min(chargeCount, Math.Floor(totalPaid / monthlyFee));
-        DateOnly? oldestUnpaid = fullyPaidCharges < chargeCount ? firstDue.AddMonths(fullyPaidCharges) : null;
-        var arrearsSince = oldestUnpaid is null ? null : ArrearsBegan(firstDue, chargeCount, monthlyFee, received);
+        var oldestUnpaid = OldestUnpaid(charges, totalPaid);
+        var arrearsSince = oldestUnpaid is null ? null : ArrearsBegan(charges, received);
         var interest = terms.ChargesInterest
-            ? InterestOn(terms, firstDue, chargeCount, received, lastDay, asOf) with { Waived = waived }
+            ? InterestOn(terms, charges, received, lastDay, asOf) with { Waived = waived }
             : LeaseFeeInterest.None with { Waived = waived };
         if (interest.Charged.IsPositive || interest.Accruing.IsPositive)
         {
@@ -81,7 +91,23 @@ public sealed class LeaseFeeStatement : ValueObject
             interest = interest with { WaivedIfPaidBy = waiverEnds >= asOf ? waiverEnds : null };
         }
 
-        return new LeaseFeeStatement(asOf, monthlyFee, chargeCount, totalPaid, oldestUnpaid, arrearsSince, interest);
+        return new LeaseFeeStatement(
+            asOf, monthlyFee, openingBalance, chargeCount, totalPaid, oldestUnpaid, arrearsSince, interest);
+    }
+
+    // Payments pay the oldest charges first, so the first charge the total paid doesn't cover is the oldest unpaid.
+    private static DateOnly? OldestUnpaid(List<Charge> charges, Money totalPaid)
+    {
+        var left = totalPaid;
+        foreach (var charge in charges)
+        {
+            if (left < charge.Amount)
+                return charge.Due;
+
+            left -= charge.Amount;
+        }
+
+        return null;
     }
 
     // Pays each charge from the payments in date order, as the balance does, and charges interest on each part by
@@ -89,8 +115,7 @@ public sealed class LeaseFeeStatement : ValueObject
     // Interest is worked out in fractions of a cent and rounded once per charge.
     private static LeaseFeeInterest InterestOn(
         LeaseFeeTerms terms,
-        DateOnly firstDue,
-        int chargeCount,
+        List<Charge> charges,
         List<ReceivedPayment> received,
         DateOnly lastDay,
         DateOnly asOf)
@@ -101,10 +126,9 @@ public sealed class LeaseFeeStatement : ValueObject
         var accruing = 0m;
         var next = 0;
         var left = received.Count > 0 ? received[0].Amount : Money.Zero;
-        for (var charge = 0; charge < chargeCount; charge++)
+        foreach (var (due, amount) in charges)
         {
-            var due = firstDue.AddMonths(charge);
-            var unpaid = terms.MonthlyFee;
+            var unpaid = amount;
             var onCharge = 0m;
             while (unpaid.IsPositive && next < received.Count)
             {
@@ -137,15 +161,13 @@ public sealed class LeaseFeeStatement : ValueObject
     // Walks charges and payments in date order; a charge on the same day as a payment comes first, so a payment
     // received on the 1st pays that month. The arrears begin at the first charge that leaves a balance due after
     // the lease was last paid up, and end whenever a payment brings the balance to zero or below.
-    private static DateOnly? ArrearsBegan(
-        DateOnly firstDue, int chargeCount, Money monthlyFee, List<ReceivedPayment> received)
+    private static DateOnly? ArrearsBegan(List<Charge> charges, List<ReceivedPayment> received)
     {
         var balance = Money.Zero;
         DateOnly? since = null;
         var next = 0;
-        for (var charge = 0; charge < chargeCount; charge++)
+        foreach (var (due, amount) in charges)
         {
-            var due = firstDue.AddMonths(charge);
             for (; next < received.Count && received[next].ReceivedDate < due; next++)
             {
                 balance -= received[next].Amount;
@@ -153,7 +175,7 @@ public sealed class LeaseFeeStatement : ValueObject
                     since = null;
             }
 
-            balance += monthlyFee;
+            balance += amount;
             if (balance.IsPositive && since is null)
                 since = due;
         }
@@ -178,11 +200,14 @@ public sealed class LeaseFeeStatement : ValueObject
     /// <summary>Gets the fee charged each month.</summary>
     public Money MonthlyFee { get; }
 
+    /// <summary>Gets the balance owed on the day fees are tracked from, once that day has come; otherwise zero.</summary>
+    public Money OpeningBalance { get; }
+
     /// <summary>Gets how many monthly charges have fallen due.</summary>
     public int ChargeCount { get; }
 
-    /// <summary>Gets the total charged so far.</summary>
-    public Money TotalCharged => ChargeCount * MonthlyFee;
+    /// <summary>Gets the total charged so far, the opening balance included.</summary>
+    public Money TotalCharged => OpeningBalance + (ChargeCount * MonthlyFee);
 
     /// <summary>Gets the total of the payments that count.</summary>
     public Money TotalPaid { get; }
@@ -228,6 +253,7 @@ public sealed class LeaseFeeStatement : ValueObject
     {
         yield return AsOf;
         yield return MonthlyFee;
+        yield return OpeningBalance;
         yield return ChargeCount;
         yield return TotalPaid;
         yield return OldestUnpaidDueDate ?? DateOnly.MinValue;
@@ -244,3 +270,6 @@ internal readonly record struct LeaseFeeInterest(Money Charged, Money Waived, Mo
 {
     public static LeaseFeeInterest None => new(Money.Zero, Money.Zero, Money.Zero, null);
 }
+
+/// <summary>An amount that fell due on a day, while a statement is worked out.</summary>
+internal readonly record struct Charge(DateOnly Due, Money Amount);

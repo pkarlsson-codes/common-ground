@@ -82,6 +82,9 @@ test('creating a lease on a parcel\'s home lists it first, shows its homeowner a
   await field(form, 'Repair Reserve Fee ($/month)').fill('10')
   await expect(form).toContainText('Monthly Lease Fee: $50.00, due on the 1st')
   await expect(form).toContainText('Late Interest: None')
+  // A lease that started before this month asks where fee tracking begins, defaulting to this month's 1st.
+  await expect(field(form, 'Fees Tracked From')).toHaveValue(`${isoDate().slice(0, 8)}01`)
+  await field(form, 'Owed on That Day ($)').fill('150')
   await field(form, 'Base Price ($)').fill('180000')
   await field(form, 'Original Appraised Value ($)').fill('240000')
   await field(form, 'Covenant Terms').fill('Owner-occupied, permanently affordable')
@@ -113,6 +116,8 @@ test('creating a lease on a parcel\'s home lists it first, shows its homeowner a
   await expect(detailValue(detail, 'Term')).toHaveText('50 years')
   await expect(detailValue(detail, 'Option Window')).toHaveText('45 days')
   await expect(detailValue(detail, 'Monthly Fee')).toContainText('$40.00 land use + $10.00 repair reserve')
+  await expect(detailValue(detail, 'Fees Tracked From')).toContainText('$150.00 owed then')
+  await expect(detailValue(detail, 'Balance')).toContainText('$200.00 due')
   await expect(detailValue(detail, 'Base Price')).toHaveText('$180,000')
   await expect(detailValue(detail, 'Original Appraised Value')).toHaveText('$240,000')
   await expect(detailValue(detail, 'Covenant Terms')).toHaveText('Owner-occupied, permanently affordable')

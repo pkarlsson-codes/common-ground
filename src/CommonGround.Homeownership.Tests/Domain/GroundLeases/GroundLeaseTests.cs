@@ -34,13 +34,18 @@ public class GroundLeaseTests
         /// <summary>$60 a month at 36.5% a year: 6 cents a day of interest on an unpaid month.</summary>
         public LeaseFeeTerms FeesWithInterest { get; } = LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m), 36.5m);
 
-        public GroundLeaseCreated Established(ResalePolicyTerms? terms = null, LeaseFeeTerms? fees = null) =>
+        public GroundLeaseCreated Established(
+            ResalePolicyTerms? terms = null, LeaseFeeTerms? fees = null, LeaseFeeTracking? tracking = null) =>
             GroundLease.Establish(
                 LeaseId, ParcelId, HomeId, Homeowner, LeaseStart, 99, 60, fees ?? Fees, 200_000m, 250_000m, "Standard affordability covenant",
-                terms ?? ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, StaffUser);
+                terms ?? ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, StaffUser, tracking);
 
-        public GroundLease Lease(ResalePolicyTerms? terms = null, LeaseFeeTerms? fees = null) =>
-            EventReplay.Replay<GroundLease>(Established(terms, fees));
+        public GroundLease Lease(ResalePolicyTerms? terms = null, LeaseFeeTerms? fees = null, LeaseFeeTracking? tracking = null) =>
+            EventReplay.Replay<GroundLease>(Established(terms, fees, tracking));
+
+        /// <summary>Tracked from 2025-03-15 with $200 owed that day.</summary>
+        public static LeaseFeeTracking TrackedFromMarch15 { get; } =
+            LeaseFeeTracking.Create(new DateOnly(2025, 3, 15), Money.Create(200m), LeaseStart);
 
         public GroundLeaseTemplate ActiveTemplate(string covenantTerms, int termYears, ResalePolicyTerms terms) =>
             EventReplay.Replay<GroundLeaseTemplate>(
@@ -85,7 +90,27 @@ public class GroundLeaseTests
                 TemplateId = (GroundLeaseTemplateId?)null,
                 PurchaseWorkflowId = (PurchaseWorkflowId?)null,
                 CreatedBy = _testBed.StaffUser,
+                LeaseFeeTracking = LeaseFeeTracking.FromLeaseStart(new DateOnly(2025, 1, 1)),
             });
+        }
+
+        [Fact]
+        public void GivenTracking_WhenEstablished_ThenTheLeaseKeepsIt()
+        {
+            var sut = _testBed.Lease(tracking: TestBed.TrackedFromMarch15);
+
+            sut.LeaseFeeTracking.Should().Be(TestBed.TrackedFromMarch15);
+        }
+
+        [Fact]
+        public void GivenTrackingFromBeforeTheLeaseStart_WhenEstablished_ThenThrowsBusinessRuleViolation()
+        {
+            var tracking = LeaseFeeTracking.Create(new DateOnly(2024, 12, 1), Money.Zero, new DateOnly(2024, 1, 1));
+
+            var act = () => _testBed.Established(tracking: tracking);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.lease_fee_tracking.create.tracked_from_before_lease_start");
         }
 
         [Theory]
@@ -353,7 +378,7 @@ public class GroundLeaseTests
         [Theory]
         [InlineData(0, "2025-03-01", "homeownership.ground_lease.record_lease_fee_payment.amount_non_positive")]
         [InlineData(60, "2025-03-11", "homeownership.ground_lease.record_lease_fee_payment.received_date_in_future")]
-        [InlineData(60, "2024-12-31", "homeownership.ground_lease.record_lease_fee_payment.received_date_before_lease_start")]
+        [InlineData(60, "2024-12-31", "homeownership.ground_lease.record_lease_fee_payment.received_date_before_fees_tracked")]
         public void GivenInvalidPayment_WhenRecorded_ThenThrowsBusinessRuleViolation(int amount, string received, string expectedCode)
         {
             var sut = _testBed.Lease();
@@ -363,6 +388,31 @@ public class GroundLeaseTests
                 new DateOnly(2025, 3, 10), _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
+        }
+
+        [Fact]
+        public void GivenTrackedLease_WhenPaymentReceivedBeforeTracking_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = _testBed.Lease(tracking: TestBed.TrackedFromMarch15);
+
+            var act = () => sut.RecordLeaseFeePayment(
+                LeaseFeePaymentId.Generate(), new DateOnly(2025, 3, 14), Money.Create(60m), PaymentMethod.Check, null,
+                new DateOnly(2025, 4, 10), _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.record_lease_fee_payment.received_date_before_fees_tracked");
+        }
+
+        [Fact]
+        public void GivenTrackedLease_WhenStatementWorkedOut_ThenItOwesTheOpeningBalanceAndMonthsSinceTracking()
+        {
+            var sut = _testBed.Lease(tracking: TestBed.TrackedFromMarch15);
+
+            sut.LeaseFeeStatementAsOf(new DateOnly(2025, 4, 10)).Should().BeEquivalentTo(new
+            {
+                Balance = Money.Create(260m),
+                OldestUnpaidDueDate = (DateOnly?)new DateOnly(2025, 3, 15),
+            });
         }
 
         [Fact]

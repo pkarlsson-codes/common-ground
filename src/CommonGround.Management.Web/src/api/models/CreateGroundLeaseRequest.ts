@@ -154,6 +154,18 @@ export interface CreateGroundLeaseRequest {
      * @memberof CreateGroundLeaseRequest
      */
     interestWaiverDays?: number;
+    /**
+     * 
+     * @type {CalendarDate}
+     * @memberof CreateGroundLeaseRequest
+     */
+    feesTrackedFrom?: CalendarDate | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateGroundLeaseRequest
+     */
+    openingBalance?: number | null;
 }
 
 /**
@@ -194,6 +206,8 @@ export function CreateGroundLeaseRequestFromJSONTyped(json: any, ignoreDiscrimin
         'improvementsCap': json['improvementsCap'] == null ? undefined : json['improvementsCap'],
         'lateInterestRate': json['lateInterestRate'] == null ? undefined : json['lateInterestRate'],
         'interestWaiverDays': json['interestWaiverDays'] == null ? undefined : json['interestWaiverDays'],
+        'feesTrackedFrom': json['feesTrackedFrom'] == null ? undefined : CalendarDateFromJSON(json['feesTrackedFrom']),
+        'openingBalance': json['openingBalance'] == null ? undefined : json['openingBalance'],
     };
 }
 
@@ -229,6 +243,8 @@ export function CreateGroundLeaseRequestToJSONTyped(value?: CreateGroundLeaseReq
         'improvementsCap': value['improvementsCap'],
         'lateInterestRate': value['lateInterestRate'],
         'interestWaiverDays': value['interestWaiverDays'],
+        'feesTrackedFrom': CalendarDateToJSON(value['feesTrackedFrom']),
+        'openingBalance': value['openingBalance'],
     };
 }
 

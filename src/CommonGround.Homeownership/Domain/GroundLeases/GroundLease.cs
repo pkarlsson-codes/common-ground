@@ -80,6 +80,9 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// </summary>
     public LeaseFeeTerms LeaseFeeTerms { get; private set; }
 
+    /// <summary>Gets the day the lease's fees are tracked from and what was owed then.</summary>
+    public LeaseFeeTracking LeaseFeeTracking { get; private set; }
+
     /// <summary>Gets the day the lease ended, or null while it is active.</summary>
     public DateOnly? EndedOn { get; private set; }
 
@@ -100,7 +103,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
 
     /// <summary>
     /// Creates a ground lease that didn't come from a purchase, such as one signed before the trust used
-    /// CommonGround. Refused while the home is already leased, being sold, or in a home selection.
+    /// CommonGround. Refused while the home is already leased, being sold, or in a home selection. Fees are tracked
+    /// from the lease start unless <paramref name="leaseFeeTracking"/> says otherwise.
     /// </summary>
     public static GroundLeaseCreated Establish(
         GroundLeaseId id,
@@ -116,7 +120,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         string covenantTerms,
         ResalePolicyTerms resalePolicyTerms,
         HomeCommitments homeCommitments,
-        UserId createdBy)
+        UserId createdBy,
+        LeaseFeeTracking? leaseFeeTracking = null)
     {
         ArgumentNullException.ThrowIfNull(leaseFeeTerms);
         ArgumentNullException.ThrowIfNull(landParcelId);
@@ -149,6 +154,10 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         if (string.IsNullOrWhiteSpace(covenantTerms))
             throw BusinessRuleViolation.GroundLease.Create.CovenantTermsRequired();
 
+        var tracking = leaseFeeTracking ?? LeaseFeeTracking.FromLeaseStart(leaseStartDate);
+        if (tracking.TrackedFrom < leaseStartDate)
+            throw BusinessRuleViolation.LeaseFeeTracking.Create.TrackedFromBeforeLeaseStart(tracking.TrackedFrom, leaseStartDate);
+
         return new GroundLeaseCreated(
             id.Value,
             landParcelId,
@@ -160,6 +169,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             leaseFeeTerms.RepairReserveFee,
             leaseFeeTerms.LateInterestRate,
             leaseFeeTerms.InterestWaiverDays,
+            tracking.TrackedFrom,
+            tracking.OpeningBalance,
             basePrice,
             originalAppraisedValue,
             covenantTerms,
@@ -297,8 +308,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         if (receivedDate > today)
             throw BusinessRuleViolation.GroundLease.RecordLeaseFeePayment.ReceivedDateInFuture(receivedDate, today);
 
-        if (receivedDate < LeaseStartDate)
-            throw BusinessRuleViolation.GroundLease.RecordLeaseFeePayment.ReceivedDateBeforeLeaseStart(receivedDate, LeaseStartDate);
+        if (receivedDate < LeaseFeeTracking.TrackedFrom)
+            throw BusinessRuleViolation.GroundLease.RecordLeaseFeePayment.ReceivedDateBeforeFeesTracked(receivedDate, LeaseFeeTracking.TrackedFrom);
 
         return new LeaseFeePaymentRecorded(
             Id.Value,
@@ -405,7 +416,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     public LeaseFeeStatement LeaseFeeStatementAsOf(DateOnly asOf) =>
         LeaseFeeStatement.Calculate(
             LeaseFeeTerms,
-            LeaseStartDate,
+            LeaseFeeTracking,
             EndedOn,
             CountedPayments(),
             asOf,
@@ -455,6 +466,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         TermYears = e.TermYears;
         OptionWindowDays = e.OptionWindowDays;
         LeaseFeeTerms = LeaseFeeTerms.Create(e.LandUseFee, e.RepairReserveFee, e.LateInterestRate, e.InterestWaiverDays);
+        LeaseFeeTracking = LeaseFeeTracking.Create(e.FeesTrackedFrom, e.OpeningBalance, e.LeaseStartDate);
         BasePrice = e.BasePrice;
         OriginalAppraisedValue = e.OriginalAppraisedValue;
         CovenantTerms = e.CovenantTerms;
@@ -496,6 +508,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         TermYears = e.TermYears;
         OptionWindowDays = e.OptionWindowDays;
         LeaseFeeTerms = LeaseFeeTerms.Create(e.LandUseFee, e.RepairReserveFee, e.LateInterestRate, e.InterestWaiverDays);
+        LeaseFeeTracking = LeaseFeeTracking.FromLeaseStart(e.LeaseStartDate);
         BasePrice = e.BasePrice;
         OriginalAppraisedValue = e.OriginalAppraisedValue;
         CovenantTerms = e.CovenantTerms;

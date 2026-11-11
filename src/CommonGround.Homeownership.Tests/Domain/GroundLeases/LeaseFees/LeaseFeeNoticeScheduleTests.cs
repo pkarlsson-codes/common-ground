@@ -17,7 +17,7 @@ public class LeaseFeeNoticeScheduleTests
         /// <summary>A $60 lease paid through January, so February's charge is the oldest unpaid.</summary>
         public static LeaseFeeStatement BehindSinceFebruary(string asOf) =>
             LeaseFeeStatement.Calculate(
-                LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m)), LeaseStart, null, [new ReceivedPayment(LeaseStart, Money.Create(60m))], Day(asOf));
+                LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m)), LeaseFeeTracking.FromLeaseStart(LeaseStart), null, [new ReceivedPayment(LeaseStart, Money.Create(60m))], Day(asOf));
 
         public static DateOnly Day(string iso) => DateOnly.Parse(iso, CultureInfo.InvariantCulture);
 
@@ -115,7 +115,7 @@ public class LeaseFeeNoticeScheduleTests
         public void GivenNothingOwed_WhenAskedLongAfter_ThenNothingIsDue()
         {
             var paidUp = LeaseFeeStatement.Calculate(
-                LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m)), TestBed.LeaseStart, null, [new ReceivedPayment(TestBed.LeaseStart, Money.Create(600m))],
+                LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m)), LeaseFeeTracking.FromLeaseStart(TestBed.LeaseStart), null, [new ReceivedPayment(TestBed.LeaseStart, Money.Create(600m))],
                 TestBed.Day("2026-04-20"));
 
             _testBed.Schedule.NoticeDue(paidUp, []).Should().BeNull();

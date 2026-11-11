@@ -237,16 +237,48 @@ public class LeaseFeesTests(ApiFactory factory)
         });
     }
 
+    [Fact]
+    public async Task CreateLease_TrackedFromThisMonthWithAnOpeningBalance_OwesOnlyThatAndThisMonth()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var today = (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Today;
+        var thisMonth = new DateOnly(today.Year, today.Month, 1);
+        var homeowner = UniqueName();
+        var leaseId = await CreateLease(client, homeowner, leaseStart: new DateOnly(2005, 3, 1), feesTrackedFrom: thisMonth, openingBalance: 250m);
+
+        var lease = await client.GetFromJsonAsync<GroundLeaseResponse>($"/api/ground-leases/{leaseId}");
+        lease!.LeaseFees.Should().BeEquivalentTo(new
+        {
+            FeesTrackedFrom = thisMonth,
+            OpeningBalance = 250m,
+            Statement = new { TotalCharged = 310m, Balance = 310m, OldestUnpaidDueDate = (DateOnly?)thisMonth },
+        });
+
+        var listed = await client.GetFromJsonAsync<PaginatedResponse<LeaseFeeBalanceResponse>>(
+            $"/api/lease-fee-balances?search={Uri.EscapeDataString(homeowner)}");
+        listed!.Items.Should().ContainSingle().Which.Balance.Should().Be(310m);
+
+        var early = await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/lease-fee-payments",
+            new RecordLeaseFeePaymentRequest(thisMonth.AddDays(-1), 60m, "Check", null));
+        early.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+    }
+
     private static string UniqueName() =>
         "Dana " + string.Concat(Guid.NewGuid().ToString("N").Where(char.IsLetter).Take(8).Select(char.ToUpperInvariant).Select((c, i) => i == 0 ? c : char.ToLowerInvariant(c)));
 
-    private static async Task<string> CreateLease(HttpClient client, string homeowner, DateOnly leaseStart, decimal lateInterestRate = 0m)
+    private static async Task<string> CreateLease(
+        HttpClient client,
+        string homeowner,
+        DateOnly leaseStart,
+        decimal lateInterestRate = 0m,
+        DateOnly? feesTrackedFrom = null,
+        decimal? openingBalance = null)
     {
         var response = await client.PostAsJsonAsync("/api/ground-leases",
             new CreateGroundLeaseRequest(
                 Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), homeowner, "dana@example.com", null,
                 leaseStart, 99, 60, 45m, 15m, 200_000m, 250_000m, "Standard covenant", "AppraisalBased",
-                0.25m, null, null, null, null, lateInterestRate));
+                0.25m, null, null, null, null, lateInterestRate, FeesTrackedFrom: feesTrackedFrom, OpeningBalance: openingBalance));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<CreateGroundLeaseResponse>())!.GroundLeaseId;
     }

@@ -48,6 +48,9 @@ export const daysBetween = (from: CalendarDate, to: CalendarDate) =>
 
 export const yearOf = (date: CalendarDate) => Number(date.slice(0, 4))
 
+/** The 1st of the date's month. */
+export const startOfMonth = (date: CalendarDate): CalendarDate => `${date.slice(0, 8)}01` as CalendarDate
+
 /** Today in the given IANA time zone. */
 export const todayIn = (timeZone: string, now = new Date()): CalendarDate =>
   // en-CA formats as YYYY-MM-DD.

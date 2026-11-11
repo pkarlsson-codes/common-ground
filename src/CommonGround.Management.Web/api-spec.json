@@ -8866,6 +8866,16 @@
           "interestWaiverDays": {
             "type": "integer",
             "format": "int32"
+          },
+          "feesTrackedFrom": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "openingBalance": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
           }
         }
       },
@@ -9029,6 +9039,16 @@
             "type": "integer",
             "description": "Days after the due date within which a payment owes no interest.",
             "format": "int32"
+          },
+          "feesTrackedFrom": {
+            "type": "string",
+            "description": "The first day the trust tracks the lease's fees in CommonGround.",
+            "format": "date"
+          },
+          "openingBalance": {
+            "type": "number",
+            "description": "What the homeowner owed on that day.",
+            "format": "decimal"
           },
           "statement": {
             "description": "What the lease owes today.",

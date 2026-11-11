@@ -36,6 +36,10 @@ public static class GroundLeasesEndpoints
             request.AnnualPercentage,
             request.ImprovementsCap);
 
+        var leaseFeeTracking = request.FeesTrackedFrom is { } trackedFrom
+            ? LeaseFeeTracking.Create(trackedFrom, Money.Create(request.OpeningBalance ?? 0m), request.LeaseStartDate)
+            : null;
+
         var id = GroundLeaseId.Generate();
 
         var command = new CreateGroundLease(
@@ -51,7 +55,8 @@ public static class GroundLeasesEndpoints
             request.OriginalAppraisedValue,
             request.CovenantTerms,
             resalePolicyTerms,
-            userId);
+            userId,
+            leaseFeeTracking);
 
         await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);
 
@@ -132,6 +137,8 @@ public static class GroundLeasesEndpoints
                 leaseFees.MonthlyFee.Amount,
                 view.LateInterestRate,
                 view.InterestWaiverDays,
+                view.FeesTrackedFrom,
+                view.OpeningBalance,
                 new LeaseFeeStatementDto(
                     leaseFees.AsOf,
                     leaseFees.TotalCharged.Amount,

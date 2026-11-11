@@ -35,6 +35,8 @@ public sealed record GroundLeaseResponse(
 /// <param name="MonthlyFee">Their sum, charged on the 1st of each month.</param>
 /// <param name="LateInterestRate">Yearly interest rate on a late fee, in percent; zero charges none.</param>
 /// <param name="InterestWaiverDays">Days after the due date within which a payment owes no interest.</param>
+/// <param name="FeesTrackedFrom">The first day the trust tracks the lease's fees in CommonGround.</param>
+/// <param name="OpeningBalance">What the homeowner owed on that day.</param>
 /// <param name="Statement">What the lease owes today.</param>
 /// <param name="Payments">Every payment recorded, voided ones included, newest received first.</param>
 /// <param name="NoticeDue">The late notice due now, First, Second or Default, or null.</param>
@@ -47,6 +49,8 @@ public sealed record LeaseFeesDto(
     decimal MonthlyFee,
     decimal LateInterestRate,
     int InterestWaiverDays,
+    DateOnly FeesTrackedFrom,
+    decimal OpeningBalance,
     LeaseFeeStatementDto Statement,
     IReadOnlyList<LeaseFeePaymentDto> Payments,
     string? NoticeDue,

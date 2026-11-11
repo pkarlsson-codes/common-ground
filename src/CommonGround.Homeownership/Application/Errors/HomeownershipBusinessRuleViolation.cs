@@ -245,13 +245,13 @@ public static class BusinessRuleViolation
                         ["today"] = today,
                     });
 
-            public static BusinessRuleViolationException ReceivedDateBeforeLeaseStart(DateOnly receivedDate, DateOnly leaseStartDate)
+            public static BusinessRuleViolationException ReceivedDateBeforeFeesTracked(DateOnly receivedDate, DateOnly feesTrackedFrom)
                 => new(
-                    "homeownership.ground_lease.record_lease_fee_payment.received_date_before_lease_start",
+                    "homeownership.ground_lease.record_lease_fee_payment.received_date_before_fees_tracked",
                     new Dictionary<string, object?>
                     {
                         ["receivedDate"] = receivedDate,
-                        ["leaseStartDate"] = leaseStartDate,
+                        ["feesTrackedFrom"] = feesTrackedFrom,
                     });
         }
 
@@ -435,6 +435,29 @@ public static class BusinessRuleViolation
                     new Dictionary<string, object?>
                     {
                         ["interestWaiverDays"] = interestWaiverDays,
+                    });
+        }
+    }
+
+    public static class LeaseFeeTracking
+    {
+        public static class Create
+        {
+            public static BusinessRuleViolationException TrackedFromBeforeLeaseStart(DateOnly trackedFrom, DateOnly leaseStartDate)
+                => new(
+                    "homeownership.lease_fee_tracking.create.tracked_from_before_lease_start",
+                    new Dictionary<string, object?>
+                    {
+                        ["trackedFrom"] = trackedFrom,
+                        ["leaseStartDate"] = leaseStartDate,
+                    });
+
+            public static BusinessRuleViolationException OpeningBalanceNegative(decimal openingBalance)
+                => new(
+                    "homeownership.lease_fee_tracking.create.opening_balance_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["openingBalance"] = openingBalance,
                     });
         }
     }

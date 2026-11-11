@@ -64,11 +64,13 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
   const interestDue = statement?.interestDue ?? 0
   const interestAccruing = statement?.interestAccruing ?? 0
   const interestWaivers = fees.interestWaivers ?? []
+  const openingBalance = fees.openingBalance ?? 0
+  const trackedLater = !!fees.feesTrackedFrom && !!lease.leaseStartDate && fees.feesTrackedFrom > lease.leaseStartDate
 
   return (
     <div className="detail-section">
       <div className="detail-section__title">Lease Fees</div>
-      {monthlyFee === 0 && payments.length === 0 ? (
+      {monthlyFee === 0 && openingBalance === 0 && payments.length === 0 ? (
         <p style={{ fontSize: 13, color: 'var(--text-dim)' }}>No lease fee.</p>
       ) : (
         <>
@@ -86,6 +88,15 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
               <div className="detail-field__label">Late Interest</div>
               <div className="detail-field__value">{lateInterestText(fees.lateInterestRate, fees.interestWaiverDays)}</div>
             </div>
+            {trackedLater && (
+              <div className="detail-field">
+                <div className="detail-field__label">Fees Tracked From</div>
+                <div className="detail-field__value">
+                  {longDate(fees.feesTrackedFrom)}
+                  {openingBalance > 0 && <span className="mono">, {formatPrice(openingBalance)} owed then</span>}
+                </div>
+              </div>
+            )}
             <div className="detail-field">
               <div className="detail-field__label">Balance</div>
               <div className="detail-field__value mono" style={balance > 0 ? { color: 'var(--red)' } : undefined}>

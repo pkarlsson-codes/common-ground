@@ -23,7 +23,8 @@ public sealed record CreateGroundLease(
     decimal OriginalAppraisedValue,
     string CovenantTerms,
     ResalePolicyTerms ResalePolicyTerms,
-    UserId CreatedBy);
+    UserId CreatedBy,
+    LeaseFeeTracking? LeaseFeeTracking = null);
 
 /// <summary>Handles <see cref="CreateGroundLease"/>.</summary>
 public static class CreateGroundLeaseHandler
@@ -77,7 +78,8 @@ public static class CreateGroundLeaseHandler
             command.CovenantTerms,
             command.ResalePolicyTerms,
             homeCommitments,
-            command.CreatedBy);
+            command.CreatedBy,
+            command.LeaseFeeTracking);
 
         return MartenOps.StartStream<GroundLease>(command.GroundLeaseId.Value, started);
     }

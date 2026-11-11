@@ -87,6 +87,12 @@ public class GroundLeaseView
     /// <summary>Gets or sets the days after the due date within which a payment owes no interest.</summary>
     public int InterestWaiverDays { get; set; }
 
+    /// <summary>Gets or sets the first day the trust tracks the lease's fees in CommonGround.</summary>
+    public DateOnly FeesTrackedFrom { get; set; }
+
+    /// <summary>Gets or sets what the homeowner owed on <see cref="FeesTrackedFrom"/>.</summary>
+    public decimal OpeningBalance { get; set; }
+
     /// <summary>Gets or sets the day the lease ended, or null while it is active.</summary>
     public DateOnly? EndedOn { get; set; }
 

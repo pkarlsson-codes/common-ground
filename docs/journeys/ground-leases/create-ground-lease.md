@@ -8,17 +8,18 @@ For recording a lease that didn't come from a purchase, such as one signed befor
 4. User searches and selects a Land Parcel
 5. User searches and selects a Home on that parcel (disabled until a parcel is chosen)
 6. User enters the Homeowner's Full Name and Email (both required) and optionally a Phone number
-7. User enters Lease Start Date (default today; may be years back for a lease that predates CommonGround) Term (years, default 99), Option Window (days the trust has to buy the home after the homeowner gives notice to sell, default 60), and the monthly Land Use Fee and Repair Reserve Fee ($, both required, zero or more, both default 0; the form shows their sum as the Monthly Lease Fee, due on the 1st), and the late interest terms as on a template (see [Create Ground Lease Template](../ground-lease-templates/create-ground-lease-template.md)), copied from the signed lease. Fees are charged on the 1st of each month from the first 1st on or after the start date, so a lease that predates CommonGround starts with every month since then unpaid until its past payments are recorded
-8. User enters Covenant Terms (required), Base Price (what the homeowner paid for the home) and Original Appraised Value (the home's appraised value at that purchase). Both are required and above zero
-9. User selects a Resale Formula: Appraisal Based, Index Based, or Fixed Percentage (default Appraisal Based)
-10. If Appraisal Based, user enters Appreciation Share (decimal fraction, e.g. 0.25 = 25%, default 0.25)
-11. If Index Based, user selects Index Type (CPI, AMI, or Custom, default CPI) and enters Baseline Index Value (default 100)
-12. If Fixed Percentage, user enters Annual Percentage (decimal fraction, e.g. 0.01 = 1%, default 0.01)
-13. User optionally checks "Set improvements cap" and enters an Improvements Cap ($, default 25000 when first checked)
-14. User clicks "Create Lease" (disabled until Land Parcel and Home are both selected)
-15. If the home already has an active lease, an open home selection, or an open purchase, the panel stays open with an error saying why, and nothing is created
-16. Otherwise: toast "Ground lease created", the panel closes, and the new lease appears at the top of the Ground Leases table (newest first), titled with the homeowner's name
-17. Shortly after:
+7. User enters Lease Start Date (default today; may be years back for a lease that predates CommonGround) Term (years, default 99), Option Window (days the trust has to buy the home after the homeowner gives notice to sell, default 60), and the monthly Land Use Fee and Repair Reserve Fee ($, both required, zero or more, both default 0; the form shows their sum as the Monthly Lease Fee, due on the 1st), and the late interest terms as on a template (see [Create Ground Lease Template](../ground-lease-templates/create-ground-lease-template.md)), copied from the signed lease. Fees are charged on the 1st of each month from the first 1st on or after the day fees are tracked from
+8. If the start date is before this month, the form also asks for Fees Tracked From (default the 1st of this month, not before the start date; months before it aren't charged) and Owed on That Day ($, zero or more, default 0: fees and interest still unpaid from before). The amount owed is due on the tracked-from day, so a lease with a balance shows it on Today and in late notices from then on. Payments received before that day can't be recorded; they belong in the amount owed. A lease that starts this month or later is tracked from its start date with nothing owed
+9. User enters Covenant Terms (required), Base Price (what the homeowner paid for the home) and Original Appraised Value (the home's appraised value at that purchase). Both are required and above zero
+10. User selects a Resale Formula: Appraisal Based, Index Based, or Fixed Percentage (default Appraisal Based)
+11. If Appraisal Based, user enters Appreciation Share (decimal fraction, e.g. 0.25 = 25%, default 0.25)
+12. If Index Based, user selects Index Type (CPI, AMI, or Custom, default CPI) and enters Baseline Index Value (default 100)
+13. If Fixed Percentage, user enters Annual Percentage (decimal fraction, e.g. 0.01 = 1%, default 0.01)
+14. User optionally checks "Set improvements cap" and enters an Improvements Cap ($, default 25000 when first checked)
+15. User clicks "Create Lease" (disabled until Land Parcel and Home are both selected)
+16. If the home already has an active lease, an open home selection, or an open purchase, the panel stays open with an error saying why, and nothing is created
+17. Otherwise: toast "Ground lease created", the panel closes, and the new lease appears at the top of the Ground Leases table (newest first), titled with the homeowner's name
+18. Shortly after:
     - Stewardship opens a case for the lease, dated the day the lease was recorded (not its start date)
     - The home shows Leased on Homes, leased since the lease start date, and no longer appears on Today as an available home
 

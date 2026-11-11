@@ -19,7 +19,7 @@ public static class LeaseFeeStatements
 
         return LeaseFeeStatement.Calculate(
             TermsOf(view),
-            view.LeaseStartDate,
+            LeaseFeeTracking.Create(view.FeesTrackedFrom, Money.Create(view.OpeningBalance), view.LeaseStartDate),
             view.EndedOn,
             PaymentsOf(view),
             asOf,
