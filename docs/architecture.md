@@ -40,7 +40,6 @@ flowchart TB
     subgraph Infra["Local Infra (docker-compose)"]
         Postgres[("PostgreSQL<br/>(pgvector)")]
         Redis[("Redis")]
-        RabbitMQ[("RabbitMQ")]
         Keycloak["Keycloak"]
         MinIO[("MinIO")]
         Seq["Seq"]
@@ -54,7 +53,6 @@ flowchart TB
     HomeEndpoints -- "session tokens" --> Redis
 
     Contexts --> Postgres
-    Contexts --> RabbitMQ
     Documents --> MinIO
     ApiEndpoints -.-> Seq
     MgmtEndpoints -.-> Seq
@@ -64,6 +62,7 @@ flowchart TB
 ## Notes
 
 - Frontends (Management Web today, Homeowner Web upcoming) aren't shown as boxes yet — they just proxy `/api` and `/auth` to their gateway's endpoints layer.
-- Each gateway is a BFF: its endpoints layer owns the OIDC/session boundary (tokens in Redis), and its API Clients layer crosses the process boundary to call the API's endpoints layer with a minted internal JWT. Gateways never talk to Postgres/RabbitMQ/MinIO directly.
+- Each gateway is a BFF: its endpoints layer owns the OIDC/session boundary (tokens in Redis), and its API Clients layer crosses the process boundary to call the API's endpoints layer with a minted internal JWT. Gateways never talk to Postgres/MinIO directly.
 - The API is one process today: its endpoints layer (minimal API endpoints, one file set per module under `src/CommonGround.API/<Module>/`) dispatches into the bounded contexts, each implemented as its own project (`CommonGround.HomeBuyers`, `CommonGround.Stewardship`, etc.) but all hosted together.
-- Only `Documents` talks to MinIO; all bounded contexts share Postgres (via Marten) and RabbitMQ (via Wolverine).
+- Only `Documents` talks to MinIO; all bounded contexts share Postgres through Marten. Wolverine delivers messages between them on durable local queues stored in Postgres.
+- Integration events (types in the `.Events` namespace of a `*.Contracts` assembly) can also go to an external transport for a service split out of the API later. `Messaging:Transport` picks it: `None` (the default), `Postgres` (one queue, `Messaging:PostgresQueue`, default `integration_events`) or `RabbitMq` (one exchange per event type, settings under `Messaging:RabbitMq`). Handlers in the API receive the events with any setting.

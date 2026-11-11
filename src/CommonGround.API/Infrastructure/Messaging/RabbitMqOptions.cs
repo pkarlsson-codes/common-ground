@@ -1,4 +1,4 @@
-namespace CommonGround.API.Infrastructure;
+namespace CommonGround.API.Infrastructure.Messaging;
 
 /// <summary>Configuration options for RabbitMQ connection.</summary>
 internal sealed class RabbitMqOptions

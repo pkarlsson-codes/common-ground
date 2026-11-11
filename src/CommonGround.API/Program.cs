@@ -1,6 +1,7 @@
 using CommonGround.API;
 using CommonGround.API.Infrastructure;
 using CommonGround.API.Infrastructure.Configuration;
+using CommonGround.API.Infrastructure.Messaging;
 using CommonGround.API.Infrastructure.Seeding;
 using CommonGround.Documents.Infrastructure;
 using CommonGround.HomeBuyers.Infrastructure;
@@ -18,6 +19,7 @@ using Wolverine;
 using Wolverine.ErrorHandling;
 using Wolverine.Http;
 using Wolverine.Persistence;
+using Wolverine.Postgresql.Transport;
 using Wolverine.RabbitMQ;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,8 +46,20 @@ try
         SeedCommand.Configure(builder);
     }
 
-    var rabbitMqOptions = builder.Configuration.GetSection("RabbitMq").Get<RabbitMqOptions>() ?? new RabbitMqOptions();
-    var useRabbitMq = !builder.Environment.IsEnvironment("Testing");
+    var messaging = builder.Configuration.GetSection(MessagingOptions.SectionName).Get<MessagingOptions>()
+        ?? new MessagingOptions();
+
+    System.Reflection.Assembly[] handlerAssemblies =
+    [
+        typeof(CommonGroundApiAssemblyReference).Assembly,
+        typeof(HomeBuyersAssemblyReference).Assembly,
+        typeof(PropertyRegistryAssemblyReference).Assembly,
+        typeof(HomeownershipAssemblyReference).Assembly,
+        typeof(IdentityAssemblyReference).Assembly,
+        typeof(StewardshipAssemblyReference).Assembly,
+        typeof(DocumentsAssemblyReference).Assembly,
+        typeof(TrustManagementAssemblyReference).Assembly,
+    ];
 
     builder.Host.UseWolverine(opts =>
     {
@@ -74,33 +88,37 @@ try
             .Or<DocumentAlreadyExistsException>()
             .RetryWithCooldown(50.Milliseconds(), 100.Milliseconds(), 250.Milliseconds());
 
-        if (useRabbitMq)
+        switch (messaging.Transport)
         {
-            opts.UseRabbitMq(rabbit =>
-            {
-                rabbit.HostName = rabbitMqOptions.Host;
-                rabbit.Port = rabbitMqOptions.Port;
-                rabbit.UserName = rabbitMqOptions.Username;
-                rabbit.Password = rabbitMqOptions.Password;
-            }).AutoProvision().UseConventionalRouting(routing =>
-            {
-                routing.IncludeTypes(t =>
-                    t.Namespace?.EndsWith(".Events", StringComparison.Ordinal) == true &&
-                    t.Assembly.GetName().Name?.EndsWith(".Contracts", StringComparison.Ordinal) == true);
-                routing.OnlyApplyToOutboundMessages();
-            });
+            case MessageTransport.RabbitMq:
+                var rabbitMq = messaging.RabbitMq;
+                opts.UseRabbitMq(rabbit =>
+                {
+                    rabbit.HostName = rabbitMq.Host;
+                    rabbit.Port = rabbitMq.Port;
+                    rabbit.UserName = rabbitMq.Username;
+                    rabbit.Password = rabbitMq.Password;
+                }).AutoProvision().UseConventionalRouting(routing =>
+                {
+                    routing.IncludeTypes(IntegrationEvents.Includes);
+                    routing.OnlyApplyToOutboundMessages();
+                });
+                break;
 
-            opts.Policies.ConventionalLocalRoutingIsAdditive();
+            case MessageTransport.Postgres:
+                // The queue table lives in the database Marten already uses (IntegrateWithWolverine).
+                var queue = opts.Transports.GetOrCreate<PostgresqlTransport>().Queues[messaging.PostgresQueue];
+                opts.RouteWith(new PostgresIntegrationEventRouting(queue));
+                break;
         }
 
-        opts.Discovery.IncludeAssembly(typeof(CommonGroundApiAssemblyReference).Assembly);
-        opts.Discovery.IncludeAssembly(typeof(HomeBuyersAssemblyReference).Assembly);
-        opts.Discovery.IncludeAssembly(typeof(PropertyRegistryAssemblyReference).Assembly);
-        opts.Discovery.IncludeAssembly(typeof(HomeownershipAssemblyReference).Assembly);
-        opts.Discovery.IncludeAssembly(typeof(IdentityAssemblyReference).Assembly);
-        opts.Discovery.IncludeAssembly(typeof(StewardshipAssemblyReference).Assembly);
-        opts.Discovery.IncludeAssembly(typeof(DocumentsAssemblyReference).Assembly);
-        opts.Discovery.IncludeAssembly(typeof(TrustManagementAssemblyReference).Assembly);
+        // An event sent to an external transport still reaches this process's own handlers.
+        opts.Policies.ConventionalLocalRoutingIsAdditive();
+
+        foreach (var assembly in handlerAssemblies)
+        {
+            opts.Discovery.IncludeAssembly(assembly);
+        }
     });
 
     var app = builder.Build();

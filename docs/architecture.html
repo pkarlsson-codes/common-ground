@@ -131,7 +131,6 @@ flowchart TB
     subgraph Infra["Local Infra (docker-compose)"]
         Postgres[("PostgreSQL<br/>(pgvector)")]
         Redis[("Redis")]
-        RabbitMQ[("RabbitMQ")]
         Keycloak["Keycloak"]
         MinIO[("MinIO")]
         Seq["Seq"]
@@ -145,7 +144,6 @@ flowchart TB
     HomeEndpoints -- "session tokens" --> Redis
 
     Contexts --> Postgres
-    Contexts --> RabbitMQ
     Documents --> MinIO
     ApiEndpoints -.-> Seq
     MgmtEndpoints -.-> Seq
