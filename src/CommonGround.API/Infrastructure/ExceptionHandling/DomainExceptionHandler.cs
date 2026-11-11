@@ -49,6 +49,30 @@ internal sealed class DomainExceptionHandler(IProblemDetailsService problemDetai
     }
 
     /// <summary>
+    /// Gets a user-facing error message by looking up the error code in the message map
+    /// and substituting any template parameters from the exception's Args.
+    /// Falls back to a generic message if the code is not found.
+    /// </summary>
+    /// <param name="exception">The domain exception.</param>
+    /// <returns>The message to show staff.</returns>
+    internal static string GetUserFacingMessage(DomainException exception)
+    {
+        ArgumentNullException.ThrowIfNull(exception);
+
+        if (string.IsNullOrWhiteSpace(exception.Code))
+        {
+            return GenericErrorMessage;
+        }
+
+        if (!BusinessRuleErrorMessageMap.ByCode.TryGetValue(exception.Code, out var template))
+        {
+            return GenericErrorMessage;
+        }
+
+        return SubstituteParameters(template, exception.Args);
+    }
+
+    /// <summary>
     /// Walks the exception chain to find a <see cref="DomainException"/>. Inline Marten
     /// projections (e.g. concurrency guards that throw from an Apply method) surface their
     /// exceptions wrapped in a JasperFx <c>ApplyEventException</c>, so a direct type check
@@ -65,26 +89,6 @@ internal sealed class DomainExceptionHandler(IProblemDetailsService problemDetai
         }
 
         return null;
-    }
-
-    /// <summary>
-    /// Gets a user-facing error message by looking up the error code in the message map
-    /// and substituting any template parameters from the exception's Args.
-    /// Falls back to a generic message if the code is not found.
-    /// </summary>
-    private static string GetUserFacingMessage(DomainException exception)
-    {
-        if (string.IsNullOrWhiteSpace(exception.Code))
-        {
-            return GenericErrorMessage;
-        }
-
-        if (!BusinessRuleErrorMessageMap.ByCode.TryGetValue(exception.Code, out var template))
-        {
-            return GenericErrorMessage;
-        }
-
-        return SubstituteParameters(template, exception.Args);
     }
 
     /// <summary>
