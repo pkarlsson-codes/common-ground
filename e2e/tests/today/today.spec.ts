@@ -99,9 +99,12 @@ test('a purchase with eligibility recorded waits on its appraisal, and Today ope
   const { workflowId, apn } = await createPurchaseWorkflow(page, buyer)
   await post(page, `/api/v1/purchase-workflows/${workflowId}/eligibility`, { verifiedDate: isoDate(), notes: null })
 
-  await page.goto('/')
+  // Today reads the purchase view, which catches up with the recorded eligibility after the POST returns.
   const row = section(page, 'Purchases').getByRole('row', { name: new RegExp(apn) })
-  await expect(row).toContainText(`${buyer}: waiting on appraisal`)
+  await expect(async () => {
+    await page.goto('/')
+    await expect(row).toContainText(`${buyer}: waiting on appraisal`, { timeout: 2_000 })
+  }).toPass()
   await expect(row.getByRole('button', { name: new RegExp(`^Record appraisal: `) })).toBeVisible()
   await expect(row.getByRole('button', { name: /^Record eligibility: / })).toHaveCount(0)
 
