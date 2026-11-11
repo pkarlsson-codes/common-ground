@@ -31,12 +31,16 @@ test('the page lists the columns and offers a template file', async ({ page }) =
   const csv = await template.text()
   expect(csv).toMatch(/^Parcel Number,Parcel Address,/)
 
-  // The example row is valid except for its template name, which no trust has.
-  await chooseFile(page, csv)
-  await page.getByRole('button', { name: 'Check File' }).click()
-  const errors = page.getByRole('table', { name: 'Errors' }).locator('tbody tr')
-  await expect(errors).toHaveCount(1)
-  await expect(errors).toContainText('Lease Template')
+  // With a template name the trust has, the example row passes the check.
+  const { templateName } = await createGroundLeaseTemplate(page)
+  const example = csv.replace(',Standard Lease,', `,${templateName},`).replace('12-345-678', `APN-${uniqueId()}`)
+  await chooseFile(page, example)
+  // The new template reaches the import's template list through a projection.
+  await expect(async () => {
+    await page.getByRole('button', { name: 'Check File' }).click()
+    await expect(page.getByLabel('Import summary'))
+      .toHaveText('Will create 1 land parcel, 1 home and 1 ground lease.', { timeout: 2_000 })
+  }).toPass()
 })
 
 test('a file with an error lists it and imports nothing; the fixed file imports, and importing it again skips everything', async ({ page }) => {

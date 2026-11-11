@@ -132,7 +132,7 @@ public sealed class LeaseFeesSeeder(ITrustClock trustClock) : IDevelopmentSeeder
         var monthlyFee = statement.MonthlyFee;
         var unpaid = Math.Min(arrears?.MonthsBehind ?? 0, statement.ChargeCount);
         var paidMonths = statement.ChargeCount - unpaid;
-        var firstDue = LeaseFeeStatement.FirstDueDateOnOrAfter(lease.LeaseStartDate);
+        var firstDue = LeaseFeeStatement.FirstDueDateOnOrAfter(lease.LeaseFeeTracking.TrackedFrom);
 
         // Each lease pays one way, so the history reads like one household's habit.
         var byCheck = (lease.CurrentHomeowner?.FullName.Value.Length ?? 0) % 2 == 0;

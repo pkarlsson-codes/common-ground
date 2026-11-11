@@ -17,7 +17,7 @@ public class PortfolioImportPlannerTests
         [
             "Parcel Number", "Parcel Address", "Parcel Acres", "Acquired On", "Acquired By",
             "Unit", "Home Type", "Bedrooms", "Bathrooms", "Accessible", "Square Feet", "Year Built", "Assessed Value", "Assessed On",
-            "Homeowner Name", "Homeowner Email", "Lease Template", "Lease Start", "Base Price", "Appraised Value at Purchase",
+            "Homeowner Name", "Homeowner Email", "Homeowner Phone", "Lease Template", "Lease Start", "Base Price", "Appraised Value at Purchase",
             "Land Use Fee", "Fees Tracked From", "Amount Owed Then",
         ];
 
@@ -154,7 +154,7 @@ public class PortfolioImportPlannerTests
         }
 
         [Fact]
-        public void GivenAValueADomainRuleRefuses_WhenPlanned_ThenReportsTheRuleOnTheRow()
+        public void GivenAValueADomainRuleRefuses_WhenPlanned_ThenReportsTheRuleOnItsRowAndColumn()
         {
             var row = _testBed.Row();
             row["Parcel Acres"] = "0";
@@ -162,7 +162,30 @@ public class PortfolioImportPlannerTests
             var plan = _testBed.Plan(TestBed.Csv(row));
 
             var error = plan.Errors.Should().ContainSingle().Subject;
-            (error.Row, error.Column).Should().Be((2, (string?)null));
+            (error.Row, error.Column).Should().Be((2, "Parcel Acres"));
+        }
+
+        [Fact]
+        public void GivenAPhoneNumberWithoutAnAreaCode_WhenPlanned_ThenReportsItOnTheHomeownerPhoneColumn()
+        {
+            var row = _testBed.Row();
+            row["Homeowner Phone"] = "555-0100";
+
+            var plan = _testBed.Plan(TestBed.Csv(row));
+
+            var error = plan.Errors.Should().ContainSingle().Subject;
+            (error.Row, error.Column, error.Message).Should().Be((2, "Homeowner Phone", "Enter a valid phone number."));
+        }
+
+        [Fact]
+        public void GivenThePhoneNumberInTheDownloadableTemplate_WhenPlanned_ThenAcceptsIt()
+        {
+            var row = _testBed.Row();
+            row["Homeowner Phone"] = "(217) 555-0123";
+
+            var plan = _testBed.Plan(TestBed.Csv(row));
+
+            plan.Errors.Should().BeEmpty();
         }
 
         [Fact]

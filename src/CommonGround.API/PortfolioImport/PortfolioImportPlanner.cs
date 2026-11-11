@@ -492,7 +492,7 @@ internal static class PortfolioImportPlanner
             return null;
         }
 
-        /// <summary>Runs a domain factory and records the rule it breaks, if any.</summary>
+        /// <summary>Runs a domain factory and records the rule it breaks, if any, on the column that breaks it.</summary>
         public bool Check(Action create)
         {
             try
@@ -502,7 +502,8 @@ internal static class PortfolioImportPlanner
             }
             catch (DomainException ex)
             {
-                Error(null, DomainExceptionHandler.GetUserFacingMessage(ex));
+                var column = ex.Code is { } code ? PortfolioColumns.ByErrorCode.GetValueOrDefault(code) : null;
+                Error(column, DomainExceptionHandler.GetUserFacingMessage(ex));
                 return false;
             }
         }

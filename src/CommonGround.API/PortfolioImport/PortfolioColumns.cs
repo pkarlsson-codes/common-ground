@@ -39,4 +39,32 @@ internal static class PortfolioColumns
         ParcelNumber, ParcelAddress, ParcelAcres, AcquiredOn, AcquiredBy,
         HomeType, Bedrooms, Bathrooms, SquareFeet, YearBuilt, AssessedValue, AssessedOn,
     ];
+
+    /// <summary>
+    /// The column whose value breaks each domain rule the import checks, by error code. A rule not listed here is
+    /// reported on the row as a whole.
+    /// </summary>
+    public static readonly IReadOnlyDictionary<string, string> ByErrorCode = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["property_registry.land_parcel.register.legal_parcel_number_required"] = ParcelNumber,
+        ["property_registry.land_parcel.register.address_required"] = ParcelAddress,
+        ["property_registry.land_parcel.register.area_non_positive"] = ParcelAcres,
+        ["property_registry.home.register.bedrooms_negative"] = Bedrooms,
+        ["property_registry.home.register.bathrooms_non_positive"] = Bathrooms,
+        ["property_registry.home.register.square_footage_non_positive"] = SquareFeet,
+        ["property_registry.home.register.year_built_out_of_range"] = YearBuilt,
+        ["property_registry.unit_assessment.create.assessed_value_negative"] = AssessedValue,
+        ["property_registry.unit_assessment.create.assessment_date_in_future"] = AssessedOn,
+        ["shared.person_name.required"] = HomeownerName,
+        ["shared.person_name.too_long"] = HomeownerName,
+        ["shared.email.required"] = HomeownerEmail,
+        ["shared.email.invalid_format"] = HomeownerEmail,
+        ["shared.phone.invalid_format"] = HomeownerPhone,
+        ["homeownership.ground_lease.create.base_price_non_positive"] = BasePrice,
+        ["homeownership.ground_lease.create.original_appraised_value_non_positive"] = AppraisedValue,
+        ["homeownership.lease_fee_terms.create.land_use_fee_negative"] = LandUseFee,
+        ["homeownership.lease_fee_terms.create.repair_reserve_fee_negative"] = RepairReserveFee,
+        ["homeownership.lease_fee_tracking.create.tracked_from_before_lease_start"] = FeesTrackedFrom,
+        ["homeownership.lease_fee_tracking.create.opening_balance_negative"] = AmountOwed,
+    };
 }
