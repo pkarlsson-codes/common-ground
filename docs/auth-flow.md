@@ -5,7 +5,7 @@ How a user gets a session and how that session becomes an authenticated API call
 Key facts:
 
 - The gateway is the only OIDC client. The browser never talks to Keycloak directly except during the redirect dance, and Keycloak tokens never reach the browser or the API.
-- Upstream tokens (access/refresh/id) live server-side in Redis, keyed by a random session ID stored in the `cg_session` cookie (HttpOnly). `cg_csrf` is JS-readable for CSRF protection; `cg_auth` is the ASP.NET cookie-auth ticket.
+- Upstream tokens (access/refresh/id) live server-side in the gateway's `sessions` table in Postgres (7-day expiry, expired rows deleted hourly), keyed by a random session ID stored in the `cg_session` cookie (HttpOnly). `cg_csrf` is JS-readable for CSRF protection; `cg_auth` is the ASP.NET cookie-auth ticket.
 - Every gateway→API call carries a freshly minted internal JWT (HS256, 5-minute lifetime, issuer `CommonGround.Gateway`, audience `CommonGround.API`). The API derives identity from its `user_id` claim; `tenant_id` carries the trust ID.
 
 ## Login
@@ -16,7 +16,7 @@ sequenceDiagram
     participant B as Browser
     participant G as Gateway
     participant K as Keycloak
-    participant R as Redis
+    participant R as Session store (Postgres)
     participant A as API
 
     B->>G: GET /auth/login?returnUrl=…
@@ -42,7 +42,7 @@ sequenceDiagram
     autonumber
     participant B as Browser
     participant G as Gateway
-    participant R as Redis
+    participant R as Session store (Postgres)
     participant A as API
 
     B->>G: GET /api/… (cookies: cg_auth, cg_session)
@@ -58,7 +58,7 @@ sequenceDiagram
     G-->>B: response
 ```
 
-The trust ID always comes from the Redis session lookup, not from claims — a request with a valid `cg_auth` cookie but no Redis session gets a JWT without `tenant_id`.
+The trust ID always comes from the session lookup, not from claims — a request with a valid `cg_auth` cookie but no session row gets a JWT without `tenant_id`.
 
 ## Token refresh
 
@@ -67,7 +67,7 @@ sequenceDiagram
     autonumber
     participant B as Browser
     participant G as Gateway
-    participant R as Redis
+    participant R as Session store (Postgres)
     participant K as Keycloak
 
     B->>G: POST /auth/refresh (cg_session)
@@ -81,8 +81,8 @@ sequenceDiagram
     G-->>B: Set-Cookie new cg_session + cg_csrf, 200
 ```
 
-Refresh rotates the session ID: the old Redis entry is deleted and new cookies are issued, so a captured `cg_session` value goes stale after the next refresh.
+Refresh rotates the session ID: the old session row is deleted and new cookies are issued, so a captured `cg_session` value goes stale after the next refresh.
 
 ## Logout
 
-No diagram — `GET /auth/logout` deletes the Redis entry and the `cg_session`/`cg_csrf` cookies, then signs out of both the cookie scheme and Keycloak (passing the stored `id_token` as the logout hint).
+No diagram — `GET /auth/logout` deletes the session row and the `cg_session`/`cg_csrf` cookies, then signs out of both the cookie scheme and Keycloak (passing the stored `id_token` as the logout hint).

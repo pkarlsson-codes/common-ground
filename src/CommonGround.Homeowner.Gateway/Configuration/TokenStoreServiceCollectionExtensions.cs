@@ -1,31 +1,42 @@
 using CommonGround.Homeowner.Gateway.Services;
-using StackExchange.Redis;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Npgsql;
 
 namespace CommonGround.Homeowner.Gateway.Configuration;
 
 /// <summary>
-/// Registration helpers for server-side token storage backed by Redis.
+/// Registers session storage and the Data Protection key ring in Postgres.
 /// </summary>
 public static class TokenStoreServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers a Redis-backed <see cref="ITokenStore"/> using configuration key
-    /// <c>Authentication:TokenStore:Redis:ConnectionString</c>.
+    /// Registers a Postgres <see cref="ITokenStore"/> and Data Protection key repository using
+    /// the connection string <c>ConnectionStrings:Database</c>.
     /// </summary>
     /// <param name="services">The DI service collection.</param>
     /// <param name="configuration">Application configuration.</param>
     /// <returns>The service collection for chaining.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the Redis connection string is missing.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the connection string is missing.</exception>
     public static IServiceCollection AddTokenStoreFromConfig(this IServiceCollection services, IConfiguration configuration)
     {
-        var redisConnectionString = configuration.GetValue<string>("Authentication:TokenStore:Redis:ConnectionString");
-        if (string.IsNullOrWhiteSpace(redisConnectionString))
+        var connectionString = configuration.GetConnectionString("Database");
+        if (string.IsNullOrWhiteSpace(connectionString))
         {
-            throw new InvalidOperationException("Redis connection string is required for token store (Authentication:TokenStore:Redis:ConnectionString)");
+            throw new InvalidOperationException("A Postgres connection string is required for the session store (ConnectionStrings:Database)");
         }
 
-        services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConnectionString));
-        services.AddSingleton<ITokenStore, RedisTokenStore>();
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddSingleton(new GatewayDatabase(NpgsqlDataSource.Create(connectionString)));
+        services.AddSingleton<PostgresTokenStore>();
+        services.AddSingleton<ITokenStore>(sp => sp.GetRequiredService<PostgresTokenStore>());
+        services.AddHostedService<GatewayDatabaseMaintenance>();
+
+        services.AddDataProtection().SetApplicationName("commonground-homeowner-gateway");
+        services.AddOptions<KeyManagementOptions>()
+            .Configure<GatewayDatabase>((options, database) => options.XmlRepository = new PostgresXmlRepository(database));
+
         return services;
     }
 }

@@ -91,7 +91,7 @@ sequenceDiagram
     participant B as Browser
     participant G as Gateway
     participant K as Keycloak
-    participant R as Redis
+    participant R as Session store (Postgres)
     participant A as API
 
     B->>G: GET /auth/login?returnUrl=…
@@ -118,7 +118,7 @@ sequenceDiagram
     autonumber
     participant B as Browser
     participant G as Gateway
-    participant R as Redis
+    participant R as Session store (Postgres)
     participant A as API
 
     B->>G: GET /api/… (cookies: cg_auth, cg_session)
@@ -134,7 +134,7 @@ sequenceDiagram
     G-->>B: response
     </div>
   </div>
-  <p class="note">The trust ID always comes from the Redis session lookup, not from claims — a request with a valid <code>cg_auth</code> cookie but no Redis session gets a JWT without <code>tenant_id</code>. Keycloak tokens never cross the gateway→API boundary; the internal JWT is the only credential the API ever sees.</p>
+  <p class="note">The trust ID always comes from the session lookup, not from claims — a request with a valid <code>cg_auth</code> cookie but no session row gets a JWT without <code>tenant_id</code>. Keycloak tokens never cross the gateway→API boundary; the internal JWT is the only credential the API ever sees.</p>
 
   <h2>Token refresh</h2>
   <div class="diagram-container">
@@ -144,7 +144,7 @@ sequenceDiagram
     autonumber
     participant B as Browser
     participant G as Gateway
-    participant R as Redis
+    participant R as Session store (Postgres)
     participant K as Keycloak
 
     B->>G: POST /auth/refresh (cg_session)
@@ -158,7 +158,7 @@ sequenceDiagram
     G-->>B: Set-Cookie new cg_session + cg_csrf, 200
     </div>
   </div>
-  <p class="note">Refresh rotates the session ID: the old Redis entry is deleted and new cookies are issued, so a captured <code>cg_session</code> value goes stale after the next refresh. Logout (<code>GET /auth/logout</code>) deletes the Redis entry and cookies, then signs out of both the cookie scheme and Keycloak using the stored <code>id_token</code> as the logout hint.</p>
+  <p class="note">Refresh rotates the session ID: the old session row is deleted and new cookies are issued, so a captured <code>cg_session</code> value goes stale after the next refresh. Logout (<code>GET /auth/logout</code>) deletes the session row and cookies, then signs out of both the cookie scheme and Keycloak using the stored <code>id_token</code> as the logout hint.</p>
 
 </body>
 </html>

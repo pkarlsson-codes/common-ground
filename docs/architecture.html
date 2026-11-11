@@ -130,7 +130,6 @@ flowchart TB
 
     subgraph Infra["Local Infra (docker-compose)"]
         Postgres[("PostgreSQL<br/>(pgvector)")]
-        Redis[("Redis")]
         Keycloak["Keycloak"]
         MinIO[("MinIO")]
         Seq["Seq"]
@@ -139,9 +138,9 @@ flowchart TB
     MgmtClients -- "internal JWT" --> ApiEndpoints
     HomeClients -- "internal JWT" --> ApiEndpoints
     MgmtEndpoints -- "OIDC login" --> Keycloak
-    MgmtEndpoints -- "session tokens" --> Redis
+    MgmtEndpoints -- "sessions, Data Protection keys" --> Postgres
     HomeEndpoints -- "OIDC login" --> Keycloak
-    HomeEndpoints -- "session tokens" --> Redis
+    HomeEndpoints -- "sessions, Data Protection keys" --> Postgres
 
     Contexts --> Postgres
     Documents --> MinIO

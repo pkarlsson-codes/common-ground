@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Drops all Marten-managed schemas, wiping all application data, and clears the gateways'
-# Redis sessions, which name users and trusts that no longer exist once the data is gone.
+# sessions, which name users and trusts that no longer exist once the data is gone.
 # `npm run db:reset` runs this and then `npm run db:seed`, which recreates the schemas and seeds them.
 set -euo pipefail
 
@@ -8,7 +8,6 @@ POSTGRES_CONTAINER="${POSTGRES_CONTAINER:-commonground_postgres}"
 POSTGRES_DB="${POSTGRES_DB:-commonground}"
 POSTGRES_USER="${POSTGRES_USER:-postgres}"
 POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-postgres}"
-REDIS_CONTAINER="${REDIS_CONTAINER:-commonground_redis}"
 
 psql_exec() {
     local sql="$1"
@@ -42,7 +41,10 @@ done
 echo "[db-reset-marten]   DROP SCHEMA IF EXISTS public CASCADE + recreate"
 psql_exec "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;"
 
-echo "[db-reset-marten] Clearing gateway sessions from Redis..."
-docker exec "$REDIS_CONTAINER" redis-cli FLUSHDB
+# The gateways' schemas stay: their Data Protection keys keep existing auth cookies readable. Only sessions go.
+echo "[db-reset-marten] Clearing gateway sessions..."
+for gateway_schema in management_gateway homeowner_gateway; do
+    psql_exec "DO \$\$ BEGIN IF to_regclass('$gateway_schema.sessions') IS NOT NULL THEN DELETE FROM $gateway_schema.sessions; END IF; END \$\$;"
+done
 
 echo "[db-reset-marten] Done. Run npm run db:seed to recreate the schemas and seed them (npm run db:reset does), then log in again."
