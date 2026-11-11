@@ -30,3 +30,10 @@ public sealed record SetLeaseFeeNoticePolicyRequest(
 public sealed record WaiveLeaseFeeInterestRequest(
     decimal Amount,
     string Reason);
+
+/// <summary>Request to correct the day a lease's fees are tracked from and what was owed on it.</summary>
+/// <param name="FeesTrackedFrom">The first day the trust tracks fees in CommonGround, on or after the lease start.</param>
+/// <param name="OpeningBalance">What the homeowner owed on that day; zero when paid up.</param>
+public sealed record CorrectLeaseFeeTrackingRequest(
+    DateOnly FeesTrackedFrom,
+    decimal OpeningBalance);

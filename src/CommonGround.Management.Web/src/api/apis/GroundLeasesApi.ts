@@ -17,6 +17,7 @@
 import * as runtime from '../runtime';
 import type {
   CalculateResaleEstimateRequest,
+  CorrectLeaseFeeTrackingRequest,
   CreateGroundLeaseRequest,
   CreateGroundLeaseResponse,
   GroundLeaseResponse,
@@ -39,6 +40,8 @@ import type {
 import {
     CalculateResaleEstimateRequestFromJSON,
     CalculateResaleEstimateRequestToJSON,
+    CorrectLeaseFeeTrackingRequestFromJSON,
+    CorrectLeaseFeeTrackingRequestToJSON,
     CreateGroundLeaseRequestFromJSON,
     CreateGroundLeaseRequestToJSON,
     CreateGroundLeaseResponseFromJSON,
@@ -80,6 +83,11 @@ import {
 export interface CalculateResaleEstimateOperationRequest {
     groundLeaseId: string;
     calculateResaleEstimateRequest: CalculateResaleEstimateRequest;
+}
+
+export interface CorrectLeaseFeeTrackingOperationRequest {
+    groundLeaseId: string;
+    correctLeaseFeeTrackingRequest: CorrectLeaseFeeTrackingRequest;
 }
 
 export interface CreateGroundLeaseOperationRequest {
@@ -161,6 +169,20 @@ export interface GroundLeasesApiInterface {
     /**
      */
     calculateResaleEstimate(requestParameters: CalculateResaleEstimateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResaleEstimateResponse>;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
+     * @param {CorrectLeaseFeeTrackingRequest} correctLeaseFeeTrackingRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    correctLeaseFeeTrackingRaw(requestParameters: CorrectLeaseFeeTrackingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    correctLeaseFeeTracking(requestParameters: CorrectLeaseFeeTrackingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -382,6 +404,58 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
     async calculateResaleEstimate(requestParameters: CalculateResaleEstimateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResaleEstimateResponse> {
         const response = await this.calculateResaleEstimateRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async correctLeaseFeeTrackingRaw(requestParameters: CorrectLeaseFeeTrackingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling correctLeaseFeeTracking().'
+            );
+        }
+
+        if (requestParameters['correctLeaseFeeTrackingRequest'] == null) {
+            throw new runtime.RequiredError(
+                'correctLeaseFeeTrackingRequest',
+                'Required parameter "correctLeaseFeeTrackingRequest" was null or undefined when calling correctLeaseFeeTracking().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/lease-fee-tracking`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CorrectLeaseFeeTrackingRequestToJSON(requestParameters['correctLeaseFeeTrackingRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async correctLeaseFeeTracking(requestParameters: CorrectLeaseFeeTrackingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.correctLeaseFeeTrackingRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**

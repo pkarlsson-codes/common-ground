@@ -1634,6 +1634,71 @@
         }
       }
     },
+    "/api/v1/ground-leases/{groundLeaseId}/lease-fee-tracking": {
+      "put": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "CorrectLeaseFeeTracking",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "CorrectLeaseFeeTrackingRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorrectLeaseFeeTrackingRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/lease-fee-notices/due": {
       "get": {
         "tags": [
@@ -9858,6 +9923,23 @@
           "reason": {
             "type": "string",
             "description": "Why, such as hardship."
+          }
+        }
+      },
+      "CorrectLeaseFeeTrackingRequest": {
+        "type": "object",
+        "description": "Request to correct the day a lease's fees are tracked from and what was owed on it.",
+        "additionalProperties": false,
+        "properties": {
+          "feesTrackedFrom": {
+            "type": "string",
+            "description": "The first day the trust tracks fees in CommonGround, on or after the lease start.",
+            "format": "date"
+          },
+          "openingBalance": {
+            "type": "number",
+            "description": "What the homeowner owed on that day; zero when paid up.",
+            "format": "decimal"
           }
         }
       },

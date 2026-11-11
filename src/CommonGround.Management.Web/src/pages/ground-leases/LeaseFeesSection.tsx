@@ -10,6 +10,7 @@ import RecordLeaseFeeNoticePanel from './RecordLeaseFeeNoticePanel'
 import RecordLeaseFeePaymentPanel from './RecordLeaseFeePaymentPanel'
 import VoidLeaseFeePaymentPanel from './VoidLeaseFeePaymentPanel'
 import WaiveLeaseFeeInterestPanel from './WaiveLeaseFeeInterestPanel'
+import CorrectLeaseFeeTrackingPanel from './CorrectLeaseFeeTrackingPanel'
 
 const longDate = (d?: CalendarDate | null) => (d ? formatCalendarDate(d, { year: 'numeric', month: 'long', day: 'numeric' }) : '—')
 
@@ -51,6 +52,7 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
   const [recordingNotice, setRecordingNotice] = useState(false)
   const [voiding, setVoiding] = useState<LeaseFeePaymentDto | null>(null)
   const [waiving, setWaiving] = useState(false)
+  const [correctingTracking, setCorrectingTracking] = useState(false)
   const fees = lease.leaseFees
   if (!fees) return null
 
@@ -164,6 +166,9 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
                 Waive Interest
               </button>
             )}
+            <button type="button" className="btn btn-ghost" onClick={() => setCorrectingTracking(true)}>
+              Correct Fee Tracking
+            </button>
           </div>
 
           {payments.length === 0 ? (
@@ -267,6 +272,9 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
         </>
       )}
 
+      {correctingTracking && (
+        <CorrectLeaseFeeTrackingPanel lease={lease} onClose={() => setCorrectingTracking(false)} />
+      )}
       {waiving && (
         <WaiveLeaseFeeInterestPanel lease={lease} onClose={() => setWaiving(false)} />
       )}

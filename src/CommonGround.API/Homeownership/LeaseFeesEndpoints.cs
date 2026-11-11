@@ -157,6 +157,28 @@ public static class LeaseFeesEndpoints
             new WaiveLeaseFeeInterestResponse(id.Value));
     }
 
+    [WolverinePut("/api/ground-leases/{groundLeaseId}/lease-fee-tracking")]
+    public static async Task<IResult> CorrectLeaseFeeTracking(
+        string groundLeaseId,
+        CorrectLeaseFeeTrackingRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new CorrectLeaseFeeTracking(
+                GroundLeaseId.Create(groundLeaseId),
+                request.FeesTrackedFrom,
+                Money.Create(request.OpeningBalance),
+                httpContext.GetUserId()),
+            cancellationToken);
+
+        return Results.NoContent();
+    }
+
     [WolverineGet("/api/lease-fee-notices/due")]
     public static async Task<IResult> GetLeaseFeeNoticesDue(
         [FromQuery] string? groundLeaseId,

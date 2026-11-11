@@ -506,6 +506,62 @@ public class GroundLeaseTests
         }
     }
 
+    public class TheCorrectLeaseFeeTrackingMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        private static readonly DateOnly March15 = new(2025, 3, 15);
+
+        [Fact]
+        public void GivenLeaseTrackedFromItsStart_WhenCorrected_ThenItOwesTheOpeningBalanceAndMonthsSinceTheNewDay()
+        {
+            var sut = _testBed.Lease();
+
+            var (corrected, _) = sut.Decide(l => l.CorrectLeaseFeeTracking(March15, Money.Create(200m), _testBed.StaffUser));
+
+            corrected.LeaseFeeStatementAsOf(new DateOnly(2025, 4, 10)).Should().BeEquivalentTo(new
+            {
+                Balance = Money.Create(260m),
+                OldestUnpaidDueDate = (DateOnly?)March15,
+            });
+        }
+
+        [Theory]
+        [InlineData("2024-12-31", 0, "homeownership.lease_fee_tracking.create.tracked_from_before_lease_start")]
+        [InlineData("2025-03-15", -1, "homeownership.lease_fee_tracking.create.opening_balance_negative")]
+        public void GivenInvalidTracking_WhenCorrected_ThenThrowsBusinessRuleViolation(string trackedFrom, int openingBalance, string expectedCode)
+        {
+            var sut = _testBed.Lease();
+
+            var act = () => sut.CorrectLeaseFeeTracking(DateOnly.Parse(trackedFrom, CultureInfo.InvariantCulture), Money.Create(openingBalance), _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
+        }
+
+        [Fact]
+        public void GivenPaymentBeforeTheNewDay_WhenCorrected_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = _testBed.Lease().Decide(l => _testBed.Payment(l, 60m, new DateOnly(2025, 2, 3))).Aggregate;
+
+            var act = () => sut.CorrectLeaseFeeTracking(March15, Money.Zero, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.correct_lease_fee_tracking.payment_before_fees_tracked");
+        }
+
+        [Fact]
+        public void GivenVoidedPaymentBeforeTheNewDay_WhenCorrected_ThenCorrectsIt()
+        {
+            var (lease, events) = _testBed.Lease().Decide(l => _testBed.Payment(l, 60m, new DateOnly(2025, 2, 3)));
+            var paymentId = LeaseFeePaymentId.Create(((LeaseFeePaymentRecorded)events.Single()).PaymentId);
+            var sut = lease.Decide(l => l.VoidLeaseFeePayment(paymentId, "Before tracking", _testBed.StaffUser)).Aggregate;
+
+            var (corrected, _) = sut.Decide(l => l.CorrectLeaseFeeTracking(March15, Money.Zero, _testBed.StaffUser));
+
+            corrected.LeaseFeeTracking.TrackedFrom.Should().Be(March15);
+        }
+    }
+
     public class TheLeaseFeeStatementAsOfMethod
     {
         private readonly TestBed _testBed = new();

@@ -263,6 +263,39 @@ public class LeaseFeesTests(ApiFactory factory)
         early.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
     }
 
+    [Fact]
+    public async Task CorrectTracking_OnALeaseTrackedFromItsStart_OwesOnlyTheOpeningBalanceAndRefusesADayAfterAPayment()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var today = (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Today;
+        var thisMonth = new DateOnly(today.Year, today.Month, 1);
+        var homeowner = UniqueName();
+        var leaseId = await CreateLease(client, homeowner, leaseStart: new DateOnly(2005, 3, 1));
+
+        (await client.PutAsJsonAsync($"/api/ground-leases/{leaseId}/lease-fee-tracking",
+            new CorrectLeaseFeeTrackingRequest(thisMonth, 250m))).StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var lease = await client.GetFromJsonAsync<GroundLeaseResponse>($"/api/ground-leases/{leaseId}");
+        lease!.LeaseFees.Should().BeEquivalentTo(new
+        {
+            FeesTrackedFrom = thisMonth,
+            OpeningBalance = 250m,
+            Statement = new { Balance = 310m, OldestUnpaidDueDate = (DateOnly?)thisMonth },
+        });
+        var listed = await client.GetFromJsonAsync<PaginatedResponse<LeaseFeeBalanceResponse>>(
+            $"/api/lease-fee-balances?search={Uri.EscapeDataString(homeowner)}");
+        listed!.Items.Should().ContainSingle().Which.Balance.Should().Be(310m);
+
+        (await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/lease-fee-payments",
+            new RecordLeaseFeePaymentRequest(today, 60m, "Check", null))).EnsureSuccessStatusCode();
+        var refused = await client.PutAsJsonAsync($"/api/ground-leases/{leaseId}/lease-fee-tracking",
+            new CorrectLeaseFeeTrackingRequest(today.AddDays(1), 0m));
+
+        refused.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        var problem = await refused.Content.ReadFromJsonAsync<ProblemDetails>();
+        problem!.Detail.Should().Be("A payment was received before that day. Void it first, or choose a day on or before it.");
+    }
+
     private static string UniqueName() =>
         "Dana " + string.Concat(Guid.NewGuid().ToString("N").Where(char.IsLetter).Take(8).Select(char.ToUpperInvariant).Select((c, i) => i == 0 ? c : char.ToLowerInvariant(c)));
 

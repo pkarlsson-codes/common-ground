@@ -340,6 +340,22 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     }
 
     /// <summary>
+    /// Corrects the day the lease's fees are tracked from and what was owed on it, such as after an import with the
+    /// wrong date. Refused for a day before the lease started, an opening balance below zero, or a day after a
+    /// payment that still counts: void that payment first.
+    /// </summary>
+    public LeaseFeeTrackingCorrected CorrectLeaseFeeTracking(DateOnly feesTrackedFrom, Money openingBalance, UserId correctedBy)
+    {
+        var tracking = LeaseFeeTracking.Create(feesTrackedFrom, openingBalance, LeaseStartDate);
+
+        var earliestPayment = _leaseFeePayments.Where(p => !p.IsVoided).Select(p => (DateOnly?)p.ReceivedDate).Min();
+        if (earliestPayment < tracking.TrackedFrom)
+            throw BusinessRuleViolation.GroundLease.CorrectLeaseFeeTracking.PaymentBeforeFeesTracked(earliestPayment.Value, tracking.TrackedFrom);
+
+        return new LeaseFeeTrackingCorrected(Id.Value, tracking.TrackedFrom, tracking.OpeningBalance, correctedBy.Value);
+    }
+
+    /// <summary>
     /// Records a late notice the trust sent, keeping the balance and oldest unpaid month on the day it was sent.
     /// Refused for a sent date in the future or before the lease started, or when nothing was owed that day. A
     /// notice can be recorded before it falls due, and on an ended lease. A notice of default also keeps the trust's
@@ -556,6 +572,10 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     public void Apply(LeaseFeeInterestWaived e) =>
         _leaseFeeInterestWaivers.Add(LeaseFeeInterestWaiver.Create(
             LeaseFeeInterestWaiverId.Create(e.WaiverId), e.WaivedOn, e.Amount, e.Reason));
+
+    /// <summary>Applies <see cref="LeaseFeeTrackingCorrected"/>.</summary>
+    public void Apply(LeaseFeeTrackingCorrected e) =>
+        LeaseFeeTracking = LeaseFeeTracking.Create(e.FeesTrackedFrom, e.OpeningBalance, LeaseStartDate);
 
     /// <summary>Applies <see cref="LeaseFeePaymentVoided"/>.</summary>
     public void Apply(LeaseFeePaymentVoided e) =>

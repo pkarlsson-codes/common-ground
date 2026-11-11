@@ -323,6 +323,18 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class CorrectLeaseFeeTracking
+        {
+            public static BusinessRuleViolationException PaymentBeforeFeesTracked(DateOnly receivedDate, DateOnly feesTrackedFrom)
+                => new(
+                    "homeownership.ground_lease.correct_lease_fee_tracking.payment_before_fees_tracked",
+                    new Dictionary<string, object?>
+                    {
+                        ["receivedDate"] = receivedDate,
+                        ["feesTrackedFrom"] = feesTrackedFrom,
+                    });
+        }
+
         public static class VoidLeaseFeePayment
         {
             public static BusinessRuleViolationException ReasonRequired()

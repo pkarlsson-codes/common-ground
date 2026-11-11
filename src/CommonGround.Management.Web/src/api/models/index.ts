@@ -14,6 +14,7 @@ export * from './CancelHomeSelectionRequest';
 export * from './CancelPropertyInspectionRequest';
 export * from './CloseStewardshipCaseRequest';
 export * from './CompletePropertyInspectionRequest';
+export * from './CorrectLeaseFeeTrackingRequest';
 export * from './CounselingReferralResponse';
 export * from './CreateGroundLeaseRequest';
 export * from './CreateGroundLeaseResponse';

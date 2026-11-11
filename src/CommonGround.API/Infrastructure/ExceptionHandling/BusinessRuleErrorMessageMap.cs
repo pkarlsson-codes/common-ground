@@ -67,6 +67,7 @@ internal static class BusinessRuleErrorMessageMap
             ["homeownership.ground_lease.record_lease_fee_payment.received_date_before_fees_tracked"] = "Received date can't be before the day the lease's fees are tracked from. Earlier payments belong in the opening balance.",
             ["homeownership.lease_fee_tracking.create.tracked_from_before_lease_start"] = "Fees tracked from can't be before the lease start date.",
             ["homeownership.lease_fee_tracking.create.opening_balance_negative"] = "Amount owed can't be negative.",
+            ["homeownership.ground_lease.correct_lease_fee_tracking.payment_before_fees_tracked"] = "A payment was received before that day. Void it first, or choose a day on or before it.",
             ["homeownership.ground_lease.record_lease_fee_notice.sent_date_in_future"] = "Date sent cannot be in the future.",
             ["homeownership.ground_lease.record_lease_fee_notice.sent_date_before_lease_start"] = "Date sent cannot be before the lease start date.",
             ["homeownership.ground_lease.record_lease_fee_notice.nothing_owed"] = "This lease had no balance due on that date.",

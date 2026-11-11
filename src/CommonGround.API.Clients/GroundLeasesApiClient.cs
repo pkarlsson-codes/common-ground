@@ -90,6 +90,14 @@ public sealed class GroundLeasesApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task CorrectLeaseFeeTrackingAsync(string groundLeaseId, CorrectLeaseFeeTrackingRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PutAsync($"api/ground-leases/{groundLeaseId}/lease-fee-tracking", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task<LeaseFeeNoticesDueResponse> GetLeaseFeeNoticesDueAsync(string? groundLeaseId, CancellationToken cancellationToken)
     {
         var query = string.IsNullOrWhiteSpace(groundLeaseId) ? string.Empty : $"?groundLeaseId={Uri.EscapeDataString(groundLeaseId)}";

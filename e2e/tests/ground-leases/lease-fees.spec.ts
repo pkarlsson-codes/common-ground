@@ -3,7 +3,7 @@ import { createHome, createLandParcel, post } from '../support/api'
 import { detailValue, expectToast, field, isoDate, panel, topPanel, uniqueId } from '../support/ui'
 
 // Journeys: docs/journeys/ground-leases/record-lease-fee-payment, void-lease-fee-payment,
-//   view-ground-lease-detail (Lease Fees section); docs/journeys/stewardship/view-lease-fees
+//   correct-lease-fee-tracking, view-ground-lease-detail (Lease Fees section); docs/journeys/stewardship/view-lease-fees
 
 /** The 1st of the month `monthsBack` months before the trust's today, as YYYY-MM-DD. */
 const firstOfMonth = (monthsBack: number) => {
@@ -94,6 +94,35 @@ test('recording a payment lowers the balance, and voiding it restores the balanc
   await expect(payment).toContainText('Voided: Check bounced')
   await expect(payment.getByRole('button', { name: 'Void' })).toHaveCount(0)
   await expect(detail).toBeVisible()
+})
+
+test('correcting fee tracking to this month charges only the amount owed then and this month', async ({ page }) => {
+  await page.goto('/ground-leases')
+  const homeowner = `Tracked Owner ${uniqueId()}`
+  await createLeaseOwingThreeMonths(page, homeowner)
+
+  await openLease(page, homeowner)
+  const section = leaseFees(page)
+  await expect(detailValue(section, 'Balance')).toHaveText('$180.00 due')
+
+  await section.getByRole('button', { name: 'Correct Fee Tracking' }).click()
+  const correct = panel(page, 'Correct Fee Tracking')
+  const save = correct.getByRole('button', { name: 'Save' })
+  await expect(field(correct, 'Fees Tracked From')).toHaveValue(firstOfMonth(2))
+  await expect(save).toBeDisabled()
+  await field(correct, 'Fees Tracked From').fill(firstOfMonth(3))
+  await expect(correct).toContainText("Can't be before the lease start")
+  await expect(save).toBeDisabled()
+
+  await field(correct, 'Fees Tracked From').fill(firstOfMonth(0))
+  await field(correct, 'Owed on That Day ($)').fill('25')
+  await save.click()
+  await expectToast(page, 'Fee tracking corrected')
+  await expect(correct).toBeHidden()
+
+  await expect(detailValue(section, 'Balance')).toHaveText('$85.00 due')
+  await expect(detailValue(section, 'Oldest Unpaid')).toHaveText(monthName(firstOfMonth(0)))
+  await expect(detailValue(section, 'Fees Tracked From')).toContainText('$25.00 owed then')
 })
 
 test('the Lease Fees tab lists a lease with a balance due, and its row opens the lease', async ({ page }) => {

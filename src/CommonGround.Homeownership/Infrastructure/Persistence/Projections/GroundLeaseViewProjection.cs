@@ -127,6 +127,12 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             WaivedBy = e.WaivedBy,
         });
 
+    public static void Apply(GroundLeaseView view, LeaseFeeTrackingCorrected e)
+    {
+        view.FeesTrackedFrom = e.FeesTrackedFrom;
+        view.OpeningBalance = e.OpeningBalance.Amount;
+    }
+
     public static void Apply(GroundLeaseView view, LeaseFeePaymentVoided e)
     {
         var payment = view.LeaseFeePayments.Find(p => p.PaymentId == e.PaymentId);

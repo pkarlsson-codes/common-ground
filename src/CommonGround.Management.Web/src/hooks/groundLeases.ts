@@ -207,6 +207,15 @@ export function useWaiveLeaseFeeInterest() {
   })
 }
 
+export function useCorrectLeaseFeeTracking() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ groundLeaseId, feesTrackedFrom, openingBalance }: { groundLeaseId: string; feesTrackedFrom: CalendarDate; openingBalance: number }) =>
+      api.correctLeaseFeeTracking({ groundLeaseId, correctLeaseFeeTrackingRequest: { feesTrackedFrom, openingBalance } }),
+    onSuccess: (_d, v) => invalidateLeaseFees(qc, v.groundLeaseId),
+  })
+}
+
 export function useLeaseFeeNoticePolicy() {
   return useQuery({
     queryKey: ['lease-fee-notice-policy'],

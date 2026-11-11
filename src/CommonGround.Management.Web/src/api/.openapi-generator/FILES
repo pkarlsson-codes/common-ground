@@ -32,6 +32,7 @@ models/CancelHomeSelectionRequest.ts
 models/CancelPropertyInspectionRequest.ts
 models/CloseStewardshipCaseRequest.ts
 models/CompletePropertyInspectionRequest.ts
+models/CorrectLeaseFeeTrackingRequest.ts
 models/CounselingReferralResponse.ts
 models/CreateGroundLeaseRequest.ts
 models/CreateGroundLeaseResponse.ts
