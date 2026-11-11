@@ -83,4 +83,15 @@ public static class TrustInvitationsEndpoints
         ITrustsApiClient client,
         CancellationToken cancellationToken)
         => Results.Ok(await client.ListTrustMembersAsync(cancellationToken).ConfigureAwait(false));
+
+    [WolverinePost("/api/v1/trust-members/{userId}/remove")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> RemoveTrustMember(
+        string userId,
+        ITrustsApiClient client,
+        CancellationToken cancellationToken)
+    {
+        await client.RemoveTrustMemberAsync(userId, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
 }

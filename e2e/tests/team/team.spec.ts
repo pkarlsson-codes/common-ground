@@ -5,8 +5,9 @@ import { expectToast, panel, topPanel, uniqueId } from '../support/ui'
 // Journeys:
 //   docs/journeys/team/invite-staff — a member makes an invite link, sees it pending, cancels one
 //   docs/journeys/onboarding/join-a-trust — a colleague opens the link, registers, joins and lands on Today
+//   docs/journeys/team/remove-a-member — the member removes the colleague, who loses access at once
 
-test('a colleague joins with an invite link and shows up on the Team page', async ({ page, browser }) => {
+test('a colleague joins with an invite link, shows up on the Team page, and is removed', async ({ page, browser }) => {
   const id = uniqueId()
   const email = `colleague-${id}@example.com`
 
@@ -45,15 +46,23 @@ test('a colleague joins with an invite link and shows up on the Team page', asyn
   // Opening the link again: the colleague is in a trust now.
   await colleague.goto(link)
   await expect(colleague.getByRole('heading', { name: 'You already belong to a trust.' })).toBeVisible()
-  await colleagueContext.close()
 
-  // Identity records the membership from an integration event, a moment after joining.
   const memberRow = page.getByRole('table', { name: 'Members' }).getByRole('row', { name: new RegExp(`Colleague ${id}`) })
-  await expect(async () => {
-    await page.goto('/team')
-    await expect(memberRow).toContainText(email, { timeout: 2_000 })
-  }).toPass()
+  await page.goto('/team')
+  await expect(memberRow).toContainText(email)
   await expect(pendingRow).toHaveCount(0)
+  await expect(page.getByRole('table', { name: 'Members' }).getByRole('row', { name: /\(you\)/ }).getByRole('button', { name: 'Remove' })).toHaveCount(0)
+
+  await memberRow.getByRole('button', { name: 'Remove' }).click()
+  await expect(topPanel(page)).toContainText('will lose access to the trust at once')
+  await topPanel(page).getByRole('button', { name: 'Remove Member' }).click()
+  await expectToast(page, `Invited Colleague ${id} removed`)
+  await expect(memberRow).toHaveCount(0)
+
+  // The colleague's session still names the trust; their next request is refused and they land on onboarding.
+  await colleague.goto('/')
+  await expect(colleague.getByRole('heading', { name: "You're not part of a trust yet" })).toBeVisible()
+  await colleagueContext.close()
 })
 
 test('a member cancels a pending invite', async ({ page }) => {

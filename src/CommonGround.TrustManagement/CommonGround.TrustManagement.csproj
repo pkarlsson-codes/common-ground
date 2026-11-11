@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CommonGround.SharedKernel\CommonGround.SharedKernel.csproj" />
-    <ProjectReference Include="..\CommonGround.TrustManagement.Contracts\CommonGround.TrustManagement.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

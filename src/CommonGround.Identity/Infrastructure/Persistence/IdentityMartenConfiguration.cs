@@ -16,7 +16,8 @@ public static class IdentityMartenConfiguration
 
         options.Schema.For<UserView>()
             .DatabaseSchemaName("identity")
-            .Index(x => x.TrustId);
+            .Index(x => x.TrustId)
+            .Index(x => x.UserId);
 
         options.Schema.For<UserSeedLookup>()
             .DatabaseSchemaName("identity");

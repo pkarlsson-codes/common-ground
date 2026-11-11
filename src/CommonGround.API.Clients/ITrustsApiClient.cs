@@ -34,6 +34,12 @@ public interface ITrustsApiClient
     /// <returns>A task that completes when it is cancelled.</returns>
     Task CancelTrustInvitationAsync(string invitationId, CancellationToken ct = default);
 
+    /// <summary>Removes a member from the caller's trust.</summary>
+    /// <param name="userId">The member to remove.</param>
+    /// <param name="ct">A token to cancel the operation.</param>
+    /// <returns>A task that completes when they are removed.</returns>
+    Task RemoveTrustMemberAsync(string userId, CancellationToken ct = default);
+
     /// <summary>Shows what an invite link joins, for the invite page.</summary>
     /// <param name="request">The request.</param>
     /// <param name="ct">A token to cancel the operation.</param>

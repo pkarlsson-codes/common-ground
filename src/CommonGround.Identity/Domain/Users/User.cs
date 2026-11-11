@@ -1,3 +1,4 @@
+using CommonGround.Identity.Application.Errors;
 using CommonGround.Identity.Domain.Users.Events;
 using CommonGround.SharedKernel.Domain;
 
@@ -39,6 +40,24 @@ public sealed class User : AggregateRoot<UserId>
     public UserTrustAssigned? AssignTrustIfNone(TrustId trustId) =>
         TrustId is null ? new UserTrustAssigned(Id.Value, trustId.Value) : null;
 
+    /// <summary>Decides to remove the user from their trust. A member can't remove themselves.</summary>
+    /// <param name="trustId">The trust of the member who removes them.</param>
+    /// <param name="removedBy">The member who removes them.</param>
+    public UserRemovedFromTrust RemoveFromTrust(TrustId trustId, UserId removedBy)
+    {
+        if (TrustId != trustId)
+        {
+            throw BusinessRuleViolation.User.RemoveFromTrust.NotAMember();
+        }
+
+        if (removedBy == Id)
+        {
+            throw BusinessRuleViolation.User.RemoveFromTrust.CannotRemoveSelf();
+        }
+
+        return new UserRemovedFromTrust(Id.Value, trustId.Value, removedBy.Value);
+    }
+
     /// <summary>Decides to keep the email address and name the sign-in server gives on a later sign-in.</summary>
     /// <param name="email">The email address it gave, or <see langword="null"/> to keep the one on record.</param>
     /// <param name="displayName">The name it gave, or <see langword="null"/> to keep the one on record.</param>
@@ -72,6 +91,14 @@ public sealed class User : AggregateRoot<UserId>
         ArgumentNullException.ThrowIfNull(e);
 
         TrustId = global::CommonGround.SharedKernel.Domain.TrustId.Create(e.TrustId);
+    }
+
+    /// <summary>Applies <see cref="UserRemovedFromTrust"/>.</summary>
+    public void Apply(UserRemovedFromTrust e)
+    {
+        ArgumentNullException.ThrowIfNull(e);
+
+        TrustId = null;
     }
 
     /// <summary>Applies <see cref="UserProfileUpdated"/>.</summary>

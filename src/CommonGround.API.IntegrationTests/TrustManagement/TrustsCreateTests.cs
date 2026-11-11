@@ -108,19 +108,18 @@ public class TrustsCreateTests(ApiFactory factory)
     public async Task CreateTrust_UserAlreadyHasTrust_Returns409()
     {
         var subject = $"self-create-existing-trust-{Guid.NewGuid():N}";
-        var existingTrustId = "trust-testdefault00000000000";
 
-        var bootstrapClient = factory.CreateClient().WithAuthToken(trustId: string.Empty);
-
-        var ensureResponse = await bootstrapClient.PostAsJsonAsync(
+        var ensureResponse = await factory.CreateClient().WithAuthToken(trustId: string.Empty).PostAsJsonAsync(
             "/api/users/ensure",
-            new EnsureUserRequest(subject, "existingtrust@example.com", "Existing Trust", TrustId: existingTrustId));
+            new EnsureUserRequest(subject, "existingtrust@example.com", "Existing Trust", TrustId: null));
+        var userId = (await ensureResponse.Content.ReadFromJsonAsync<EnsureUserResponse>())!.UserId;
 
-        ensureResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var ensurePayload = await ensureResponse.Content.ReadFromJsonAsync<EnsureUserResponse>();
-        ensurePayload.Should().NotBeNull();
+        var first = await factory.CreateClient().WithAuthToken(userId: userId, trustId: string.Empty).PostAsJsonAsync(
+            "/api/trusts",
+            new CreateTrustRequest($"First Trust {Guid.NewGuid():N}", "America/Denver"));
+        var existingTrustId = (await first.Content.ReadFromJsonAsync<CreateTrustResponse>())!.TrustId;
 
-        var client = factory.CreateClient().WithAuthToken(userId: ensurePayload!.UserId, trustId: existingTrustId);
+        var client = factory.CreateClient().WithAuthToken(userId: userId, trustId: existingTrustId);
 
         var response = await client.PostAsJsonAsync(
             "/api/trusts",

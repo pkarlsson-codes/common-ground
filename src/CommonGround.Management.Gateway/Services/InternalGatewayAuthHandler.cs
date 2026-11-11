@@ -8,6 +8,9 @@ namespace CommonGround.Management.Gateway.Services;
 /// </summary>
 public sealed partial class InternalGatewayAuthHandler : DelegatingHandler
 {
+    // Set by the API's TrustMembershipMiddleware on its 403.
+    private const string MembershipHeader = "X-Trust-Membership";
+
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IInternalJwtService _jwtService;
     private readonly ITokenStore _tokenStore;
@@ -72,7 +75,23 @@ public sealed partial class InternalGatewayAuthHandler : DelegatingHandler
         var token = _jwtService.GenerateToken(userId, trustId, sessionId);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+        // The user was removed from the trust. Drop it from the session so /auth/me sends them to onboarding.
+        if (response.StatusCode == System.Net.HttpStatusCode.Forbidden
+            && response.Headers.TryGetValues(MembershipHeader, out var values)
+            && values.Contains("ended", StringComparer.Ordinal)
+            && !string.IsNullOrWhiteSpace(sessionId))
+        {
+            var stored = await _tokenStore.TryGetTokensAsync(sessionId, cancellationToken).ConfigureAwait(false);
+            if (stored is { } tokens)
+            {
+                await _tokenStore.SaveTokensAsync(sessionId, tokens.userId, null, tokens.accessToken, tokens.refreshToken, tokens.idToken, cancellationToken).ConfigureAwait(false);
+                Logs.TrustMembershipEnded(_logger, tokens.userId);
+            }
+        }
+
+        return response;
     }
 
     private static partial class Logs
@@ -85,5 +104,8 @@ public sealed partial class InternalGatewayAuthHandler : DelegatingHandler
 
         [LoggerMessage(EventId = 3, Level = LogLevel.Debug, Message = "Forwarding request with userId {UserId}. Path: {Path}")]
         internal static partial void ForwardingWithUser(ILogger logger, string userId, string path);
+
+        [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "User {UserId} is no longer a member of the session's trust; trust removed from the session")]
+        internal static partial void TrustMembershipEnded(ILogger logger, string userId);
     }
 }

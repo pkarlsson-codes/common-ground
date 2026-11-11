@@ -34,6 +34,14 @@ export function useCancelInvitation() {
   })
 }
 
+export function useRemoveMember() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (userId: string) => api.removeTrustMember({ userId }),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ['team', 'members'] }) },
+  })
+}
+
 /** What an invite link joins. Not retried: an invalid link stays invalid. */
 export function useInvitationPreview(token: string) {
   return useQuery({

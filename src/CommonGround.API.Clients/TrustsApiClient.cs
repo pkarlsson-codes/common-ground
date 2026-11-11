@@ -36,6 +36,10 @@ public sealed class TrustsApiClient(
         => await PostAsync($"api/trust-invitations/{Uri.EscapeDataString(invitationId)}/cancel", ct).ConfigureAwait(false);
 
     /// <inheritdoc/>
+    public async Task RemoveTrustMemberAsync(string userId, CancellationToken ct = default)
+        => await PostAsync($"api/trust-members/{Uri.EscapeDataString(userId)}/remove", ct).ConfigureAwait(false);
+
+    /// <inheritdoc/>
     public async Task<TrustInvitationPreviewResponse> PreviewTrustInvitationAsync(TrustInvitationTokenRequest request, CancellationToken ct = default)
         => await PostAsync<TrustInvitationTokenRequest, TrustInvitationPreviewResponse>("api/trust-invitations/preview", request, ct).ConfigureAwait(false);
 

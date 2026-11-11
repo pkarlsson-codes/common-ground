@@ -187,6 +187,8 @@ internal static class BusinessRuleErrorMessageMap
             ["stewardship.stewardship_case.submit_occupancy_verification.invalid_status"] = "Occupancy verification cannot be submitted in the current status.",
             ["stewardship.stewardship_case.verify_occupancy.invalid_status"] = "Occupancy verification cannot be approved in the current status.",
 
+            ["identity.user.remove_from_trust.not_a_member"] = "That person isn't a member of this trust.",
+            ["identity.user.remove_from_trust.cannot_remove_self"] = "You can't remove yourself from the trust.",
             ["trust_management.trust.create.name_required"] = "Trust name is required.",
             ["trust_management.trust.request_onboarding.correlation_id_required"] = "A correlation identifier is required to initiate trust onboarding.",
             ["trust_management.trust_invitation.not_found"] = "That invite doesn't exist.",

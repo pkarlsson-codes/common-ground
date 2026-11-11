@@ -1,6 +1,7 @@
 using CommonGround.API.Contracts.TrustManagement.Requests;
 using CommonGround.API.Contracts.TrustManagement.Responses;
 using CommonGround.API.Infrastructure.Auth;
+using CommonGround.Identity.Application.Commands;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.TrustManagement.Application.Commands;
@@ -52,6 +53,9 @@ public static class TrustsEndpoints
         await bus.InvokeAsync(
             new CreateTrust(trustId, request.Name, request.TimeZone, userId, correlationId),
             cancellationToken).ConfigureAwait(false);
+
+        // Assigned here as well as from TrustOnboardingRequested, so the membership check passes on the next request.
+        await bus.InvokeAsync(new AssignUserToTrustIfNone(userId, trustId), cancellationToken).ConfigureAwait(false);
 
         return Results.Ok(new CreateTrustResponse(trustId.Value));
     }

@@ -10,4 +10,4 @@ For when a trust adds a colleague to CommonGround.
 6. To withdraw an invite, user clicks "Cancel" on its row and confirms. The link stops working and the row is removed
 7. When the colleague joins, they appear in Members and the invite leaves Pending Invites
 
-Continues in: [Join a Trust](../onboarding/join-a-trust.md)
+Continues in: [Join a Trust](../onboarding/join-a-trust.md), [Remove a Member](remove-a-member.md)

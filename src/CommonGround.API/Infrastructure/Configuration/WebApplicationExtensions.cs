@@ -1,3 +1,4 @@
+using CommonGround.API.Infrastructure.Auth;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Scalar.AspNetCore;
 using Serilog;
@@ -47,6 +48,7 @@ internal static class WebApplicationExtensions
         app.UseCors();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseMiddleware<TrustMembershipMiddleware>();
 
         return app;
     }

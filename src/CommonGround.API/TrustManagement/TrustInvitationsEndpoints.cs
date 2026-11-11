@@ -1,6 +1,7 @@
 using CommonGround.API.Contracts.TrustManagement.Requests;
 using CommonGround.API.Contracts.TrustManagement.Responses;
 using CommonGround.API.Infrastructure.Auth;
+using CommonGround.Identity.Application.Commands;
 using CommonGround.Identity.Application.Queries;
 using CommonGround.Identity.Application.ReadModels;
 using CommonGround.SharedKernel.Domain;
@@ -136,6 +137,9 @@ public static class TrustInvitationsEndpoints
             new AcceptTrustInvitation(InvitationToken.Hash(request.Token), httpContext.GetUserId(), TimeProviderContext.Current.UtcNow),
             cancellationToken).ConfigureAwait(false);
 
+        // Assigned here as well as from TrustMemberJoined, so the membership check passes on the next request.
+        await bus.InvokeAsync(new AssignUserToTrustIfNone(httpContext.GetUserId(), trustId), cancellationToken).ConfigureAwait(false);
+
         return Results.Ok(new AcceptTrustInvitationResponse(trustId.Value));
     }
 
@@ -157,5 +161,27 @@ public static class TrustInvitationsEndpoints
         return Results.Ok(new TrustMemberListResponse(members
             .Select(m => new TrustMemberResponse(m.UserId, m.DisplayName, m.Email))
             .ToList()));
+    }
+
+    // Removes a member from the caller's trust. TrustMembershipMiddleware refuses their next request.
+    [WolverinePost("/api/trust-members/{userId}/remove")]
+    [NotTenanted]
+    [Authorize]
+    public static async Task<IResult> RemoveTrustMember(
+        string userId,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        if (httpContext.TryGetTenantId() is not { } trustId)
+        {
+            return Results.Forbid();
+        }
+
+        await bus.InvokeAsync(
+            new RemoveTrustMember(UserId.Create(userId), trustId, httpContext.GetUserId()),
+            cancellationToken).ConfigureAwait(false);
+
+        return Results.NoContent();
     }
 }

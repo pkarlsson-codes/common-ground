@@ -60,6 +60,10 @@ export interface PreviewTrustInvitationRequest {
     trustInvitationTokenRequest: TrustInvitationTokenRequest;
 }
 
+export interface RemoveTrustMemberRequest {
+    userId: string;
+}
+
 /**
  * TrustInvitationsApi - interface
  * 
@@ -142,6 +146,19 @@ export interface TrustInvitationsApiInterface {
     /**
      */
     previewTrustInvitation(requestParameters: PreviewTrustInvitationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrustInvitationPreviewResponse>;
+
+    /**
+     * 
+     * @param {string} userId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TrustInvitationsApiInterface
+     */
+    removeTrustMemberRaw(requestParameters: RemoveTrustMemberRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    removeTrustMember(requestParameters: RemoveTrustMemberRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
 }
 
@@ -355,6 +372,48 @@ export class TrustInvitationsApi extends runtime.BaseAPI implements TrustInvitat
     async previewTrustInvitation(requestParameters: PreviewTrustInvitationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrustInvitationPreviewResponse> {
         const response = await this.previewTrustInvitationRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async removeTrustMemberRaw(requestParameters: RemoveTrustMemberRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['userId'] == null) {
+            throw new runtime.RequiredError(
+                'userId',
+                'Required parameter "userId" was null or undefined when calling removeTrustMember().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/trust-members/{userId}/remove`;
+        urlPath = urlPath.replace(`{${"userId"}}`, encodeURIComponent(String(requestParameters['userId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async removeTrustMember(requestParameters: RemoveTrustMemberRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.removeTrustMemberRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
 }

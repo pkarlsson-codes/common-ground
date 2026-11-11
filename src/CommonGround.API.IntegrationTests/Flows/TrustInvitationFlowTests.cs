@@ -10,8 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace CommonGround.API.IntegrationTests.Flows;
 
 /// <summary>
-/// A trust member invites a colleague, who joins with the link. Joining is recorded in TrustManagement and
-/// the membership assigned by Identity from the integration event, so this runs on the durable host.
+/// A trust member invites a colleague, who joins with the link, and later removes them. Runs on the durable host,
+/// so the membership check sees what a real request sees right after joining or removal.
 /// </summary>
 [Collection(DurableIntegrationCollection.Name)]
 public class TrustInvitationFlowTests(DurableApiFactory factory)
@@ -55,6 +55,56 @@ public class TrustInvitationFlowTests(DurableApiFactory factory)
         reused.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
         (await reused.Content.ReadFromJsonAsync<ProblemDetails>())!.Extensions["code"]!.ToString()
             .Should().Be("trust_management.trust_invitation.accept.no_longer_valid");
+    }
+
+    [Fact]
+    public async Task ARemovedMember_LosesAccessOnTheNextRequest_AndCanBeInvitedAgain()
+    {
+        var founderId = await EnsureUserAsync($"Founder {Guid.NewGuid():N}");
+        var created = await _tracker.TrackAsync(async () =>
+        {
+            var response = await factory.CreateClient().WithAuthToken(userId: founderId, trustId: string.Empty)
+                .PostAsJsonAsync("/api/trusts", new CreateTrustRequest($"Removal Flow CLT {Guid.NewGuid():N}", "America/Denver"));
+            return (await response.Content.ReadFromJsonAsync<CreateTrustResponse>())!;
+        });
+        var founder = factory.CreateClient().WithAuthToken(userId: founderId, trustId: created.TrustId);
+        (await founder.GetAsync("/api/trusts/current")).StatusCode.Should().Be(HttpStatusCode.OK, "the creator is assigned before the response");
+
+        var colleagueId = await EnsureUserAsync($"Colleague {Guid.NewGuid():N}");
+        await JoinAsync(founder, colleagueId);
+        var colleagueInTrust = factory.CreateClient().WithAuthToken(userId: colleagueId, trustId: created.TrustId);
+        (await colleagueInTrust.GetAsync("/api/trusts/current")).StatusCode.Should().Be(HttpStatusCode.OK, "the colleague is assigned before the response");
+
+        var removeSelf = await founder.PostAsync($"/api/trust-members/{founderId}/remove", null);
+        removeSelf.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await removeSelf.Content.ReadFromJsonAsync<ProblemDetails>())!.Extensions["code"]!.ToString()
+            .Should().Be("identity.user.remove_from_trust.cannot_remove_self");
+
+        (await founder.PostAsync($"/api/trust-members/{colleagueId}/remove", null)).StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        // The colleague's session still names the trust; the API refuses it.
+        var refused = await colleagueInTrust.GetAsync("/api/trusts/current");
+        refused.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        (await refused.Content.ReadFromJsonAsync<ProblemDetails>())!.Extensions["code"]!.ToString()
+            .Should().Be("identity.trust_membership.ended");
+        (await founder.GetFromJsonAsync<TrustMemberListResponse>("/api/trust-members"))!.Items
+            .Select(m => m.UserId).Should().BeEquivalentTo([founderId]);
+
+        var removeAgain = await founder.PostAsync($"/api/trust-members/{colleagueId}/remove", null);
+        (await removeAgain.Content.ReadFromJsonAsync<ProblemDetails>())!.Extensions["code"]!.ToString()
+            .Should().Be("identity.user.remove_from_trust.not_a_member");
+
+        await JoinAsync(founder, colleagueId);
+        (await colleagueInTrust.GetAsync("/api/trusts/current")).StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    private async Task JoinAsync(HttpClient member, string userId)
+    {
+        var invite = await (await member.PostAsJsonAsync("/api/trust-invitations", new CreateTrustInvitationRequest("colleague@example.org")))
+            .Content.ReadFromJsonAsync<CreateTrustInvitationResponse>();
+        var joiner = factory.CreateClient().WithAuthToken(userId: userId, trustId: string.Empty);
+        (await joiner.PostAsJsonAsync("/api/trust-invitations/accept", new TrustInvitationTokenRequest(invite!.Token)))
+            .StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     private async Task<string> EnsureUserAsync(string name)
