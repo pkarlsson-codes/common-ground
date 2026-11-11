@@ -81,6 +81,12 @@ public class GroundLeaseView
     /// <summary>Gets or sets the monthly repair reserve fee.</summary>
     public decimal RepairReserveFee { get; set; }
 
+    /// <summary>Gets or sets the yearly interest rate on a late fee, in percent; zero charges none.</summary>
+    public decimal LateInterestRate { get; set; }
+
+    /// <summary>Gets or sets the days after the due date within which a payment owes no interest.</summary>
+    public int InterestWaiverDays { get; set; }
+
     /// <summary>Gets or sets the day the lease ended, or null while it is active.</summary>
     public DateOnly? EndedOn { get; set; }
 
@@ -89,6 +95,28 @@ public class GroundLeaseView
 
     /// <summary>Gets or sets every late notice recorded, in the order recorded.</summary>
     public List<LeaseFeeNoticeEntry> LeaseFeeNotices { get; set; } = [];
+
+    /// <summary>Gets or sets every late-fee interest waiver, in the order recorded.</summary>
+    public List<LeaseFeeInterestWaiverEntry> LeaseFeeInterestWaivers { get; set; } = [];
+}
+
+/// <summary>Late-fee interest waived, in a ground lease view.</summary>
+public class LeaseFeeInterestWaiverEntry
+{
+    /// <summary>Gets or sets the waiver ID.</summary>
+    public string WaiverId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the day it was waived.</summary>
+    public DateOnly WaivedOn { get; set; }
+
+    /// <summary>Gets or sets how much interest was waived.</summary>
+    public decimal Amount { get; set; }
+
+    /// <summary>Gets or sets why.</summary>
+    public string Reason { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the user who waived it.</summary>
+    public string WaivedBy { get; set; } = string.Empty;
 }
 
 /// <summary>A late lease fee notice in a ground lease view.</summary>

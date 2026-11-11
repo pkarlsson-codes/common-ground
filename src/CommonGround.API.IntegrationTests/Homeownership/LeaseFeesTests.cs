@@ -161,16 +161,55 @@ public class LeaseFeesTests(ApiFactory factory)
         }
     }
 
+    [Fact]
+    public async Task WaiveInterest_OnALeaseWithInterestOwed_LowersTheBalanceAndRefusesMoreThanIsOwed()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var today = (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Today;
+        var oldest = new DateOnly(today.Year, today.Month, 1).AddMonths(-2);
+        var leaseId = await CreateLease(client, UniqueName(), leaseStart: oldest, lateInterestRate: 36.5m);
+
+        // 36.5% a year on $60 is 6 cents a day. The oldest charge is always more than 30 days late; the others may not be.
+        var dues = new[] { oldest, oldest.AddMonths(1), oldest.AddMonths(2) };
+        var days = dues.Select(d => today.DayNumber - d.DayNumber).ToList();
+        var interest = days.Where(d => d > 30).Sum(d => 0.06m * d);
+        var accruing = days.Where(d => d <= 30).Sum(d => 0.06m * d);
+
+        var lease = await client.GetFromJsonAsync<GroundLeaseResponse>($"/api/ground-leases/{leaseId}");
+        lease!.LeaseFees.Should().BeEquivalentTo(new
+        {
+            LateInterestRate = 36.5m,
+            InterestWaiverDays = 30,
+            Statement = new { InterestDue = interest, InterestAccruing = accruing, Balance = 180m + interest },
+        });
+
+        var refused = await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/lease-fee-interest-waivers",
+            new WaiveLeaseFeeInterestRequest(interest + 0.01m, "Hardship"));
+        refused.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await refused.Content.ReadFromJsonAsync<ProblemDetails>())!.Detail.Should().Be("That is more than the interest owed.");
+
+        var waived = await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/lease-fee-interest-waivers",
+            new WaiveLeaseFeeInterestRequest(interest, "  Job loss  "));
+        waived.StatusCode.Should().Be(HttpStatusCode.Created);
+
+        var after = await client.GetFromJsonAsync<GroundLeaseResponse>($"/api/ground-leases/{leaseId}");
+        after!.LeaseFees.Should().BeEquivalentTo(new
+        {
+            Statement = new { InterestDue = 0m, InterestWaived = interest, Balance = 180m },
+            InterestWaivers = new[] { new { WaivedOn = today, Amount = interest, Reason = "Job loss" } },
+        });
+    }
+
     private static string UniqueName() =>
         "Dana " + string.Concat(Guid.NewGuid().ToString("N").Where(char.IsLetter).Take(8).Select(char.ToUpperInvariant).Select((c, i) => i == 0 ? c : char.ToLowerInvariant(c)));
 
-    private static async Task<string> CreateLease(HttpClient client, string homeowner, DateOnly leaseStart)
+    private static async Task<string> CreateLease(HttpClient client, string homeowner, DateOnly leaseStart, decimal lateInterestRate = 0m)
     {
         var response = await client.PostAsJsonAsync("/api/ground-leases",
             new CreateGroundLeaseRequest(
                 Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), homeowner, "dana@example.com", null,
                 leaseStart, 99, 60, 45m, 15m, 200_000m, 250_000m, "Standard covenant", "AppraisalBased",
-                0.25m, null, null, null, null));
+                0.25m, null, null, null, null, lateInterestRate));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<CreateGroundLeaseResponse>())!.GroundLeaseId;
     }

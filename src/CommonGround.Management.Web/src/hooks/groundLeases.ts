@@ -56,6 +56,8 @@ export function useCreateGroundLease() {
           optionWindowDays: form.optionWindowDays,
           landUseFee: form.landUseFee,
           repairReserveFee: form.repairReserveFee,
+          lateInterestRate: form.lateInterestRate,
+          interestWaiverDays: form.interestWaiverDays,
           basePrice: form.basePrice,
           originalAppraisedValue: form.originalAppraisedValue,
           covenantTerms: form.covenantTerms || undefined,
@@ -171,6 +173,15 @@ export function useRecordLeaseFeeNotice() {
         groundLeaseId,
         recordLeaseFeeNoticeRequest: { level: form.level, sentOn: form.sentOn, delivery: form.delivery },
       }),
+    onSuccess: (_d, v) => invalidateLeaseFees(qc, v.groundLeaseId),
+  })
+}
+
+export function useWaiveLeaseFeeInterest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ groundLeaseId, amount, reason }: { groundLeaseId: string; amount: number; reason: string }) =>
+      api.waiveLeaseFeeInterest({ groundLeaseId, waiveLeaseFeeInterestRequest: { amount, reason } }),
     onSuccess: (_d, v) => invalidateLeaseFees(qc, v.groundLeaseId),
   })
 }

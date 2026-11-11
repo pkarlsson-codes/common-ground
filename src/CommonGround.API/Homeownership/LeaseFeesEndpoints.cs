@@ -129,6 +129,33 @@ public static class LeaseFeesEndpoints
             new RecordLeaseFeeNoticeResponse(id.Value));
     }
 
+    [WolverinePost("/api/ground-leases/{groundLeaseId}/lease-fee-interest-waivers")]
+    public static async Task<IResult> WaiveLeaseFeeInterest(
+        string groundLeaseId,
+        WaiveLeaseFeeInterestRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        var id = LeaseFeeInterestWaiverId.Generate();
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new WaiveLeaseFeeInterest(
+                GroundLeaseId.Create(groundLeaseId),
+                id,
+                request.Amount,
+                request.Reason,
+                httpContext.GetUserId()),
+            cancellationToken);
+
+        return Results.Created(
+            $"/api/ground-leases/{groundLeaseId}/lease-fee-interest-waivers/{id.Value}",
+            new WaiveLeaseFeeInterestResponse(id.Value));
+    }
+
     [WolverineGet("/api/lease-fee-notices/due")]
     public static async Task<IResult> GetLeaseFeeNoticesDue(
         [FromQuery] string? groundLeaseId,
@@ -193,5 +220,10 @@ public static class LeaseFeesEndpoints
             b.Statement.DaysOverdue,
             b.NoticeDue?.DisplayName,
             b.LastNotice?.Level,
-            b.LastNotice?.SentOn);
+            b.LastNotice?.SentOn,
+            b.Lease.LateInterestRate,
+            b.Lease.InterestWaiverDays,
+            b.Statement.InterestDue,
+            b.Statement.InterestAccruing,
+            b.Statement.InterestWaivedIfPaidBy);
 }

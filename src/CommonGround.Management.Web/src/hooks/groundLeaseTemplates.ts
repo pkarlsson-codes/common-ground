@@ -23,6 +23,8 @@ export function useCreateGroundLeaseTemplate() {
           optionWindowDays: form.optionWindowDays,
           landUseFee: form.landUseFee,
           repairReserveFee: form.repairReserveFee,
+          lateInterestRate: form.lateInterestRate,
+          interestWaiverDays: form.interestWaiverDays,
           covenantTerms: form.covenantTerms,
           formulaKind: form.formulaKind,
           appreciationShare: form.appreciationShare ?? undefined,

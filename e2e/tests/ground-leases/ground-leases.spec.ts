@@ -81,6 +81,7 @@ test('creating a lease on a parcel\'s home lists it first, shows its homeowner a
   await field(form, 'Land Use Fee ($/month)').fill('40')
   await field(form, 'Repair Reserve Fee ($/month)').fill('10')
   await expect(form).toContainText('Monthly Lease Fee: $50.00, due on the 1st')
+  await expect(form).toContainText('Late Interest: None')
   await field(form, 'Base Price ($)').fill('180000')
   await field(form, 'Original Appraised Value ($)').fill('240000')
   await field(form, 'Covenant Terms').fill('Owner-occupied, permanently affordable')

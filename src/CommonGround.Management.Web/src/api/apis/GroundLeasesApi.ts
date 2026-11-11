@@ -33,6 +33,8 @@ import type {
   ResaleEstimateResponse,
   SetLeaseFeeNoticePolicyRequest,
   VoidLeaseFeePaymentRequest,
+  WaiveLeaseFeeInterestRequest,
+  WaiveLeaseFeeInterestResponse,
 } from '../models/index';
 import {
     CalculateResaleEstimateRequestFromJSON,
@@ -69,6 +71,10 @@ import {
     SetLeaseFeeNoticePolicyRequestToJSON,
     VoidLeaseFeePaymentRequestFromJSON,
     VoidLeaseFeePaymentRequestToJSON,
+    WaiveLeaseFeeInterestRequestFromJSON,
+    WaiveLeaseFeeInterestRequestToJSON,
+    WaiveLeaseFeeInterestResponseFromJSON,
+    WaiveLeaseFeeInterestResponseToJSON,
 } from '../models/index';
 
 export interface CalculateResaleEstimateOperationRequest {
@@ -128,6 +134,11 @@ export interface VoidLeaseFeePaymentOperationRequest {
     groundLeaseId: string;
     paymentId: string;
     voidLeaseFeePaymentRequest: VoidLeaseFeePaymentRequest;
+}
+
+export interface WaiveLeaseFeeInterestOperationRequest {
+    groundLeaseId: string;
+    waiveLeaseFeeInterestRequest: WaiveLeaseFeeInterestRequest;
 }
 
 /**
@@ -306,6 +317,20 @@ export interface GroundLeasesApiInterface {
     /**
      */
     voidLeaseFeePayment(requestParameters: VoidLeaseFeePaymentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
+     * @param {WaiveLeaseFeeInterestRequest} waiveLeaseFeeInterestRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    waiveLeaseFeeInterestRaw(requestParameters: WaiveLeaseFeeInterestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    waiveLeaseFeeInterest(requestParameters: WaiveLeaseFeeInterestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
 }
 
@@ -824,6 +849,51 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
             default:
                 return await response.value();
         }
+    }
+
+    /**
+     */
+    async waiveLeaseFeeInterestRaw(requestParameters: WaiveLeaseFeeInterestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling waiveLeaseFeeInterest().'
+            );
+        }
+
+        if (requestParameters['waiveLeaseFeeInterestRequest'] == null) {
+            throw new runtime.RequiredError(
+                'waiveLeaseFeeInterestRequest',
+                'Required parameter "waiveLeaseFeeInterestRequest" was null or undefined when calling waiveLeaseFeeInterest().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/lease-fee-interest-waivers`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: WaiveLeaseFeeInterestRequestToJSON(requestParameters['waiveLeaseFeeInterestRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async waiveLeaseFeeInterest(requestParameters: WaiveLeaseFeeInterestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.waiveLeaseFeeInterestRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
 }

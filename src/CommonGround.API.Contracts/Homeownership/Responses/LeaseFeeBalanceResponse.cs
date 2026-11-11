@@ -13,6 +13,11 @@ namespace CommonGround.API.Contracts.Homeownership.Responses;
 /// <param name="NoticeDue">The late notice due now, First or Second, or null.</param>
 /// <param name="LastNoticeLevel">The level of the last notice sent since the arrears began, or null.</param>
 /// <param name="LastNoticeSentOn">The day that notice was sent, or null.</param>
+/// <param name="LateInterestRate">The lease's yearly interest rate on a late fee, in percent; zero charges none.</param>
+/// <param name="InterestWaiverDays">Days after the due date within which a payment owes no interest.</param>
+/// <param name="InterestDue">Interest owed after waivers; part of the balance.</param>
+/// <param name="InterestAccruing">Interest running on fees still within the waiver days; not in the balance.</param>
+/// <param name="InterestWaivedIfPaidBy">The last day the oldest unpaid fee can be paid without interest, if that is still ahead.</param>
 public sealed record LeaseFeeBalanceResponse(
     string GroundLeaseId,
     string HomeId,
@@ -25,7 +30,12 @@ public sealed record LeaseFeeBalanceResponse(
     int DaysOverdue,
     string? NoticeDue,
     string? LastNoticeLevel,
-    DateOnly? LastNoticeSentOn);
+    DateOnly? LastNoticeSentOn,
+    decimal LateInterestRate,
+    int InterestWaiverDays,
+    decimal InterestDue,
+    decimal InterestAccruing,
+    DateOnly? InterestWaivedIfPaidBy);
 
 /// <summary>The late notices to print, one letter per lease.</summary>
 /// <param name="Today">The trust's today, the date on every letter.</param>
@@ -50,3 +60,7 @@ public sealed record LeaseFeeNoticePolicyResponse(
 /// <summary>The result of recording a late notice.</summary>
 /// <param name="NoticeId">The new notice's ID.</param>
 public sealed record RecordLeaseFeeNoticeResponse(string NoticeId);
+
+/// <summary>Response after waiving late-fee interest.</summary>
+/// <param name="WaiverId">The new waiver's ID.</param>
+public sealed record WaiveLeaseFeeInterestResponse(string WaiverId);

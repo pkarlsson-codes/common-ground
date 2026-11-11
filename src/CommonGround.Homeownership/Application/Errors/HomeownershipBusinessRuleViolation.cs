@@ -283,6 +283,29 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class WaiveLeaseFeeInterest
+        {
+            public static BusinessRuleViolationException ReasonRequired()
+                => new("homeownership.ground_lease.waive_lease_fee_interest.reason_required");
+
+            public static BusinessRuleViolationException AmountNonPositive(decimal amount)
+                => new(
+                    "homeownership.ground_lease.waive_lease_fee_interest.amount_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["amount"] = amount,
+                    });
+
+            public static BusinessRuleViolationException AmountAboveInterestOwed(decimal amount, decimal interestOwed)
+                => new(
+                    "homeownership.ground_lease.waive_lease_fee_interest.amount_above_interest_owed",
+                    new Dictionary<string, object?>
+                    {
+                        ["amount"] = amount,
+                        ["interestOwed"] = interestOwed,
+                    });
+        }
+
         public static class VoidLeaseFeePayment
         {
             public static BusinessRuleViolationException ReasonRequired()
@@ -348,6 +371,22 @@ public static class BusinessRuleViolation
                     new Dictionary<string, object?>
                     {
                         ["repairReserveFee"] = repairReserveFee,
+                    });
+
+            public static BusinessRuleViolationException LateInterestRateOutOfRange(decimal lateInterestRate)
+                => new(
+                    "homeownership.lease_fee_terms.create.late_interest_rate_out_of_range",
+                    new Dictionary<string, object?>
+                    {
+                        ["lateInterestRate"] = lateInterestRate,
+                    });
+
+            public static BusinessRuleViolationException InterestWaiverDaysNegative(int interestWaiverDays)
+                => new(
+                    "homeownership.lease_fee_terms.create.interest_waiver_days_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["interestWaiverDays"] = interestWaiverDays,
                     });
         }
     }

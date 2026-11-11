@@ -47,7 +47,7 @@ export interface LeaseFeeStatementDto {
      */
     totalPaid?: number;
     /**
-     * Above zero a balance due, below zero a credit.
+     * Fees plus interest due, less payments: above zero a balance due, below zero a credit.
      * @type {number}
      * @memberof LeaseFeeStatementDto
      */
@@ -70,6 +70,36 @@ export interface LeaseFeeStatementDto {
      * @memberof LeaseFeeStatementDto
      */
     arrearsSince?: CalendarDate | null;
+    /**
+     * Interest on fees paid or unpaid past the waiver days, before waivers.
+     * @type {number}
+     * @memberof LeaseFeeStatementDto
+     */
+    interestCharged?: number;
+    /**
+     * Interest the trust waived.
+     * @type {number}
+     * @memberof LeaseFeeStatementDto
+     */
+    interestWaived?: number;
+    /**
+     * Interest owed after waivers; part of the balance.
+     * @type {number}
+     * @memberof LeaseFeeStatementDto
+     */
+    interestDue?: number;
+    /**
+     * Interest running on fees still within the waiver days; not in the balance.
+     * @type {number}
+     * @memberof LeaseFeeStatementDto
+     */
+    interestAccruing?: number;
+    /**
+     * The last day the oldest unpaid fee can be paid without interest, if that is still ahead.
+     * @type {CalendarDate}
+     * @memberof LeaseFeeStatementDto
+     */
+    interestWaivedIfPaidBy?: CalendarDate | null;
 }
 
 /**
@@ -96,6 +126,11 @@ export function LeaseFeeStatementDtoFromJSONTyped(json: any, ignoreDiscriminator
         'oldestUnpaidDueDate': json['oldestUnpaidDueDate'] == null ? undefined : CalendarDateFromJSON(json['oldestUnpaidDueDate']),
         'daysOverdue': json['daysOverdue'] == null ? undefined : json['daysOverdue'],
         'arrearsSince': json['arrearsSince'] == null ? undefined : CalendarDateFromJSON(json['arrearsSince']),
+        'interestCharged': json['interestCharged'] == null ? undefined : json['interestCharged'],
+        'interestWaived': json['interestWaived'] == null ? undefined : json['interestWaived'],
+        'interestDue': json['interestDue'] == null ? undefined : json['interestDue'],
+        'interestAccruing': json['interestAccruing'] == null ? undefined : json['interestAccruing'],
+        'interestWaivedIfPaidBy': json['interestWaivedIfPaidBy'] == null ? undefined : CalendarDateFromJSON(json['interestWaivedIfPaidBy']),
     };
 }
 
@@ -117,6 +152,11 @@ export function LeaseFeeStatementDtoToJSONTyped(value?: LeaseFeeStatementDto | n
         'oldestUnpaidDueDate': CalendarDateToJSON(value['oldestUnpaidDueDate']),
         'daysOverdue': value['daysOverdue'],
         'arrearsSince': CalendarDateToJSON(value['arrearsSince']),
+        'interestCharged': value['interestCharged'],
+        'interestWaived': value['interestWaived'],
+        'interestDue': value['interestDue'],
+        'interestAccruing': value['interestAccruing'],
+        'interestWaivedIfPaidBy': CalendarDateToJSON(value['interestWaivedIfPaidBy']),
     };
 }
 

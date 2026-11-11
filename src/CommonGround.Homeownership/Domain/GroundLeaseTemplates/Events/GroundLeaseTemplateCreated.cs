@@ -11,6 +11,8 @@ public sealed record GroundLeaseTemplateCreated(
     int OptionWindowDays,
     decimal LandUseFee,
     decimal RepairReserveFee,
+    decimal LateInterestRate,
+    int InterestWaiverDays,
     string CovenantTerms,
     FormulaKind FormulaKind,
     decimal? AppreciationShare,

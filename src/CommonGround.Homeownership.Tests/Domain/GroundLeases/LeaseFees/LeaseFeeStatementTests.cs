@@ -16,8 +16,29 @@ public class LeaseFeeStatementTests
 
         public LeaseFeeStatement CalculateWithDatedPayments(
             DateOnly leaseStart, DateOnly asOf, params (string Received, decimal Amount)[] payments) =>
+            LeaseFeeStatement.Calculate(Terms, leaseStart, null, Dated(payments), asOf);
+
+        /// <summary>$60 a month at 36.5% a year: 6 cents a day of interest on an unpaid month.</summary>
+        public LeaseFeeTerms TermsWithInterest { get; } = LeaseFeeTerms.Create(45m, 15m, 36.5m);
+
+        /// <summary>A statement for a lease that started on 2026-01-01 and charges interest.</summary>
+        public LeaseFeeStatement CalculateWithInterest(
+            string asOf,
+            (string Received, decimal Amount)[]? payments = null,
+            string? endedOn = null,
+            params (string WaivedOn, decimal Amount)[] waivers) =>
             LeaseFeeStatement.Calculate(
-                Terms, leaseStart, null, payments.Select(p => new ReceivedPayment(DateOnly.Parse(p.Received, System.Globalization.CultureInfo.InvariantCulture), p.Amount)), asOf);
+                TermsWithInterest,
+                new DateOnly(2026, 1, 1),
+                endedOn is null ? null : Day(endedOn),
+                Dated(payments ?? []),
+                Day(asOf),
+                waivers.Select(w => new WaivedInterest(Day(w.WaivedOn), w.Amount)));
+
+        private static DateOnly Day(string day) => DateOnly.Parse(day, System.Globalization.CultureInfo.InvariantCulture);
+
+        private static IEnumerable<ReceivedPayment> Dated((string Received, decimal Amount)[] payments) =>
+            payments.Select(p => new ReceivedPayment(Day(p.Received), p.Amount));
     }
 
     public class TheCalculateMethod
@@ -129,6 +150,101 @@ public class LeaseFeeStatementTests
             var sut = _testBed.CalculateWithDatedPayments(new DateOnly(2026, 1, 1), new DateOnly(2026, 1, 20), ("2026-01-25", 60m));
 
             sut.Should().BeEquivalentTo(new { Balance = 60m, ArrearsSince = (DateOnly?)new DateOnly(2026, 1, 1) });
+        }
+    }
+
+    public class TheInterest
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenFeePaidWithinTheWaiverDays_WhenCalculated_ThenNoInterestIsOwed()
+        {
+            var sut = _testBed.CalculateWithInterest("2026-01-31", [("2026-01-31", 60m)]);
+
+            sut.Should().BeEquivalentTo(new { InterestCharged = 0m, InterestAccruing = 0m, Balance = 0m });
+        }
+
+        [Fact]
+        public void GivenFeeUnpaidWithinTheWaiverDays_WhenCalculated_ThenInterestIsAccruingButNotInTheBalance()
+        {
+            var sut = _testBed.CalculateWithInterest("2026-01-31");
+
+            sut.Should().BeEquivalentTo(new
+            {
+                InterestCharged = 0m,
+                InterestAccruing = 1.80m,
+                Balance = 60m,
+                InterestWaivedIfPaidBy = (DateOnly?)new DateOnly(2026, 1, 31),
+            });
+        }
+
+        [Fact]
+        public void GivenFeeUnpaidPastTheWaiverDays_WhenCalculated_ThenInterestFromTheDueDateIsInTheBalance()
+        {
+            var sut = _testBed.CalculateWithInterest("2026-02-01");
+
+            sut.Should().BeEquivalentTo(new
+            {
+                InterestCharged = 1.86m,
+                InterestDue = 1.86m,
+                Balance = 121.86m,
+                InterestWaivedIfPaidBy = (DateOnly?)null,
+            });
+        }
+
+        [Fact]
+        public void GivenFeePaidPastTheWaiverDays_WhenCalculated_ThenInterestRunsToTheDayItWasPaid()
+        {
+            var sut = _testBed.CalculateWithInterest("2026-02-10", [("2026-02-10", 60m)]);
+
+            sut.Should().BeEquivalentTo(new
+            {
+                InterestCharged = 2.40m,
+                InterestAccruing = 0.54m,
+                Balance = 62.40m,
+                InterestWaivedIfPaidBy = (DateOnly?)new DateOnly(2026, 3, 3),
+            });
+        }
+
+        [Fact]
+        public void GivenPartPaidWithinTheWaiverDays_WhenCalculated_ThenOnlyTheLatePartEarnsInterest()
+        {
+            var sut = _testBed.CalculateWithInterest("2026-02-20", [("2026-01-20", 30m), ("2026-02-20", 30m)]);
+
+            sut.InterestCharged.Should().Be(1.50m);
+        }
+
+        [Fact]
+        public void GivenPaymentAboveTheFees_WhenCalculated_ThenTheRestPaysTheInterest()
+        {
+            var sut = _testBed.CalculateWithInterest("2026-02-10", [("2026-02-10", 122.40m)]);
+
+            sut.Balance.Should().Be(0m);
+        }
+
+        [Fact]
+        public void GivenEndedLease_WhenCalculated_ThenInterestStopsOnTheDayItEnded()
+        {
+            var sut = _testBed.CalculateWithInterest("2026-03-01", endedOn: "2026-01-20");
+
+            sut.InterestCharged.Should().Be(1.14m);
+        }
+
+        [Fact]
+        public void GivenWaivers_WhenCalculated_ThenThoseUpToTheDayLowerTheInterestDue()
+        {
+            var sut = _testBed.CalculateWithInterest("2026-02-01", null, null, ("2026-02-01", 1m), ("2026-02-02", 0.86m));
+
+            sut.Should().BeEquivalentTo(new { InterestWaived = 1m, InterestDue = 0.86m, Balance = 120.86m });
+        }
+
+        [Fact]
+        public void GivenNoInterestRate_WhenFeeIsPaidLate_ThenNoInterestIsOwed()
+        {
+            var sut = _testBed.CalculateWithDatedPayments(new DateOnly(2026, 1, 1), new DateOnly(2026, 3, 1), ("2026-02-20", 60m));
+
+            sut.Should().BeEquivalentTo(new { InterestCharged = 0m, InterestAccruing = 0m });
         }
     }
 }

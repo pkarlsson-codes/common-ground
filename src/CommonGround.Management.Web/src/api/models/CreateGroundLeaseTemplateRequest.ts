@@ -92,6 +92,18 @@ export interface CreateGroundLeaseTemplateRequest {
      * @memberof CreateGroundLeaseTemplateRequest
      */
     improvementsCap?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateGroundLeaseTemplateRequest
+     */
+    lateInterestRate?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateGroundLeaseTemplateRequest
+     */
+    interestWaiverDays?: number;
 }
 
 /**
@@ -123,6 +135,8 @@ export function CreateGroundLeaseTemplateRequestFromJSONTyped(json: any, ignoreD
         'baselineIndexValue': json['baselineIndexValue'] == null ? undefined : json['baselineIndexValue'],
         'annualPercentage': json['annualPercentage'] == null ? undefined : json['annualPercentage'],
         'improvementsCap': json['improvementsCap'] == null ? undefined : json['improvementsCap'],
+        'lateInterestRate': json['lateInterestRate'] == null ? undefined : json['lateInterestRate'],
+        'interestWaiverDays': json['interestWaiverDays'] == null ? undefined : json['interestWaiverDays'],
     };
 }
 
@@ -149,6 +163,8 @@ export function CreateGroundLeaseTemplateRequestToJSONTyped(value?: CreateGround
         'baselineIndexValue': value['baselineIndexValue'],
         'annualPercentage': value['annualPercentage'],
         'improvementsCap': value['improvementsCap'],
+        'lateInterestRate': value['lateInterestRate'],
+        'interestWaiverDays': value['interestWaiverDays'],
     };
 }
 

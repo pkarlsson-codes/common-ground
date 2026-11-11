@@ -127,6 +127,20 @@ public static class GroundLeasesEndpoints
         return Results.Created($"/api/v1/ground-leases/{groundLeaseId}/lease-fee-notices/{result.NoticeId}", result);
     }
 
+    [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/lease-fee-interest-waivers")]
+    [ProducesResponseType<WaiveLeaseFeeInterestResponse>(StatusCodes.Status201Created)]
+    public static async Task<IResult> WaiveLeaseFeeInterest(
+        string groundLeaseId,
+        WaiveLeaseFeeInterestRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        var result = await client.WaiveLeaseFeeInterestAsync(groundLeaseId, request, cancellationToken).ConfigureAwait(false);
+        return Results.Created($"/api/v1/ground-leases/{groundLeaseId}/lease-fee-interest-waivers/{result.WaiverId}", result);
+    }
+
     [WolverineGet("/api/v1/lease-fee-notices/due")]
     [ProducesResponseType<LeaseFeeNoticesDueResponse>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetLeaseFeeNoticesDue(

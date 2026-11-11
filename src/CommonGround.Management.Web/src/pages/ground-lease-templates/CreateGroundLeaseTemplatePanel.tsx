@@ -17,6 +17,8 @@ const emptyCreate = (): CreateGroundLeaseTemplateForm => ({
   optionWindowDays: 60,
   landUseFee: 0,
   repairReserveFee: 0,
+  lateInterestRate: 0,
+  interestWaiverDays: 30,
   covenantTerms: '',
   formulaKind: 'AppraisalBased',
   appreciationShare: 0.25,
@@ -106,8 +108,7 @@ export default function CreateGroundLeaseTemplatePanel({ onClose }: Props) {
             />
           </div>
           <LeaseFeeFields
-            landUseFee={form.landUseFee}
-            repairReserveFee={form.repairReserveFee}
+            fees={form}
             onChange={fees => setForm(f => ({ ...f, ...fees }))}
           />
 

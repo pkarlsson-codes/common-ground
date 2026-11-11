@@ -17,11 +17,20 @@ public static class LeaseFeeStatements
         ArgumentNullException.ThrowIfNull(view);
 
         return LeaseFeeStatement.Calculate(
-            LeaseFeeTerms.Create(view.LandUseFee, view.RepairReserveFee),
+            TermsOf(view),
             view.LeaseStartDate,
             view.EndedOn,
             view.LeaseFeePayments.Where(p => p.VoidReason is null).Select(p => new ReceivedPayment(p.ReceivedDate, p.Amount)),
-            asOf);
+            asOf,
+            view.LeaseFeeInterestWaivers.Select(w => new WaivedInterest(w.WaivedOn, w.Amount)));
+    }
+
+    /// <summary>The lease's fee and interest terms.</summary>
+    public static LeaseFeeTerms TermsOf(GroundLeaseView view)
+    {
+        ArgumentNullException.ThrowIfNull(view);
+
+        return LeaseFeeTerms.Create(view.LandUseFee, view.RepairReserveFee, view.LateInterestRate, view.InterestWaiverDays);
     }
 
     /// <summary>

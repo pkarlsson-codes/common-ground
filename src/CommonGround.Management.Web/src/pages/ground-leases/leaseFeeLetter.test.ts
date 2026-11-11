@@ -38,4 +38,26 @@ describe('leaseFeeLetter', () => {
     expect(letter.paragraphs.join(' ')).toContain('formal notice of default')
     expect(letter.signOff).toEqual([])
   })
+
+  it('tells a first notice the interest rate and the day it is waived until', () => {
+    const letter = leaseFeeLetter(
+      { ...lease, balance: 60, oldestUnpaidDueDate: d('2026-11-01'), lateInterestRate: 10, interestWaiverDays: 30, interestWaivedIfPaidBy: d('2026-12-01') },
+      'First', d('2026-11-10'), '')
+
+    expect(letter.paragraphs[1]).toBe(
+      'Under your ground lease, interest at 10% a year is counted on a late fee from the day it was due. If you pay the November 2026 fee by December 1, 2026, no interest will be charged on it.')
+  })
+
+  it('shows the interest owed as part of the amount in a second notice', () => {
+    const letter = leaseFeeLetter({ ...lease, balance: 181.25, lateInterestRate: 10, interestWaiverDays: 30, interestDue: 1.25 }, 'Second', d('2026-11-10'), '')
+
+    expect(letter.paragraphs[0]).toBe(
+      'Our records show that your lease fee has not been paid in full. As of November 10, 2026, you owe $181.25, for the monthly lease fee of $60.00 due for September 2026 to November 2026. This includes $1.25 of interest at 10% a year on fees not paid within 30 days of their due date.')
+  })
+
+  it('says nothing about interest when the lease charges none', () => {
+    const letter = leaseFeeLetter(lease, 'Second', d('2026-11-10'), '')
+
+    expect(letter.paragraphs.join(' ')).not.toContain('interest')
+  })
 })

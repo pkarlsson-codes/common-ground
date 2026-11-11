@@ -20,4 +20,6 @@ public sealed record CreateGroundLeaseRequest(
     string? IndexType,
     decimal? BaselineIndexValue,
     decimal? AnnualPercentage,
-    decimal? ImprovementsCap);
+    decimal? ImprovementsCap,
+    decimal LateInterestRate = 0m,
+    int InterestWaiverDays = 30);

@@ -18,6 +18,25 @@ public class LeaseFeeTermsTests
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }
 
+        [Theory]
+        [InlineData(-0.01, 30, "homeownership.lease_fee_terms.create.late_interest_rate_out_of_range")]
+        [InlineData(100.01, 30, "homeownership.lease_fee_terms.create.late_interest_rate_out_of_range")]
+        [InlineData(10, -1, "homeownership.lease_fee_terms.create.interest_waiver_days_negative")]
+        public void GivenInvalidInterestTerms_WhenCreated_ThenThrowsBusinessRuleViolation(double rate, int waiverDays, string expectedCode)
+        {
+            var act = () => LeaseFeeTerms.Create(45m, 15m, (decimal)rate, waiverDays);
+
+            act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
+        }
+
+        [Fact]
+        public void GivenNoInterestTerms_WhenCreated_ThenChargesNoInterestAndWaivesWithinThirtyDays()
+        {
+            var sut = LeaseFeeTerms.Create(45m, 15m);
+
+            sut.Should().BeEquivalentTo(new { ChargesInterest = false, InterestWaiverDays = 30 });
+        }
+
         [Fact]
         public void GivenBothFees_WhenCreated_ThenChargesTheirSumEachMonth()
         {

@@ -89,6 +89,7 @@ models/LandParcelListItemResponse.ts
 models/LandParcelResponse.ts
 models/LeaseExecutionDetailsDto.ts
 models/LeaseFeeBalanceResponse.ts
+models/LeaseFeeInterestWaiverDto.ts
 models/LeaseFeeNoticeDto.ts
 models/LeaseFeeNoticePolicyResponse.ts
 models/LeaseFeeNoticesDueResponse.ts
@@ -187,6 +188,8 @@ models/UploadDocumentResponse.ts
 models/VerifyOccupancyRequest.ts
 models/VoidLeaseFeePaymentRequest.ts
 models/WaitingListEntryResponse.ts
+models/WaiveLeaseFeeInterestRequest.ts
+models/WaiveLeaseFeeInterestResponse.ts
 models/WithdrawApplicationRequest.ts
 models/WithdrawIntentToSellRequest.ts
 models/WithdrawPurchaseRequest.ts

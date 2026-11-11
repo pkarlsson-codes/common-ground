@@ -18,6 +18,8 @@ public sealed record GroundLeaseCreatedFromPurchase(
     int OptionWindowDays,
     decimal LandUseFee,
     decimal RepairReserveFee,
+    decimal LateInterestRate,
+    int InterestWaiverDays,
     decimal BasePrice,
     decimal? OriginalAppraisedValue,
     string CovenantTerms,

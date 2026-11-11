@@ -19,6 +19,8 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             OptionWindowDays = e.Data.OptionWindowDays,
             LandUseFee = e.Data.LandUseFee,
             RepairReserveFee = e.Data.RepairReserveFee,
+            LateInterestRate = e.Data.LateInterestRate,
+            InterestWaiverDays = e.Data.InterestWaiverDays,
             BasePrice = e.Data.BasePrice,
             OriginalAppraisedValue = e.Data.OriginalAppraisedValue,
             CovenantTerms = e.Data.CovenantTerms,
@@ -49,6 +51,8 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             OptionWindowDays = e.Data.OptionWindowDays,
             LandUseFee = e.Data.LandUseFee,
             RepairReserveFee = e.Data.RepairReserveFee,
+            LateInterestRate = e.Data.LateInterestRate,
+            InterestWaiverDays = e.Data.InterestWaiverDays,
             BasePrice = e.Data.BasePrice,
             OriginalAppraisedValue = e.Data.OriginalAppraisedValue,
             CovenantTerms = e.Data.CovenantTerms,
@@ -106,6 +110,16 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             OldestUnpaidDueDate = e.OldestUnpaidDueDate,
             RecordedBy = e.RecordedBy,
             RecordedAt = e.OccurredAt,
+        });
+
+    public static void Apply(GroundLeaseView view, LeaseFeeInterestWaived e) =>
+        view.LeaseFeeInterestWaivers.Add(new LeaseFeeInterestWaiverEntry
+        {
+            WaiverId = e.WaiverId,
+            WaivedOn = e.WaivedOn,
+            Amount = e.Amount,
+            Reason = e.Reason,
+            WaivedBy = e.WaivedBy,
         });
 
     public static void Apply(GroundLeaseView view, LeaseFeePaymentVoided e)

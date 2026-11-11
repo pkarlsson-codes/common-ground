@@ -45,7 +45,7 @@ public static class GroundLeasesEndpoints
             request.LeaseStartDate,
             request.TermYears,
             request.OptionWindowDays,
-            LeaseFeeTerms.Create(request.LandUseFee, request.RepairReserveFee),
+            LeaseFeeTerms.Create(request.LandUseFee, request.RepairReserveFee, request.LateInterestRate, request.InterestWaiverDays),
             request.BasePrice,
             request.OriginalAppraisedValue,
             request.CovenantTerms,
@@ -129,6 +129,8 @@ public static class GroundLeasesEndpoints
                 view.LandUseFee,
                 view.RepairReserveFee,
                 leaseFees.MonthlyFee,
+                view.LateInterestRate,
+                view.InterestWaiverDays,
                 new LeaseFeeStatementDto(
                     leaseFees.AsOf,
                     leaseFees.TotalCharged,
@@ -136,7 +138,12 @@ public static class GroundLeasesEndpoints
                     leaseFees.Balance,
                     leaseFees.OldestUnpaidDueDate,
                     leaseFees.DaysOverdue,
-                    leaseFees.ArrearsSince),
+                    leaseFees.ArrearsSince,
+                    leaseFees.InterestCharged,
+                    leaseFees.InterestWaived,
+                    leaseFees.InterestDue,
+                    leaseFees.InterestAccruing,
+                    leaseFees.InterestWaivedIfPaidBy),
                 view.LeaseFeePayments
                     .OrderByDescending(p => p.ReceivedDate)
                     .ThenByDescending(p => p.RecordedAt)
@@ -165,6 +172,12 @@ public static class GroundLeasesEndpoints
                         n.OldestUnpaidDueDate,
                         n.RecordedBy,
                         n.RecordedAt))
+                    .ToList()
+                    .AsReadOnly(),
+                view.LeaseFeeInterestWaivers
+                    .AsEnumerable()
+                    .Reverse()
+                    .Select(w => new LeaseFeeInterestWaiverDto(w.WaiverId, w.WaivedOn, w.Amount, w.Reason, w.WaivedBy))
                     .ToList()
                     .AsReadOnly()),
             view.CreatedAt,

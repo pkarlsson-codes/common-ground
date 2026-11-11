@@ -33,18 +33,37 @@ public sealed record GroundLeaseResponse(
 /// <param name="LandUseFee">Monthly land use fee.</param>
 /// <param name="RepairReserveFee">Monthly repair reserve fee.</param>
 /// <param name="MonthlyFee">Their sum, charged on the 1st of each month.</param>
+/// <param name="LateInterestRate">Yearly interest rate on a late fee, in percent; zero charges none.</param>
+/// <param name="InterestWaiverDays">Days after the due date within which a payment owes no interest.</param>
 /// <param name="Statement">What the lease owes today.</param>
 /// <param name="Payments">Every payment recorded, voided ones included, newest received first.</param>
 /// <param name="NoticeDue">The late notice due now, First or Second, or null.</param>
 /// <param name="Notices">Every late notice recorded, newest sent first.</param>
+/// <param name="InterestWaivers">Every interest waiver, newest first.</param>
 public sealed record LeaseFeesDto(
     decimal LandUseFee,
     decimal RepairReserveFee,
     decimal MonthlyFee,
+    decimal LateInterestRate,
+    int InterestWaiverDays,
     LeaseFeeStatementDto Statement,
     IReadOnlyList<LeaseFeePaymentDto> Payments,
     string? NoticeDue,
-    IReadOnlyList<LeaseFeeNoticeDto> Notices);
+    IReadOnlyList<LeaseFeeNoticeDto> Notices,
+    IReadOnlyList<LeaseFeeInterestWaiverDto> InterestWaivers);
+
+/// <summary>Late-fee interest the trust waived.</summary>
+/// <param name="WaiverId">The waiver's ID.</param>
+/// <param name="WaivedOn">The day it was waived.</param>
+/// <param name="Amount">How much was waived.</param>
+/// <param name="Reason">Why.</param>
+/// <param name="WaivedBy">The user who waived it.</param>
+public sealed record LeaseFeeInterestWaiverDto(
+    string WaiverId,
+    DateOnly WaivedOn,
+    decimal Amount,
+    string Reason,
+    string WaivedBy);
 
 /// <summary>A late lease fee notice the trust sent.</summary>
 /// <param name="NoticeId">The notice's ID.</param>
@@ -69,10 +88,15 @@ public sealed record LeaseFeeNoticeDto(
 /// <param name="AsOf">The day it is worked out for.</param>
 /// <param name="TotalCharged">Total charged so far.</param>
 /// <param name="TotalPaid">Total of the payments that count.</param>
-/// <param name="Balance">Above zero a balance due, below zero a credit.</param>
+/// <param name="Balance">Fees plus interest due, less payments: above zero a balance due, below zero a credit.</param>
 /// <param name="OldestUnpaidDueDate">Due date of the oldest charge not fully paid, if any.</param>
 /// <param name="DaysOverdue">Days since that charge fell due; zero when nothing is owed.</param>
 /// <param name="ArrearsSince">Due date of the first charge left unpaid since the lease was last paid up, if any.</param>
+/// <param name="InterestCharged">Interest on fees paid or unpaid past the waiver days, before waivers.</param>
+/// <param name="InterestWaived">Interest the trust waived.</param>
+/// <param name="InterestDue">Interest owed after waivers; part of the balance.</param>
+/// <param name="InterestAccruing">Interest running on fees still within the waiver days; not in the balance.</param>
+/// <param name="InterestWaivedIfPaidBy">The last day the oldest unpaid fee can be paid without interest, if that is still ahead.</param>
 public sealed record LeaseFeeStatementDto(
     DateOnly AsOf,
     decimal TotalCharged,
@@ -80,7 +104,12 @@ public sealed record LeaseFeeStatementDto(
     decimal Balance,
     DateOnly? OldestUnpaidDueDate,
     int DaysOverdue,
-    DateOnly? ArrearsSince);
+    DateOnly? ArrearsSince,
+    decimal InterestCharged,
+    decimal InterestWaived,
+    decimal InterestDue,
+    decimal InterestAccruing,
+    DateOnly? InterestWaivedIfPaidBy);
 
 /// <summary>A lease fee payment.</summary>
 /// <param name="PaymentId">The payment's ID.</param>

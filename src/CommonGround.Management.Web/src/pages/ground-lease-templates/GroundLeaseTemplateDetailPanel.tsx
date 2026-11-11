@@ -5,6 +5,7 @@ import { FORMULA_KIND_LABELS, statusLabel } from '../../hooks/types'
 import SlideOver from '../../components/SlideOver'
 import StatusBadge from '../../components/StatusBadge'
 import { useToast } from '../../hooks/useToast'
+import { lateInterestText } from '../ground-leases/lateInterest'
 import { formatPrice } from '../../lib/currency'
 import { getErrorMessage } from '../../lib/getErrorMessage'
 
@@ -108,6 +109,10 @@ export default function GroundLeaseTemplateDetailPanel({ templateId, onClose }: 
                 {formatPrice(detail.landUseFee ?? 0)} land use + {formatPrice(detail.repairReserveFee ?? 0)} repair reserve
               </div>
             </div>
+          </div>
+          <div className="detail-field">
+            <div className="detail-field__label">Late Interest</div>
+            <div className="detail-field__value">{lateInterestText(detail.lateInterestRate, detail.interestWaiverDays)}</div>
           </div>
           {detail.appreciationShare != null && (
             <div className="detail-field">

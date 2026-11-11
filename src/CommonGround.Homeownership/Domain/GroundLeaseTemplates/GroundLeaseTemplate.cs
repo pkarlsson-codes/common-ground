@@ -84,6 +84,8 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
             optionWindowDays,
             leaseFeeTerms.LandUseFee,
             leaseFeeTerms.RepairReserveFee,
+            leaseFeeTerms.LateInterestRate,
+            leaseFeeTerms.InterestWaiverDays,
             covenantTerms,
             resalePolicyTerms.FormulaKind,
             resalePolicyTerms.AppreciationShare,
@@ -136,7 +138,7 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
         TemplateName = e.TemplateName;
         TermYears = e.TermYears;
         OptionWindowDays = e.OptionWindowDays;
-        LeaseFeeTerms = LeaseFeeTerms.Create(e.LandUseFee, e.RepairReserveFee);
+        LeaseFeeTerms = LeaseFeeTerms.Create(e.LandUseFee, e.RepairReserveFee, e.LateInterestRate, e.InterestWaiverDays);
         CovenantTerms = e.CovenantTerms;
         ResalePolicyTerms = e.FormulaKind switch
         {

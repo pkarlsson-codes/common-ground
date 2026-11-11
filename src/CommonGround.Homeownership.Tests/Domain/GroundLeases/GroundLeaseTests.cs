@@ -31,12 +31,16 @@ public class GroundLeaseTests
 
         public LeaseFeeTerms Fees { get; } = LeaseFeeTerms.Create(45m, 15m);
 
-        public GroundLeaseCreated Established(ResalePolicyTerms? terms = null) =>
+        /// <summary>$60 a month at 36.5% a year: 6 cents a day of interest on an unpaid month.</summary>
+        public LeaseFeeTerms FeesWithInterest { get; } = LeaseFeeTerms.Create(45m, 15m, 36.5m);
+
+        public GroundLeaseCreated Established(ResalePolicyTerms? terms = null, LeaseFeeTerms? fees = null) =>
             GroundLease.Establish(
-                LeaseId, ParcelId, HomeId, Homeowner, LeaseStart, 99, 60, Fees, 200_000m, 250_000m, "Standard affordability covenant",
+                LeaseId, ParcelId, HomeId, Homeowner, LeaseStart, 99, 60, fees ?? Fees, 200_000m, 250_000m, "Standard affordability covenant",
                 terms ?? ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, StaffUser);
 
-        public GroundLease Lease(ResalePolicyTerms? terms = null) => EventReplay.Replay<GroundLease>(Established(terms));
+        public GroundLease Lease(ResalePolicyTerms? terms = null, LeaseFeeTerms? fees = null) =>
+            EventReplay.Replay<GroundLease>(Established(terms, fees));
 
         public GroundLeaseTemplate ActiveTemplate(string covenantTerms, int termYears, ResalePolicyTerms terms) =>
             EventReplay.Replay<GroundLeaseTemplate>(
@@ -457,6 +461,30 @@ public class GroundLeaseTests
         private readonly TestBed _testBed = new();
 
         [Fact]
+        public void GivenTemplateWithInterest_WhenCreatedFromPurchase_ThenTheLeaseChargesTheTemplatesInterest()
+        {
+            var template = EventReplay.Replay<GroundLeaseTemplate>(GroundLeaseTemplate.Define(
+                GroundLeaseTemplateId.Generate(), "Template", 99, 45, "Covenants", ResalePolicyTerms.AppraisalBased(0.25m),
+                LeaseFeeTerms.Create(45m, 15m, 12m, 20), _testBed.StaffUser));
+
+            var sut = EventReplay.Replay<GroundLease>(_testBed.FromPurchase(template));
+
+            sut.LeaseFeeTerms.Should().BeEquivalentTo(new { LateInterestRate = 12m, InterestWaiverDays = 20 });
+        }
+
+        [Fact]
+        public void GivenInterestWaived_WhenAsked_ThenTheWaiverLowersTheInterestDue()
+        {
+            var sut = _testBed.Lease(fees: _testBed.FeesWithInterest)
+                .Decide(l => l.WaiveLeaseFeeInterest(LeaseFeeInterestWaiverId.Generate(), 1m, "Hardship", new DateOnly(2025, 2, 1), _testBed.StaffUser))
+                .Aggregate;
+
+            var statement = sut.LeaseFeeStatementAsOf(new DateOnly(2025, 2, 1));
+
+            statement.Should().BeEquivalentTo(new { InterestCharged = 1.86m, InterestWaived = 1m, InterestDue = 0.86m });
+        }
+
+        [Fact]
         public void GivenTerminatedLease_WhenAsked_ThenStopsChargingAfterTheTerminationDate()
         {
             var sut = _testBed.Lease().Decide(l => l.Terminate("Sold", new DateOnly(2025, 3, 20), _testBed.StaffUser)).Aggregate;
@@ -527,6 +555,44 @@ public class GroundLeaseTests
                 Delivery = NoticeDelivery.CertifiedMail,
                 BalanceDue = 60m,
                 OldestUnpaidDueDate = new DateOnly(2025, 2, 1),
+            });
+        }
+    }
+
+    public class TheWaiveLeaseFeeInterestMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        // January's $60 unpaid on Feb 1 is 31 days late: $1.86 interest owed.
+        private static readonly DateOnly Today = new(2025, 2, 1);
+
+        [Theory]
+        [InlineData(1, " ", "homeownership.ground_lease.waive_lease_fee_interest.reason_required")]
+        [InlineData(0, "Hardship", "homeownership.ground_lease.waive_lease_fee_interest.amount_non_positive")]
+        [InlineData(1.87, "Hardship", "homeownership.ground_lease.waive_lease_fee_interest.amount_above_interest_owed")]
+        public void GivenInvalidWaiver_WhenWaived_ThenThrowsBusinessRuleViolation(double amount, string reason, string expectedCode)
+        {
+            var sut = _testBed.Lease(fees: _testBed.FeesWithInterest);
+
+            var act = () => sut.WaiveLeaseFeeInterest(
+                LeaseFeeInterestWaiverId.Generate(), (decimal)amount, reason, Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
+        }
+
+        [Fact]
+        public void GivenAllTheInterestOwed_WhenWaived_ThenKeepsTheWaiverWithItsTrimmedReason()
+        {
+            var sut = _testBed.Lease(fees: _testBed.FeesWithInterest);
+
+            var (waived, _) = sut.Decide(l => l.WaiveLeaseFeeInterest(
+                LeaseFeeInterestWaiverId.Generate(), 1.86m, "  Job loss  ", Today, _testBed.StaffUser));
+
+            waived.LeaseFeeInterestWaivers.Should().ContainSingle().Which.Should().BeEquivalentTo(new
+            {
+                WaivedOn = Today,
+                Amount = 1.86m,
+                Reason = "Job loss",
             });
         }
     }

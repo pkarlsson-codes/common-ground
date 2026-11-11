@@ -14,6 +14,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { LeaseFeeInterestWaiverDto } from './LeaseFeeInterestWaiverDto';
+import {
+    LeaseFeeInterestWaiverDtoFromJSON,
+    LeaseFeeInterestWaiverDtoFromJSONTyped,
+    LeaseFeeInterestWaiverDtoToJSON,
+    LeaseFeeInterestWaiverDtoToJSONTyped,
+} from './LeaseFeeInterestWaiverDto';
 import type { LeaseFeePaymentDto } from './LeaseFeePaymentDto';
 import {
     LeaseFeePaymentDtoFromJSON,
@@ -61,6 +68,18 @@ export interface LeaseFeesDto {
      */
     monthlyFee?: number;
     /**
+     * Yearly interest rate on a late fee, in percent; zero charges none.
+     * @type {number}
+     * @memberof LeaseFeesDto
+     */
+    lateInterestRate?: number;
+    /**
+     * Days after the due date within which a payment owes no interest.
+     * @type {number}
+     * @memberof LeaseFeesDto
+     */
+    interestWaiverDays?: number;
+    /**
      * 
      * @type {LeaseFeeStatementDto}
      * @memberof LeaseFeesDto
@@ -84,6 +103,12 @@ export interface LeaseFeesDto {
      * @memberof LeaseFeesDto
      */
     notices?: Array<LeaseFeeNoticeDto>;
+    /**
+     * Every interest waiver, newest first.
+     * @type {Array<LeaseFeeInterestWaiverDto>}
+     * @memberof LeaseFeesDto
+     */
+    interestWaivers?: Array<LeaseFeeInterestWaiverDto>;
 }
 
 /**
@@ -106,10 +131,13 @@ export function LeaseFeesDtoFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'landUseFee': json['landUseFee'] == null ? undefined : json['landUseFee'],
         'repairReserveFee': json['repairReserveFee'] == null ? undefined : json['repairReserveFee'],
         'monthlyFee': json['monthlyFee'] == null ? undefined : json['monthlyFee'],
+        'lateInterestRate': json['lateInterestRate'] == null ? undefined : json['lateInterestRate'],
+        'interestWaiverDays': json['interestWaiverDays'] == null ? undefined : json['interestWaiverDays'],
         'statement': json['statement'] == null ? undefined : LeaseFeeStatementDtoFromJSON(json['statement']),
         'payments': json['payments'] == null ? undefined : ((json['payments'] as Array<any>).map(LeaseFeePaymentDtoFromJSON)),
         'noticeDue': json['noticeDue'] == null ? undefined : json['noticeDue'],
         'notices': json['notices'] == null ? undefined : ((json['notices'] as Array<any>).map(LeaseFeeNoticeDtoFromJSON)),
+        'interestWaivers': json['interestWaivers'] == null ? undefined : ((json['interestWaivers'] as Array<any>).map(LeaseFeeInterestWaiverDtoFromJSON)),
     };
 }
 
@@ -127,10 +155,13 @@ export function LeaseFeesDtoToJSONTyped(value?: LeaseFeesDto | null, ignoreDiscr
         'landUseFee': value['landUseFee'],
         'repairReserveFee': value['repairReserveFee'],
         'monthlyFee': value['monthlyFee'],
+        'lateInterestRate': value['lateInterestRate'],
+        'interestWaiverDays': value['interestWaiverDays'],
         'statement': LeaseFeeStatementDtoToJSON(value['statement']),
         'payments': value['payments'] == null ? undefined : ((value['payments'] as Array<any>).map(LeaseFeePaymentDtoToJSON)),
         'noticeDue': value['noticeDue'],
         'notices': value['notices'] == null ? undefined : ((value['notices'] as Array<any>).map(LeaseFeeNoticeDtoToJSON)),
+        'interestWaivers': value['interestWaivers'] == null ? undefined : ((value['interestWaivers'] as Array<any>).map(LeaseFeeInterestWaiverDtoToJSON)),
     };
 }
 

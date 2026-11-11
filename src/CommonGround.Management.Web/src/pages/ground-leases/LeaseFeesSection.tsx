@@ -4,16 +4,19 @@ import { NOTICE_DELIVERY_LABELS, NOTICE_LEVEL_LABELS, PAYMENT_METHOD_LABELS } fr
 import { formatCalendarDate } from '../../lib/calendarDate'
 import { formatPrice } from '../../lib/currency'
 import { formatBalance, formatDaysOverdue, formatDueMonth } from './leaseFeeFormat'
+import { lateInterestText } from './lateInterest'
 import { openNoticeLetters } from './leaseFeeLetter'
 import RecordLeaseFeeNoticePanel from './RecordLeaseFeeNoticePanel'
 import RecordLeaseFeePaymentPanel from './RecordLeaseFeePaymentPanel'
 import VoidLeaseFeePaymentPanel from './VoidLeaseFeePaymentPanel'
+import WaiveLeaseFeeInterestPanel from './WaiveLeaseFeeInterestPanel'
 
-/** The lease's monthly fee, what it owes today, the payments the trust has recorded, and its late notices. */
+/** The lease's monthly fee, what it owes today with late interest, the payments the trust has recorded, and its late notices. */
 export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse }) {
   const [recording, setRecording] = useState(false)
   const [recordingNotice, setRecordingNotice] = useState(false)
   const [voiding, setVoiding] = useState<LeaseFeePaymentDto | null>(null)
+  const [waiving, setWaiving] = useState(false)
   const fees = lease.leaseFees
   if (!fees) return null
 
@@ -23,6 +26,10 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
   const payments = fees.payments ?? []
   const notices = fees.notices ?? []
   const noticeDue = fees.noticeDue
+  const chargesInterest = (fees.lateInterestRate ?? 0) > 0
+  const interestDue = statement?.interestDue ?? 0
+  const interestAccruing = statement?.interestAccruing ?? 0
+  const interestWaivers = fees.interestWaivers ?? []
 
   return (
     <div className="detail-section">
@@ -42,9 +49,16 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
               </div>
             </div>
             <div className="detail-field">
+              <div className="detail-field__label">Late Interest</div>
+              <div className="detail-field__value">{lateInterestText(fees.lateInterestRate, fees.interestWaiverDays)}</div>
+            </div>
+            <div className="detail-field">
               <div className="detail-field__label">Balance</div>
               <div className="detail-field__value mono" style={balance > 0 ? { color: 'var(--red)' } : undefined}>
                 {formatBalance(balance)}
+                {interestDue > 0 && (
+                  <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>includes {formatPrice(interestDue)} interest</div>
+                )}
               </div>
             </div>
             {statement?.oldestUnpaidDueDate && (
@@ -60,6 +74,16 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
               </>
             )}
           </div>
+
+          {chargesInterest && interestAccruing > 0 && (
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
+              Interest accruing: {formatPrice(interestAccruing)}
+              {statement?.interestWaivedIfPaidBy && statement.oldestUnpaidDueDate && (
+                <>, waived if the {formatDueMonth(statement.oldestUnpaidDueDate)} fee is paid by {formatCalendarDate(statement.interestWaivedIfPaidBy)}</>
+              )}
+              . Not in the balance yet.
+            </p>
+          )}
 
           {noticeDue && (
             <div
@@ -86,6 +110,11 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
             {!noticeDue && (statement?.balance ?? 0) > 0 && (
               <button type="button" className="btn btn-ghost" onClick={() => setRecordingNotice(true)}>
                 Record Notice
+              </button>
+            )}
+            {interestDue > 0 && (
+              <button type="button" className="btn btn-ghost" onClick={() => setWaiving(true)}>
+                Waive Interest
               </button>
             )}
           </div>
@@ -164,9 +193,36 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
               </table>
             </div>
           )}
+
+          {interestWaivers.length > 0 && (
+            <div className="registry-table-wrap" style={{ marginTop: 12 }}>
+              <div className="detail-field__label" style={{ marginBottom: 4 }}>Interest Waived</div>
+              <table className="registry-table" aria-label="Interest waivers">
+                <thead>
+                  <tr>
+                    <th>Waived</th>
+                    <th>Amount</th>
+                    <th>Reason</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {interestWaivers.map(w => (
+                    <tr key={w.waiverId}>
+                      <td className="cell-mono">{w.waivedOn ? formatCalendarDate(w.waivedOn) : '—'}</td>
+                      <td className="cell-mono">{formatPrice(w.amount ?? 0)}</td>
+                      <td>{w.reason}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </>
       )}
 
+      {waiving && (
+        <WaiveLeaseFeeInterestPanel lease={lease} onClose={() => setWaiving(false)} />
+      )}
       {recordingNotice && (
         <RecordLeaseFeeNoticePanel lease={lease} onClose={() => setRecordingNotice(false)} />
       )}

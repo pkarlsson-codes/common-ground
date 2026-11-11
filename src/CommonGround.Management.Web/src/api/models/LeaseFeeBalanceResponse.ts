@@ -100,6 +100,36 @@ export interface LeaseFeeBalanceResponse {
      * @memberof LeaseFeeBalanceResponse
      */
     lastNoticeSentOn?: CalendarDate | null;
+    /**
+     * The lease's yearly interest rate on a late fee, in percent; zero charges none.
+     * @type {number}
+     * @memberof LeaseFeeBalanceResponse
+     */
+    lateInterestRate?: number;
+    /**
+     * Days after the due date within which a payment owes no interest.
+     * @type {number}
+     * @memberof LeaseFeeBalanceResponse
+     */
+    interestWaiverDays?: number;
+    /**
+     * Interest owed after waivers; part of the balance.
+     * @type {number}
+     * @memberof LeaseFeeBalanceResponse
+     */
+    interestDue?: number;
+    /**
+     * Interest running on fees still within the waiver days; not in the balance.
+     * @type {number}
+     * @memberof LeaseFeeBalanceResponse
+     */
+    interestAccruing?: number;
+    /**
+     * The last day the oldest unpaid fee can be paid without interest, if that is still ahead.
+     * @type {CalendarDate}
+     * @memberof LeaseFeeBalanceResponse
+     */
+    interestWaivedIfPaidBy?: CalendarDate | null;
 }
 
 /**
@@ -131,6 +161,11 @@ export function LeaseFeeBalanceResponseFromJSONTyped(json: any, ignoreDiscrimina
         'noticeDue': json['noticeDue'] == null ? undefined : json['noticeDue'],
         'lastNoticeLevel': json['lastNoticeLevel'] == null ? undefined : json['lastNoticeLevel'],
         'lastNoticeSentOn': json['lastNoticeSentOn'] == null ? undefined : CalendarDateFromJSON(json['lastNoticeSentOn']),
+        'lateInterestRate': json['lateInterestRate'] == null ? undefined : json['lateInterestRate'],
+        'interestWaiverDays': json['interestWaiverDays'] == null ? undefined : json['interestWaiverDays'],
+        'interestDue': json['interestDue'] == null ? undefined : json['interestDue'],
+        'interestAccruing': json['interestAccruing'] == null ? undefined : json['interestAccruing'],
+        'interestWaivedIfPaidBy': json['interestWaivedIfPaidBy'] == null ? undefined : CalendarDateFromJSON(json['interestWaivedIfPaidBy']),
     };
 }
 
@@ -157,6 +192,11 @@ export function LeaseFeeBalanceResponseToJSONTyped(value?: LeaseFeeBalanceRespon
         'noticeDue': value['noticeDue'],
         'lastNoticeLevel': value['lastNoticeLevel'],
         'lastNoticeSentOn': CalendarDateToJSON(value['lastNoticeSentOn']),
+        'lateInterestRate': value['lateInterestRate'],
+        'interestWaiverDays': value['interestWaiverDays'],
+        'interestDue': value['interestDue'],
+        'interestAccruing': value['interestAccruing'],
+        'interestWaivedIfPaidBy': CalendarDateToJSON(value['interestWaivedIfPaidBy']),
     };
 }
 

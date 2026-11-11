@@ -65,7 +65,7 @@ public sealed class GroundLeaseTemplatesSeeder : IDevelopmentSeeder
                 entry.OptionWindowDays,
                 entry.CovenantTerms,
                 ToResalePolicyTerms(entry),
-                LeaseFeeTerms.Create(entry.LandUseFee, entry.RepairReserveFee),
+                LeaseFeeTerms.Create(entry.LandUseFee, entry.RepairReserveFee, entry.LateInterestRate, entry.InterestWaiverDays),
                 SeederUserId);
 
             object[] events = entry.Archived
@@ -146,6 +146,10 @@ public sealed class GroundLeaseTemplatesSeeder : IDevelopmentSeeder
         public decimal LandUseFee { get; set; }
 
         public decimal RepairReserveFee { get; set; }
+
+        public decimal LateInterestRate { get; set; }
+
+        public int InterestWaiverDays { get; set; } = LeaseFeeTerms.DefaultInterestWaiverDays;
 
         public string CovenantTerms { get; set; } = string.Empty;
 

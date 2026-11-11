@@ -93,6 +93,11 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <summary>Gets every late notice recorded on this lease, in the order recorded.</summary>
     public IReadOnlyList<LeaseFeeNotice> LeaseFeeNotices => _leaseFeeNotices;
 
+    private readonly List<LeaseFeeInterestWaiver> _leaseFeeInterestWaivers = [];
+
+    /// <summary>Gets every late-fee interest waiver on this lease, in the order recorded.</summary>
+    public IReadOnlyList<LeaseFeeInterestWaiver> LeaseFeeInterestWaivers => _leaseFeeInterestWaivers;
+
     /// <summary>
     /// Creates a ground lease that didn't come from a purchase, such as one signed before the trust used
     /// CommonGround. Refused while the home is already leased, being sold, or in a home selection.
@@ -153,6 +158,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             optionWindowDays,
             leaseFeeTerms.LandUseFee,
             leaseFeeTerms.RepairReserveFee,
+            leaseFeeTerms.LateInterestRate,
+            leaseFeeTerms.InterestWaiverDays,
             basePrice,
             originalAppraisedValue,
             covenantTerms,
@@ -195,6 +202,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             template.OptionWindowDays,
             template.LeaseFeeTerms.LandUseFee,
             template.LeaseFeeTerms.RepairReserveFee,
+            template.LeaseFeeTerms.LateInterestRate,
+            template.LeaseFeeTerms.InterestWaiverDays,
             purchaseWorkflow.PurchasePrice,
             purchaseWorkflow.AppraisalDetails?.AppraisedValue,
             template.CovenantTerms,
@@ -348,6 +357,30 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             Id.Value, noticeId.Value, level, sentOn, delivery, statement.Balance, oldestUnpaid, recordedBy.Value);
     }
 
+    /// <summary>
+    /// Waives late-fee interest owed today, such as for a household in hardship (Art 5.4). Refused without a reason,
+    /// for an amount of zero or less, or one above the interest owed today. An ended lease's interest can be waived too.
+    /// </summary>
+    public LeaseFeeInterestWaived WaiveLeaseFeeInterest(
+        LeaseFeeInterestWaiverId waiverId,
+        decimal amount,
+        string reason,
+        DateOnly today,
+        UserId waivedBy)
+    {
+        if (string.IsNullOrWhiteSpace(reason))
+            throw BusinessRuleViolation.GroundLease.WaiveLeaseFeeInterest.ReasonRequired();
+
+        if (amount <= 0)
+            throw BusinessRuleViolation.GroundLease.WaiveLeaseFeeInterest.AmountNonPositive(amount);
+
+        var interestDue = LeaseFeeStatementAsOf(today).InterestDue;
+        if (amount > interestDue)
+            throw BusinessRuleViolation.GroundLease.WaiveLeaseFeeInterest.AmountAboveInterestOwed(amount, interestDue);
+
+        return new LeaseFeeInterestWaived(Id.Value, waiverId.Value, today, amount, reason.Trim(), waivedBy.Value);
+    }
+
     /// <summary>Works out what the lease owes as of a day, usually the trust's today.</summary>
     public LeaseFeeStatement LeaseFeeStatementAsOf(DateOnly asOf) =>
         LeaseFeeStatement.Calculate(
@@ -355,7 +388,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             LeaseStartDate,
             EndedOn,
             _leaseFeePayments.Where(p => !p.IsVoided).Select(p => new ReceivedPayment(p.ReceivedDate, p.Amount)),
-            asOf);
+            asOf,
+            _leaseFeeInterestWaivers.Select(w => new WaivedInterest(w.WaivedOn, w.Amount)));
 
     /// <summary>
     /// Gets the late notice the lease needs as of a day, or null. Only an active lease needs one; an ended lease's
@@ -390,7 +424,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         LeaseStartDate = e.LeaseStartDate;
         TermYears = e.TermYears;
         OptionWindowDays = e.OptionWindowDays;
-        LeaseFeeTerms = LeaseFeeTerms.Create(e.LandUseFee, e.RepairReserveFee);
+        LeaseFeeTerms = LeaseFeeTerms.Create(e.LandUseFee, e.RepairReserveFee, e.LateInterestRate, e.InterestWaiverDays);
         BasePrice = e.BasePrice;
         OriginalAppraisedValue = e.OriginalAppraisedValue;
         CovenantTerms = e.CovenantTerms;
@@ -431,7 +465,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         LeaseStartDate = e.LeaseStartDate;
         TermYears = e.TermYears;
         OptionWindowDays = e.OptionWindowDays;
-        LeaseFeeTerms = LeaseFeeTerms.Create(e.LandUseFee, e.RepairReserveFee);
+        LeaseFeeTerms = LeaseFeeTerms.Create(e.LandUseFee, e.RepairReserveFee, e.LateInterestRate, e.InterestWaiverDays);
         BasePrice = e.BasePrice;
         OriginalAppraisedValue = e.OriginalAppraisedValue;
         CovenantTerms = e.CovenantTerms;
@@ -473,6 +507,11 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     public void Apply(LeaseFeeNoticeRecorded e) =>
         _leaseFeeNotices.Add(LeaseFeeNotice.Create(
             LeaseFeeNoticeId.Create(e.NoticeId), e.Level, e.SentOn, e.Delivery, e.BalanceDue, e.OldestUnpaidDueDate));
+
+    /// <summary>Applies <see cref="LeaseFeeInterestWaived"/>.</summary>
+    public void Apply(LeaseFeeInterestWaived e) =>
+        _leaseFeeInterestWaivers.Add(LeaseFeeInterestWaiver.Create(
+            LeaseFeeInterestWaiverId.Create(e.WaiverId), e.WaivedOn, e.Amount, e.Reason));
 
     /// <summary>Applies <see cref="LeaseFeePaymentVoided"/>.</summary>
     public void Apply(LeaseFeePaymentVoided e) =>

@@ -67,6 +67,13 @@ public interface IGroundLeasesApiClient
     /// <returns>The response containing the new notice ID.</returns>
     Task<RecordLeaseFeeNoticeResponse> RecordLeaseFeeNoticeAsync(string groundLeaseId, RecordLeaseFeeNoticeRequest request, CancellationToken cancellationToken);
 
+    /// <summary>Waives late-fee interest owed on a lease today.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="request">The amount and reason.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response containing the new waiver ID.</returns>
+    Task<WaiveLeaseFeeInterestResponse> WaiveLeaseFeeInterestAsync(string groundLeaseId, WaiveLeaseFeeInterestRequest request, CancellationToken cancellationToken);
+
     /// <summary>Gets the late notices due, for printing; only one lease's when <paramref name="groundLeaseId"/> is given.</summary>
     /// <param name="groundLeaseId">The ID of one ground lease, or null for all.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>

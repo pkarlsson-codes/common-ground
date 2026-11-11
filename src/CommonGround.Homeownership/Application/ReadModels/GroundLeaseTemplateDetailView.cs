@@ -21,6 +21,12 @@ public class GroundLeaseTemplateDetailView
     /// <summary>Gets or sets the monthly repair reserve fee.</summary>
     public decimal RepairReserveFee { get; set; }
 
+    /// <summary>Gets or sets the yearly interest rate on a late fee, in percent; zero charges none.</summary>
+    public decimal LateInterestRate { get; set; }
+
+    /// <summary>Gets or sets the days after the due date within which a payment owes no interest.</summary>
+    public int InterestWaiverDays { get; set; }
+
     /// <summary>Gets or sets the covenant terms text.</summary>
     public string CovenantTerms { get; set; } = string.Empty;
 

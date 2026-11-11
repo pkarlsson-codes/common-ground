@@ -17,3 +17,10 @@ public sealed record SetLeaseFeeNoticePolicyRequest(
     int FirstNoticeDays,
     int SecondNoticeDays,
     string? LetterSignOff);
+
+/// <summary>Request to waive late-fee interest owed on a lease today.</summary>
+/// <param name="Amount">How much interest to waive; no more than is owed.</param>
+/// <param name="Reason">Why, such as hardship.</param>
+public sealed record WaiveLeaseFeeInterestRequest(
+    decimal Amount,
+    string Reason);

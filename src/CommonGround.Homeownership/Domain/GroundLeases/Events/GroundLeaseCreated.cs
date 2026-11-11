@@ -12,6 +12,8 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.Events;
 /// <param name="OptionWindowDays">Days the trust has to buy the home after its homeowner gives notice to sell.</param>
 /// <param name="LandUseFee">Monthly land use fee.</param>
 /// <param name="RepairReserveFee">Monthly repair reserve fee.</param>
+/// <param name="LateInterestRate">Yearly interest rate on a late fee, in percent; zero charges none.</param>
+/// <param name="InterestWaiverDays">Days after the due date within which a payment owes no interest.</param>
 /// <param name="BasePrice">What the homeowner paid for the home.</param>
 /// <param name="OriginalAppraisedValue">The home's appraised value at that purchase.</param>
 /// <param name="CovenantTerms">Free-text covenant terms.</param>
@@ -34,6 +36,8 @@ public sealed record GroundLeaseCreated(
     int OptionWindowDays,
     decimal LandUseFee,
     decimal RepairReserveFee,
+    decimal LateInterestRate,
+    int InterestWaiverDays,
     decimal BasePrice,
     decimal OriginalAppraisedValue,
     string CovenantTerms,

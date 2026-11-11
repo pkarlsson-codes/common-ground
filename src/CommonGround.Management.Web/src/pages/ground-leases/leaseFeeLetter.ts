@@ -9,6 +9,10 @@ export interface LetterLease {
   monthlyFee?: number
   balance?: number
   oldestUnpaidDueDate?: CalendarDate | null
+  lateInterestRate?: number
+  interestWaiverDays?: number
+  interestDue?: number
+  interestWaivedIfPaidBy?: CalendarDate | null
 }
 
 export interface LeaseFeeLetter {
@@ -43,11 +47,26 @@ export function leaseFeeLetter(lease: LetterLease, level: string, today: Calenda
   const date = formatCalendarDate(today, { year: 'numeric', month: 'long', day: 'numeric' })
   const second = level === 'Second'
 
+  const rate = lease.lateInterestRate ?? 0
+  const interestDue = lease.interestDue ?? 0
+  const rateText = `${rate.toLocaleString('en-US', { maximumFractionDigits: 3 })}% a year`
+
   const paragraphs = [
     `Our records show that your lease fee has not been paid in full. As of ${date}, you owe ${balance}`
-      + (months ? `, for the monthly lease fee of ${fee} due for ${months}.` : '.'),
-    'Please pay the amount due as soon as you can. If you have already sent your payment, thank you, and please disregard this letter.',
+      + (months ? `, for the monthly lease fee of ${fee} due for ${months}` : '')
+      + (interestDue > 0
+        ? `. This includes ${formatPrice(interestDue)} of interest at ${rateText} on fees not paid within ${lease.interestWaiverDays ?? 0} days of their due date.`
+        : '.'),
   ]
+  if (rate > 0 && lease.interestWaivedIfPaidBy && lease.oldestUnpaidDueDate)
+    paragraphs.push(
+      `Under your ground lease, interest at ${rateText} is counted on a late fee from the day it was due. If you pay the `
+        + `${formatDueMonth(lease.oldestUnpaidDueDate)} fee by ${formatCalendarDate(lease.interestWaivedIfPaidBy, { year: 'numeric', month: 'long', day: 'numeric' })}, `
+        + 'no interest will be charged on it.',
+    )
+  paragraphs.push(
+    'Please pay the amount due as soon as you can. If you have already sent your payment, thank you, and please disregard this letter.',
+  )
   if (second)
     paragraphs.push(
       'This is our second notice. Under your ground lease, continued failure to pay the lease fee can lead to a formal notice of default, and a default that is not cured in time puts your lease at risk.',

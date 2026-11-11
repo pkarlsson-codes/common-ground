@@ -1562,6 +1562,78 @@
         }
       }
     },
+    "/api/v1/ground-leases/{groundLeaseId}/lease-fee-interest-waivers": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "WaiveLeaseFeeInterest",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "WaiveLeaseFeeInterestRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaiveLeaseFeeInterestRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaiveLeaseFeeInterestResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/lease-fee-notices/due": {
       "get": {
         "tags": [
@@ -8455,6 +8527,14 @@
             "type": "number",
             "format": "decimal",
             "nullable": true
+          },
+          "lateInterestRate": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "interestWaiverDays": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -8609,6 +8689,16 @@
             "description": "Their sum, charged on the 1st of each month.",
             "format": "decimal"
           },
+          "lateInterestRate": {
+            "type": "number",
+            "description": "Yearly interest rate on a late fee, in percent; zero charges none.",
+            "format": "decimal"
+          },
+          "interestWaiverDays": {
+            "type": "integer",
+            "description": "Days after the due date within which a payment owes no interest.",
+            "format": "int32"
+          },
           "statement": {
             "description": "What the lease owes today.",
             "oneOf": [
@@ -8635,6 +8725,13 @@
             "items": {
               "$ref": "#/components/schemas/LeaseFeeNoticeDto"
             }
+          },
+          "interestWaivers": {
+            "type": "array",
+            "description": "Every interest waiver, newest first.",
+            "items": {
+              "$ref": "#/components/schemas/LeaseFeeInterestWaiverDto"
+            }
           }
         }
       },
@@ -8660,7 +8757,7 @@
           },
           "balance": {
             "type": "number",
-            "description": "Above zero a balance due, below zero a credit.",
+            "description": "Fees plus interest due, less payments: above zero a balance due, below zero a credit.",
             "format": "decimal"
           },
           "oldestUnpaidDueDate": {
@@ -8677,6 +8774,32 @@
           "arrearsSince": {
             "type": "string",
             "description": "Due date of the first charge left unpaid since the lease was last paid up, if any.",
+            "format": "date",
+            "nullable": true
+          },
+          "interestCharged": {
+            "type": "number",
+            "description": "Interest on fees paid or unpaid past the waiver days, before waivers.",
+            "format": "decimal"
+          },
+          "interestWaived": {
+            "type": "number",
+            "description": "Interest the trust waived.",
+            "format": "decimal"
+          },
+          "interestDue": {
+            "type": "number",
+            "description": "Interest owed after waivers; part of the balance.",
+            "format": "decimal"
+          },
+          "interestAccruing": {
+            "type": "number",
+            "description": "Interest running on fees still within the waiver days; not in the balance.",
+            "format": "decimal"
+          },
+          "interestWaivedIfPaidBy": {
+            "type": "string",
+            "description": "The last day the oldest unpaid fee can be paid without interest, if that is still ahead.",
             "format": "date",
             "nullable": true
           }
@@ -8772,6 +8895,35 @@
             "type": "string",
             "description": "When it was recorded.",
             "format": "date-time"
+          }
+        }
+      },
+      "LeaseFeeInterestWaiverDto": {
+        "type": "object",
+        "description": "Late-fee interest the trust waived.",
+        "additionalProperties": false,
+        "properties": {
+          "waiverId": {
+            "type": "string",
+            "description": "The waiver's ID."
+          },
+          "waivedOn": {
+            "type": "string",
+            "description": "The day it was waived.",
+            "format": "date"
+          },
+          "amount": {
+            "type": "number",
+            "description": "How much was waived.",
+            "format": "decimal"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why."
+          },
+          "waivedBy": {
+            "type": "string",
+            "description": "The user who waived it."
           }
         }
       },
@@ -9078,6 +9230,32 @@
             "description": "The day that notice was sent, or null.",
             "format": "date",
             "nullable": true
+          },
+          "lateInterestRate": {
+            "type": "number",
+            "description": "The lease's yearly interest rate on a late fee, in percent; zero charges none.",
+            "format": "decimal"
+          },
+          "interestWaiverDays": {
+            "type": "integer",
+            "description": "Days after the due date within which a payment owes no interest.",
+            "format": "int32"
+          },
+          "interestDue": {
+            "type": "number",
+            "description": "Interest owed after waivers; part of the balance.",
+            "format": "decimal"
+          },
+          "interestAccruing": {
+            "type": "number",
+            "description": "Interest running on fees still within the waiver days; not in the balance.",
+            "format": "decimal"
+          },
+          "interestWaivedIfPaidBy": {
+            "type": "string",
+            "description": "The last day the oldest unpaid fee can be paid without interest, if that is still ahead.",
+            "format": "date",
+            "nullable": true
           }
         }
       },
@@ -9109,6 +9287,33 @@
           "delivery": {
             "type": "string",
             "description": "How it was sent: FirstClassMail, CertifiedMail, RegisteredMail, HandDelivered or Email."
+          }
+        }
+      },
+      "WaiveLeaseFeeInterestResponse": {
+        "type": "object",
+        "description": "Response after waiving late-fee interest.",
+        "additionalProperties": false,
+        "properties": {
+          "waiverId": {
+            "type": "string",
+            "description": "The new waiver's ID."
+          }
+        }
+      },
+      "WaiveLeaseFeeInterestRequest": {
+        "type": "object",
+        "description": "Request to waive late-fee interest owed on a lease today.",
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": "How much interest to waive; no more than is owed.",
+            "format": "decimal"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why, such as hardship."
           }
         }
       },
@@ -9245,6 +9450,14 @@
             "type": "number",
             "format": "decimal",
             "nullable": true
+          },
+          "lateInterestRate": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "interestWaiverDays": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -9343,6 +9556,16 @@
             "type": "number",
             "description": "Monthly repair reserve fee.",
             "format": "decimal"
+          },
+          "lateInterestRate": {
+            "type": "number",
+            "description": "Yearly interest rate on a late fee, in percent; zero charges none.",
+            "format": "decimal"
+          },
+          "interestWaiverDays": {
+            "type": "integer",
+            "description": "Days after the due date within which a payment owes no interest.",
+            "format": "int32"
           },
           "covenantTerms": {
             "type": "string",

@@ -21,6 +21,8 @@ internal sealed class GroundLeaseTemplateDetailViewProjection : SingleStreamProj
             OptionWindowDays = e.OptionWindowDays,
             LandUseFee = e.LandUseFee,
             RepairReserveFee = e.RepairReserveFee,
+            LateInterestRate = e.LateInterestRate,
+            InterestWaiverDays = e.InterestWaiverDays,
             CovenantTerms = e.CovenantTerms,
             Status = "Active",
             FormulaKind = e.FormulaKind.ToString(),
