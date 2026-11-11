@@ -23,6 +23,7 @@ import StewardshipPage from './pages/stewardship/StewardshipPage'
 import LeaseFeeNoticesPrintPage from './pages/lease-fee-notices/LeaseFeeNoticesPrintPage'
 import TrustPolicyPage from './pages/trust-policy/TrustPolicyPage'
 import TeamPage from './pages/team/TeamPage'
+import PortfolioImportPage from './pages/portfolio-import/PortfolioImportPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useCurrentTrust } from './hooks/trusts'
 import { setTrustTimeZone } from './lib/calendarDate'
@@ -110,6 +111,7 @@ export default function App() {
                 <Route path="/stewardship"          element={<StewardshipPage />} />
                 <Route path="/trust-policy"         element={<TrustPolicyPage />} />
                 <Route path="/team"                 element={<TeamPage />} />
+                <Route path="/portfolio-import"     element={<PortfolioImportPage />} />
               </Route>
               <Route path="/lease-fee-notices/print" element={<LeaseFeeNoticesPrintPage />} />
             </Route>

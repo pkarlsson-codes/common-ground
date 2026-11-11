@@ -4258,6 +4258,118 @@
         }
       }
     },
+    "/api/v1/portfolio-import/check": {
+      "post": {
+        "tags": [
+          "PortfolioImport"
+        ],
+        "operationId": "CheckPortfolioImport",
+        "requestBody": {
+          "x-name": "PortfolioImportRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortfolioImportRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioImportResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/portfolio-import": {
+      "post": {
+        "tags": [
+          "PortfolioImport"
+        ],
+        "operationId": "ImportPortfolio",
+        "requestBody": {
+          "x-name": "PortfolioImportRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortfolioImportRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioImportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioImportResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/purchase-workflows": {
       "post": {
         "tags": [
@@ -11717,6 +11829,83 @@
         "type": "object",
         "description": "Request to recommission a parcel.",
         "additionalProperties": false
+      },
+      "PortfolioImportResponse": {
+        "type": "object",
+        "description": "The result of checking or importing a file.",
+        "additionalProperties": false,
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortfolioImportErrorDto"
+            }
+          },
+          "parcelsToCreate": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "parcelsExisting": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "homesToCreate": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "homesExisting": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "leasesToCreate": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "leasesExisting": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imported": {
+            "type": "boolean"
+          },
+          "stoppedAtRow": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "PortfolioImportErrorDto": {
+        "type": "object",
+        "description": "One problem with an import file.",
+        "additionalProperties": false,
+        "properties": {
+          "row": {
+            "type": "integer",
+            "description": "The spreadsheet row number; the header is row 1.",
+            "format": "int32"
+          },
+          "column": {
+            "type": "string",
+            "description": "The column header, or null when the problem is with the row as a whole.",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "description": "What is wrong."
+          }
+        }
+      },
+      "PortfolioImportRequest": {
+        "type": "object",
+        "description": "A portfolio import file: one CSV row per home, with its land parcel and its ground lease.",
+        "additionalProperties": false,
+        "properties": {
+          "csv": {
+            "type": "string",
+            "description": "The file's text."
+          }
+        }
       },
       "InitiatePurchaseWorkflowResponse": {
         "type": "object",

@@ -10,6 +10,7 @@ apis/HomesApi.ts
 apis/HouseholdApi.ts
 apis/LandParcelsApi.ts
 apis/OidcApi.ts
+apis/PortfolioImportApi.ts
 apis/PurchaseWorkflowsApi.ts
 apis/ResalesApi.ts
 apis/StewardshipApi.ts
@@ -126,6 +127,9 @@ models/PaginatedResponseOfResaleResponse.ts
 models/PaginatedResponseOfStewardshipCaseResponse.ts
 models/PaginatedResponseOfWaitingListEntryResponse.ts
 models/PassOverDto.ts
+models/PortfolioImportErrorDto.ts
+models/PortfolioImportRequest.ts
+models/PortfolioImportResponse.ts
 models/PreviewResalePriceRequest.ts
 models/ProblemDetails.ts
 models/PropertyInspectionResponse.ts

@@ -1,6 +1,7 @@
 import {
   ClipboardList,
   FileCog,
+  FileUp,
   FolderOpen,
   Hammer,
   HeartHandshake,
@@ -46,6 +47,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Lease templates', to: '/ground-lease-templates', icon: FileCog,        group: 'settings' },
   { label: 'Trust policy',    to: '/trust-policy',           icon: SlidersHorizontal, group: 'settings' },
   { label: 'Team',            to: '/team',                   icon: Users,          group: 'settings' },
+  { label: 'Import portfolio', to: '/portfolio-import',      icon: FileUp,         group: 'settings' },
 ]
 
 export type Focus = 'everything' | 'intake' | 'sales' | 'stewardship'

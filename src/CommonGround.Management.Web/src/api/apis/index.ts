@@ -12,6 +12,7 @@ export * from './HomesApi';
 export * from './HouseholdApi';
 export * from './LandParcelsApi';
 export * from './OidcApi';
+export * from './PortfolioImportApi';
 export * from './PurchaseWorkflowsApi';
 export * from './ResalesApi';
 export * from './StewardshipApi';
