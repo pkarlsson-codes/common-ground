@@ -33,3 +33,6 @@ docs/clt-manuals/
 docs/spec/
 docs/stories/
 docs/ai/
+
+# Document files from the file system blob store
+src/CommonGround.API/data/

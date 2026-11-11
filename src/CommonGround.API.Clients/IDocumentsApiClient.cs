@@ -95,11 +95,11 @@ public interface IDocumentsApiClient
     Task<PaginatedResponse<EntityDocumentItemResponse>> GetEntityDocumentsAsync(
         string entityType, string entityId, GetEntityDocumentsQuerySpec querySpec, CancellationToken cancellationToken);
 
-    /// <summary>Gets the absolute URL the client should redirect to for downloading.</summary>
-    /// <remarks>Surfaces the API's 302 location header, so the HttpClient must be configured not to follow redirects.</remarks>
+    /// <summary>Gets a document version's file: a URL to redirect to (S3 store) or the file itself (file system store).</summary>
+    /// <remarks>Reads the API's 302 location header, so the HttpClient must be configured not to follow redirects.</remarks>
     /// <param name="documentId">The ID of the document to download.</param>
     /// <param name="versionId">The version to download, or null for the current version.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>The URI to redirect to for downloading the document.</returns>
-    Task<Uri> GetDownloadUrlAsync(string documentId, string? versionId, CancellationToken cancellationToken);
+    /// <returns>The download. The caller disposes it after sending the file.</returns>
+    Task<DocumentDownloadResult> GetDownloadAsync(string documentId, string? versionId, CancellationToken cancellationToken);
 }

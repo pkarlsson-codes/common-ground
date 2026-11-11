@@ -131,7 +131,7 @@ flowchart TB
     subgraph Infra["Local Infra (docker-compose)"]
         Postgres[("PostgreSQL<br/>(pgvector)")]
         Keycloak["Keycloak"]
-        MinIO[("MinIO")]
+        Blobs[("Document files: disk or S3")]
         Seq["Seq"]
     end
 
@@ -143,7 +143,7 @@ flowchart TB
     HomeEndpoints -- "sessions, Data Protection keys" --> Postgres
 
     Contexts --> Postgres
-    Documents --> MinIO
+    Documents --> Blobs
     ApiEndpoints -.-> Seq
     MgmtEndpoints -.-> Seq
     HomeEndpoints -.-> Seq

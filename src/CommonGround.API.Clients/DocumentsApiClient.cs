@@ -112,18 +112,29 @@ public sealed class DocumentsApiClient(
     }
 
     /// <inheritdoc/>
-    public async Task<Uri> GetDownloadUrlAsync(string documentId, string? versionId, CancellationToken cancellationToken)
+    public async Task<DocumentDownloadResult> GetDownloadAsync(string documentId, string? versionId, CancellationToken cancellationToken)
     {
         var path = versionId is null
             ? $"api/documents/{documentId}/download"
             : $"api/documents/{documentId}/download?versionId={Uri.EscapeDataString(versionId)}";
-        using var resp = await HttpClient.GetAsync(path, cancellationToken).ConfigureAwait(false);
+        var resp = await HttpClient.GetAsync(path, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
 
-        if ((int)resp.StatusCode is not(>= 300 and < 400) || resp.Headers.Location is null)
+        if ((int)resp.StatusCode is >= 300 and < 400 && resp.Headers.Location is { } location)
+        {
+            resp.Dispose();
+            return DocumentDownloadResult.RedirectTo(location);
+        }
+
+        try
         {
             resp.EnsureSuccessStatusCode();
         }
+        catch
+        {
+            resp.Dispose();
+            throw;
+        }
 
-        return resp.Headers.Location!;
+        return DocumentDownloadResult.FileIn(resp);
     }
 }

@@ -5,17 +5,20 @@ using Marten;
 
 namespace CommonGround.Documents.Application.Queries;
 
-/// <summary>Returns a short-lived presigned URL for a version of a document (the current one unless specified).</summary>
-public sealed record GetDocumentDownloadUrl(DocumentId DocumentId, string? VersionId = null);
+/// <summary>Returns how to serve a version of a document (the current one unless specified).</summary>
+public sealed record GetDocumentDownload(DocumentId DocumentId, string? VersionId = null);
 
-/// <summary>Handles <see cref="GetDocumentDownloadUrl"/>.</summary>
-public static class GetDocumentDownloadUrlHandler
+/// <summary>A version's blob, with the file name and content type to serve it under.</summary>
+public sealed record DocumentDownload(DocumentBlobDownload Blob, string FileName, string ContentType);
+
+/// <summary>Handles <see cref="GetDocumentDownload"/>.</summary>
+public static class GetDocumentDownloadHandler
 {
     private static readonly TimeSpan PresignedExpiry = TimeSpan.FromMinutes(5);
 
-    /// <summary>Handles the get document download URL request.</summary>
-    public static async Task<Uri> Handle(
-        GetDocumentDownloadUrl request,
+    /// <summary>Handles the get document download request.</summary>
+    public static async Task<DocumentDownload> Handle(
+        GetDocumentDownload request,
         IQuerySession session,
         IDocumentBlobStore blobs,
         CancellationToken cancellationToken)
@@ -28,6 +31,7 @@ public static class GetDocumentDownloadUrlHandler
         var versionId = request.VersionId ?? view.CurrentVersionId;
         var version = view.Versions.SingleOrDefault(v => v.VersionId == versionId)
             ?? throw new AggregateNotFoundException($"Version {versionId} of document {request.DocumentId.Value} was not found.");
-        return await blobs.GetPresignedDownloadUrlAsync(version.BlobKey, PresignedExpiry, cancellationToken).ConfigureAwait(false);
+        var blob = await blobs.GetDownloadAsync(version.BlobKey, PresignedExpiry, cancellationToken).ConfigureAwait(false);
+        return new DocumentDownload(blob, version.FileName, version.ContentType);
     }
 }

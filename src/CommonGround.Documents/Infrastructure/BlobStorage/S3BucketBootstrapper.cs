@@ -9,10 +9,10 @@ namespace CommonGround.Documents.Infrastructure.BlobStorage;
 /// <summary>
 /// Hosted service that ensures the documents bucket exists at startup.
 /// </summary>
-internal sealed partial class MinIOBucketBootstrapper(
+internal sealed partial class S3BucketBootstrapper(
     IMinioClient client,
-    IOptions<MinIOOptions> options,
-    ILogger<MinIOBucketBootstrapper> logger)
+    IOptions<S3BlobStoreOptions> options,
+    ILogger<S3BucketBootstrapper> logger)
     : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -32,7 +32,7 @@ internal sealed partial class MinIOBucketBootstrapper(
 
     private static partial class Logs
     {
-        [LoggerMessage(0, LogLevel.Information, "Creating MinIO bucket {Bucket}")]
+        [LoggerMessage(0, LogLevel.Information, "Creating S3 bucket {Bucket}")]
         public static partial void CreatingBucket(ILogger logger, string bucket);
     }
 }

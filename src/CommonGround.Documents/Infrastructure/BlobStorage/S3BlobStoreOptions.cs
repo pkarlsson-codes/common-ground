@@ -1,12 +1,12 @@
 namespace CommonGround.Documents.Infrastructure.BlobStorage;
 
-/// <summary>Configuration for the MinIO-backed document blob store.</summary>
-public sealed class MinIOOptions
+/// <summary>Configuration for the S3 document blob store (MinIO in development).</summary>
+public sealed class S3BlobStoreOptions
 {
     /// <summary>The configuration section name.</summary>
-    public const string SectionName = "MinIO";
+    public const string SectionName = "Documents:S3";
 
-    /// <summary>Gets or sets the MinIO endpoint host:port (no scheme, e.g. "localhost:9000").</summary>
+    /// <summary>Gets or sets the S3 endpoint host:port (no scheme, e.g. "localhost:9000").</summary>
     public string Endpoint { get; set; } = "localhost:9000";
 
     /// <summary>Gets or sets the access key.</summary>

@@ -71,7 +71,7 @@ internal static class CorePlatformClientExtensions
         services.AddApiClient<IStewardshipApiClient, StewardshipApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
-        // Downloads hand the API's redirect to the presigned blob URL back to the browser, so don't follow it.
+        // Downloads hand the API's redirect to the presigned S3 URL back to the browser, so don't follow it.
         services.AddApiClient<IDocumentsApiClient, DocumentsApiClient>(corePlatformUri)
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false })
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();

@@ -19,6 +19,7 @@ internal sealed class InMemoryDocumentBlobStore : IDocumentBlobStore
         return new DocumentBlobUploadResult(suggestedKey, hash, bytes.LongLength);
     }
 
-    public Task<Uri> GetPresignedDownloadUrlAsync(string blobKey, TimeSpan expiry, CancellationToken cancellationToken)
-        => Task.FromResult(new Uri($"https://fake-minio.local/{Uri.EscapeDataString(blobKey)}"));
+    /// <summary>Serves the stored bytes, as the file system store does (the production default).</summary>
+    public Task<DocumentBlobDownload> GetDownloadAsync(string blobKey, TimeSpan expiry, CancellationToken cancellationToken)
+        => Task.FromResult<DocumentBlobDownload>(new DocumentBlobDownload.File(new MemoryStream(_store[blobKey], writable: false)));
 }

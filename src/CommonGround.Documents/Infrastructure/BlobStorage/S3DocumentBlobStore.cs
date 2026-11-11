@@ -7,14 +7,14 @@ using Minio.DataModel.Args;
 
 namespace CommonGround.Documents.Infrastructure.BlobStorage;
 
-/// <summary>MinIO-backed implementation of <see cref="IDocumentBlobStore"/>.</summary>
-public sealed partial class MinIODocumentBlobStore(
+/// <summary>S3 implementation (MinIO, AWS S3 or any S3-compatible service) of <see cref="IDocumentBlobStore"/>.</summary>
+public sealed partial class S3DocumentBlobStore(
     IMinioClient client,
-    IOptions<MinIOOptions> options,
-    ILogger<MinIODocumentBlobStore> logger)
+    IOptions<S3BlobStoreOptions> options,
+    ILogger<S3DocumentBlobStore> logger)
     : IDocumentBlobStore
 {
-    private readonly MinIOOptions _options = options.Value;
+    private readonly S3BlobStoreOptions _options = options.Value;
 
     /// <inheritdoc/>
     public async Task<DocumentBlobUploadResult> UploadAsync(
@@ -65,7 +65,7 @@ public sealed partial class MinIODocumentBlobStore(
     }
 
     /// <inheritdoc/>
-    public async Task<Uri> GetPresignedDownloadUrlAsync(
+    public async Task<DocumentBlobDownload> GetDownloadAsync(
         string blobKey,
         TimeSpan expiry,
         CancellationToken cancellationToken)
@@ -79,7 +79,7 @@ public sealed partial class MinIODocumentBlobStore(
 
         var url = await client.PresignedGetObjectAsync(args).ConfigureAwait(false);
         _ = cancellationToken; // PresignedGetObjectAsync (Minio 6.x) does not accept a token.
-        return new Uri(url);
+        return new DocumentBlobDownload.Redirect(new Uri(url));
     }
 
     private static partial class Logs

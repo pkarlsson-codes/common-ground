@@ -10,6 +10,9 @@ namespace CommonGround.Management.Gateway.Endpoints;
 
 public static class DocumentsEndpoints
 {
+    private static readonly string[] DownloadHeaders =
+        ["Content-Disposition", "Content-Length", "X-Content-Type-Options", "Content-Security-Policy"];
+
     private static readonly JsonSerializerOptions _webJson = new(JsonSerializerDefaults.Web);
 
     [WolverinePost("/api/v1/documents")]
@@ -73,11 +76,32 @@ public static class DocumentsEndpoints
     public static async Task<IResult> DownloadDocument(
         string documentId,
         string? versionId,
+        HttpContext httpContext,
         IDocumentsApiClient client,
         CancellationToken cancellationToken)
     {
-        var url = await client.GetDownloadUrlAsync(documentId, versionId, cancellationToken).ConfigureAwait(false);
-        return Results.Redirect(url.ToString());
+        ArgumentNullException.ThrowIfNull(httpContext);
+
+        var download = await client.GetDownloadAsync(documentId, versionId, cancellationToken).ConfigureAwait(false);
+        httpContext.Response.RegisterForDispose(download);
+        if (download.RedirectUrl is { } url)
+        {
+            return Results.Redirect(url.ToString());
+        }
+
+        // The file system store: pass the API's file through with the headers it set (disposition, nosniff, CSP sandbox).
+        var file = download.FileResponse!;
+        var headers = httpContext.Response.Headers;
+        foreach (var name in DownloadHeaders)
+        {
+            if (file.Headers.TryGetValues(name, out var values) || file.Content.Headers.TryGetValues(name, out values))
+            {
+                headers[name] = values.ToArray();
+            }
+        }
+
+        var body = await file.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        return Results.Stream(body, file.Content.Headers.ContentType?.ToString());
     }
 
     [WolverinePost("/api/v1/documents/{documentId}/versions")]

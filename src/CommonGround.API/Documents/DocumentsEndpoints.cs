@@ -156,10 +156,19 @@ public static class DocumentsEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(documentId);
 
-        var url = await bus.InvokeForTenantAsync<Uri>(bus.TenantId!,
-            new GetDocumentDownloadUrl(DocumentId.Create(documentId), versionId), cancellationToken).ConfigureAwait(false);
+        var download = await bus.InvokeForTenantAsync<DocumentDownload>(bus.TenantId!,
+            new GetDocumentDownload(DocumentId.Create(documentId), versionId), cancellationToken).ConfigureAwait(false);
 
-        return Results.Redirect(url.ToString());
+        switch (download.Blob)
+        {
+            case DocumentBlobDownload.Redirect redirect:
+                return Results.Redirect(redirect.Url.ToString());
+            case DocumentBlobDownload.File file:
+                DocumentFileHeaders.Apply(httpContext.Response.Headers, download.FileName, download.ContentType);
+                return Results.Stream(file.Content, download.ContentType, enableRangeProcessing: true);
+            default:
+                throw new InvalidOperationException($"Unknown blob download {download.Blob.GetType().Name}.");
+        }
     }
 
     [WolverinePost("/api/documents/{documentId}/versions")]
