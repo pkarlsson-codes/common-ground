@@ -19,7 +19,11 @@ test('the board puts a purchase in the column of the step it waits on, and moves
     await expect(column(page, step)).toBeVisible()
   }
   const card = column(page, 'Eligibility').getByRole('button', { name: new RegExp(buyer) })
-  await expect(card).toContainText(home)
+  // Homeownership learns the home's label from an integration event, so reload until it has.
+  await expect(async () => {
+    await page.reload()
+    await expect(card).toContainText(home, { timeout: 2_000 })
+  }).toPass()
   await expect(card).toContainText('Since today')
 
   await card.click()
