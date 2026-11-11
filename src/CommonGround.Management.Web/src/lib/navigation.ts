@@ -45,6 +45,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Documents',       to: '/documents',              icon: FolderOpen,     group: 'records' },
   { label: 'Lease templates', to: '/ground-lease-templates', icon: FileCog,        group: 'settings' },
   { label: 'Trust policy',    to: '/trust-policy',           icon: SlidersHorizontal, group: 'settings' },
+  { label: 'Team',            to: '/team',                   icon: Users,          group: 'settings' },
 ]
 
 export type Focus = 'everything' | 'intake' | 'sales' | 'stewardship'

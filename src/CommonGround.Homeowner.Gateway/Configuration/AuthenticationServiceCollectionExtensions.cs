@@ -40,6 +40,10 @@ public static class AuthenticationServiceCollectionExtensions
                 options.SaveTokens = false;
                 options.CallbackPath = "/auth/callback";
                 options.GetClaimsFromUserInfoEndpoint = true;
+
+                // Keep the provider's claim names ("email", "name", "sub"): the gateway reads them by those names.
+                // Mapped, "email" would arrive as ClaimTypes.Email and users would be registered without one.
+                options.MapInboundClaims = false;
                 options.Scope.Clear();
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");

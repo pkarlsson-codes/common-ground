@@ -39,6 +39,18 @@ public sealed class User : AggregateRoot<UserId>
     public UserTrustAssigned? AssignTrustIfNone(TrustId trustId) =>
         TrustId is null ? new UserTrustAssigned(Id.Value, trustId.Value) : null;
 
+    /// <summary>Decides to keep the email address and name the sign-in server gives on a later sign-in.</summary>
+    /// <param name="email">The email address it gave, or <see langword="null"/> to keep the one on record.</param>
+    /// <param name="displayName">The name it gave, or <see langword="null"/> to keep the one on record.</param>
+    /// <returns>The update, or <see langword="null"/> when nothing changed.</returns>
+    public UserProfileUpdated? UpdateProfile(string? email, string? displayName)
+    {
+        var newEmail = string.IsNullOrWhiteSpace(email) ? Email : email;
+        var newName = string.IsNullOrWhiteSpace(displayName) ? DisplayName : displayName;
+
+        return newEmail == Email && newName == DisplayName ? null : new UserProfileUpdated(Id.Value, newEmail, newName);
+    }
+
     /// <summary>Starts a user from its first event.</summary>
     public static User Create(UserRegistered e)
     {
@@ -60,5 +72,14 @@ public sealed class User : AggregateRoot<UserId>
         ArgumentNullException.ThrowIfNull(e);
 
         TrustId = global::CommonGround.SharedKernel.Domain.TrustId.Create(e.TrustId);
+    }
+
+    /// <summary>Applies <see cref="UserProfileUpdated"/>.</summary>
+    public void Apply(UserProfileUpdated e)
+    {
+        ArgumentNullException.ThrowIfNull(e);
+
+        Email = e.Email;
+        DisplayName = e.DisplayName;
     }
 }

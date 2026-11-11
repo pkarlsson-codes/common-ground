@@ -2,7 +2,7 @@
 
 1. User signs in (or registers a new account on the sign-in page) but does not belong to any trust yet
 2. User is redirected to Onboarding ("You're not part of a trust yet")
-3. Page explains: access requires either an invite from a trust admin (opening the invite link from email while signed in adds the user automatically) or creating a new trust
+3. Page explains: to work in an existing trust, ask one of its members for an invite link and open it (see [Join a Trust](join-a-trust.md)); otherwise create a new trust
 4. User clicks "Create a trust"
 5. User is taken to the Create Trust page
 6. User enters Trust Name and picks a Time Zone (required; prefilled from the browser's time zone). The trust's time zone decides what "today" is and how dates derived from timestamps are shown

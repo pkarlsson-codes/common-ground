@@ -2,3 +2,4 @@ node_modules/
 playwright/.auth/
 playwright-report/
 test-results/
+failed-runs/

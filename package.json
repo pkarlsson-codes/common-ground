@@ -26,7 +26,7 @@
     "management:web:test": "cd src/CommonGround.Management.Web && npm run test",
     "management:web:generate": "bash ./scripts/generate-api-clients.sh",
     "e2e:install": "cd e2e && npm install && npx playwright install chromium",
-    "e2e": "cd e2e && npx playwright test",
+    "e2e": "cd e2e && node run.mjs",
     "e2e:ui": "cd e2e && npx playwright test --ui",
     "e2e:demo": "cd e2e && SLOWMO=${SLOWMO:-400} npx playwright test --headed --workers=1",
     "e2e:report": "cd e2e && npx playwright show-report",

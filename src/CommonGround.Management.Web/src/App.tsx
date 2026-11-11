@@ -1,4 +1,5 @@
 import './App.css'
+import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import Layout from './components/Layout'
 import DevelopmentProjectsPage from './pages/DevelopmentProjectsPage'
@@ -12,6 +13,7 @@ import ApplicationsPage from './pages/ApplicationsPage'
 import HouseholdsPage from './pages/HouseholdsPage'
 import WaitingListPage from './pages/WaitingListPage'
 import LandParcelsPage from './pages/LandParcelsPage'
+import InvitePage from './pages/InvitePage'
 import OnboardingPage from './pages/OnboardingPage'
 import PurchaseWorkflowsPage from './pages/PurchaseWorkflowsPage'
 import ResalesPage from './pages/ResalesPage'
@@ -20,6 +22,7 @@ import TodayPage from './pages/TodayPage'
 import StewardshipPage from './pages/stewardship/StewardshipPage'
 import LeaseFeeNoticesPrintPage from './pages/lease-fee-notices/LeaseFeeNoticesPrintPage'
 import TrustPolicyPage from './pages/trust-policy/TrustPolicyPage'
+import TeamPage from './pages/team/TeamPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useCurrentTrust } from './hooks/trusts'
 import { setTrustTimeZone } from './lib/calendarDate'
@@ -46,16 +49,20 @@ function ConnectionError({ error }: { error: string }) {
 function ProtectedRoute() {
   const { isLoading, isAuthenticated, user, error } = useAuth()
   const location = useLocation()
+  const needsLogin = !isLoading && !error && !isAuthenticated
+  const returnUrl = `${location.pathname}${location.search}${location.hash}`
+  useEffect(() => {
+    if (needsLogin) window.location.href = `/auth/login?returnUrl=${encodeURIComponent(returnUrl)}`
+  }, [needsLogin, returnUrl])
+
   if (isLoading) return <Loading />
   if (error) return <ConnectionError error={error} />
-  if (!isAuthenticated) {
-    const returnUrl = `${location.pathname}${location.search}${location.hash}`
-    window.location.href = `/auth/login?returnUrl=${encodeURIComponent(returnUrl)}`
-    return null
-  }
+  if (!isAuthenticated) return null
 
   const onOnboarding = location.pathname === '/onboarding' || location.pathname === '/signup'
-  if (!user?.hasTrust && !onOnboarding) {
+  // An invite link works with or without a trust: the page itself says when the user already has one.
+  const onInvite = location.pathname.startsWith('/invite/')
+  if (!user?.hasTrust && !onOnboarding && !onInvite) {
     return <Navigate to="/onboarding" replace />
   }
   if (user?.hasTrust && onOnboarding) {
@@ -83,6 +90,7 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
+            <Route path="/invite/:token" element={<InvitePage />} />
             <Route element={<TrustRoute />}>
               <Route element={<Layout />}>
                 <Route index element={<TodayPage />} />
@@ -101,6 +109,7 @@ export default function App() {
                 <Route path="/documents"           element={<DocumentsPage />} />
                 <Route path="/stewardship"          element={<StewardshipPage />} />
                 <Route path="/trust-policy"         element={<TrustPolicyPage />} />
+                <Route path="/team"                 element={<TeamPage />} />
               </Route>
               <Route path="/lease-fee-notices/print" element={<LeaseFeeNoticesPrintPage />} />
             </Route>

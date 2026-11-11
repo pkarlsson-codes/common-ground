@@ -15,7 +15,8 @@ public static class IdentityMartenConfiguration
         ArgumentNullException.ThrowIfNull(options);
 
         options.Schema.For<UserView>()
-            .DatabaseSchemaName("identity");
+            .DatabaseSchemaName("identity")
+            .Index(x => x.TrustId);
 
         options.Schema.For<UserSeedLookup>()
             .DatabaseSchemaName("identity");

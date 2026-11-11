@@ -1,6 +1,8 @@
 using CommonGround.Identity.Application.ReadModels;
 using CommonGround.Identity.Domain.Users;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Extensions;
+using JasperFx.Events;
 using Marten;
 using Wolverine.Marten;
 
@@ -20,13 +22,18 @@ public sealed record EnsureUser(
 /// <param name="TrustId">The trust this user belongs to, if assigned.</param>
 public sealed record EnsureUserResult(string UserId, string? TrustId);
 
+/// <summary>What <see cref="EnsureUser"/> decides from.</summary>
+/// <param name="Existing">The user already registered for the subject, if any.</param>
+/// <param name="Stream">That user's stream, fetched for writing, when there is one.</param>
+public sealed record EnsureUserState(UserView? Existing, IEventStream<User>? Stream);
+
 /// <summary>Handles <see cref="EnsureUser"/>.</summary>
 public static class EnsureUserHandler
 {
-    /// <summary>Finds the user already registered for the subject, if any.</summary>
-    public static async Task<UserView?> LoadAsync(
+    /// <summary>Finds the user already registered for the subject, if any, and fetches their stream.</summary>
+    public static async Task<EnsureUserState> LoadAsync(
         EnsureUser command,
-        IQuerySession session,
+        IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
@@ -38,17 +45,31 @@ public static class EnsureUserHandler
             .ConfigureAwait(false);
 
         // Backward compatibility fallback for existing rows keyed directly by subject.
-        return existingBySubject
+        var existing = existingBySubject
             ?? await session.LoadAsync<UserView>(command.KeycloakSubject, cancellationToken).ConfigureAwait(false);
+        if (existing is null)
+        {
+            return new EnsureUserState(null, null);
+        }
+
+        var stream = await session.Events.FetchForWriting<User>(existing.UserId, cancellationToken).ConfigureAwait(false);
+        return new EnsureUserState(existing, stream);
     }
 
-    /// <summary>Returns the existing user, or registers a new one without a trust.</summary>
-    public static (EnsureUserResult, IMartenOp) Handle(EnsureUser command, UserView? existing)
+    /// <summary>Returns the existing user, keeping the email and name they signed in with, or registers a new one without a trust.</summary>
+    public static (EnsureUserResult, IMartenOp) Handle(EnsureUser command, EnsureUserState state)
     {
         ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(state);
 
-        if (existing is not null)
+        if (state.Existing is { } existing)
         {
+            // A row kept from before users were event sourced has no stream to update.
+            if (state.Stream is { Aggregate: not null } stream)
+            {
+                stream.Decide(u => u.UpdateProfile(command.Email, command.DisplayName));
+            }
+
             return (new EnsureUserResult(existing.UserId, existing.TrustId), MartenOps.Nothing());
         }
 

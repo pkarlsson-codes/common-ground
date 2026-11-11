@@ -22,4 +22,28 @@ public sealed class TrustsApiClient(
         ArgumentNullException.ThrowIfNull(request);
         return await PostAsync<CreateTrustRequest, CreateTrustResponse>("api/trusts", request, ct).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task<CreateTrustInvitationResponse> CreateTrustInvitationAsync(CreateTrustInvitationRequest request, CancellationToken ct = default)
+        => await PostAsync<CreateTrustInvitationRequest, CreateTrustInvitationResponse>("api/trust-invitations", request, ct).ConfigureAwait(false);
+
+    /// <inheritdoc/>
+    public async Task<TrustInvitationListResponse> ListTrustInvitationsAsync(CancellationToken ct = default)
+        => await GetAsync<TrustInvitationListResponse>("api/trust-invitations", ct).ConfigureAwait(false);
+
+    /// <inheritdoc/>
+    public async Task CancelTrustInvitationAsync(string invitationId, CancellationToken ct = default)
+        => await PostAsync($"api/trust-invitations/{Uri.EscapeDataString(invitationId)}/cancel", ct).ConfigureAwait(false);
+
+    /// <inheritdoc/>
+    public async Task<TrustInvitationPreviewResponse> PreviewTrustInvitationAsync(TrustInvitationTokenRequest request, CancellationToken ct = default)
+        => await PostAsync<TrustInvitationTokenRequest, TrustInvitationPreviewResponse>("api/trust-invitations/preview", request, ct).ConfigureAwait(false);
+
+    /// <inheritdoc/>
+    public async Task<AcceptTrustInvitationResponse> AcceptTrustInvitationAsync(TrustInvitationTokenRequest request, CancellationToken ct = default)
+        => await PostAsync<TrustInvitationTokenRequest, AcceptTrustInvitationResponse>("api/trust-invitations/accept", request, ct).ConfigureAwait(false);
+
+    /// <inheritdoc/>
+    public async Task<TrustMemberListResponse> ListTrustMembersAsync(CancellationToken ct = default)
+        => await GetAsync<TrustMemberListResponse>("api/trust-members", ct).ConfigureAwait(false);
 }

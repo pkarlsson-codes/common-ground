@@ -47,12 +47,11 @@ export default function OnboardingPage() {
             You're not part of a trust yet
           </h1>
           <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            CommonGround is organized around Community Land Trusts. To access the platform, you either need an
-            invite from a trust admin, or you can create your own trust.
+            CommonGround is organized around Community Land Trusts. To work in an existing trust, you need an
+            invite link from one of its members. Otherwise, you can create your own trust.
           </p>
           <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-dim)', lineHeight: 1.5 }}>
-            If you've received an invite, just open the link from your email while signed in and you'll be
-            added automatically.
+            Ask a member of your trust to invite you from its Team page, then open the link they send you.
           </p>
         </div>
 

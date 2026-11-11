@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "playwright test",
+    "test": "node run.mjs",
     "test:ui": "playwright test --ui",
     "report": "playwright show-report"
   },

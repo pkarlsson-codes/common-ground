@@ -18,4 +18,25 @@ public static class BusinessRuleViolation
                 => new("trust_management.trust.request_onboarding.correlation_id_required");
         }
     }
+
+    public static class TrustInvitation
+    {
+        public static BusinessRuleViolationException NotFound()
+            => new("trust_management.trust_invitation.not_found");
+
+        public static class Accept
+        {
+            public static BusinessRuleViolationException NoLongerValid()
+                => new("trust_management.trust_invitation.accept.no_longer_valid");
+
+            public static BusinessRuleViolationException AlreadyInTrust()
+                => new("trust_management.trust_invitation.accept.already_in_trust");
+        }
+
+        public static class Cancel
+        {
+            public static BusinessRuleViolationException AlreadyAccepted()
+                => new("trust_management.trust_invitation.cancel.already_accepted");
+        }
+    }
 }

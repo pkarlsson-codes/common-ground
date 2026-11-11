@@ -1,5 +1,8 @@
+using CommonGround.TrustManagement.Application.ReadModels;
 using CommonGround.TrustManagement.Domain.Trusts.Events;
+using CommonGround.TrustManagement.Infrastructure.Persistence.Projections;
 using CommonGround.TrustManagement.Infrastructure.Seeding;
+using JasperFx.Events.Projections;
 using Marten;
 
 namespace CommonGround.TrustManagement.Infrastructure.Persistence;
@@ -18,5 +21,14 @@ public static class TrustManagementMartenConfiguration
         options.Schema.For<TrustSeedLookup>()
             .DatabaseSchemaName(SeedSchemaName)
             .Index(x => x.SeedKey);
+
+        // Trusts and their invitations are written from the default-tenant session: a user who isn't in a
+        // trust yet finds an invitation by its link.
+        options.Schema.For<TrustInvitationView>()
+            .DatabaseSchemaName("trust_management")
+            .UniqueIndex(x => x.TokenHash)
+            .Index(x => x.TrustId);
+
+        options.Projections.Add<TrustInvitationViewProjection>(ProjectionLifecycle.Inline);
     }
 }

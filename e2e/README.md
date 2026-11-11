@@ -10,6 +10,13 @@ npm run infra:start   # docker infra must be up
 npm run e2e           # or e2e:ui for the interactive runner, e2e:report for the last HTML report
 ```
 
+`npm run e2e` runs `run.mjs`, which passes its arguments to `playwright test`. When a run fails, it copies the console
+output (`output.txt`), the HTML report and the traces to `failed-runs/<time>/`, so the next run can't overwrite them,
+and keeps the 5 newest. Open one with `npx playwright show-report failed-runs/<time>/playwright-report`.
+
+A run uses 4 workers (4 Chromium instances). Playwright's own default, half the CPU cores, ran a 32 GB machine out of
+memory. Set `E2E_WORKERS` to change it: `E2E_WORKERS=8 npm run e2e`.
+
 To watch a run as a demo, `npm run e2e:demo` runs headed, one test at a time, pausing 400 ms before each action.
 Set `SLOWMO` to change the pause, and pass a path to run one area: `SLOWMO=800 npm run e2e:demo -- tests/purchase-workflows`.
 

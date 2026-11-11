@@ -23,7 +23,7 @@ test('a new user without a trust creates one and is taken into the app', async (
   // Signed in but not in a trust: every page redirects to Onboarding.
   await expect(page).toHaveURL(/\/onboarding$/)
   await expect(page.getByRole('heading', { name: "You're not part of a trust yet" })).toBeVisible()
-  await expect(page.getByText('invite from a trust admin')).toBeVisible()
+  await expect(page.getByText('invite link from one of its members')).toBeVisible()
   await page.goto('/land-parcels')
   await expect(page).toHaveURL(/\/onboarding$/)
 

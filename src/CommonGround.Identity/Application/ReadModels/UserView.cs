@@ -12,6 +12,12 @@ public sealed class UserView
     /// <summary>Gets the CommonGround UserId.</summary>
     public string UserId { get; set; } = string.Empty;
 
+    /// <summary>Gets the email address the sign-in server gave at registration, if any.</summary>
+    public string? Email { get; set; }
+
+    /// <summary>Gets the name the sign-in server gave at registration, if any.</summary>
+    public string? DisplayName { get; set; }
+
     /// <summary>Gets the trust this user belongs to, if assigned.</summary>
     public string? TrustId { get; set; }
 }

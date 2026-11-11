@@ -16,9 +16,15 @@ const slowMo = Number(process.env.SLOWMO ?? 0)
 const waitFor = (url: string) =>
   `until curl -sf ${url} >/dev/null; do sleep 1; done`
 
+// Playwright's default is half the CPU cores (12 on a 24-core machine). Each worker is a Chromium
+// instance on top of the API, gateway, web app and Docker infra, which ran a 32 GB desktop out of
+// memory. E2E_WORKERS=<n> overrides the cap.
+const workers = Number(process.env.E2E_WORKERS ?? 4)
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
+  workers,
   forbidOnly: !!process.env.CI,
   retries: 0,
   reporter: [['list'], ['html', { open: 'never' }]],

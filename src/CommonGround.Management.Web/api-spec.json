@@ -7578,6 +7578,285 @@
         }
       }
     },
+    "/api/v1/trust-invitations": {
+      "post": {
+        "tags": [
+          "TrustInvitations"
+        ],
+        "operationId": "CreateTrustInvitation",
+        "requestBody": {
+          "x-name": "CreateTrustInvitationRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTrustInvitationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTrustInvitationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "TrustInvitations"
+        ],
+        "operationId": "ListTrustInvitations",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustInvitationListResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trust-invitations/{invitationId}/cancel": {
+      "post": {
+        "tags": [
+          "TrustInvitations"
+        ],
+        "operationId": "CancelTrustInvitation",
+        "parameters": [
+          {
+            "name": "invitationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trust-invitations/preview": {
+      "post": {
+        "tags": [
+          "TrustInvitations"
+        ],
+        "operationId": "PreviewTrustInvitation",
+        "requestBody": {
+          "x-name": "TrustInvitationTokenRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrustInvitationTokenRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustInvitationPreviewResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trust-invitations/accept": {
+      "post": {
+        "tags": [
+          "TrustInvitations"
+        ],
+        "operationId": "AcceptTrustInvitation",
+        "requestBody": {
+          "x-name": "TrustInvitationTokenRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrustInvitationTokenRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptTrustInvitationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trust-members": {
+      "get": {
+        "tags": [
+          "TrustInvitations"
+        ],
+        "operationId": "ListTrustMembers",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustMemberListResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/trusts/current": {
       "get": {
         "tags": [
@@ -13272,6 +13551,153 @@
             "type": "integer",
             "description": "How many items it has.",
             "format": "int32"
+          }
+        }
+      },
+      "CreateTrustInvitationResponse": {
+        "type": "object",
+        "description": "A new invitation. The token is returned only here; the link is built from it.",
+        "additionalProperties": false,
+        "properties": {
+          "invitationId": {
+            "type": "string",
+            "description": "The invitation id."
+          },
+          "token": {
+            "type": "string",
+            "description": "The secret token for the invite link."
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When the link stops working.",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateTrustInvitationRequest": {
+        "type": "object",
+        "description": "Makes an invite link to the caller's trust.",
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "The colleague's email address."
+          }
+        }
+      },
+      "TrustInvitationListResponse": {
+        "type": "object",
+        "description": "A trust's invitations that can still be used.",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The invitations, newest first.",
+            "items": {
+              "$ref": "#/components/schemas/TrustInvitationResponse"
+            }
+          }
+        }
+      },
+      "TrustInvitationResponse": {
+        "type": "object",
+        "description": "A pending invitation.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The invitation id."
+          },
+          "email": {
+            "type": "string",
+            "description": "The address it was made for."
+          },
+          "invitedByName": {
+            "type": "string",
+            "description": "The name of the member who made it, or null when unknown.",
+            "nullable": true
+          },
+          "issuedAt": {
+            "type": "string",
+            "description": "When it was made.",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When the link stops working.",
+            "format": "date-time"
+          }
+        }
+      },
+      "TrustInvitationPreviewResponse": {
+        "type": "object",
+        "description": "What the invite page shows before the user joins.",
+        "additionalProperties": false,
+        "properties": {
+          "trustName": {
+            "type": "string",
+            "description": "The trust the link joins."
+          },
+          "email": {
+            "type": "string",
+            "description": "The address the invitation was made for."
+          }
+        }
+      },
+      "TrustInvitationTokenRequest": {
+        "type": "object",
+        "description": "An invite link's token, sent in the body so it stays out of URLs and request logs.",
+        "additionalProperties": false,
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "The token from the invite link."
+          }
+        }
+      },
+      "AcceptTrustInvitationResponse": {
+        "type": "object",
+        "description": "The trust a user joined with an invite link.",
+        "additionalProperties": false,
+        "properties": {
+          "trustId": {
+            "type": "string",
+            "description": "The trust's id."
+          }
+        }
+      },
+      "TrustMemberListResponse": {
+        "type": "object",
+        "description": "The users who belong to a trust.",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The members, by name.",
+            "items": {
+              "$ref": "#/components/schemas/TrustMemberResponse"
+            }
+          }
+        }
+      },
+      "TrustMemberResponse": {
+        "type": "object",
+        "description": "A trust member.",
+        "additionalProperties": false,
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "The user's id."
+          },
+          "name": {
+            "type": "string",
+            "description": "The user's name, or null when the sign-in server gave none.",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "description": "The user's email address, or null when the sign-in server gave none.",
+            "nullable": true
           }
         }
       },

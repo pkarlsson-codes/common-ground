@@ -67,7 +67,12 @@ public sealed class OidcEventsFactory(
         }
 
         var email = ctx.Principal?.FindFirst("email")?.Value;
+
+        // Not every provider puts "name" in the ID token (the dev realm's profile scope gives only the parts).
+        var fullName = string.Join(' ', new[] { ctx.Principal?.FindFirst("given_name")?.Value, ctx.Principal?.FindFirst("family_name")?.Value }
+            .Where(part => !string.IsNullOrWhiteSpace(part)));
         var displayName = ctx.Principal?.FindFirst("name")?.Value
+                       ?? (fullName.Length > 0 ? fullName : null)
                        ?? ctx.Principal?.FindFirst("preferred_username")?.Value;
 
         ctx.Properties!.Items.TryGetValue("trust_id", out var trustId);

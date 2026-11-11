@@ -15,6 +15,8 @@ internal sealed class UserViewProjection : SingleStreamProjection<UserView, stri
             Id = e.Data.KeycloakSubject,
             KeycloakSubject = e.Data.KeycloakSubject,
             UserId = e.Data.AggregateId,
+            Email = e.Data.Email,
+            DisplayName = e.Data.DisplayName,
             TrustId = null, // User starts without a trust
         };
 
@@ -22,5 +24,12 @@ internal sealed class UserViewProjection : SingleStreamProjection<UserView, stri
     public static void Apply(UserView view, UserTrustAssigned e)
     {
         view.TrustId = e.TrustId;
+    }
+
+    /// <summary>Keeps the email address and name from the latest sign-in.</summary>
+    public static void Apply(UserView view, UserProfileUpdated e)
+    {
+        view.Email = e.Email;
+        view.DisplayName = e.DisplayName;
     }
 }

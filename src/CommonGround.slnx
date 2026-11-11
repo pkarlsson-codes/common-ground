@@ -19,6 +19,7 @@
   <Project Path="CommonGround.Testing/CommonGround.Testing.csproj" />
   <Project Path="CommonGround.TrustManagement.Contracts/CommonGround.TrustManagement.Contracts.csproj" />
   <Project Path="CommonGround.TrustManagement/CommonGround.TrustManagement.csproj" />
+  <Project Path="CommonGround.TrustManagement.Tests/CommonGround.TrustManagement.Tests.csproj" />
   <Project Path="CommonGround.Management.Gateway/CommonGround.Management.Gateway.csproj" />
   <Project Path="CommonGround.HomeBuyers.Contracts\CommonGround.HomeBuyers.Contracts.csproj" />
   <Project Path="CommonGround.HomeBuyers\CommonGround.HomeBuyers.csproj" />

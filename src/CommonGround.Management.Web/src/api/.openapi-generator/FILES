@@ -14,9 +14,11 @@ apis/PurchaseWorkflowsApi.ts
 apis/ResalesApi.ts
 apis/StewardshipApi.ts
 apis/TodayApi.ts
+apis/TrustInvitationsApi.ts
 apis/TrustsApi.ts
 apis/index.ts
 index.ts
+models/AcceptTrustInvitationResponse.ts
 models/ActivateCurePeriodRequest.ts
 models/AddDocumentVersionResponse.ts
 models/AddHouseholdMemberRequest.ts
@@ -34,6 +36,8 @@ models/CreateGroundLeaseRequest.ts
 models/CreateGroundLeaseResponse.ts
 models/CreateGroundLeaseTemplateRequest.ts
 models/CreateGroundLeaseTemplateResponse.ts
+models/CreateTrustInvitationRequest.ts
+models/CreateTrustInvitationResponse.ts
 models/CreateTrustRequest.ts
 models/CreateTrustResponse.ts
 models/CurePeriodActivationResponse.ts
@@ -181,6 +185,12 @@ models/SubmitOccupancyVerificationRequest.ts
 models/TagDocumentRequest.ts
 models/TitleDetailsDto.ts
 models/TodayResponse.ts
+models/TrustInvitationListResponse.ts
+models/TrustInvitationPreviewResponse.ts
+models/TrustInvitationResponse.ts
+models/TrustInvitationTokenRequest.ts
+models/TrustMemberListResponse.ts
+models/TrustMemberResponse.ts
 models/TrustResponse.ts
 models/UpdateDocumentMetadataRequest.ts
 models/UpdateHouseholdCircumstancesRequest.ts

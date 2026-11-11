@@ -16,4 +16,38 @@ public interface ITrustsApiClient
     /// <param name="ct">A token to cancel the operation.</param>
     /// <returns>The response containing the stable trust ID.</returns>
     Task<CreateTrustResponse> CreateTrustAsync(CreateTrustRequest request, CancellationToken ct = default);
+
+    /// <summary>Makes an invite link to the caller's trust.</summary>
+    /// <param name="request">The request.</param>
+    /// <param name="ct">A token to cancel the operation.</param>
+    /// <returns>The invitation and the token for its link.</returns>
+    Task<CreateTrustInvitationResponse> CreateTrustInvitationAsync(CreateTrustInvitationRequest request, CancellationToken ct = default);
+
+    /// <summary>Lists the caller's trust's invitations that can still be used.</summary>
+    /// <param name="ct">A token to cancel the operation.</param>
+    /// <returns>The pending invitations.</returns>
+    Task<TrustInvitationListResponse> ListTrustInvitationsAsync(CancellationToken ct = default);
+
+    /// <summary>Cancels an unused invitation.</summary>
+    /// <param name="invitationId">The invitation.</param>
+    /// <param name="ct">A token to cancel the operation.</param>
+    /// <returns>A task that completes when it is cancelled.</returns>
+    Task CancelTrustInvitationAsync(string invitationId, CancellationToken ct = default);
+
+    /// <summary>Shows what an invite link joins, for the invite page.</summary>
+    /// <param name="request">The request.</param>
+    /// <param name="ct">A token to cancel the operation.</param>
+    /// <returns>The trust name and invited email.</returns>
+    Task<TrustInvitationPreviewResponse> PreviewTrustInvitationAsync(TrustInvitationTokenRequest request, CancellationToken ct = default);
+
+    /// <summary>Joins the caller to the trust an invite link is for.</summary>
+    /// <param name="request">The request.</param>
+    /// <param name="ct">A token to cancel the operation.</param>
+    /// <returns>The trust joined.</returns>
+    Task<AcceptTrustInvitationResponse> AcceptTrustInvitationAsync(TrustInvitationTokenRequest request, CancellationToken ct = default);
+
+    /// <summary>Lists the members of the caller's trust.</summary>
+    /// <param name="ct">A token to cancel the operation.</param>
+    /// <returns>The members.</returns>
+    Task<TrustMemberListResponse> ListTrustMembersAsync(CancellationToken ct = default);
 }

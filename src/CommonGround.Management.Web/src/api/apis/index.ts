@@ -16,4 +16,5 @@ export * from './PurchaseWorkflowsApi';
 export * from './ResalesApi';
 export * from './StewardshipApi';
 export * from './TodayApi';
+export * from './TrustInvitationsApi';
 export * from './TrustsApi';

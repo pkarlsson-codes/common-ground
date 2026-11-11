@@ -189,5 +189,9 @@ internal static class BusinessRuleErrorMessageMap
 
             ["trust_management.trust.create.name_required"] = "Trust name is required.",
             ["trust_management.trust.request_onboarding.correlation_id_required"] = "A correlation identifier is required to initiate trust onboarding.",
+            ["trust_management.trust_invitation.not_found"] = "That invite doesn't exist.",
+            ["trust_management.trust_invitation.accept.no_longer_valid"] = "This invite link is no longer valid. Ask a member of the trust for a new one.",
+            ["trust_management.trust_invitation.accept.already_in_trust"] = "You already belong to a trust.",
+            ["trust_management.trust_invitation.cancel.already_accepted"] = "This invite has already been used, so it can't be cancelled.",
         };
 }

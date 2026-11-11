@@ -2,13 +2,34 @@ using System.Net;
 using System.Net.Http.Json;
 using CommonGround.API.Contracts.Identity.Requests;
 using CommonGround.API.Contracts.Identity.Responses;
+using CommonGround.API.Contracts.TrustManagement.Responses;
+using CommonGround.Identity.Application.Commands;
+using CommonGround.SharedKernel.Domain;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using Wolverine;
 
 namespace CommonGround.API.IntegrationTests.Identity;
 
 [Collection(IntegrationCollection.Name)]
 public class UsersTests(ApiFactory factory)
 {
+    [Fact]
+    public async Task EnsureUser_SignInWithANewNameAndEmail_KeepsThemForTheMembersList()
+    {
+        var client = factory.CreateClient().WithAuthToken(trustId: string.Empty);
+        var subject = $"test-subject-renamed-{Guid.NewGuid()}";
+        var first = await (await client.PostAsJsonAsync("/api/users/ensure", new EnsureUserRequest(subject, "old@example.com", "Old Name", TrustId: null)))
+            .Content.ReadFromJsonAsync<EnsureUserResponse>();
+        var trustId = TrustId.Generate();
+        await factory.Services.GetRequiredService<IMessageBus>().InvokeAsync(new AssignUserToTrustIfNone(UserId.Create(first!.UserId), trustId));
+
+        await client.PostAsJsonAsync("/api/users/ensure", new EnsureUserRequest(subject, "new@example.com", "New Name", TrustId: null));
+
+        var members = await factory.CreateClient().WithAuthToken(trustId: trustId.Value).GetFromJsonAsync<TrustMemberListResponse>("/api/trust-members");
+        members!.Items.Should().ContainSingle().Which.Should().BeEquivalentTo(new { first.UserId, Name = "New Name", Email = "new@example.com" });
+    }
+
     [Fact]
     public async Task EnsureUser_Unauthenticated_Returns401()
     {
