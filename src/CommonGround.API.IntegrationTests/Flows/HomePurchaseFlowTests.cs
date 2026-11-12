@@ -388,7 +388,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
     {
         var response = await client.PostAsJsonAsync("/api/homes",
             new RegisterHomeRequest(
-                landParcelId, "SingleFamily", 3, 2m, false, 1200m, 1990, "Test Appraiser", new DateOnly(2024, 1, 1), 280000m));
+                landParcelId, "SingleFamily", 3, 2m, false, 80, 1200m, 1990, "Test Appraiser", new DateOnly(2024, 1, 1), 280000m));
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         return (await response.Content.ReadFromJsonAsync<RegisterHomeResponse>())!.HomeId;
     }

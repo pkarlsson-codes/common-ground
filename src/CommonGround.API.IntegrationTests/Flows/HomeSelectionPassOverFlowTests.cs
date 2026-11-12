@@ -175,7 +175,7 @@ public class HomeSelectionPassOverFlowTests(DurableApiFactory factory)
 
             var home = await client.PostAsJsonAsync("/api/homes",
                 new RegisterHomeRequest(
-                    landParcelId, "SingleFamily", 3, 2m, false, 1200m, 1990, "Test Appraiser", new DateOnly(2024, 1, 1), 280000m));
+                    landParcelId, "SingleFamily", 3, 2m, false, 80, 1200m, 1990, "Test Appraiser", new DateOnly(2024, 1, 1), 280000m));
             home.StatusCode.Should().Be(HttpStatusCode.Created);
             return (await home.Content.ReadFromJsonAsync<RegisterHomeResponse>())!.HomeId;
         });

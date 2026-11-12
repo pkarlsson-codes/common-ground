@@ -23,7 +23,7 @@ import {
 } from './CalendarDate';
 
 /**
- * Request to register a new building on a land parcel.
+ * Request to register a new home on a land parcel.
  * @export
  * @interface RegisterHomeRequest
  */
@@ -58,6 +58,12 @@ export interface RegisterHomeRequest {
      * @memberof RegisterHomeRequest
      */
     isAccessible?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof RegisterHomeRequest
+     */
+    incomeLimitPercentOfAmi: number | null;
     /**
      * 
      * @type {number}
@@ -100,6 +106,7 @@ export interface RegisterHomeRequest {
  * Check if a given object implements the RegisterHomeRequest interface.
  */
 export function instanceOfRegisterHomeRequest(value: object): value is RegisterHomeRequest {
+    if (!('incomeLimitPercentOfAmi' in value) || value['incomeLimitPercentOfAmi'] === undefined) return false;
     return true;
 }
 
@@ -118,6 +125,7 @@ export function RegisterHomeRequestFromJSONTyped(json: any, ignoreDiscriminator:
         'bedrooms': json['bedrooms'] == null ? undefined : json['bedrooms'],
         'bathrooms': json['bathrooms'] == null ? undefined : json['bathrooms'],
         'isAccessible': json['isAccessible'] == null ? undefined : json['isAccessible'],
+        'incomeLimitPercentOfAmi': json['incomeLimitPercentOfAmi'],
         'squareFootage': json['squareFootage'] == null ? undefined : json['squareFootage'],
         'yearBuilt': json['yearBuilt'] == null ? undefined : json['yearBuilt'],
         'appraiserName': json['appraiserName'] == null ? undefined : json['appraiserName'],
@@ -143,6 +151,7 @@ export function RegisterHomeRequestToJSONTyped(value?: RegisterHomeRequest | nul
         'bedrooms': value['bedrooms'],
         'bathrooms': value['bathrooms'],
         'isAccessible': value['isAccessible'],
+        'incomeLimitPercentOfAmi': value['incomeLimitPercentOfAmi'],
         'squareFootage': value['squareFootage'],
         'yearBuilt': value['yearBuilt'],
         'appraiserName': value['appraiserName'],

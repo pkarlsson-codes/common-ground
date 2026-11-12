@@ -29,6 +29,7 @@ public class HomesTests(ApiFactory factory)
                 3,
                 2m,
                 false,
+                80,
                 1200m,
                 1990,
                 "Test Appraiser",
@@ -87,6 +88,7 @@ public class HomesTests(ApiFactory factory)
                 3,
                 2m,
                 false,
+                80,
                 1200m,
                 1990,
                 "Test Appraiser",
@@ -111,6 +113,7 @@ public class HomesTests(ApiFactory factory)
                 3,
                 2m,
                 false,
+                80,
                 1200m,
                 1990,
                 "Test Appraiser",
@@ -133,6 +136,7 @@ public class HomesTests(ApiFactory factory)
                 4,
                 2m,
                 true,
+                80,
                 1800m,
                 2005,
                 "Test Appraiser",
@@ -176,6 +180,7 @@ public class HomesTests(ApiFactory factory)
                 3,
                 2m,
                 false,
+                80,
                 1200m,
                 1990,
                 "Test Appraiser",
@@ -260,14 +265,36 @@ public class HomesTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task RegisterHome_WithoutTheIncomeLimitField_ReturnsBadRequest()
+    {
+        var parcelId = await CreateLandParcelAsync();
+        var client = factory.CreateClient().WithAuthToken();
+
+        var response = await client.PostAsJsonAsync("/api/homes", new
+        {
+            landParcelId = parcelId,
+            homeType = "SingleFamily",
+            bedrooms = 3,
+            bathrooms = 2m,
+            isAccessible = false,
+            squareFootage = 1200m,
+            yearBuilt = 1990,
+            appraiserName = "Test Appraiser",
+            initialAssessedDate = "2024-01-01",
+            initialAssessedValue = 280000m,
+        });
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task RegisterHome_WithNoIncomeLimit_HomeHasNone()
     {
         var parcelId = await CreateLandParcelAsync();
         var client = factory.CreateClient().WithAuthToken();
 
         var response = await client.PostAsJsonAsync("/api/homes",
-            new RegisterHomeRequest(parcelId, "SingleFamily", 3, 2m, false, 1200m, 1990, "Test Appraiser", new DateOnly(2024, 1, 1), 280000m,
-                IncomeLimitPercentOfAmi: null));
+            new RegisterHomeRequest(parcelId, "SingleFamily", 3, 2m, false, null, 1200m, 1990, "Test Appraiser", new DateOnly(2024, 1, 1), 280000m));
         response.EnsureSuccessStatusCode();
         var homeId = (await response.Content.ReadFromJsonAsync<RegisterHomeResponse>())!.HomeId;
 
@@ -291,6 +318,18 @@ public class HomesTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task SetHomeIncomeLimit_WithoutThePercentField_ReturnsBadRequestAndKeepsTheLimit()
+    {
+        var parcelId = await CreateLandParcelAsync();
+        var client = factory.CreateClient().WithAuthToken();
+        var homeId = await RegisterHomeAsync(client, parcelId);
+
+        (await client.PutAsJsonAsync($"/api/homes/{homeId}/income-limit", new { }))
+            .StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}"))!.IncomeLimitPercentOfAmi.Should().Be(80);
+    }
+
+    [Fact]
     public async Task SetHomeIncomeLimit_OutOfRange_Returns422WithTheRange()
     {
         var parcelId = await CreateLandParcelAsync();
@@ -308,7 +347,7 @@ public class HomesTests(ApiFactory factory)
     private static async Task<string> RegisterHomeAsync(HttpClient client, string parcelId)
     {
         var response = await client.PostAsJsonAsync("/api/homes",
-            new RegisterHomeRequest(parcelId, "SingleFamily", 3, 2m, false, 1200m, 1990, "Test Appraiser", new DateOnly(2024, 1, 1), 280000m));
+            new RegisterHomeRequest(parcelId, "SingleFamily", 3, 2m, false, 80, 1200m, 1990, "Test Appraiser", new DateOnly(2024, 1, 1), 280000m));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<RegisterHomeResponse>())!.HomeId;
     }

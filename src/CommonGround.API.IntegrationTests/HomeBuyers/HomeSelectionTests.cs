@@ -418,6 +418,7 @@ public class HomeSelectionTests(ApiFactory factory)
                 3,
                 2m,
                 false,
+                80,
                 1200m,
                 1990,
                 "Test Appraiser",

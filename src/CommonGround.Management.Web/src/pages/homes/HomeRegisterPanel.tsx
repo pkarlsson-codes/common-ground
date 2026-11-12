@@ -13,6 +13,9 @@ import { DateInput } from '../../components/DateInput'
 
 const landParcelsApi = new LandParcelsApi(apiConfig)
 
+/** The most common limit in the manual (HOME program, the IRS low-income definition). */
+const DEFAULT_INCOME_LIMIT_PERCENT_OF_AMI = 80
+
 interface FormState {
   landParcelId: string
   homeType: string
@@ -20,6 +23,8 @@ interface FormState {
   bedrooms: number
   bathrooms: number
   isAccessible: boolean
+  incomeLimitPercentOfAmi: number
+  noIncomeLimit: boolean
   squareFootage: number
   yearBuilt: number
   initialAssessedValue: number
@@ -34,6 +39,8 @@ const emptyForm = (parcelId = ''): FormState => ({
   bedrooms: 0,
   bathrooms: 0,
   isAccessible: false,
+  incomeLimitPercentOfAmi: DEFAULT_INCOME_LIMIT_PERCENT_OF_AMI,
+  noIncomeLimit: false,
   squareFootage: 0,
   yearBuilt: 0,
   initialAssessedValue: 0,
@@ -71,13 +78,15 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
     e.preventDefault()
     setFormError(null)
     try {
+      const { noIncomeLimit, ...fields } = form
       await registerMutation.mutateAsync({
-        ...form,
+        ...fields,
         bedrooms:             Number(form.bedrooms),
         bathrooms:            Number(form.bathrooms),
         squareFootage:        Number(form.squareFootage),
         yearBuilt:            Number(form.yearBuilt),
         initialAssessedValue: Number(form.initialAssessedValue),
+        incomeLimitPercentOfAmi: noIncomeLimit ? null : Number(form.incomeLimitPercentOfAmi),
         initialAssessedDate:  form.initialAssessedDate ?? undefined,
         appraiserName:        form.appraiserName || undefined,
         unitDesignation:      form.unitDesignation.trim() || undefined,
@@ -186,6 +195,28 @@ export default function HomeRegisterPanel({ onClose, initialParcelId }: Props) {
                 onChange={e => setForm(f => ({ ...f, isAccessible: e.target.checked }))}
               />
               Accessible home
+            </label>
+          </div>
+          <div className="form-field">
+            <label className="form-label" htmlFor="home-income-limit">Income Limit (% of AMI)</label>
+            <input
+              id="home-income-limit"
+              className="form-input"
+              type="number"
+              min="1"
+              max="200"
+              value={form.incomeLimitPercentOfAmi}
+              onChange={e => setForm(f => ({ ...f, incomeLimitPercentOfAmi: parseInt(e.target.value, 10) || 0 }))}
+              disabled={form.noIncomeLimit}
+              required={!form.noIncomeLimit}
+            />
+            <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input
+                type="checkbox"
+                checked={form.noIncomeLimit}
+                onChange={e => setForm(f => ({ ...f, noIncomeLimit: e.target.checked }))}
+              />
+              No income limit
             </label>
           </div>
           <div className="form-field">

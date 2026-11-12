@@ -81,6 +81,12 @@ export interface HomeResponse {
      * @type {number}
      * @memberof HomeResponse
      */
+    incomeLimitPercentOfAmi?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof HomeResponse
+     */
     squareFootage?: number;
     /**
      * 
@@ -199,6 +205,7 @@ export function HomeResponseFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'bedrooms': json['bedrooms'] == null ? undefined : json['bedrooms'],
         'bathrooms': json['bathrooms'] == null ? undefined : json['bathrooms'],
         'isAccessible': json['isAccessible'] == null ? undefined : json['isAccessible'],
+        'incomeLimitPercentOfAmi': json['incomeLimitPercentOfAmi'] == null ? undefined : json['incomeLimitPercentOfAmi'],
         'squareFootage': json['squareFootage'] == null ? undefined : json['squareFootage'],
         'yearBuilt': json['yearBuilt'] == null ? undefined : json['yearBuilt'],
         'assessedValue': json['assessedValue'] == null ? undefined : json['assessedValue'],
@@ -237,6 +244,7 @@ export function HomeResponseToJSONTyped(value?: HomeResponse | null, ignoreDiscr
         'bedrooms': value['bedrooms'],
         'bathrooms': value['bathrooms'],
         'isAccessible': value['isAccessible'],
+        'incomeLimitPercentOfAmi': value['incomeLimitPercentOfAmi'],
         'squareFootage': value['squareFootage'],
         'yearBuilt': value['yearBuilt'],
         'assessedValue': value['assessedValue'],

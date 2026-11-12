@@ -17,13 +17,16 @@ public static class HomeIncomeLimitSetHandler
         return session.LoadAsync<HomeFactsView>(@event.HomeId, cancellationToken);
     }
 
-    /// <summary>Records the home's new income limit. A home HomeBuyers has no facts for is left alone.</summary>
+    /// <summary>
+    /// Records the home's new income limit. Throws when HomeBuyers has no facts for the home, so the message
+    /// fails and lands in the dead letter queue instead of leaving selection checking the old limit.
+    /// </summary>
     public static IMartenOp Handle(HomeIncomeLimitSet @event, HomeFactsView? facts)
     {
         ArgumentNullException.ThrowIfNull(@event);
 
         if (facts is null)
-            return MartenOps.Nothing();
+            throw new InvalidOperationException($"HomeBuyers has no facts for home {@event.HomeId}, so its income limit can't be recorded.");
 
         facts.IncomeLimitPercentOfAmi = @event.PercentOfAmi;
         return MartenOps.Store(facts);

@@ -11006,8 +11006,11 @@
       },
       "RegisterHomeRequest": {
         "type": "object",
-        "description": "Request to register a new building on a land parcel.",
+        "description": "Request to register a new home on a land parcel.",
         "additionalProperties": false,
+        "required": [
+          "incomeLimitPercentOfAmi"
+        ],
         "properties": {
           "landParcelId": {
             "type": "string"
@@ -11025,6 +11028,11 @@
           },
           "isAccessible": {
             "type": "boolean"
+          },
+          "incomeLimitPercentOfAmi": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           },
           "squareFootage": {
             "type": "number",
@@ -11082,6 +11090,11 @@
           },
           "isAccessible": {
             "type": "boolean"
+          },
+          "incomeLimitPercentOfAmi": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           },
           "squareFootage": {
             "type": "number",

@@ -56,6 +56,8 @@ export async function createHome(page: Page, landParcelId: string) {
     homeType: 'SingleFamily',
     bedrooms: 3,
     bathrooms: 2,
+    isAccessible: false,
+    incomeLimitPercentOfAmi: 80,
     squareFootage: 1200,
     yearBuilt: 1990,
     appraiserName: 'E2E Appraiser',

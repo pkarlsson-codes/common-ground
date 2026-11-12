@@ -1,6 +1,10 @@
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Namotion.Reflection;
 using NJsonSchema;
+using NJsonSchema.Generation;
 using NSwag;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
@@ -29,6 +33,7 @@ public static class OpenApiServiceCollectionExtensions
             options.Description = "CommonGround Web Gateway API";
             options.OperationProcessors.Add(new EndpointNameOperationProcessor());
             options.OperationProcessors.Add(new ProblemDetailsResponseProcessor());
+            options.SchemaSettings.SchemaProcessors.Add(new RequiredNullableSchemaProcessor());
             options.PostProcess = document =>
             {
                 var httpUrl = configuration["Gateway:BaseUrl"]
@@ -58,6 +63,32 @@ public static class OpenApiServiceCollectionExtensions
             };
             context.OperationDescription.Operation.Responses["400"] = response;
             return true;
+        }
+    }
+
+    /// <summary>
+    /// NSwag makes a <see cref="JsonRequiredAttribute"/> property non-nullable. For a nullable property that is
+    /// wrong: the client must send the field, but null is a valid value (a home's income limit of "none").
+    /// This puts nullable back, so the generated TypeScript type is <c>number | null</c>.
+    /// </summary>
+    private sealed class RequiredNullableSchemaProcessor : ISchemaProcessor
+    {
+        public void Process(SchemaProcessorContext context)
+        {
+            foreach (var property in context.ContextualType.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (property.GetCustomAttribute<JsonRequiredAttribute>() is null
+                    || property.ToContextualProperty().Nullability != Nullability.Nullable)
+                {
+                    continue;
+                }
+
+                var name = JsonNamingPolicy.CamelCase.ConvertName(property.Name);
+                if (context.Schema.ActualProperties.TryGetValue(name, out var schemaProperty))
+                {
+                    schemaProperty.IsNullableRaw = true;
+                }
+            }
         }
     }
 
