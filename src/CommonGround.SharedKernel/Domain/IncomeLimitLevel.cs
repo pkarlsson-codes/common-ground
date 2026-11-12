@@ -1,7 +1,6 @@
-using CommonGround.HomeBuyers.Application.Errors;
-using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Domain.Errors;
 
-namespace CommonGround.HomeBuyers.Domain.IncomeLimitSchedules;
+namespace CommonGround.SharedKernel.Domain;
 
 /// <summary>
 /// One row of a published income limit table: the most a household may earn at a percent of area median
@@ -44,19 +43,19 @@ public sealed class IncomeLimitLevel : ValueObject
 
         if (percentOfAmi is < MinimumPercentOfAmi or > MaximumPercentOfAmi)
         {
-            throw BusinessRuleViolation.IncomeLimitSchedule.Level.PercentOutOfRange(percentOfAmi);
+            throw BusinessRuleViolation.IncomeLimitLevel.PercentOutOfRange(percentOfAmi);
         }
 
         if (limits.Count != PrintedHouseholdSizes)
         {
-            throw BusinessRuleViolation.IncomeLimitSchedule.Level.WrongNumberOfLimits(percentOfAmi, limits.Count);
+            throw BusinessRuleViolation.IncomeLimitLevel.WrongNumberOfLimits(percentOfAmi, limits.Count);
         }
 
         for (var i = 0; i < limits.Count; i++)
         {
             if (!limits[i].IsPositive)
             {
-                throw BusinessRuleViolation.IncomeLimitSchedule.Level.LimitNotPositive(percentOfAmi, householdSize: i + 1);
+                throw BusinessRuleViolation.IncomeLimitLevel.LimitNotPositive(percentOfAmi, householdSize: i + 1);
             }
         }
 

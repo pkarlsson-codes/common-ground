@@ -1,9 +1,8 @@
-using CommonGround.HomeBuyers.Domain.IncomeLimitSchedules;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using FluentAssertions;
 
-namespace CommonGround.HomeBuyers.Tests.Domain.IncomeLimitSchedules;
+namespace CommonGround.SharedKernel.Tests.Domain;
 
 public class IncomeLimitLevelTests
 {
@@ -29,7 +28,7 @@ public class IncomeLimitLevelTests
             var act = () => IncomeLimitLevel.Create(percent, _testBed.EightyPercentLimits);
 
             act.Should().Throw<BusinessRuleViolationException>()
-                .Which.Code.Should().Be("home_buyers.income_limit_schedule.level.percent_out_of_range");
+                .Which.Code.Should().Be("shared.income_limit_level.percent_out_of_range");
         }
 
         [Fact]
@@ -38,7 +37,7 @@ public class IncomeLimitLevelTests
             var act = () => IncomeLimitLevel.Create(80, _testBed.EightyPercentLimits[..7]);
 
             act.Should().Throw<BusinessRuleViolationException>()
-                .Which.Code.Should().Be("home_buyers.income_limit_schedule.level.wrong_number_of_limits");
+                .Which.Code.Should().Be("shared.income_limit_level.wrong_number_of_limits");
         }
 
         [Fact]
@@ -51,7 +50,7 @@ public class IncomeLimitLevelTests
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Should().BeEquivalentTo(new
                 {
-                    Code = "home_buyers.income_limit_schedule.level.limit_not_positive",
+                    Code = "shared.income_limit_level.limit_not_positive",
                     Args = new Dictionary<string, object?> { ["percentOfAmi"] = 80, ["householdSize"] = 3 },
                 });
         }

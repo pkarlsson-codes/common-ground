@@ -40,6 +40,24 @@ export interface EligibilityDetailsDto {
      * @memberof EligibilityDetailsDto
      */
     notes?: string | null;
+    /**
+     * The household's annual income as the documents showed it.
+     * @type {number}
+     * @memberof EligibilityDetailsDto
+     */
+    verifiedAnnualIncome?: number;
+    /**
+     * The number of people in the household as the documents showed it.
+     * @type {number}
+     * @memberof EligibilityDetailsDto
+     */
+    verifiedHouseholdSize?: number;
+    /**
+     * The limit for that size the income was checked against, or null when the purchase has no limit.
+     * @type {number}
+     * @memberof EligibilityDetailsDto
+     */
+    incomeLimit?: number | null;
 }
 
 /**
@@ -61,6 +79,9 @@ export function EligibilityDetailsDtoFromJSONTyped(json: any, ignoreDiscriminato
         
         'verifiedDate': json['verifiedDate'] == null ? undefined : CalendarDateFromJSON(json['verifiedDate']),
         'notes': json['notes'] == null ? undefined : json['notes'],
+        'verifiedAnnualIncome': json['verifiedAnnualIncome'] == null ? undefined : json['verifiedAnnualIncome'],
+        'verifiedHouseholdSize': json['verifiedHouseholdSize'] == null ? undefined : json['verifiedHouseholdSize'],
+        'incomeLimit': json['incomeLimit'] == null ? undefined : json['incomeLimit'],
     };
 }
 
@@ -77,6 +98,9 @@ export function EligibilityDetailsDtoToJSONTyped(value?: EligibilityDetailsDto |
         
         'verifiedDate': CalendarDateToJSON(value['verifiedDate']),
         'notes': value['notes'],
+        'verifiedAnnualIncome': value['verifiedAnnualIncome'],
+        'verifiedHouseholdSize': value['verifiedHouseholdSize'],
+        'incomeLimit': value['incomeLimit'],
     };
 }
 

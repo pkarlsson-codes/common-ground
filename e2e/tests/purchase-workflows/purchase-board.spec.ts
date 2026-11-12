@@ -30,6 +30,8 @@ test('the board puts a purchase in the column of the step it waits on, and moves
   const detail = panel(page, buyer)
   await detail.getByText(/^Eligibility$/).locator('xpath=../..').getByRole('button', { name: 'Expand' }).click()
   await field(detail, 'Verified Date').fill(isoDate())
+  await field(detail, 'Verified Annual Income ($)').fill('52000')
+  await field(detail, 'Verified Household Size').fill('2')
   await detail.getByRole('button', { name: 'Record Eligibility' }).click()
   await expectToast(page, 'Eligibility recorded')
 

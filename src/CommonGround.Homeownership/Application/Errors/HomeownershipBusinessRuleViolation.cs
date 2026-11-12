@@ -3,6 +3,7 @@ using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.Homeownership.Domain.Resales;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 
 namespace CommonGround.Homeownership.Application.Errors;
@@ -19,6 +20,38 @@ public static class BusinessRuleViolation
                     new Dictionary<string, object?>
                     {
                         ["purchasePrice"] = purchasePrice,
+                    });
+        }
+
+        public static class RecordEligibilityVerified
+        {
+            public static BusinessRuleViolationException IncomeNegative(Money income)
+                => new(
+                    "homeownership.purchase_workflow.record_eligibility_verified.income_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["income"] = income,
+                    });
+
+            public static BusinessRuleViolationException HouseholdSizeBelowOne(int householdSize)
+                => new(
+                    "homeownership.purchase_workflow.record_eligibility_verified.household_size_below_one",
+                    new Dictionary<string, object?>
+                    {
+                        ["householdSize"] = householdSize,
+                    });
+
+            public static BusinessRuleViolationException OverIncomeLimit(
+                Money income, Money limit, int percentOfAmi, int householdSize, DateOnly effectiveFrom)
+                => new(
+                    "homeownership.purchase_workflow.record_eligibility_verified.over_income_limit",
+                    new Dictionary<string, object?>
+                    {
+                        ["income"] = income,
+                        ["limit"] = limit,
+                        ["percentOfAmi"] = percentOfAmi,
+                        ["householdSize"] = householdSize,
+                        ["effectiveFrom"] = effectiveFrom,
                     });
         }
 

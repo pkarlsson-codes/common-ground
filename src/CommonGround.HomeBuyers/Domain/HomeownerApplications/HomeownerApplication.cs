@@ -88,13 +88,28 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     /// application's household, have completed readiness, and hold a prequalification still valid on
     /// <paramref name="selectedDate"/>.
     /// </summary>
+    /// <param name="household">This application's household.</param>
+    /// <param name="selectionId">The selection the application is chosen in.</param>
+    /// <param name="homeId">The home.</param>
+    /// <param name="landParcelId">The home's land parcel.</param>
+    /// <param name="groundLeaseTemplateId">The ground lease template the purchase will use.</param>
+    /// <param name="purchasePrice">The purchase price, above zero.</param>
+    /// <param name="selectedDate">The date of the selection.</param>
+    /// <param name="selectedBy">The staff user choosing.</param>
+    /// <param name="candidate">The application's candidate in the selection: the income and size it was judged on.</param>
+    /// <param name="incomeLimitLevel">The limit row the selection judged by, or <see langword="null"/> when the home had none.</param>
+    /// <param name="incomeLimitsEffectiveFrom">The effective date of the schedule <paramref name="incomeLimitLevel"/> came from.</param>
     public ApplicationSelectedForHome SelectForHome(
         Household household,
         HomeSelectionId selectionId,
         string homeId, string landParcelId, string groundLeaseTemplateId,
-        decimal purchasePrice, DateOnly selectedDate, UserId selectedBy)
+        decimal purchasePrice, DateOnly selectedDate, UserId selectedBy,
+        SelectionCandidate candidate,
+        IncomeLimitLevel? incomeLimitLevel,
+        DateOnly? incomeLimitsEffectiveFrom)
     {
         ArgumentNullException.ThrowIfNull(household);
+        ArgumentNullException.ThrowIfNull(candidate);
         if (household.Id != HouseholdId)
             throw new ArgumentException("Household does not belong to this application.", nameof(household));
         GuardNotTerminal();
@@ -128,7 +143,12 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
             groundLeaseTemplateId,
             purchasePrice,
             selectedDate,
-            selectedBy.Value);
+            selectedBy.Value,
+            candidate.AnnualIncome,
+            candidate.HouseholdSize,
+            incomeLimitLevel?.PercentOfAmi,
+            incomeLimitLevel is null ? null : incomeLimitsEffectiveFrom,
+            incomeLimitLevel?.Limits);
     }
 
     /// <summary>

@@ -143,6 +143,7 @@ models/PropertyInspectionResponse.ts
 models/PurchaseBoardCardResponse.ts
 models/PurchaseBoardColumnResponse.ts
 models/PurchaseBoardResponse.ts
+models/PurchaseIncomeLimitDto.ts
 models/PurchaseWorkflowListItemResponse.ts
 models/PurchaseWorkflowResponse.ts
 models/RecordAppraisalCompletedRequest.ts

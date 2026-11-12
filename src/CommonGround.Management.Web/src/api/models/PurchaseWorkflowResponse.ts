@@ -56,6 +56,13 @@ import {
     AppraisalDetailsDtoToJSON,
     AppraisalDetailsDtoToJSONTyped,
 } from './AppraisalDetailsDto';
+import type { PurchaseIncomeLimitDto } from './PurchaseIncomeLimitDto';
+import {
+    PurchaseIncomeLimitDtoFromJSON,
+    PurchaseIncomeLimitDtoFromJSONTyped,
+    PurchaseIncomeLimitDtoToJSON,
+    PurchaseIncomeLimitDtoToJSONTyped,
+} from './PurchaseIncomeLimitDto';
 import type { EligibilityDetailsDto } from './EligibilityDetailsDto';
 import {
     EligibilityDetailsDtoFromJSON,
@@ -65,7 +72,9 @@ import {
 } from './EligibilityDetailsDto';
 
 /**
- * Detail response for a purchase workflow.
+ * Detail response for a purchase workflow. DeclaredAnnualIncome and DeclaredHouseholdSize are what the
+ * household declared when selected, and IncomeLimit the limit the home's selection judged by; all null when the
+ * purchase didn't start from a selection, and IncomeLimit null when the home had no limit.
  * @export
  * @interface PurchaseWorkflowResponse
  */
@@ -154,6 +163,24 @@ export interface PurchaseWorkflowResponse {
      * @memberof PurchaseWorkflowResponse
      */
     createdAt?: Date;
+    /**
+     * 
+     * @type {number}
+     * @memberof PurchaseWorkflowResponse
+     */
+    declaredAnnualIncome?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof PurchaseWorkflowResponse
+     */
+    declaredHouseholdSize?: number | null;
+    /**
+     * 
+     * @type {PurchaseIncomeLimitDto}
+     * @memberof PurchaseWorkflowResponse
+     */
+    incomeLimit?: PurchaseIncomeLimitDto | null;
     /**
      * 
      * @type {EligibilityDetailsDto}
@@ -271,6 +298,9 @@ export function PurchaseWorkflowResponseFromJSONTyped(json: any, ignoreDiscrimin
         'buyerPhone': json['buyerPhone'] == null ? undefined : json['buyerPhone'],
         'purchasePrice': json['purchasePrice'] == null ? undefined : json['purchasePrice'],
         'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
+        'declaredAnnualIncome': json['declaredAnnualIncome'] == null ? undefined : json['declaredAnnualIncome'],
+        'declaredHouseholdSize': json['declaredHouseholdSize'] == null ? undefined : json['declaredHouseholdSize'],
+        'incomeLimit': json['incomeLimit'] == null ? undefined : PurchaseIncomeLimitDtoFromJSON(json['incomeLimit']),
         'eligibilityDetails': json['eligibilityDetails'] == null ? undefined : EligibilityDetailsDtoFromJSON(json['eligibilityDetails']),
         'appraisalDetails': json['appraisalDetails'] == null ? undefined : AppraisalDetailsDtoFromJSON(json['appraisalDetails']),
         'financingDetails': json['financingDetails'] == null ? undefined : FinancingDetailsDtoFromJSON(json['financingDetails']),
@@ -313,6 +343,9 @@ export function PurchaseWorkflowResponseToJSONTyped(value?: PurchaseWorkflowResp
         'buyerPhone': value['buyerPhone'],
         'purchasePrice': value['purchasePrice'],
         'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
+        'declaredAnnualIncome': value['declaredAnnualIncome'],
+        'declaredHouseholdSize': value['declaredHouseholdSize'],
+        'incomeLimit': PurchaseIncomeLimitDtoToJSON(value['incomeLimit']),
         'eligibilityDetails': EligibilityDetailsDtoToJSON(value['eligibilityDetails']),
         'appraisalDetails': AppraisalDetailsDtoToJSON(value['appraisalDetails']),
         'financingDetails': FinancingDetailsDtoToJSON(value['financingDetails']),

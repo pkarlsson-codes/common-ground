@@ -118,7 +118,14 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
         if (entry.Eligibility is { } eligibility)
         {
             var verified = eligibility.Date.Resolve(today);
-            steps.Add((verified, w => w.RecordEligibilityVerified(verified, eligibility.Notes, SeederUserId)));
+
+            // Seeded purchases all start from a selection, so the documents confirm what the household declared.
+            steps.Add((verified, w => w.RecordEligibilityVerified(
+                verified,
+                w.DeclaredAnnualIncome ?? throw new InvalidOperationException($"Purchase workflow {w.Id} has no declared income to verify."),
+                w.DeclaredHouseholdSize ?? throw new InvalidOperationException($"Purchase workflow {w.Id} has no declared household size to verify."),
+                eligibility.Notes,
+                SeederUserId)));
         }
 
         if (entry.Appraisal is { } appraisal)

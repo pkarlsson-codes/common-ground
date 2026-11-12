@@ -62,7 +62,7 @@ public class IncomeLimitScheduleTests(ApiFactory factory)
         var response = await client.PostAsJsonAsync("/api/income-limit-schedules",
             new IncomeLimitScheduleRequest(FutureDate(), [new(80, EightyPercentLimits[..7])]));
 
-        await ShouldBeViolationAsync(response, "home_buyers.income_limit_schedule.level.wrong_number_of_limits");
+        await ShouldBeViolationAsync(response, "shared.income_limit_level.wrong_number_of_limits");
     }
 
     [Fact]

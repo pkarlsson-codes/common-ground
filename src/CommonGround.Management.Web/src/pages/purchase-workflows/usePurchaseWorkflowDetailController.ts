@@ -31,7 +31,20 @@ export type TrackKey = 'eligibility' | 'appraisal' | 'financing' | 'inspection' 
 
 const today = () => trustToday()
 
-const emptyEligibility = (): RecordEligibilityForm => ({ verifiedDate: today(), notes: '' })
+/** The eligibility form as typed. A null income or size is untouched and shows what the household declared. */
+type EligibilityDraft = Omit<RecordEligibilityForm, 'verifiedAnnualIncome' | 'verifiedHouseholdSize'> & {
+  verifiedAnnualIncome: string | null
+  verifiedHouseholdSize: string | null
+}
+
+const emptyEligibility = (): EligibilityDraft => ({ verifiedDate: today(), verifiedAnnualIncome: null, verifiedHouseholdSize: null, notes: '' })
+
+/** Fills untouched fields with what the household declared when selected, or leaves them empty when it wasn't. */
+const resolveEligibility = (draft: EligibilityDraft, detail: PurchaseWorkflowResponse | undefined): RecordEligibilityForm => ({
+  ...draft,
+  verifiedAnnualIncome: draft.verifiedAnnualIncome ?? (detail?.declaredAnnualIncome == null ? '' : String(detail.declaredAnnualIncome)),
+  verifiedHouseholdSize: draft.verifiedHouseholdSize ?? (detail?.declaredHouseholdSize == null ? '' : String(detail.declaredHouseholdSize)),
+})
 const emptyAppraisal = (): RecordAppraisalForm => ({ appraisedValue: 0, appraisalDate: today(), appraiserName: '', notes: '' })
 const emptyFinancing = (): RecordFinancingForm => ({ lenderName: '', committedAmount: 0, preapprovalLetterDate: today() })
 const emptyInspection = (): RecordInspectionForm => ({ inspectionDate: today(), inspectorName: '', notes: '' })
@@ -55,7 +68,7 @@ export function usePurchaseWorkflowDetailController({
   showToast,
   isDetailOpen,
 }: UsePurchaseWorkflowDetailControllerParams) {
-  const [eligForm, setEligForm] = useState<RecordEligibilityForm>(emptyEligibility)
+  const [eligForm, setEligForm] = useState<EligibilityDraft>(emptyEligibility)
   const [appraisalForm, setAppraisalForm] = useState<RecordAppraisalForm>(emptyAppraisal)
   const [finForm, setFinForm] = useState<RecordFinancingForm>(emptyFinancing)
   const [inspForm, setInspForm] = useState<RecordInspectionForm>(emptyInspection)
@@ -142,7 +155,7 @@ export function usePurchaseWorkflowDetailController({
     expandedTracks,
     toggleTrack,
     collapseTrack,
-    eligForm,
+    eligForm: resolveEligibility(eligForm, detail),
     setEligForm,
     appraisalForm,
     setAppraisalForm,

@@ -190,13 +190,20 @@ export async function createPurchaseWorkflow(page: Page, buyerName: string, { fr
 }
 
 /**
+ * An eligibility verification body whose income is under every baseline limit (the 50% one-person limit is 43,750).
+ */
+export function eligibilityVerified(verifiedDate: string) {
+  return { verifiedDate, verifiedAnnualIncome: 40000, verifiedHouseholdSize: 1, notes: null }
+}
+
+/**
  * Takes a purchase through every track to closing, which creates an active ground lease for the buyer (from the
  * workflow's lease template, so it can be resold).
  */
 export async function createLeaseFromPurchase(page: Page, buyerName: string) {
   const workflow = await createPurchaseWorkflow(page, buyerName)
   const path = `/api/v1/purchase-workflows/${workflow.workflowId}`
-  await post(page, `${path}/eligibility`, { verifiedDate: isoDate(-10), notes: null })
+  await post(page, `${path}/eligibility`, eligibilityVerified(isoDate(-10)))
   await post(page, `${path}/appraisal`, { appraisedValue: 250000, appraisalDate: isoDate(-10), appraiserName: 'E2E Appraiser', notes: null })
   await post(page, `${path}/financing`, { lenderName: 'E2E Lender', committedAmount: 180000, preapprovalLetterDate: isoDate(-9) })
   await post(page, `${path}/inspection`, { inspectionDate: isoDate(-8), inspectorName: 'E2E Inspector', notes: null })

@@ -45,15 +45,16 @@ public class HandlerTestBed
     public HomeownerApplication SelectedApplication(Household household)
     {
         var application = ApprovedApplication(household);
-        return application.Evolve(application.SelectForHome(household, HomeSelectionId.Generate(), HomeId, "land-parcel-1", "template-1", 200000m, SelectedDate, StaffUser))!;
+        return application.Evolve(application.SelectForHome(
+            household, HomeSelectionId.Generate(), HomeId, "land-parcel-1", "template-1", 200000m, SelectedDate, StaffUser,
+            CandidateFor(application, household), incomeLimitLevel: null, incomeLimitsEffectiveFrom: null))!;
     }
 
     public HomeSelection OpenSelection(params (HomeownerApplication Application, Household Household)[] candidates) =>
         EventReplay.Replay<HomeSelection>(HomeSelection.Start(
             HomeSelectionId.Generate(),
             HomeId,
-            [.. candidates.Select(c => SelectionCandidate.Create(
-                c.Application.Id, c.Household.Id, Money.Create(65000m), 1, false, new DateOnly(2026, 6, 1), incomeLimit: null))],
+            [.. candidates.Select(c => CandidateFor(c.Application, c.Household))],
             incomeLimitPercentOfAmi: null,
             scheduleInEffect: null,
             SelectedDate,
@@ -64,5 +65,9 @@ public class HandlerTestBed
         new(
             new StubEventStream<HomeownerApplication>(application),
             household,
-            new HomeFactsView { Id = HomeId, LandParcelId = "land-parcel-1" });
+            new HomeFactsView { Id = HomeId, LandParcelId = "land-parcel-1" },
+            CandidateFor(application, household));
+
+    public static SelectionCandidate CandidateFor(HomeownerApplication application, Household household) =>
+        SelectionCandidate.Create(application.Id, household.Id, Money.Create(65000m), 1, false, new DateOnly(2026, 6, 1), incomeLimit: null);
 }

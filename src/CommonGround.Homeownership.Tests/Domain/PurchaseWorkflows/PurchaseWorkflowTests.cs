@@ -25,7 +25,7 @@ public class PurchaseWorkflowTests
 
     private static PurchaseWorkflow SatisfyAllTracks(PurchaseWorkflow workflow)
     {
-        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), "Income verified", StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), Money.Create(60_000m), 2, "Income verified", StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.RecordAppraisalCompleted(300_000m, new DateOnly(2025, 3, 3), "Jane Appraiser", null, StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.RecordFinancingCommitted("First National", 240_000m, new DateOnly(2025, 3, 5), StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.RecordInspectionCompleted(new DateOnly(2025, 3, 10), "Bob Inspector", "All clear", StaffUser)).Aggregate;
@@ -71,7 +71,7 @@ public class PurchaseWorkflowTests
     {
         var workflow = CreateWorkflow();
 
-        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), Money.Create(60_000m), 2, null, StaffUser)).Aggregate;
 
         workflow.Phase.Should().Be(WorkflowPhase.InProgress);
         workflow.IsEligibilityVerified.Should().BeTrue();
@@ -119,7 +119,7 @@ public class PurchaseWorkflowTests
     public void ScheduleClosing_WhenOnlyTheAppraisalIsMissing_Throws()
     {
         var workflow = CreateWorkflow();
-        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), Money.Create(60_000m), 2, null, StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.RecordFinancingCommitted("Bank", 240_000m, new DateOnly(2025, 3, 5), StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.RecordInspectionCompleted(new DateOnly(2025, 3, 10), "Inspector", null, StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.RecordTitleCleared(new DateOnly(2025, 3, 12), null, StaffUser)).Aggregate;
@@ -186,7 +186,7 @@ public class PurchaseWorkflowTests
         // Record in non-sequential order to prove parallel independence
         workflow = workflow.Decide(a => a.RecordTitleCleared(new DateOnly(2025, 3, 12), null, StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.RecordLeaseExecuted(new DateOnly(2025, 3, 15), StaffUser)).Aggregate;
-        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), Money.Create(60_000m), 2, null, StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.RecordInspectionCompleted(new DateOnly(2025, 3, 10), "Inspector", null, StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.RecordFinancingCommitted("Bank", 240_000m, new DateOnly(2025, 3, 5), StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.RecordAppraisalCompleted(300_000m, new DateOnly(2025, 3, 3), "Appraiser", null, StaffUser)).Aggregate;
@@ -202,9 +202,9 @@ public class PurchaseWorkflowTests
     {
         var workflow = CreateWorkflow();
 
-        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), "First", StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), Money.Create(60_000m), 2, "First", StaffUser)).Aggregate;
 
-        var (after, events) = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 4, 1), "Second", StaffUser));
+        var (after, events) = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 4, 1), Money.Create(60_000m), 2, "Second", StaffUser));
 
         events.Should().BeEmpty();
         after.EligibilityDetails!.Notes.Should().Be("First");
@@ -228,7 +228,7 @@ public class PurchaseWorkflowTests
     public void ScheduleClosing_WhenTracksMissing_Throws()
     {
         var workflow = CreateWorkflow();
-        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), Money.Create(60_000m), 2, null, StaffUser)).Aggregate;
 
         var act = () => workflow.ScheduleClosing(new DateOnly(2025, 4, 1), StaffUser);
 
@@ -331,7 +331,7 @@ public class PurchaseWorkflowTests
     public void WithdrawPurchase_FromAnyNonTerminal_Succeeds()
     {
         var workflow = CreateWorkflow();
-        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), Money.Create(60_000m), 2, null, StaffUser)).Aggregate;
 
         workflow = workflow.Decide(a => a.WithdrawPurchase(new DateOnly(2025, 3, 20), "Changed mind", StaffUser)).Aggregate;
 
@@ -346,7 +346,7 @@ public class PurchaseWorkflowTests
     public void StallWorkflow_FromInProgress_Succeeds()
     {
         var workflow = CreateWorkflow();
-        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), Money.Create(60_000m), 2, null, StaffUser)).Aggregate;
 
         workflow = workflow.Decide(a => a.StallWorkflow("Waiting on appraisal", new DateOnly(2025, 3, 15), new DateOnly(2025, 4, 15), StaffUser)).Aggregate;
 
@@ -372,7 +372,7 @@ public class PurchaseWorkflowTests
     public void StallWorkflow_ThenRecordTrack_ResumesToInProgress()
     {
         var workflow = CreateWorkflow();
-        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), null, StaffUser)).Aggregate;
+        workflow = workflow.Decide(a => a.RecordEligibilityVerified(new DateOnly(2025, 3, 1), Money.Create(60_000m), 2, null, StaffUser)).Aggregate;
         workflow = workflow.Decide(a => a.StallWorkflow("Waiting", new DateOnly(2025, 3, 15), new DateOnly(2025, 4, 15), StaffUser)).Aggregate;
         workflow.Phase.Should().Be(WorkflowPhase.Stalled);
 
@@ -390,7 +390,7 @@ public class PurchaseWorkflowTests
         workflow = workflow.Decide(a => a.FailPurchase("Deal fell through", new DateOnly(2025, 3, 20), StaffUser)).Aggregate;
 
         var act = () => workflow.RecordEligibilityVerified(
-            new DateOnly(2025, 3, 25), null, StaffUser);
+            new DateOnly(2025, 3, 25), Money.Create(60_000m), 2, null, StaffUser);
 
         act.Should().Throw<BusinessRuleViolationException>()
             .WithMessage("*terminal*");
@@ -408,5 +408,122 @@ public class PurchaseWorkflowTests
         initiated.BuyerEmail.Should().Be("alice@example.com");
         initiated.BuyerPhone.Should().Be("+12025551234");
         initiated.PurchasePrice.Should().Be(250_000m);
+    }
+
+    public class TheRecordEligibilityVerifiedMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenIncomeOverTheLimitForTheVerifiedSize_WhenRecorded_ThenThrowsOverIncomeLimitNamingTheLimit()
+        {
+            var sut = _testBed.WorkflowWithLimit();
+
+            var act = () => sut.RecordEligibilityVerified(_testBed.VerifiedDate, Money.Create(57_150.01m), 2, null, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Should().BeEquivalentTo(new
+                {
+                    Code = "homeownership.purchase_workflow.record_eligibility_verified.over_income_limit",
+                    Args = new Dictionary<string, object?>
+                    {
+                        ["income"] = Money.Create(57_150.01m),
+                        ["limit"] = Money.Create(57_150m),
+                        ["percentOfAmi"] = 80,
+                        ["householdSize"] = 2,
+                        ["effectiveFrom"] = _testBed.LimitsEffectiveFrom,
+                    },
+                });
+        }
+
+        [Fact]
+        public void GivenIncomeAtTheLimit_WhenRecorded_ThenRecordsTheLimitItWasCheckedAgainst()
+        {
+            var sut = _testBed.WorkflowWithLimit();
+
+            var verified = sut.RecordEligibilityVerified(_testBed.VerifiedDate, Money.Create(57_150m), 2, null, _testBed.StaffUser);
+
+            verified.Should().BeEquivalentTo(new
+            {
+                VerifiedAnnualIncome = Money.Create(57_150m),
+                VerifiedHouseholdSize = 2,
+                IncomeLimit = Money.Create(57_150m),
+            });
+        }
+
+        [Fact]
+        public void GivenTheHouseholdGrewSinceSelection_WhenRecorded_ThenJudgesByTheLimitForTheVerifiedSize()
+        {
+            var sut = _testBed.WorkflowWithLimit();
+
+            var verified = sut.RecordEligibilityVerified(_testBed.VerifiedDate, Money.Create(60_000m), 3, null, _testBed.StaffUser);
+
+            verified!.IncomeLimit.Should().Be(Money.Create(64_300m));
+        }
+
+        [Fact]
+        public void GivenNoLimit_WhenRecorded_ThenRecordsTheIncomeWithoutALimit()
+        {
+            var sut = _testBed.WorkflowWithoutLimit();
+
+            var verified = sut.RecordEligibilityVerified(_testBed.VerifiedDate, Money.Create(500_000m), 1, null, _testBed.StaffUser);
+
+            verified!.IncomeLimit.Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenHouseholdSizeZero_WhenRecorded_ThenThrowsHouseholdSizeBelowOne()
+        {
+            var sut = _testBed.WorkflowWithLimit();
+
+            var act = () => sut.RecordEligibilityVerified(_testBed.VerifiedDate, Money.Create(40_000m), 0, null, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.purchase_workflow.record_eligibility_verified.household_size_below_one");
+        }
+
+        [Fact]
+        public void GivenNegativeIncome_WhenRecorded_ThenThrowsIncomeNegative()
+        {
+            var sut = _testBed.WorkflowWithoutLimit();
+
+            var act = () => sut.RecordEligibilityVerified(_testBed.VerifiedDate, Money.Create(-1m), 1, null, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.purchase_workflow.record_eligibility_verified.income_negative");
+        }
+
+        public class TestBed
+        {
+            public UserId StaffUser { get; } = UserId.Generate();
+
+            public DateOnly VerifiedDate { get; } = new(2026, 9, 1);
+
+            public DateOnly LimitsEffectiveFrom { get; } = new(2026, 4, 1);
+
+            public IncomeLimitLevel Level { get; } = IncomeLimitLevel.Create(
+                80,
+                [.. new[] { 50_000m, 57_150m, 64_300m, 71_400m, 77_150m, 82_850m, 88_550m, 94_250m }.Select(Money.Create)]);
+
+            public PurchaseWorkflow WorkflowWithLimit() => Workflow(Level);
+
+            public PurchaseWorkflow WorkflowWithoutLimit() => Workflow(level: null);
+
+            private PurchaseWorkflow Workflow(IncomeLimitLevel? level) =>
+                EventReplay.Replay<PurchaseWorkflow>(PurchaseWorkflow.Initiate(
+                    PurchaseWorkflowId.Generate(),
+                    GroundLeaseTemplateId.Generate(),
+                    ParcelId,
+                    HomeId,
+                    Buyer,
+                    250_000m,
+                    StaffUser,
+                    "application-1",
+                    "household-1",
+                    Money.Create(55_000m),
+                    2,
+                    level,
+                    level is null ? null : LimitsEffectiveFrom));
+        }
     }
 }

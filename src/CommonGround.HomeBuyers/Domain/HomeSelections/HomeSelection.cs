@@ -31,6 +31,9 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
 
     /// <summary>The effective date of the income limit schedule the candidates were judged by, when the home had a limit.</summary>
     public DateOnly? IncomeLimitsEffectiveFrom { get; private set; }
+
+    /// <summary>The schedule's row for the home's percent that the candidates were judged by, when the home had a limit.</summary>
+    public IncomeLimitLevel? IncomeLimitLevel { get; private set; }
     public HomeownerApplicationId? SelectedApplicationId { get; private set; }
     public string? CancellationReason { get; private set; }
 
@@ -88,6 +91,7 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
                 level?.LimitFor(c.HouseholdSize)))],
             incomeLimitPercentOfAmi,
             level is null ? null : scheduleInEffect!.EffectiveFrom,
+            level?.Limits,
             startedBy.Value);
     }
 
@@ -230,6 +234,9 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
             .ToList();
         IncomeLimitPercentOfAmi = e.IncomeLimitPercentOfAmi;
         IncomeLimitsEffectiveFrom = e.IncomeLimitsEffectiveFrom;
+        IncomeLimitLevel = e.IncomeLimitPercentOfAmi is { } percent && e.IncomeLimits is { } limits
+            ? IncomeLimitLevel.Create(percent, limits)
+            : null;
     }
 
     /// <summary>Applies <see cref="HouseholdSelectedByPriority"/>.</summary>

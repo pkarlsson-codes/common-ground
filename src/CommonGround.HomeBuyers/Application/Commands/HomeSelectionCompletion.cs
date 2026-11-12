@@ -15,10 +15,12 @@ namespace CommonGround.HomeBuyers.Application.Commands;
 /// <param name="Application">The chosen candidate's application stream.</param>
 /// <param name="Household">The chosen candidate's household, read-only.</param>
 /// <param name="Home">The home being selected for.</param>
+/// <param name="Candidate">The chosen candidate in the selection.</param>
 public sealed record ChosenApplication(
     IEventStream<HomeownerApplication> Application,
     Household Household,
-    HomeFactsView Home);
+    HomeFactsView Home,
+    SelectionCandidate Candidate);
 
 /// <summary>
 /// Shared steps for the commands that choose a household in a home selection. Completing a
@@ -67,7 +69,7 @@ public static class HomeSelectionCompletion
             .ConfigureAwait(false)
             ?? throw new AggregateNotFoundException(selection.HomeId);
 
-        return new ChosenApplication(application, household, home);
+        return new ChosenApplication(application, household, home, candidate);
     }
 
     /// <summary>Selects the chosen candidate's application for the home.</summary>
@@ -90,6 +92,9 @@ public static class HomeSelectionCompletion
             groundLeaseTemplateId,
             purchasePrice,
             selectedDate,
-            selectedBy));
+            selectedBy,
+            chosen.Candidate,
+            selection.IncomeLimitLevel,
+            selection.IncomeLimitsEffectiveFrom));
     }
 }

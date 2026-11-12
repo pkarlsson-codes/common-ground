@@ -236,38 +236,6 @@ public static class BusinessRuleViolation
 
     public static class IncomeLimitSchedule
     {
-        public static class Level
-        {
-            public static BusinessRuleViolationException PercentOutOfRange(int percentOfAmi)
-                => new(
-                    "home_buyers.income_limit_schedule.level.percent_out_of_range",
-                    new Dictionary<string, object?>
-                    {
-                        ["percentOfAmi"] = percentOfAmi,
-                        ["minimum"] = IncomeLimitLevel.MinimumPercentOfAmi,
-                        ["maximum"] = IncomeLimitLevel.MaximumPercentOfAmi,
-                    });
-
-            public static BusinessRuleViolationException WrongNumberOfLimits(int percentOfAmi, int count)
-                => new(
-                    "home_buyers.income_limit_schedule.level.wrong_number_of_limits",
-                    new Dictionary<string, object?>
-                    {
-                        ["percentOfAmi"] = percentOfAmi,
-                        ["count"] = count,
-                        ["requiredCount"] = IncomeLimitLevel.PrintedHouseholdSizes,
-                    });
-
-            public static BusinessRuleViolationException LimitNotPositive(int percentOfAmi, int householdSize)
-                => new(
-                    "home_buyers.income_limit_schedule.level.limit_not_positive",
-                    new Dictionary<string, object?>
-                    {
-                        ["percentOfAmi"] = percentOfAmi,
-                        ["householdSize"] = householdSize,
-                    });
-        }
-
         public static class Levels
         {
             public static BusinessRuleViolationException Required()

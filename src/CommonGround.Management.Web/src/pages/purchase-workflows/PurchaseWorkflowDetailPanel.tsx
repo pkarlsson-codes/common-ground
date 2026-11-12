@@ -8,9 +8,54 @@ import PurchaseExceptionActionsSection from './PurchaseExceptionActionsSection'
 import { usePurchaseWorkflowDetailController } from './usePurchaseWorkflowDetailController'
 import { DateInput } from '../../components/DateInput'
 import { useEffect } from 'react'
+import type { PurchaseWorkflowResponse } from '../../api'
+import type { RecordEligibilityForm } from '../../hooks/types'
+import { formatCalendarDate } from '../../lib/calendarDate'
 
 const fmtCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
+
+const PRINTED_HOUSEHOLD_SIZES = 8
+
+const incomeLimitDescription = (detail: PurchaseWorkflowResponse) => {
+  const limit = detail.incomeLimit
+  if (limit?.percentOfAmi == null) return 'No income limit'
+  const effective = limit.effectiveFrom ? `, limits effective ${formatCalendarDate(limit.effectiveFrom)}` : ''
+  return `${limit.percentOfAmi}% of AMI${effective}`
+}
+
+/**
+ * The limit for the household size typed into the eligibility form, read from the selection's printed row.
+ * Above 8 people the API works it out when the verification is recorded.
+ */
+function EligibilityLimitCheck({ detail, form }: { detail: PurchaseWorkflowResponse; form: RecordEligibilityForm }) {
+  const limits = detail.incomeLimit?.limits
+  const size = Number(form.verifiedHouseholdSize)
+  if (!limits || form.verifiedHouseholdSize === '' || !Number.isInteger(size) || size < 1) return null
+
+  const people = `${size} ${size === 1 ? 'person' : 'people'}`
+  if (size > PRINTED_HOUSEHOLD_SIZES) {
+    return <div className="form-hint" role="status">Limit for {people}: worked out when recorded</div>
+  }
+
+  const limit = limits[size - 1]
+  const over = form.verifiedAnnualIncome !== '' && Number(form.verifiedAnnualIncome) > limit
+  return (
+    <div className="form-hint" role="status">
+      Limit for {people}: {fmtCurrency(limit)}
+      {over && <> <span className="badge badge-overincomelimit">Over income limit</span></>}
+    </div>
+  )
+}
+
+const eligibilitySummary = (detail: PurchaseWorkflowResponse) => {
+  const e = detail.eligibilityDetails
+  if (!e) return 'Pending'
+  const size = e.verifiedHouseholdSize ?? 0
+  const income = `${fmtCurrency(Number(e.verifiedAnnualIncome ?? 0))} income, ${size} ${size === 1 ? 'person' : 'people'}`
+  const within = e.incomeLimit == null ? '' : `, within the ${fmtCurrency(e.incomeLimit)} limit`
+  return `Verified ${e.verifiedDate ?? ''}: ${income}${within}`
+}
 
 function SkeletonRows() {
   return (
@@ -70,17 +115,16 @@ export default function PurchaseWorkflowDetailPanel({
 
               <PurchaseTrackSection
                 label="Eligibility"
-                summary={
-                  detail.eligibilityDetails
-                    ? `Verified ${detail.eligibilityDetails.verifiedDate ?? ''}`.trim()
-                    : 'Pending'
-                }
+                summary={eligibilitySummary(detail)}
                 complete={!!detail.eligibilityDetails}
                 expandable={!detail.eligibilityDetails}
                 expanded={s.expandedTracks.has('eligibility')}
                 onToggle={() => s.toggleTrack('eligibility')}
               >
                 <form onSubmit={e => s.handleElig(e, s.eligForm)}>
+                  <div style={{ marginBottom: 10, fontSize: 12, color: 'var(--text-secondary)' }}>
+                    Income limit: {incomeLimitDescription(detail)}
+                  </div>
                   <div className="form-grid" style={{ marginBottom: 10 }}>
                     <div className="form-field">
                       <label className="form-label">Verified Date</label>
@@ -90,6 +134,35 @@ export default function PurchaseWorkflowDetailPanel({
                         onChange={v => s.setEligForm(f => ({ ...f, verifiedDate: v }))}
                         required
                       />
+                    </div>
+                    <div className="form-field">
+                      <label className="form-label" htmlFor="elig-income">Verified Annual Income ($)</label>
+                      <input
+                        id="elig-income"
+                        className="form-input"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={s.eligForm.verifiedAnnualIncome}
+                        onChange={e => s.setEligForm(f => ({ ...f, verifiedAnnualIncome: e.target.value }))}
+                        required
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label className="form-label" htmlFor="elig-size">Verified Household Size</label>
+                      <input
+                        id="elig-size"
+                        className="form-input"
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={s.eligForm.verifiedHouseholdSize}
+                        onChange={e => s.setEligForm(f => ({ ...f, verifiedHouseholdSize: e.target.value }))}
+                        required
+                      />
+                    </div>
+                    <div className="form-field full">
+                      <EligibilityLimitCheck detail={detail} form={s.eligForm} />
                     </div>
                     <div className="form-field full">
                       <label className="form-label">Notes (optional)</label>

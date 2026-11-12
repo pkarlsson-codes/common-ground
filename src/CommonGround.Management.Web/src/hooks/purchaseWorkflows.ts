@@ -160,6 +160,8 @@ export function useRecordEligibilityVerified() {
         workflowId,
         recordEligibilityVerifiedRequest: {
           verifiedDate: form.verifiedDate,
+          verifiedAnnualIncome: Number(form.verifiedAnnualIncome),
+          verifiedHouseholdSize: Number(form.verifiedHouseholdSize),
           notes: form.notes || undefined,
         },
       }),
@@ -171,6 +173,8 @@ export function useRecordEligibilityVerified() {
         eligibilityDetails: {
           verifiedDate: form.verifiedDate,
           notes: form.notes || undefined,
+          verifiedAnnualIncome: Number(form.verifiedAnnualIncome),
+          verifiedHouseholdSize: Number(form.verifiedHouseholdSize),
         },
       })
       return { workflowId, ...context }

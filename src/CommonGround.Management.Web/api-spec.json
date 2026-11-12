@@ -12501,7 +12501,7 @@
       },
       "PurchaseWorkflowResponse": {
         "type": "object",
-        "description": "Detail response for a purchase workflow.",
+        "description": "Detail response for a purchase workflow. DeclaredAnnualIncome and DeclaredHouseholdSize are what the\nhousehold declared when selected, and IncomeLimit the limit the home's selection judged by; all null when the\npurchase didn't start from a selection, and IncomeLimit null when the home had no limit.",
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -12551,6 +12551,24 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "declaredAnnualIncome": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "declaredHouseholdSize": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "incomeLimit": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PurchaseIncomeLimitDto"
+              }
+            ]
           },
           "eligibilityDetails": {
             "nullable": true,
@@ -12638,6 +12656,31 @@
           }
         }
       },
+      "PurchaseIncomeLimitDto": {
+        "type": "object",
+        "description": "The income limit a purchase's home selection judged by.",
+        "additionalProperties": false,
+        "properties": {
+          "percentOfAmi": {
+            "type": "integer",
+            "description": "The home's limit as a percent of AMI.",
+            "format": "int32"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "The effective date of the schedule the amounts came from.",
+            "format": "date"
+          },
+          "limits": {
+            "type": "array",
+            "description": "The schedule's limits at that percent for 1 to 8 people, in that order.",
+            "items": {
+              "type": "number",
+              "format": "decimal"
+            }
+          }
+        }
+      },
       "EligibilityDetailsDto": {
         "type": "object",
         "description": "Eligibility verification details.",
@@ -12651,6 +12694,22 @@
           "notes": {
             "type": "string",
             "description": "Optional notes.",
+            "nullable": true
+          },
+          "verifiedAnnualIncome": {
+            "type": "number",
+            "description": "The household's annual income as the documents showed it.",
+            "format": "decimal"
+          },
+          "verifiedHouseholdSize": {
+            "type": "integer",
+            "description": "The number of people in the household as the documents showed it.",
+            "format": "int32"
+          },
+          "incomeLimit": {
+            "type": "number",
+            "description": "The limit for that size the income was checked against, or null when the purchase has no limit.",
+            "format": "decimal",
             "nullable": true
           }
         }
@@ -12850,13 +12909,29 @@
         "type": "object",
         "description": "Request to record buyer eligibility verified.",
         "additionalProperties": false,
+        "required": [
+          "verifiedAnnualIncome",
+          "verifiedHouseholdSize"
+        ],
         "properties": {
           "verifiedDate": {
             "type": "string",
+            "description": "Date eligibility was verified.",
             "format": "date"
+          },
+          "verifiedAnnualIncome": {
+            "type": "number",
+            "description": "The household's annual income as the documents show it. Required.",
+            "format": "decimal"
+          },
+          "verifiedHouseholdSize": {
+            "type": "integer",
+            "description": "The number of people in the household as the documents show it. Required.",
+            "format": "int32"
           },
           "notes": {
             "type": "string",
+            "description": "Optional notes.",
             "nullable": true
           }
         }

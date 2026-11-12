@@ -60,7 +60,13 @@ public static class ApplicationSelectedHandler
             @event.PurchasePrice,
             UserId.Create(@event.SelectedBy),
             @event.ApplicationId,
-            @event.HouseholdId);
+            @event.HouseholdId,
+            Money.Create(@event.AnnualIncome),
+            @event.HouseholdSize,
+            @event.IncomeLimitPercentOfAmi is { } percent && @event.IncomeLimits is { } limits
+                ? IncomeLimitLevel.Create(percent, [.. limits.Select(Money.Create)])
+                : null,
+            @event.IncomeLimitsEffectiveFrom);
 
         return (MartenOps.StartStream<PurchaseWorkflow>(workflowId.Value, initiated), selectionEnded);
     }

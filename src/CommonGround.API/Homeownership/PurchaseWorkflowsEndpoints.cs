@@ -120,6 +120,8 @@ public static class PurchaseWorkflowsEndpoints
             new RecordEligibilityVerified(
                 PurchaseWorkflowId.Create(workflowId),
                 request.VerifiedDate,
+                Money.Create(request.VerifiedAnnualIncome),
+                request.VerifiedHouseholdSize,
                 request.Notes,
                 userId),
             cancellationToken);
@@ -386,7 +388,15 @@ public static class PurchaseWorkflowsEndpoints
     private static PurchaseWorkflowResponse MapToResponse(PurchaseWorkflowView view, string? homeLabel)
     {
         var eligibility = view.EligibilityDetails is null ? null
-            : new EligibilityDetailsDto(view.EligibilityDetails.VerifiedDate, view.EligibilityDetails.Notes);
+            : new EligibilityDetailsDto(
+                view.EligibilityDetails.VerifiedDate,
+                view.EligibilityDetails.Notes,
+                view.EligibilityDetails.VerifiedAnnualIncome,
+                view.EligibilityDetails.VerifiedHouseholdSize,
+                view.EligibilityDetails.IncomeLimit);
+        var incomeLimit = view is { IncomeLimitPercentOfAmi: { } percent, IncomeLimitsEffectiveFrom: { } effectiveFrom, IncomeLimits: { } limits }
+            ? new PurchaseIncomeLimitDto(percent, effectiveFrom, limits)
+            : null;
         var appraisal = view.AppraisalDetails is null ? null
             : new AppraisalDetailsDto(view.AppraisalDetails.AppraisedValue, view.AppraisalDetails.AppraisalDate, view.AppraisalDetails.AppraiserName, view.AppraisalDetails.Notes);
         var financing = view.FinancingDetails is null ? null
@@ -413,6 +423,9 @@ public static class PurchaseWorkflowsEndpoints
             view.BuyerPhone,
             view.PurchasePrice,
             view.CreatedAt,
+            view.DeclaredAnnualIncome,
+            view.DeclaredHouseholdSize,
+            incomeLimit,
             eligibility,
             appraisal,
             financing,

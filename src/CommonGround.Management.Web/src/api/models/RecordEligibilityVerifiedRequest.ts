@@ -29,13 +29,25 @@ import {
  */
 export interface RecordEligibilityVerifiedRequest {
     /**
-     * 
+     * Date eligibility was verified.
      * @type {CalendarDate}
      * @memberof RecordEligibilityVerifiedRequest
      */
     verifiedDate?: CalendarDate;
     /**
-     * 
+     * The household's annual income as the documents show it. Required.
+     * @type {number}
+     * @memberof RecordEligibilityVerifiedRequest
+     */
+    verifiedAnnualIncome: number;
+    /**
+     * The number of people in the household as the documents show it. Required.
+     * @type {number}
+     * @memberof RecordEligibilityVerifiedRequest
+     */
+    verifiedHouseholdSize: number;
+    /**
+     * Optional notes.
      * @type {string}
      * @memberof RecordEligibilityVerifiedRequest
      */
@@ -46,6 +58,8 @@ export interface RecordEligibilityVerifiedRequest {
  * Check if a given object implements the RecordEligibilityVerifiedRequest interface.
  */
 export function instanceOfRecordEligibilityVerifiedRequest(value: object): value is RecordEligibilityVerifiedRequest {
+    if (!('verifiedAnnualIncome' in value) || value['verifiedAnnualIncome'] === undefined) return false;
+    if (!('verifiedHouseholdSize' in value) || value['verifiedHouseholdSize'] === undefined) return false;
     return true;
 }
 
@@ -60,6 +74,8 @@ export function RecordEligibilityVerifiedRequestFromJSONTyped(json: any, ignoreD
     return {
         
         'verifiedDate': json['verifiedDate'] == null ? undefined : CalendarDateFromJSON(json['verifiedDate']),
+        'verifiedAnnualIncome': json['verifiedAnnualIncome'],
+        'verifiedHouseholdSize': json['verifiedHouseholdSize'],
         'notes': json['notes'] == null ? undefined : json['notes'],
     };
 }
@@ -76,6 +92,8 @@ export function RecordEligibilityVerifiedRequestToJSONTyped(value?: RecordEligib
     return {
         
         'verifiedDate': CalendarDateToJSON(value['verifiedDate']),
+        'verifiedAnnualIncome': value['verifiedAnnualIncome'],
+        'verifiedHouseholdSize': value['verifiedHouseholdSize'],
         'notes': value['notes'],
     };
 }

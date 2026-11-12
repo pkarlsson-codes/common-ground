@@ -24,6 +24,11 @@ internal sealed class PurchaseWorkflowViewProjection : SingleStreamProjection<Pu
             BuyerPhone = e.Data.BuyerPhone,
             PurchasePrice = e.Data.PurchasePrice,
             CreatedAt = e.Data.OccurredAt,
+            DeclaredAnnualIncome = e.Data.DeclaredAnnualIncome?.Amount,
+            DeclaredHouseholdSize = e.Data.DeclaredHouseholdSize,
+            IncomeLimitPercentOfAmi = e.Data.IncomeLimitPercentOfAmi,
+            IncomeLimitsEffectiveFrom = e.Data.IncomeLimitsEffectiveFrom,
+            IncomeLimits = e.Data.IncomeLimits?.Select(limit => limit.Amount).ToList(),
         };
 
     public static void Apply(PurchaseWorkflowView view, BuyerEligibilityVerified e)
@@ -33,6 +38,9 @@ internal sealed class PurchaseWorkflowViewProjection : SingleStreamProjection<Pu
         {
             VerifiedDate = e.VerifiedDate,
             Notes = e.EligibilityNotes,
+            VerifiedAnnualIncome = e.VerifiedAnnualIncome.Amount,
+            VerifiedHouseholdSize = e.VerifiedHouseholdSize,
+            IncomeLimit = e.IncomeLimit?.Amount,
         };
     }
 

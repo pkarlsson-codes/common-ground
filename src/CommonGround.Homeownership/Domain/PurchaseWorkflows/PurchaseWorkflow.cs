@@ -49,6 +49,18 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <summary>Gets the user who initiated this workflow.</summary>
     public UserId InitiatedBy { get; private set; }
 
+    /// <summary>Gets the annual income the household declared when selected, or null when the purchase didn't start from a selection.</summary>
+    public Money? DeclaredAnnualIncome { get; private set; }
+
+    /// <summary>Gets the household size declared when selected, or null when the purchase didn't start from a selection.</summary>
+    public int? DeclaredHouseholdSize { get; private set; }
+
+    /// <summary>Gets the limit row the home's selection judged by, or null when there is none.</summary>
+    public IncomeLimitLevel? IncomeLimitLevel { get; private set; }
+
+    /// <summary>Gets the effective date of the schedule <see cref="IncomeLimitLevel"/> came from.</summary>
+    public DateOnly? IncomeLimitsEffectiveFrom { get; private set; }
+
     /// <summary>Gets eligibility track details, or null if not yet verified.</summary>
     public EligibilityDetails? EligibilityDetails { get; private set; }
 
@@ -124,6 +136,10 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <param name="initiatedBy">The user initiating the workflow.</param>
     /// <param name="applicationId">The homeowner application this workflow originates from, or null for manual/resale-initiated workflows.</param>
     /// <param name="householdId">The buying household, or null for manual/resale-initiated workflows.</param>
+    /// <param name="declaredAnnualIncome">The income the household declared when selected, or null for manual/resale-initiated workflows.</param>
+    /// <param name="declaredHouseholdSize">The household size declared when selected, or null for manual/resale-initiated workflows.</param>
+    /// <param name="incomeLimitLevel">The limit row the home's selection judged by, or null when there is none.</param>
+    /// <param name="incomeLimitsEffectiveFrom">The effective date of the schedule <paramref name="incomeLimitLevel"/> came from.</param>
     /// <returns>A new purchase workflow instance.</returns>
     public static PurchaseWorkflowInitiated Initiate(
         PurchaseWorkflowId id,
@@ -134,7 +150,11 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         decimal purchasePrice,
         UserId initiatedBy,
         string? applicationId = null,
-        string? householdId = null)
+        string? householdId = null,
+        Money? declaredAnnualIncome = null,
+        int? declaredHouseholdSize = null,
+        IncomeLimitLevel? incomeLimitLevel = null,
+        DateOnly? incomeLimitsEffectiveFrom = null)
     {
         ArgumentNullException.ThrowIfNull(landParcelId);
         ArgumentNullException.ThrowIfNull(homeId);
@@ -156,22 +176,49 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
             purchasePrice,
             initiatedBy.Value,
             applicationId,
-            householdId);
+            householdId,
+            declaredAnnualIncome,
+            declaredHouseholdSize,
+            incomeLimitLevel?.PercentOfAmi,
+            incomeLimitLevel is null ? null : incomeLimitsEffectiveFrom,
+            incomeLimitLevel?.Limits);
     }
 
-    /// <summary>Records that buyer eligibility has been verified. Idempotent.</summary>
+    /// <summary>
+    /// Records that buyer eligibility has been verified from the household's documents. Refused when the verified
+    /// income is over <see cref="IncomeLimitLevel"/>'s limit for the verified household size. Idempotent.
+    /// </summary>
     /// <param name="verifiedDate">Date of verification.</param>
+    /// <param name="verifiedAnnualIncome">The household's annual income as the documents show it, zero or more.</param>
+    /// <param name="verifiedHouseholdSize">The number of people in the household as the documents show it, at least 1.</param>
     /// <param name="notes">Optional notes.</param>
     /// <param name="recordedBy">The user recording this fact.</param>
     public BuyerEligibilityVerified? RecordEligibilityVerified(
-        DateOnly verifiedDate, string? notes, UserId recordedBy)
+        DateOnly verifiedDate, Money verifiedAnnualIncome, int verifiedHouseholdSize, string? notes, UserId recordedBy)
     {
+        ArgumentNullException.ThrowIfNull(verifiedAnnualIncome);
         GuardNotTerminal();
         if (IsEligibilityVerified) return null;
 
+        if (verifiedAnnualIncome.IsNegative)
+            throw BusinessRuleViolation.PurchaseWorkflow.RecordEligibilityVerified.IncomeNegative(verifiedAnnualIncome);
+
+        if (verifiedHouseholdSize < 1)
+            throw BusinessRuleViolation.PurchaseWorkflow.RecordEligibilityVerified.HouseholdSizeBelowOne(verifiedHouseholdSize);
+
+        var limit = IncomeLimitLevel?.LimitFor(verifiedHouseholdSize);
+        if (limit is not null && verifiedAnnualIncome > limit)
+        {
+            throw BusinessRuleViolation.PurchaseWorkflow.RecordEligibilityVerified.OverIncomeLimit(
+                verifiedAnnualIncome, limit, IncomeLimitLevel!.PercentOfAmi, verifiedHouseholdSize, IncomeLimitsEffectiveFrom!.Value);
+        }
+
         return new BuyerEligibilityVerified(
             Id.Value, verifiedDate, notes,
-            recordedBy.Value);
+            recordedBy.Value,
+            verifiedAnnualIncome,
+            verifiedHouseholdSize,
+            limit);
     }
 
     /// <summary>Records that the home's appraisal has been completed. Idempotent.</summary>
@@ -382,12 +429,19 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         CreatedAt = e.OccurredAt;
         ApplicationId = e.ApplicationId;
         HouseholdId = e.HouseholdId;
+        DeclaredAnnualIncome = e.DeclaredAnnualIncome;
+        DeclaredHouseholdSize = e.DeclaredHouseholdSize;
+        IncomeLimitLevel = e.IncomeLimitPercentOfAmi is { } percent && e.IncomeLimits is { } limits
+            ? IncomeLimitLevel.Create(percent, limits)
+            : null;
+        IncomeLimitsEffectiveFrom = e.IncomeLimitsEffectiveFrom;
     }
 
     /// <summary>Applies <see cref="BuyerEligibilityVerified"/>.</summary>
     public void Apply(BuyerEligibilityVerified e)
     {
-        EligibilityDetails = new EligibilityDetails(e.VerifiedDate, e.EligibilityNotes);
+        EligibilityDetails = new EligibilityDetails(
+            e.VerifiedDate, e.EligibilityNotes, e.VerifiedAnnualIncome, e.VerifiedHouseholdSize, e.IncomeLimit);
         AdvancePhaseIfNeeded();
     }
 

@@ -8,7 +8,8 @@ namespace CommonGround.HomeBuyers.Domain.HomeSelections.Events;
 /// list as it stood at that moment; later changes to an application don't alter it.
 /// <paramref name="IncomeLimitPercentOfAmi"/> is the home's income limit the candidates were judged
 /// against, null when it has none, and <paramref name="IncomeLimitsEffectiveFrom"/> the effective date
-/// of the income limit schedule the amounts came from.
+/// of the income limit schedule the amounts came from. <paramref name="IncomeLimits"/> is that schedule's
+/// row for the percent, for 1 to 8 people, so the purchase can judge a household whose size changed.
 /// </summary>
 public sealed record HomeSelectionStarted(
     string AggregateId,
@@ -16,6 +17,7 @@ public sealed record HomeSelectionStarted(
     IReadOnlyList<SnapshotCandidate> Candidates,
     int? IncomeLimitPercentOfAmi,
     DateOnly? IncomeLimitsEffectiveFrom,
+    IReadOnlyList<Money>? IncomeLimits,
     string StartedBy) : DomainEvent(AggregateId);
 
 /// <summary>

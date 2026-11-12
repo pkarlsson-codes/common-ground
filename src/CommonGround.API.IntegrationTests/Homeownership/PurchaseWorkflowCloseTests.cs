@@ -181,7 +181,7 @@ public class PurchaseWorkflowCloseTests(ApiFactory factory)
         var responses = new List<HttpResponseMessage>
         {
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/eligibility",
-                new RecordEligibilityVerifiedRequest(new DateOnly(2026, 6, 1), null)),
+                new RecordEligibilityVerifiedRequest(new DateOnly(2026, 6, 1), 50_000m, 1, null)),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/financing",
                 new RecordFinancingCommittedRequest("Test Lender", 140000m, new DateOnly(2026, 6, 2))),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/inspection",

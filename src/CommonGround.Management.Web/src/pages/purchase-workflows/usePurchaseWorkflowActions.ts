@@ -15,6 +15,7 @@ import type {
 import { getAvailableActions } from '../../lib/transitionActions'
 import { trackTransitionEvent } from '../../lib/telemetry'
 import type { TrackKey } from './usePurchaseWorkflowDetailController'
+import { getErrorMessage } from '../../lib/getErrorMessage'
 
 type TrackMutation<T> = {
   mutateAsync: (args: { workflowId: string; form: T }) => Promise<unknown>
@@ -99,7 +100,7 @@ export function usePurchaseWorkflowActions({
         onTrackSuccess(options.trackKey)
       }
     } catch (error) {
-      showToast('Action failed', 'error')
+      showToast(await getErrorMessage(error, 'Action failed'), 'error')
       trackTransitionEvent({
         event: 'ui.transition',
         aggregate: 'workflow',

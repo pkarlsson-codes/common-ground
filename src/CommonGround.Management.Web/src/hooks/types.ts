@@ -97,6 +97,9 @@ export interface RecordCheckInForm {
 
 export interface RecordEligibilityForm {
   verifiedDate: CalendarDate
+  /** Text as typed, so 0 stays a real income and an empty field stays empty. */
+  verifiedAnnualIncome: string
+  verifiedHouseholdSize: string
   notes: string
 }
 

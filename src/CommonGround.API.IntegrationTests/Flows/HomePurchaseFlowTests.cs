@@ -70,6 +70,41 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
     }
 
     [Fact]
+    public async Task VerifyingEligibility_JudgesTheVerifiedIncomeByTheLimitTheSelectionUsed()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var purchase = await SelectHouseholdAsync(client);
+        var path = $"/api/purchase-workflows/{purchase.WorkflowId}";
+
+        (await client.GetFromJsonAsync<PurchaseWorkflowResponse>(path))!.Should().BeEquivalentTo(new
+        {
+            DeclaredAnnualIncome = 65000m,
+            DeclaredHouseholdSize = 1,
+            IncomeLimit = new
+            {
+                PercentOfAmi = 80,
+                EffectiveFrom = TestIncomeLimitsInitialData.EffectiveFrom,
+                Limits = TestIncomeLimitsInitialData.EightyPercentLimits,
+            },
+        });
+
+        var over = await client.PostAsJsonAsync($"{path}/eligibility", new RecordEligibilityVerifiedRequest(SelectedDate, 75_000m, 1, null));
+        over.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        var problem = (await over.Content.ReadFromJsonAsync<ProblemDetails>())!;
+        problem.Extensions["code"]!.ToString().Should().Be("homeownership.purchase_workflow.record_eligibility_verified.over_income_limit");
+        problem.Detail.Should().Be("The verified income of $75,000 is over the 80% of AMI limit of $70,000 for a household of 1 (limits effective Jan 1, 2000).");
+
+        (await TrackAsync(() => client.PostAsJsonAsync($"{path}/eligibility", new RecordEligibilityVerifiedRequest(SelectedDate, 75_000m, 2, null))))
+            .StatusCode.Should().Be(HttpStatusCode.NoContent);
+        (await client.GetFromJsonAsync<PurchaseWorkflowResponse>(path))!.EligibilityDetails.Should().BeEquivalentTo(new
+        {
+            VerifiedAnnualIncome = 75_000m,
+            VerifiedHouseholdSize = 2,
+            IncomeLimit = 80_000m,
+        });
+    }
+
+    [Fact]
     public async Task SelectingAHousehold_MovesTheHomeFromSelectionsToPurchasesOnToday()
     {
         var client = factory.CreateClient().WithAuthToken();
@@ -446,7 +481,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
         var responses = new List<HttpResponseMessage>
         {
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/eligibility",
-                new RecordEligibilityVerifiedRequest(new DateOnly(2026, 8, 1), null)),
+                new RecordEligibilityVerifiedRequest(new DateOnly(2026, 8, 1), 50_000m, 1, null)),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/appraisal",
                 new RecordAppraisalCompletedRequest(200000m, new DateOnly(2026, 8, 2), "Test Appraiser", null)),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/financing",

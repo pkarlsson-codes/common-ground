@@ -1,3 +1,4 @@
+using CommonGround.SharedKernel.Domain;
 using CommonGround.HomeBuyers.Application.EventHandlers;
 using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
@@ -25,7 +26,8 @@ public class PassOverCandidatesHandlerTests
             };
             var selected = new ApplicationSelectedForHome(
                 applicationIds[1], "household-1", "Alice Johnson", "alice@example.com", null, selection.Id,
-                HandlerTestBed.HomeId, "land-parcel-1", "template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser.Value);
+                HandlerTestBed.HomeId, "land-parcel-1", "template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser.Value,
+                Money.Create(65000m), 1, null, null, null);
 
             var commands = PassOverCandidatesHandler.Handle(selected, selection).ToList();
 
@@ -50,7 +52,8 @@ public class PassOverCandidatesHandlerTests
             };
             var selected = new ApplicationSelectedForHome(
                 applicationIds[1], "household-1", "Alice Johnson", "alice@example.com", null, selection.Id,
-                HandlerTestBed.HomeId, "land-parcel-1", "template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser.Value);
+                HandlerTestBed.HomeId, "land-parcel-1", "template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser.Value,
+                Money.Create(65000m), 1, null, null, null);
 
             var commands = PassOverCandidatesHandler.Handle(selected, selection).ToList();
 

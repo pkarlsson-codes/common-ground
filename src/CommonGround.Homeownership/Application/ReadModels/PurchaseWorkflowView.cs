@@ -42,6 +42,21 @@ public class PurchaseWorkflowView
     /// <summary>Gets or sets when the workflow was created.</summary>
     public DateTimeOffset CreatedAt { get; set; }
 
+    /// <summary>Gets or sets the annual income the household declared when selected, or null when the purchase didn't start from a selection.</summary>
+    public decimal? DeclaredAnnualIncome { get; set; }
+
+    /// <summary>Gets or sets the household size declared when selected, or null when the purchase didn't start from a selection.</summary>
+    public int? DeclaredHouseholdSize { get; set; }
+
+    /// <summary>Gets or sets the home's limit as a percent of AMI the selection judged by, or null when there is none.</summary>
+    public int? IncomeLimitPercentOfAmi { get; set; }
+
+    /// <summary>Gets or sets the effective date of the schedule the limits came from.</summary>
+    public DateOnly? IncomeLimitsEffectiveFrom { get; set; }
+
+    /// <summary>Gets or sets the schedule's limits at that percent for 1 to 8 people.</summary>
+    public List<decimal>? IncomeLimits { get; set; }
+
     /// <summary>Gets or sets the eligibility verification details.</summary>
     public EligibilityDetailsEntry? EligibilityDetails { get; set; }
 
@@ -93,6 +108,15 @@ public class EligibilityDetailsEntry
 
     /// <summary>Gets or sets optional notes.</summary>
     public string? Notes { get; set; }
+
+    /// <summary>Gets or sets the household's annual income as the documents showed it.</summary>
+    public decimal VerifiedAnnualIncome { get; set; }
+
+    /// <summary>Gets or sets the number of people in the household as the documents showed it.</summary>
+    public int VerifiedHouseholdSize { get; set; }
+
+    /// <summary>Gets or sets the limit the income was checked against, or null when the purchase has no limit.</summary>
+    public decimal? IncomeLimit { get; set; }
 }
 
 /// <summary>Appraisal details.</summary>

@@ -39,6 +39,34 @@ async function recordTrack(detail: Locator, label: string, fields: Record<string
 const confirmDialog = (page: Page) =>
   page.getByRole('dialog').filter({ hasText: 'This action cannot be undone.' }).last()
 
+test('eligibility verification judges the verified income by the limit the home selection used', async ({ page }) => {
+  const buyer = `Eligibility ${uniqueId()}`
+  // The household declares $65,000 for 1 person; the home is at 80% of AMI, and the e2e baseline in effect
+  // (effective Jan 1, 2000) allows $70,000 for 1 person and $80,000 for 2.
+  const { templateName } = await createPurchaseWorkflow(page, buyer, { fromApplication: true })
+  const detail = await openWorkflow(page, templateName, buyer)
+
+  await track(detail, 'Eligibility').getByRole('button', { name: 'Expand' }).click()
+  await expect(detail.getByText('Income limit: 80% of AMI, limits effective Jan 1, 2000')).toBeVisible()
+  await expect(field(detail, 'Verified Annual Income ($)')).toHaveValue('65000')
+  await expect(field(detail, 'Verified Household Size')).toHaveValue('1')
+  const limitCheck = detail.getByRole('status').filter({ hasText: /^Limit for/ })
+  await expect(limitCheck).toHaveText('Limit for 1 person: $70,000')
+
+  await field(detail, 'Verified Annual Income ($)').fill('75000')
+  await expect(limitCheck).toContainText('Over income limit')
+  await detail.getByRole('button', { name: 'Record Eligibility' }).click()
+  await expectToast(page,
+    'The verified income of $75,000 is over the 80% of AMI limit of $70,000 for a household of 1 (limits effective Jan 1, 2000).')
+  await expect(track(detail, 'Eligibility')).toContainText('Pending')
+
+  await field(detail, 'Verified Household Size').fill('2')
+  await expect(limitCheck).toHaveText('Limit for 2 people: $80,000')
+  await detail.getByRole('button', { name: 'Record Eligibility' }).click()
+  await expectToast(page, 'Eligibility recorded')
+  await expect(detail.getByText(`Verified ${isoDate()}: $75,000 income, 2 people, within the $80,000 limit`)).toBeVisible()
+})
+
 test('recording every track, scheduling, and closing a purchase creates the ground lease', async ({ page }) => {
   test.slow()
   await page.goto('/purchase-workflows')
@@ -61,10 +89,15 @@ test('recording every track, scheduling, and closing a purchase creates the grou
   await expect(trackLabel(detail, 'Closing')).toHaveCount(0)
 
   const eligibilityDate = isoDate(-10)
-  await recordTrack(detail, 'Eligibility', { 'Verified Date': eligibilityDate, 'Notes (optional)': 'Income verified' },
-    'Record Eligibility', 'Eligibility recorded')
+  await recordTrack(detail, 'Eligibility', {
+    'Verified Date': eligibilityDate,
+    'Verified Annual Income ($)': '52000',
+    'Verified Household Size': '2',
+    'Notes (optional)': 'Income verified',
+  }, 'Record Eligibility', 'Eligibility recorded')
   await expect(trackLabel(detail, 'Eligibility')).toHaveText('✓ Eligibility')
-  await expect(detail.getByText(`Verified ${eligibilityDate}`)).toBeVisible()
+  // Initiated directly, so there was no selection and no limit to check against.
+  await expect(detail.getByText(`Verified ${eligibilityDate}: $52,000 income, 2 people`, { exact: true })).toBeVisible()
   await expect(detailValue(detail, 'Phase')).toHaveText('In Progress')
 
   const appraisalDate = isoDate(-9)

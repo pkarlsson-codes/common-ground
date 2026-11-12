@@ -100,4 +100,48 @@ public static class BusinessRuleViolation
                     ["amount"] = amount,
                 });
     }
+
+    /// <summary>Violations raised by <see cref="Domain.IncomeLimitLevel"/>.</summary>
+    public static class IncomeLimitLevel
+    {
+        /// <summary>Creates the violation for a percent of AMI outside the allowed range.</summary>
+        /// <param name="percentOfAmi">The rejected percent.</param>
+        /// <returns>The business rule violation exception.</returns>
+        public static BusinessRuleViolationException PercentOutOfRange(int percentOfAmi)
+            => new(
+                "shared.income_limit_level.percent_out_of_range",
+                new Dictionary<string, object?>
+                {
+                    ["percentOfAmi"] = percentOfAmi,
+                    ["minimum"] = Domain.IncomeLimitLevel.MinimumPercentOfAmi,
+                    ["maximum"] = Domain.IncomeLimitLevel.MaximumPercentOfAmi,
+                });
+
+        /// <summary>Creates the violation for a level without one limit per printed household size.</summary>
+        /// <param name="percentOfAmi">The level's percent.</param>
+        /// <param name="count">The number of limits given.</param>
+        /// <returns>The business rule violation exception.</returns>
+        public static BusinessRuleViolationException WrongNumberOfLimits(int percentOfAmi, int count)
+            => new(
+                "shared.income_limit_level.wrong_number_of_limits",
+                new Dictionary<string, object?>
+                {
+                    ["percentOfAmi"] = percentOfAmi,
+                    ["count"] = count,
+                    ["requiredCount"] = Domain.IncomeLimitLevel.PrintedHouseholdSizes,
+                });
+
+        /// <summary>Creates the violation for a limit of zero or less.</summary>
+        /// <param name="percentOfAmi">The level's percent.</param>
+        /// <param name="householdSize">The household size whose limit was rejected.</param>
+        /// <returns>The business rule violation exception.</returns>
+        public static BusinessRuleViolationException LimitNotPositive(int percentOfAmi, int householdSize)
+            => new(
+                "shared.income_limit_level.limit_not_positive",
+                new Dictionary<string, object?>
+                {
+                    ["percentOfAmi"] = percentOfAmi,
+                    ["householdSize"] = householdSize,
+                });
+    }
 }

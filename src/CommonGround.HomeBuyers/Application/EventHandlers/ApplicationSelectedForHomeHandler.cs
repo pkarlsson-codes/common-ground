@@ -23,6 +23,11 @@ public static class ApplicationSelectedForHomeHandler
             @event.GroundLeaseTemplateId,
             @event.PurchasePrice,
             @event.SelectedDate,
-            @event.SelectedBy);
+            @event.SelectedBy,
+            @event.AnnualIncome.Amount,
+            @event.HouseholdSize,
+            @event.IncomeLimitPercentOfAmi,
+            @event.IncomeLimitsEffectiveFrom,
+            @event.IncomeLimits?.Select(limit => limit.Amount).ToList());
     }
 }

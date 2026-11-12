@@ -30,6 +30,9 @@ public class HomeownerApplicationTests
                 StaffUser));
         }
 
+        public SelectionCandidate Candidate(HomeownerApplication application) =>
+            SelectionCandidate.Create(application.Id, Household.Id, Money.Create(55_000m), 2, false, new DateOnly(2026, 6, 1), incomeLimit: null);
+
         public TestBed WithReadiness(bool counseling = true, bool orientation = true, DateOnly? prequalificationExpiry = null)
         {
             if (counseling)
@@ -54,7 +57,7 @@ public class HomeownerApplicationTests
         {
             WithReadiness();
             var application = ApprovedApplication();
-            application = application.Decide(a => a.SelectForHome(Household, SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, SelectedDate, StaffUser)).Aggregate;
+            application = application.Decide(a => a.SelectForHome(Household, SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, SelectedDate, StaffUser, Candidate(a), null, null)).Aggregate;
             return application;
         }
     }
@@ -146,7 +149,7 @@ public class HomeownerApplicationTests
             var sut = _testBed.SubmittedApplication();
 
             var act = () => sut.SelectForHome(
-                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser);
+                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser, _testBed.Candidate(sut), null, null);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.homeowner_application.select_applicant.phase_not_approved");
@@ -159,7 +162,7 @@ public class HomeownerApplicationTests
             var sut = _testBed.ApprovedApplication();
 
             var act = () => sut.SelectForHome(
-                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", purchasePrice: 0m, _testBed.SelectedDate, _testBed.StaffUser);
+                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", purchasePrice: 0m, _testBed.SelectedDate, _testBed.StaffUser, _testBed.Candidate(sut), null, null);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.homeowner_application.select_applicant.purchase_price_non_positive");
@@ -172,7 +175,7 @@ public class HomeownerApplicationTests
             var sut = _testBed.ApprovedApplication();
 
             var act = () => sut.SelectForHome(
-                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser);
+                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser, _testBed.Candidate(sut), null, null);
 
             var thrown = act.Should().Throw<BusinessRuleViolationException>().Which;
             thrown.Code.Should().Be("home_buyers.homeowner_application.select_applicant.household_readiness_incomplete");
@@ -186,7 +189,7 @@ public class HomeownerApplicationTests
             var sut = _testBed.ApprovedApplication();
 
             var act = () => sut.SelectForHome(
-                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser);
+                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser, _testBed.Candidate(sut), null, null);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.homeowner_application.select_applicant.prequalification_expired");
@@ -200,7 +203,7 @@ public class HomeownerApplicationTests
             var otherHousehold = new TestBed().WithReadiness().Household;
 
             var act = () => sut.SelectForHome(
-                otherHousehold, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser);
+                otherHousehold, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser, _testBed.Candidate(sut), null, null);
 
             act.Should().Throw<ArgumentException>();
         }
@@ -212,7 +215,7 @@ public class HomeownerApplicationTests
             var sut = _testBed.ApprovedApplication();
 
             (sut, var events) = sut.Decide(a => a.SelectForHome(
-                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser));
+                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser, _testBed.Candidate(sut), null, null));
 
             sut.Phase.Should().Be(ApplicationPhase.Selected);
             events.OfType<ApplicationSelectedForHome>().Should().ContainSingle()
@@ -222,6 +225,28 @@ public class HomeownerApplicationTests
                     ApplicantFullName = "Alice Johnson",
                     ApplicantEmail = "alice@example.com",
                 });
+        }
+
+        [Fact]
+        public void GivenTheSelectionJudgedByALimit_WhenSelected_ThenCarriesTheLimitAndTheIncomeItJudged()
+        {
+            _testBed.WithReadiness();
+            var sut = _testBed.ApprovedApplication();
+            var level = IncomeLimitLevel.Create(
+                80, [.. new[] { 50_000m, 57_150m, 64_300m, 71_400m, 77_150m, 82_850m, 88_550m, 94_250m }.Select(Money.Create)]);
+
+            var selected = sut.SelectForHome(
+                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m,
+                _testBed.SelectedDate, _testBed.StaffUser, _testBed.Candidate(sut), level, new DateOnly(2026, 4, 1));
+
+            selected.Should().BeEquivalentTo(new
+            {
+                AnnualIncome = Money.Create(55_000m),
+                HouseholdSize = 2,
+                IncomeLimitPercentOfAmi = 80,
+                IncomeLimitsEffectiveFrom = new DateOnly(2026, 4, 1),
+                IncomeLimits = level.Limits,
+            });
         }
     }
 

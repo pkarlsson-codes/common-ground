@@ -22,7 +22,7 @@ public class PurchaseBoardTests(ApiFactory factory)
         StepOf(before, workflowId).Should().Be("Eligibility");
 
         (await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/eligibility",
-            new RecordEligibilityVerifiedRequest(before.Today, null)))
+            new RecordEligibilityVerifiedRequest(before.Today, 50_000m, 1, null)))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var after = await GetBoardAsync(client);

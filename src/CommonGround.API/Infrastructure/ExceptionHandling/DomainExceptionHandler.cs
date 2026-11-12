@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -105,10 +107,24 @@ internal sealed class DomainExceptionHandler(IProblemDetailsService problemDetai
         foreach (var kvp in args)
         {
             var placeholder = $"{{{kvp.Key}}}";
-            var value = kvp.Value?.ToString() ?? string.Empty;
+            var value = FormatValue(kvp.Value).Replace("$", "$$", StringComparison.Ordinal);
             result = Regex.Replace(result, Regex.Escape(placeholder), value, RegexOptions.IgnoreCase);
         }
 
         return result;
     }
+
+    /// <summary>
+    /// Renders a template value as staff read it: a calendar date as "Apr 1, 2026" and money as "$81,600"
+    /// (cents shown only when there are any). Everything else uses its own text.
+    /// </summary>
+    private static string FormatValue(object? value) => value switch
+    {
+        null => string.Empty,
+        DateOnly date => date.ToString("MMM d, yyyy", CultureInfo.InvariantCulture),
+        Money money => money.Amount.ToString(
+            decimal.Truncate(money.Amount) == money.Amount ? "$#,##0" : "$#,##0.00",
+            CultureInfo.InvariantCulture),
+        _ => Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty,
+    };
 }
