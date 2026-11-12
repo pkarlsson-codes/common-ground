@@ -17,7 +17,8 @@ public sealed class SelectionCandidate : ValueObject
         Money annualIncome,
         int householdSize,
         bool requiresAccessibility,
-        DateOnly waitingSince)
+        DateOnly waitingSince,
+        Money? incomeLimit)
     {
         ApplicationId = applicationId;
         HouseholdId = householdId;
@@ -25,16 +26,21 @@ public sealed class SelectionCandidate : ValueObject
         HouseholdSize = householdSize;
         RequiresAccessibility = requiresAccessibility;
         WaitingSince = waitingSince;
+        IncomeLimit = incomeLimit;
     }
 
-    /// <summary>Creates and validates a new <see cref="SelectionCandidate"/>.</summary>
+    /// <summary>
+    /// Creates and validates a new <see cref="SelectionCandidate"/>. <paramref name="incomeLimit"/> is the home's
+    /// income limit for the household's size, or <see langword="null"/> when the home has none.
+    /// </summary>
     public static SelectionCandidate Create(
         HomeownerApplicationId applicationId,
         HouseholdId householdId,
         Money annualIncome,
         int householdSize,
         bool requiresAccessibility,
-        DateOnly waitingSince)
+        DateOnly waitingSince,
+        Money? incomeLimit)
     {
         ArgumentNullException.ThrowIfNull(annualIncome);
         if (annualIncome.IsNegative)
@@ -42,7 +48,7 @@ public sealed class SelectionCandidate : ValueObject
         ArgumentOutOfRangeException.ThrowIfLessThan(householdSize, 1);
 
         return new SelectionCandidate(
-            applicationId, householdId, annualIncome, householdSize, requiresAccessibility, waitingSince);
+            applicationId, householdId, annualIncome, householdSize, requiresAccessibility, waitingSince, incomeLimit);
     }
 
     /// <summary>The candidate's application.</summary>
@@ -63,6 +69,12 @@ public sealed class SelectionCandidate : ValueObject
     /// <summary>The date the household joined the waiting list.</summary>
     public DateOnly WaitingSince { get; }
 
+    /// <summary>The home's income limit for the household's size when the selection started, or <see langword="null"/> when the home has none.</summary>
+    public Money? IncomeLimit { get; }
+
+    /// <summary>Whether the household's income is over <see cref="IncomeLimit"/>. A household over it can't be selected.</summary>
+    public bool IsOverIncomeLimit => IncomeLimit is not null && AnnualIncome > IncomeLimit;
+
     /// <inheritdoc/>
     protected override IEnumerable<object> GetEqualityComponents()
     {
@@ -72,5 +84,7 @@ public sealed class SelectionCandidate : ValueObject
         yield return HouseholdSize;
         yield return RequiresAccessibility;
         yield return WaitingSince;
+        if (IncomeLimit is not null)
+            yield return IncomeLimit;
     }
 }

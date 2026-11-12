@@ -15,7 +15,7 @@ public sealed record IncomeLimitSchedules(IReadOnlyList<IncomeLimitScheduleView>
 /// <summary>Handles <see cref="GetIncomeLimitSchedules"/>.</summary>
 public static class GetIncomeLimitSchedulesHandler
 {
-    /// <summary>Lists the schedules and marks the one in effect today: the latest one effective on or before it.</summary>
+    /// <summary>Lists the schedules and marks the one in effect on the trust's today.</summary>
     public static async Task<IncomeLimitSchedules> Handle(
         GetIncomeLimitSchedules request,
         IQuerySession session,
@@ -31,7 +31,7 @@ public static class GetIncomeLimitSchedulesHandler
             .ConfigureAwait(false);
 
         var today = await trustClock.TodayAsync(session.TenantId, cancellationToken).ConfigureAwait(false);
-        var inEffect = schedules.FirstOrDefault(s => s.EffectiveFrom <= today);
+        var inEffect = IncomeLimitScheduleView.InEffectOn(schedules, today);
 
         return new IncomeLimitSchedules(schedules, inEffect?.Id);
     }

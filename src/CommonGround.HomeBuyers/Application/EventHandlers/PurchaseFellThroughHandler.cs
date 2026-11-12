@@ -4,6 +4,7 @@ using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.Homeownership.Contracts.Events;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Domain.Services;
 using CommonGround.SharedKernel.Extensions;
 using JasperFx.Events;
 using Marten;
@@ -34,6 +35,7 @@ public static class PurchaseFellThroughHandler
     public static async Task<FallenThroughPurchase?> LoadAsync(
         PurchaseFellThrough @event,
         IDocumentSession session,
+        ITrustClock trustClock,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(@event);
@@ -62,7 +64,7 @@ public static class PurchaseFellThroughHandler
         // Snapshotted while the household is still selected, so it isn't a candidate for the home
         // whose purchase it just fell through on.
         var nextSelection = await StartHomeSelectionHandler
-            .LoadStartAsync(session, @event.HomeId, selectionId, cancellationToken)
+            .LoadStartAsync(session, trustClock, @event.HomeId, selectionId, cancellationToken)
             .ConfigureAwait(false);
 
         return new FallenThroughPurchase(application, selection, nextSelection);
@@ -70,7 +72,8 @@ public static class PurchaseFellThroughHandler
 
     /// <summary>
     /// Marks the selection that chose the household as fallen through, starts a new selection for the home
-    /// (unless nobody is waiting), and returns the household's application to the waiting list. The new
+    /// (unless nobody is waiting, or the home has an income limit with no limits in effect for it, which
+    /// leaves staff to start it once they enter them), and returns the household's application to the waiting list. The new
     /// selection is started before the application returns, so the household isn't a candidate for the
     /// home whose purchase it just fell through on.
     /// </summary>
@@ -86,7 +89,7 @@ public static class PurchaseFellThroughHandler
         {
             purchase.Selection.Decide(s => s.RecordPurchaseFellThrough(@event.Reason, @event.FellThroughDate));
 
-            if (purchase.NextSelection is { Candidates.Count: > 0 } next)
+            if (purchase.NextSelection is { Candidates.Count: > 0, HasIncomeLimitsInEffect: true } next)
             {
                 nextSelection = StartHomeSelectionHandler.Start(
                     HomeSelectionId.Generate(), @event.HomeId, next, UserId.Create(@event.RecordedBy));

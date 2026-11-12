@@ -11,6 +11,6 @@ If the home has an income limit and no income limits in effect today have that l
 
 A home has at most one open or completed selection. If someone else started one first, the start is rejected and the card shows "This home already has an open or completed selection." Once a selection is cancelled, or the purchase it led to fails or is withdrawn, a new one can be started.
 
-When a purchase that came from a selection fails or is withdrawn, a new selection for the home is started automatically, so the home goes straight back to the Selection stage.
+When a purchase that came from a selection fails or is withdrawn, a new selection for the home is started automatically, so the home goes straight back to the Selection stage. It is not started when nobody is waiting, or when the home has an income limit and no income limits in effect today have that level; staff start it once they enter them.
 
 Continues in: [View Home Selection](view-home-selection.md)

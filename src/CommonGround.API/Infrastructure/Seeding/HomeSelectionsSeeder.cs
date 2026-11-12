@@ -4,6 +4,7 @@ using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.HomeBuyers.Domain.Households;
+using CommonGround.HomeBuyers.Domain.IncomeLimitSchedules;
 using CommonGround.HomeBuyers.Infrastructure.Seeding;
 using CommonGround.Homeownership.Infrastructure.Seeding;
 using CommonGround.PropertyRegistry.Application.ReadModels;
@@ -95,8 +96,21 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
                     .FirstOrDefaultAsync(cancellation)
                     .ConfigureAwait(false);
 
+                var home = await trustSession
+                    .LoadAsync<HomeFactsView>(homeId, cancellation)
+                    .ConfigureAwait(false)
+                    ?? throw new InvalidOperationException($"HomeBuyers has no facts for home {homeId} (seed key '{entry.HomeSeedKey}').");
+                var scheduleInEffect = await LoadScheduleInEffectAsync(trustSession, startedDate, cancellation).ConfigureAwait(false);
+
                 var started = HomeSelection.Start(
-                    selectionId, homeId, candidates, EntityIds.CreateOrNull<HomeSelectionId>(activeSelectionId), SeederUserId);
+                    selectionId,
+                    homeId,
+                    candidates,
+                    home.IncomeLimitPercentOfAmi,
+                    scheduleInEffect,
+                    startedDate,
+                    EntityIds.CreateOrNull<HomeSelectionId>(activeSelectionId),
+                    SeederUserId);
                 trustSession.Events.StartStream<HomeSelection>(selectionId.Value, started);
                 await trustSession.SaveChangesAsync(cancellation).ConfigureAwait(false);
 
@@ -182,6 +196,19 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
         }
     }
 
+    /// <summary>The income limit schedule in effect on <paramref name="day"/>, if any.</summary>
+    private static async Task<IncomeLimitSchedule?> LoadScheduleInEffectAsync(
+        IQuerySession session,
+        DateOnly day,
+        CancellationToken cancellation)
+    {
+        var schedules = await session.Query<IncomeLimitScheduleView>().ToListAsync(cancellation).ConfigureAwait(false);
+        var inEffect = IncomeLimitScheduleView.InEffectOn(schedules, day);
+        return inEffect is null
+            ? null
+            : await session.LoadAggregateAsync<IncomeLimitSchedule>(inEffect.Id, cancellation).ConfigureAwait(false);
+    }
+
     /// <summary>The waiting list on <paramref name="startedDate"/>: approved applications approved by then, longest waiting first.</summary>
     private static async Task<IReadOnlyList<SelectionCandidate>> LoadCandidatesAsync(
         IQuerySession session,
@@ -203,7 +230,8 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
                 Money.Create(v.AnnualIncome),
                 v.HouseholdSize,
                 v.AccessibilityRequired,
-                v.ApprovedDate!.Value))];
+                v.ApprovedDate!.Value,
+                incomeLimit: null))];
     }
 
     private static async Task<HomeownerApplicationId> LoadApplicationIdAsync(

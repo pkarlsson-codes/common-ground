@@ -13,6 +13,7 @@ using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.PropertyRegistry.Contracts.Events;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Domain.Services;
 using CommonGround.SharedKernel.Infrastructure.API;
 using FluentAssertions;
 using Marten;
@@ -101,6 +102,70 @@ public class HomeSelectionTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task StartHomeSelection_ForHomeWithIncomeLimit_JudgesEachCandidateAndRecordsTheLimitsUsed()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var homeId = await CreateHomeAsync(client, incomeLimitPercentOfAmi: 80);
+        var within = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1), annualIncome: 70_000m);
+        var over = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1), annualIncome: 70_001m);
+
+        var selection = await GetSelectionAsync(client, await StartSelectionAsync(client, homeId));
+
+        selection.IncomeLimitPercentOfAmi.Should().Be(80);
+        selection.IncomeLimitsEffectiveFrom.Should().Be(TestIncomeLimitsInitialData.EffectiveFrom);
+        var candidates = selection.Candidates.ToDictionary(c => c.ApplicationId);
+        var onePersonLimit = TestIncomeLimitsInitialData.EightyPercentLimits[0];
+        candidates[within.ApplicationId].Should().BeEquivalentTo(new { IncomeLimit = onePersonLimit, IsOverIncomeLimit = false, CanBeSelected = true });
+        candidates[over.ApplicationId].Should().BeEquivalentTo(new { IncomeLimit = onePersonLimit, IsOverIncomeLimit = true, CanBeSelected = false });
+    }
+
+    [Fact]
+    public async Task StartHomeSelection_ForHomeWithNoIncomeLimit_JudgesNobody()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var homeId = await CreateHomeAsync(client, incomeLimitPercentOfAmi: null);
+        var applicant = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1), annualIncome: 500_000m);
+
+        var selection = await GetSelectionAsync(client, await StartSelectionAsync(client, homeId));
+
+        selection.IncomeLimitPercentOfAmi.Should().BeNull();
+        selection.IncomeLimitsEffectiveFrom.Should().BeNull();
+        selection.Candidates.Single(c => c.ApplicationId == applicant.ApplicationId)
+            .Should().BeEquivalentTo(new { IncomeLimit = (decimal?)null, IsOverIncomeLimit = false, CanBeSelected = true });
+    }
+
+    [Fact]
+    public async Task StartHomeSelection_ForHomeWithALevelNoScheduleInEffectHas_Returns422()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var homeId = await CreateHomeAsync(client, incomeLimitPercentOfAmi: 60);
+        await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
+
+        var response = await client.PostAsync($"/api/homes/{homeId}/home-selections", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await ReadProblemCodeAsync(response)).Should().Be("home_buyers.home_selection.start.no_income_limits_in_effect");
+        (await GetSelectionsForHomeAsync(client, homeId)).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task SelectByPriority_ForCandidateOverIncomeLimit_Returns422()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var homeId = await CreateHomeAsync(client, incomeLimitPercentOfAmi: 80);
+        var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
+        var over = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1), annualIncome: 90_000m);
+        var selectionId = await StartSelectionAsync(client, homeId);
+
+        var response = await client.PostAsJsonAsync($"/api/home-selections/{selectionId}/select-by-priority",
+            new SelectHouseholdByPriorityRequest(over.ApplicationId, ["LowerIncome"], "Lowest income", templateId, 200000m, SelectedDate));
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await ReadProblemCodeAsync(response)).Should().Be("home_buyers.home_selection.select_by_priority.over_income_limit");
+        (await GetSelectionAsync(client, selectionId)).Status.Should().Be("Open");
+    }
+
+    [Fact]
     public async Task StartHomeSelection_ForHomeHomeBuyersDoesNotKnow_Returns404()
     {
         var client = factory.CreateClient().WithAuthToken();
@@ -139,8 +204,9 @@ public class HomeSelectionTests(ApiFactory factory)
         // Both starts check for an active selection before either is saved.
         var firstCommand = new StartHomeSelection(HomeSelectionId.Generate(), homeId, UserId.Generate());
         var secondCommand = firstCommand with { SelectionId = HomeSelectionId.Generate() };
-        var firstStart = await StartHomeSelectionHandler.LoadAsync(firstCommand, first, CancellationToken.None);
-        var secondStart = await StartHomeSelectionHandler.LoadAsync(secondCommand, second, CancellationToken.None);
+        var trustClock = scope.ServiceProvider.GetRequiredService<ITrustClock>();
+        var firstStart = await StartHomeSelectionHandler.LoadAsync(firstCommand, first, trustClock, CancellationToken.None);
+        var secondStart = await StartHomeSelectionHandler.LoadAsync(secondCommand, second, trustClock, CancellationToken.None);
         StartHomeSelectionHandler.Handle(firstCommand, firstStart).Execute(first);
         StartHomeSelectionHandler.Handle(secondCommand, secondStart).Execute(second);
         await first.SaveChangesAsync();
@@ -407,7 +473,7 @@ public class HomeSelectionTests(ApiFactory factory)
     }
 
     /// <summary>Registers a home and seeds HomeBuyers's view of it, which MediatorOnly mode would not forward.</summary>
-    private async Task<string> CreateHomeAsync(HttpClient client, string? landParcelId = null)
+    private async Task<string> CreateHomeAsync(HttpClient client, string? landParcelId = null, int? incomeLimitPercentOfAmi = 80)
     {
         landParcelId ??= await CreateLandParcelAsync(client);
 
@@ -418,7 +484,7 @@ public class HomeSelectionTests(ApiFactory factory)
                 3,
                 2m,
                 false,
-                80,
+                incomeLimitPercentOfAmi,
                 1200m,
                 1990,
                 "Test Appraiser",
@@ -430,7 +496,7 @@ public class HomeSelectionTests(ApiFactory factory)
         using var scope = factory.Services.CreateScope();
         await using var session = scope.ServiceProvider.GetRequiredService<IDocumentStore>().LightweightSession(ApiFactory.TestTrustId);
         HomeRegisteredHandler.Handle(
-            new HomeRegistered(homeId, landParcelId, Label: "1 Test Lane", Bedrooms: 3, IsAccessible: false, IncomeLimitPercentOfAmi: 80))
+            new HomeRegistered(homeId, landParcelId, Label: "1 Test Lane", Bedrooms: 3, IsAccessible: false, incomeLimitPercentOfAmi))
             .Execute(session);
         await session.SaveChangesAsync();
 

@@ -10,7 +10,9 @@ namespace CommonGround.API.IntegrationTests.HomeBuyers;
 /// <summary>
 /// Covers entering, correcting and listing income limit schedules. Every test shares the test trust, and a
 /// trust can't have two schedules on one date, so each test picks its own far-future date; only
-/// <see cref="GetIncomeLimitSchedules_MarksTheLatestScheduleEffectiveOnOrBeforeTodayAsInEffect"/> enters past dates.
+/// <see cref="GetIncomeLimitSchedules_MarksTheLatestScheduleEffectiveOnOrBeforeTodayAsInEffect"/> enters past dates,
+/// and those are before <see cref="TestIncomeLimitsInitialData.EffectiveFrom"/>, so the schedule home selections
+/// judge by stays in effect.
 /// </summary>
 [Collection(IntegrationCollection.Name)]
 public class IncomeLimitScheduleTests(ApiFactory factory)
@@ -99,15 +101,17 @@ public class IncomeLimitScheduleTests(ApiFactory factory)
     public async Task GetIncomeLimitSchedules_MarksTheLatestScheduleEffectiveOnOrBeforeTodayAsInEffect()
     {
         var client = factory.CreateClient().WithAuthToken();
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        var older = await EnterAsync(client, today.AddYears(-2));
-        var current = await EnterAsync(client, today.AddYears(-1));
+        var older = await EnterAsync(client, new DateOnly(1998, 7, 1));
+        var newer = await EnterAsync(client, new DateOnly(1999, 7, 1));
         var upcoming = await EnterAsync(client, FutureDate());
 
         var schedules = await client.GetFromJsonAsync<List<IncomeLimitScheduleResponse>>("/api/income-limit-schedules");
 
-        schedules!.Where(s => s.IsInEffect).Should().ContainSingle().Which.Id.Should().Be(current);
-        schedules.Select(s => s.Id).Should().Contain([older, upcoming]);
+        // The latest past schedule is the test trust's baseline from 2000-01-01, entered after these two's dates.
+        schedules!.Where(s => s.IsInEffect).Should().ContainSingle()
+            .Which.EffectiveFrom.Should().Be(TestIncomeLimitsInitialData.EffectiveFrom);
+        schedules.Where(s => s.Id == older || s.Id == newer || s.Id == upcoming).Should().HaveCount(3)
+            .And.OnlyContain(s => !s.IsInEffect);
         schedules.Select(s => s.EffectiveFrom).Should().BeInDescendingOrder();
     }
 

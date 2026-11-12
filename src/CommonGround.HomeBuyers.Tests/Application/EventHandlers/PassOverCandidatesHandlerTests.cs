@@ -37,5 +37,24 @@ public class PassOverCandidatesHandlerTests
                 c.SelectedDate.Should().Be(_testBed.SelectedDate);
             });
         }
+
+        [Fact]
+        public void GivenCandidateOverIncomeLimit_WhenAnotherIsSelected_ThenDoesNotPassItOver()
+        {
+            string[] applicationIds = [.. Enumerable.Range(0, 3).Select(_ => HomeownerApplicationId.Generate().Value)];
+            var selection = new HomeSelectionView
+            {
+                Id = HomeSelectionId.Generate().Value,
+                HomeId = HandlerTestBed.HomeId,
+                Candidates = [.. applicationIds.Select((id, i) => new HomeSelectionCandidateEntry { ApplicationId = id, IsOverIncomeLimit = i == 2 })],
+            };
+            var selected = new ApplicationSelectedForHome(
+                applicationIds[1], "household-1", "Alice Johnson", "alice@example.com", null, selection.Id,
+                HandlerTestBed.HomeId, "land-parcel-1", "template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser.Value);
+
+            var commands = PassOverCandidatesHandler.Handle(selected, selection).ToList();
+
+            commands.Select(c => c.ApplicationId.Value).Should().Equal(applicationIds[0]);
+        }
     }
 }

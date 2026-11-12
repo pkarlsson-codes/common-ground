@@ -4,6 +4,7 @@ using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications.Events;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.HomeBuyers.Domain.HomeSelections.Events;
+using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.Homeownership.Contracts.Events;
 using CommonGround.SharedKernel.Domain;
 using FluentAssertions;
@@ -23,8 +24,7 @@ public class PurchaseFellThroughHandlerTests
         {
             var (application, selection) = SelectedApplicationWithSelection();
             var waiting = _testBed.ReadyHousehold();
-            var next = new SelectionStart([SelectionCandidate.Create(
-                _testBed.ApprovedApplication(waiting).Id, waiting.Id, Money.Create(65000m), 1, false, new DateOnly(2026, 6, 1))], null);
+            var next = NextSelection(waiting, incomeLimitPercentOfAmi: null);
 
             var op = PurchaseFellThroughHandler.Handle(FellThrough(application), new FallenThroughPurchase(application, selection, next));
 
@@ -39,9 +39,23 @@ public class PurchaseFellThroughHandlerTests
             var (application, selection) = SelectedApplicationWithSelection();
 
             var op = PurchaseFellThroughHandler.Handle(
-                FellThrough(application), new FallenThroughPurchase(application, selection, new SelectionStart([], null)));
+                FellThrough(application),
+                new FallenThroughPurchase(application, selection, new SelectionStart([], null, null, null, _testBed.SelectedDate)));
 
             op.Should().NotBeAssignableTo<IStartStream>();
+            application.EventsAppended.Should().ContainSingle().Which.Should().BeOfType<ApplicationReturnedToWaitingList>();
+        }
+
+        [Fact]
+        public void GivenHomeHasIncomeLimitButNoLimitsInEffect_WhenPurchaseFellThrough_ThenStartsNoSelectionAndReturnsTheHousehold()
+        {
+            var (application, selection) = SelectedApplicationWithSelection();
+            var next = NextSelection(_testBed.ReadyHousehold(), incomeLimitPercentOfAmi: 80);
+
+            var op = PurchaseFellThroughHandler.Handle(FellThrough(application), new FallenThroughPurchase(application, selection, next));
+
+            op.Should().NotBeAssignableTo<IStartStream>();
+            selection.EventsAppended.Should().ContainSingle().Which.Should().BeOfType<HomeSelectionPurchaseFellThrough>();
             application.EventsAppended.Should().ContainSingle().Which.Should().BeOfType<ApplicationReturnedToWaitingList>();
         }
 
@@ -55,6 +69,15 @@ public class PurchaseFellThroughHandlerTests
             op.Should().NotBeAssignableTo<IStartStream>();
             application.EventsAppended.Should().BeEmpty();
         }
+
+        private SelectionStart NextSelection(Household waiting, int? incomeLimitPercentOfAmi) =>
+            new(
+                [SelectionCandidate.Create(
+                    _testBed.ApprovedApplication(waiting).Id, waiting.Id, Money.Create(65000m), 1, false, new DateOnly(2026, 6, 1), incomeLimit: null)],
+                ActiveSelectionId: null,
+                incomeLimitPercentOfAmi,
+                ScheduleInEffect: null,
+                _testBed.SelectedDate);
 
         private (StubEventStream<HomeownerApplication> Application, StubEventStream<HomeSelection> Selection) SelectedApplicationWithSelection()
         {

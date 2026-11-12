@@ -18,6 +18,12 @@ public class HomeSelectionView
     /// <summary>Gets or sets when the selection started.</summary>
     public DateTimeOffset StartedAt { get; set; }
 
+    /// <summary>Gets or sets the home's income limit as a percent of AMI when the selection started, or null when it had none.</summary>
+    public int? IncomeLimitPercentOfAmi { get; set; }
+
+    /// <summary>Gets or sets the effective date of the income limit schedule the candidates were judged by.</summary>
+    public DateOnly? IncomeLimitsEffectiveFrom { get; set; }
+
     /// <summary>Gets or sets the waiting list as it stood when the selection started.</summary>
     public List<HomeSelectionCandidateEntry> Candidates { get; set; } = [];
 
@@ -78,4 +84,10 @@ public class HomeSelectionCandidateEntry
 
     /// <summary>Gets or sets the date the household joined the waiting list.</summary>
     public DateOnly WaitingSince { get; set; }
+
+    /// <summary>Gets or sets the home's income limit for the household's size, or null when the home has none.</summary>
+    public decimal? IncomeLimit { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether the household's income was over <see cref="IncomeLimit"/>, so it can't be selected.</summary>
+    public bool IsOverIncomeLimit { get; set; }
 }

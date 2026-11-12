@@ -11,8 +11,9 @@ public sealed record HomeSelectionDetails(
 
 /// <summary>
 /// A candidate's frozen priority facts, together with its household's current primary contact and
-/// whether its application can still be selected today. A candidate stops being selectable once its
-/// application leaves the waiting list or its household's readiness lapses.
+/// whether its application can still be selected today. A candidate over the home's income limit is never
+/// selectable; any other stops being selectable once its application leaves the waiting list or its
+/// household's readiness lapses.
 /// </summary>
 public sealed record HomeSelectionCandidateDetails(
     HomeSelectionCandidateEntry Facts,

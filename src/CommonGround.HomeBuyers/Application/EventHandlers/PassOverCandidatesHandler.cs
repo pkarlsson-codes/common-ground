@@ -30,7 +30,10 @@ public static class PassOverCandidatesHandler
             ?? throw new AggregateNotFoundException(typeof(HomeSelection), @event.HomeSelectionId);
     }
 
-    /// <summary>Asks for every candidate except the chosen one to be passed over.</summary>
+    /// <summary>
+    /// Asks for every candidate except the chosen one and those over the home's income limit to be passed
+    /// over. An over-limit household didn't lose to another household; it could never have been chosen.
+    /// </summary>
     public static IEnumerable<PassOverApplication> Handle(ApplicationSelectedForHome @event, HomeSelectionView selection)
     {
         ArgumentNullException.ThrowIfNull(@event);
@@ -40,7 +43,7 @@ public static class PassOverCandidatesHandler
         return
         [
             .. selection.Candidates
-                .Where(c => c.ApplicationId != @event.AggregateId)
+                .Where(c => c.ApplicationId != @event.AggregateId && !c.IsOverIncomeLimit)
                 .Select(c => new PassOverApplication(
                     HomeownerApplicationId.Create(c.ApplicationId), selectionId, @event.HomeId, @event.SelectedDate)),
         ];

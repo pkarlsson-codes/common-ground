@@ -2,6 +2,7 @@ using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.HomeBuyers.Domain.HomeSelections.Events;
 using CommonGround.HomeBuyers.Domain.Households;
+using CommonGround.HomeBuyers.Domain.IncomeLimitSchedules;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using CommonGround.Testing;
@@ -28,7 +29,31 @@ public class HomeSelectionTests
 
         public string HomeId { get; } = "home-1";
 
-        public HomeSelection OpenSelection() => EventReplay.Replay<HomeSelection>(HomeSelection.Start(HomeSelectionId.Generate(), HomeId, Candidates, null, StaffUser));
+        public DateOnly Today { get; } = new(2026, 11, 12);
+
+        /// <summary>A schedule with an 80% level whose 2-person limit (57,000) is below application B's income.</summary>
+        public IncomeLimitSchedule Schedule { get; } = EventReplay.Replay<IncomeLimitSchedule>(IncomeLimitSchedule.Enter(
+            IncomeLimitScheduleId.Generate(),
+            new DateOnly(2026, 4, 1),
+            [IncomeLimitLevel.Create(80, [.. new[] { 50000m, 57000m, 64000m, 71000m, 77000m, 82000m, 88000m, 94000m }.Select(Money.Create)])],
+            scheduleOnSameDate: null,
+            UserId.Generate()));
+
+        public HomeSelectionStarted Start(
+            int? incomeLimitPercentOfAmi = null, IncomeLimitSchedule? scheduleInEffect = null, IReadOnlyList<SelectionCandidate>? candidates = null, HomeSelectionId? activeSelectionId = null) =>
+            HomeSelection.Start(
+                HomeSelectionId.Generate(),
+                HomeId,
+                candidates ?? Candidates,
+                incomeLimitPercentOfAmi,
+                scheduleInEffect,
+                Today,
+                activeSelectionId,
+                StaffUser);
+
+        public HomeSelection OpenSelection() => EventReplay.Replay<HomeSelection>(Start());
+
+        public HomeSelection OpenSelectionWithIncomeLimit() => EventReplay.Replay<HomeSelection>(Start(80, Schedule));
 
         public HomeSelection CompletedSelection()
         {
@@ -56,7 +81,8 @@ public class HomeSelectionTests
                 Money.Create(annualIncome),
                 householdSize,
                 requiresAccessibility,
-                waitingSince);
+                waitingSince,
+                incomeLimit: null);
     }
 
     public class TheStartMethod
@@ -66,8 +92,7 @@ public class HomeSelectionTests
         [Fact]
         public void GivenHomeHasActiveSelection_WhenStarted_ThenThrowsHomeHasActiveSelection()
         {
-            var act = () => HomeSelection.Start(
-                HomeSelectionId.Generate(), _testBed.HomeId, _testBed.Candidates, activeSelectionId: HomeSelectionId.Generate(), _testBed.StaffUser);
+            var act = () => _testBed.Start(activeSelectionId: HomeSelectionId.Generate());
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.home_selection.start.home_has_active_selection");
@@ -76,21 +101,61 @@ public class HomeSelectionTests
         [Fact]
         public void GivenNobodyWaiting_WhenStarted_ThenThrowsWaitingListEmpty()
         {
-            var act = () => HomeSelection.Start(HomeSelectionId.Generate(), _testBed.HomeId, candidates: [], null, _testBed.StaffUser);
+            var act = () => _testBed.Start(candidates: []);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.home_selection.start.waiting_list_empty");
         }
 
         [Fact]
-        public void GivenWaitingCandidates_WhenStarted_ThenIsOpenWithTheCandidatesSnapshotted()
+        public void GivenHomeWithNoIncomeLimit_WhenStarted_ThenIsOpenWithTheCandidatesSnapshottedWithoutLimits()
         {
-            var started = HomeSelection.Start(HomeSelectionId.Generate(), _testBed.HomeId, _testBed.Candidates, null, _testBed.StaffUser);
-
-            var sut = EventReplay.Replay<HomeSelection>(started);
+            var sut = EventReplay.Replay<HomeSelection>(_testBed.Start());
 
             sut.Status.Should().Be(HomeSelectionStatus.Open);
             sut.Candidates.Should().Equal(_testBed.Candidates);
+            sut.IncomeLimitPercentOfAmi.Should().BeNull();
+            sut.IncomeLimitsEffectiveFrom.Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenHomeWithIncomeLimitAndNoScheduleInEffect_WhenStarted_ThenThrowsNoIncomeLimitsInEffect()
+        {
+            var act = () => _testBed.Start(80, scheduleInEffect: null);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Should().BeEquivalentTo(new
+                {
+                    Code = "home_buyers.home_selection.start.no_income_limits_in_effect",
+                    Args = new Dictionary<string, object?>
+                    {
+                        ["homeId"] = _testBed.HomeId,
+                        ["percentOfAmi"] = 80,
+                        ["today"] = _testBed.Today,
+                    },
+                });
+        }
+
+        [Fact]
+        public void GivenHomeWithIncomeLimitTheScheduleHasNoLevelFor_WhenStarted_ThenThrowsNoIncomeLimitsInEffect()
+        {
+            var act = () => _testBed.Start(60, _testBed.Schedule);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.home_selection.start.no_income_limits_in_effect");
+        }
+
+        [Fact]
+        public void GivenHomeWithIncomeLimit_WhenStarted_ThenRecordsTheLimitsAndEachCandidatesLimitForItsSize()
+        {
+            var sut = EventReplay.Replay<HomeSelection>(_testBed.Start(80, _testBed.Schedule));
+
+            sut.IncomeLimitPercentOfAmi.Should().Be(80);
+            sut.IncomeLimitsEffectiveFrom.Should().Be(new DateOnly(2026, 4, 1));
+            sut.Candidates.Select(c => (c.IncomeLimit!.Amount, c.IsOverIncomeLimit)).Should().Equal(
+                (64000m, false),
+                (57000m, true),
+                (71000m, false));
         }
     }
 
@@ -143,6 +208,17 @@ public class HomeSelectionTests
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.home_selection.modify.not_open");
+        }
+
+        [Fact]
+        public void GivenCandidateOverIncomeLimit_WhenSelected_ThenThrowsOverIncomeLimit()
+        {
+            var sut = _testBed.OpenSelectionWithIncomeLimit();
+
+            var act = () => sut.SelectByPriority(_testBed.B, [SelectionPriority.LowerIncome], "Lowest income", _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.home_selection.select_by_priority.over_income_limit");
         }
 
         [Fact]
@@ -261,6 +337,21 @@ public class HomeSelectionTests
                 {
                     PoolApplicationIds = new[] { "application-b" },
                     IneligibleApplicationIds = new[] { "application-a", "application-c" },
+                });
+        }
+
+        [Fact]
+        public void GivenCandidateOverIncomeLimit_WhenDrawn_ThenLeavesThemOutOfThePoolAndRecordsThem()
+        {
+            var sut = _testBed.OpenSelectionWithIncomeLimit();
+
+            (_, var events) = sut.Decide(a => a.DrawLottery(null, _testBed.AllEligible(), 42, _testBed.StaffUser));
+
+            events.OfType<HouseholdSelectedByLottery>().Should().ContainSingle()
+                .Which.Should().BeEquivalentTo(new
+                {
+                    PoolApplicationIds = new[] { "application-a", "application-c" },
+                    IneligibleApplicationIds = new[] { "application-b" },
                 });
         }
     }

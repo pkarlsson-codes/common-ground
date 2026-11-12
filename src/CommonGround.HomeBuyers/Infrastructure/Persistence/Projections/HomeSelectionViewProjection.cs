@@ -17,6 +17,8 @@ internal sealed class HomeSelectionViewProjection : SingleStreamProjection<HomeS
             Status = HomeSelectionStatus.Open.DisplayName,
             StartedBy = e.Data.StartedBy,
             StartedAt = e.Data.OccurredAt,
+            IncomeLimitPercentOfAmi = e.Data.IncomeLimitPercentOfAmi,
+            IncomeLimitsEffectiveFrom = e.Data.IncomeLimitsEffectiveFrom,
             Candidates = [.. e.Data.Candidates.Select(c => new HomeSelectionCandidateEntry
             {
                 ApplicationId = c.ApplicationId,
@@ -25,6 +27,8 @@ internal sealed class HomeSelectionViewProjection : SingleStreamProjection<HomeS
                 HouseholdSize = c.HouseholdSize,
                 RequiresAccessibility = c.RequiresAccessibility,
                 WaitingSince = c.WaitingSince,
+                IncomeLimit = c.IncomeLimit?.Amount,
+                IsOverIncomeLimit = c.IncomeLimit is not null && c.AnnualIncome > c.IncomeLimit,
             })],
         };
 

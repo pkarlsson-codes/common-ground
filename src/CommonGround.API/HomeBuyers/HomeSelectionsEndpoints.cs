@@ -195,6 +195,8 @@ public static class HomeSelectionsEndpoints
             details.Home?.Label,
             details.Home?.Bedrooms,
             details.Home?.IsAccessible,
+            view.IncomeLimitPercentOfAmi,
+            view.IncomeLimitsEffectiveFrom,
             view.Status,
             view.StartedBy,
             view.StartedAt,
@@ -222,6 +224,8 @@ public static class HomeSelectionsEndpoints
             candidate.Facts.HouseholdSize,
             candidate.Facts.RequiresAccessibility,
             candidate.Facts.WaitingSince,
+            candidate.Facts.IncomeLimit,
+            candidate.Facts.IsOverIncomeLimit,
             candidate.ApplicationPhase,
             candidate.CanBeSelected);
 

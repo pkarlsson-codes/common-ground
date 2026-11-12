@@ -117,6 +117,7 @@ public class ApiFactory : WebApplicationFactory<Program>
             });
 
             services.InitializeMartenWith<TestTrustInitialData>();
+            services.InitializeMartenWith<TestIncomeLimitsInitialData>();
 
             services.AddSingleton<IDocumentBlobStore, InMemoryDocumentBlobStore>();
 

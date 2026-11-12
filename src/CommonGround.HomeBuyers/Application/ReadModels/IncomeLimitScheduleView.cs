@@ -23,6 +23,16 @@ public class IncomeLimitScheduleView
 
     /// <summary>Gets or sets when the schedule was last corrected, if it was.</summary>
     public DateTimeOffset? CorrectedAt { get; set; }
+
+    /// <summary>
+    /// Finds the schedule in effect on <paramref name="day"/>: the latest one effective on or before it.
+    /// A schedule applies from its effective date until the next schedule's.
+    /// </summary>
+    /// <param name="schedules">The trust's schedules, in any order.</param>
+    /// <param name="day">The day to find the schedule for.</param>
+    /// <returns>The schedule, or <see langword="null"/> when none is effective yet.</returns>
+    public static IncomeLimitScheduleView? InEffectOn(IEnumerable<IncomeLimitScheduleView> schedules, DateOnly day) =>
+        schedules.Where(s => s.EffectiveFrom <= day).MaxBy(s => s.EffectiveFrom);
 }
 
 /// <summary>One level of an <see cref="IncomeLimitScheduleView"/>.</summary>

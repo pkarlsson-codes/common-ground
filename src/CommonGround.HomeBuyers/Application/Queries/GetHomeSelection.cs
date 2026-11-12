@@ -53,7 +53,9 @@ public static class GetHomeSelectionHandler
                     c,
                     household is null ? null : HouseholdContact.From(household),
                     phase,
-                    phase == ApplicationPhase.Approved.DisplayName && (household?.IsReadyForSelectionOn(today) ?? false));
+                    !c.IsOverIncomeLimit
+                        && phase == ApplicationPhase.Approved.DisplayName
+                        && (household?.IsReadyForSelectionOn(today) ?? false));
             })]);
     }
 }

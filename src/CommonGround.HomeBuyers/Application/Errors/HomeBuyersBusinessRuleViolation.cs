@@ -143,6 +143,16 @@ public static class BusinessRuleViolation
                     {
                         ["homeId"] = homeId,
                     });
+
+            public static BusinessRuleViolationException NoIncomeLimitsInEffect(string homeId, int percentOfAmi, DateOnly today)
+                => new(
+                    "home_buyers.home_selection.start.no_income_limits_in_effect",
+                    new Dictionary<string, object?>
+                    {
+                        ["homeId"] = homeId,
+                        ["percentOfAmi"] = percentOfAmi,
+                        ["today"] = today,
+                    });
         }
 
         public static class SelectByPriority
@@ -154,6 +164,14 @@ public static class BusinessRuleViolation
             public static BusinessRuleViolationException ReasonRequired()
                 => new(
                     "home_buyers.home_selection.select_by_priority.reason_required");
+
+            public static BusinessRuleViolationException OverIncomeLimit(HomeownerApplicationId applicationId)
+                => new(
+                    "home_buyers.home_selection.select_by_priority.over_income_limit",
+                    new Dictionary<string, object?>
+                    {
+                        ["applicationId"] = applicationId.Value,
+                    });
         }
 
         public static class DrawLottery
