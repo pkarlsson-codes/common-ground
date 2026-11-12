@@ -1,0 +1,21 @@
+[
+  {
+    "trustSeedKey": "dev-default",
+    "effectiveFrom": "today-13m",
+    "enteredDate": "today-13m",
+    "levels": [
+      { "percentOfAmi": 50, "limits": [37300, 42600, 47950, 53250, 57550, 61800, 66050, 70300] },
+      { "percentOfAmi": 80, "limits": [59650, 68200, 76700, 85200, 92050, 98850, 105650, 112500] }
+    ]
+  },
+  {
+    "trustSeedKey": "dev-default",
+    "effectiveFrom": "today-7m",
+    "enteredDate": "today-7m",
+    "levels": [
+      { "percentOfAmi": 50, "limits": [38800, 44300, 49850, 55400, 59850, 64250, 68700, 73150] },
+      { "percentOfAmi": 80, "limits": [62050, 70900, 79750, 88600, 95700, 102800, 109900, 116950] },
+      { "percentOfAmi": 120, "limits": [93050, 106350, 119650, 132950, 143600, 154200, 164850, 175500] }
+    ]
+  }
+]

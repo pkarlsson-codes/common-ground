@@ -44,6 +44,7 @@ internal static class DevelopmentSeeder
         services.AddTransient<IDevelopmentSeeder, DevelopmentProjectsSeeder>();
         services.AddTransient<IDevelopmentSeeder, UsersSeeder>();
         services.AddTransient<IDevelopmentSeeder, HouseholdsSeeder>();
+        services.AddTransient<IDevelopmentSeeder, IncomeLimitsSeeder>();
         services.AddTransient<IDevelopmentSeeder, GroundLeaseTemplatesSeeder>();
         services.AddTransient<IDevelopmentSeeder, HomeSelectionsSeeder>();
         services.AddTransient<IDevelopmentSeeder, PurchaseWorkflowsSeeder>();

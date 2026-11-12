@@ -42,6 +42,15 @@ public static class HomeBuyersMartenConfiguration
                 index.Predicate =
                     $"data ->> 'Status' in ('{HomeSelectionStatus.Open.DisplayName}', '{HomeSelectionStatus.Completed.DisplayName}')";
             });
+        // One schedule per effective date. IncomeLimitSchedule.Enter and Correct check this from the
+        // view; the unique index catches two entries racing past that check.
+        options.Schema.For<IncomeLimitScheduleView>()
+            .DatabaseSchemaName(SchemaName)
+            .Index(x => x.EffectiveFrom, index =>
+            {
+                index.IsUnique = true;
+                index.TenancyScope = TenancyScope.PerTenant;
+            });
         options.Schema.For<HouseholdView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<HouseholdListItemView>().DatabaseSchemaName(SchemaName);
         options.Schema.For<HouseholdPassOversView>().DatabaseSchemaName(SchemaName);
@@ -58,6 +67,7 @@ public static class HomeBuyersMartenConfiguration
         options.Projections.Add<HomeownerApplicationViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HomeownerApplicationListItemViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HomeSelectionViewProjection>(ProjectionLifecycle.Inline);
+        options.Projections.Add<IncomeLimitScheduleViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HouseholdViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HouseholdListItemViewProjection>(ProjectionLifecycle.Inline);
         options.Projections.Add<HouseholdPassOversViewProjection>(ProjectionLifecycle.Inline);

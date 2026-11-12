@@ -1,6 +1,7 @@
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.HomeBuyers.Domain.Households;
+using CommonGround.HomeBuyers.Domain.IncomeLimitSchedules;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 
@@ -211,6 +212,68 @@ public static class BusinessRuleViolation
                     new Dictionary<string, object?>
                     {
                         ["applicationId"] = applicationId.Value,
+                    });
+        }
+    }
+
+    public static class IncomeLimitSchedule
+    {
+        public static class Level
+        {
+            public static BusinessRuleViolationException PercentOutOfRange(int percentOfAmi)
+                => new(
+                    "home_buyers.income_limit_schedule.level.percent_out_of_range",
+                    new Dictionary<string, object?>
+                    {
+                        ["percentOfAmi"] = percentOfAmi,
+                        ["minimum"] = IncomeLimitLevel.MinimumPercentOfAmi,
+                        ["maximum"] = IncomeLimitLevel.MaximumPercentOfAmi,
+                    });
+
+            public static BusinessRuleViolationException WrongNumberOfLimits(int percentOfAmi, int count)
+                => new(
+                    "home_buyers.income_limit_schedule.level.wrong_number_of_limits",
+                    new Dictionary<string, object?>
+                    {
+                        ["percentOfAmi"] = percentOfAmi,
+                        ["count"] = count,
+                        ["requiredCount"] = IncomeLimitLevel.PrintedHouseholdSizes,
+                    });
+
+            public static BusinessRuleViolationException LimitNotPositive(int percentOfAmi, int householdSize)
+                => new(
+                    "home_buyers.income_limit_schedule.level.limit_not_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["percentOfAmi"] = percentOfAmi,
+                        ["householdSize"] = householdSize,
+                    });
+        }
+
+        public static class Levels
+        {
+            public static BusinessRuleViolationException Required()
+                => new(
+                    "home_buyers.income_limit_schedule.levels.required");
+
+            public static BusinessRuleViolationException DuplicatePercent(int percentOfAmi)
+                => new(
+                    "home_buyers.income_limit_schedule.levels.duplicate_percent",
+                    new Dictionary<string, object?>
+                    {
+                        ["percentOfAmi"] = percentOfAmi,
+                    });
+        }
+
+        public static class EffectiveFrom
+        {
+            public static BusinessRuleViolationException Taken(DateOnly effectiveFrom, IncomeLimitScheduleId scheduleId)
+                => new(
+                    "home_buyers.income_limit_schedule.effective_from.taken",
+                    new Dictionary<string, object?>
+                    {
+                        ["effectiveFrom"] = effectiveFrom,
+                        ["scheduleId"] = scheduleId.Value,
                     });
         }
     }
