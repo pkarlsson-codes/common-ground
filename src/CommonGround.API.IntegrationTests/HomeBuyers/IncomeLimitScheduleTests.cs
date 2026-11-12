@@ -105,10 +105,10 @@ public class IncomeLimitScheduleTests(ApiFactory factory)
         var newer = await EnterAsync(client, new DateOnly(1999, 7, 1));
         var upcoming = await EnterAsync(client, FutureDate());
 
-        var schedules = await client.GetFromJsonAsync<List<IncomeLimitScheduleResponse>>("/api/income-limit-schedules");
+        var schedules = (await client.GetFromJsonAsync<List<IncomeLimitScheduleResponse>>("/api/income-limit-schedules"))!;
 
         // The latest past schedule is the test trust's baseline from 2000-01-01, entered after these two's dates.
-        schedules!.Where(s => s.IsInEffect).Should().ContainSingle()
+        schedules.Where(s => s.IsInEffect).Should().ContainSingle()
             .Which.EffectiveFrom.Should().Be(TestIncomeLimitsInitialData.EffectiveFrom);
         schedules.Where(s => s.Id == older || s.Id == newer || s.Id == upcoming).Should().HaveCount(3)
             .And.OnlyContain(s => !s.IsInEffect);
