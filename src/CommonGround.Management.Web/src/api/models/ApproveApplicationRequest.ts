@@ -23,7 +23,7 @@ import {
 } from './CalendarDate';
 
 /**
- * Request to approve eligibility.
+ * Request to approve a submitted application, putting the household on the waiting list.
  * @export
  * @interface ApproveApplicationRequest
  */

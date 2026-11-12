@@ -10734,7 +10734,7 @@
       },
       "ApproveApplicationRequest": {
         "type": "object",
-        "description": "Request to approve eligibility.",
+        "description": "Request to approve a submitted application, putting the household on the waiting list.",
         "additionalProperties": false,
         "properties": {
           "approvedDate": {
