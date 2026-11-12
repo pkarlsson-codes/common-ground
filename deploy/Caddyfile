@@ -1,0 +1,13 @@
+# Caddy gets and renews the TLS certificate for DOMAIN on its own (ports 80 and 443 must be open).
+{$DOMAIN} {
+	encode zstd gzip
+
+	handle /auth-server/* {
+		reverse_proxy keycloak:8080
+	}
+
+	# The gateway serves the web app, /api and /auth.
+	handle {
+		reverse_proxy gateway:8080
+	}
+}

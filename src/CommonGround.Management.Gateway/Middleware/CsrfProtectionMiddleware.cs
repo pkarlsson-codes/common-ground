@@ -30,8 +30,13 @@ public static class CsrfProtectionExtensions
                 return;
             }
 
-            var allowedOrigins = context.RequestServices.GetRequiredService<IConfiguration>()
-                .GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+            // The gateway's own origin is always allowed: in production it serves the web app itself.
+            // Behind a proxy the scheme comes from X-Forwarded-Proto (ASPNETCORE_FORWARDEDHEADERS_ENABLED).
+            var ownOrigin = $"{context.Request.Scheme}://{context.Request.Host}";
+            var allowedOrigins = (context.RequestServices.GetRequiredService<IConfiguration>()
+                .GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>())
+                .Append(ownOrigin)
+                .ToArray();
             var origin = context.Request.Headers["Origin"].ToString();
             var referer = context.Request.Headers["Referer"].ToString();
             bool originOk = !string.IsNullOrEmpty(origin) && allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase);

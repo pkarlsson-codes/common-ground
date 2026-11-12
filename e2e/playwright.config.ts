@@ -21,6 +21,11 @@ const waitFor = (url: string) =>
 // memory. E2E_WORKERS=<n> overrides the cap.
 const workers = Number(process.env.E2E_WORKERS ?? 4)
 
+// E2E_BASE_URL=<url> runs the specs against a stack that is already running, such as deploy/compose.yml,
+// instead of starting the dev servers. It accepts self-signed certificates (Caddy's local CA for localhost).
+// That stack must have an e2e user (password e2e) in its realm, and it has no seeded data.
+const deployedUrl = process.env.E2E_BASE_URL
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
@@ -31,7 +36,8 @@ export default defineConfig({
   timeout: slowMo ? 0 : 30_000,
   expect: { timeout: 10_000 },
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: deployedUrl ?? 'http://localhost:3000',
+    ignoreHTTPSErrors: !!deployedUrl,
     timezoneId: E2E_TIME_ZONE,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
@@ -45,7 +51,7 @@ export default defineConfig({
       dependencies: ['setup'],
     },
   ],
-  webServer: [
+  webServer: deployedUrl ? [] : [
     {
       // Builds the whole solution once so the gateway can start with --no-build and
       // the two `dotnet run`s don't race on shared obj/ folders.

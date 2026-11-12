@@ -1,0 +1,20 @@
+# Build context is the repo root. Only src/ is needed by the Dockerfiles.
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/logs/
+**/TestResults/
+**/*.user
+src/CommonGround.API/data/
+.git/
+.vs/
+.idea/
+.vscode/
+docs/
+e2e/
+deploy/
+scripts/
+templates/
+config/
+node_modules/

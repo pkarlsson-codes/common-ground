@@ -31,7 +31,10 @@ public static class TokenStoreServiceCollectionExtensions
         services.AddSingleton(new GatewayDatabase(NpgsqlDataSource.Create(connectionString)));
         services.AddSingleton<PostgresTokenStore>();
         services.AddSingleton<ITokenStore>(sp => sp.GetRequiredService<PostgresTokenStore>());
-        services.AddHostedService<GatewayDatabaseMaintenance>();
+
+        // First of all hosted services: Data Protection's own hosted service reads the key ring at startup,
+        // and on a new database the table it reads doesn't exist until this one has run.
+        services.Insert(0, ServiceDescriptor.Singleton<IHostedService, GatewayDatabaseMaintenance>());
 
         services.AddDataProtection().SetApplicationName("commonground-management-gateway");
         services.AddOptions<KeyManagementOptions>()

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 
 namespace CommonGround.API.Tests.Gateway;
 
@@ -71,7 +72,8 @@ public sealed class OidcControllerReturnUrlTests
             config,
             new StubTokenStore(),
             new StubHttpClientFactory(),
-            new StubHostEnvironment());
+            new StubHostEnvironment(),
+            new StubOidcOptions());
 
         var queryString = !string.IsNullOrWhiteSpace(returnUrl)
             ? new QueryString($"?returnUrl={Uri.EscapeDataString(returnUrl)}")
@@ -98,6 +100,15 @@ public sealed class OidcControllerReturnUrlTests
 
         public Task RemoveAsync(string sessionId, CancellationToken cancellationToken = default)
             => Task.CompletedTask;
+    }
+
+    private sealed class StubOidcOptions : IOptionsMonitor<OpenIdConnectOptions>
+    {
+        public OpenIdConnectOptions CurrentValue { get; } = new();
+
+        public OpenIdConnectOptions Get(string? name) => CurrentValue;
+
+        public IDisposable? OnChange(Action<OpenIdConnectOptions, string?> listener) => null;
     }
 
     private sealed class StubHttpClientFactory : IHttpClientFactory

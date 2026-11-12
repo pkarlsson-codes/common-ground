@@ -4,7 +4,7 @@ import { isoDate, uniqueId } from './ui'
 // Seeds test data through the gateway (same session as the browser), for steps that aren't
 // the journey under test. Mutations need the double-submit CSRF header and an allowed Origin.
 
-const ORIGIN = 'http://localhost:3000'
+const ORIGIN = process.env.E2E_BASE_URL ?? 'http://localhost:3000'
 
 async function headers(page: Page) {
   const csrf = (await page.context().cookies(ORIGIN)).find(c => c.name === 'cg_csrf')?.value

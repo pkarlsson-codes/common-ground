@@ -36,3 +36,4 @@ docs/ai/
 
 # Document files from the file system blob store
 src/CommonGround.API/data/
+deploy/.env

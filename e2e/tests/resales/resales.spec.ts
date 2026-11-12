@@ -131,9 +131,13 @@ test('the trust appraises, buys the home back, holds it and releases it for sale
   const { apn, homeowner, groundLeaseId } = await createLease(page)
   await post(page, `/api/v1/ground-leases/${groundLeaseId}/intent-to-sell`, { noticeDate: isoDate(-5), channel: 'Phone', notes: null })
 
-  await page.goto('/resales')
-  await page.locator('tbody tr', { hasText: homeowner }).click()
+  // Homeownership learns the home's label from PropertyRegistry's HomeRegistered event, so reload until it has.
   const resale = panel(page, `${apn} Elm St`)
+  await expect(async () => {
+    await page.goto('/resales')
+    await page.locator('tbody tr', { hasText: homeowner }).click()
+    await expect(resale).toBeVisible({ timeout: 1000 })
+  }).toPass()
   await resale.getByRole('button', { name: 'Record Appraisal' }).click()
 
   const appraisal = panel(page, 'Record Appraisal')

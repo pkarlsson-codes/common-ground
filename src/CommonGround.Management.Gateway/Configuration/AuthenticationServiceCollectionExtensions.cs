@@ -33,6 +33,15 @@ public static class AuthenticationServiceCollectionExtensions
             .AddOpenIdConnect(options =>
             {
                 options.Authority = configuration["Authentication:OIDC:Authority"];
+
+                // Optional internal address of the discovery document, for when the gateway can't reach the
+                // provider at its public URL (Keycloak behind the same proxy, with backchannel URLs dynamic).
+                var metadataAddress = configuration["Authentication:OIDC:MetadataAddress"];
+                if (!string.IsNullOrWhiteSpace(metadataAddress))
+                {
+                    options.MetadataAddress = metadataAddress;
+                }
+
                 options.ClientId = configuration["Authentication:OIDC:ClientId"];
                 options.ClientSecret = configuration["Authentication:OIDC:ClientSecret"];
                 options.ResponseType = OpenIdConnectResponseType.Code;

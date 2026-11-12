@@ -1,4 +1,5 @@
 using CommonGround.Management.Gateway.Middleware;
+using Microsoft.AspNetCore.StaticFiles;
 using Wolverine.Http;
 
 namespace CommonGround.Management.Gateway.Configuration;
@@ -8,6 +9,21 @@ namespace CommonGround.Management.Gateway.Configuration;
 /// </summary>
 internal static partial class WebApplicationExtensions
 {
+    /// <summary>
+    /// Vite puts a content hash in every file name under /assets, so those can be cached for good.
+    /// index.html and the other files must be checked again so a new release is picked up.
+    /// </summary>
+    private static readonly StaticFileOptions WebAppFiles = new()
+    {
+        OnPrepareResponse = context =>
+        {
+            context.Context.Response.Headers.CacheControl =
+                context.Context.Request.Path.StartsWithSegments("/assets", StringComparison.Ordinal)
+                    ? "public, max-age=31536000, immutable"
+                    : "no-cache";
+        },
+    };
+
     /// <summary>
     /// Configures the request pipeline for development environments.
     /// </summary>
@@ -37,6 +53,7 @@ internal static partial class WebApplicationExtensions
         app.UseGlobalErrorHandling();
         app.UseCors();
         app.UseSecurityHeaders();
+        app.UseStaticFiles(WebAppFiles);
         app.UseAuthentication();
         app.UseCsrfProtection();
         app.UseAuthorization();
@@ -54,6 +71,12 @@ internal static partial class WebApplicationExtensions
         app.MapHealthChecks("/health").AllowAnonymous();
         app.MapControllers();
         app.MapWolverineEndpoints();
+
+        // The built web app is copied into wwwroot (see the Dockerfile); in development Vite serves it instead.
+        // Unknown /api and /auth paths stay 404s; every other unknown path is a client-side route.
+        app.Map("/api/{**path}", () => Results.NotFound()).AllowAnonymous();
+        app.Map("/auth/{**path}", () => Results.NotFound()).AllowAnonymous();
+        app.MapFallbackToFile("index.html", WebAppFiles).AllowAnonymous();
 
         return app;
     }

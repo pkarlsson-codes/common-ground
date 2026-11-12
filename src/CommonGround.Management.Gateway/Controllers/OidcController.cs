@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace CommonGround.Management.Gateway.Controllers;
 
@@ -19,6 +20,7 @@ public sealed class OidcController : ControllerBase
     private readonly ITokenStore _tokenStore;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IHostEnvironment _env;
+    private readonly IOptionsMonitor<OpenIdConnectOptions> _oidcOptions;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OidcController"/> class.
@@ -27,12 +29,15 @@ public sealed class OidcController : ControllerBase
     /// <param name="tokenStore">Token store for managing server-side tokens.</param>
     /// <param name="httpClientFactory">Factory for creating HTTP clients.</param>
     /// <param name="env">Host environment used to determine cookie security flags.</param>
+    /// <param name="oidcOptions">OIDC options, whose configuration manager holds the provider's discovery document.</param>
     public OidcController(
         IConfiguration configuration,
         ITokenStore tokenStore,
         IHttpClientFactory httpClientFactory,
-        IHostEnvironment env)
+        IHostEnvironment env,
+        IOptionsMonitor<OpenIdConnectOptions> oidcOptions)
     {
+        _oidcOptions = oidcOptions;
         _configuration = configuration;
         _tokenStore = tokenStore;
         _httpClientFactory = httpClientFactory;
@@ -114,15 +119,18 @@ public sealed class OidcController : ControllerBase
             return Unauthorized(new { error = "No refresh token" });
         }
 
-        var authority = _configuration["Authentication:OIDC:Authority"]?.TrimEnd('/');
         var clientId = _configuration["Authentication:OIDC:ClientId"];
         var clientSecret = _configuration["Authentication:OIDC:ClientSecret"];
-        if (string.IsNullOrWhiteSpace(authority) || string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
+        if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
         {
             return StatusCode(500, new { error = "OIDC configuration incomplete" });
         }
 
-        var tokenEndpoint = $"{authority}/protocol/openid-connect/token";
+        // The discovery document's token endpoint, not one built from the authority: behind a proxy the
+        // gateway reaches the provider at an internal address (Authentication:OIDC:MetadataAddress).
+        var oidc = _oidcOptions.Get(OpenIdConnectDefaults.AuthenticationScheme);
+        var providerConfiguration = await oidc.ConfigurationManager!.GetConfigurationAsync(HttpContext.RequestAborted);
+        var tokenEndpoint = providerConfiguration.TokenEndpoint;
         var form = new Dictionary<string, string>
         {
             ["grant_type"] = "refresh_token",
