@@ -2,7 +2,7 @@
 
 For when a trust records the income limits its homes are bound by, usually once a year when HUD or the state agency publishes new ones.
 
-1. User clicks **Income Limits** in the sidebar, under Settings
+1. User clicks **Income Limits** in the sidebar, under Settings, or **Enter limits** on a Today item saying limits are missing or out of date (see [Work Through Today](../today/work-through-today.md)), which opens the page with the panel of step 4 already open
 2. The page lists the trust's schedules, newest Effective From first: Effective From, the levels it holds (e.g. "50%, 80%, 120% of AMI"), and who entered it. The schedule in effect today is marked "In effect". With no schedules the page says "No income limits entered. Selections for homes with an income limit can't start until you enter them."
 3. User clicks "Enter Income Limits"
 4. "Enter Income Limits" panel opens with Effective From (defaults to today) and one row per level. The rows start with the levels of the newest schedule and empty amounts, or one empty row if there is none

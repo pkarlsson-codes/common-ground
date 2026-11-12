@@ -27,8 +27,8 @@ export function areasForFocus(focus: Focus): readonly TodayArea[] {
 
 export interface RecordLink {
   to: string
-  /** Asks the list page to open the record's detail panel. */
-  state?: { openId: string }
+  /** Asks the page to open the record's detail panel, or (`enter`) its panel for entering a new record. */
+  state?: { openId?: string; enter?: boolean }
 }
 
 const RECORD_PAGES: Record<string, string> = {
@@ -43,6 +43,7 @@ const RECORD_PAGES: Record<string, string> = {
 /** Where a row leads: the record's detail, opened on its list page (selections have a page of their own). */
 export function recordLink(item: Pick<WorkItemResponse, 'recordType' | 'recordId'>): RecordLink | null {
   const id = item.recordId
+  if (item.recordType === 'income-limits') return { to: '/income-limits', state: id ? { openId: id } : undefined }
   if (!id) return null
   if (item.recordType === 'selection') return { to: `/homes/selections/${id}` }
   const to = RECORD_PAGES[item.recordType ?? '']
@@ -62,6 +63,8 @@ const KINDS: Record<string, { page: string; area: TodayArea }> = {
   'lease-fee-notice-due': { page: '/stewardship', area: 'stewardship' },
   'lease-default-uncured': { page: '/stewardship', area: 'stewardship' },
   'document-expiring': { page: '/documents', area: 'records' },
+  'income-limits-missing': { page: '/income-limits', area: 'selections' },
+  'income-limits-stale': { page: '/income-limits', area: 'selections' },
 }
 
 /** How many items are waiting on each sidebar page, by its path. */
@@ -103,6 +106,17 @@ const ACTION_LABELS: Record<string, string> = {
   'record-closing': 'Record closing',
   'record-lease-fee-notice': 'Record notice',
   'review-lease-default': 'Review default',
+  'enter-income-limits': 'Enter limits',
+}
+
+/** Actions that lead somewhere other than the row's record. */
+const ACTION_LINKS: Record<string, RecordLink> = {
+  'enter-income-limits': { to: '/income-limits', state: { enter: true } },
+}
+
+/** Where an action without a panel on Today leads: its own page, or else the row's record. */
+export function actionLink(item: Pick<WorkItemResponse, 'recordType' | 'recordId'>, key: string): RecordLink | null {
+  return ACTION_LINKS[key] ?? recordLink(item)
 }
 
 /** The actions whose panel opens over Today; the rest open the record, where the action is. */

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Focus } from './navigation'
-import { areasForFocus, countForFocus, countsByPage, recordLink, rowActions, type TodayArea } from './today'
+import { actionLink, areasForFocus, countForFocus, countsByPage, recordLink, rowActions, type TodayArea } from './today'
 
 describe('areasForFocus', () => {
   it.each<[Focus, TodayArea[]]>([
@@ -30,6 +30,24 @@ describe('recordLink', () => {
 
   it('has nowhere to go for a record type it does not know', () => {
     expect(recordLink({ recordType: 'mystery', recordId: 'm-1' })).toBeNull()
+  })
+
+  it('opens the Income Limits page, on the schedule in effect when there is one', () => {
+    expect(recordLink({ recordType: 'income-limits', recordId: 'sch-1' }))
+      .toEqual({ to: '/income-limits', state: { openId: 'sch-1' } })
+    expect(recordLink({ recordType: 'income-limits', recordId: '' })).toEqual({ to: '/income-limits', state: undefined })
+  })
+})
+
+describe('actionLink', () => {
+  it('opens the Enter Income Limits panel for Enter limits', () => {
+    expect(actionLink({ recordType: 'income-limits', recordId: 'sch-1' }, 'enter-income-limits'))
+      .toEqual({ to: '/income-limits', state: { enter: true } })
+  })
+
+  it('opens the row record for other actions', () => {
+    expect(actionLink({ recordType: 'home', recordId: 'h-1' }, 'start-selection'))
+      .toEqual({ to: '/homes', state: { openId: 'h-1' } })
   })
 })
 

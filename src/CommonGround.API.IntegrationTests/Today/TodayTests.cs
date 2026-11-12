@@ -7,7 +7,10 @@ using CommonGround.API.Contracts.Documents.Responses;
 using CommonGround.API.Contracts.HomeBuyers.Requests;
 using CommonGround.API.Contracts.HomeBuyers.Responses;
 using CommonGround.API.Contracts.Today.Responses;
+using CommonGround.HomeBuyers.Application.ReadModels;
 using FluentAssertions;
+using Marten;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CommonGround.API.IntegrationTests.Today;
 
@@ -68,6 +71,24 @@ public class TodayTests(ApiFactory factory)
         applicants.Items.Count.Should().Be(everything.Items.Count(i => i.Area == "applicants" || i.Area == "records"));
         applicants.AreaCounts.Should().BeEquivalentTo(everything.AreaCounts);
         applicants.TotalCount.Should().Be(everything.Items.Count);
+    }
+
+    [Fact]
+    public async Task GetToday_ListsMissingIncomeLimitsWhenAHomesLevelIsNotInEffect()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        using (var scope = factory.Services.CreateScope())
+        {
+            await using var session = scope.ServiceProvider.GetRequiredService<IDocumentStore>().LightweightSession(ApiFactory.TestTrustId);
+            session.Store(new HomeFactsView { Id = $"today-home-{Guid.NewGuid():N}", Label = "Today Limit Lane", IncomeLimitPercentOfAmi = 61 });
+            await session.SaveChangesAsync();
+        }
+
+        var result = await GetTodayAsync(client);
+
+        result.Items.Should().ContainSingle(i => i.Kind == "income-limits-missing")
+            .Which.Should().Match<WorkItemResponse>(i =>
+                i.Area == "selections" && i.Detail.Contains("61%") && i.Actions.SequenceEqual(new[] { "enter-income-limits" }));
     }
 
     private static async Task<TodayResponse> GetTodayAsync(HttpClient client, string query = "") =>

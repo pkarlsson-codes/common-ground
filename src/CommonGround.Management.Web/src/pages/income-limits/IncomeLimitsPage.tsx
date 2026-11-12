@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import PageEyebrow from '../../components/PageEyebrow'
 import { describeLevels, useIncomeLimitSchedules } from '../../hooks/incomeLimits'
 import { useTrustMembers } from '../../hooks/team'
@@ -11,7 +12,19 @@ type Panel = { kind: 'enter' } | { kind: 'view'; id: string } | { kind: 'correct
 export default function IncomeLimitsPage() {
   const { data, isLoading, isError, refetch } = useIncomeLimitSchedules()
   const { data: members } = useTrustMembers()
-  const [panel, setPanel] = useState<Panel>(null)
+  const location = useLocation()
+  const navigate = useNavigate()
+  // A link from Today opens the Enter panel, or a schedule's detail, on arrival.
+  const [panel, setPanel] = useState<Panel>(() => {
+    const state = location.state as { openId?: string; enter?: boolean } | null
+    if (state?.enter) return { kind: 'enter' }
+    return state?.openId ? { kind: 'view', id: state.openId } : null
+  })
+
+  useEffect(() => {
+    if (!location.state) return
+    navigate({ pathname: location.pathname, search: location.search, hash: location.hash }, { replace: true, state: null })
+  }, [location, navigate])
 
   const schedules = data ?? []
   const newest = schedules[0] ?? null

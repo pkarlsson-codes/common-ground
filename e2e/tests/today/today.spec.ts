@@ -4,6 +4,7 @@ import { expectToast, field, isoDate, panel, uniqueId } from '../support/ui'
 
 // Journeys (docs/journeys/today/):
 //   work-through-today — items grouped by area, a row's actions fix it on Today, a row opens its record, focus narrows the areas
+//   enter-income-limits — Enter limits on a missing-limits item opens the Enter Income Limits panel
 
 const section = (page: Page, name: string) => page.getByRole('region', { name: new RegExp(`^${name}`) })
 
@@ -116,4 +117,21 @@ test('a purchase with eligibility recorded waits on its appraisal, and Today ope
   await field(detail, 'Appraised Value ($)').fill('240000')
   await detail.getByRole('button', { name: 'Record Appraisal' }).click()
   await expectToast(page, 'Appraisal recorded')
+})
+
+test('a home whose income limit has no level in effect makes Income limits missing, and Enter limits opens the panel', async ({ page }) => {
+  // No schedule this suite enters has a 61% level, so the item stays once any 61% home exists.
+  const { parcelId } = await createLandParcel(page)
+  await createHome(page, parcelId, { incomeLimitPercentOfAmi: 61 })
+
+  const row = section(page, 'Selections').getByRole('row', { name: /^Income limits missing/ })
+  await expect(async () => {
+    await page.goto('/')
+    await expect(row).toContainText('61%', { timeout: 2_000 })
+  }).toPass()
+
+  await row.getByRole('button', { name: 'Enter limits: Income limits' }).click()
+
+  await expect(page).toHaveURL(/\/income-limits$/)
+  await expect(panel(page, 'Enter Income Limits')).toBeVisible()
 })

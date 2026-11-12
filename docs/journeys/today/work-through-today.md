@@ -6,7 +6,7 @@
 4. Within a section, items run overdue first, then due soonest, then waiting longest. Each row shows what's waiting, the record (household, home or document), one line of detail and a due chip: red when overdue, amber when due within a week, plain otherwise. A row with no due date shows how long it has waited
 5. What appears:
    - **Applicants**: applications waiting for a decision; households with an open application that are missing readiness steps; prequalifications expiring within 30 days
-   - **Selections**: open home selections; available homes with no selection started
+   - **Selections**: open home selections; available homes with no selection started. Income limits: when a home has an income limit and the limits in effect today have no level for its percent (or no limits are in effect), one item "Income limits missing" whose detail names the missing percents and the homes whose selections can't start (up to 3, then "and N more"). When the limits in effect are more than 12 months old and no later schedule is entered, one item "Income limits out of date", waiting since they turned 12 months old, since HUD publishes new limits every year. Neither appears when no home has an income limit
    - **Purchases**: every open purchase: stalled (due by its resolution target), closing within 14 days, or waiting on the steps it hasn't recorded
    - **Stewardship**: active leases with a late fee notice or notice of default due (see [Send Lease Fee Notices](../stewardship/send-lease-fee-notices.md)); the detail gives the amount due and days overdue. Also active leases whose notice of default wasn't cured by its deadline, due the day after it; the detail gives the deadline and what is still to pay of the amount owed. The item goes once the amount is paid or the lease ends
    - **Records**: documents expiring within 30 days, or expired
@@ -16,6 +16,7 @@
    - **Prequalification expiring**: Record prequalification
    - **Home available**: Start selection
    - **Selection open**: Choose household
+   - **Income limits missing** or **out of date**: Enter limits, which opens the Income Limits page with the Enter Income Limits panel open; clicking the row opens the page
    - **Purchase waiting or stalled**: one button per step not yet recorded (Record eligibility, appraisal, financing, inspection, title, lease signing), or Schedule closing once every step is in; **Closing coming up**: Record closing
    - **Lease fee notice due**: Record notice, which opens the lease, where the letter is printed and the notice recorded
    - **Lease default not cured**: Review default, which opens the lease. Ending the lease (Art 12.4) or agreeing a plan is staff's decision; nothing in the app ends it automatically

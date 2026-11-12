@@ -1,3 +1,4 @@
+using System.Globalization;
 using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.SharedKernel.Application.WorkItems;
@@ -23,6 +24,18 @@ public static class HomeBuyersWorkItems
     /// <summary>A home selection that hasn't chosen a household yet.</summary>
     public const string SelectionOpen = "selection-open";
 
+    /// <summary>A home has an income limit that the limits in effect have no level for.</summary>
+    public const string IncomeLimitsMissing = "income-limits-missing";
+
+    /// <summary>The limits in effect are more than <see cref="IncomeLimitsStaleMonths"/> months old.</summary>
+    public const string IncomeLimitsStale = "income-limits-stale";
+
+    /// <summary>How old the limits in effect can get before staff are asked for new ones. HUD publishes yearly.</summary>
+    public const int IncomeLimitsStaleMonths = 12;
+
+    /// <summary>How many blocked homes the missing-limits item names before it says how many more.</summary>
+    public const int BlockedHomesNamed = 3;
+
     /// <summary>Approve a submitted application.</summary>
     public const string ApproveApplication = "approve-application";
 
@@ -40,6 +53,9 @@ public static class HomeBuyersWorkItems
 
     /// <summary>Choose the household a selection goes to.</summary>
     public const string ChooseHousehold = "choose-household";
+
+    /// <summary>Enter a new income limit schedule.</summary>
+    public const string EnterIncomeLimits = "enter-income-limits";
 
     /// <summary>
     /// The items for an open (submitted or approved) application: a decision while it is submitted, and its
@@ -105,6 +121,58 @@ public static class HomeBuyersWorkItems
         return new WorkItem(
             WorkArea.Selections, SelectionOpen, "selection", selection.Id, homeLabel ?? "Home",
             $"Open, {candidates} to choose from", null, zone.ToDate(selection.StartedAt), [ChooseHousehold]);
+    }
+
+    /// <summary>
+    /// The items for the trust's income limits on <paramref name="today"/>: missing when a home's percent has no
+    /// level in the schedule in effect (or none is in effect), naming those homes; out of date when the schedule
+    /// in effect is more than <see cref="IncomeLimitsStaleMonths"/> months old and no later one is entered. None
+    /// when no home has an income limit.
+    /// </summary>
+    /// <param name="homes">The trust's homes.</param>
+    /// <param name="schedules">The trust's income limit schedules, in any order.</param>
+    /// <param name="today">The trust's today.</param>
+    /// <returns>The income limits' work items.</returns>
+    public static IEnumerable<WorkItem> ForIncomeLimits(
+        IReadOnlyCollection<HomeFactsView> homes,
+        IReadOnlyCollection<IncomeLimitScheduleView> schedules,
+        DateOnly today)
+    {
+        ArgumentNullException.ThrowIfNull(homes);
+        ArgumentNullException.ThrowIfNull(schedules);
+
+        var limited = homes.Where(h => h.IncomeLimitPercentOfAmi is not null).ToList();
+        if (limited.Count == 0)
+            yield break;
+
+        var inEffect = IncomeLimitScheduleView.InEffectOn(schedules, today);
+        var levels = inEffect?.Levels.Select(l => l.PercentOfAmi).ToHashSet() ?? [];
+        var blocked = limited
+            .Where(h => !levels.Contains(h.IncomeLimitPercentOfAmi!.Value))
+            .OrderBy(h => h.Label, StringComparer.Ordinal)
+            .ToList();
+
+        if (blocked.Count > 0)
+        {
+            var percents = blocked.Select(h => h.IncomeLimitPercentOfAmi!.Value).Distinct().Order().Select(p => $"{p}%");
+            var named = string.Join(", ", blocked.Take(BlockedHomesNamed).Select(h => h.Label));
+            var more = blocked.Count > BlockedHomesNamed ? $" and {blocked.Count - BlockedHomesNamed} more" : string.Empty;
+            yield return new WorkItem(
+                WorkArea.Selections, IncomeLimitsMissing, "income-limits", inEffect?.Id ?? string.Empty, "Income limits",
+                $"No {string.Join(", ", percents)} limits in effect; selections can't start for {named}{more}",
+                null, today, [EnterIncomeLimits]);
+        }
+
+        if (inEffect is not null
+            && inEffect.EffectiveFrom.AddMonths(IncomeLimitsStaleMonths) < today
+            && !schedules.Any(s => s.EffectiveFrom > inEffect.EffectiveFrom))
+        {
+            var since = inEffect.EffectiveFrom.ToString("MMM d, yyyy", CultureInfo.GetCultureInfo("en-US"));
+            yield return new WorkItem(
+                WorkArea.Selections, IncomeLimitsStale, "income-limits", inEffect.Id, "Income limits",
+                $"In effect since {since}, over {IncomeLimitsStaleMonths} months ago; HUD publishes new limits every year",
+                null, inEffect.EffectiveFrom.AddMonths(IncomeLimitsStaleMonths), [EnterIncomeLimits]);
+        }
     }
 
     private static List<(string Step, string Action)> MissingReadiness(HouseholdListItemView household, DateOnly today)

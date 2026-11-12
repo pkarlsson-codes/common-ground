@@ -4,7 +4,7 @@ import type { WorkItemResponse } from '../api'
 import { useToday } from '../hooks/today'
 import type { LayoutContext } from '../components/Layout'
 import { daysBetween, formatCalendarDate, type CalendarDate } from '../lib/calendarDate'
-import { TODAY_SECTIONS, areasForFocus, recordLink, rowActions, type TodaySection } from '../lib/today'
+import { TODAY_SECTIONS, actionLink, areasForFocus, recordLink, rowActions, type TodaySection } from '../lib/today'
 import ApproveApplicationPanel from './applications/ApproveApplicationPanel'
 import DenyApplicationPanel from './applications/DenyApplicationPanel'
 import RecordCltOrientationPanel from './households/RecordCltOrientationPanel'
@@ -23,6 +23,8 @@ const KIND_LABELS: Record<string, string> = {
   'lease-fee-notice-due': 'Lease fee notice due',
   'lease-default-uncured': 'Lease default not cured',
   'document-expiring': 'Document expiring',
+  'income-limits-missing': 'Income limits missing',
+  'income-limits-stale': 'Income limits out of date',
 }
 
 type ActivePanel = { action: string; recordId: string }
@@ -99,7 +101,10 @@ function SectionTable({ section, items, today, onAction }: {
                           onClick={e => {
                             e.stopPropagation()
                             if (action.opensPanel) onAction({ action: action.key, recordId: item.recordId! })
-                            else open?.()
+                            else {
+                              const target = actionLink(item, action.key)
+                              if (target) navigate(target.to, { state: target.state })
+                            }
                           }}
                         >
                           {action.label}
