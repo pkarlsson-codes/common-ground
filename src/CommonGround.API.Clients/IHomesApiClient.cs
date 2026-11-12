@@ -31,6 +31,13 @@ public interface IHomesApiClient
     /// <returns>A task representing the asynchronous operation.</returns>
     Task ReleaseHomeForSaleAsync(string homeId, CancellationToken cancellationToken);
 
+    /// <summary>Sets a home's income limit.</summary>
+    /// <param name="homeId">The home's ID.</param>
+    /// <param name="request">The limit as a percent of AMI, or null for none.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when the limit is set.</returns>
+    Task SetHomeIncomeLimitAsync(string homeId, SetHomeIncomeLimitRequest request, CancellationToken cancellationToken);
+
     /// <summary>Records an assessment for a home.</summary>
     /// <param name="homeId">The ID of the home to assess.</param>
     /// <param name="request">The assessment details.</param>

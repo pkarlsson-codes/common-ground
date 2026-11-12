@@ -38,6 +38,31 @@ const homeDescription = (selection: HomeSelectionResponse) => {
   return `${selection.homeBedrooms} bd home${selection.homeIsAccessible ? ' · Accessible' : ''}`
 }
 
+const incomeLimitDescription = (selection: HomeSelectionResponse) => {
+  if (selection.incomeLimitPercentOfAmi == null) return 'No income limit'
+  const effective = selection.incomeLimitsEffectiveFrom
+    ? `, limits effective ${formatCalendarDate(selection.incomeLimitsEffectiveFrom)}`
+    : ''
+  return `${selection.incomeLimitPercentOfAmi}% of AMI${effective}`
+}
+
+const canBeSelectedLabel = (candidate: HomeSelectionCandidateDto) => {
+  if (candidate.isOverIncomeLimit) return 'No (over income limit)'
+  return candidate.canBeSelected ? 'Yes' : 'No'
+}
+
+function IncomeLimitCell({ candidate }: { candidate: HomeSelectionCandidateDto }) {
+  if (candidate.incomeLimit == null) return <>—</>
+  return (
+    <>
+      <span className="cell-mono">{fmtCurrency(Number(candidate.incomeLimit))}</span>
+      {candidate.isOverIncomeLimit && (
+        <div><span className="badge badge-overincomelimit">Over income limit</span></div>
+      )}
+    </>
+  )
+}
+
 function Outcome({ selection }: { selection: HomeSelectionResponse }) {
   if (selection.status === 'Cancelled') {
     return (
@@ -114,9 +139,13 @@ function Outcome({ selection }: { selection: HomeSelectionResponse }) {
   )
 }
 
-function CandidateOutcome({ selection, applicationId }: { selection: HomeSelectionResponse; applicationId: string }) {
+function CandidateOutcome({ selection, candidate }: { selection: HomeSelectionResponse; candidate: HomeSelectionCandidateDto }) {
+  const applicationId = candidate.applicationId!
   if (selection.selectedApplicationId === applicationId) {
     return <span className="badge badge-closed">Selected</span>
+  }
+  if (candidate.isOverIncomeLimit) {
+    return <span className="badge badge-overincomelimit">Over income limit</span>
   }
   if (selection.lotteryIneligibleApplicationIds?.includes(applicationId)) {
     return <span className="badge badge-default">Left out of draw</span>
@@ -145,7 +174,7 @@ export default function HomeSelectionPage() {
           <h1 className="page-header__title">{selection ? selection.homeLabel || homeDescription(selection) : '…'}</h1>
           {selection && (
             <div className="page-header__count">
-              {selection.homeLabel && `${homeDescription(selection)} · `}Started {fmtDateTime(selection.startedAt)} by {selection.startedBy} · {candidates.length} candidate{candidates.length !== 1 ? 's' : ''}
+              {selection.homeLabel && `${homeDescription(selection)} · `}Started {fmtDateTime(selection.startedAt)} by {selection.startedBy} · {incomeLimitDescription(selection)} · {candidates.length} candidate{candidates.length !== 1 ? 's' : ''}
             </div>
           )}
         </div>
@@ -206,6 +235,7 @@ export default function HomeSelectionPage() {
                   <th>Primary Contact</th>
                   <th>Annual Income</th>
                   <th>Household Size</th>
+                  <th>Income Limit</th>
                   <th>Needs Accessibility</th>
                   <th>Waiting Since</th>
                   <th>Application</th>
@@ -239,22 +269,23 @@ export default function HomeSelectionPage() {
                       </td>
                       <td><span className="cell-mono">{fmtCurrency(Number(candidate.annualIncome ?? 0))}</span></td>
                       <td><span className="cell-mono">{candidate.householdSize ?? '—'}</span></td>
+                      <td><IncomeLimitCell candidate={candidate} /></td>
                       <td>{candidate.requiresAccessibility ? 'Yes' : 'No'}</td>
                       <td><span className="cell-mono">{fmtDate(candidate.waitingSince)}</span></td>
                       <td><ApplicationPhaseBadge phase={candidate.applicationPhase} /></td>
-                      <td>{candidate.canBeSelected ? 'Yes' : 'No'}</td>
+                      <td>{canBeSelectedLabel(candidate)}</td>
                       <td style={{ textAlign: 'right' }}>
                         {isOpen ? (
                           <button
                             type="button"
                             className="btn btn-secondary btn-sm"
-                            disabled={!candidate.canBeSelected}
+                            disabled={!candidate.canBeSelected || candidate.isOverIncomeLimit}
                             onClick={() => setActionPanel({ kind: 'select-by-priority', candidate })}
                           >
                             Select
                           </button>
                         ) : (
-                          <CandidateOutcome selection={selection} applicationId={applicationId} />
+                          <CandidateOutcome selection={selection} candidate={candidate} />
                         )}
                       </td>
                     </tr>

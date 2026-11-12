@@ -1,10 +1,11 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import { createHome, createLandParcel, uploadHomeDocument } from '../support/api'
+import { createApplication, createHome, createLandParcel, uploadHomeDocument } from '../support/api'
 import { detailValue, expectToast, field, panel, uniqueId } from '../support/ui'
 
 // Journeys: docs/journeys/homes/
 //   register-home, view-home-detail, record-home-assessment, upload-home-document,
-//   remove-home-document, manage-home-document-versions, initiate-development-project-from-home
+//   remove-home-document, manage-home-document-versions, initiate-development-project-from-home,
+//   set-home-income-limit
 
 /** Narrows the Homes table to the homes on one parcel (each test creates its own parcel). */
 async function filterByParcel(page: Page, apn: string) {
@@ -113,6 +114,48 @@ test('registering a home adds it to the registry with its details and initial as
   await detail.getByRole('button', { name: 'Open Land Parcel' }).click()
   await expect(page).toHaveURL(/\/land-parcels$/)
   await expect(panel(page, apn)).toContainText(`${apn} Elm St`)
+})
+
+test('setting a home income limit warns when the limits in effect lack that level', async ({ page }) => {
+  const { detail } = await openSeededHome(page)
+  await expect(detailValue(detail, 'Income Limit')).toHaveText('80% of AMI')
+
+  const nextStep = detail.getByRole('region', { name: 'Next step' })
+  await nextStep.getByRole('button', { name: 'More actions' }).click()
+  await nextStep.getByRole('menuitem', { name: 'Set Income Limit' }).click()
+  const set = panel(page, 'Set Income Limit')
+  await expect(field(set, 'Percent of AMI')).toHaveValue('80')
+  await expect(set.getByRole('status')).toHaveCount(0)
+
+  await field(set, 'Percent of AMI').fill('60')
+  await expect(set.getByRole('status')).toContainText('The income limits in effect have no 60% of AMI level.')
+  await set.getByRole('button', { name: 'Save' }).click()
+  await expectToast(page, 'Income limit saved')
+  await expect(detailValue(detail, 'Income Limit')).toHaveText('60% of AMI')
+
+  await nextStep.getByRole('button', { name: 'More actions' }).click()
+  await nextStep.getByRole('menuitem', { name: 'Set Income Limit' }).click()
+  await set.getByText('No income limit').click()
+  await expect(set.getByRole('status')).toHaveCount(0)
+  await set.getByRole('button', { name: 'Save' }).click()
+  await expectToast(page, 'Income limit saved')
+  await expect(detailValue(detail, 'Income Limit')).toHaveText('No income limit')
+})
+
+test('a selection for a home whose income limit level is not in effect is refused', async ({ page }) => {
+  // Someone must be waiting, or the start is refused for that reason instead.
+  await createApplication(page, `Waiting ${uniqueId()}`)
+  await page.goto('/homes')
+  const { parcelId, apn } = await createLandParcel(page)
+  await createHome(page, parcelId, { incomeLimitPercentOfAmi: 60 })
+  await (await filterByParcel(page, apn)).click()
+  const nextStep = panel(page, `${apn} Elm St`).getByRole('region', { name: 'Next step' })
+
+  // HomeBuyers learns about the new home from an integration event, so retry until the start is refused for its limit.
+  await expect(async () => {
+    await nextStep.getByRole('button', { name: 'Start Selection' }).click()
+    await expect(nextStep).toContainText('No income limits for 60% of AMI are in effect', { timeout: 2000 })
+  }).toPass()
 })
 
 test('recording an assessment lists it first and updates the home details', async ({ page }) => {

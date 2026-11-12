@@ -76,6 +76,18 @@ export function useRecordHomeAssessment() {
   })
 }
 
+export function useSetHomeIncomeLimit() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ homeId, percentOfAmi }: { homeId: string; percentOfAmi: number | null }) =>
+      api.setHomeIncomeLimit({ homeId, setHomeIncomeLimitRequest: { percentOfAmi } }),
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ['home', v.homeId] })
+      qc.invalidateQueries({ queryKey: ['homes'] })
+    },
+  })
+}
+
 export function useReleaseHomeForSale() {
   const qc = useQueryClient()
   return useMutation({

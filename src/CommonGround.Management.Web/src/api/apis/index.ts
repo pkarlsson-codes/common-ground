@@ -10,6 +10,7 @@ export * from './HomeSelectionsApi';
 export * from './HomeownerApplicationsApi';
 export * from './HomesApi';
 export * from './HouseholdApi';
+export * from './IncomeLimitSchedulesApi';
 export * from './LandParcelsApi';
 export * from './OidcApi';
 export * from './PortfolioImportApi';

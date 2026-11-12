@@ -32,6 +32,8 @@ import {
 /**
  * A candidate's priority facts as they stood when the selection started, with its household's
  * current primary contact and whether its application can still be selected today.
+ * IncomeLimit is the home's limit for the household's size, null when the home has none;
+ * a candidate with IsOverIncomeLimit can't be selected.
  * @export
  * @interface HomeSelectionCandidateDto
  */
@@ -80,6 +82,18 @@ export interface HomeSelectionCandidateDto {
     waitingSince?: CalendarDate;
     /**
      * 
+     * @type {number}
+     * @memberof HomeSelectionCandidateDto
+     */
+    incomeLimit?: number | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof HomeSelectionCandidateDto
+     */
+    isOverIncomeLimit?: boolean;
+    /**
+     * 
      * @type {string}
      * @memberof HomeSelectionCandidateDto
      */
@@ -116,6 +130,8 @@ export function HomeSelectionCandidateDtoFromJSONTyped(json: any, ignoreDiscrimi
         'householdSize': json['householdSize'] == null ? undefined : json['householdSize'],
         'requiresAccessibility': json['requiresAccessibility'] == null ? undefined : json['requiresAccessibility'],
         'waitingSince': json['waitingSince'] == null ? undefined : CalendarDateFromJSON(json['waitingSince']),
+        'incomeLimit': json['incomeLimit'] == null ? undefined : json['incomeLimit'],
+        'isOverIncomeLimit': json['isOverIncomeLimit'] == null ? undefined : json['isOverIncomeLimit'],
         'applicationPhase': json['applicationPhase'] == null ? undefined : json['applicationPhase'],
         'canBeSelected': json['canBeSelected'] == null ? undefined : json['canBeSelected'],
     };
@@ -139,6 +155,8 @@ export function HomeSelectionCandidateDtoToJSONTyped(value?: HomeSelectionCandid
         'householdSize': value['householdSize'],
         'requiresAccessibility': value['requiresAccessibility'],
         'waitingSince': CalendarDateToJSON(value['waitingSince']),
+        'incomeLimit': value['incomeLimit'],
+        'isOverIncomeLimit': value['isOverIncomeLimit'],
         'applicationPhase': value['applicationPhase'],
         'canBeSelected': value['canBeSelected'],
     };

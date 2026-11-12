@@ -23,6 +23,7 @@ import type {
   RecordHomeAssessmentRequest,
   RegisterHomeRequest,
   RegisterHomeResponse,
+  SetHomeIncomeLimitRequest,
 } from '../models/index';
 import {
     HomeResponseFromJSON,
@@ -39,6 +40,8 @@ import {
     RegisterHomeRequestToJSON,
     RegisterHomeResponseFromJSON,
     RegisterHomeResponseToJSON,
+    SetHomeIncomeLimitRequestFromJSON,
+    SetHomeIncomeLimitRequestToJSON,
 } from '../models/index';
 
 export interface GetHomeRequest {
@@ -70,6 +73,11 @@ export interface RegisterHomeOperationRequest {
 
 export interface ReleaseHomeForSaleRequest {
     homeId: string;
+}
+
+export interface SetHomeIncomeLimitOperationRequest {
+    homeId: string;
+    setHomeIncomeLimitRequest: SetHomeIncomeLimitRequest;
 }
 
 /**
@@ -163,6 +171,20 @@ export interface HomesApiInterface {
     /**
      */
     releaseHomeForSale(requestParameters: ReleaseHomeForSaleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {string} homeId 
+     * @param {SetHomeIncomeLimitRequest} setHomeIncomeLimitRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof HomesApiInterface
+     */
+    setHomeIncomeLimitRaw(requestParameters: SetHomeIncomeLimitOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    setHomeIncomeLimit(requestParameters: SetHomeIncomeLimitOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
 }
 
@@ -417,6 +439,58 @@ export class HomesApi extends runtime.BaseAPI implements HomesApiInterface {
      */
     async releaseHomeForSale(requestParameters: ReleaseHomeForSaleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
         const response = await this.releaseHomeForSaleRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
+    async setHomeIncomeLimitRaw(requestParameters: SetHomeIncomeLimitOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['homeId'] == null) {
+            throw new runtime.RequiredError(
+                'homeId',
+                'Required parameter "homeId" was null or undefined when calling setHomeIncomeLimit().'
+            );
+        }
+
+        if (requestParameters['setHomeIncomeLimitRequest'] == null) {
+            throw new runtime.RequiredError(
+                'setHomeIncomeLimitRequest',
+                'Required parameter "setHomeIncomeLimitRequest" was null or undefined when calling setHomeIncomeLimit().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/homes/{homeId}/income-limit`;
+        urlPath = urlPath.replace(`{${"homeId"}}`, encodeURIComponent(String(requestParameters['homeId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: SetHomeIncomeLimitRequestToJSON(requestParameters['setHomeIncomeLimitRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async setHomeIncomeLimit(requestParameters: SetHomeIncomeLimitOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.setHomeIncomeLimitRaw(requestParameters, initOverrides);
         switch (response.raw.status) {
             case 204:
                 return null;

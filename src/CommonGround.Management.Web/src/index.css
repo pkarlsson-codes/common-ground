@@ -548,6 +548,7 @@ body {
 .badge-failed             { background: var(--danger-surface);  color: var(--red);     }
 .badge-withdrawn          { background: var(--neutral-surface); color: var(--text-secondary); }
 .badge-stalled            { background: var(--warning-surface); color: var(--warning); }
+.badge-overincomelimit    { background: var(--warning-surface); color: var(--warning); }
 
 /* ── Pagination ───────────────────────────────────── */
 .pagination {

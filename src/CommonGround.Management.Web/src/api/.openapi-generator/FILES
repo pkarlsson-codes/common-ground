@@ -8,6 +8,7 @@ apis/HomeSelectionsApi.ts
 apis/HomeownerApplicationsApi.ts
 apis/HomesApi.ts
 apis/HouseholdApi.ts
+apis/IncomeLimitSchedulesApi.ts
 apis/LandParcelsApi.ts
 apis/OidcApi.ts
 apis/PortfolioImportApi.ts
@@ -55,6 +56,7 @@ models/DocumentResponse.ts
 models/DocumentVersionResponse.ts
 models/DrawSelectionLotteryRequest.ts
 models/EligibilityDetailsDto.ts
+models/EnterIncomeLimitScheduleResponse.ts
 models/EntityDocumentItemResponse.ts
 models/EscalateViolationRequest.ts
 models/ExercisePurchaseOptionRequest.ts
@@ -85,6 +87,10 @@ models/HouseholdMemberDto.ts
 models/HouseholdMemberRequest.ts
 models/HouseholdResponse.ts
 models/IdentifyViolationRequest.ts
+models/IncomeLimitLevelRequest.ts
+models/IncomeLimitLevelResponse.ts
+models/IncomeLimitScheduleRequest.ts
+models/IncomeLimitScheduleResponse.ts
 models/InitiateDevelopmentProjectRequest.ts
 models/InitiateDevelopmentProjectResponse.ts
 models/InitiateOccupancyVerificationRequest.ts
@@ -177,6 +183,7 @@ models/ScheduleClosingRequest.ts
 models/SchedulePropertyInspectionRequest.ts
 models/SelectHouseholdByPriorityRequest.ts
 models/ServicerDelinquencyResponse.ts
+models/SetHomeIncomeLimitRequest.ts
 models/SetLeaseFeeNoticePolicyRequest.ts
 models/SoftDeleteDocumentRequest.ts
 models/StallWorkflowRequest.ts

@@ -10,6 +10,7 @@ import DevelopmentProjectsSection from '../land-parcels/DevelopmentProjectsSecti
 import { HomeConnectedRecords, HomeLifecycle } from './HomeLifecycle'
 import { formatInstant, trustToday } from '../../lib/calendarDate'
 import { DateInput } from '../../components/DateInput'
+import SetIncomeLimitPanel from './SetIncomeLimitPanel'
 
 type Tab = 'details' | 'documents'
 
@@ -45,6 +46,7 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
   const [assessment, setAssessment] = useState<RecordHomeAssessmentRequest>(emptyAssessment)
   const [showAssessmentForm, setShowAssessmentForm] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('details')
+  const [settingIncomeLimit, setSettingIncomeLimit] = useState(false)
   const { success } = useToast()
 
   const sortedAssessments = assessments?.items
@@ -81,6 +83,7 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
             home={detail}
             moreActions={[
               { label: 'Add New Assessment', onClick: () => { setActiveTab('details'); setShowAssessmentForm(true) } },
+              { label: 'Set Income Limit', onClick: () => setSettingIncomeLimit(true) },
               { label: 'Upload Document', onClick: () => setActiveTab('documents') },
             ]}
           />
@@ -128,6 +131,12 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
                 <div className="detail-field">
                   <div className="detail-field__label">Accessible</div>
                   <div className="detail-field__value">{detail.isAccessible ? 'Yes' : 'No'}</div>
+                </div>
+                <div className="detail-field">
+                  <div className="detail-field__label">Income Limit</div>
+                  <div className="detail-field__value">
+                    {detail.incomeLimitPercentOfAmi == null ? 'No income limit' : `${detail.incomeLimitPercentOfAmi}% of AMI`}
+                  </div>
                 </div>
                 <div className="detail-field">
                   <div className="detail-field__label">Year Built</div>
@@ -287,6 +296,13 @@ export default function HomeDetailPanel({ homeId, onClose }: Props) {
             </>
           )}
         </>
+      )}
+      {settingIncomeLimit && detail && (
+        <SetIncomeLimitPanel
+          homeId={homeId}
+          currentPercentOfAmi={detail.incomeLimitPercentOfAmi ?? null}
+          onClose={() => setSettingIncomeLimit(false)}
+        />
       )}
     </SlideOver>
   )

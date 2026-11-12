@@ -56,6 +56,20 @@ public static class HomesEndpoints
         return Results.NoContent();
     }
 
+    [WolverinePut("/api/v1/homes/{homeId}/income-limit")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> SetHomeIncomeLimit(
+        string homeId,
+        SetHomeIncomeLimitRequest request,
+        IHomesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.SetHomeIncomeLimitAsync(homeId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
     [WolverinePost("/api/v1/homes/{homeId}/assessments")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public static async Task<IResult> RecordHomeAssessment(

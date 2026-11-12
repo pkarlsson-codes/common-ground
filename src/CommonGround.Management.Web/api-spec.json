@@ -3240,6 +3240,71 @@
         }
       }
     },
+    "/api/v1/homes/{homeId}/income-limit": {
+      "put": {
+        "tags": [
+          "Homes"
+        ],
+        "operationId": "SetHomeIncomeLimit",
+        "parameters": [
+          {
+            "name": "homeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "SetHomeIncomeLimitRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetHomeIncomeLimitRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/homes/{homeId}/assessments": {
       "post": {
         "tags": [
@@ -3969,6 +4034,171 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/RecordMortgagePrequalificationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/income-limit-schedules": {
+      "get": {
+        "tags": [
+          "IncomeLimitSchedules"
+        ],
+        "operationId": "GetIncomeLimitSchedules",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IncomeLimitScheduleResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "IncomeLimitSchedules"
+        ],
+        "operationId": "EnterIncomeLimitSchedule",
+        "requestBody": {
+          "x-name": "IncomeLimitScheduleRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IncomeLimitScheduleRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnterIncomeLimitScheduleResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/income-limit-schedules/{scheduleId}": {
+      "put": {
+        "tags": [
+          "IncomeLimitSchedules"
+        ],
+        "operationId": "CorrectIncomeLimitSchedule",
+        "parameters": [
+          {
+            "name": "scheduleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "IncomeLimitScheduleRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IncomeLimitScheduleRequest"
               }
             }
           },
@@ -10790,7 +11020,7 @@
       },
       "HomeSelectionResponse": {
         "type": "object",
-        "description": "A home selection with the home's facts and each candidate's priority facts side by side, in\nwaiting-list order. Status is \"Open\", \"Completed\" or \"Cancelled\";\nSelectionMethod is \"Priority\" or \"Lottery\" once completed.",
+        "description": "A home selection with the home's facts and each candidate's priority facts side by side, in\nwaiting-list order. Status is \"Open\", \"Completed\" or \"Cancelled\";\nSelectionMethod is \"Priority\" or \"Lottery\" once completed.\nIncomeLimitPercentOfAmi is the home's income limit the candidates were judged against\nwhen the selection started, null when it had none, and IncomeLimitsEffectiveFrom the\neffective date of the income limits used.",
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -10810,6 +11040,16 @@
           },
           "homeIsAccessible": {
             "type": "boolean",
+            "nullable": true
+          },
+          "incomeLimitPercentOfAmi": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "incomeLimitsEffectiveFrom": {
+            "type": "string",
+            "format": "date",
             "nullable": true
           },
           "status": {
@@ -10889,7 +11129,7 @@
       },
       "HomeSelectionCandidateDto": {
         "type": "object",
-        "description": "A candidate's priority facts as they stood when the selection started, with its household's\ncurrent primary contact and whether its application can still be selected today.",
+        "description": "A candidate's priority facts as they stood when the selection started, with its household's\ncurrent primary contact and whether its application can still be selected today.\nIncomeLimit is the home's limit for the household's size, null when the home has none;\na candidate with IsOverIncomeLimit can't be selected.",
         "additionalProperties": false,
         "properties": {
           "applicationId": {
@@ -10920,6 +11160,14 @@
           "waitingSince": {
             "type": "string",
             "format": "date"
+          },
+          "incomeLimit": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "isOverIncomeLimit": {
+            "type": "boolean"
           },
           "applicationPhase": {
             "type": "string"
@@ -11253,6 +11501,22 @@
           },
           "saleStage": {
             "type": "string"
+          }
+        }
+      },
+      "SetHomeIncomeLimitRequest": {
+        "type": "object",
+        "description": "Request to set a home's income limit.",
+        "additionalProperties": false,
+        "required": [
+          "percentOfAmi"
+        ],
+        "properties": {
+          "percentOfAmi": {
+            "type": "integer",
+            "description": "The limit as a percent of AMI, from 1 to 200, or null for no income limit. Required, so an empty body is a\n400 instead of clearing the limit.",
+            "format": "int32",
+            "nullable": true
           }
         }
       },
@@ -11762,6 +12026,123 @@
           "expiryDate": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "IncomeLimitScheduleResponse": {
+        "type": "object",
+        "description": "One of the trust's income limit schedules.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The schedule's ID."
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "The date it applies from.",
+            "format": "date"
+          },
+          "isInEffect": {
+            "type": "boolean",
+            "description": "Whether it is the schedule in effect on the trust's today."
+          },
+          "levels": {
+            "type": "array",
+            "description": "Its levels, lowest percent first.",
+            "items": {
+              "$ref": "#/components/schemas/IncomeLimitLevelResponse"
+            }
+          },
+          "enteredBy": {
+            "type": "string",
+            "description": "The ID of the staff user who entered it."
+          },
+          "enteredAt": {
+            "type": "string",
+            "description": "When it was entered.",
+            "format": "date-time"
+          },
+          "correctedBy": {
+            "type": "string",
+            "description": "The ID of the staff user who last corrected it, if anyone did.",
+            "nullable": true
+          },
+          "correctedAt": {
+            "type": "string",
+            "description": "When it was last corrected, if it was.",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "IncomeLimitLevelResponse": {
+        "type": "object",
+        "description": "One level of an income limit schedule.",
+        "additionalProperties": false,
+        "properties": {
+          "percentOfAmi": {
+            "type": "integer",
+            "description": "The percent of area median income.",
+            "format": "int32"
+          },
+          "limits": {
+            "type": "array",
+            "description": "The limit for 1 to 8 people, in that order.",
+            "items": {
+              "type": "number",
+              "format": "decimal"
+            }
+          }
+        }
+      },
+      "EnterIncomeLimitScheduleResponse": {
+        "type": "object",
+        "description": "Response returned after entering an income limit schedule.",
+        "additionalProperties": false,
+        "properties": {
+          "scheduleId": {
+            "type": "string",
+            "description": "The new schedule's ID."
+          }
+        }
+      },
+      "IncomeLimitScheduleRequest": {
+        "type": "object",
+        "description": "Request to enter an income limit schedule, or to correct one.",
+        "additionalProperties": false,
+        "properties": {
+          "effectiveFrom": {
+            "type": "string",
+            "description": "The date the schedule applies from.",
+            "format": "date"
+          },
+          "levels": {
+            "type": "array",
+            "description": "The schedule's levels.",
+            "items": {
+              "$ref": "#/components/schemas/IncomeLimitLevelRequest"
+            }
+          }
+        }
+      },
+      "IncomeLimitLevelRequest": {
+        "type": "object",
+        "description": "One level of an income limit schedule, as published.",
+        "additionalProperties": false,
+        "properties": {
+          "percentOfAmi": {
+            "type": "integer",
+            "description": "The percent of area median income, from 1 to 200.",
+            "format": "int32"
+          },
+          "limits": {
+            "type": "array",
+            "description": "The limit for 1 to 8 people, in that order.",
+            "items": {
+              "type": "number",
+              "format": "decimal"
+            }
           }
         }
       },

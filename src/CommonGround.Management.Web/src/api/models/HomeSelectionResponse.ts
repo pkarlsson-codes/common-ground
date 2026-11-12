@@ -33,6 +33,9 @@ import {
  * A home selection with the home's facts and each candidate's priority facts side by side, in
  * waiting-list order. Status is "Open", "Completed" or "Cancelled";
  * SelectionMethod is "Priority" or "Lottery" once completed.
+ * IncomeLimitPercentOfAmi is the home's income limit the candidates were judged against
+ * when the selection started, null when it had none, and IncomeLimitsEffectiveFrom the
+ * effective date of the income limits used.
  * @export
  * @interface HomeSelectionResponse
  */
@@ -67,6 +70,18 @@ export interface HomeSelectionResponse {
      * @memberof HomeSelectionResponse
      */
     homeIsAccessible?: boolean | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof HomeSelectionResponse
+     */
+    incomeLimitPercentOfAmi?: number | null;
+    /**
+     * 
+     * @type {CalendarDate}
+     * @memberof HomeSelectionResponse
+     */
+    incomeLimitsEffectiveFrom?: CalendarDate | null;
     /**
      * 
      * @type {string}
@@ -187,6 +202,8 @@ export function HomeSelectionResponseFromJSONTyped(json: any, ignoreDiscriminato
         'homeLabel': json['homeLabel'] == null ? undefined : json['homeLabel'],
         'homeBedrooms': json['homeBedrooms'] == null ? undefined : json['homeBedrooms'],
         'homeIsAccessible': json['homeIsAccessible'] == null ? undefined : json['homeIsAccessible'],
+        'incomeLimitPercentOfAmi': json['incomeLimitPercentOfAmi'] == null ? undefined : json['incomeLimitPercentOfAmi'],
+        'incomeLimitsEffectiveFrom': json['incomeLimitsEffectiveFrom'] == null ? undefined : CalendarDateFromJSON(json['incomeLimitsEffectiveFrom']),
         'status': json['status'] == null ? undefined : json['status'],
         'startedBy': json['startedBy'] == null ? undefined : json['startedBy'],
         'startedAt': json['startedAt'] == null ? undefined : (new Date(json['startedAt'])),
@@ -222,6 +239,8 @@ export function HomeSelectionResponseToJSONTyped(value?: HomeSelectionResponse |
         'homeLabel': value['homeLabel'],
         'homeBedrooms': value['homeBedrooms'],
         'homeIsAccessible': value['homeIsAccessible'],
+        'incomeLimitPercentOfAmi': value['incomeLimitPercentOfAmi'],
+        'incomeLimitsEffectiveFrom': CalendarDateToJSON(value['incomeLimitsEffectiveFrom']),
         'status': value['status'],
         'startedBy': value['startedBy'],
         'startedAt': value['startedAt'] == null ? undefined : ((value['startedAt']).toISOString()),

@@ -37,6 +37,31 @@ export async function get<T>(page: Page, path: string): Promise<T> {
   return ok<T>(await page.request.get(path), `GET ${path}`)
 }
 
+/** The baseline schedule's date. Tests must not enter schedules between it and today, or they replace it. */
+export const BASELINE_INCOME_LIMITS_DATE = '2000-01-01'
+
+/** The baseline schedule's 80% of AMI limits for 1 to 8 people. A one-person household over 70,000 is over it. */
+export const BASELINE_80_PERCENT_LIMITS = [70000, 80000, 90000, 99950, 107950, 115950, 123950, 131950]
+
+const scale = (limits: number[], factor: number) => limits.map(l => Math.round((l * factor) / 50) * 50)
+
+/**
+ * Enters the income limits every test's homes are judged by, effective 2000-01-01 with 50%, 80% and 120% levels,
+ * unless the trust already has them. Without a schedule in effect, a selection for a home with a limit can't start.
+ */
+export async function ensureBaselineIncomeLimits(page: Page) {
+  const schedules = await get<{ effectiveFrom: string }[]>(page, '/api/v1/income-limit-schedules')
+  if (schedules.some(s => s.effectiveFrom === BASELINE_INCOME_LIMITS_DATE)) return
+  await post(page, '/api/v1/income-limit-schedules', {
+    effectiveFrom: BASELINE_INCOME_LIMITS_DATE,
+    levels: [
+      { percentOfAmi: 50, limits: scale(BASELINE_80_PERCENT_LIMITS, 0.625) },
+      { percentOfAmi: 80, limits: BASELINE_80_PERCENT_LIMITS },
+      { percentOfAmi: 120, limits: scale(BASELINE_80_PERCENT_LIMITS, 1.5) },
+    ],
+  })
+}
+
 export async function createLandParcel(page: Page) {
   const apn = `APN-${uniqueId()}`
   const { parcelId } = await post<{ parcelId: string }>(page, '/api/v1/land-parcels', {
@@ -50,14 +75,14 @@ export async function createLandParcel(page: Page) {
   return { parcelId, apn }
 }
 
-export async function createHome(page: Page, landParcelId: string) {
+export async function createHome(page: Page, landParcelId: string, { incomeLimitPercentOfAmi = 80 as number | null } = {}) {
   const { homeId } = await post<{ homeId: string }>(page, '/api/v1/homes', {
     landParcelId,
     homeType: 'SingleFamily',
     bedrooms: 3,
     bathrooms: 2,
     isAccessible: false,
-    incomeLimitPercentOfAmi: 80,
+    incomeLimitPercentOfAmi,
     squareFootage: 1200,
     yearBuilt: 1990,
     appraiserName: 'E2E Appraiser',
@@ -86,14 +111,15 @@ export async function createGroundLeaseTemplate(page: Page) {
 
 /**
  * Registers a one-member household, records its readiness, and submits its application; approves it unless told
- * otherwise. `ready: false` skips CLT orientation, leaving readiness incomplete.
+ * otherwise. `ready: false` skips CLT orientation, leaving readiness incomplete. The default income is under the
+ * baseline 80% limit for one person.
  */
-export async function createApplication(page: Page, name: string, { approve = true, ready = true } = {}) {
+export async function createApplication(page: Page, name: string, { approve = true, ready = true, annualIncome = 65000 } = {}) {
   const email = `${name.toLowerCase().replace(/\s+/g, '-')}@example.com`
   const { householdId } = await post<{ householdId: string }>(page, '/api/v1/households', {
     members: [{ name, email, phone: '+12025550143', isPrimary: true }],
     requiresAccessibility: false,
-    annualIncome: 65000,
+    annualIncome,
   })
   await post(page, `/api/v1/households/${householdId}/housing-counseling`, {
     certificationNumber: 'CERT-E2E', completedDate: isoDate(-7), counselorOrganization: 'E2E Counseling Org',

@@ -14,6 +14,7 @@ import {
   ScrollText,
   SlidersHorizontal,
   Users,
+  Scale,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -46,6 +47,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Documents',       to: '/documents',              icon: FolderOpen,     group: 'records' },
   { label: 'Lease templates', to: '/ground-lease-templates', icon: FileCog,        group: 'settings' },
   { label: 'Trust policy',    to: '/trust-policy',           icon: SlidersHorizontal, group: 'settings' },
+  { label: 'Income limits',   to: '/income-limits',          icon: Scale,          group: 'settings' },
   { label: 'Team',            to: '/team',                   icon: Users,          group: 'settings' },
   { label: 'Import portfolio', to: '/portfolio-import',      icon: FileUp,         group: 'settings' },
 ]

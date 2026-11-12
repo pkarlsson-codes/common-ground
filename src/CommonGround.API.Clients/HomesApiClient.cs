@@ -45,6 +45,14 @@ public sealed class HomesApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task SetHomeIncomeLimitAsync(string homeId, SetHomeIncomeLimitRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PutAsync($"api/homes/{homeId}/income-limit", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task RecordHomeAssessmentAsync(string homeId, RecordHomeAssessmentRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);

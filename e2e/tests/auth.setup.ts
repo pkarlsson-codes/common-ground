@@ -1,10 +1,11 @@
 import { expect, test as setup } from '@playwright/test'
+import { ensureBaselineIncomeLimits } from './support/api'
 
 const authFile = 'playwright/.auth/user.json'
 
 // Logs in as the e2e user (config/keycloak/realm-commonground-dev.json) through the real
 // gateway + Keycloak flow, creating the user's trust on first run, then saves the session
-// for every other test.
+// for every other test. Also enters the trust's baseline income limits.
 setup('authenticate', async ({ page }) => {
   await page.goto('/')
 
@@ -25,5 +26,6 @@ setup('authenticate', async ({ page }) => {
   }
 
   await expect(page.getByRole('heading', { name: 'Today', level: 1 })).toBeVisible()
+  await ensureBaselineIncomeLimits(page)
   await page.context().storageState({ path: authFile })
 })
