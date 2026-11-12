@@ -13,6 +13,7 @@ For a trust that already has homes and leases when it starts using CommonGround.
 
 Notes:
 - Fees Tracked From defaults to the 1st of this month and Amount Owed Then to zero, so leases signed years ago don't fill Today with late notices for months before the trust used CommonGround. See [Create Ground Lease](../ground-leases/create-ground-lease.md).
+- Income Limit is the home's limit as a percent of AMI, e.g. `80`, or `None` for a home sold at market rate. Empty means 80, as on [Register Home](../homes/register-home.md).
 - Dates may be written `2005-06-01` or `6/1/2005`. Amounts may include `$` and `,`.
 
 Continues in: [Work through Today](../today/work-through-today.md)

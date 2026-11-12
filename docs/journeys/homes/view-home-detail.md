@@ -14,8 +14,8 @@
    - Leased: who the home is leased to and since when, with "Open Ground Lease"
    - Held by Trust: the date the trust bought the home, with "Release for Sale". A held home does not appear on Today
    - Resale: who gave notice to sell and when, and the resale's step, with "Open Resale". Once the trust has declined to buy and no selection is open, "Start Selection"; with a selection open, "Open Selection"
-5. "More actions" opens a menu with the home's other actions: "Add New Assessment" and "Upload Document"
-6. "Details" tab shows status, whether the home is accessible, year built, assessed value, last assessed date, condition notes (if any), and registered at
+5. "More actions" opens a menu with the home's other actions: "Add New Assessment", "Set Income Limit" and "Upload Document"
+6. "Details" tab shows status, whether the home is accessible, its income limit ("80% of AMI" or "No income limit"), year built, assessed value, last assessed date, condition notes (if any), and registered at
 7. A Connected Records section links to the home's land parcel, its home selections, its purchases (newest first, each with buyer and phase), the households that bought or are buying it, and its ground lease, each showing the record's status
 8. Panel also shows a Development Projects section listing projects on the home's parcel with their name and status
 9. Panel also shows an Assessments section listing assessments newest first, starting from the initial assessment entered at registration, each with its date, assessed value, and appraiser name (or "—" if none was entered)
@@ -26,6 +26,7 @@ Continues in: [Upload Home Document](upload-home-document.md)
 Continues in: [Remove Home Document](remove-home-document.md)
 Continues in: [Manage Home Document Versions](manage-home-document-versions.md)
 Continues in: [Record Home Assessment](record-home-assessment.md)
+Continues in: [Set Home Income Limit](set-home-income-limit.md)
 Continues in: [Release Home for Sale](release-home-for-sale.md)
 Continues in: [Start Home Selection](../home-selections/start-home-selection.md)
 Continues in: [View Home Selection](../home-selections/view-home-selection.md)
