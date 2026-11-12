@@ -211,12 +211,13 @@ internal static class PortfolioImportPlanner
         var bedrooms = row.Integer(PortfolioColumns.Bedrooms, required: true);
         var bathrooms = row.Decimal(PortfolioColumns.Bathrooms, required: true);
         var accessible = row.YesNo(PortfolioColumns.Accessible);
+        var incomeLimit = row.IncomeLimit(PortfolioColumns.IncomeLimit);
         var squareFeet = row.Decimal(PortfolioColumns.SquareFeet, required: true);
         var yearBuilt = row.Integer(PortfolioColumns.YearBuilt, required: true);
         var assessedValue = row.Decimal(PortfolioColumns.AssessedValue, required: true);
         var assessedOn = row.Date(PortfolioColumns.AssessedOn, required: true);
         if (parcelId is null || homeType is null || bedrooms is null || bathrooms is null || accessible is null
-            || squareFeet is null || yearBuilt is null || assessedValue is null || assessedOn is null)
+            || incomeLimit is null || squareFeet is null || yearBuilt is null || assessedValue is null || assessedOn is null)
         {
             return null;
         }
@@ -224,7 +225,7 @@ internal static class PortfolioImportPlanner
         var id = HomeId.Generate();
         var landParcelId = LandParcelId.Create(parcelId);
         var command = new RegisterHome(
-            id, landParcelId, unit, homeType, bedrooms.Value, bathrooms.Value, accessible.Value, squareFeet.Value,
+            id, landParcelId, unit, homeType, bedrooms.Value, bathrooms.Value, accessible.Value, incomeLimit.PercentOfAmi, squareFeet.Value,
             yearBuilt.Value, assessedValue.Value, assessedOn.Value, AppraiserName: null, context.ImportedBy);
 
         var valid = row.Check(() =>
@@ -233,7 +234,7 @@ internal static class PortfolioImportPlanner
                 assessedValue.Value, assessedOn.Value, appraiserName: null, conditionNotes: null, context.ImportedBy,
                 TimeProviderContext.Current.UtcNow, context.Today);
             Home.Register(
-                id, landParcelId, unit, homeType, bedrooms.Value, bathrooms.Value, accessible.Value, squareFeet.Value,
+                id, landParcelId, unit, homeType, bedrooms.Value, bathrooms.Value, accessible.Value, incomeLimit.PercentOfAmi, squareFeet.Value,
                 yearBuilt.Value, assessment, context.ImportedBy);
         });
         if (!valid)
@@ -317,6 +318,12 @@ internal static class PortfolioImportPlanner
         public string Id { get; } = id;
 
         public bool IsNew { get; } = isNew;
+    }
+
+    /// <summary>A home's income limit read from the file: a percent of AMI, or null for none.</summary>
+    private sealed class ImportedIncomeLimit(int? percentOfAmi)
+    {
+        public int? PercentOfAmi { get; } = percentOfAmi;
     }
 
     private sealed class PlanningContext
@@ -449,6 +456,28 @@ internal static class PortfolioImportPlanner
                     Error(column, $"\"{text}\" is not Yes or No.");
                     return null;
             }
+        }
+
+        public ImportedIncomeLimit? IncomeLimit(string column)
+        {
+            var text = Text(column, required: false);
+            if (text is null)
+            {
+                return new ImportedIncomeLimit(Home.DefaultIncomeLimitPercentOfAmi);
+            }
+
+            if (string.Equals(text, "None", StringComparison.OrdinalIgnoreCase))
+            {
+                return new ImportedIncomeLimit(null);
+            }
+
+            if (int.TryParse(text.TrimEnd('%').Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var percent))
+            {
+                return new ImportedIncomeLimit(percent);
+            }
+
+            Error(column, $"\"{text}\" is not a percent of AMI, such as 80, or None.");
+            return null;
         }
 
         public T? Choice<T>(string column, IEnumerable<T> options, bool required)

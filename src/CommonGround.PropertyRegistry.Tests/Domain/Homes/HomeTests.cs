@@ -2,6 +2,7 @@ using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Domain.Homes.Events;
 using CommonGround.PropertyRegistry.Domain.LandParcels;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Domain.Exceptions;
 using CommonGround.Testing;
 using FluentAssertions;
 using Xunit;
@@ -20,8 +21,8 @@ public class HomeTests
         public UnitAssessment InitialAssessment() =>
             UnitAssessment.Create(280000m, new DateOnly(2024, 1, 1), null, null, StaffUser, DateTimeOffset.UtcNow, Today);
 
-        public HomeRegistered Registered(string? unitDesignation = "Unit B") =>
-            Home.Register(HomeId, ParcelId, unitDesignation, HomeType.SingleFamily, 3, 2m, true, 1200m, 1985, InitialAssessment(), StaffUser);
+        public HomeRegistered Registered(string? unitDesignation = "Unit B", int? incomeLimitPercentOfAmi = 80) =>
+            Home.Register(HomeId, ParcelId, unitDesignation, HomeType.SingleFamily, 3, 2m, true, incomeLimitPercentOfAmi, 1200m, 1985, InitialAssessment(), StaffUser);
 
         public Home AvailableHome() => EventReplay.Replay<Home>(Registered());
     }
@@ -51,6 +52,58 @@ public class HomeTests
             var registered = _testBed.Registered(unitDesignation);
 
             EventReplay.Replay<Home>(registered).UnitDesignation.Should().BeNull();
+        }
+
+        [Theory]
+        [InlineData(80)]
+        [InlineData(null)]
+        public void GivenAnIncomeLimitOrNone_WhenRegistered_ThenHomeHasIt(int? percentOfAmi)
+        {
+            var registered = _testBed.Registered(incomeLimitPercentOfAmi: percentOfAmi);
+
+            EventReplay.Replay<Home>(registered).IncomeLimitPercentOfAmi.Should().Be(percentOfAmi);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(201)]
+        public void GivenAnIncomeLimitOutOfRange_WhenRegistered_ThenThrows(int percentOfAmi)
+        {
+            var act = () => _testBed.Registered(incomeLimitPercentOfAmi: percentOfAmi);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("property_registry.home.income_limit.percent_out_of_range");
+        }
+    }
+
+    public class TheSetIncomeLimitMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(200)]
+        [InlineData(null)]
+        public void GivenALimitInRangeOrNone_WhenSet_ThenHomeHasIt(int? percentOfAmi)
+        {
+            var sut = _testBed.AvailableHome();
+
+            var set = sut.SetIncomeLimit(percentOfAmi, _testBed.StaffUser);
+
+            EventReplay.Replay<Home>(_testBed.Registered(), set).IncomeLimitPercentOfAmi.Should().Be(percentOfAmi);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(201)]
+        public void GivenALimitOutOfRange_WhenSet_ThenThrows(int percentOfAmi)
+        {
+            var sut = _testBed.AvailableHome();
+
+            var act = () => sut.SetIncomeLimit(percentOfAmi, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("property_registry.home.income_limit.percent_out_of_range");
         }
     }
 }

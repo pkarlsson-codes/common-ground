@@ -46,6 +46,7 @@ public static class HomesEndpoints
             request.Bedrooms,
             request.Bathrooms,
             request.IsAccessible,
+            request.IncomeLimitPercentOfAmi,
             request.SquareFootage,
             request.YearBuilt,
             request.InitialAssessedValue,
@@ -72,7 +73,7 @@ public static class HomesEndpoints
             cancellationToken);
 
         var response = new HomeResponse(view.Id, view.LandParcelId, label, view.UnitDesignation,
-            view.UnitType, view.Bedrooms, view.Bathrooms, view.IsAccessible, view.SquareFootage,
+            view.UnitType, view.Bedrooms, view.Bathrooms, view.IsAccessible, view.IncomeLimitPercentOfAmi, view.SquareFootage,
             view.YearBuilt, view.AssessedValue, view.LastAssessedDate,
             view.ConditionNotes, view.RegisteredAt,
             availability.AvailableAgainDate, availability.SelectionOpenedDate, availability.UnderContractDate,
@@ -117,6 +118,24 @@ public static class HomesEndpoints
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
 
         await bus.InvokeForTenantAsync(bus.TenantId!, new ReleaseHomeForSale(HomeId.Create(homeId)), cancellationToken);
+
+        return Results.NoContent();
+    }
+
+    [WolverinePut("/api/homes/{homeId}/income-limit")]
+    public static async Task<IResult> SetHomeIncomeLimit(
+        string homeId,
+        SetHomeIncomeLimitRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        var command = new SetHomeIncomeLimit(HomeId.Create(homeId), request.PercentOfAmi, httpContext.GetUserId());
+
+        await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);
 
         return Results.NoContent();
     }

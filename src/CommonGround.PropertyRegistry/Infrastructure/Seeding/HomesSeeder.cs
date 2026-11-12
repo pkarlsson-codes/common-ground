@@ -102,6 +102,7 @@ public sealed class HomesSeeder(ITrustClock trustClock, PropagationWaiter propag
                     entry.Bedrooms,
                     entry.Bathrooms,
                     entry.IsAccessible,
+                    entry.IncomeLimitPercentOfAmi,
                     entry.SquareFootage,
                     entry.YearBuilt,
                     initialAssessment,
@@ -188,6 +189,8 @@ public sealed class HomesSeeder(ITrustClock trustClock, PropagationWaiter propag
         public decimal Bathrooms { get; set; }
 
         public bool IsAccessible { get; set; }
+
+        public int? IncomeLimitPercentOfAmi { get; set; } = Home.DefaultIncomeLimitPercentOfAmi;
 
         public decimal SquareFootage { get; set; }
 

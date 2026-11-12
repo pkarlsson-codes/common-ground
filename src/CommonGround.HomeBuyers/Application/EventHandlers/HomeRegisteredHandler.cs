@@ -19,6 +19,7 @@ public static class HomeRegisteredHandler
             Label = @event.Label,
             Bedrooms = @event.Bedrooms,
             IsAccessible = @event.IsAccessible,
+            IncomeLimitPercentOfAmi = @event.IncomeLimitPercentOfAmi,
         });
     }
 }

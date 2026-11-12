@@ -80,6 +80,19 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class IncomeLimit
+        {
+            public static BusinessRuleViolationException PercentOutOfRange(int percentOfAmi, int minimum, int maximum)
+                => new(
+                    "property_registry.home.income_limit.percent_out_of_range",
+                    new Dictionary<string, object?>
+                    {
+                        ["percentOfAmi"] = percentOfAmi,
+                        ["minimum"] = minimum,
+                        ["maximum"] = maximum,
+                    });
+        }
+
         public static class ReleaseForSale
         {
             public static BusinessRuleViolationException NotHeld()

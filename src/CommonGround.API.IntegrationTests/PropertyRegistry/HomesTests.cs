@@ -7,6 +7,7 @@ using CommonGround.PropertyRegistry.Application.EventHandlers;
 using CommonGround.SharedKernel.Infrastructure.API;
 using FluentAssertions;
 using Marten;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CommonGround.API.IntegrationTests.PropertyRegistry;
@@ -148,6 +149,7 @@ public class HomesTests(ApiFactory factory)
         home!.Id.Should().Be(homeId);
         home.LandParcelId.Should().Be(parcelId);
         home.IsAccessible.Should().BeTrue();
+        home.IncomeLimitPercentOfAmi.Should().Be(80);
         home.AssessedValue.Should().Be(420000m);
         home.LastAssessedDate.Should().Be(new DateOnly(2024, 1, 1));
     }
@@ -244,6 +246,63 @@ public class HomesTests(ApiFactory factory)
         inSelection!.Items.Select(h => (h.Id, h.Occupancy, h.SaleStage))
             .Should().Equal((inSelectionHomeId, "Vacant", "InSelection"));
         notOffered!.Items.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task SetHomeIncomeLimit_Unauthenticated_Returns401()
+    {
+        var client = factory.CreateClient();
+
+        var response = await client.PutAsJsonAsync(
+            "/api/homes/unit-00000000000000000000000000/income-limit", new SetHomeIncomeLimitRequest(60));
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task RegisterHome_WithNoIncomeLimit_HomeHasNone()
+    {
+        var parcelId = await CreateLandParcelAsync();
+        var client = factory.CreateClient().WithAuthToken();
+
+        var response = await client.PostAsJsonAsync("/api/homes",
+            new RegisterHomeRequest(parcelId, "SingleFamily", 3, 2m, false, 1200m, 1990, "Test Appraiser", new DateOnly(2024, 1, 1), 280000m,
+                IncomeLimitPercentOfAmi: null));
+        response.EnsureSuccessStatusCode();
+        var homeId = (await response.Content.ReadFromJsonAsync<RegisterHomeResponse>())!.HomeId;
+
+        (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}"))!.IncomeLimitPercentOfAmi.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task SetHomeIncomeLimit_ThenNone_HomeShowsEachInTurn()
+    {
+        var parcelId = await CreateLandParcelAsync();
+        var client = factory.CreateClient().WithAuthToken();
+        var homeId = await RegisterHomeAsync(client, parcelId);
+
+        (await client.PutAsJsonAsync($"/api/homes/{homeId}/income-limit", new SetHomeIncomeLimitRequest(60)))
+            .StatusCode.Should().Be(HttpStatusCode.NoContent);
+        (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}"))!.IncomeLimitPercentOfAmi.Should().Be(60);
+
+        (await client.PutAsJsonAsync($"/api/homes/{homeId}/income-limit", new SetHomeIncomeLimitRequest(null)))
+            .StatusCode.Should().Be(HttpStatusCode.NoContent);
+        (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}"))!.IncomeLimitPercentOfAmi.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task SetHomeIncomeLimit_OutOfRange_Returns422WithTheRange()
+    {
+        var parcelId = await CreateLandParcelAsync();
+        var client = factory.CreateClient().WithAuthToken();
+        var homeId = await RegisterHomeAsync(client, parcelId);
+
+        var response = await client.PutAsJsonAsync($"/api/homes/{homeId}/income-limit", new SetHomeIncomeLimitRequest(250));
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        var problem = (await response.Content.ReadFromJsonAsync<ProblemDetails>())!;
+        problem.Extensions["code"]!.ToString().Should().Be("property_registry.home.income_limit.percent_out_of_range");
+        problem.Detail.Should().Be("Income limit must be between 1% and 200% of AMI.");
     }
 
     private static async Task<string> RegisterHomeAsync(HttpClient client, string parcelId)

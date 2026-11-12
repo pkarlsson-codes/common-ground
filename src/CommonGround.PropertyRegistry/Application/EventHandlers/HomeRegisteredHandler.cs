@@ -19,6 +19,7 @@ public static class HomeRegisteredHandler
             @event.LandParcelId,
             HomeLabel.Format(parcel?.Address ?? string.Empty, @event.UnitDesignation),
             @event.Bedrooms,
-            @event.IsAccessible);
+            @event.IsAccessible,
+            @event.IncomeLimitPercentOfAmi);
     }
 }

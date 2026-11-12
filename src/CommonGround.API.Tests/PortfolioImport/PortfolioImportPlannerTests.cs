@@ -16,7 +16,7 @@ public class PortfolioImportPlannerTests
         private static readonly string[] Columns =
         [
             "Parcel Number", "Parcel Address", "Parcel Acres", "Acquired On", "Acquired By",
-            "Unit", "Home Type", "Bedrooms", "Bathrooms", "Accessible", "Square Feet", "Year Built", "Assessed Value", "Assessed On",
+            "Unit", "Home Type", "Bedrooms", "Bathrooms", "Accessible", "Income Limit", "Square Feet", "Year Built", "Assessed Value", "Assessed On",
             "Homeowner Name", "Homeowner Email", "Homeowner Phone", "Lease Template", "Lease Start", "Base Price", "Appraised Value at Purchase",
             "Land Use Fee", "Fees Tracked From", "Amount Owed Then",
         ];
@@ -140,6 +140,36 @@ public class PortfolioImportPlannerTests
                 (3, "Home Type"), (3, "Bedrooms"), (3, "Lease Start"),
             });
             plan.Steps.Should().BeEmpty();
+        }
+
+        [Theory]
+        [InlineData("", 80)]
+        [InlineData("60", 60)]
+        [InlineData("120%", 120)]
+        [InlineData("none", null)]
+        public void GivenAnIncomeLimitCell_WhenPlanned_ThenTheHomeGetsThatLimit(string cell, int? percentOfAmi)
+        {
+            var row = _testBed.Row();
+            row["Income Limit"] = cell;
+
+            var plan = _testBed.Plan(TestBed.Csv(row));
+
+            plan.Errors.Should().BeEmpty();
+            plan.Steps.Select(s => s.Command).OfType<RegisterHome>().Single().IncomeLimitPercentOfAmi.Should().Be(percentOfAmi);
+        }
+
+        [Theory]
+        [InlineData("eighty")]
+        [InlineData("250")]
+        public void GivenAnIncomeLimitThatIsNotAPercentOrIsOutOfRange_WhenPlanned_ThenReportsItOnTheIncomeLimitColumn(string cell)
+        {
+            var row = _testBed.Row();
+            row["Income Limit"] = cell;
+
+            var plan = _testBed.Plan(TestBed.Csv(row));
+
+            var error = plan.Errors.Should().ContainSingle().Subject;
+            (error.Row, error.Column).Should().Be((2, "Income Limit"));
         }
 
         [Fact]

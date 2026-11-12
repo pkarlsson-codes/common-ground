@@ -429,7 +429,7 @@ public class HomeSelectionTests(ApiFactory factory)
         using var scope = factory.Services.CreateScope();
         await using var session = scope.ServiceProvider.GetRequiredService<IDocumentStore>().LightweightSession(ApiFactory.TestTrustId);
         HomeRegisteredHandler.Handle(
-            new HomeRegistered(homeId, landParcelId, Label: "1 Test Lane", Bedrooms: 3, IsAccessible: false))
+            new HomeRegistered(homeId, landParcelId, Label: "1 Test Lane", Bedrooms: 3, IsAccessible: false, IncomeLimitPercentOfAmi: 80))
             .Execute(session);
         await session.SaveChangesAsync();
 

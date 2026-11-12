@@ -12,6 +12,15 @@ namespace CommonGround.PropertyRegistry.Domain.Homes;
 /// </summary>
 public sealed class Home : AggregateRoot<HomeId>
 {
+    /// <summary>The income limit a new home gets unless staff choose another: 80% of area median income.</summary>
+    public const int DefaultIncomeLimitPercentOfAmi = 80;
+
+    /// <summary>The lowest percent of AMI an income limit can be.</summary>
+    public const int MinimumIncomeLimitPercentOfAmi = 1;
+
+    /// <summary>The highest percent of AMI an income limit can be.</summary>
+    public const int MaximumIncomeLimitPercentOfAmi = 200;
+
     private readonly List<UnitAssessment> _assessments = [];
 
 #pragma warning disable CS8618 // State is set by Create from the stream's first event.
@@ -45,6 +54,12 @@ public sealed class Home : AggregateRoot<HomeId>
     /// <summary>Gets a value indicating whether the home is accessible to people with disabilities.</summary>
     public bool IsAccessible { get; private set; }
 
+    /// <summary>
+    /// Gets the most a buying household may earn, as a percent of area median income (AMI) for its size,
+    /// or null when the home has no income limit (sold at market rate).
+    /// </summary>
+    public int? IncomeLimitPercentOfAmi { get; private set; }
+
     /// <summary>Gets the assessment history for this home, oldest first.</summary>
     public IReadOnlyList<UnitAssessment> Assessments => _assessments;
 
@@ -57,6 +72,7 @@ public sealed class Home : AggregateRoot<HomeId>
         int bedrooms,
         decimal bathrooms,
         bool isAccessible,
+        int? incomeLimitPercentOfAmi,
         decimal squareFootage,
         int yearBuilt,
         UnitAssessment initialAssessment,
@@ -80,6 +96,8 @@ public sealed class Home : AggregateRoot<HomeId>
         if (yearBuilt < minYear || yearBuilt > maxYear)
             throw BusinessRuleViolation.Home.Register.YearBuiltOutOfRange(yearBuilt, minYear, maxYear);
 
+        EnsureIncomeLimitInRange(incomeLimitPercentOfAmi);
+
         return new HomeRegistered(
             id.Value,
             landParcelId.Value,
@@ -88,6 +106,7 @@ public sealed class Home : AggregateRoot<HomeId>
             bedrooms,
             bathrooms,
             isAccessible,
+            incomeLimitPercentOfAmi,
             squareFootage,
             yearBuilt,
             initialAssessment.AssessedValue,
@@ -103,6 +122,17 @@ public sealed class Home : AggregateRoot<HomeId>
             throw BusinessRuleViolation.Home.RecordAssessment.AssessedValueNegative(assessedValue);
 
         return new HomeAssessed(Id.Value, assessedValue, assessmentDate, appraiserName, conditionNotes, recordedById.Value);
+    }
+
+    /// <summary>Sets the home's income limit, as the subsidy behind it requires.</summary>
+    /// <param name="percentOfAmi">The limit as a percent of AMI, from 1 to 200, or null for no income limit.</param>
+    /// <param name="setBy">The staff user setting the limit.</param>
+    /// <returns>The event recording the new limit.</returns>
+    public HomeIncomeLimitSet SetIncomeLimit(int? percentOfAmi, UserId setBy)
+    {
+        EnsureIncomeLimitInRange(percentOfAmi);
+
+        return new HomeIncomeLimitSet(Id.Value, percentOfAmi, setBy.Value);
     }
 
     /// <summary>Starts a home from its first event.</summary>
@@ -124,6 +154,7 @@ public sealed class Home : AggregateRoot<HomeId>
         Bedrooms = e.Bedrooms;
         Bathrooms = e.Bathrooms;
         IsAccessible = e.IsAccessible;
+        IncomeLimitPercentOfAmi = e.IncomeLimitPercentOfAmi;
         SquareFootage = e.SquareFootage;
         YearBuilt = e.YearBuilt;
         RegisteredBy = UserId.Create(e.RegisteredBy);
@@ -140,5 +171,19 @@ public sealed class Home : AggregateRoot<HomeId>
     public void Apply(HomeAssessed e)
     {
         _assessments.Add(UnitAssessment.Reconstitute(e.AssessedValue, e.AssessmentDate, e.AppraiserName, e.ConditionNotes, UserId.Create(e.RecordedById), e.OccurredAt));
+    }
+
+    /// <summary>Applies <see cref="HomeIncomeLimitSet"/>.</summary>
+    public void Apply(HomeIncomeLimitSet e)
+    {
+        ArgumentNullException.ThrowIfNull(e);
+
+        IncomeLimitPercentOfAmi = e.PercentOfAmi;
+    }
+
+    private static void EnsureIncomeLimitInRange(int? percentOfAmi)
+    {
+        if (percentOfAmi is < MinimumIncomeLimitPercentOfAmi or > MaximumIncomeLimitPercentOfAmi)
+            throw BusinessRuleViolation.Home.IncomeLimit.PercentOutOfRange(percentOfAmi.Value, MinimumIncomeLimitPercentOfAmi, MaximumIncomeLimitPercentOfAmi);
     }
 }

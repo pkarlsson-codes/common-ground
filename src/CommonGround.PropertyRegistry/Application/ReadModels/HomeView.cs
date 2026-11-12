@@ -24,6 +24,9 @@ public class HomeView
     /// <summary>Gets or sets a value indicating whether the home is accessible to people with disabilities.</summary>
     public bool IsAccessible { get; set; }
 
+    /// <summary>Gets or sets the income limit as a percent of AMI, or null when the home has no income limit.</summary>
+    public int? IncomeLimitPercentOfAmi { get; set; }
+
     /// <summary>Gets or sets the total square footage.</summary>
     public decimal SquareFootage { get; set; }
 

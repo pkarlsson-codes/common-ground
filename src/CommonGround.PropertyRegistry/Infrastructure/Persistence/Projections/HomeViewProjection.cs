@@ -19,6 +19,7 @@ internal sealed class HomeViewProjection : SingleStreamProjection<HomeView, stri
             Bedrooms = e.Data.Bedrooms,
             Bathrooms = e.Data.Bathrooms,
             IsAccessible = e.Data.IsAccessible,
+            IncomeLimitPercentOfAmi = e.Data.IncomeLimitPercentOfAmi,
             SquareFootage = e.Data.SquareFootage,
             YearBuilt = e.Data.YearBuilt,
             AssessedValue = e.Data.InitialAssessedValue,
@@ -33,4 +34,7 @@ internal sealed class HomeViewProjection : SingleStreamProjection<HomeView, stri
         view.LastAssessedDate = e.AssessmentDate;
         view.ConditionNotes = e.ConditionNotes;
     }
+
+    /// <summary>Applies a new income limit.</summary>
+    public static void Apply(HomeView view, HomeIncomeLimitSet e) => view.IncomeLimitPercentOfAmi = e.PercentOfAmi;
 }

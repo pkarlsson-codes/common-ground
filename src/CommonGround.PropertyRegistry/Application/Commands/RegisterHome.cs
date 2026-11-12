@@ -15,6 +15,7 @@ namespace CommonGround.PropertyRegistry.Application.Commands;
 /// <param name="Bedrooms">Number of bedrooms.</param>
 /// <param name="Bathrooms">Number of bathrooms (supports 1.5 etc.).</param>
 /// <param name="IsAccessible">Whether the home is accessible to people with disabilities.</param>
+/// <param name="IncomeLimitPercentOfAmi">The income limit as a percent of AMI, or null for no income limit.</param>
 /// <param name="SquareFootage">Total square footage.</param>
 /// <param name="YearBuilt">Year the home was built.</param>
 /// <param name="InitialAssessedValue">Initial assessed value in dollars.</param>
@@ -29,6 +30,7 @@ public sealed record RegisterHome(
     int Bedrooms,
     decimal Bathrooms,
     bool IsAccessible,
+    int? IncomeLimitPercentOfAmi,
     decimal SquareFootage,
     int YearBuilt,
     decimal InitialAssessedValue,
@@ -74,6 +76,7 @@ public static class RegisterHomeHandler
             command.Bedrooms,
             command.Bathrooms,
             command.IsAccessible,
+            command.IncomeLimitPercentOfAmi,
             command.SquareFootage,
             command.YearBuilt,
             initialAssessment,

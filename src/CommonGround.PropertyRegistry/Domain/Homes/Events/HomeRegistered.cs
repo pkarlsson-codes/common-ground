@@ -11,6 +11,7 @@ public sealed record HomeRegistered(
     int Bedrooms,
     decimal Bathrooms,
     bool IsAccessible,
+    int? IncomeLimitPercentOfAmi,
     decimal SquareFootage,
     int YearBuilt,
     decimal InitialAssessedValue,

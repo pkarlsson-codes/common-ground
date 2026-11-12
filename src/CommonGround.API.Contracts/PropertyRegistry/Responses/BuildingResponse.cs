@@ -10,6 +10,7 @@ public sealed record HomeResponse(
     int Bedrooms,
     decimal Bathrooms,
     bool IsAccessible,
+    int? IncomeLimitPercentOfAmi,
     decimal SquareFootage,
     int YearBuilt,
     decimal AssessedValue,

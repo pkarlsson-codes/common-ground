@@ -16,6 +16,13 @@ internal static class BusinessRuleErrorMessageMap
             ["documents.document.update_metadata.title_blank"] = "Document title is required.",
             ["documents.document.upload.size_non_positive"] = "File size must be greater than zero.",
 
+            ["home_buyers.income_limit_schedule.effective_from.taken"] = "Another income limit schedule is already effective from {effectiveFrom}.",
+            ["home_buyers.income_limit_schedule.level.limit_not_positive"] = "The {percentOfAmi}% limit for {householdSize} people must be greater than zero.",
+            ["home_buyers.income_limit_schedule.level.percent_out_of_range"] = "Percent of AMI must be between {minimum} and {maximum}.",
+            ["home_buyers.income_limit_schedule.level.wrong_number_of_limits"] = "The {percentOfAmi}% level needs a limit for each household size from 1 to {requiredCount}.",
+            ["home_buyers.income_limit_schedule.levels.duplicate_percent"] = "The {percentOfAmi}% level is entered more than once.",
+            ["home_buyers.income_limit_schedule.levels.required"] = "Enter at least one income limit level.",
+
             ["home_buyers.home_selection.cancel.reason_required"] = "A reason is required to cancel a home selection.",
             ["home_buyers.home_selection.draw_lottery.no_eligible_candidates"] = "None of the candidates in the lottery can be selected right now.",
             ["home_buyers.home_selection.draw_lottery.tied_pool_too_small"] = "A lottery needs at least {minimumPoolSize} tied candidates.",
@@ -143,6 +150,7 @@ internal static class BusinessRuleErrorMessageMap
             ["property_registry.land_parcel.register.area_non_positive"] = "Parcel area must be greater than zero acres.",
             ["property_registry.land_parcel.register.legal_parcel_number_required"] = "Legal parcel number is required.",
             ["property_registry.land_parcel.withdraw_for_redevelopment.parcel_decommissioned"] = "Decommissioned parcels cannot be withdrawn for redevelopment.",
+            ["property_registry.home.income_limit.percent_out_of_range"] = "Income limit must be between {minimum}% and {maximum}% of AMI.",
             ["property_registry.home.release_for_sale.not_held"] = "Only a home the trust is holding can be released for sale.",
             ["property_registry.unit_assessment.create.assessed_value_negative"] = "Assessed value cannot be negative.",
             ["property_registry.unit_assessment.create.assessment_date_in_future"] = "Assessment date cannot be in the future.",

@@ -15,6 +15,7 @@ internal static class PortfolioColumns
     public const string Bedrooms = "Bedrooms";
     public const string Bathrooms = "Bathrooms";
     public const string Accessible = "Accessible";
+    public const string IncomeLimit = "Income Limit";
     public const string SquareFeet = "Square Feet";
     public const string YearBuilt = "Year Built";
     public const string AssessedValue = "Assessed Value";
@@ -53,6 +54,7 @@ internal static class PortfolioColumns
         ["property_registry.home.register.bathrooms_non_positive"] = Bathrooms,
         ["property_registry.home.register.square_footage_non_positive"] = SquareFeet,
         ["property_registry.home.register.year_built_out_of_range"] = YearBuilt,
+        ["property_registry.home.income_limit.percent_out_of_range"] = IncomeLimit,
         ["property_registry.unit_assessment.create.assessed_value_negative"] = AssessedValue,
         ["property_registry.unit_assessment.create.assessment_date_in_future"] = AssessedOn,
         ["shared.person_name.required"] = HomeownerName,

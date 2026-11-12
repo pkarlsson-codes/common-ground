@@ -25,6 +25,7 @@ const COLUMNS: readonly Column[] = [
   { name: 'Bedrooms',                    required: 'Yes',                 values: 'A whole number' },
   { name: 'Bathrooms',                   required: 'Yes',                 values: 'A number, such as 1.5' },
   { name: 'Accessible',                  required: 'No',                  values: 'Yes or No; blank means No' },
+  { name: 'Income Limit',                required: 'No',                  values: 'A percent of AMI, such as 80, or None; blank means 80' },
   { name: 'Square Feet',                 required: 'Yes',                 values: 'A number' },
   { name: 'Year Built',                  required: 'Yes',                 values: 'A year, such as 1952' },
   { name: 'Assessed Value',              required: 'Yes',                 values: AMOUNT },
