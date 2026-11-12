@@ -6,16 +6,17 @@ namespace CommonGround.HomeBuyers.Domain.Households;
 /// <summary>Household circumstances.</summary>
 public sealed class HouseholdCircumstances : ValueObject
 {
-    private HouseholdCircumstances(bool requiresAccessibility, decimal annualIncome)
+    private HouseholdCircumstances(bool requiresAccessibility, Money annualIncome)
     {
         RequiresAccessibility = requiresAccessibility;
         AnnualIncome = annualIncome;
     }
 
     /// <summary>Creates and validates a new <see cref="HouseholdCircumstances"/>.</summary>
-    public static HouseholdCircumstances Create(bool requiresAccessibility, decimal annualIncome)
+    public static HouseholdCircumstances Create(bool requiresAccessibility, Money annualIncome)
     {
-        if (annualIncome < 0)
+        ArgumentNullException.ThrowIfNull(annualIncome);
+        if (annualIncome.IsNegative)
             throw BusinessRuleViolation.Household.Circumstances.AnnualIncomeNegative(annualIncome);
 
         return new HouseholdCircumstances(requiresAccessibility, annualIncome);
@@ -25,7 +26,7 @@ public sealed class HouseholdCircumstances : ValueObject
     public bool RequiresAccessibility { get; }
 
     /// <summary>Household's annual income.</summary>
-    public decimal AnnualIncome { get; }
+    public Money AnnualIncome { get; }
 
     /// <inheritdoc/>
     protected override IEnumerable<object> GetEqualityComponents()

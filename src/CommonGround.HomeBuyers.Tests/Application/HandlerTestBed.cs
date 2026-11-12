@@ -25,7 +25,7 @@ public class HandlerTestBed
         var household = EventReplay.Replay<Household>(global::CommonGround.HomeBuyers.Domain.Households.Household.Register(
             HouseholdId.Generate(),
             [HouseholdMember.Create(PersonName.Create("Alice Johnson"), EmailAddress.Create("alice@example.com"), new PhoneNumber("(202) 555-0100"), true)],
-            HouseholdCircumstances.Create(false, 65000m),
+            HouseholdCircumstances.Create(false, Money.Create(65000m)),
             StaffUser));
         return ready
             ? household.Evolve(
@@ -53,7 +53,7 @@ public class HandlerTestBed
             HomeSelectionId.Generate(),
             HomeId,
             [.. candidates.Select(c => SelectionCandidate.Create(
-                c.Application.Id, c.Household.Id, 65000m, 1, false, new DateOnly(2026, 6, 1)))],
+                c.Application.Id, c.Household.Id, Money.Create(65000m), 1, false, new DateOnly(2026, 6, 1)))],
             null,
             StaffUser));
 

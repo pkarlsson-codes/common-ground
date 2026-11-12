@@ -15,7 +15,7 @@ internal sealed class HomeownerApplicationViewProjection : SingleStreamProjectio
             Id = e.Data.AggregateId,
             HouseholdId = e.Data.HouseholdId,
             HouseholdSize = e.Data.HouseholdSize,
-            AnnualIncome = e.Data.AnnualIncome,
+            AnnualIncome = e.Data.AnnualIncome.Amount,
             AccessibilityRequired = e.Data.AccessibilityRequired,
             Phase = ApplicationPhase.Submitted.DisplayName,
             SubmittedAt = e.Data.OccurredAt,

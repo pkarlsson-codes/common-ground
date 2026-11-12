@@ -32,7 +32,7 @@ public static class HouseholdEndpoints
             id,
             [.. request.Members.Select(m => new RegisterHouseholdMember(PersonName.Create(m.Name), EmailAddress.Create(m.Email), new PhoneNumber(m.Phone), m.IsPrimary))],
             request.RequiresAccessibility,
-            request.AnnualIncome,
+            Money.Create(request.AnnualIncome),
             userId);
 
         await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);
@@ -173,7 +173,7 @@ public static class HouseholdEndpoints
             new UpdateHouseholdCircumstances(
                 HouseholdId.Create(householdId),
                 request.RequiresAccessibility,
-                request.AnnualIncome,
+                Money.Create(request.AnnualIncome),
                 userId),
             cancellationToken);
 

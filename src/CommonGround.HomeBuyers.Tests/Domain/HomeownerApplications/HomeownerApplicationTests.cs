@@ -26,7 +26,7 @@ public class HomeownerApplicationTests
                     HouseholdMember.Create(PersonName.Create("Alice Johnson"), EmailAddress.Create("alice@example.com"), new PhoneNumber("(202) 555-0100"), true),
                     HouseholdMember.Create(PersonName.Create("Bob Johnson"), EmailAddress.Create("bob@example.com"), new PhoneNumber("(202) 555-0101"), false),
                 ],
-                HouseholdCircumstances.Create(false, 65000m),
+                HouseholdCircumstances.Create(false, Money.Create(65000m)),
                 StaffUser));
         }
 

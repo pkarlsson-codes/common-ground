@@ -53,7 +53,7 @@ public class HomeSelectionTests
             SelectionCandidate.Create(
                 HomeownerApplicationId.Create(applicationId),
                 HouseholdId.Generate(),
-                annualIncome,
+                Money.Create(annualIncome),
                 householdSize,
                 requiresAccessibility,
                 waitingSince);

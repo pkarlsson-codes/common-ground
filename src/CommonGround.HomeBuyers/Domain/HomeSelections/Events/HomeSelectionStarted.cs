@@ -1,3 +1,4 @@
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.HomeBuyers.Domain.HomeSelections.Events;
@@ -16,7 +17,7 @@ public sealed record HomeSelectionStarted(
 public sealed record SnapshotCandidate(
     string ApplicationId,
     string HouseholdId,
-    decimal AnnualIncome,
+    Money AnnualIncome,
     int HouseholdSize,
     bool RequiresAccessibility,
     DateOnly WaitingSince);

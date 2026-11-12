@@ -14,7 +14,7 @@ public sealed class SelectionCandidate : ValueObject
     private SelectionCandidate(
         HomeownerApplicationId applicationId,
         HouseholdId householdId,
-        decimal annualIncome,
+        Money annualIncome,
         int householdSize,
         bool requiresAccessibility,
         DateOnly waitingSince)
@@ -31,12 +31,14 @@ public sealed class SelectionCandidate : ValueObject
     public static SelectionCandidate Create(
         HomeownerApplicationId applicationId,
         HouseholdId householdId,
-        decimal annualIncome,
+        Money annualIncome,
         int householdSize,
         bool requiresAccessibility,
         DateOnly waitingSince)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(annualIncome);
+        ArgumentNullException.ThrowIfNull(annualIncome);
+        if (annualIncome.IsNegative)
+            throw new ArgumentOutOfRangeException(nameof(annualIncome), annualIncome, "Annual income can't be negative.");
         ArgumentOutOfRangeException.ThrowIfLessThan(householdSize, 1);
 
         return new SelectionCandidate(
@@ -50,7 +52,7 @@ public sealed class SelectionCandidate : ValueObject
     public HouseholdId HouseholdId { get; }
 
     /// <summary>The household's annual income as declared on the application.</summary>
-    public decimal AnnualIncome { get; }
+    public Money AnnualIncome { get; }
 
     /// <summary>The number of people in the household as declared on the application.</summary>
     public int HouseholdSize { get; }

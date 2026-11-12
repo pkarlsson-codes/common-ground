@@ -20,7 +20,7 @@ internal sealed class HouseholdViewProjection : SingleStreamProjection<Household
                 IsPrimary = m.IsPrimary,
             })],
             HouseholdSize = e.Members.Count,
-            AnnualIncome = e.AnnualIncome,
+            AnnualIncome = e.AnnualIncome.Amount,
             AccessibilityRequired = e.RequiresAccessibility,
             RegisteredAt = e.OccurredAt,
             RegisteredBy = e.RegisteredById,
@@ -55,7 +55,7 @@ internal sealed class HouseholdViewProjection : SingleStreamProjection<Household
 
     public static void Apply(HouseholdView view, HouseholdCircumstancesUpdated e)
     {
-        view.AnnualIncome = e.AnnualIncome;
+        view.AnnualIncome = e.AnnualIncome.Amount;
         view.AccessibilityRequired = e.RequiresAccessibility;
     }
 

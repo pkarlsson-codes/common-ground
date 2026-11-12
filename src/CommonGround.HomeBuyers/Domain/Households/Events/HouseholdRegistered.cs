@@ -1,3 +1,4 @@
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.HomeBuyers.Domain.Households.Events;
@@ -5,7 +6,7 @@ namespace CommonGround.HomeBuyers.Domain.Households.Events;
 public sealed record HouseholdRegistered(
     string AggregateId,
     IReadOnlyList<RegisteredMember> Members,
-    decimal AnnualIncome,
+    Money AnnualIncome,
     bool RequiresAccessibility,
     string RegisteredById)
     : DomainEvent(AggregateId);

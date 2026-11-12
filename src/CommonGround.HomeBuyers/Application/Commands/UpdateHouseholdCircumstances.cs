@@ -9,7 +9,7 @@ namespace CommonGround.HomeBuyers.Application.Commands;
 public sealed record UpdateHouseholdCircumstances(
     HouseholdId HouseholdId,
     bool RequiresAccessibility,
-    decimal AnnualIncome,
+    Money AnnualIncome,
     UserId UpdatedBy);
 
 /// <summary>Handles <see cref="UpdateHouseholdCircumstances"/>.</summary>

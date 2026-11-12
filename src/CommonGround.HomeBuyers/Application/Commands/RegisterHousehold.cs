@@ -9,7 +9,7 @@ public sealed record RegisterHousehold(
     HouseholdId HouseholdId,
     IReadOnlyList<RegisterHouseholdMember> Members,
     bool RequiresAccessibility,
-    decimal AnnualIncome,
+    Money AnnualIncome,
     UserId RegisteredBy);
 
 /// <summary>A member to register as part of <see cref="RegisterHousehold"/>.</summary>

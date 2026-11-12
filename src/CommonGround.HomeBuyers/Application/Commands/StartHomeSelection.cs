@@ -80,7 +80,7 @@ public static class StartHomeSelectionHandler
             .Select(v => SelectionCandidate.Create(
                 HomeownerApplicationId.Create(v.Id),
                 HouseholdId.Create(v.HouseholdId),
-                v.AnnualIncome,
+                Money.Create(v.AnnualIncome),
                 v.HouseholdSize,
                 v.AccessibilityRequired,
                 v.ApprovedDate ?? throw new InvalidOperationException($"Approved application {v.Id} has no approval date.")))

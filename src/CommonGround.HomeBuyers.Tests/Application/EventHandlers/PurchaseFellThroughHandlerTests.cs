@@ -5,6 +5,7 @@ using CommonGround.HomeBuyers.Domain.HomeownerApplications.Events;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.HomeBuyers.Domain.HomeSelections.Events;
 using CommonGround.Homeownership.Contracts.Events;
+using CommonGround.SharedKernel.Domain;
 using FluentAssertions;
 using JasperFx.Events;
 using Wolverine.Marten;
@@ -23,7 +24,7 @@ public class PurchaseFellThroughHandlerTests
             var (application, selection) = SelectedApplicationWithSelection();
             var waiting = _testBed.ReadyHousehold();
             var next = new SelectionStart([SelectionCandidate.Create(
-                _testBed.ApprovedApplication(waiting).Id, waiting.Id, 65000m, 1, false, new DateOnly(2026, 6, 1))], null);
+                _testBed.ApprovedApplication(waiting).Id, waiting.Id, Money.Create(65000m), 1, false, new DateOnly(2026, 6, 1))], null);
 
             var op = PurchaseFellThroughHandler.Handle(FellThrough(application), new FallenThroughPurchase(application, selection, next));
 

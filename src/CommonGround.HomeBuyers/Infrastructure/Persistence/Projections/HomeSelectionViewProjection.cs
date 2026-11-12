@@ -21,7 +21,7 @@ internal sealed class HomeSelectionViewProjection : SingleStreamProjection<HomeS
             {
                 ApplicationId = c.ApplicationId,
                 HouseholdId = c.HouseholdId,
-                AnnualIncome = c.AnnualIncome,
+                AnnualIncome = c.AnnualIncome.Amount,
                 HouseholdSize = c.HouseholdSize,
                 RequiresAccessibility = c.RequiresAccessibility,
                 WaitingSince = c.WaitingSince,

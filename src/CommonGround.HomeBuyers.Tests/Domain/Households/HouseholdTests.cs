@@ -12,7 +12,7 @@ public class HouseholdTests
     public class TestBed
     {
         public UserId StaffUser { get; } = UserId.Generate();
-        public HouseholdCircumstances Circumstances { get; } = HouseholdCircumstances.Create(false, 65000m);
+        public HouseholdCircumstances Circumstances { get; } = HouseholdCircumstances.Create(false, Money.Create(65000m));
 
         public HouseholdMember Primary { get; } = HouseholdMember.Create(PersonName.Create("Alice Johnson"), EmailAddress.Create("alice@example.com"), new PhoneNumber("(202) 555-0100"), true);
         public HouseholdMember Partner { get; } = HouseholdMember.Create(PersonName.Create("Bob Johnson"), EmailAddress.Create("bob@example.com"), new PhoneNumber("(202) 555-0101"), false);
@@ -175,7 +175,7 @@ public class HouseholdTests
         public void GivenNewCircumstances_WhenUpdated_ThenDeclarationReflectsThem()
         {
             var sut = _testBed.RegisteredHousehold();
-            var updated = HouseholdCircumstances.Create(true, 72000m);
+            var updated = HouseholdCircumstances.Create(true, Money.Create(72000m));
 
             sut = sut.Decide(a => a.UpdateCircumstances(updated, _testBed.StaffUser)).Aggregate;
 
@@ -187,7 +187,7 @@ public class HouseholdTests
         {
             var sut = _testBed.RegisteredHousehold();
 
-            (sut, var events) = sut.Decide(a => a.UpdateCircumstances(HouseholdCircumstances.Create(false, 65000m), _testBed.StaffUser));
+            (sut, var events) = sut.Decide(a => a.UpdateCircumstances(HouseholdCircumstances.Create(false, Money.Create(65000m)), _testBed.StaffUser));
 
             events.OfType<HouseholdCircumstancesUpdated>().Should().BeEmpty();
         }

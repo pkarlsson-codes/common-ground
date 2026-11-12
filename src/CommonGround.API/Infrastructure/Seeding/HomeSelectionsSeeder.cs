@@ -200,7 +200,7 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
             .Select(v => SelectionCandidate.Create(
                 HomeownerApplicationId.Create(v.Id),
                 HouseholdId.Create(v.HouseholdId),
-                v.AnnualIncome,
+                Money.Create(v.AnnualIncome),
                 v.HouseholdSize,
                 v.AccessibilityRequired,
                 v.ApprovedDate!.Value))];

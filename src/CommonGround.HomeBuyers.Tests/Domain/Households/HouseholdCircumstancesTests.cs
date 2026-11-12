@@ -1,4 +1,5 @@
 using CommonGround.HomeBuyers.Domain.Households;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using FluentAssertions;
 
@@ -11,7 +12,7 @@ public class HouseholdCircumstancesTests
         [Fact]
         public void GivenNegativeAnnualIncome_WhenCreated_ThenThrowsAnnualIncomeNegative()
         {
-            var act = () => HouseholdCircumstances.Create(false, -0.01m);
+            var act = () => HouseholdCircumstances.Create(false, Money.Create(-0.01m));
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.household.circumstances.annual_income_negative");
@@ -22,9 +23,9 @@ public class HouseholdCircumstancesTests
         [InlineData(65000)]
         public void GivenNonNegativeAnnualIncome_WhenCreated_ThenSucceeds(decimal annualIncome)
         {
-            var sut = HouseholdCircumstances.Create(true, annualIncome);
+            var sut = HouseholdCircumstances.Create(true, Money.Create(annualIncome));
 
-            sut.AnnualIncome.Should().Be(annualIncome);
+            sut.AnnualIncome.Amount.Should().Be(annualIncome);
         }
     }
 }

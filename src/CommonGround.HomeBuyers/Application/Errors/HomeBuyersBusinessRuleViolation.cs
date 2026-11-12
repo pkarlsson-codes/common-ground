@@ -1,6 +1,7 @@
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.HomeBuyers.Domain.Households;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 
 namespace CommonGround.HomeBuyers.Application.Errors;
@@ -244,12 +245,12 @@ public static class BusinessRuleViolation
 
         public static class Circumstances
         {
-            public static BusinessRuleViolationException AnnualIncomeNegative(decimal annualIncome)
+            public static BusinessRuleViolationException AnnualIncomeNegative(Money annualIncome)
                 => new(
                     "home_buyers.household.circumstances.annual_income_negative",
                     new Dictionary<string, object?>
                     {
-                        ["annualIncome"] = annualIncome,
+                        ["annualIncome"] = annualIncome.Amount,
                     });
         }
 
