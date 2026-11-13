@@ -20,9 +20,11 @@ import type {
   CorrectLeaseFeeTrackingRequest,
   CreateGroundLeaseRequest,
   CreateGroundLeaseResponse,
+  EditPermittedMortgageRequest,
   GroundLeaseResponse,
   LeaseFeeNoticePolicyResponse,
   LeaseFeeNoticesDueResponse,
+  MarkPermittedMortgagePaidOffRequest,
   PaginatedResponseOfGroundLeaseListItemResponse,
   PaginatedResponseOfLeaseFeeBalanceResponse,
   ProblemDetails,
@@ -30,6 +32,8 @@ import type {
   RecordLeaseFeeNoticeResponse,
   RecordLeaseFeePaymentRequest,
   RecordLeaseFeePaymentResponse,
+  RecordPermittedMortgageRequest,
+  RecordPermittedMortgageResponse,
   RecordStewardshipCheckInRequest,
   ResaleEstimateResponse,
   SetLeaseFeeNoticePolicyRequest,
@@ -46,12 +50,16 @@ import {
     CreateGroundLeaseRequestToJSON,
     CreateGroundLeaseResponseFromJSON,
     CreateGroundLeaseResponseToJSON,
+    EditPermittedMortgageRequestFromJSON,
+    EditPermittedMortgageRequestToJSON,
     GroundLeaseResponseFromJSON,
     GroundLeaseResponseToJSON,
     LeaseFeeNoticePolicyResponseFromJSON,
     LeaseFeeNoticePolicyResponseToJSON,
     LeaseFeeNoticesDueResponseFromJSON,
     LeaseFeeNoticesDueResponseToJSON,
+    MarkPermittedMortgagePaidOffRequestFromJSON,
+    MarkPermittedMortgagePaidOffRequestToJSON,
     PaginatedResponseOfGroundLeaseListItemResponseFromJSON,
     PaginatedResponseOfGroundLeaseListItemResponseToJSON,
     PaginatedResponseOfLeaseFeeBalanceResponseFromJSON,
@@ -66,6 +74,10 @@ import {
     RecordLeaseFeePaymentRequestToJSON,
     RecordLeaseFeePaymentResponseFromJSON,
     RecordLeaseFeePaymentResponseToJSON,
+    RecordPermittedMortgageRequestFromJSON,
+    RecordPermittedMortgageRequestToJSON,
+    RecordPermittedMortgageResponseFromJSON,
+    RecordPermittedMortgageResponseToJSON,
     RecordStewardshipCheckInRequestFromJSON,
     RecordStewardshipCheckInRequestToJSON,
     ResaleEstimateResponseFromJSON,
@@ -94,6 +106,12 @@ export interface CreateGroundLeaseOperationRequest {
     createGroundLeaseRequest: CreateGroundLeaseRequest;
 }
 
+export interface EditPermittedMortgageOperationRequest {
+    groundLeaseId: string;
+    mortgageId: string;
+    editPermittedMortgageRequest: EditPermittedMortgageRequest;
+}
+
 export interface GetGroundLeaseRequest {
     groundLeaseId: string;
 }
@@ -119,6 +137,12 @@ export interface GetLeaseFeeNoticesDueRequest {
     groundLeaseId?: string | null;
 }
 
+export interface MarkPermittedMortgagePaidOffOperationRequest {
+    groundLeaseId: string;
+    mortgageId: string;
+    markPermittedMortgagePaidOffRequest: MarkPermittedMortgagePaidOffRequest;
+}
+
 export interface RecordLeaseFeeNoticeOperationRequest {
     groundLeaseId: string;
     recordLeaseFeeNoticeRequest: RecordLeaseFeeNoticeRequest;
@@ -127,6 +151,11 @@ export interface RecordLeaseFeeNoticeOperationRequest {
 export interface RecordLeaseFeePaymentOperationRequest {
     groundLeaseId: string;
     recordLeaseFeePaymentRequest: RecordLeaseFeePaymentRequest;
+}
+
+export interface RecordPermittedMortgageOperationRequest {
+    groundLeaseId: string;
+    recordPermittedMortgageRequest: RecordPermittedMortgageRequest;
 }
 
 export interface RecordStewardshipCheckInOperationRequest {
@@ -196,6 +225,21 @@ export interface GroundLeasesApiInterface {
     /**
      */
     createGroundLease(requestParameters: CreateGroundLeaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
+     * @param {string} mortgageId 
+     * @param {EditPermittedMortgageRequest} editPermittedMortgageRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    editPermittedMortgageRaw(requestParameters: EditPermittedMortgageOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    editPermittedMortgage(requestParameters: EditPermittedMortgageOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -273,6 +317,21 @@ export interface GroundLeasesApiInterface {
     /**
      * 
      * @param {string} groundLeaseId 
+     * @param {string} mortgageId 
+     * @param {MarkPermittedMortgagePaidOffRequest} markPermittedMortgagePaidOffRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    markPermittedMortgagePaidOffRaw(requestParameters: MarkPermittedMortgagePaidOffOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    markPermittedMortgagePaidOff(requestParameters: MarkPermittedMortgagePaidOffOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
      * @param {RecordLeaseFeeNoticeRequest} recordLeaseFeeNoticeRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -297,6 +356,20 @@ export interface GroundLeasesApiInterface {
     /**
      */
     recordLeaseFeePayment(requestParameters: RecordLeaseFeePaymentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
+     * @param {RecordPermittedMortgageRequest} recordPermittedMortgageRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    recordPermittedMortgageRaw(requestParameters: RecordPermittedMortgageOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    recordPermittedMortgage(requestParameters: RecordPermittedMortgageOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
     /**
      * 
@@ -497,6 +570,66 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
 
     /**
      */
+    async editPermittedMortgageRaw(requestParameters: EditPermittedMortgageOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling editPermittedMortgage().'
+            );
+        }
+
+        if (requestParameters['mortgageId'] == null) {
+            throw new runtime.RequiredError(
+                'mortgageId',
+                'Required parameter "mortgageId" was null or undefined when calling editPermittedMortgage().'
+            );
+        }
+
+        if (requestParameters['editPermittedMortgageRequest'] == null) {
+            throw new runtime.RequiredError(
+                'editPermittedMortgageRequest',
+                'Required parameter "editPermittedMortgageRequest" was null or undefined when calling editPermittedMortgage().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/permitted-mortgages/{mortgageId}`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+        urlPath = urlPath.replace(`{${"mortgageId"}}`, encodeURIComponent(String(requestParameters['mortgageId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: EditPermittedMortgageRequestToJSON(requestParameters['editPermittedMortgageRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async editPermittedMortgage(requestParameters: EditPermittedMortgageOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.editPermittedMortgageRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
     async getGroundLeaseRaw(requestParameters: GetGroundLeaseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GroundLeaseResponse>> {
         if (requestParameters['groundLeaseId'] == null) {
             throw new runtime.RequiredError(
@@ -688,6 +821,66 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
 
     /**
      */
+    async markPermittedMortgagePaidOffRaw(requestParameters: MarkPermittedMortgagePaidOffOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling markPermittedMortgagePaidOff().'
+            );
+        }
+
+        if (requestParameters['mortgageId'] == null) {
+            throw new runtime.RequiredError(
+                'mortgageId',
+                'Required parameter "mortgageId" was null or undefined when calling markPermittedMortgagePaidOff().'
+            );
+        }
+
+        if (requestParameters['markPermittedMortgagePaidOffRequest'] == null) {
+            throw new runtime.RequiredError(
+                'markPermittedMortgagePaidOffRequest',
+                'Required parameter "markPermittedMortgagePaidOffRequest" was null or undefined when calling markPermittedMortgagePaidOff().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/permitted-mortgages/{mortgageId}/paid-off`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+        urlPath = urlPath.replace(`{${"mortgageId"}}`, encodeURIComponent(String(requestParameters['mortgageId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: MarkPermittedMortgagePaidOffRequestToJSON(requestParameters['markPermittedMortgagePaidOffRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async markPermittedMortgagePaidOff(requestParameters: MarkPermittedMortgagePaidOffOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.markPermittedMortgagePaidOffRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
     async recordLeaseFeeNoticeRaw(requestParameters: RecordLeaseFeeNoticeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['groundLeaseId'] == null) {
             throw new runtime.RequiredError(
@@ -773,6 +966,51 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
      */
     async recordLeaseFeePayment(requestParameters: RecordLeaseFeePaymentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.recordLeaseFeePaymentRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async recordPermittedMortgageRaw(requestParameters: RecordPermittedMortgageOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling recordPermittedMortgage().'
+            );
+        }
+
+        if (requestParameters['recordPermittedMortgageRequest'] == null) {
+            throw new runtime.RequiredError(
+                'recordPermittedMortgageRequest',
+                'Required parameter "recordPermittedMortgageRequest" was null or undefined when calling recordPermittedMortgage().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/permitted-mortgages`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RecordPermittedMortgageRequestToJSON(requestParameters['recordPermittedMortgageRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async recordPermittedMortgage(requestParameters: RecordPermittedMortgageOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.recordPermittedMortgageRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

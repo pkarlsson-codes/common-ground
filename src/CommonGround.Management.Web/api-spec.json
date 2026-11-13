@@ -1835,6 +1835,226 @@
         }
       }
     },
+    "/api/v1/ground-leases/{groundLeaseId}/permitted-mortgages": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "RecordPermittedMortgage",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordPermittedMortgageRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordPermittedMortgageRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordPermittedMortgageResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ground-leases/{groundLeaseId}/permitted-mortgages/{mortgageId}": {
+      "put": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "EditPermittedMortgage",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "mortgageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "EditPermittedMortgageRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditPermittedMortgageRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 3
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ground-leases/{groundLeaseId}/permitted-mortgages/{mortgageId}/paid-off": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "MarkPermittedMortgagePaidOff",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "mortgageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "MarkPermittedMortgagePaidOffRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkPermittedMortgagePaidOffRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 3
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ground-lease-templates": {
       "post": {
         "tags": [
@@ -10470,6 +10690,80 @@
             "type": "string",
             "description": "The lines printed at the end of every letter; empty or null for none.",
             "nullable": true
+          }
+        }
+      },
+      "RecordPermittedMortgageResponse": {
+        "type": "object",
+        "description": "Response after recording a permitted mortgage.",
+        "additionalProperties": false,
+        "properties": {
+          "mortgageId": {
+            "type": "string",
+            "description": "The new mortgage's ID."
+          }
+        }
+      },
+      "RecordPermittedMortgageRequest": {
+        "type": "object",
+        "description": "Request to record a mortgage the trust permitted outside CommonGround on a lease.",
+        "additionalProperties": false,
+        "required": [
+          "noticeAddress",
+          "originalPrincipal"
+        ],
+        "properties": {
+          "lender": {
+            "type": "string",
+            "description": "The lender or servicer."
+          },
+          "noticeAddress": {
+            "type": "string",
+            "description": "Where the trust sends copies of notices, or null when not known.",
+            "minLength": 1,
+            "nullable": true
+          },
+          "originalPrincipal": {
+            "type": "number",
+            "description": "The loan amount when it closed.",
+            "format": "decimal"
+          },
+          "permittedOn": {
+            "type": "string",
+            "description": "The day the trust permitted it; not in the future, not before the lease start.",
+            "format": "date"
+          }
+        }
+      },
+      "EditPermittedMortgageRequest": {
+        "type": "object",
+        "description": "Request to change a permitted mortgage's lender and notice address.",
+        "additionalProperties": false,
+        "required": [
+          "noticeAddress"
+        ],
+        "properties": {
+          "lender": {
+            "type": "string",
+            "description": "The lender or servicer now."
+          },
+          "noticeAddress": {
+            "type": "string",
+            "description": "Where the trust sends copies of notices now, or null when not known.",
+            "minLength": 1,
+            "nullable": true
+          }
+        }
+      },
+      "MarkPermittedMortgagePaidOffRequest": {
+        "type": "object",
+        "description": "Request to mark a permitted mortgage paid off.",
+        "additionalProperties": false,
+        "properties": {
+          "paidOffOn": {
+            "type": "string",
+            "description": "The day it was paid off; not in the future, not before it was permitted.",
+            "format": "date"
           }
         }
       },

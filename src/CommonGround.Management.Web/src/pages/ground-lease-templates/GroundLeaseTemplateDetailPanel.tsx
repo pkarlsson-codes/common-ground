@@ -144,6 +144,12 @@ export default function GroundLeaseTemplateDetailPanel({ templateId, onClose }: 
               <div className="detail-field__value mono">{fmtCurrency(detail.improvementsCap)}</div>
             </div>
           )}
+          {detail.maxMortgageDebtPercent != null && (
+            <div className="detail-field">
+              <div className="detail-field__label">Debt Cap</div>
+              <div className="detail-field__value">{detail.maxMortgageDebtPercent}% of the purchase option price</div>
+            </div>
+          )}
           {detail.covenantTerms && (
             <div className="detail-field full-span">
               <div className="detail-field__label">Covenant Terms</div>

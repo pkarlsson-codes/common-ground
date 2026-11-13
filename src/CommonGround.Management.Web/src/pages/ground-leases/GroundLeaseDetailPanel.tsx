@@ -14,6 +14,7 @@ import { trustToday } from '../../lib/calendarDate'
 import { DateInput } from '../../components/DateInput'
 import LeaseResaleSection from './LeaseResaleSection'
 import LeaseFeesSection from './LeaseFeesSection'
+import LeaseMortgagesSection from './LeaseMortgagesSection'
 
 function SkeletonRows() {
   return (
@@ -157,6 +158,8 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
           <LeaseResaleSection groundLeaseId={groundLeaseId} leaseActive={detail.status === 'Active'} />
 
           <LeaseFeesSection lease={detail} />
+
+          <LeaseMortgagesSection lease={detail} />
 
           <div className="detail-section">
             <div className="detail-section__title">Stewardship Check-Ins</div>

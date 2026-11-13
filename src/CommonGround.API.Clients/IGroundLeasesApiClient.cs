@@ -97,4 +97,27 @@ public interface IGroundLeasesApiClient
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>The policy as saved.</returns>
     Task<LeaseFeeNoticePolicyResponse> SetLeaseFeeNoticePolicyAsync(SetLeaseFeeNoticePolicyRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Records a mortgage the trust permitted outside CommonGround on a lease.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="request">The mortgage details.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response containing the new mortgage ID.</returns>
+    Task<RecordPermittedMortgageResponse> RecordPermittedMortgageAsync(string groundLeaseId, RecordPermittedMortgageRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Changes a permitted mortgage's lender and notice address.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="mortgageId">The ID of the permitted mortgage.</param>
+    /// <param name="request">The new lender and notice address.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when the mortgage is changed.</returns>
+    Task EditPermittedMortgageAsync(string groundLeaseId, string mortgageId, EditPermittedMortgageRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Marks a permitted mortgage paid off.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="mortgageId">The ID of the permitted mortgage.</param>
+    /// <param name="request">The day it was paid off.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when the mortgage is marked paid off.</returns>
+    Task MarkPermittedMortgagePaidOffAsync(string groundLeaseId, string mortgageId, MarkPermittedMortgagePaidOffRequest request, CancellationToken cancellationToken);
 }

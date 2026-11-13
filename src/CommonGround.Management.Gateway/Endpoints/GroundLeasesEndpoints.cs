@@ -187,4 +187,50 @@ public static class GroundLeasesEndpoints
         var result = await client.SetLeaseFeeNoticePolicyAsync(request, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
+
+    [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/permitted-mortgages")]
+    [ProducesResponseType<RecordPermittedMortgageResponse>(StatusCodes.Status201Created)]
+    public static async Task<IResult> RecordPermittedMortgage(
+        string groundLeaseId,
+        RecordPermittedMortgageRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        var result = await client.RecordPermittedMortgageAsync(groundLeaseId, request, cancellationToken).ConfigureAwait(false);
+        return Results.Created($"/api/v1/ground-leases/{groundLeaseId}/permitted-mortgages/{result.MortgageId}", result);
+    }
+
+    [WolverinePut("/api/v1/ground-leases/{groundLeaseId}/permitted-mortgages/{mortgageId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> EditPermittedMortgage(
+        string groundLeaseId,
+        string mortgageId,
+        EditPermittedMortgageRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(mortgageId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.EditPermittedMortgageAsync(groundLeaseId, mortgageId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/permitted-mortgages/{mortgageId}/paid-off")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> MarkPermittedMortgagePaidOff(
+        string groundLeaseId,
+        string mortgageId,
+        MarkPermittedMortgagePaidOffRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(mortgageId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.MarkPermittedMortgagePaidOffAsync(groundLeaseId, mortgageId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
 }

@@ -56,6 +56,7 @@ models/DocumentLibraryItemResponse.ts
 models/DocumentResponse.ts
 models/DocumentVersionResponse.ts
 models/DrawSelectionLotteryRequest.ts
+models/EditPermittedMortgageRequest.ts
 models/EligibilityDetailsDto.ts
 models/EnterIncomeLimitScheduleResponse.ts
 models/EntityDocumentItemResponse.ts
@@ -119,6 +120,7 @@ models/LeaseFeesDto.ts
 models/LeaseViolationResponse.ts
 models/MakeCounselingReferralRequest.ts
 models/MarkOccupancyVerificationOverdueRequest.ts
+models/MarkPermittedMortgagePaidOffRequest.ts
 models/MortgagePrequalificationDto.ts
 models/MortgagesDto.ts
 models/OccupancyVerificationResponse.ts
@@ -176,6 +178,8 @@ models/RecordLeaseFeeNoticeResponse.ts
 models/RecordLeaseFeePaymentRequest.ts
 models/RecordLeaseFeePaymentResponse.ts
 models/RecordMortgagePrequalificationRequest.ts
+models/RecordPermittedMortgageRequest.ts
+models/RecordPermittedMortgageResponse.ts
 models/RecordPurchaseClosedRequest.ts
 models/RecordResaleAppraisalRequest.ts
 models/RecordServicerDelinquencyRequest.ts

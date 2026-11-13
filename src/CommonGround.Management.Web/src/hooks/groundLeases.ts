@@ -274,3 +274,69 @@ export function useVoidLeaseFeePayment() {
     onSuccess: (_d, v) => invalidateLeaseFees(qc, v.groundLeaseId),
   })
 }
+
+/** How a permitted mortgage was permitted (Art 8), as the lease's Mortgages section shows it. */
+export const MORTGAGE_SOURCE_LABELS: Record<string, string> = {
+  LeaseSigning: 'Lease signing',
+  Request: 'Request',
+  Recorded: 'Recorded',
+}
+
+export interface RecordPermittedMortgageForm {
+  lender: string
+  noticeAddress: string
+  originalPrincipal: number
+  permittedOn: CalendarDate
+}
+
+export interface EditPermittedMortgageForm {
+  lender: string
+  noticeAddress: string
+}
+
+function invalidateLease(qc: ReturnType<typeof useQueryClient>, groundLeaseId: string) {
+  qc.invalidateQueries({ queryKey: ['ground-lease', groundLeaseId] })
+}
+
+export function useRecordPermittedMortgage() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ groundLeaseId, form }: { groundLeaseId: string; form: RecordPermittedMortgageForm }) =>
+      api.recordPermittedMortgage({
+        groundLeaseId,
+        recordPermittedMortgageRequest: {
+          lender: form.lender.trim(),
+          // The API requires the field; null means no address on file.
+          noticeAddress: form.noticeAddress.trim() || null,
+          originalPrincipal: form.originalPrincipal,
+          permittedOn: form.permittedOn,
+        },
+      }),
+    onSuccess: (_d, v) => invalidateLease(qc, v.groundLeaseId),
+  })
+}
+
+export function useEditPermittedMortgage() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ groundLeaseId, mortgageId, form }: { groundLeaseId: string; mortgageId: string; form: EditPermittedMortgageForm }) =>
+      api.editPermittedMortgage({
+        groundLeaseId,
+        mortgageId,
+        editPermittedMortgageRequest: {
+          lender: form.lender.trim(),
+          noticeAddress: form.noticeAddress.trim() || null,
+        },
+      }),
+    onSuccess: (_d, v) => invalidateLease(qc, v.groundLeaseId),
+  })
+}
+
+export function useMarkPermittedMortgagePaidOff() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ groundLeaseId, mortgageId, paidOffOn }: { groundLeaseId: string; mortgageId: string; paidOffOn: CalendarDate }) =>
+      api.markPermittedMortgagePaidOff({ groundLeaseId, mortgageId, markPermittedMortgagePaidOffRequest: { paidOffOn } }),
+    onSuccess: (_d, v) => invalidateLease(qc, v.groundLeaseId),
+  })
+}
