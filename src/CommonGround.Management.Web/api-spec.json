@@ -51,6 +51,85 @@
         }
       }
     },
+    "/api/v1/demo/sandboxes": {
+      "post": {
+        "tags": [
+          "Demo"
+        ],
+        "operationId": "StartSandbox",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoSandboxResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "409": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/demo/sandboxes/current": {
+      "get": {
+        "tags": [
+          "Demo"
+        ],
+        "operationId": "GetCurrentSandbox",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentDemoSandboxResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/development-projects": {
       "get": {
         "tags": [
@@ -9519,6 +9598,37 @@
           "instance": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "DemoSandboxResponse": {
+        "type": "object",
+        "description": "A sample trust being filled, or ready.",
+        "additionalProperties": false,
+        "properties": {
+          "trustId": {
+            "type": "string",
+            "description": "The sample trust's ID."
+          },
+          "status": {
+            "type": "string",
+            "description": "Seeding while it is filled, Ready when it can be used, Failed if filling it failed."
+          }
+        }
+      },
+      "CurrentDemoSandboxResponse": {
+        "type": "object",
+        "description": "The signed-in user's latest sandbox.",
+        "additionalProperties": false,
+        "properties": {
+          "sandbox": {
+            "description": "The sandbox, or null when the user hasn't started one.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DemoSandboxResponse"
+              }
+            ]
           }
         }
       },

@@ -26,6 +26,11 @@ public sealed class TrustsSeeder : IDevelopmentSeeder
             return;
         }
 
+        if (run.Trust is not null && entries.Count != 1)
+        {
+            throw new InvalidOperationException($"Seed run '{run.Key}' names its trust, but the seed file has {entries.Count} trusts.");
+        }
+
         using var session = store.LightweightSession();
 
         foreach (var entry in entries)
@@ -41,8 +46,9 @@ public sealed class TrustsSeeder : IDevelopmentSeeder
                 }
             }
 
-            var trustId = TrustId.Generate();
-            session.Events.StartStream<Trust>(trustId.Value, Trust.Establish(trustId, entry.Name, IanaTimeZone.Create(entry.TimeZone)));
+            var trustId = run.Trust?.Id ?? TrustId.Generate();
+            var name = run.Trust?.Name ?? entry.Name;
+            session.Events.StartStream<Trust>(trustId.Value, Trust.Establish(trustId, name, IanaTimeZone.Create(entry.TimeZone)));
 
             session.Store(new TrustSeedLookup
             {

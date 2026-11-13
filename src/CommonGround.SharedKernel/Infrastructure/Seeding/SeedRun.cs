@@ -1,3 +1,5 @@
+using CommonGround.SharedKernel.Domain;
+
 namespace CommonGround.SharedKernel.Infrastructure.Seeding;
 
 /// <summary>
@@ -29,6 +31,32 @@ public sealed record SeedRun
     /// <summary>Gets the run's key.</summary>
     public string Key { get; }
 
+    /// <summary>
+    /// Gets the ID and name the run's trust gets instead of the seed file's, or <see langword="null"/> to use the
+    /// seed file's. Only for a seed file with one trust.
+    /// </summary>
+    public SeedRunTrust? Trust { get; init; }
+
     /// <summary>Gets whether this is the <see cref="Development"/> run.</summary>
     public bool IsDevelopment => this == Development;
+}
+
+/// <summary>The ID and name a seed run gives its trust instead of the seed file's.</summary>
+public sealed record SeedRunTrust
+{
+    /// <summary>Initializes a new instance of the <see cref="SeedRunTrust"/> class.</summary>
+    /// <param name="id">The trust ID.</param>
+    /// <param name="name">The trust name.</param>
+    public SeedRunTrust(TrustId id, string name)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        Id = id;
+        Name = name;
+    }
+
+    /// <summary>Gets the trust ID.</summary>
+    public TrustId Id { get; }
+
+    /// <summary>Gets the trust name.</summary>
+    public string Name { get; }
 }

@@ -16,12 +16,18 @@
 
 import * as runtime from '../runtime';
 import type {
+  CurrentDemoSandboxResponse,
   DemoResponse,
+  DemoSandboxResponse,
   ProblemDetails,
 } from '../models/index';
 import {
+    CurrentDemoSandboxResponseFromJSON,
+    CurrentDemoSandboxResponseToJSON,
     DemoResponseFromJSON,
     DemoResponseToJSON,
+    DemoSandboxResponseFromJSON,
+    DemoSandboxResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
 } from '../models/index';
@@ -39,11 +45,35 @@ export interface DemoApiInterface {
      * @throws {RequiredError}
      * @memberof DemoApiInterface
      */
+    getCurrentSandboxRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CurrentDemoSandboxResponse>>;
+
+    /**
+     */
+    getCurrentSandbox(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CurrentDemoSandboxResponse>;
+
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DemoApiInterface
+     */
     getDemoRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DemoResponse>>;
 
     /**
      */
     getDemo(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DemoResponse>;
+
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DemoApiInterface
+     */
+    startSandboxRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DemoSandboxResponse>>;
+
+    /**
+     */
+    startSandbox(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DemoSandboxResponse>;
 
 }
 
@@ -51,6 +81,33 @@ export interface DemoApiInterface {
  * 
  */
 export class DemoApi extends runtime.BaseAPI implements DemoApiInterface {
+
+    /**
+     */
+    async getCurrentSandboxRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CurrentDemoSandboxResponse>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/demo/sandboxes/current`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CurrentDemoSandboxResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getCurrentSandbox(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CurrentDemoSandboxResponse> {
+        const response = await this.getCurrentSandboxRaw(initOverrides);
+        return await response.value();
+    }
 
     /**
      */
@@ -76,6 +133,33 @@ export class DemoApi extends runtime.BaseAPI implements DemoApiInterface {
      */
     async getDemo(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DemoResponse> {
         const response = await this.getDemoRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async startSandboxRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DemoSandboxResponse>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/demo/sandboxes`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => DemoSandboxResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async startSandbox(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DemoSandboxResponse> {
+        const response = await this.startSandboxRaw(initOverrides);
         return await response.value();
     }
 

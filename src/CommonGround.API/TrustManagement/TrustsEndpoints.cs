@@ -66,6 +66,7 @@ public static class TrustsEndpoints
             var sandbox = DemoSandbox.Start(trustId.Value, userId.Value, TimeProviderContext.Current.UtcNow, demo.SandboxDays, DemoSandboxStatus.Ready);
             var session = store.LightweightSession();
             await using var sessionDisposal = session.ConfigureAwait(false);
+            await DemoCapacity.EnsureRoomAsync(session, demo, cancellationToken).ConfigureAwait(false);
             session.Store(sandbox);
             await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             if (logger.IsEnabled(LogLevel.Information))

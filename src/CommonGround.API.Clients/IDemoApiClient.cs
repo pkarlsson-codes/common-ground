@@ -9,4 +9,14 @@ public interface IDemoApiClient
     /// <param name="ct">A token to cancel the operation.</param>
     /// <returns>The trust's delete date and the feedback link.</returns>
     Task<DemoResponse> GetDemoAsync(CancellationToken ct = default);
+
+    /// <summary>Starts a sample trust for the caller, who has no trust yet. The API answers 404 when demo mode is off.</summary>
+    /// <param name="ct">A token to cancel the operation.</param>
+    /// <returns>The sandbox being filled.</returns>
+    Task<DemoSandboxResponse> StartSandboxAsync(CancellationToken ct = default);
+
+    /// <summary>Gets the caller's latest sandbox. The API answers 404 when demo mode is off.</summary>
+    /// <param name="ct">A token to cancel the operation.</param>
+    /// <returns>The sandbox, if the caller started one.</returns>
+    Task<CurrentDemoSandboxResponse> GetCurrentSandboxAsync(CancellationToken ct = default);
 }

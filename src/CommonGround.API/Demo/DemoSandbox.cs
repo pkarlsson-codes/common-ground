@@ -21,6 +21,9 @@ public sealed class DemoSandbox
     /// <summary>Gets or sets whether the sandbox's trust is ready to use.</summary>
     public DemoSandboxStatus Status { get; set; }
 
+    /// <summary>Gets or sets the key of the seed run that fills a sample trust, or <see langword="null"/> for an empty trust.</summary>
+    public string? RunKey { get; set; }
+
     /// <summary>Starts a sandbox for a trust, deleted <paramref name="sandboxDays"/> days after <paramref name="createdAt"/>.</summary>
     /// <param name="trustId">The trust.</param>
     /// <param name="ownerUserId">The user who started it.</param>
@@ -43,6 +46,29 @@ public sealed class DemoSandbox
             Status = status,
         };
     }
+
+    /// <summary>
+    /// Starts a sandbox whose trust is filled with sample records by its own seed run. It is
+    /// <see cref="DemoSandboxStatus.Seeding"/> until the run finishes.
+    /// </summary>
+    /// <param name="trustId">The trust the seed run creates.</param>
+    /// <param name="ownerUserId">The user who started it.</param>
+    /// <param name="createdAt">When it was started.</param>
+    /// <param name="sandboxDays">How many days it lives.</param>
+    /// <returns>The sandbox.</returns>
+    public static DemoSandbox StartSample(string trustId, string ownerUserId, DateTimeOffset createdAt, int sandboxDays)
+    {
+        var sandbox = Start(trustId, ownerUserId, createdAt, sandboxDays, DemoSandboxStatus.Seeding);
+        sandbox.RunKey = $"sandbox-{Guid.NewGuid():N}";
+        return sandbox;
+    }
+}
+
+/// <summary>The name every sample trust gets.</summary>
+public static class SampleTrust
+{
+    /// <summary>The sample trust's name.</summary>
+    public const string Name = "Sample Land Trust";
 }
 
 /// <summary>Where a sandbox's trust is in being set up.</summary>

@@ -47,6 +47,67 @@ public class DemoTests(ApiFactory factory)
         body.Should().Be(new DemoResponse(expected, FeedbackUrl));
     }
 
+    [Fact]
+    public async Task GetCurrentSandbox_DemoModeOff_Returns404()
+    {
+        var client = factory.CreateClient().WithAuthToken(userId: await EnsureUserAsync(factory), trustId: string.Empty);
+
+        var response = await client.GetAsync("/api/demo/sandboxes/current");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task CreateTrust_DemoFull_Returns422DemoFull()
+    {
+        await using var room = DemoHost(maxSandboxes: 100);
+        await ClientInNewTrustAsync(room);
+        await using var full = DemoHost(maxSandboxes: 1);
+        var client = full.CreateClient().WithAuthToken(userId: await EnsureUserAsync(full), trustId: string.Empty);
+
+        var response = await client.PostAsJsonAsync("/api/trusts", new CreateTrustRequest("Demo Trust", "America/Denver"));
+
+        await ShouldBeDemoFullAsync(response);
+    }
+
+    [Fact]
+    public async Task StartSandbox_DemoFull_Returns422DemoFull()
+    {
+        await using var room = DemoHost(maxSandboxes: 100);
+        await ClientInNewTrustAsync(room);
+        await using var full = DemoHost(maxSandboxes: 1);
+        var client = full.CreateClient().WithAuthToken(userId: await EnsureUserAsync(full), trustId: string.Empty);
+
+        var response = await client.PostAsync("/api/demo/sandboxes", null);
+
+        await ShouldBeDemoFullAsync(response);
+    }
+
+    private static async Task ShouldBeDemoFullAsync(HttpResponseMessage response)
+    {
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        var problem = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        problem!["code"].ToString().Should().Be("demo.full");
+    }
+
+    private WebApplicationFactory<Program> DemoHost(int maxSandboxes) =>
+        factory.WithWebHostBuilder(builder => builder.ConfigureAppConfiguration((_, config) =>
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Demo:Enabled"] = "true",
+                ["Demo:MaxSandboxes"] = maxSandboxes.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["Demo:FeedbackUrl"] = FeedbackUrl,
+            })));
+
+    private static async Task<string> EnsureUserAsync(WebApplicationFactory<Program> host)
+    {
+        var ensured = await (await host.CreateClient().WithAuthToken(trustId: string.Empty).PostAsJsonAsync(
+                "/api/users/ensure",
+                new EnsureUserRequest($"demo-{Guid.NewGuid():N}", "demo@example.org", "Demo Visitor", TrustId: null)))
+            .Content.ReadFromJsonAsync<EnsureUserResponse>();
+        return ensured!.UserId;
+    }
+
     private static async Task<HttpClient> ClientInNewTrustAsync(WebApplicationFactory<Program> host)
     {
         var ensured = await (await host.CreateClient().WithAuthToken(trustId: string.Empty).PostAsJsonAsync(

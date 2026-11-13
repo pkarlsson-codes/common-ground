@@ -265,5 +265,7 @@ internal static class BusinessRuleErrorMessageMap
             ["trust_management.trust_invitation.accept.no_longer_valid"] = "This invite link is no longer valid. Ask a member of the trust for a new one.",
             ["trust_management.trust_invitation.accept.already_in_trust"] = "You already belong to a trust.",
             ["trust_management.trust_invitation.cancel.already_accepted"] = "This invite has already been used, so it can't be cancelled.",
+
+            ["demo.full"] = "The demo is full right now. Try again tomorrow.",
         };
 }
