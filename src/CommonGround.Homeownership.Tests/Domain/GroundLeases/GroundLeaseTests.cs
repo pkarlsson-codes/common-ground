@@ -6,6 +6,7 @@ using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates.Events;
+using CommonGround.Homeownership.Domain.MortgageRequests;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.Homeownership.Domain.Resales;
 using CommonGround.SharedKernel.Domain;
@@ -982,6 +983,66 @@ public class GroundLeaseTests
         public void GivenMortgageNotOnTheLease_WhenMarkedPaidOff_ThenThrowsBusinessRuleViolation()
         {
             var act = () => LeaseWithMortgage().MarkPermittedMortgagePaidOff(PermittedMortgageId.Generate(), Today, Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.mark_permitted_mortgage_paid_off.mortgage_not_found");
+        }
+    }
+
+    public class ThePermitRequestedMortgageMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        private readonly PermittedMortgageId _purchaseLoanId = PermittedMortgageId.Generate();
+
+        private static readonly DateOnly ApprovedOn = new(2026, 5, 20);
+
+        private static readonly DateOnly ClosedOn = new(2026, 6, 1);
+
+        private GroundLease LeaseWithPurchaseLoan() => _testBed.Lease()
+            .Decide(l => l.RecordPermittedMortgage(
+                _purchaseLoanId, "First Bank", null, Money.Create(150_000m), TestBed.LeaseStart, ClosedOn, _testBed.StaffUser))
+            .Aggregate;
+
+        private MortgageRequest ApprovedRefinance(GroundLease lease)
+        {
+            var requestId = MortgageRequestId.Generate();
+            var events = MortgageRequest.Receive(
+                requestId, lease, null, new DateOnly(2026, 5, 1),
+                MortgageLoanTerms.Create("Columbia Bank", MortgagePurpose.Refinance, Money.Create(140_000m), Money.Create(140_000m), 5.5m, MortgageRateType.Fixed, 30),
+                ClosedOn, null, LoanAppraisal.Create(Money.Create(330_000m), new DateOnly(2026, 5, 1), null), null, ClosedOn, _testBed.StaffUser);
+
+            return EventReplay.Replay<MortgageRequest>([.. events])
+                .Decide(r => r.Approve(ApprovedOn, null, ClosedOn, _testBed.StaffUser)).Aggregate;
+        }
+
+        [Fact]
+        public void GivenApprovedRefinance_WhenPermitted_ThenAddsTheLoanFromItsApprovalAndPaysOffTheOldOne()
+        {
+            var lease = LeaseWithPurchaseLoan();
+            var newId = PermittedMortgageId.Generate();
+
+            var (sut, _) = lease.Decide(l => l.PermitRequestedMortgage(
+                newId, ApprovedRefinance(lease), ClosedOn, [_purchaseLoanId], ClosedOn, _testBed.StaffUser));
+
+            sut.PermittedMortgages.Should().BeEquivalentTo(new object[]
+            {
+                new { Id = _purchaseLoanId, PaidOffOn = (DateOnly?)ClosedOn },
+                new
+                {
+                    Id = newId, Lender = "Columbia Bank", OriginalPrincipal = Money.Create(140_000m), PermittedOn = ApprovedOn,
+                    Source = MortgagePermissionSource.Request, PaidOffOn = (DateOnly?)null,
+                },
+            });
+        }
+
+        [Fact]
+        public void GivenPaidOffMortgageNotOnTheLease_WhenPermitted_ThenThrowsBusinessRuleViolation()
+        {
+            var lease = LeaseWithPurchaseLoan();
+
+            var act = () => lease.PermitRequestedMortgage(
+                PermittedMortgageId.Generate(), ApprovedRefinance(lease), ClosedOn, [PermittedMortgageId.Generate()], ClosedOn, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("homeownership.ground_lease.mark_permitted_mortgage_paid_off.mortgage_not_found");

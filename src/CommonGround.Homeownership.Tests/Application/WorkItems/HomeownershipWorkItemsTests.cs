@@ -116,4 +116,76 @@ public class HomeownershipWorkItemsTests
             item.Actions.Should().Equal(HomeownershipWorkItems.RecordClosing);
         }
     }
+
+    public class TheForMortgageRequestMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        private static MortgageRequestView Request(string status) => new()
+        {
+            Id = "mortgagerequest-1",
+            GroundLeaseId = "groundlease-1",
+            HomeId = "home-1",
+            HomeownerFullName = "Dana Whitfield",
+            Status = status,
+            ReceivedOn = new DateOnly(2026, 10, 20),
+            Lender = "Columbia Bank",
+            Principal = 175_000m,
+            ExpectedClosingOn = new DateOnly(2026, 11, 1),
+        };
+
+        [Fact]
+        public void GivenPendingRequestWithoutAppraisal_WhenDerived_ThenWaitsSinceReceiptDueOnTheClosingAndAsksForTheAppraisal()
+        {
+            var item = HomeownershipWorkItems.ForMortgageRequest(Request("Pending"), "14 Alder Lane", _testBed.Today);
+
+            item.Should().BeEquivalentTo(new
+            {
+                Kind = HomeownershipWorkItems.MortgageRequestPending,
+                RecordType = "ground-lease",
+                RecordId = "groundlease-1",
+                Detail = "Dana Whitfield: mortgage request, $175,000 from Columbia Bank, waiting for the appraisal",
+                DueDate = (DateOnly?)new DateOnly(2026, 11, 1),
+                WaitingSince = new DateOnly(2026, 10, 20),
+                Actions = new[] { HomeownershipWorkItems.RecordMortgageRequestAppraisal },
+            });
+        }
+
+        [Fact]
+        public void GivenPendingRequestWithAppraisal_WhenDerived_ThenAsksForTheDecision()
+        {
+            var request = Request("Pending");
+            request.PurchaseOptionPrice = 220_000m;
+
+            var item = HomeownershipWorkItems.ForMortgageRequest(request, null, _testBed.Today);
+
+            item!.Actions.Should().Equal(HomeownershipWorkItems.DecideMortgageRequest);
+        }
+
+        [Fact]
+        public void GivenApprovedLoanPastItsClosing_WhenDerived_ThenWaitsSinceTheDayAfterTheClosing()
+        {
+            var item = HomeownershipWorkItems.ForMortgageRequest(Request("Approved"), null, _testBed.Today);
+
+            item.Should().BeEquivalentTo(new
+            {
+                Kind = HomeownershipWorkItems.MortgageLoanClosingUnrecorded,
+                DueDate = (DateOnly?)null,
+                WaitingSince = new DateOnly(2026, 11, 2),
+                Actions = new[] { HomeownershipWorkItems.RecordMortgageLoanClosed },
+            });
+        }
+
+        [Theory]
+        [InlineData("Approved", "2026-11-02")]
+        [InlineData("Closed", "2026-11-01")]
+        [InlineData("Denied", "2026-11-01")]
+        public void GivenRequestNeedingNothing_WhenDerived_ThenHasNoItem(string status, string expectedClosingOn)
+        {
+            var request = Request(status);
+            request.ExpectedClosingOn = DateOnly.Parse(expectedClosingOn, System.Globalization.CultureInfo.InvariantCulture);
+
+            HomeownershipWorkItems.ForMortgageRequest(request, null, _testBed.Today).Should().BeNull();
+        }
+    }
 }

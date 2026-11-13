@@ -2,6 +2,7 @@ using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Application.WorkItems;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.Homeownership.Domain.MortgageRequests;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Application.WorkItems;
 using CommonGround.SharedKernel.Domain.Services;
@@ -10,9 +11,9 @@ using Marten;
 namespace CommonGround.Homeownership.Application.Queries;
 
 /// <summary>
-/// Returns Homeownership's work items: one for every open purchase, every lease with a late notice due, and every
-/// active lease with an uncured notice of default, unless staff are already working with the homeowner in a
-/// foreclosure prevention case.
+/// Returns Homeownership's work items: one for every open purchase, every lease with a late notice due, every
+/// active lease with an uncured notice of default (unless staff are already working with the homeowner in a
+/// foreclosure prevention case), every pending mortgage request, and every approved loan past its expected closing.
 /// </summary>
 /// <param name="Today">The trust's today, against which upcoming closings are judged.</param>
 /// <param name="LeasesWithOpenPreventionCase">The leases with an unresolved foreclosure prevention case, from
@@ -60,6 +61,16 @@ public static class GetHomeownershipWorkItemsHandler
             && b.DefaultCure?.Status == DefaultCureStatus.Uncured
             && !request.LeasesWithOpenPreventionCase.Contains(b.Lease.Id));
 
+        var openRequestStatuses = new[] { MortgageRequestStatus.Pending.DisplayName, MortgageRequestStatus.Approved.DisplayName };
+        var requests = await session.Query<MortgageRequestView>()
+            .Where(v => openRequestStatuses.Contains(v.Status))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        var requestLabels = (await session
+            .LoadManyAsync<HomeLabelView>(cancellationToken, requests.Select(r => r.HomeId).Distinct())
+            .ConfigureAwait(false))
+            .ToDictionary(v => v.Id, v => v.Label);
+
         return new WorkItemList([
             .. workflows.Select(w => HomeownershipWorkItems.ForPurchase(
                 w,
@@ -69,6 +80,9 @@ public static class GetHomeownershipWorkItemsHandler
                 zone)),
             .. notices.Select(b => HomeownershipWorkItems.ForLeaseFeeNotice(b, policy.Schedule)),
             .. uncured.Select(HomeownershipWorkItems.ForUncuredDefault),
+            .. requests
+                .Select(r => HomeownershipWorkItems.ForMortgageRequest(r, requestLabels.GetValueOrDefault(r.HomeId), request.Today))
+                .OfType<WorkItem>(),
         ]);
     }
 }

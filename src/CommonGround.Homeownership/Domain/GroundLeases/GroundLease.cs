@@ -7,6 +7,7 @@ using CommonGround.Homeownership.Application.Errors;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
+using CommonGround.Homeownership.Domain.MortgageRequests;
 using CommonGround.Homeownership.Domain.Resales;
 
 namespace CommonGround.Homeownership.Domain.GroundLeases;
@@ -544,6 +545,53 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             throw BusinessRuleViolation.GroundLease.MarkPermittedMortgagePaidOff.PaidOffOnBeforePermitted(paidOffOn, mortgage.PermittedOn);
 
         return new PermittedMortgagePaidOff(Id.Value, mortgageId.Value, paidOffOn, recordedBy.Value);
+    }
+
+    /// <summary>
+    /// Adds a loan the trust approved on the homeowner's request, once it closed, as a permitted mortgage from its
+    /// approval date, and marks the mortgages it paid off as paid off on the closing date. Refused for a paid-off
+    /// mortgage not on this lease, already paid off, or permitted after the closing date.
+    /// </summary>
+    /// <param name="mortgageId">The new permitted mortgage's ID.</param>
+    /// <param name="request">The approved request on this lease.</param>
+    /// <param name="closedOn">The day the loan closed.</param>
+    /// <param name="paidOffMortgageIds">The lease's mortgages the loan paid off.</param>
+    /// <param name="today">The trust's today.</param>
+    /// <param name="recordedBy">The staff user recording it.</param>
+    public IReadOnlyList<IDomainEvent> PermitRequestedMortgage(
+        PermittedMortgageId mortgageId,
+        MortgageRequest request,
+        DateOnly closedOn,
+        IReadOnlyList<PermittedMortgageId> paidOffMortgageIds,
+        DateOnly today,
+        UserId recordedBy)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(paidOffMortgageIds);
+
+        if (request.GroundLeaseId != Id)
+            throw new ArgumentException("The request isn't on this lease.", nameof(request));
+
+        var approvedOn = request.ApprovedOn
+            ?? throw new ArgumentException("The request isn't approved.", nameof(request));
+
+        IReadOnlyList<IDomainEvent> paidOff = [.. paidOffMortgageIds
+            .Distinct()
+            .Select(id => MarkPermittedMortgagePaidOff(id, closedOn, today, recordedBy))];
+
+        return
+        [
+            new PermittedMortgageRecorded(
+                Id.Value,
+                mortgageId.Value,
+                request.Terms.Lender,
+                null,
+                request.Terms.Principal,
+                approvedOn,
+                MortgagePermissionSource.Request,
+                recordedBy.Value),
+            .. paidOff,
+        ];
     }
 
     private static string? OptionalText(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();

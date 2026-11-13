@@ -1,6 +1,7 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
+using CommonGround.Homeownership.Domain.MortgageRequests;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.Homeownership.Domain.Resales;
 using CommonGround.SharedKernel.Domain;
@@ -931,6 +932,297 @@ public static class BusinessRuleViolation
                     new Dictionary<string, object?>
                     {
                         ["improvementsCap"] = improvementsCap,
+                    });
+        }
+    }
+
+    public static class MortgageLoanTerms
+    {
+        public static class Create
+        {
+            public static BusinessRuleViolationException LenderRequired()
+                => new(
+                    "homeownership.mortgage_loan_terms.create.lender_required");
+
+            public static BusinessRuleViolationException PrincipalNonPositive(decimal principal)
+                => new(
+                    "homeownership.mortgage_loan_terms.create.principal_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["principal"] = principal,
+                    });
+
+            public static BusinessRuleViolationException TotalDebtBelowPrincipal(decimal totalDebtAfterClosing, decimal principal)
+                => new(
+                    "homeownership.mortgage_loan_terms.create.total_debt_below_principal",
+                    new Dictionary<string, object?>
+                    {
+                        ["totalDebtAfterClosing"] = totalDebtAfterClosing,
+                        ["principal"] = principal,
+                    });
+
+            public static BusinessRuleViolationException InterestRateOutOfRange(decimal interestRatePercent)
+                => new(
+                    "homeownership.mortgage_loan_terms.create.interest_rate_out_of_range",
+                    new Dictionary<string, object?>
+                    {
+                        ["interestRatePercent"] = interestRatePercent,
+                    });
+
+            public static BusinessRuleViolationException TermYearsOutOfRange(int termYears)
+                => new(
+                    "homeownership.mortgage_loan_terms.create.term_years_out_of_range",
+                    new Dictionary<string, object?>
+                    {
+                        ["termYears"] = termYears,
+                    });
+        }
+    }
+
+    public static class LoanAppraisal
+    {
+        public static class Create
+        {
+            public static BusinessRuleViolationException AppraisedValueNonPositive(decimal appraisedValue)
+                => new(
+                    "homeownership.loan_appraisal.create.appraised_value_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["appraisedValue"] = appraisedValue,
+                    });
+
+            public static BusinessRuleViolationException CurrentIndexValueNonPositive(decimal currentIndexValue)
+                => new(
+                    "homeownership.loan_appraisal.create.current_index_value_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["currentIndexValue"] = currentIndexValue,
+                    });
+        }
+    }
+
+    public static class MortgageRequest
+    {
+        public static BusinessRuleViolationException ClosingCostsNegative(decimal closingCosts)
+            => new(
+                "homeownership.mortgage_request.closing_costs_negative",
+                new Dictionary<string, object?>
+                {
+                    ["closingCosts"] = closingCosts,
+                });
+
+        public static class Receive
+        {
+            public static BusinessRuleViolationException LeaseNotActive(GroundLeaseStatus status)
+                => new(
+                    "homeownership.mortgage_request.receive.lease_not_active",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException RequestPending(string pendingRequestId)
+                => new(
+                    "homeownership.mortgage_request.receive.request_pending",
+                    new Dictionary<string, object?>
+                    {
+                        ["pendingRequestId"] = pendingRequestId,
+                    });
+
+            public static BusinessRuleViolationException ReceivedOnInFuture(DateOnly receivedOn, DateOnly today)
+                => new(
+                    "homeownership.mortgage_request.receive.received_on_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["receivedOn"] = receivedOn,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException ReceivedOnBeforeLeaseStart(DateOnly receivedOn, DateOnly leaseStartDate)
+                => new(
+                    "homeownership.mortgage_request.receive.received_on_before_lease_start",
+                    new Dictionary<string, object?>
+                    {
+                        ["receivedOn"] = receivedOn,
+                        ["leaseStartDate"] = leaseStartDate,
+                    });
+
+            public static BusinessRuleViolationException ExpectedClosingBeforeReceived(DateOnly expectedClosingOn, DateOnly receivedOn)
+                => new(
+                    "homeownership.mortgage_request.receive.expected_closing_before_received",
+                    new Dictionary<string, object?>
+                    {
+                        ["expectedClosingOn"] = expectedClosingOn,
+                        ["receivedOn"] = receivedOn,
+                    });
+        }
+
+        public static class RecordAppraisal
+        {
+            public static BusinessRuleViolationException NotPending(MortgageRequestStatus status)
+                => new(
+                    "homeownership.mortgage_request.record_appraisal.not_pending",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException AppraisalDateInFuture(DateOnly appraisalDate, DateOnly today)
+                => new(
+                    "homeownership.mortgage_request.record_appraisal.appraisal_date_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["appraisalDate"] = appraisalDate,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException LeaseFiguresMissing()
+                => new(
+                    "homeownership.mortgage_request.record_appraisal.lease_figures_missing");
+
+            public static BusinessRuleViolationException PurchaseOptionPriceNonPositive(decimal purchaseOptionPrice)
+                => new(
+                    "homeownership.mortgage_request.record_appraisal.purchase_option_price_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["purchaseOptionPrice"] = purchaseOptionPrice,
+                    });
+        }
+
+        public static class Approve
+        {
+            public static BusinessRuleViolationException NotPending(MortgageRequestStatus status)
+                => new(
+                    "homeownership.mortgage_request.approve.not_pending",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException AppraisalRequired()
+                => new(
+                    "homeownership.mortgage_request.approve.appraisal_required");
+
+            public static BusinessRuleViolationException ApprovedOnBeforeReceived(DateOnly approvedOn, DateOnly receivedOn)
+                => new(
+                    "homeownership.mortgage_request.approve.approved_on_before_received",
+                    new Dictionary<string, object?>
+                    {
+                        ["approvedOn"] = approvedOn,
+                        ["receivedOn"] = receivedOn,
+                    });
+
+            public static BusinessRuleViolationException ApprovedOnInFuture(DateOnly approvedOn, DateOnly today)
+                => new(
+                    "homeownership.mortgage_request.approve.approved_on_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["approvedOn"] = approvedOn,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException OverCapReasonRequired(decimal debtPercent, int capPercent)
+                => new(
+                    "homeownership.mortgage_request.approve.over_cap_reason_required",
+                    new Dictionary<string, object?>
+                    {
+                        ["debtPercent"] = debtPercent,
+                        ["capPercent"] = capPercent,
+                    });
+        }
+
+        public static class Deny
+        {
+            public static BusinessRuleViolationException NotPending(MortgageRequestStatus status)
+                => new(
+                    "homeownership.mortgage_request.deny.not_pending",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException ReasonRequired()
+                => new(
+                    "homeownership.mortgage_request.deny.reason_required");
+
+            public static BusinessRuleViolationException DeniedOnBeforeReceived(DateOnly deniedOn, DateOnly receivedOn)
+                => new(
+                    "homeownership.mortgage_request.deny.denied_on_before_received",
+                    new Dictionary<string, object?>
+                    {
+                        ["deniedOn"] = deniedOn,
+                        ["receivedOn"] = receivedOn,
+                    });
+
+            public static BusinessRuleViolationException DeniedOnInFuture(DateOnly deniedOn, DateOnly today)
+                => new(
+                    "homeownership.mortgage_request.deny.denied_on_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["deniedOn"] = deniedOn,
+                        ["today"] = today,
+                    });
+        }
+
+        public static class RecordLoanClosed
+        {
+            public static BusinessRuleViolationException NotApproved(MortgageRequestStatus status)
+                => new(
+                    "homeownership.mortgage_request.record_loan_closed.not_approved",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException ClosedOnBeforeApproved(DateOnly closedOn, DateOnly approvedOn)
+                => new(
+                    "homeownership.mortgage_request.record_loan_closed.closed_on_before_approved",
+                    new Dictionary<string, object?>
+                    {
+                        ["closedOn"] = closedOn,
+                        ["approvedOn"] = approvedOn,
+                    });
+
+            public static BusinessRuleViolationException ClosedOnInFuture(DateOnly closedOn, DateOnly today)
+                => new(
+                    "homeownership.mortgage_request.record_loan_closed.closed_on_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["closedOn"] = closedOn,
+                        ["today"] = today,
+                    });
+        }
+
+        public static class Withdraw
+        {
+            public static BusinessRuleViolationException NotOpen(MortgageRequestStatus status)
+                => new(
+                    "homeownership.mortgage_request.withdraw.not_open",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException ReasonRequired()
+                => new(
+                    "homeownership.mortgage_request.withdraw.reason_required");
+
+            public static BusinessRuleViolationException WithdrawnOnBeforeReceived(DateOnly withdrawnOn, DateOnly receivedOn)
+                => new(
+                    "homeownership.mortgage_request.withdraw.withdrawn_on_before_received",
+                    new Dictionary<string, object?>
+                    {
+                        ["withdrawnOn"] = withdrawnOn,
+                        ["receivedOn"] = receivedOn,
+                    });
+
+            public static BusinessRuleViolationException WithdrawnOnInFuture(DateOnly withdrawnOn, DateOnly today)
+                => new(
+                    "homeownership.mortgage_request.withdraw.withdrawn_on_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["withdrawnOn"] = withdrawnOn,
+                        ["today"] = today,
                     });
         }
     }
