@@ -23,6 +23,10 @@ certificates. The stack's realm needs a user `e2e` with password `e2e` and a ver
 `kcadm.sh` in the Keycloak container). Specs that sign up a new user (onboarding, team) stop at Keycloak's verify-email
 page there, because the production realm requires a verified email.
 
+`tests/onboarding/try-the-demo.spec.ts` needs the API in demo mode and skips itself otherwise. Run it on its own with
+`E2E_DEMO=1 npm run e2e -- tests/onboarding/try-the-demo.spec.ts`. Demo mode changes Onboarding's buttons, so the other
+onboarding specs fail in it.
+
 To watch a run as a demo, `npm run e2e:demo` runs headed, one test at a time, pausing 400 ms before each action.
 Set `SLOWMO` to change the pause, and pass a path to run one area: `SLOWMO=800 npm run e2e:demo -- tests/purchase-workflows`.
 

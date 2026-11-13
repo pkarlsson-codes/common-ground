@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AuthApi } from '../api'
 import { ResponseError } from '../api/runtime'
@@ -37,5 +38,5 @@ export function useCurrentUser() {
 
 export function useRefreshCurrentUser() {
   const qc = useQueryClient()
-  return () => qc.refetchQueries({ queryKey: currentUserQueryKey })
+  return useCallback(() => qc.refetchQueries({ queryKey: currentUserQueryKey }), [qc])
 }

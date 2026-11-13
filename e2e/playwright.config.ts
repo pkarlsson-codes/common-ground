@@ -26,6 +26,12 @@ const workers = Number(process.env.E2E_WORKERS ?? 4)
 // That stack must have an e2e user (password e2e) in its realm, and it has no seeded data.
 const deployedUrl = process.env.E2E_BASE_URL
 
+// E2E_DEMO=1 starts the API in demo mode, for tests/onboarding/try-the-demo.spec.ts, which skips itself otherwise.
+// Demo mode changes Onboarding's buttons, so the other onboarding specs fail in it: run that spec on its own.
+const demoEnv = process.env.E2E_DEMO
+  ? { Demo__Enabled: 'true', Demo__FeedbackUrl: 'mailto:demo@example.org', Demo__MaxSandboxes: '10000' }
+  : undefined
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
@@ -64,6 +70,7 @@ export default defineConfig({
       ].join(' && '),
       cwd: repoRoot,
       url: 'http://localhost:5000/health',
+      env: demoEnv,
       reuseExistingServer: false,
       timeout: 300_000,
       stdout: 'ignore',
