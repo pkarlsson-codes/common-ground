@@ -1,159 +1,312 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CommonGround — Architecture</title>
-  <script src="./diagram-panzoom.js"></script>
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-    import elkLayouts from 'https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs';
-    mermaid.registerLayoutLoaders(elkLayouts);
-    mermaid.initialize({ startOnLoad: false, theme: 'dark', layout: 'elk' });
-    await mermaid.run();
-    setupPanZoom();
-  </script>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background: #0f1117;
-      color: #e2e8f0;
-      margin: 0;
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      box-sizing: border-box;
-      overflow-y: auto;
-    }
-    h1 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-      color: #f8fafc;
-    }
-    p.subtitle {
-      color: #94a3b8;
-      margin-top: 0;
-      margin-bottom: 2rem;
-      font-size: 0.9rem;
-    }
-    .diagram-container {
-      background: #1e2330;
-      border: 1px solid #2d3748;
-      border-radius: 0.75rem;
-      padding: 0;
-      flex: 1;
-      min-height: 300px;
-      overflow: hidden;
-      position: relative;
-      cursor: grab;
-    }
-    .diagram-container:active {
-      cursor: grabbing;
-    }
-    .diagram-container .mermaid {
-      display: block;
-    }
-    .diagram-hint {
-      position: absolute;
-      bottom: 0.75rem;
-      right: 1rem;
-      font-size: 0.75rem;
-      color: #475569;
-      pointer-events: none;
-      z-index: 10;
-    }
-    .legend {
-      margin-top: 1.5rem;
-      display: flex;
-      gap: 2rem;
-      font-size: 0.8rem;
-      color: #94a3b8;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .legend-line {
-      width: 2rem;
-      height: 2px;
-      background: #64748b;
-    }
-    .legend-line.dashed {
-      background: repeating-linear-gradient(90deg, #64748b 0, #64748b 4px, transparent 4px, transparent 8px);
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Architecture Overview</title>
+<link rel="stylesheet" href="./docs.css" />
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
+  const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  mermaid.initialize({ startOnLoad: true, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict' });
+</script>
 </head>
 <body>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <p class="toc-title"><a href="./index.html">CommonGround docs</a></p>
+  <ol>
+    <li><a href="#purpose">Purpose and audience</a></li>
+    <li><a href="#context">The system at a glance</a></li>
+    <li><a href="#processes">Processes and ports</a></li>
+    <li><a href="#contexts">Bounded contexts</a></li>
+    <li><a href="#request">How a request flows</a></li>
+    <li><a href="#domain">Domain model rules</a></li>
+    <li><a href="#persistence">Persistence</a></li>
+    <li><a href="#messaging">Messaging between contexts</a></li>
+    <li><a href="#tenancy">Trusts, users and sign-in</a></li>
+    <li><a href="#time">Dates and times</a></li>
+    <li><a href="#today">Today: the work queue</a></li>
+    <li><a href="#documents">Document files</a></li>
+    <li><a href="#web">The web app</a></li>
+    <li><a href="#deploy">Deployment</a></li>
+    <li><a href="#testing">Testing</a></li>
+    <li><a href="#decisions">Decisions and their reasons</a></li>
+    <li><a href="#start">Where to start reading</a></li>
+  </ol>
+</nav>
 
-  <h1>CommonGround — Architecture</h1>
-  <p class="subtitle">Processes, the layers inside each, and the local infrastructure they depend on. Source of truth: <code>docs/architecture.md</code>.</p>
+<main>
+<header>
+  <h1>Architecture Overview</h1>
+  <p class="lede">How CommonGround is built: the processes, the bounded contexts inside the API, how data and messages move between them, and why it was built this way.</p>
+  <p class="meta">Last checked against the code: 2026-11-13.</p>
+</header>
 
-  <div class="diagram-container">
-    <div class="diagram-hint">scroll to zoom · drag to pan</div>
-    <div class="mermaid">
-flowchart TB
-    subgraph GatewayMgmt["Process: Management Gateway (:4000)"]
-        MgmtEndpoints["Endpoints"]
-        MgmtClients["API Clients"]
-        MgmtEndpoints --> MgmtClients
-    end
+<section id="purpose">
+  <h2>1. Purpose and audience</h2>
+  <p>CommonGround is software for community land trusts (CLTs). A CLT owns land and sells the homes on it to income-qualified households under a long ground lease, with a resale formula that keeps the home affordable for the next buyer. Staff use CommonGround to run that work: the waiting list, applications, home sales, ground leases, lease fees, resales and stewardship. The product goal is a free or low-cost alternative to the commercial CLT software.</p>
+  <p>This document is for a developer who joins or forks the project. It assumes you know C#, ASP.NET Core and React. It doesn't assume you know CLTs, Marten or Wolverine.</p>
+  <p>Words used throughout:</p>
+  <dl>
+    <dt>Trust</dt><dd>One CLT using CommonGround. Each trust is a tenant; its data is separated from every other trust's.</dd>
+    <dt>Bounded context</dt><dd>One area of the domain with its own model and its own project, such as <code>HomeBuyers</code> or <code>Homeownership</code>.</dd>
+    <dt>Gateway</dt><dd>A backend-for-frontend (BFF) process. It owns sign-in and cookies, and calls the API for the browser.</dd>
+  </dl>
+</section>
 
-    subgraph GatewayHome["Process: Homeowner Gateway"]
-        HomeEndpoints["Endpoints"]
-        HomeClients["API Clients"]
-        HomeEndpoints --> HomeClients
-    end
-
-    subgraph API["Process: API (:5000)"]
-        ApiEndpoints["Endpoints"]
-        subgraph Contexts["Bounded contexts"]
-            direction LR
-            HomeBuyers["HomeBuyers"]
-            Documents["Documents"]
-            Homeownership["Homeownership"]
-            Identity["Identity"]
-            PropertyRegistry["PropertyRegistry"]
-            Stewardship["Stewardship"]
-            TrustManagement["TrustManagement"]
-        end
-        ApiEndpoints --> HomeBuyers
-        ApiEndpoints --> Documents
-        ApiEndpoints --> Homeownership
-        ApiEndpoints --> Identity
-        ApiEndpoints --> PropertyRegistry
-        ApiEndpoints --> Stewardship
-        ApiEndpoints --> TrustManagement
-    end
-
-    subgraph Infra["Local Infra (docker-compose)"]
-        Postgres[("PostgreSQL<br/>(pgvector)")]
-        Keycloak["Keycloak"]
-        Blobs[("Document files: disk or S3")]
-        Seq["Seq"]
-    end
-
-    MgmtClients -- "internal JWT" --> ApiEndpoints
-    HomeClients -- "internal JWT" --> ApiEndpoints
-    MgmtEndpoints -- "OIDC login" --> Keycloak
-    MgmtEndpoints -- "sessions, Data Protection keys" --> Postgres
-    HomeEndpoints -- "OIDC login" --> Keycloak
-    HomeEndpoints -- "sessions, Data Protection keys" --> Postgres
-
-    Contexts --> Postgres
-    Documents --> Blobs
-    ApiEndpoints -.-> Seq
-    MgmtEndpoints -.-> Seq
-    HomeEndpoints -.-> Seq
-    </div>
+<section id="context">
+  <h2>2. The system at a glance</h2>
+  <p>A staff member's browser talks to one origin, the management gateway. The gateway signs the user in through Keycloak, keeps their tokens server-side, and calls the API with a short-lived internal JWT. The API holds all business logic and stores everything in Postgres, except uploaded files.</p>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  Staff(["Staff member<br/>(browser)"])
+  subgraph Server["One server (deploy/compose.yml)"]
+    Caddy["Caddy<br/>TLS"]
+    Gateway["Management gateway<br/>serves web app, /api, /auth"]
+    API["API<br/>all business logic"]
+    Keycloak["Keycloak<br/>sign-up, sign-in"]
+    PG[("Postgres<br/>events, read models,<br/>messages, sessions,<br/>Keycloak users")]
+    Files[("Document files<br/>disk volume or S3")]
+  end
+  Staff -- HTTPS --> Caddy
+  Caddy --> Gateway
+  Caddy -- /auth-server --> Keycloak
+  Gateway -- "OIDC" --> Keycloak
+  Gateway -- "internal JWT" --> API
+  Gateway -- "sessions,<br/>Data Protection keys" --> PG
+  API --> PG
+  API --> Files
+  Keycloak --> PG
+</pre>
   </div>
+  <p>A homeowner gateway (<code>CommonGround.Homeowner.Gateway</code>) follows the same pattern for future homeowner self-service. It has no web app yet and isn't deployed.</p>
+</section>
 
-  <div class="legend">
-    <div class="legend-item"><span class="legend-line"></span> synchronous call / dependency</div>
-    <div class="legend-item"><span class="legend-line dashed"></span> logging (Seq)</div>
+<section id="processes">
+  <h2>3. Processes and ports</h2>
+  <table>
+    <thead><tr><th>Process</th><th>Project</th><th>Development</th><th>Production</th></tr></thead>
+    <tbody>
+      <tr><td>Management web app</td><td><code>CommonGround.Management.Web</code></td><td>Vite dev server, port 3000; proxies <code>/api</code> and <code>/auth</code> to the gateway</td><td>Built to static files, served by the gateway from <code>wwwroot</code></td></tr>
+      <tr><td>Management gateway</td><td><code>CommonGround.Management.Gateway</code></td><td>Port 4000</td><td>Behind Caddy</td></tr>
+      <tr><td>API</td><td><code>CommonGround.API</code></td><td>Port 5000</td><td>Internal only; the gateway is its only caller</td></tr>
+      <tr><td>Postgres</td><td><code>docker-compose.yml</code></td><td>Port 5432 (<code>pgvector/pgvector:pg15</code>)</td><td>Plain Postgres container</td></tr>
+      <tr><td>Keycloak 26</td><td><code>config/keycloak</code>, <code>deploy/keycloak</code></td><td>Port 7080, <code>start-dev</code></td><td><code>start</code>, under <code>/auth-server</code></td></tr>
+      <tr><td>MinIO</td><td><code>docker-compose.yml</code></td><td>Ports 9000/9001, S3 for document files</td><td>Not used; files go on a volume, or any S3 bucket</td></tr>
+      <tr><td>Seq</td><td><code>docker-compose.yml</code></td><td>Port 5341, log search</td><td>Not used; logs go to the console</td></tr>
+    </tbody>
+  </table>
+  <p>Start the development infrastructure with <code>npm run infra:start</code>, then run the API, gateway and web app (<code>npm run api:start</code>, <code>management:gateway:start</code>, <code>management:web:start</code>). The API doesn't seed data at startup: run <code>npm run db:seed</code>, or <code>npm run db:reset</code> to wipe and seed.</p>
+</section>
+
+<section id="contexts">
+  <h2>4. Bounded contexts</h2>
+  <p>The API is one process that hosts seven bounded contexts. Each is its own class library, so the compiler stops one context from using another's internals. They share one Postgres database through Marten.</p>
+  <table>
+    <thead><tr><th>Context</th><th>What it covers</th><th>Aggregates (in <code>Domain/</code>)</th><th>Publishes integration events</th></tr></thead>
+    <tbody>
+      <tr><td><code>HomeBuyers</code></td><td>People who want to buy: households, applications, matching a household to a home, income limits</td><td>Household, HomeownerApplication, HomeSelection, IncomeLimitSchedule</td><td>Yes</td></tr>
+      <tr><td><code>PropertyRegistry</code></td><td>The physical portfolio</td><td>LandParcel, Home, DevelopmentProject</td><td>Yes</td></tr>
+      <tr><td><code>Homeownership</code></td><td>A home once sold: ground leases, purchase workflow, mortgages, resales, lease fee notices</td><td>GroundLease, GroundLeaseTemplate, PurchaseWorkflow, MortgageRequest, Resale, LeaseFeeNoticePolicy</td><td>Yes</td></tr>
+      <tr><td><code>Stewardship</code></td><td>Keeping homeowners in their homes: stewardship cases, foreclosure prevention</td><td>StewardshipCase, ForeclosurePreventionCase</td><td>No</td></tr>
+      <tr><td><code>TrustManagement</code></td><td>The trust itself: settings, policy, members, invitations</td><td>Trust, TrustInvitation</td><td>No</td></tr>
+      <tr><td><code>Identity</code></td><td>Users, linked to their Keycloak subject</td><td>User</td><td>No</td></tr>
+      <tr><td><code>Documents</code></td><td>Uploaded files attached to any record</td><td>Document</td><td>No</td></tr>
+    </tbody>
+  </table>
+  <p>A context that publishes integration events has a <code>CommonGround.&lt;Context&gt;.Contracts</code> project; its <code>Events</code> folder holds the event types other contexts may react to. Which contexts talk to which can be read from the project references to <code>*.Contracts</code>.</p>
+
+  <h3>Project layout</h3>
+  <table>
+    <thead><tr><th>Project</th><th>Holds</th></tr></thead>
+    <tbody>
+      <tr><td><code>CommonGround.&lt;Context&gt;/Domain</code></td><td>Aggregates, entities, value objects, domain events. No infrastructure references.</td></tr>
+      <tr><td><code>CommonGround.&lt;Context&gt;/Application</code></td><td><code>Commands</code>, <code>Queries</code>, <code>EventHandlers</code>, <code>ReadModels</code>, <code>WorkItems</code>, <code>Errors</code>: Wolverine handlers and the records they handle.</td></tr>
+      <tr><td><code>CommonGround.&lt;Context&gt;/Infrastructure</code></td><td>Marten configuration, projections, development seeders.</td></tr>
+      <tr><td><code>CommonGround.API/&lt;Context&gt;</code></td><td>HTTP endpoints for that context. Endpoints translate requests into commands and queries; they hold no business rules.</td></tr>
+      <tr><td><code>CommonGround.API.Contracts</code></td><td>Request and response types of the API.</td></tr>
+      <tr><td><code>CommonGround.API.Clients</code></td><td>Typed <code>HttpClient</code> clients the gateways use to call the API.</td></tr>
+      <tr><td><code>CommonGround.SharedKernel</code></td><td>Base classes (<code>AggregateRoot</code>, <code>Entity</code>, <code>ValueObject</code>, <code>Enumeration</code>), shared value objects (<code>Money</code>, <code>Address</code>, <code>TrustId</code>, <code>UserId</code>, <code>IncomeLimitTable</code>), clocks, Marten and Wolverine setup.</td></tr>
+    </tbody>
+  </table>
+  <p>The API project also has modules that aren't bounded contexts: <code>Today</code> (the work queue), <code>Reports</code>, <code>PortfolioImport</code> and <code>Demo</code> (sample-trust sandboxes). They read from or write to the contexts through commands and queries.</p>
+</section>
+
+<section id="request">
+  <h2>5. How a request flows</h2>
+  <p>Example: a staff member records that a household finished housing counseling.</p>
+  <div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  participant B as Browser
+  participant G as Management gateway
+  participant A as API endpoint
+  participant H as Handler
+  participant M as Marten (Postgres)
+  participant W as Wolverine queues
+  B->>G: POST /api/... + cookies
+  G->>G: CSRF check, session, mint JWT
+  G->>A: same request + Bearer JWT
+  A->>A: JWT, trust membership
+  A->>H: InvokeForTenantAsync
+  H->>M: load Household
+  H->>H: decide: returns event
+  H->>M: append, project, outbox
+  M-->>W: publish events
+  W->>W: other contexts' handlers
+  A-->>G: 200 or problem
+  G-->>B: response
+</pre>
   </div>
+  <ol>
+    <li>The browser sends the request with its cookies, plus the <code>cg_csrf</code> value as a header.</li>
+    <li>The gateway checks the CSRF header, finds the session from <code>cg_session</code>, and mints an internal JWT.</li>
+    <li>The gateway's endpoint calls the API through a typed client in <code>CommonGround.API.Clients</code>.</li>
+    <li>The API validates the JWT and checks the user still belongs to the trust.</li>
+    <li>The API endpoint sends the <code>RecordHousingCounseling</code> command with <code>bus.InvokeForTenantAsync(trustId, …)</code>.</li>
+    <li>Wolverine loads the <code>Household</code> aggregate for the handler (<code>[WriteAggregate]</code>).</li>
+    <li>The handler calls <code>household.RecordHousingCounseling(…)</code>, which returns an event or <code>null</code>.</li>
+    <li>In one transaction: the event is appended, inline projections update, and outgoing messages are stored.</li>
+    <li>Marten publishes the events to Wolverine.</li>
+    <li>Other contexts' handlers run on durable local queues, each in its own transaction. The response doesn't wait for them.</li>
+    <li>The API returns 200, or a problem response with an error code.</li>
+    <li>The gateway passes the response to the browser.</li>
+  </ol>
+  <p>The handler for that example is <code>src/CommonGround.HomeBuyers/Application/Commands/RecordHousingCounseling.cs</code>. It is a static method: Wolverine loads the aggregate, the handler calls one decision method, and Wolverine appends whatever event comes back. If the method returns <code>null</code>, nothing is written.</p>
+</section>
 
+<section id="domain">
+  <h2>6. Domain model rules</h2>
+  <ul>
+    <li><strong>Aggregates are deciders.</strong> A decision method checks the request against current state and returns the event(s) it decides on, without changing state. Marten rebuilds state by calling the aggregate's public static <code>Create</code> for the first event and a public <code>Apply</code> for each later one. An event without a public <code>Apply</code> is silently ignored when state is rebuilt.</li>
+    <li><strong>Every domain type derives from a SharedKernel base class</strong> and starts from a <code>dotnet new</code> template in <code>templates/</code> (<code>ddd-aggregate</code>, <code>ddd-entity</code>, <code>ddd-vo</code>, <code>ddd-enum</code>). See <code>docs/ai/creating-domain-types.md</code>.</li>
+    <li><strong>Bad input a user can send is a business rule violation</strong>, not an <code>ArgumentException</code>. The exception handler turns it into a problem response with an error code, and every error code has a message.</li>
+    <li><strong>A rule used in two places is a missing concept.</strong> Extract it into a value object or domain service, as was done for <code>Money</code> and <code>IncomeLimitTable</code>.</li>
+  </ul>
+</section>
+
+<section id="persistence">
+  <h2>7. Persistence</h2>
+  <p>The API stores all state with <a href="https://martendb.io/">Marten</a> on Postgres. Setup is in <code>src/CommonGround.SharedKernel/Extensions/MartenServiceCollectionExtensions.cs</code>.</p>
+  <ul>
+    <li><strong>Event sourcing.</strong> Each aggregate is an event stream in the <code>commonground_events</code> schema, with string stream IDs. The event log is the record of what happened and when, which a CLT needs for audits and reports.</li>
+    <li><strong>Read models</strong> are Marten projections that turn events into documents for queries. The projections in this code are registered <code>Inline</code>, so they update in the same transaction as the events. Each context registers its own in <code>Infrastructure/Persistence</code>.</li>
+    <li><strong>Tenancy.</strong> Every document and every event is tagged with its trust (<code>AllDocumentsAreMultiTenanted</code>, <code>TenancyStyle.Conjoined</code>). Code opens a session for one trust and can't see another trust's rows.</li>
+    <li><strong>Schema.</strong> Marten applies database changes at startup. The project has never been deployed, so there are no migrations yet; <code>npm run db:reset</code> is always safe in development.</li>
+  </ul>
+  <p>The gateways store their sessions and ASP.NET Data Protection keys in their own Postgres schemas (<code>management_gateway</code>, <code>homeowner_gateway</code>) and read nothing else there.</p>
+</section>
+
+<section id="messaging">
+  <h2>8. Messaging between contexts</h2>
+  <p><a href="https://wolverinefx.net/">Wolverine</a> is both the in-process mediator (endpoints call handlers through <code>IMessageBus</code>) and the message bus between contexts. Setup is in <code>src/CommonGround.API/Program.cs</code>.</p>
+  <ul>
+    <li><strong>Contexts don't call each other.</strong> When one context needs to react to another, the publisher puts an event type in its <code>*.Contracts/Events</code> folder, and the subscriber writes a handler for it. Example: <code>PurchaseClosed</code> from Homeownership.</li>
+    <li><strong>Durable local queues.</strong> Messages are stored in the Postgres inbox/outbox in the same transaction as the events. They survive a restart, and scheduled messages (a prequalification expiring months later) are stored and polled for.</li>
+    <li><strong>One handler per context per event</strong> (<code>MultipleHandlerBehavior.Separated</code>). Each runs on its own queue with its own transaction and retries, so one context's failure doesn't roll back another's.</li>
+    <li><strong>Concurrency.</strong> Two handlers writing the same stream at once: the loser gets a version conflict and is retried after 50, 100 and 250 ms, reloading what it writes.</li>
+    <li><strong>Handlers run at the time of their cause.</strong> <code>EventClockMiddleware</code> sets the clock to the event's time, so a reaction is dated when its cause happened even if it's delivered late, and seeded data gets reactions on the seeded date.</li>
+    <li><strong>No event is dropped silently.</strong> A handler that can't act logs or fails; see <code>docs/ai/api-contracts.md</code>.</li>
+    <li><strong>Handler class names end in <code>Handler</code> or <code>Consumer</code></strong>, or Wolverine doesn't find them.</li>
+  </ul>
+  <p><code>Messaging:Transport</code> can also send integration events to an external transport, for when a context is split into its own service: <code>None</code> (default), <code>Postgres</code> (one queue table, no extra container) or <code>RabbitMq</code>. Handlers inside the API receive the events with every setting.</p>
+</section>
+
+<section id="tenancy">
+  <h2>9. Trusts, users and sign-in</h2>
+  <ul>
+    <li>The gateway is the only OIDC client. Keycloak tokens never reach the browser or the API. They are stored server-side in the gateway's <code>sessions</code> table, keyed by the <code>cg_session</code> cookie.</li>
+    <li>Cookies: <code>cg_auth</code> (ASP.NET cookie ticket), <code>cg_session</code> (HttpOnly session ID), <code>cg_csrf</code> (readable by JavaScript, sent back as a header for CSRF checks).</li>
+    <li>For each API call the gateway mints an internal JWT (HS256, 5-minute lifetime) with <code>user_id</code>, <code>tenant_id</code> (the trust) and <code>session_id</code>. The API takes identity from <code>user_id</code> and the tenant from <code>tenant_id</code>.</li>
+    <li>On first sign-in the gateway calls the API's <code>EnsureUser</code> with a service token, so users are created just in time.</li>
+    <li><code>TrustMembershipMiddleware</code> in the API refuses a request whose user is no longer a member of the token's trust. Without it a removed member would keep access until their session expired (up to 7 days).</li>
+    <li>A new user gets into a trust in one of three ways: creates one in Onboarding, accepts an invitation, or tries a demo sandbox.</li>
+  </ul>
+  <p>Sequence diagrams for login, an API call, refresh and logout: <a href="./auth-flow.html">Authentication flow</a>.</p>
+</section>
+
+<section id="time">
+  <h2>10. Dates and times</h2>
+  <ul>
+    <li>An instant (when something happened) is a UTC <code>DateTimeOffset</code>.</li>
+    <li>A calendar date (a lease start, a due date) is a <code>DateOnly</code> in C# and a <code>CalendarDate</code> in the web app.</li>
+    <li>"Today" is in the trust's time zone: <code>ITrustClock</code> in C#, <code>trustToday()</code> in the web app. A trust in Hawaii and one in Maine have different todays at the same instant.</li>
+    <li>Code reads the time through <code>ITimeProvider</code>, never <code>DateTime.Now</code>, so tests and seeders can set the clock.</li>
+  </ul>
+  <p>Full rules: <code>docs/ai/dates-and-times.md</code>.</p>
+</section>
+
+<section id="today">
+  <h2>11. Today: the work queue</h2>
+  <p>The Today page lists everything that needs a staff member: an application awaiting a decision, a lease fee notice coming due, a document to review. No context owns this list. Each context derives <code>WorkItem</code>s from its own read models in response to a query (<code>GetHomeBuyersWorkItems</code>, <code>GetDocumentsWorkItems</code>, and so on), and <code>src/CommonGround.API/Today/TodayEndpoints.cs</code> asks each one and merges the answers. A new kind of work item needs no change outside its own context, except the web app, which skips kinds it doesn't know.</p>
+</section>
+
+<section id="documents">
+  <h2>12. Document files</h2>
+  <p>Only the <code>Documents</code> context reads or writes files, through <code>IDocumentBlobStore</code>. <code>Documents:Store</code> picks the store: <code>FileSystem</code> (default; a mounted volume) or <code>S3</code> (any S3-compatible bucket; MinIO in development). The S3 store redirects downloads to a presigned URL. With the file system store the API streams the file, and the gateway serves it with <code>Content-Disposition</code>, <code>nosniff</code> and a <code>sandbox</code> CSP so an uploaded HTML or SVG file can't run script on the app's origin.</p>
+</section>
+
+<section id="web">
+  <h2>13. The web app</h2>
+  <ul>
+    <li>React 19, Vite, React Router 7, TanStack Query 5, Tailwind CSS 4; tests in Vitest.</li>
+    <li>Code is organised by page under <code>src/pages/&lt;area&gt;/</code>, with shared components in <code>src/components/</code> and data hooks in <code>src/hooks/</code>.</li>
+    <li>The API client in <code>src/api/</code> is generated, not hand-written: <code>npm run management:web:generate</code> builds the gateway, exports its OpenAPI spec with NSwag, and runs OpenAPI Generator (<code>typescript-fetch</code>). Re-run it after changing a gateway endpoint or contract.</li>
+    <li>The gateway forwards API contracts to the browser, so a new required request field breaks the web forms and e2e tests until they send it.</li>
+    <li>Business defaults (what a field starts as) live in the client. On the wire, a null field and an absent field mean the same thing. See <code>docs/ai/api-contracts.md</code>.</li>
+  </ul>
+  <p>Each user-facing journey has a doc in <code>docs/journeys/</code> describing the screens, entry points and outcomes.</p>
+</section>
+
+<section id="deploy">
+  <h2>14. Deployment</h2>
+  <p><code>deploy/compose.yml</code> runs five containers on one server: Caddy, Postgres, Keycloak, API and management gateway, plus a <code>documents</code> volume. Caddy gets TLS certificates and sends traffic to the gateway, and <code>/auth-server</code> to Keycloak. A small cloud server with 2 vCPU and 4 GB RAM is the target; Keycloak is the largest consumer at about 1.25 GB planned.</p>
+  <p>Backup is a nightly <code>pg_dump</code> plus a copy of the documents volume (or the S3 bucket). The server never seeds data. The same setup serves an operator who hosts many CLTs and a CLT that hosts its own copy. Details and the options that were rejected: <code>docs/hosting-decision.md</code>.</p>
+</section>
+
+<section id="testing">
+  <h2>15. Testing</h2>
+  <table>
+    <thead><tr><th>Layer</th><th>Where</th><th>What it checks</th></tr></thead>
+    <tbody>
+      <tr><td>Unit</td><td><code>src/CommonGround.&lt;Context&gt;.Tests</code>, <code>SharedKernel.Tests</code>, <code>API.Tests</code></td><td>Aggregate decisions and value objects. Rules in <code>docs/ai/unit-testing.md</code>.</td></tr>
+      <tr><td>Integration</td><td><code>src/CommonGround.API.IntegrationTests</code></td><td>The API over HTTP with <code>WebApplicationFactory</code>, against real Postgres. Tokens are signed with the test key and need a real trust membership.</td></tr>
+      <tr><td>Web unit</td><td><code>src/CommonGround.Management.Web</code> (Vitest)</td><td>Components and helpers.</td></tr>
+      <tr><td>End-to-end</td><td><code>e2e/</code> (Playwright)</td><td>Journeys through the real stack: browser, gateway, API, Keycloak. Run with <code>npm run e2e</code>.</td></tr>
+    </tbody>
+  </table>
+  <p>A Husky pre-commit hook builds the solution and runs the .NET tests.</p>
+</section>
+
+<section id="decisions">
+  <h2>16. Decisions and their reasons</h2>
+  <table>
+    <thead><tr><th>Decision</th><th>Reason</th></tr></thead>
+    <tbody>
+      <tr><td>One API process with seven bounded contexts, not microservices</td><td>One small server is cheap for a nonprofit to run. Separate projects and integration events keep the contexts apart, so one can be split out later by changing <code>Messaging:Transport</code>.</td></tr>
+      <tr><td>Event sourcing with Marten</td><td>CLT work is a long history (a lease lasts 99 years, a home resells several times). Audits and reports need what happened and when, not only current state. Marten gives that on plain Postgres.</td></tr>
+      <tr><td>Postgres for everything except files</td><td>One database to run and back up. Redis and RabbitMQ were removed from the default setup; config can bring them back when load requires it.</td></tr>
+      <tr><td>A BFF gateway in front of the API</td><td>Tokens stay off the browser. The app, <code>/api</code> and <code>/auth</code> share one origin, so cookies stay first-party and no CORS is needed.</td></tr>
+      <tr><td>Keycloak for sign-in</td><td>It gives sign-up, password reset, lockout and two-factor sign-in without the project writing security code. Replacing it with ASP.NET Core Identity is planned if an operator needs a 2 GB server or Keycloak upgrades break.</td></tr>
+      <tr><td>Conjoined tenancy (one database, rows tagged by trust)</td><td>A shared instance can host many small CLTs at low cost. Marten enforces the separation per session.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="start">
+  <h2>17. Where to start reading</h2>
+  <ol>
+    <li><code>src/CommonGround.API/Program.cs</code>: how the API is assembled, and the Wolverine policies with their reasons.</li>
+    <li>One context end to end: <code>src/CommonGround.HomeBuyers/Domain/Households</code>, then <code>Application/Commands</code>, then <code>src/CommonGround.API/HomeBuyers/HouseholdEndpoints.cs</code>.</li>
+    <li>The gateway's matching file: <code>src/CommonGround.Management.Gateway/Endpoints/HouseholdEndpoints.cs</code>, and <code>Services/InternalJwtService.cs</code>.</li>
+    <li>The matching page in <code>src/CommonGround.Management.Web/src/pages/households/</code> and its journey doc in <code>docs/journeys/households/</code>.</li>
+    <li>The rules for contributors in <code>docs/ai/</code> and <code>CLAUDE.md</code>.</li>
+  </ol>
+</section>
+</main>
+</div>
 </body>
 </html>
