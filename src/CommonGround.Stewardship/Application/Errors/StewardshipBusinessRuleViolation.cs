@@ -191,12 +191,40 @@ public static class BusinessRuleViolation
         {
             public static BusinessRuleViolationException GroundLeaseIdRequired()
                 => new("stewardship.foreclosure_prevention_case.open.ground_lease_id_required");
+
+            public static BusinessRuleViolationException CaseAlreadyOpen(string groundLeaseId, ForeclosurePreventionCaseId unresolvedCaseId)
+                => new(
+                    "stewardship.foreclosure_prevention_case.open.case_already_open",
+                    new Dictionary<string, object?>
+                    {
+                        ["groundLeaseId"] = groundLeaseId,
+                        ["unresolvedCaseId"] = unresolvedCaseId.Value,
+                    });
+        }
+
+        public static class OpenForLeaseDefault
+        {
+            public static BusinessRuleViolationException NoUnpaidDefault(string groundLeaseId)
+                => new(
+                    "stewardship.foreclosure_prevention_case.open_for_lease_default.no_unpaid_default",
+                    new Dictionary<string, object?>
+                    {
+                        ["groundLeaseId"] = groundLeaseId,
+                    });
         }
 
         public static class RecordServicerDelinquency
         {
             public static BusinessRuleViolationException ServicerNameRequired()
                 => new("stewardship.foreclosure_prevention_case.record_servicer_delinquency.servicer_name_required");
+
+            public static BusinessRuleViolationException InvalidDelinquentMonths(int delinquentMonths)
+                => new(
+                    "stewardship.foreclosure_prevention_case.record_servicer_delinquency.invalid_delinquent_months",
+                    new Dictionary<string, object?>
+                    {
+                        ["delinquentMonths"] = delinquentMonths,
+                    });
         }
 
         public static class MakeCounselingReferral

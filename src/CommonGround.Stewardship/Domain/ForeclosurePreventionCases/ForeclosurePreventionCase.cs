@@ -1,6 +1,6 @@
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
-using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.Stewardship.Application.Errors;
 using CommonGround.Stewardship.Domain.ForeclosurePreventionCases.Events;
 
 namespace CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
@@ -46,21 +46,72 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     /// <summary>All cure period activations for this case.</summary>
     public IReadOnlyList<CurePeriodActivation> CurePeriodActivations => _curePeriodActivations;
 
-    /// <summary>Opens a new foreclosure prevention case.</summary>
+    /// <summary>The unpaid notice of default the case was opened for, or null if it wasn't opened from a lease default.</summary>
+    public LeaseDefaultNotice? LeaseDefault { get; private set; }
+
+    /// <summary>
+    /// Opens a new foreclosure prevention case. A lease has at most one unresolved case, whichever trigger opened it.
+    /// </summary>
+    /// <param name="id">The new case's ID.</param>
+    /// <param name="groundLeaseId">The lease the case is for.</param>
+    /// <param name="trigger">What led to the case.</param>
+    /// <param name="openedDate">The trust date the case opens.</param>
+    /// <param name="unresolvedCaseId">The lease's unresolved case, if it has one.</param>
+    /// <param name="openedBy">The staff member opening the case.</param>
     public static ForeclosurePreventionCaseOpened Open(
         ForeclosurePreventionCaseId id,
         string groundLeaseId,
         ForeclosurePreventionTrigger trigger,
         DateOnly openedDate,
+        ForeclosurePreventionCaseId? unresolvedCaseId,
         UserId openedBy)
     {
         if (string.IsNullOrWhiteSpace(groundLeaseId))
-            throw new BusinessRuleViolationException("GroundLeaseId is required.");
+            throw BusinessRuleViolation.ForeclosurePreventionCase.Open.GroundLeaseIdRequired();
+        if (unresolvedCaseId is { } openCase)
+            throw BusinessRuleViolation.ForeclosurePreventionCase.Open.CaseAlreadyOpen(groundLeaseId, openCase);
 
         return new ForeclosurePreventionCaseOpened(
             id.Value,
             groundLeaseId, trigger, openedDate,
             openedBy.Value);
+    }
+
+    /// <summary>
+    /// Opens a case for a lease whose notice of default is unpaid (Art 12.1, Ch 25), recording the notice's figures.
+    /// Refused when the lease has no unpaid notice of default or already has an unresolved case.
+    /// </summary>
+    /// <param name="id">The new case's ID.</param>
+    /// <param name="groundLeaseId">The lease the case is for.</param>
+    /// <param name="unpaidDefault">The lease's notice of default as of <paramref name="openedDate"/>, or null when it has no unpaid one.</param>
+    /// <param name="openedDate">The trust date the case opens.</param>
+    /// <param name="unresolvedCaseId">The lease's unresolved case, if it has one.</param>
+    /// <param name="openedBy">The staff member opening the case.</param>
+    /// <returns>The opening and the arrears it records, in that order.</returns>
+    public static IReadOnlyList<DomainEvent> OpenForLeaseDefault(
+        ForeclosurePreventionCaseId id,
+        string groundLeaseId,
+        LeaseDefaultNotice? unpaidDefault,
+        DateOnly openedDate,
+        ForeclosurePreventionCaseId? unresolvedCaseId,
+        UserId openedBy)
+    {
+        var opened = Open(id, groundLeaseId, ForeclosurePreventionTrigger.LeaseFeeArrears, openedDate, unresolvedCaseId, openedBy);
+        if (unpaidDefault is null)
+            throw BusinessRuleViolation.ForeclosurePreventionCase.OpenForLeaseDefault.NoUnpaidDefault(groundLeaseId);
+
+        return
+        [
+            opened,
+            new LeaseFeeArrearsRecorded(
+                id.Value,
+                unpaidDefault.SentOn,
+                unpaidDefault.AmountOwed.Amount,
+                unpaidDefault.CureBy,
+                unpaidDefault.StillToPay.Amount,
+                openedDate,
+                openedBy.Value),
+        ];
     }
 
     /// <summary>Records a servicer delinquency without advancing the case to Active.</summary>
@@ -69,9 +120,9 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     {
         GuardNotResolved();
         if (string.IsNullOrWhiteSpace(servicerName))
-            throw new BusinessRuleViolationException("Servicer name is required.");
+            throw BusinessRuleViolation.ForeclosurePreventionCase.RecordServicerDelinquency.ServicerNameRequired();
         if (delinquentMonths <= 0)
-            throw new BusinessRuleViolationException("Delinquent months must be positive.");
+            throw BusinessRuleViolation.ForeclosurePreventionCase.RecordServicerDelinquency.InvalidDelinquentMonths(delinquentMonths);
 
         return new ServicerDelinquencyRecorded(
             Id.Value, servicerName, delinquentMonths, recordedDate,
@@ -84,7 +135,7 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     {
         GuardNotResolved();
         if (string.IsNullOrWhiteSpace(agencyName))
-            throw new BusinessRuleViolationException("Agency name is required.");
+            throw BusinessRuleViolation.ForeclosurePreventionCase.MakeCounselingReferral.AgencyNameRequired();
 
         return new CounselingReferralMade(
             Id.Value, Guid.NewGuid(), agencyName, referralDate,
@@ -97,7 +148,7 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     {
         GuardActive();
         if (string.IsNullOrWhiteSpace(outcome))
-            throw new BusinessRuleViolationException("Outcome is required.");
+            throw BusinessRuleViolation.ForeclosurePreventionCase.RecordCounselingOutcome.OutcomeRequired();
         var referral = FindReferral(referralId);
         _ = referral;
 
@@ -112,7 +163,7 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     {
         GuardNotResolved();
         if (string.IsNullOrWhiteSpace(lenderName))
-            throw new BusinessRuleViolationException("Lender name is required.");
+            throw BusinessRuleViolation.ForeclosurePreventionCase.RequestForbearance.LenderNameRequired();
 
         return new ForbearanceRequested(
             Id.Value, Guid.NewGuid(), lenderName, requestedDate,
@@ -139,9 +190,9 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     {
         GuardNotResolved();
         if (string.IsNullOrWhiteSpace(lraId))
-            throw new BusinessRuleViolationException("LraId is required.");
+            throw BusinessRuleViolation.ForeclosurePreventionCase.ActivateCurePeriod.LraIdRequired();
         if (curePeriodDays <= 0)
-            throw new BusinessRuleViolationException("Cure period days must be positive.");
+            throw BusinessRuleViolation.ForeclosurePreventionCase.ActivateCurePeriod.InvalidCurePeriodDays(curePeriodDays);
 
         var cureDeadline = activationDate.AddDays(curePeriodDays);
         return new CurePeriodActivated(
@@ -153,8 +204,7 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     public ForeclosurePreventionCaseResolved Resolve(ForeclosurePreventionOutcome outcome, DateOnly resolvedDate, UserId resolvedBy)
     {
         if (Status != ForeclosurePreventionCaseStatus.Active)
-            throw new BusinessRuleViolationException(
-                "ForeclosurePreventionCase must be Active to resolve.");
+            throw BusinessRuleViolation.ForeclosurePreventionCase.Resolve.InvalidStatus(Status);
 
         return new ForeclosurePreventionCaseResolved(
             Id.Value, outcome, resolvedDate,
@@ -178,6 +228,14 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
         Trigger = e.Trigger;
         OpenedDate = e.OpenedDate;
         Status = ForeclosurePreventionCaseStatus.Opened;
+    }
+
+    /// <summary>Applies <see cref="LeaseFeeArrearsRecorded"/>.</summary>
+    public void Apply(LeaseFeeArrearsRecorded e)
+    {
+        ArgumentNullException.ThrowIfNull(e);
+
+        LeaseDefault = LeaseDefaultNotice.Create(e.NoticeSentOn, Money.Create(e.AmountOwed), e.CureBy, Money.Create(e.StillToPay));
     }
 
     /// <summary>Applies <see cref="CounselingReferralMade"/>.</summary>
@@ -249,24 +307,20 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     private void GuardNotResolved()
     {
         if (Status == ForeclosurePreventionCaseStatus.Resolved)
-            throw new BusinessRuleViolationException(
-                "Cannot modify a resolved ForeclosurePreventionCase.");
+            throw BusinessRuleViolation.ForeclosurePreventionCase.GuardNotResolved.InvalidStatus(Status);
     }
 
     private void GuardActive()
     {
         if (Status != ForeclosurePreventionCaseStatus.Active)
-            throw new BusinessRuleViolationException(
-                "ForeclosurePreventionCase must be Active for this operation.");
+            throw BusinessRuleViolation.ForeclosurePreventionCase.GuardActive.InvalidStatus(Status);
     }
 
     private CounselingReferral FindReferral(Guid id) =>
         _counselingReferrals.Find(r => r.Id == id)
-        ?? throw new BusinessRuleViolationException(
-            $"CounselingReferral {id} not found.");
+        ?? throw BusinessRuleViolation.ForeclosurePreventionCase.FindReferral.NotFound(id);
 
     private ForbearanceRequest FindForbearanceRequest(Guid id) =>
         _forbearanceRequests.Find(r => r.Id == id)
-        ?? throw new BusinessRuleViolationException(
-            $"ForbearanceRequest {id} not found.");
+        ?? throw BusinessRuleViolation.ForeclosurePreventionCase.FindForbearanceRequest.NotFound(id);
 }

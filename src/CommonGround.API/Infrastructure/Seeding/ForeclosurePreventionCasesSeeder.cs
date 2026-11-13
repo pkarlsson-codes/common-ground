@@ -79,7 +79,7 @@ public sealed class ForeclosurePreventionCasesSeeder(ITrustClock trustClock, Pro
                 clock.MoveTo(opened);
                 trustSession.Events.StartStream<ForeclosurePreventionCase>(
                     caseId.Value,
-                    ForeclosurePreventionCase.Open(caseId, stewardshipCase.GroundLeaseId, trigger, opened, SeederUserId));
+                    [.. OpeningEvents(entry, caseId, stewardshipCase.GroundLeaseId, trigger, opened, today)]);
                 await trustSession.SaveChangesAsync(cancellation).ConfigureAwait(false);
 
                 var stream = await trustSession.Events
@@ -106,6 +106,35 @@ public sealed class ForeclosurePreventionCasesSeeder(ITrustClock trustClock, Pro
                 await propagation.WaitForIdleAsync(cancellation).ConfigureAwait(false);
             }).ConfigureAwait(false);
         }
+    }
+
+    /// <summary>
+    /// The case's opening, as the app records it: a case opened from a lease default records the notice of
+    /// default with it, so its seed entry must give the notice's figures.
+    /// </summary>
+    private static IReadOnlyList<object> OpeningEvents(
+        ForeclosurePreventionCaseSeedEntry entry,
+        ForeclosurePreventionCaseId caseId,
+        string groundLeaseId,
+        ForeclosurePreventionTrigger trigger,
+        DateOnly opened,
+        DateOnly today)
+    {
+        if (trigger != ForeclosurePreventionTrigger.LeaseFeeArrears)
+        {
+            return [ForeclosurePreventionCase.Open(caseId, groundLeaseId, trigger, opened, unresolvedCaseId: null, SeederUserId)];
+        }
+
+        var notice = entry.LeaseDefault ?? throw new InvalidOperationException(
+            $"Foreclosure prevention case seed '{entry.SeedKey}' was opened from a lease default, so it needs a leaseDefault.");
+
+        return ForeclosurePreventionCase.OpenForLeaseDefault(
+            caseId,
+            groundLeaseId,
+            LeaseDefaultNotice.Create(notice.SentOn.Resolve(today), Money.Create(notice.AmountOwed), notice.CureBy.Resolve(today), Money.Create(notice.StillToPay)),
+            opened,
+            unresolvedCaseId: null,
+            SeederUserId);
     }
 
     private static List<(DateOnly Date, Action<IEventStream<ForeclosurePreventionCase>> Act)> Actions(
@@ -288,6 +317,8 @@ public sealed class ForeclosurePreventionCasesSeeder(ITrustClock trustClock, Pro
 
         public SeedDate Opened { get; set; }
 
+        public LeaseDefaultSeedEntry? LeaseDefault { get; set; }
+
         public List<DelinquencySeedEntry> Delinquencies { get; set; } = [];
 
         public List<ReferralSeedEntry> CounselingReferrals { get; set; } = [];
@@ -302,6 +333,17 @@ public sealed class ForeclosurePreventionCasesSeeder(ITrustClock trustClock, Pro
     private class DatedSeedEntry
     {
         public SeedDate Date { get; set; }
+    }
+
+    private sealed class LeaseDefaultSeedEntry
+    {
+        public SeedDate SentOn { get; set; }
+
+        public decimal AmountOwed { get; set; }
+
+        public SeedDate CureBy { get; set; }
+
+        public decimal StillToPay { get; set; }
     }
 
     private sealed class DelinquencySeedEntry : DatedSeedEntry

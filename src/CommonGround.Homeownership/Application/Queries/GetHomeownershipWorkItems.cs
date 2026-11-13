@@ -11,10 +11,13 @@ namespace CommonGround.Homeownership.Application.Queries;
 
 /// <summary>
 /// Returns Homeownership's work items: one for every open purchase, every lease with a late notice due, and every
-/// active lease with an uncured notice of default.
+/// active lease with an uncured notice of default, unless staff are already working with the homeowner in a
+/// foreclosure prevention case.
 /// </summary>
 /// <param name="Today">The trust's today, against which upcoming closings are judged.</param>
-public sealed record GetHomeownershipWorkItems(DateOnly Today);
+/// <param name="LeasesWithOpenPreventionCase">The leases with an unresolved foreclosure prevention case, from
+/// Stewardship. Their uncured default is left out: the case is the work.</param>
+public sealed record GetHomeownershipWorkItems(DateOnly Today, IReadOnlySet<string> LeasesWithOpenPreventionCase);
 
 /// <summary>Handles <see cref="GetHomeownershipWorkItems"/>.</summary>
 public static class GetHomeownershipWorkItemsHandler
@@ -54,7 +57,8 @@ public static class GetHomeownershipWorkItemsHandler
         var balances = await LeaseFeeBalances.LoadAsync(session, request.Today, policy.Schedule, cancellationToken).ConfigureAwait(false);
         var notices = balances.Where(b => b.NoticeDue is not null);
         var uncured = balances.Where(b => b.Lease.Status == GroundLeaseStatus.Active.DisplayName
-            && b.DefaultCure?.Status == DefaultCureStatus.Uncured);
+            && b.DefaultCure?.Status == DefaultCureStatus.Uncured
+            && !request.LeasesWithOpenPreventionCase.Contains(b.Lease.Id));
 
         return new WorkItemList([
             .. workflows.Select(w => HomeownershipWorkItems.ForPurchase(

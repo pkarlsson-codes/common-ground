@@ -1,6 +1,6 @@
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
-using CommonGround.SharedKernel.Domain.Exceptions;
+using CommonGround.Stewardship.Application.Errors;
 using CommonGround.Stewardship.Domain.StewardshipCases.Events;
 
 namespace CommonGround.Stewardship.Domain.StewardshipCases;
@@ -48,7 +48,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         UserId openedBy)
     {
         if (string.IsNullOrWhiteSpace(groundLeaseId))
-            throw new BusinessRuleViolationException("GroundLeaseId is required.");
+            throw BusinessRuleViolation.StewardshipCase.Open.GroundLeaseIdRequired();
 
         return new StewardshipCaseOpened(
             id.Value,
@@ -83,8 +83,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         var v = FindVerification(verificationId);
         if (v.Status is not OccupancyVerificationStatus.Pending
                      and not OccupancyVerificationStatus.Overdue)
-            throw new BusinessRuleViolationException(
-                "Verification must be Pending or Overdue to submit.");
+            throw BusinessRuleViolation.StewardshipCase.SubmitOccupancyVerification.InvalidStatus(v.Status);
 
         return new OccupancyVerificationSubmitted(
             Id.Value, verificationId,
@@ -98,8 +97,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         GuardActive();
         var v = FindVerification(verificationId);
         if (v.Status != OccupancyVerificationStatus.Submitted)
-            throw new BusinessRuleViolationException(
-                "Verification must be Submitted to verify.");
+            throw BusinessRuleViolation.StewardshipCase.VerifyOccupancy.InvalidStatus(v.Status);
 
         return new OccupancyVerified(
             Id.Value, verificationId, verifiedDate,
@@ -111,11 +109,10 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     {
         GuardActive();
         if (string.IsNullOrWhiteSpace(reason))
-            throw new BusinessRuleViolationException("Failure reason is required.");
+            throw BusinessRuleViolation.StewardshipCase.FailOccupancy.FailureReasonRequired();
         var v = FindVerification(verificationId);
         if (v.Status != OccupancyVerificationStatus.Submitted)
-            throw new BusinessRuleViolationException(
-                "Verification must be Submitted to fail.");
+            throw BusinessRuleViolation.StewardshipCase.FailOccupancy.InvalidStatus(v.Status);
 
         return new OccupancyVerificationFailed(
             Id.Value, verificationId, reason, failedDate,
@@ -128,8 +125,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         GuardActive();
         var v = FindVerification(verificationId);
         if (v.Status != OccupancyVerificationStatus.Pending)
-            throw new BusinessRuleViolationException(
-                "Only Pending verifications can become Overdue.");
+            throw BusinessRuleViolation.StewardshipCase.MarkOccupancyVerificationOverdue.InvalidStatus(v.Status);
 
         return new OccupancyVerificationOverdue(
             Id.Value, verificationId, deadline);
@@ -141,7 +137,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     {
         GuardActive();
         if (string.IsNullOrWhiteSpace(inspectorName))
-            throw new BusinessRuleViolationException("Inspector name is required.");
+            throw BusinessRuleViolation.StewardshipCase.SchedulePropertyInspection.InspectorNameRequired();
 
         return new PropertyInspectionScheduled(
             Id.Value, Guid.NewGuid(),
@@ -157,8 +153,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         GuardActive();
         var insp = FindInspection(inspectionId);
         if (insp.Status != PropertyInspectionStatus.Scheduled)
-            throw new BusinessRuleViolationException(
-                "Only Scheduled inspections can be completed.");
+            throw BusinessRuleViolation.StewardshipCase.CompletePropertyInspection.InvalidStatus(insp.Status);
 
         return new PropertyInspectionCompleted(
             Id.Value, inspectionId, occupancyConfirmed,
@@ -171,11 +166,10 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     {
         GuardActive();
         if (string.IsNullOrWhiteSpace(reason))
-            throw new BusinessRuleViolationException("Cancellation reason is required.");
+            throw BusinessRuleViolation.StewardshipCase.CancelPropertyInspection.CancellationReasonRequired();
         var insp = FindInspection(inspectionId);
         if (insp.Status != PropertyInspectionStatus.Scheduled)
-            throw new BusinessRuleViolationException(
-                "Only Scheduled inspections can be cancelled.");
+            throw BusinessRuleViolation.StewardshipCase.CancelPropertyInspection.InvalidStatus(insp.Status);
 
         return new PropertyInspectionCancelled(
             Id.Value, inspectionId, reason,
@@ -189,7 +183,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     {
         GuardActive();
         if (string.IsNullOrWhiteSpace(description))
-            throw new BusinessRuleViolationException("Description is required.");
+            throw BusinessRuleViolation.StewardshipCase.IdentifyViolation.DescriptionRequired();
 
         return new LeaseViolationIdentified(
             Id.Value, Guid.NewGuid(), type, description,
@@ -203,8 +197,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         GuardActive();
         var v = FindViolation(violationId);
         if (v.Status != LeaseViolationStatus.Identified)
-            throw new BusinessRuleViolationException(
-                "Notice can only be issued for Identified violations.");
+            throw BusinessRuleViolation.StewardshipCase.IssueViolationNotice.InvalidStatus(v.Status);
 
         return new ViolationNoticeIssued(
             Id.Value, violationId, noticeDate, cureDeadline,
@@ -217,8 +210,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
         GuardActive();
         var v = FindViolation(violationId);
         if (v.Status != LeaseViolationStatus.NoticeIssued)
-            throw new BusinessRuleViolationException(
-                "Only NoticeIssued violations can be cured.");
+            throw BusinessRuleViolation.StewardshipCase.CureViolation.InvalidStatus(v.Status);
 
         return new LeaseViolationCured(
             Id.Value, violationId, curedDate,
@@ -231,11 +223,10 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     {
         GuardActive();
         if (string.IsNullOrWhiteSpace(reason))
-            throw new BusinessRuleViolationException("Escalation reason is required.");
+            throw BusinessRuleViolation.StewardshipCase.EscalateViolation.EscalationReasonRequired();
         var v = FindViolation(violationId);
         if (v.Status != LeaseViolationStatus.NoticeIssued)
-            throw new BusinessRuleViolationException(
-                "Only NoticeIssued violations can be escalated.");
+            throw BusinessRuleViolation.StewardshipCase.EscalateViolation.InvalidStatus(v.Status);
 
         return new LeaseViolationEscalated(
             Id.Value, violationId, reason, escalatedDate,
@@ -247,7 +238,7 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     {
         GuardActive();
         if (string.IsNullOrWhiteSpace(reason))
-            throw new BusinessRuleViolationException("Close reason is required.");
+            throw BusinessRuleViolation.StewardshipCase.Close.CloseReasonRequired();
 
         return new StewardshipCaseClosed(
             Id.Value, reason, closedDate,
@@ -396,22 +387,18 @@ public sealed class StewardshipCase : AggregateRoot<StewardshipCaseId>
     private void GuardActive()
     {
         if (Status != StewardshipCaseStatus.Active)
-            throw new BusinessRuleViolationException(
-                "Cannot modify a closed StewardshipCase.");
+            throw BusinessRuleViolation.StewardshipCase.GuardActive.InvalidStatus(Status);
     }
 
     private OccupancyVerification FindVerification(Guid id) =>
         _occupancyVerifications.Find(v => v.Id == id)
-        ?? throw new BusinessRuleViolationException(
-            $"OccupancyVerification {id} not found.");
+        ?? throw BusinessRuleViolation.StewardshipCase.FindVerification.NotFound(id);
 
     private PropertyInspection FindInspection(Guid id) =>
         _propertyInspections.Find(i => i.Id == id)
-        ?? throw new BusinessRuleViolationException(
-            $"PropertyInspection {id} not found.");
+        ?? throw BusinessRuleViolation.StewardshipCase.FindInspection.NotFound(id);
 
     private LeaseViolation FindViolation(Guid id) =>
         _leaseViolations.Find(v => v.Id == id)
-        ?? throw new BusinessRuleViolationException(
-            $"LeaseViolation {id} not found.");
+        ?? throw BusinessRuleViolation.StewardshipCase.FindViolation.NotFound(id);
 }

@@ -80,3 +80,29 @@ public static class GetAllForeclosurePreventionCasesHandler
         };
     }
 }
+
+/// <summary>Query for the ground leases that have an unresolved (Opened or Active) foreclosure prevention case.</summary>
+public sealed record GetGroundLeasesWithUnresolvedForeclosurePreventionCase;
+
+/// <summary>The ground leases that have an unresolved foreclosure prevention case.</summary>
+/// <param name="GroundLeaseIds">Their IDs.</param>
+public sealed record GroundLeasesWithUnresolvedForeclosurePreventionCase(IReadOnlySet<string> GroundLeaseIds);
+
+/// <summary>Handles <see cref="GetGroundLeasesWithUnresolvedForeclosurePreventionCase"/>.</summary>
+public static class GetGroundLeasesWithUnresolvedForeclosurePreventionCaseHandler
+{
+    /// <summary>Returns the IDs of the leases with an Opened or Active case.</summary>
+    public static async Task<GroundLeasesWithUnresolvedForeclosurePreventionCase> Handle(
+        GetGroundLeasesWithUnresolvedForeclosurePreventionCase query, IQuerySession session, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+
+        var ids = await session.Query<ForeclosurePreventionCaseView>()
+            .Where(x => x.Status != "Resolved")
+            .Select(x => x.GroundLeaseId)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        return new GroundLeasesWithUnresolvedForeclosurePreventionCase(ids.ToHashSet(StringComparer.Ordinal));
+    }
+}

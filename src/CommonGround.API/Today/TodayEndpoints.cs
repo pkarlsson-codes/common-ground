@@ -5,6 +5,7 @@ using CommonGround.Homeownership.Application.Queries;
 using CommonGround.PropertyRegistry.Application.Queries;
 using CommonGround.SharedKernel.Application.WorkItems;
 using CommonGround.SharedKernel.Domain.Services;
+using CommonGround.Stewardship.Application.Queries;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
@@ -29,7 +30,10 @@ public static class TodayEndpoints
 
         var homeBuyers = await bus.InvokeForTenantAsync<WorkItemList>(tenantId, new GetHomeBuyersWorkItems(today), cancellationToken).ConfigureAwait(false);
         var propertyRegistry = await bus.InvokeForTenantAsync<WorkItemList>(tenantId, new GetPropertyRegistryWorkItems(), cancellationToken).ConfigureAwait(false);
-        var homeownership = await bus.InvokeForTenantAsync<WorkItemList>(tenantId, new GetHomeownershipWorkItems(today), cancellationToken).ConfigureAwait(false);
+        var preventionCases = await bus.InvokeForTenantAsync<GroundLeasesWithUnresolvedForeclosurePreventionCase>(
+            tenantId, new GetGroundLeasesWithUnresolvedForeclosurePreventionCase(), cancellationToken).ConfigureAwait(false);
+        var homeownership = await bus.InvokeForTenantAsync<WorkItemList>(
+            tenantId, new GetHomeownershipWorkItems(today, preventionCases.GroundLeaseIds), cancellationToken).ConfigureAwait(false);
         var documents = await bus.InvokeForTenantAsync<WorkItemList>(tenantId, new GetDocumentsWorkItems(today), cancellationToken).ConfigureAwait(false);
 
         var all = WorkUrgency.Order([

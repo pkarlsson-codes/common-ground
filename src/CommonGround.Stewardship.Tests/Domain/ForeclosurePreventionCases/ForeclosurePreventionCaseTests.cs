@@ -15,7 +15,7 @@ public class ForeclosurePreventionCaseTests
 
     private static ForeclosurePreventionCase OpenCase(
         ForeclosurePreventionTrigger trigger = ForeclosurePreventionTrigger.LeaseFeeArrears) =>
-        EventReplay.Replay<ForeclosurePreventionCase>(ForeclosurePreventionCase.Open(ForeclosurePreventionCaseId.Generate(), GroundLeaseIdValue, trigger, Today, Staff));
+        EventReplay.Replay<ForeclosurePreventionCase>(ForeclosurePreventionCase.Open(ForeclosurePreventionCaseId.Generate(), GroundLeaseIdValue, trigger, Today, unresolvedCaseId: null, Staff));
 
     [Fact]
     public void Open_WithLeaseFeeArrearsTrigger_CreatesOpenedCase()
@@ -204,5 +204,79 @@ public class ForeclosurePreventionCaseTests
             .Should().Throw<BusinessRuleViolationException>();
         ((Action)(() => fpc.RecordServicerDelinquency("Bank", 3, Today, Staff)))
             .Should().Throw<BusinessRuleViolationException>();
+    }
+
+    public class TestBed
+    {
+        public UserId Staff { get; } = UserId.Generate();
+        public string GroundLeaseId { get; } = "groundlease-01JRGV0000000000000000000A";
+        public DateOnly Today { get; } = new(2026, 4, 24);
+        public ForeclosurePreventionCaseId CaseId { get; } = ForeclosurePreventionCaseId.Generate();
+
+        public LeaseDefaultNotice UnpaidDefault() =>
+            LeaseDefaultNotice.Create(new DateOnly(2026, 3, 1), Money.Create(450m), new DateOnly(2026, 3, 31), Money.Create(300m));
+    }
+
+    public class TheOpenMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenTheLeaseHasAnUnresolvedCase_WhenOpened_ThenRefusesWithCaseAlreadyOpen()
+        {
+            var act = () => ForeclosurePreventionCase.Open(
+                _testBed.CaseId, _testBed.GroundLeaseId, ForeclosurePreventionTrigger.ServicerDelinquency, _testBed.Today,
+                unresolvedCaseId: ForeclosurePreventionCaseId.Generate(), _testBed.Staff);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("stewardship.foreclosure_prevention_case.open.case_already_open");
+        }
+    }
+
+    public class TheOpenForLeaseDefaultMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenAnUnpaidDefault_WhenOpened_ThenOpensALeaseFeeArrearsCaseAndRecordsTheNoticeFigures()
+        {
+            var events = ForeclosurePreventionCase.OpenForLeaseDefault(
+                _testBed.CaseId, _testBed.GroundLeaseId, _testBed.UnpaidDefault(), _testBed.Today, unresolvedCaseId: null, _testBed.Staff);
+
+            events.Should().SatisfyRespectively(
+                first => first.Should().BeEquivalentTo(new { Trigger = ForeclosurePreventionTrigger.LeaseFeeArrears, OpenedDate = _testBed.Today }),
+                second => second.Should().BeEquivalentTo(new
+                {
+                    AggregateId = _testBed.CaseId.Value,
+                    NoticeSentOn = new DateOnly(2026, 3, 1),
+                    AmountOwed = 450m,
+                    CureBy = new DateOnly(2026, 3, 31),
+                    StillToPay = 300m,
+                    RecordedDate = _testBed.Today,
+                    RecordedBy = _testBed.Staff.Value,
+                }));
+            EventReplay.Replay<ForeclosurePreventionCase>(events).LeaseDefault.Should().Be(_testBed.UnpaidDefault());
+        }
+
+        [Fact]
+        public void GivenNoUnpaidDefault_WhenOpened_ThenRefusesWithNoUnpaidDefault()
+        {
+            var act = () => ForeclosurePreventionCase.OpenForLeaseDefault(
+                _testBed.CaseId, _testBed.GroundLeaseId, unpaidDefault: null, _testBed.Today, unresolvedCaseId: null, _testBed.Staff);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("stewardship.foreclosure_prevention_case.open_for_lease_default.no_unpaid_default");
+        }
+
+        [Fact]
+        public void GivenTheLeaseHasAnUnresolvedCase_WhenOpened_ThenRefusesWithCaseAlreadyOpen()
+        {
+            var act = () => ForeclosurePreventionCase.OpenForLeaseDefault(
+                _testBed.CaseId, _testBed.GroundLeaseId, _testBed.UnpaidDefault(), _testBed.Today,
+                unresolvedCaseId: ForeclosurePreventionCaseId.Generate(), _testBed.Staff);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("stewardship.foreclosure_prevention_case.open.case_already_open");
+        }
     }
 }

@@ -1,5 +1,9 @@
 using CommonGround.API.Contracts.Stewardship.Requests;
 using CommonGround.API.Infrastructure.Auth;
+using CommonGround.Homeownership.Application.Queries;
+using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.SharedKernel.Domain.Services;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
 using CommonGround.Stewardship.Application.Queries;
@@ -47,6 +51,32 @@ public static class ForeclosurePreventionCasesEndpoints
                 request.DelinquentMonths,
                 request.RecordedDate,
                 userId),
+            ct).ConfigureAwait(false);
+
+        return Results.Accepted(value: new { Id = id.Value });
+    }
+
+    // Opens a case for a lease whose notice of default is unpaid (cure period running or deadline passed). The
+    // figures come from the lease's fee ledger as of the trust's today, never from the client.
+    [WolverinePost("/api/stewardship/foreclosure-prevention/lease-default")]
+    public static async Task<IResult> OpenForLeaseDefault(
+        OpenForeclosurePreventionCaseForLeaseDefaultRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        ITrustClock trustClock,
+        CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        var userId = httpContext.GetUserId();
+        var tenantId = bus.TenantId!;
+
+        var lease = await bus.InvokeForTenantAsync<GroundLeaseDetails>(tenantId,
+            new GetGroundLease(GroundLeaseId.Create(request.GroundLeaseId)), ct).ConfigureAwait(false);
+        var today = await trustClock.TodayAsync(tenantId, ct).ConfigureAwait(false);
+
+        var id = ForeclosurePreventionCaseId.Generate();
+        await bus.InvokeForTenantAsync(tenantId,
+            new OpenForeclosurePreventionCaseForLeaseDefaultCommand(id, lease.Lease.Id, UnpaidDefaultOf(lease.DefaultCure), today, userId),
             ct).ConfigureAwait(false);
 
         return Results.Accepted(value: new { Id = id.Value });
@@ -132,4 +162,10 @@ public static class ForeclosurePreventionCasesEndpoints
             ForeclosurePreventionCaseId.Create(id), outcome, request.ResolvedDate, userId), ct);
         return Results.NoContent();
     }
+
+    /// <summary>The notice of default while it is unpaid (Curing or Uncured), or null.</summary>
+    private static LeaseDefaultNotice? UnpaidDefaultOf(DefaultCure? cure) =>
+        cure is not null && (cure.Status == DefaultCureStatus.Curing || cure.Status == DefaultCureStatus.Uncured)
+            ? LeaseDefaultNotice.Create(cure.SentOn, cure.AmountOwed, cure.CureBy, cure.StillToPay)
+            : null;
 }

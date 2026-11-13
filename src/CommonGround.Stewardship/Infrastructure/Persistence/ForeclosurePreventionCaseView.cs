@@ -17,6 +17,8 @@ public sealed class ForeclosurePreventionCaseView
     public DateOnly OpenedDate { get; set; }
     /// <summary>Gets or sets the date the case was resolved, if applicable.</summary>
     public DateOnly? ResolvedDate { get; set; }
+    /// <summary>Gets or sets the unpaid notice of default the case was opened for, or null if it wasn't opened from a lease default.</summary>
+    public LeaseFeeArrearsRecord? LeaseFeeArrears { get; set; }
     /// <summary>Gets or sets the servicer delinquencies recorded against the case, oldest first.</summary>
     public List<ServicerDelinquencyRecord> ServicerDelinquencies { get; set; } = [];
     /// <summary>Gets or sets the list of counseling referrals.</summary>
@@ -25,6 +27,19 @@ public sealed class ForeclosurePreventionCaseView
     public List<ForbearanceRequestRecord> ForbearanceRequests { get; set; } = [];
     /// <summary>Gets or sets the list of cure period activations.</summary>
     public List<CurePeriodActivationRecord> CurePeriodActivations { get; set; } = [];
+}
+
+/// <summary>The unpaid notice of default a foreclosure prevention case was opened for.</summary>
+public sealed class LeaseFeeArrearsRecord
+{
+    /// <summary>Gets or sets the day the notice of default was sent.</summary>
+    public DateOnly NoticeSentOn { get; set; }
+    /// <summary>Gets or sets what the notice said was owed.</summary>
+    public decimal AmountOwed { get; set; }
+    /// <summary>Gets or sets the last day to pay the amount owed, after any extension.</summary>
+    public DateOnly CureBy { get; set; }
+    /// <summary>Gets or sets what was still to pay of the amount owed when the case opened.</summary>
+    public decimal StillToPay { get; set; }
 }
 
 /// <summary>Record of a servicer delinquency within a foreclosure prevention case.</summary>

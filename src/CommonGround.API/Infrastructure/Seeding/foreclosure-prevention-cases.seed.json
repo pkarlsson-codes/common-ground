@@ -5,6 +5,7 @@
     "groundLeaseSeedKey": "gl-cedar-lane-013b",
     "trigger": "LeaseFeeArrears",
     "opened": "today-330d",
+    "leaseDefault": { "sentOn": "today-365d", "amountOwed": 150.00, "cureBy": "today-335d", "stillToPay": 150.00 },
     "counselingReferrals": [
       { "date": "today-326d", "agencyName": "Portland Housing Center", "outcome": { "date": "today-301d", "outcome": "CounselingCompleted" } }
     ],

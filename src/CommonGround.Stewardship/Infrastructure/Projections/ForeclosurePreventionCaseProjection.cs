@@ -24,6 +24,20 @@ public sealed class ForeclosurePreventionCaseProjection : SingleStreamProjection
     };
 
     /// <summary>
+    /// Applies a lease fee arrears recorded event to the view.
+    /// </summary>
+    public static void Apply(ForeclosurePreventionCaseView view, LeaseFeeArrearsRecorded e)
+    {
+        view.LeaseFeeArrears = new LeaseFeeArrearsRecord
+        {
+            NoticeSentOn = e.NoticeSentOn,
+            AmountOwed = e.AmountOwed,
+            CureBy = e.CureBy,
+            StillToPay = e.StillToPay
+        };
+    }
+
+    /// <summary>
     /// Applies a servicer delinquency recorded event to the view.
     /// </summary>
     public static void Apply(ForeclosurePreventionCaseView view, ServicerDelinquencyRecorded e)
