@@ -9,10 +9,11 @@ namespace CommonGround.SharedKernel.Infrastructure.Seeding;
 /// anything propagation creates from them) reads as the seeded moment rather than today.
 /// </summary>
 /// <remarks>
-/// The clock is <see cref="TimeProviderContext"/>, shared by the whole app. That is safe only
-/// because nothing else is handled while seeding runs: seeding runs before the app takes requests
-/// and must never run alongside a live system. Wait for propagation to go idle
-/// (<see cref="PropagationWaiter.WaitForIdleAsync"/>) before moving the clock on.
+/// The clock is scoped to the seeder's call chain (<see cref="TimeProviderContext.Use"/>), so requests handled
+/// while seeding runs keep the real time. Handlers that propagation runs get the seeded moment from the event
+/// they handle (its <c>OccurredAt</c>), not from this clock. Wait for propagation to go idle
+/// (<see cref="PropagationWaiter.WaitForIdleAsync"/>) before moving the clock on, so those handlers have run
+/// before the seeder builds on their records.
 /// </remarks>
 public sealed class SeedClock
 {
@@ -29,8 +30,8 @@ public sealed class SeedClock
     }
 
     /// <summary>
-    /// Runs <paramref name="seed"/> with the app's clock under its control, and restores the
-    /// original clock afterwards, whether or not the seed succeeds.
+    /// Runs <paramref name="seed"/> with its call chain's clock under its control, and restores the
+    /// previous clock afterwards, whether or not the seed succeeds.
     /// </summary>
     /// <param name="timeZone">The trust's time zone, which seeded dates are local to.</param>
     /// <param name="seed">The seeding to run; it moves the clock with <see cref="MoveTo(DateOnly)"/>.</param>
@@ -40,16 +41,10 @@ public sealed class SeedClock
         ArgumentNullException.ThrowIfNull(timeZone);
         ArgumentNullException.ThrowIfNull(seed);
 
-        var original = TimeProviderContext.Current;
-        var clock = new ControllableTimeProvider(original.UtcNow);
-        TimeProviderContext.SetCurrent(clock);
-        try
+        var clock = new ControllableTimeProvider(TimeProviderContext.Current.UtcNow);
+        using (TimeProviderContext.Use(clock))
         {
             await seed(new SeedClock(clock, timeZone)).ConfigureAwait(false);
-        }
-        finally
-        {
-            TimeProviderContext.SetCurrent(original);
         }
     }
 

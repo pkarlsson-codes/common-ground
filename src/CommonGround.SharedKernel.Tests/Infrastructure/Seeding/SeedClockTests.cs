@@ -6,7 +6,7 @@ using FluentAssertions;
 
 namespace CommonGround.SharedKernel.Tests.Infrastructure.Seeding;
 
-// SeedClock sets the app-wide TimeProviderContext, so these tests must not run alongside others.
+// These tests set the global TimeProviderContext clock, so they must not run alongside others.
 [CollectionDefinition(nameof(SeedClockTests), DisableParallelization = true)]
 public class SeedClockTests
 {
@@ -71,6 +71,40 @@ public class SeedClockTests
 
                 await act.Should().ThrowAsync<InvalidOperationException>();
                 TimeProviderContext.Current.Should().BeSameAs(original);
+            }
+            finally
+            {
+                TimeProviderContext.Reset();
+            }
+        }
+
+        [Fact]
+        public async Task GivenOtherFlowRunsDuringSeed_WhenItReadsTime_ThenSeesClockOutsideSeed()
+        {
+            var global = new ControllableTimeProvider(new DateTimeOffset(2030, 1, 1, 0, 0, 0, TimeSpan.Zero));
+            TimeProviderContext.SetCurrent(global);
+            try
+            {
+                var seedMoved = new TaskCompletionSource();
+                var otherRead = new TaskCompletionSource();
+                ITimeProvider? otherSaw = null;
+
+                var seed = SeedClock.RunAsync(_testBed.Denver, async clock =>
+                {
+                    clock.MoveTo(new DateOnly(2026, 7, 1));
+                    seedMoved.SetResult();
+                    await otherRead.Task;
+                });
+                var other = Task.Run(async () =>
+                {
+                    await seedMoved.Task;
+                    otherSaw = TimeProviderContext.Current;
+                    otherRead.SetResult();
+                });
+
+                await Task.WhenAll(seed, other);
+
+                otherSaw.Should().BeSameAs(global);
             }
             finally
             {

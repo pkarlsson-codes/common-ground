@@ -8,6 +8,7 @@ using CommonGround.HomeBuyers.Infrastructure;
 using CommonGround.Homeownership.Infrastructure;
 using CommonGround.Identity.Infrastructure;
 using CommonGround.PropertyRegistry.Infrastructure;
+using CommonGround.SharedKernel.Infrastructure.Messaging;
 using CommonGround.Stewardship;
 using CommonGround.TrustManagement.Infrastructure;
 using JasperFx;
@@ -69,6 +70,11 @@ try
         // (a prequalification's expiry, months out) is stored and polled for rather than held in an
         // in-memory Task.Delay, which can't wait longer than ~24.8 days.
         opts.Policies.UseDurableLocalQueues();
+
+        // A handler runs at the time of its cause (an event's OccurredAt, inherited by what it cascades), so a
+        // reaction is dated when its cause happened, however late it is delivered, and seeding gets its
+        // reactions on the seeded date.
+        EventClockMiddleware.Register(opts);
 
         // A message several bounded contexts react to (a household selected, a purchase closed or fallen
         // through, a home registered) gets one handler per context, each on its own local queue with its
