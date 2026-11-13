@@ -13,6 +13,7 @@ apis/LandParcelsApi.ts
 apis/OidcApi.ts
 apis/PortfolioImportApi.ts
 apis/PurchaseWorkflowsApi.ts
+apis/ReportsApi.ts
 apis/ResalesApi.ts
 apis/StewardshipApi.ts
 apis/TodayApi.ts
@@ -66,6 +67,11 @@ models/FinancingDetailsDto.ts
 models/ForbearanceRequestResponse.ts
 models/ForeclosurePreventionCaseResponse.ts
 models/ForeclosurePreventionQueueItemResponse.ts
+models/FunderReportIncomeBandResponse.ts
+models/FunderReportPortfolioResponse.ts
+models/FunderReportResaleResponse.ts
+models/FunderReportResponse.ts
+models/FunderReportSaleResponse.ts
 models/GroundLeaseListItemResponse.ts
 models/GroundLeaseResponse.ts
 models/GroundLeaseTemplateListItemResponse.ts

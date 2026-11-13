@@ -91,6 +91,9 @@ internal static class CorePlatformClientExtensions
         services.AddApiClient<IPortfolioImportApiClient, PortfolioImportApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
+        services.AddApiClient<IReportsApiClient, ReportsApiClient>(corePlatformUri)
+            .AddHttpMessageHandler<InternalGatewayAuthHandler>();
+
         return services;
     }
 }

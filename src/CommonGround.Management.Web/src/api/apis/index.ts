@@ -15,6 +15,7 @@ export * from './LandParcelsApi';
 export * from './OidcApi';
 export * from './PortfolioImportApi';
 export * from './PurchaseWorkflowsApi';
+export * from './ReportsApi';
 export * from './ResalesApi';
 export * from './StewardshipApi';
 export * from './TodayApi';

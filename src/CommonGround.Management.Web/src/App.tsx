@@ -23,6 +23,7 @@ import StewardshipPage from './pages/stewardship/StewardshipPage'
 import LeaseFeeNoticesPrintPage from './pages/lease-fee-notices/LeaseFeeNoticesPrintPage'
 import TrustPolicyPage from './pages/trust-policy/TrustPolicyPage'
 import IncomeLimitsPage from './pages/income-limits/IncomeLimitsPage'
+import FunderReportPage from './pages/reports/FunderReportPage'
 import TeamPage from './pages/team/TeamPage'
 import PortfolioImportPage from './pages/portfolio-import/PortfolioImportPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
@@ -112,6 +113,7 @@ export default function App() {
                 <Route path="/stewardship"          element={<StewardshipPage />} />
                 <Route path="/trust-policy"         element={<TrustPolicyPage />} />
                 <Route path="/income-limits"        element={<IncomeLimitsPage />} />
+                <Route path="/reports/funder"       element={<FunderReportPage />} />
                 <Route path="/team"                 element={<TeamPage />} />
                 <Route path="/portfolio-import"     element={<PortfolioImportPage />} />
               </Route>

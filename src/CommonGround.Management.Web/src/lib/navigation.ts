@@ -1,5 +1,6 @@
 import {
   ClipboardList,
+  FileChartColumn,
   FileCog,
   FileUp,
   FolderOpen,
@@ -45,6 +46,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Homes',           to: '/homes',                  icon: House,          group: 'records' },
   { label: 'Ground leases',   to: '/ground-leases',          icon: ScrollText,     group: 'records' },
   { label: 'Documents',       to: '/documents',              icon: FolderOpen,     group: 'records' },
+  { label: 'Funder report',   to: '/reports/funder',         icon: FileChartColumn, group: 'records' },
   { label: 'Lease templates', to: '/ground-lease-templates', icon: FileCog,        group: 'settings' },
   { label: 'Trust policy',    to: '/trust-policy',           icon: SlidersHorizontal, group: 'settings' },
   { label: 'Income limits',   to: '/income-limits',          icon: Scale,          group: 'settings' },

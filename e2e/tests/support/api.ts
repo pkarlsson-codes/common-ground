@@ -198,10 +198,11 @@ export function eligibilityVerified(verifiedDate: string) {
 
 /**
  * Takes a purchase through every track to closing, which creates an active ground lease for the buyer (from the
- * workflow's lease template, so it can be resold).
+ * workflow's lease template, so it can be resold). With `fromApplication`, the purchase starts from a home selection,
+ * so eligibility verification records the buyer's income band.
  */
-export async function createLeaseFromPurchase(page: Page, buyerName: string) {
-  const workflow = await createPurchaseWorkflow(page, buyerName)
+export async function createLeaseFromPurchase(page: Page, buyerName: string, { fromApplication = false } = {}) {
+  const workflow = await createPurchaseWorkflow(page, buyerName, { fromApplication })
   const path = `/api/v1/purchase-workflows/${workflow.workflowId}`
   await post(page, `${path}/eligibility`, eligibilityVerified(isoDate(-10)))
   await post(page, `${path}/appraisal`, { appraisedValue: 250000, appraisalDate: isoDate(-10), appraiserName: 'E2E Appraiser', notes: null })

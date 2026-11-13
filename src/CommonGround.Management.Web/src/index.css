@@ -711,7 +711,7 @@ body {
   border-radius: 6px;
 }
 .checklist-item--done {
-  border-color: rgba(78, 196, 138, 0.2);
+  border-color: color-mix(in srgb, var(--success) 20%, transparent);
 }
 .checklist-item__icon {
   width: 18px;
@@ -1141,6 +1141,27 @@ body {
 }
 .connected-record__name { color: var(--text-bright); }
 .connected-record__meta { color: var(--text-secondary); font-size: 12px; }
+
+/* ── Reports ──────────────────────────────────────── */
+.report-section { margin-bottom: 32px; }
+.report-section__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.report-section__title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+.report-period { align-items: flex-end; }
+.registry-table tfoot td {
+  border-top: 1px solid var(--border);
+  font-weight: 600;
+  color: var(--text-primary);
+}
 
 /* ── Today ────────────────────────────────────────── */
 .today-section { margin-bottom: 32px; }

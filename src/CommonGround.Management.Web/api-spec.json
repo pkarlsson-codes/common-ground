@@ -5629,6 +5629,66 @@
         }
       }
     },
+    "/api/v1/reports/funder": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "operationId": "GetFunderReport",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "nullable": true
+            },
+            "x-position": 1
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "nullable": true
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FunderReportResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/v1/ground-leases/{groundLeaseId}/intent-to-sell": {
       "post": {
         "tags": [
@@ -13149,6 +13209,227 @@
           "resolutionTargetDate": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "FunderReportResponse": {
+        "type": "object",
+        "description": "What the trust held on the last day of a period, whom it sold to in the period, and what it bought back.",
+        "additionalProperties": false,
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "The first day of the period.",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "description": "The last day of the period.",
+            "format": "date"
+          },
+          "portfolio": {
+            "description": "The homes on the books on To.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FunderReportPortfolioResponse"
+              }
+            ]
+          },
+          "sales": {
+            "type": "array",
+            "description": "One row per ground lease that started in the period, earliest first.",
+            "items": {
+              "$ref": "#/components/schemas/FunderReportSaleResponse"
+            }
+          },
+          "incomeBands": {
+            "type": "array",
+            "description": "How many sales fell in each income band, lowest band first and \"not recorded\" last.",
+            "items": {
+              "$ref": "#/components/schemas/FunderReportIncomeBandResponse"
+            }
+          },
+          "resales": {
+            "type": "array",
+            "description": "One row per buyback that closed in the period, earliest first.",
+            "items": {
+              "$ref": "#/components/schemas/FunderReportResaleResponse"
+            }
+          },
+          "totalAffordabilityGiven": {
+            "type": "number",
+            "description": "The sum of every sale's affordability given that has an appraised value.",
+            "format": "decimal"
+          },
+          "totalAffordabilityKept": {
+            "type": "number",
+            "description": "The sum of every buyback's affordability kept.",
+            "format": "decimal"
+          }
+        }
+      },
+      "FunderReportPortfolioResponse": {
+        "type": "object",
+        "description": "The homes on the books on the period's last day.",
+        "additionalProperties": false,
+        "properties": {
+          "homes": {
+            "type": "integer",
+            "description": "Homes registered, or under a ground lease that had started, by that day.",
+            "format": "int32"
+          },
+          "underGroundLease": {
+            "type": "integer",
+            "description": "Homes under a ground lease on that day.",
+            "format": "int32"
+          },
+          "heldOrForSale": {
+            "type": "integer",
+            "description": "The rest: homes the trust held or was selling on that day.",
+            "format": "int32"
+          }
+        }
+      },
+      "FunderReportSaleResponse": {
+        "type": "object",
+        "description": "A ground lease that started in the period.",
+        "additionalProperties": false,
+        "properties": {
+          "groundLeaseId": {
+            "type": "string",
+            "description": "The lease."
+          },
+          "homeId": {
+            "type": "string",
+            "description": "The leased home."
+          },
+          "homeLabel": {
+            "type": "string",
+            "description": "The label staff know the home by."
+          },
+          "leaseStartDate": {
+            "type": "string",
+            "description": "The day the lease started; for a purchase, the closing date.",
+            "format": "date"
+          },
+          "price": {
+            "type": "number",
+            "description": "The price the homeowner paid (the lease's base price).",
+            "format": "decimal"
+          },
+          "appraisedValue": {
+            "type": "number",
+            "description": "The home's appraised value at the sale, or null when not recorded.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "affordabilityGiven": {
+            "type": "number",
+            "description": "Appraised value minus price, or null when the appraised value isn't recorded.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "householdSize": {
+            "type": "integer",
+            "description": "The verified household size, or null when the lease has no recorded eligibility verification.",
+            "format": "int32",
+            "nullable": true
+          },
+          "annualIncome": {
+            "type": "number",
+            "description": "The verified annual income, or null when the lease has no recorded eligibility verification.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "incomeBandOverPercentOfAmi": {
+            "type": "integer",
+            "description": "The level the income is over, or null for the lowest band or when no band was recorded.",
+            "format": "int32",
+            "nullable": true
+          },
+          "incomeBandUpToPercentOfAmi": {
+            "type": "integer",
+            "description": "The level the income is at or under, or null above the highest level or when no band was recorded.",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "FunderReportIncomeBandResponse": {
+        "type": "object",
+        "description": "How many sales fell in one income band. Both levels null means the band was not recorded.",
+        "additionalProperties": false,
+        "properties": {
+          "overPercentOfAmi": {
+            "type": "integer",
+            "description": "The level the band starts above, or null for the lowest band.",
+            "format": "int32",
+            "nullable": true
+          },
+          "upToPercentOfAmi": {
+            "type": "integer",
+            "description": "The level the band goes up to, or null above the highest level.",
+            "format": "int32",
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "description": "How many sales fell in it.",
+            "format": "int32"
+          }
+        }
+      },
+      "FunderReportResaleResponse": {
+        "type": "object",
+        "description": "A buyback that closed in the period.",
+        "additionalProperties": false,
+        "properties": {
+          "resaleId": {
+            "type": "string",
+            "description": "The resale."
+          },
+          "homeId": {
+            "type": "string",
+            "description": "The home bought back."
+          },
+          "homeLabel": {
+            "type": "string",
+            "description": "The label staff know the home by."
+          },
+          "closingDate": {
+            "type": "string",
+            "description": "The day the buyback closed.",
+            "format": "date"
+          },
+          "originalPrice": {
+            "type": "number",
+            "description": "The price the seller paid.",
+            "format": "decimal"
+          },
+          "appraisedValue": {
+            "type": "number",
+            "description": "The home's appraised value at the resale.",
+            "format": "decimal"
+          },
+          "purchaseOptionPrice": {
+            "type": "number",
+            "description": "What the lease's formula let the trust pay.",
+            "format": "decimal"
+          },
+          "pricePaid": {
+            "type": "number",
+            "description": "What the trust paid.",
+            "format": "decimal"
+          },
+          "affordabilityKept": {
+            "type": "number",
+            "description": "Appraised value minus price paid.",
+            "format": "decimal"
+          },
+          "sellerGain": {
+            "type": "number",
+            "description": "Price paid minus original price.",
+            "format": "decimal"
           }
         }
       },
