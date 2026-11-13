@@ -95,8 +95,8 @@ export default function WelcomePage({ sandboxDays }: { sandboxDays?: number }) {
             buy, ground leases and lease fees, resales, stewardship and funder reports.
           </p>
           <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            It is still being built. We want CLT staff to tell us what is missing or wrong. Every page in the demo has
-            a link for sending feedback.
+            It is still being built, and we want CLT staff to tell us what is missing or wrong before more is added.
+            Every page in the demo has a link for sending feedback.
           </p>
         </div>
 
@@ -105,9 +105,10 @@ export default function WelcomePage({ sandboxDays }: { sandboxDays?: number }) {
           <div>
             <div style={eyebrowStyle}>The demo</div>
             <p style={textStyle}>
-              Create an account and you get your own sample trust with a few years of records: homes and land parcels,
-              households and their applications, ground leases and lease fees, resales, stewardship cases, and last
-              year's funder report. Change anything you like. No one else sees your trust, and it is deleted{' '}
+              Create an account, confirm your email, and you get your own sample trust with a few years of records:
+              homes and land parcels, households and their applications, ground leases and lease fees, resales,
+              stewardship cases, and last year's funder report. The sample trust is in Portland, Oregon. Change
+              anything you like. No one else sees your trust, and it is deleted{' '}
               {sandboxDays ? `${sandboxDays} days after you start it.` : 'a set number of days after you start it.'}
             </p>
           </div>

@@ -91,6 +91,10 @@ services:
     environment:
       ConnectionStrings__Database: Host=postgres;Database=commonground;Username=commonground;Password=${POSTGRES_PASSWORD}
       InternalJwt__SigningKey: ${INTERNAL_JWT_SIGNING_KEY:?set INTERNAL_JWT_SIGNING_KEY in .env}
+      Demo__Enabled: ${DEMO_ENABLED:-false}
+      Demo__SandboxDays: ${DEMO_SANDBOX_DAYS:-14}
+      Demo__MaxSandboxes: ${DEMO_MAX_SANDBOXES:-100}
+      Demo__FeedbackUrl: ${DEMO_FEEDBACK_URL:-}
     volumes:
       - documents:/app/data/documents
     depends_on:
