@@ -19,6 +19,7 @@ export default function IncomeLimitScheduleDetailPanel({ schedule, nameOf, onCor
       title={`Income Limits from ${formatCalendarDate(schedule.effectiveFrom!)}`}
       subtitle={schedule.isInEffect ? 'In effect' : undefined}
       onClose={onClose}
+      wide
       footer={
         <>
           <button className="btn btn-ghost" type="button" onClick={onClose}>Close</button>
@@ -26,20 +27,21 @@ export default function IncomeLimitScheduleDetailPanel({ schedule, nameOf, onCor
         </>
       }
     >
+      <p className="form-hint" style={{ marginBottom: 8 }}>Household size (people) across the top, as HUD publishes them.</p>
       <div className="registry-table-wrap">
         <table className="registry-table">
           <thead>
             <tr>
-              <th>Household Size</th>
-              {(schedule.levels ?? []).map(l => <th key={l.percentOfAmi}>{l.percentOfAmi}% of AMI</th>)}
+              <th>% of AMI</th>
+              {SIZES.map(size => <th key={size} style={{ textAlign: 'right' }}>{size}</th>)}
             </tr>
           </thead>
           <tbody>
-            {SIZES.map(size => (
-              <tr key={size}>
-                <td className="cell-mono">{size}</td>
-                {(schedule.levels ?? []).map(l => (
-                  <td key={l.percentOfAmi} className="cell-mono">{fmtCurrency(Number(l.limits?.[size - 1] ?? 0))}</td>
+            {(schedule.levels ?? []).map(l => (
+              <tr key={l.percentOfAmi}>
+                <td className="cell-mono">{l.percentOfAmi}%</td>
+                {SIZES.map(size => (
+                  <td key={size} className="cell-mono" style={{ textAlign: 'right' }}>{fmtCurrency(Number(l.limits?.[size - 1] ?? 0))}</td>
                 ))}
               </tr>
             ))}

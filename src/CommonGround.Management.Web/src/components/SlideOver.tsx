@@ -10,10 +10,12 @@ interface Props {
   footer?: ReactNode
   /** When true, closing asks "Discard changes?" first. */
   isDirty?: boolean
+  /** Wider panel for tables that need the room, such as income limits by household size. */
+  wide?: boolean
   children: ReactNode
 }
 
-export default function SlideOver({ title, subtitle, onClose, footer, isDirty = false, children }: Props) {
+export default function SlideOver({ title, subtitle, onClose, footer, isDirty = false, wide = false, children }: Props) {
   const [confirmingDiscard, setConfirmingDiscard] = useState(false)
   const requestClose = () => (isDirty ? setConfirmingDiscard(true) : onClose())
   useOverlayEscape(true, requestClose)
@@ -21,7 +23,7 @@ export default function SlideOver({ title, subtitle, onClose, footer, isDirty = 
   return (
     <div className="slideover-overlay" role="dialog" aria-modal="true">
       <div className="slideover-backdrop" onClick={requestClose} />
-      <div className="slideover-panel">
+      <div className={wide ? 'slideover-panel slideover-panel--wide' : 'slideover-panel'}>
         <div className="slideover-header">
           <div style={{ minWidth: 0 }}>
             <div className="slideover-header__title">{title}</div>

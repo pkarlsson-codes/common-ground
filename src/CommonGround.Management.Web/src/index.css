@@ -612,6 +612,24 @@ body {
   overflow-y: auto;
   animation: slideIn 200ms ease;
 }
+.slideover-panel--wide { width: 880px; }
+.slideover-panel--wide .slideover-header__subtitle { max-width: 760px; }
+
+/* Income limits entered as HUD prints them: one row per level, one column per household size. */
+.limit-grid { width: 100%; border-collapse: collapse; }
+.limit-grid th {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-align: left;
+  padding: 0 3px 6px;
+}
+.limit-grid th.limit-grid__size { text-align: right; padding-right: 11px; }
+.limit-grid__group { text-align: center !important; border-bottom: 1px solid var(--border); }
+.limit-grid td { padding: 2px 3px; }
+.limit-grid .form-input { width: 100%; min-width: 0; padding: 6px 8px; text-align: right; font-variant-numeric: tabular-nums; }
+.limit-grid__percent { width: 64px; }
+
 .slideover-header {
   padding: 24px 24px 18px;
   border-bottom: 1px solid var(--border);
