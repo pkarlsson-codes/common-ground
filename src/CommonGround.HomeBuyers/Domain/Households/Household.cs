@@ -17,12 +17,23 @@ public sealed class Household : AggregateRoot<HouseholdId>
     public IReadOnlyList<HouseholdMember> Members { get => _members.AsReadOnly(); }
     public HouseholdMember? PrimaryMember => Members.FirstOrDefault(m => m.IsPrimary);
     public HouseholdCircumstances Circumstances { get; private set; }
+
+    /// <summary>
+    /// The latest mortgage prequalification recorded, kept after it expires: whether it is valid is a question
+    /// about a date (<see cref="IsPrequalificationValidOn"/>), not about whether the expiry has been processed yet.
+    /// </summary>
     public MortgagePrequalification? MortgagePrequalification { get; private set; }
+
+    /// <summary>Whether the expiry of <see cref="MortgagePrequalification"/> has been recorded.</summary>
+    public bool IsPrequalificationExpiryRecorded { get; private set; }
     public bool IsHousingCounselingCompleted { get; private set; }
     public bool IsCltOrientationCompleted { get; private set; }
     public Declaration Declare() => new(Members.Count, Circumstances);
 
-    /// <summary>Readiness items the household has not completed yet; empty when readiness is complete.</summary>
+    /// <summary>
+    /// Readiness items the household has not completed yet; empty when readiness is complete. A prequalification
+    /// counts once recorded, expired or not; <see cref="IsPrequalificationValidOn"/> checks it is still valid.
+    /// </summary>
     public IReadOnlyList<string> OutstandingReadinessItems
     {
         get
@@ -125,7 +136,7 @@ public sealed class Household : AggregateRoot<HouseholdId>
     /// <returns>The expiry, or <see langword="null"/> when the prequalification has since been replaced or expired.</returns>
     public MortgagePrequalificationExpired? ExpirePrequalification(DateOnly originalExpiryDate)
     {
-        if (MortgagePrequalification?.ExpiryDate != originalExpiryDate) return null;
+        if (MortgagePrequalification?.ExpiryDate != originalExpiryDate || IsPrequalificationExpiryRecorded) return null;
 
         return new MortgagePrequalificationExpired(Id.Value, originalExpiryDate);
     }
@@ -186,12 +197,17 @@ public sealed class Household : AggregateRoot<HouseholdId>
     {
         MortgagePrequalification = new MortgagePrequalification(
             e.LenderName, e.ApprovedAmount, e.ExpiryDate);
+        IsPrequalificationExpiryRecorded = false;
     }
 
-    /// <summary>Applies <see cref="MortgagePrequalificationExpired"/>.</summary>
+    /// <summary>
+    /// Applies <see cref="MortgagePrequalificationExpired"/>. The prequalification stays on record: the expiry is
+    /// delivered by a scheduled message whenever it runs (late after an outage, early in the seeded timeline), so
+    /// nothing may depend on its arrival.
+    /// </summary>
     public void Apply(MortgagePrequalificationExpired _)
     {
-        MortgagePrequalification = null;
+        IsPrequalificationExpiryRecorded = true;
     }
 
     /// <summary>Applies <see cref="HousingCounselingRecorded"/>.</summary>

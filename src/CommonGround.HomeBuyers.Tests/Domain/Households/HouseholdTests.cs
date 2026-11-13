@@ -206,14 +206,14 @@ public class HouseholdTests
         }
 
         [Fact]
-        public void GivenPrequalificationExpired_WhenRead_ThenListsMortgagePrequalification()
+        public void GivenPrequalificationExpired_WhenRead_ThenIsEmpty()
         {
             var expiry = new DateOnly(2026, 12, 31);
             var sut = _testBed.ReadyHousehold(expiry);
 
             sut = sut.Decide(a => a.ExpirePrequalification(expiry)).Aggregate;
 
-            sut.OutstandingReadinessItems.Should().Equal("MortgagePrequalification");
+            sut.OutstandingReadinessItems.Should().BeEmpty();
         }
 
         [Fact]
@@ -225,9 +225,59 @@ public class HouseholdTests
         }
     }
 
+    public class TheExpirePrequalificationMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenPrequalificationOnRecord_WhenExpired_ThenEmitsExpiry()
+        {
+            var expiry = new DateOnly(2026, 12, 31);
+            var sut = _testBed.ReadyHousehold(expiry);
+
+            var (_, events) = sut.Decide(a => a.ExpirePrequalification(expiry));
+
+            events.Should().ContainSingle().Which.Should().BeOfType<MortgagePrequalificationExpired>();
+        }
+
+        [Fact]
+        public void GivenExpiryAlreadyRecorded_WhenExpiredAgain_ThenEmitsNothing()
+        {
+            var expiry = new DateOnly(2026, 12, 31);
+            var sut = _testBed.ReadyHousehold(expiry);
+            sut = sut.Decide(a => a.ExpirePrequalification(expiry)).Aggregate;
+
+            var (_, events) = sut.Decide(a => a.ExpirePrequalification(expiry));
+
+            events.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void GivenPrequalificationReplaced_WhenOldOneExpires_ThenEmitsNothing()
+        {
+            var sut = _testBed.ReadyHousehold(new DateOnly(2026, 12, 31));
+            sut = sut.Decide(a => a.RecordMortgagePrequalification("Lender", 220000m, new DateOnly(2027, 6, 30), _testBed.StaffUser)).Aggregate;
+
+            var (_, events) = sut.Decide(a => a.ExpirePrequalification(new DateOnly(2026, 12, 31)));
+
+            events.Should().BeEmpty();
+        }
+    }
+
     public class TheIsPrequalificationValidOnMethod
     {
         private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenExpiryRecordedEarly_WhenCheckedOnDateBeforeExpiry_ThenIsValid()
+        {
+            var expiry = new DateOnly(2026, 12, 31);
+            var sut = _testBed.ReadyHousehold(expiry);
+
+            sut = sut.Decide(a => a.ExpirePrequalification(expiry)).Aggregate;
+
+            sut.IsPrequalificationValidOn(new DateOnly(2026, 6, 1)).Should().BeTrue();
+        }
 
         [Theory]
         [InlineData("2026-12-30", true)]

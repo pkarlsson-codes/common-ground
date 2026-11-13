@@ -43,6 +43,12 @@ public class HomeownerApplicationTests
             return this;
         }
 
+        public TestBed WithPrequalificationExpiryRecorded(DateOnly expiry)
+        {
+            Household = Household.Decide(a => a.ExpirePrequalification(expiry)).Aggregate;
+            return this;
+        }
+
         public HomeownerApplication SubmittedApplication() =>
             EventReplay.Replay<HomeownerApplication>(HomeownerApplication.Submit(HomeownerApplicationId.Generate(), Household.Id, Household.Declare(), null, StaffUser));
 
@@ -183,6 +189,21 @@ public class HomeownerApplicationTests
         }
 
         [Fact]
+        public void GivenExpiryRecorded_WhenSelectedAfterIt_ThenThrowsPrequalificationExpired()
+        {
+            var expiry = _testBed.SelectedDate.AddDays(-1);
+            _testBed.WithReadiness(prequalificationExpiry: expiry);
+            _testBed.WithPrequalificationExpiryRecorded(expiry);
+            var sut = _testBed.ApprovedApplication();
+
+            var act = () => sut.SelectForHome(
+                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m, _testBed.SelectedDate, _testBed.StaffUser, _testBed.Candidate(sut), null, null);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.select_applicant.prequalification_expired");
+        }
+
+        [Fact]
         public void GivenPrequalificationExpiredBeforeSelectedDate_WhenSelected_ThenThrowsPrequalificationExpired()
         {
             _testBed.WithReadiness(prequalificationExpiry: _testBed.SelectedDate.AddDays(-1));
@@ -289,6 +310,17 @@ public class HomeownerApplicationTests
             var sut = _testBed.ApprovedApplication();
 
             sut.CanBeSelected(_testBed.Household, _testBed.SelectedDate).Should().BeFalse();
+        }
+
+        [Fact]
+        public void GivenExpiryRecordedBeforeItsDate_WhenCheckedForEarlierSelection_ThenIsTrue()
+        {
+            var expiry = _testBed.SelectedDate.AddDays(30);
+            _testBed.WithReadiness(prequalificationExpiry: expiry);
+            _testBed.WithPrequalificationExpiryRecorded(expiry);
+            var sut = _testBed.ApprovedApplication();
+
+            sut.CanBeSelected(_testBed.Household, _testBed.SelectedDate).Should().BeTrue();
         }
 
         [Fact]
