@@ -30,6 +30,7 @@ export * from './CureViolationRequest';
 export * from './CurrentDemoSandboxResponse';
 export * from './CurrentUserDto';
 export * from './DefaultCureDto';
+export * from './DemoModeResponse';
 export * from './DemoResponse';
 export * from './DemoSandboxResponse';
 export * from './DenyApplicationRequest';

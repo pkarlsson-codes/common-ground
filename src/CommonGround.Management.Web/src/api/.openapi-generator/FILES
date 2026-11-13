@@ -51,6 +51,7 @@ models/CureViolationRequest.ts
 models/CurrentDemoSandboxResponse.ts
 models/CurrentUserDto.ts
 models/DefaultCureDto.ts
+models/DemoModeResponse.ts
 models/DemoResponse.ts
 models/DemoSandboxResponse.ts
 models/DenyApplicationRequest.ts

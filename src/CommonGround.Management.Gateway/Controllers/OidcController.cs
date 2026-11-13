@@ -46,6 +46,7 @@ public sealed class OidcController : ControllerBase
 
     /// <summary>
     /// Initiates the OIDC authorization request with PKCE and state.
+    /// <c>?register=true</c> opens the provider's registration form instead of its sign-in form.
     /// </summary>
     /// <returns>Redirect to the identity provider's authorize endpoint.</returns>
     [HttpGet("login")]
@@ -56,7 +57,13 @@ public sealed class OidcController : ControllerBase
 
         var redirectTarget = ResolveLoginRedirectTarget(requestedReturnUrl, defaultRedirect);
 
-        var props = new AuthenticationProperties { RedirectUri = redirectTarget };
+        var props = new OpenIdConnectChallengeProperties { RedirectUri = redirectTarget };
+
+        // prompt=create (OpenID Connect "Initiating User Registration"), which Keycloak supports.
+        if (string.Equals(HttpContext.Request.Query["register"].ToString(), "true", StringComparison.OrdinalIgnoreCase))
+        {
+            props.Prompt = "create";
+        }
 
         var trustId = HttpContext.Request.Query["trustId"].ToString();
         if (!string.IsNullOrWhiteSpace(trustId))

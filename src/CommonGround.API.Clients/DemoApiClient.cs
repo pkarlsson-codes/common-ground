@@ -10,6 +10,10 @@ public sealed class DemoApiClient(
     ILogger<DemoApiClient> logger) : BaseApiClient(httpClientFactory.CreateClient(nameof(DemoApiClient)), logger), IDemoApiClient
 {
     /// <inheritdoc/>
+    public async Task<DemoModeResponse> GetModeAsync(CancellationToken ct = default)
+        => await GetAsync<DemoModeResponse>("api/demo/mode", ct).ConfigureAwait(false);
+
+    /// <inheritdoc/>
     public async Task<DemoResponse> GetDemoAsync(CancellationToken ct = default)
         => await GetAsync<DemoResponse>("api/demo", ct).ConfigureAwait(false);
 

@@ -32,7 +32,7 @@ import {
 export interface OidcApiInterface {
     /**
      * 
-     * @summary Initiates the OIDC authorization request with PKCE and state.
+     * @summary Initiates the OIDC authorization request with PKCE and state. ?register=true opens the provider\'s registration form instead of its sign-in form.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OidcApiInterface
@@ -40,7 +40,7 @@ export interface OidcApiInterface {
     loginRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>>;
 
     /**
-     * Initiates the OIDC authorization request with PKCE and state.
+     * Initiates the OIDC authorization request with PKCE and state. ?register=true opens the provider\'s registration form instead of its sign-in form.
      */
     login(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob>;
 
@@ -80,7 +80,7 @@ export interface OidcApiInterface {
 export class OidcApi extends runtime.BaseAPI implements OidcApiInterface {
 
     /**
-     * Initiates the OIDC authorization request with PKCE and state.
+     * Initiates the OIDC authorization request with PKCE and state. ?register=true opens the provider\'s registration form instead of its sign-in form.
      */
     async loginRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
         const queryParameters: any = {};
@@ -101,7 +101,7 @@ export class OidcApi extends runtime.BaseAPI implements OidcApiInterface {
     }
 
     /**
-     * Initiates the OIDC authorization request with PKCE and state.
+     * Initiates the OIDC authorization request with PKCE and state. ?register=true opens the provider\'s registration form instead of its sign-in form.
      */
     async login(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
         const response = await this.loginRaw(initOverrides);

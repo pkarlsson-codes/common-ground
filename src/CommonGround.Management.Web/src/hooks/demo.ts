@@ -51,3 +51,24 @@ export function useStartDemoSandbox() {
     onSuccess: (sandbox) => queryClient.setQueryData(['demo', 'sandbox'], { sandbox }),
   })
 }
+
+/**
+ * Whether this server is a demo server, asked without a session for the signed-out Welcome page.
+ * Data is null when demo mode is off. Only fetched while `enabled`.
+ */
+export function useDemoMode(enabled: boolean) {
+  return useQuery({
+    queryKey: ['demo', 'mode'],
+    queryFn: async () => {
+      try {
+        return await api.getMode()
+      } catch (error) {
+        if (error instanceof ResponseError && error.response.status === 404) return null
+        throw error
+      }
+    },
+    enabled,
+    staleTime: Infinity,
+    retry: false,
+  })
+}

@@ -7,7 +7,8 @@ const authFile = 'playwright/.auth/user.json'
 // gateway + Keycloak flow, creating the user's trust on first run, then saves the session
 // for every other test. Also enters the trust's baseline income limits.
 setup('authenticate', async ({ page }) => {
-  await page.goto('/')
+  // Straight to sign-in: on a demo server / shows the Welcome page to a signed-out visitor.
+  await page.goto('/auth/login')
 
   await page.locator('#username').fill('e2e')
   await page.locator('#password').fill('e2e')

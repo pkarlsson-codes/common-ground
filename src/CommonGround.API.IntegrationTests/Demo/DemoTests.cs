@@ -17,6 +17,25 @@ public class DemoTests(ApiFactory factory)
     private const string FeedbackUrl = "mailto:demo@example.org";
 
     [Fact]
+    public async Task GetMode_DemoModeOff_Returns404()
+    {
+        var response = await factory.CreateClient().GetAsync("/api/demo/mode");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task GetMode_DemoModeOnAndSignedOut_ReturnsSandboxDays()
+    {
+        await using var demo = DemoHost(maxSandboxes: 100);
+
+        var response = await demo.CreateClient().GetAsync("/api/demo/mode");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await response.Content.ReadFromJsonAsync<DemoModeResponse>()).Should().Be(new DemoModeResponse(14));
+    }
+
+    [Fact]
     public async Task GetDemo_DemoModeOff_Returns404()
     {
         var client = await ClientInNewTrustAsync(factory);

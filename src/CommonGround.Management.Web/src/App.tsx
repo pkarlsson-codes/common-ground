@@ -18,6 +18,7 @@ import OnboardingPage from './pages/OnboardingPage'
 import PurchaseWorkflowsPage from './pages/PurchaseWorkflowsPage'
 import ResalesPage from './pages/ResalesPage'
 import SignupPage from './pages/SignupPage'
+import WelcomePage from './pages/WelcomePage'
 import TodayPage from './pages/TodayPage'
 import StewardshipPage from './pages/stewardship/StewardshipPage'
 import LeaseFeeNoticesPrintPage from './pages/lease-fee-notices/LeaseFeeNoticesPrintPage'
@@ -29,6 +30,7 @@ import TeamPage from './pages/team/TeamPage'
 import PortfolioImportPage from './pages/portfolio-import/PortfolioImportPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useCurrentTrust } from './hooks/trusts'
+import { useDemoMode } from './hooks/demo'
 import { setTrustTimeZone } from './lib/calendarDate'
 
 function Loading() {
@@ -54,13 +56,21 @@ function ProtectedRoute() {
   const { isLoading, isAuthenticated, user, error } = useAuth()
   const location = useLocation()
   const needsLogin = !isLoading && !error && !isAuthenticated
+  // On a demo server a signed-out visitor at / sees the Welcome page instead of the sign-in page.
+  // Other paths (an invite link, a bookmark) still go straight to sign-in.
+  const mayWelcome = needsLogin && location.pathname === '/'
+  const demoMode = useDemoMode(mayWelcome)
+  const welcome = mayWelcome ? demoMode.data : null
+  const redirect = needsLogin && !(mayWelcome && (demoMode.isLoading || demoMode.data))
   const returnUrl = `${location.pathname}${location.search}${location.hash}`
   useEffect(() => {
-    if (needsLogin) window.location.href = `/auth/login?returnUrl=${encodeURIComponent(returnUrl)}`
-  }, [needsLogin, returnUrl])
+    if (redirect) window.location.href = `/auth/login?returnUrl=${encodeURIComponent(returnUrl)}`
+  }, [redirect, returnUrl])
 
   if (isLoading) return <Loading />
   if (error) return <ConnectionError error={error} />
+  if (welcome) return <WelcomePage sandboxDays={welcome.sandboxDays} />
+  if (mayWelcome && demoMode.isLoading) return <Loading />
   if (!isAuthenticated) return null
 
   const onOnboarding = location.pathname === '/onboarding' || location.pathname === '/signup'

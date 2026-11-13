@@ -13,6 +13,44 @@
     }
   ],
   "paths": {
+    "/api/v1/demo/mode": {
+      "get": {
+        "tags": [
+          "Demo"
+        ],
+        "operationId": "GetMode",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoModeResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/demo": {
       "get": {
         "tags": [
@@ -9447,7 +9485,7 @@
         "tags": [
           "Oidc"
         ],
-        "summary": "Initiates the OIDC authorization request with PKCE and state.",
+        "summary": "Initiates the OIDC authorization request with PKCE and state.\n?register=true opens the provider's registration form instead of its sign-in form.",
         "operationId": "Login",
         "responses": {
           "200": {
@@ -9556,19 +9594,15 @@
   },
   "components": {
     "schemas": {
-      "DemoResponse": {
+      "DemoModeResponse": {
         "type": "object",
-        "description": "What the demo banner shows for the current trust.",
+        "description": "What a signed-out visitor to a demo server is told before signing up.",
         "additionalProperties": false,
         "properties": {
-          "deletesOn": {
-            "type": "string",
-            "description": "The date the trust is deleted, in the trust's time zone.",
-            "format": "date"
-          },
-          "feedbackUrl": {
-            "type": "string",
-            "description": "Where \"Send feedback\" goes: a mailto: link or a form's web address."
+          "sandboxDays": {
+            "type": "integer",
+            "description": "How many days a sample trust lives before it is deleted.",
+            "format": "int32"
           }
         }
       },
@@ -9598,6 +9632,22 @@
           "instance": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "DemoResponse": {
+        "type": "object",
+        "description": "What the demo banner shows for the current trust.",
+        "additionalProperties": false,
+        "properties": {
+          "deletesOn": {
+            "type": "string",
+            "description": "The date the trust is deleted, in the trust's time zone.",
+            "format": "date"
+          },
+          "feedbackUrl": {
+            "type": "string",
+            "description": "Where \"Send feedback\" goes: a mailto: link or a form's web address."
           }
         }
       },

@@ -2,7 +2,8 @@ import { expect, test } from '@playwright/test'
 import { uniqueId } from '../support/ui'
 
 // Journeys (docs/journeys/onboarding/):
-//   try-the-demo — a new visitor on a demo server starts a sample trust and lands in it
+//   try-the-demo — a signed-out visitor on a demo server sees the Welcome page, registers,
+//                  starts a sample trust and lands in it
 //
 // Needs the API in demo mode: E2E_DEMO=1 npm run e2e -- tests/onboarding/try-the-demo.spec.ts
 
@@ -17,7 +18,11 @@ test('a new visitor starts a sample trust and is taken into it', async ({ page }
 
   const username = `demo-${uniqueId()}`
   await page.goto('/')
-  await page.getByRole('link', { name: 'Register' }).click()
+  await expect(page.getByRole('heading', { name: 'Try CommonGround with a sample trust' })).toBeVisible()
+  await expect(page.getByText("Don't enter real personal information.")).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/auth/login')
+  // "Try the demo" opens the registration form, not the sign-in form.
+  await page.getByRole('link', { name: 'Try the demo' }).click()
   await page.locator('#username').fill(username)
   await page.locator('#email').fill(`${username}@example.com`)
   await page.locator('#firstName').fill('Demo')

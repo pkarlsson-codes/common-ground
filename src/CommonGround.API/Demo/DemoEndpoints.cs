@@ -13,6 +13,13 @@ namespace CommonGround.API.Demo;
 /// <summary>Demo mode endpoints.</summary>
 public static class DemoEndpoints
 {
+    // For the signed-out Welcome page, so it needs no sign-in. 404 when demo mode is off.
+    [WolverineGet("/api/demo/mode")]
+    [NotTenanted]
+    [AllowAnonymous]
+    public static IResult GetMode(IOptions<DemoOptions> options) =>
+        options.Value.Enabled ? Results.Ok(new DemoModeResponse(options.Value.SandboxDays)) : Results.NotFound();
+
     // 404 when demo mode is off or the trust has no sandbox record.
     [WolverineGet("/api/demo")]
     public static async Task<IResult> GetDemo(

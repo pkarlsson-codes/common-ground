@@ -24,6 +24,18 @@ public sealed class OidcEventsFactory(
         return new OpenIdConnectEvents
         {
             OnTokenValidated = HandleTokenValidatedAsync,
+
+            // Keycloak opens its registration form for prompt=create only when it is in the query string,
+            // not inside a pushed authorization request. So registration skips the push.
+            OnPushAuthorization = context =>
+            {
+                if (context.ProtocolMessage.Prompt == "create")
+                {
+                    context.SkipPush();
+                }
+
+                return Task.CompletedTask;
+            },
             OnRedirectToIdentityProviderForSignOut = context =>
             {
                 context.ProtocolMessage.ClientId = context.Options.ClientId;

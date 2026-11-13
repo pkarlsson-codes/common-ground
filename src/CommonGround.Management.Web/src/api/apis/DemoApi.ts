@@ -17,6 +17,7 @@
 import * as runtime from '../runtime';
 import type {
   CurrentDemoSandboxResponse,
+  DemoModeResponse,
   DemoResponse,
   DemoSandboxResponse,
   ProblemDetails,
@@ -24,6 +25,8 @@ import type {
 import {
     CurrentDemoSandboxResponseFromJSON,
     CurrentDemoSandboxResponseToJSON,
+    DemoModeResponseFromJSON,
+    DemoModeResponseToJSON,
     DemoResponseFromJSON,
     DemoResponseToJSON,
     DemoSandboxResponseFromJSON,
@@ -62,6 +65,18 @@ export interface DemoApiInterface {
     /**
      */
     getDemo(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DemoResponse>;
+
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DemoApiInterface
+     */
+    getModeRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DemoModeResponse>>;
+
+    /**
+     */
+    getMode(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DemoModeResponse>;
 
     /**
      * 
@@ -133,6 +148,33 @@ export class DemoApi extends runtime.BaseAPI implements DemoApiInterface {
      */
     async getDemo(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DemoResponse> {
         const response = await this.getDemoRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getModeRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DemoModeResponse>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/demo/mode`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => DemoModeResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getMode(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DemoModeResponse> {
+        const response = await this.getModeRaw(initOverrides);
         return await response.value();
     }
 
