@@ -7,7 +7,7 @@ For when a homeowner asks to put a new loan on the home: a refinance, a second m
 3. User enters:
    - Received On (default today, not in the future) and Expected Closing (required, not before Received On). Below them: "{n} business days from receipt to closing", in amber with "The lease asks for at least 15." when fewer than 15
    - Lender (required) and Purpose (Refinance, Second Mortgage, Home Repair or Other; default Refinance)
-   - Principal ($, required, above zero) and Total Mortgage Debt After Closing ($, required, at least the principal; prefilled with the principal plus the other current permitted mortgages for any purpose but Refinance, and with the principal for Refinance; the help text says "All mortgage debt on the home once this loan closes, including loans it doesn't pay off")
+   - Principal ($, required, above zero) and Total Mortgage Debt After Closing ($, required, at least the principal; prefilled with the principal plus the other current permitted mortgages for any purpose but Refinance, and with the principal for Refinance; the help text says "All mortgage debt on the home once this loan closes, including loans it doesn't pay off" and, until the user changes the total, what it was filled in from)
    - Interest Rate (% a year, required), Rate Type (Fixed or Adjustable, default Fixed) and Term (years, required)
    - Closing Costs ($, optional)
    - Appraised Value ($, optional) and Appraisal Date (required when a value is entered, not in the future): the loan's appraisal. On an index-based lease, also Current Index Value (required when a value is entered)

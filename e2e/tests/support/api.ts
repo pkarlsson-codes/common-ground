@@ -92,6 +92,34 @@ export async function createHome(page: Page, landParcelId: string, { incomeLimit
   return homeId
 }
 
+/**
+ * Creates an active, appraisal-based ground lease directly (no purchase), started a year ago, with a 90% debt cap,
+ * a $200,000 base price and a $250,000 original appraisal. Returns its ID.
+ */
+export async function createGroundLease(page: Page, homeownerFullName: string) {
+  const { parcelId } = await createLandParcel(page)
+  const homeId = await createHome(page, parcelId)
+  const { groundLeaseId } = await post<{ groundLeaseId: string }>(page, '/api/v1/ground-leases', {
+    landParcelId: parcelId,
+    homeId,
+    homeownerFullName,
+    homeownerEmail: `${homeownerFullName.toLowerCase().replace(/\s+/g, '.')}@example.com`,
+    homeownerPhone: null,
+    leaseStartDate: isoDate(-365),
+    termYears: 99,
+    optionWindowDays: 60,
+    maxMortgageDebtPercent: 90,
+    landUseFee: 0,
+    repairReserveFee: 0,
+    basePrice: 200000,
+    originalAppraisedValue: 250000,
+    covenantTerms: 'Standard covenant terms',
+    formulaKind: 'AppraisalBased',
+    appreciationShare: 0.25,
+  })
+  return groundLeaseId
+}
+
 export async function createGroundLeaseTemplate(page: Page) {
   const templateName = `E2E Template ${uniqueId()}`
   const { groundLeaseTemplateId } = await post<{ groundLeaseTemplateId: string }>(page, '/api/v1/ground-lease-templates', {

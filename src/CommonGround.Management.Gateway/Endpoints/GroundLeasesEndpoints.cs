@@ -233,4 +233,109 @@ public static class GroundLeasesEndpoints
         await client.MarkPermittedMortgagePaidOffAsync(groundLeaseId, mortgageId, request, cancellationToken).ConfigureAwait(false);
         return Results.NoContent();
     }
+
+    [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/mortgage-requests")]
+    [ProducesResponseType<ReceiveMortgageRequestResponse>(StatusCodes.Status201Created)]
+    public static async Task<IResult> ReceiveMortgageRequest(
+        string groundLeaseId,
+        ReceiveMortgageRequestRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        var result = await client.ReceiveMortgageRequestAsync(groundLeaseId, request, cancellationToken).ConfigureAwait(false);
+        return Results.Created($"/api/v1/mortgage-requests/{result.MortgageRequestId}", result);
+    }
+
+    [WolverineGet("/api/v1/ground-leases/{groundLeaseId}/mortgage-requests")]
+    [ProducesResponseType<IReadOnlyList<MortgageRequestResponse>>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetMortgageRequests(
+        string groundLeaseId,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        return Results.Ok(await client.GetMortgageRequestsAsync(groundLeaseId, cancellationToken).ConfigureAwait(false));
+    }
+
+    [WolverineGet("/api/v1/mortgage-requests/{mortgageRequestId}")]
+    [ProducesResponseType<MortgageRequestResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetMortgageRequest(
+        string mortgageRequestId,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mortgageRequestId);
+        return Results.Ok(await client.GetMortgageRequestAsync(mortgageRequestId, cancellationToken).ConfigureAwait(false));
+    }
+
+    [WolverinePost("/api/v1/mortgage-requests/{mortgageRequestId}/loan-closed")]
+    [ProducesResponseType<RecordMortgageLoanClosedResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> RecordMortgageLoanClosed(
+        string mortgageRequestId,
+        RecordMortgageLoanClosedRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mortgageRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        return Results.Ok(await client.RecordMortgageLoanClosedAsync(mortgageRequestId, request, cancellationToken).ConfigureAwait(false));
+    }
+
+    [WolverinePost("/api/v1/mortgage-requests/{mortgageRequestId}/appraisal")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> RecordMortgageRequestAppraisal(
+        string mortgageRequestId,
+        RecordMortgageRequestAppraisalRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mortgageRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.RecordMortgageRequestAppraisalAsync(mortgageRequestId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/v1/mortgage-requests/{mortgageRequestId}/approve")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> ApproveMortgageRequest(
+        string mortgageRequestId,
+        ApproveMortgageRequestRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mortgageRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.ApproveMortgageRequestAsync(mortgageRequestId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/v1/mortgage-requests/{mortgageRequestId}/deny")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> DenyMortgageRequest(
+        string mortgageRequestId,
+        DenyMortgageRequestRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mortgageRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.DenyMortgageRequestAsync(mortgageRequestId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/v1/mortgage-requests/{mortgageRequestId}/withdraw")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> WithdrawMortgageRequest(
+        string mortgageRequestId,
+        WithdrawMortgageRequestRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mortgageRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.WithdrawMortgageRequestAsync(mortgageRequestId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
 }

@@ -1023,14 +1023,14 @@ public class GroundLeaseTests
             var newId = PermittedMortgageId.Generate();
 
             var (sut, _) = lease.Decide(l => l.PermitRequestedMortgage(
-                newId, ApprovedRefinance(lease), ClosedOn, [_purchaseLoanId], ClosedOn, _testBed.StaffUser));
+                newId, ApprovedRefinance(lease), ClosedOn, [_purchaseLoanId], "  PO Box 9, Portland OR  ", ClosedOn, _testBed.StaffUser));
 
             sut.PermittedMortgages.Should().BeEquivalentTo(new object[]
             {
                 new { Id = _purchaseLoanId, PaidOffOn = (DateOnly?)ClosedOn },
                 new
                 {
-                    Id = newId, Lender = "Columbia Bank", OriginalPrincipal = Money.Create(140_000m), PermittedOn = ApprovedOn,
+                    Id = newId, Lender = "Columbia Bank", NoticeAddress = "PO Box 9, Portland OR", OriginalPrincipal = Money.Create(140_000m), PermittedOn = ApprovedOn,
                     Source = MortgagePermissionSource.Request, PaidOffOn = (DateOnly?)null,
                 },
             });
@@ -1042,7 +1042,7 @@ public class GroundLeaseTests
             var lease = LeaseWithPurchaseLoan();
 
             var act = () => lease.PermitRequestedMortgage(
-                PermittedMortgageId.Generate(), ApprovedRefinance(lease), ClosedOn, [PermittedMortgageId.Generate()], ClosedOn, _testBed.StaffUser);
+                PermittedMortgageId.Generate(), ApprovedRefinance(lease), ClosedOn, [PermittedMortgageId.Generate()], null, ClosedOn, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("homeownership.ground_lease.mark_permitted_mortgage_paid_off.mortgage_not_found");

@@ -10,6 +10,7 @@ import DenyApplicationPanel from './applications/DenyApplicationPanel'
 import RecordCltOrientationPanel from './households/RecordCltOrientationPanel'
 import RecordHousingCounselingPanel from './households/RecordHousingCounselingPanel'
 import RecordMortgagePrequalificationPanel from './households/RecordMortgagePrequalificationPanel'
+import TodayMortgageRequestPanel from './ground-leases/TodayMortgageRequestPanel'
 
 const KIND_LABELS: Record<string, string> = {
   'application-awaiting-decision': 'Application to decide',
@@ -22,6 +23,8 @@ const KIND_LABELS: Record<string, string> = {
   'closing-scheduled': 'Closing coming up',
   'lease-fee-notice-due': 'Lease fee notice due',
   'lease-default-uncured': 'Lease default not cured',
+  'mortgage-request-pending': 'Mortgage request to decide',
+  'mortgage-loan-closing-unrecorded': 'Mortgage loan closing to confirm',
   'document-expiring': 'Document expiring',
   'income-limits-missing': 'Income limits missing',
   'income-limits-stale': 'Income limits out of date',
@@ -36,6 +39,10 @@ const ACTION_PANELS: Record<string, (recordId: string, onClose: () => void) => R
   'record-housing-counseling': (id, onClose) => <RecordHousingCounselingPanel householdId={id} onClose={onClose} />,
   'record-clt-orientation': (id, onClose) => <RecordCltOrientationPanel householdId={id} onClose={onClose} />,
   'record-mortgage-prequalification': (id, onClose) => <RecordMortgagePrequalificationPanel householdId={id} onClose={onClose} />,
+  // Mortgage items name the lease; the panel finds the request.
+  'record-mortgage-request-appraisal': (id, onClose) => <TodayMortgageRequestPanel groundLeaseId={id} open="pending" onClose={onClose} />,
+  'decide-mortgage-request': (id, onClose) => <TodayMortgageRequestPanel groundLeaseId={id} open="pending" onClose={onClose} />,
+  'record-mortgage-loan-closed': (id, onClose) => <TodayMortgageRequestPanel groundLeaseId={id} open="closing" onClose={onClose} />,
 }
 
 const plural = (n: number, word: string) => `${n.toLocaleString()} ${word}${n === 1 ? '' : 's'}`

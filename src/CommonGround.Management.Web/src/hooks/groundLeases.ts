@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { GroundLeasesApi } from '../api'
+import { GroundLeasesApi, type MortgageRequestResponse, type ReceiveMortgageRequestResponse } from '../api'
 import { apiConfig } from '../lib/apiConfig'
 import { startOfMonth, trustToday, type CalendarDate } from '../lib/calendarDate'
 import type {
@@ -338,5 +338,182 @@ export function useMarkPermittedMortgagePaidOff() {
     mutationFn: ({ groundLeaseId, mortgageId, paidOffOn }: { groundLeaseId: string; mortgageId: string; paidOffOn: CalendarDate }) =>
       api.markPermittedMortgagePaidOff({ groundLeaseId, mortgageId, markPermittedMortgagePaidOffRequest: { paidOffOn } }),
     onSuccess: (_d, v) => invalidateLease(qc, v.groundLeaseId),
+  })
+}
+
+/** What a homeowner's loan is for (Art 8.3), as the API names it and the app shows it. */
+export const MORTGAGE_PURPOSE_LABELS: Record<string, string> = {
+  Refinance: 'Refinance',
+  SecondMortgage: 'Second Mortgage',
+  HomeRepair: 'Home Repair',
+  Other: 'Other',
+}
+
+/** A mortgage request's status, as the app shows it. */
+export const MORTGAGE_REQUEST_STATUS_LABELS: Record<string, string> = {
+  Pending: 'Waiting for decision',
+  Approved: 'Approved',
+  Denied: 'Denied',
+  Closed: 'Closed',
+  Withdrawn: 'Withdrawn',
+}
+
+/** The fewest business days the lease asks for between a request and the loan's closing (Art 8.3). */
+export const MORTGAGE_REQUEST_NOTICE_BUSINESS_DAYS = 15
+
+export interface LoanAppraisalForm {
+  appraisedValue: number
+  appraisalDate: CalendarDate | null
+  /** Only sent on an index-based lease. */
+  currentIndexValue: number
+}
+
+export interface ReceiveMortgageRequestForm {
+  receivedOn: CalendarDate
+  expectedClosingOn: CalendarDate | null
+  lender: string
+  purpose: string
+  principal: number
+  totalDebtAfterClosing: number
+  interestRatePercent: number
+  rateType: string
+  termYears: number
+  closingCosts: number
+  appraisal: LoanAppraisalForm
+  notes: string
+}
+
+/** The appraisal fields as the API takes them: all null when no value was entered. */
+function appraisalFields(appraisal: LoanAppraisalForm, indexBased: boolean) {
+  const has = appraisal.appraisedValue > 0
+  return {
+    appraisedValue: has ? appraisal.appraisedValue : null,
+    appraisalDate: has ? appraisal.appraisalDate : null,
+    currentIndexValue: has && indexBased ? appraisal.currentIndexValue : null,
+  }
+}
+
+function invalidateMortgageRequests(qc: ReturnType<typeof useQueryClient>, groundLeaseId: string) {
+  qc.invalidateQueries({ queryKey: ['mortgage-requests', groundLeaseId] })
+  qc.invalidateQueries({ queryKey: ['mortgage-request'] })
+  qc.invalidateQueries({ queryKey: ['ground-lease', groundLeaseId] })
+  qc.invalidateQueries({ queryKey: ['today'] })
+}
+
+export function useMortgageRequests(groundLeaseId: string | null) {
+  return useQuery({
+    queryKey: ['mortgage-requests', groundLeaseId],
+    queryFn: () => api.getMortgageRequests({ groundLeaseId: groundLeaseId! }),
+    enabled: !!groundLeaseId,
+  })
+}
+
+export function useMortgageRequest(mortgageRequestId: string | null) {
+  return useQuery({
+    queryKey: ['mortgage-request', mortgageRequestId],
+    queryFn: () => api.getMortgageRequest({ mortgageRequestId: mortgageRequestId! }),
+    enabled: !!mortgageRequestId,
+  })
+}
+
+export function useReceiveMortgageRequest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ groundLeaseId, form, indexBased }: { groundLeaseId: string; form: ReceiveMortgageRequestForm; indexBased: boolean }) => {
+      const result = await api.receiveMortgageRequest({
+        groundLeaseId,
+        receiveMortgageRequestRequest: {
+          receivedOn: form.receivedOn,
+          expectedClosingOn: form.expectedClosingOn!,
+          lender: form.lender.trim(),
+          purpose: form.purpose,
+          principal: form.principal,
+          totalDebtAfterClosing: form.totalDebtAfterClosing,
+          interestRatePercent: form.interestRatePercent,
+          rateType: form.rateType,
+          termYears: form.termYears,
+          closingCosts: form.closingCosts > 0 ? form.closingCosts : null,
+          ...appraisalFields(form.appraisal, indexBased),
+          notes: form.notes.trim() || null,
+        },
+      })
+      return result as ReceiveMortgageRequestResponse
+    },
+    onSuccess: (_d, v) => invalidateMortgageRequests(qc, v.groundLeaseId),
+  })
+}
+
+export function useRecordMortgageRequestAppraisal() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ request, appraisal, closingCosts, indexBased }: {
+      request: MortgageRequestResponse
+      appraisal: LoanAppraisalForm
+      closingCosts: number
+      indexBased: boolean
+    }) =>
+      api.recordMortgageRequestAppraisal({
+        mortgageRequestId: request.id!,
+        recordMortgageRequestAppraisalRequest: {
+          appraisedValue: appraisal.appraisedValue,
+          appraisalDate: appraisal.appraisalDate!,
+          currentIndexValue: indexBased ? appraisal.currentIndexValue : null,
+          closingCosts: closingCosts > 0 ? closingCosts : null,
+        },
+      }),
+    onSuccess: (_d, v) => invalidateMortgageRequests(qc, v.request.groundLeaseId!),
+  })
+}
+
+export function useApproveMortgageRequest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ request, reason }: { request: MortgageRequestResponse; reason: string }) =>
+      api.approveMortgageRequest({
+        mortgageRequestId: request.id!,
+        approveMortgageRequestRequest: { approvedOn: trustToday(), reason: reason.trim() || null },
+      }),
+    onSuccess: (_d, v) => invalidateMortgageRequests(qc, v.request.groundLeaseId!),
+  })
+}
+
+export function useDenyMortgageRequest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ request, reason }: { request: MortgageRequestResponse; reason: string }) =>
+      api.denyMortgageRequest({
+        mortgageRequestId: request.id!,
+        denyMortgageRequestRequest: { deniedOn: trustToday(), reason: reason.trim() },
+      }),
+    onSuccess: (_d, v) => invalidateMortgageRequests(qc, v.request.groundLeaseId!),
+  })
+}
+
+export function useRecordMortgageLoanClosed() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ request, closedOn, paidOffMortgageIds, noticeAddress }: {
+      request: MortgageRequestResponse
+      closedOn: CalendarDate
+      paidOffMortgageIds: string[]
+      noticeAddress: string
+    }) =>
+      api.recordMortgageLoanClosed({
+        mortgageRequestId: request.id!,
+        recordMortgageLoanClosedRequest: { closedOn, paidOffMortgageIds, noticeAddress: noticeAddress.trim() || null },
+      }),
+    onSuccess: (_d, v) => invalidateMortgageRequests(qc, v.request.groundLeaseId!),
+  })
+}
+
+export function useWithdrawMortgageRequest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ request, withdrawnOn, reason }: { request: MortgageRequestResponse; withdrawnOn: CalendarDate; reason: string }) =>
+      api.withdrawMortgageRequest({
+        mortgageRequestId: request.id!,
+        withdrawMortgageRequestRequest: { withdrawnOn, reason: reason.trim() },
+      }),
+    onSuccess: (_d, v) => invalidateMortgageRequests(qc, v.request.groundLeaseId!),
   })
 }

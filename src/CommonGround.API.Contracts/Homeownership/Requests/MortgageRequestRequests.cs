@@ -59,9 +59,11 @@ public sealed record DenyMortgageRequestRequest(DateOnly DeniedOn, string Reason
 /// <summary>Request to record that an approved loan closed.</summary>
 /// <param name="ClosedOn">The day the loan closed.</param>
 /// <param name="PaidOffMortgageIds">The lease's permitted mortgages the loan paid off; empty when none.</param>
+/// <param name="NoticeAddress">Where the lender takes notices about the home, or null when not known yet.</param>
 public sealed record RecordMortgageLoanClosedRequest(
     DateOnly ClosedOn,
-    [property: JsonRequired] IReadOnlyList<string> PaidOffMortgageIds);
+    [property: JsonRequired] IReadOnlyList<string> PaidOffMortgageIds,
+    [property: JsonRequired] string? NoticeAddress);
 
 /// <summary>Request to record that the homeowner dropped a requested loan before it closed.</summary>
 /// <param name="WithdrawnOn">The day the homeowner withdrew it.</param>

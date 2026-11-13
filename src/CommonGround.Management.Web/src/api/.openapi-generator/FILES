@@ -28,6 +28,7 @@ models/AddHouseholdMemberRequest.ts
 models/AddHouseholdMemberResponse.ts
 models/AppraisalDetailsDto.ts
 models/ApproveApplicationRequest.ts
+models/ApproveMortgageRequestRequest.ts
 models/AttachDocumentRequest.ts
 models/CalculateResaleEstimateRequest.ts
 models/CancelHomeSelectionRequest.ts
@@ -49,6 +50,7 @@ models/CureViolationRequest.ts
 models/CurrentUserDto.ts
 models/DefaultCureDto.ts
 models/DenyApplicationRequest.ts
+models/DenyMortgageRequestRequest.ts
 models/DevelopmentProjectListItemResponse.ts
 models/DevelopmentProjectResponse.ts
 models/DocumentAttachmentResponse.ts
@@ -122,6 +124,7 @@ models/MakeCounselingReferralRequest.ts
 models/MarkOccupancyVerificationOverdueRequest.ts
 models/MarkPermittedMortgagePaidOffRequest.ts
 models/MortgagePrequalificationDto.ts
+models/MortgageRequestResponse.ts
 models/MortgagesDto.ts
 models/OccupancyVerificationResponse.ts
 models/OpenForeclosurePreventionCaseForLeaseDefaultRequest.ts
@@ -160,6 +163,8 @@ models/PurchaseIncomeLimitLevelDto.ts
 models/PurchaseIncomeLimitScheduleDto.ts
 models/PurchaseWorkflowListItemResponse.ts
 models/PurchaseWorkflowResponse.ts
+models/ReceiveMortgageRequestRequest.ts
+models/ReceiveMortgageRequestResponse.ts
 models/RecordAppraisalCompletedRequest.ts
 models/RecordBuybackClosedRequest.ts
 models/RecordCltOrientationRequest.ts
@@ -177,7 +182,10 @@ models/RecordLeaseFeeNoticeRequest.ts
 models/RecordLeaseFeeNoticeResponse.ts
 models/RecordLeaseFeePaymentRequest.ts
 models/RecordLeaseFeePaymentResponse.ts
+models/RecordMortgageLoanClosedRequest.ts
+models/RecordMortgageLoanClosedResponse.ts
 models/RecordMortgagePrequalificationRequest.ts
+models/RecordMortgageRequestAppraisalRequest.ts
 models/RecordPermittedMortgageRequest.ts
 models/RecordPermittedMortgageResponse.ts
 models/RecordPurchaseClosedRequest.ts
@@ -232,6 +240,7 @@ models/WaiveLeaseFeeInterestRequest.ts
 models/WaiveLeaseFeeInterestResponse.ts
 models/WithdrawApplicationRequest.ts
 models/WithdrawIntentToSellRequest.ts
+models/WithdrawMortgageRequestRequest.ts
 models/WithdrawPurchaseRequest.ts
 models/WorkCountResponse.ts
 models/WorkItemResponse.ts

@@ -140,4 +140,66 @@ public sealed class GroundLeasesApiClient(
         ArgumentNullException.ThrowIfNull(request);
         await PostAsync($"api/ground-leases/{groundLeaseId}/permitted-mortgages/{mortgageId}/paid-off", request, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task<ReceiveMortgageRequestResponse> ReceiveMortgageRequestAsync(string groundLeaseId, ReceiveMortgageRequestRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        return await PostAsync<ReceiveMortgageRequestRequest, ReceiveMortgageRequestResponse>($"api/ground-leases/{groundLeaseId}/mortgage-requests", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<MortgageRequestResponse>> GetMortgageRequestsAsync(string groundLeaseId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        return await GetAsync<IReadOnlyList<MortgageRequestResponse>>($"api/ground-leases/{groundLeaseId}/mortgage-requests", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<MortgageRequestResponse> GetMortgageRequestAsync(string mortgageRequestId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mortgageRequestId);
+        return await GetAsync<MortgageRequestResponse>($"api/mortgage-requests/{mortgageRequestId}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task RecordMortgageRequestAppraisalAsync(string mortgageRequestId, RecordMortgageRequestAppraisalRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mortgageRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/mortgage-requests/{mortgageRequestId}/appraisal", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task ApproveMortgageRequestAsync(string mortgageRequestId, ApproveMortgageRequestRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mortgageRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/mortgage-requests/{mortgageRequestId}/approve", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task DenyMortgageRequestAsync(string mortgageRequestId, DenyMortgageRequestRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mortgageRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/mortgage-requests/{mortgageRequestId}/deny", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<RecordMortgageLoanClosedResponse> RecordMortgageLoanClosedAsync(string mortgageRequestId, RecordMortgageLoanClosedRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mortgageRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        return await PostAsync<RecordMortgageLoanClosedRequest, RecordMortgageLoanClosedResponse>($"api/mortgage-requests/{mortgageRequestId}/loan-closed", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task WithdrawMortgageRequestAsync(string mortgageRequestId, WithdrawMortgageRequestRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mortgageRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/mortgage-requests/{mortgageRequestId}/withdraw", request, cancellationToken).ConfigureAwait(false);
+    }
 }

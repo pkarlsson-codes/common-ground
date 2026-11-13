@@ -17,12 +17,14 @@ namespace CommonGround.Homeownership.Application.Commands;
 /// <param name="PermittedMortgageId">The new permitted mortgage's ID, chosen by the caller.</param>
 /// <param name="ClosedOn">The day the loan closed.</param>
 /// <param name="PaidOffMortgageIds">The lease's mortgages the loan paid off.</param>
+/// <param name="NoticeAddress">Where the lender takes notices about the home, or null when not known yet.</param>
 /// <param name="RecordedBy">The staff user recording it.</param>
 public sealed record RecordMortgageLoanClosed(
     MortgageRequestId MortgageRequestId,
     PermittedMortgageId PermittedMortgageId,
     DateOnly ClosedOn,
     IReadOnlyList<PermittedMortgageId> PaidOffMortgageIds,
+    string? NoticeAddress,
     UserId RecordedBy);
 
 /// <summary>What recording a closed loan writes to, and the trust's today.</summary>
@@ -67,6 +69,6 @@ public static class RecordMortgageLoanClosedHandler
         closing.Request.Decide(r => r.RecordLoanClosed(
             command.ClosedOn, command.PermittedMortgageId, command.PaidOffMortgageIds, closing.Today, command.RecordedBy));
         closing.Lease.Decide(l => l.PermitRequestedMortgage(
-            command.PermittedMortgageId, closing.Request.Aggregate!, command.ClosedOn, command.PaidOffMortgageIds, closing.Today, command.RecordedBy));
+            command.PermittedMortgageId, closing.Request.Aggregate!, command.ClosedOn, command.PaidOffMortgageIds, command.NoticeAddress, closing.Today, command.RecordedBy));
     }
 }

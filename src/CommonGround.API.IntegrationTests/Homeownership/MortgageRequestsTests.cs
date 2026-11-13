@@ -50,14 +50,14 @@ public class MortgageRequestsTests(ApiFactory factory)
             new ApproveMortgageRequestRequest(today, null))).StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var closed = await client.PostAsJsonAsync($"/api/mortgage-requests/{requestId}/loan-closed",
-            new RecordMortgageLoanClosedRequest(today, [purchaseLoanId]));
+            new RecordMortgageLoanClosedRequest(today, [purchaseLoanId], "PO Box 9, Portland OR"));
         closed.StatusCode.Should().Be(HttpStatusCode.OK);
         var newMortgageId = (await closed.Content.ReadFromJsonAsync<RecordMortgageLoanClosedResponse>())!.PermittedMortgageId;
 
         var lease = await client.GetFromJsonAsync<GroundLeaseResponse>($"/api/ground-leases/{leaseId}");
         lease!.Mortgages.Permitted.Should().BeEquivalentTo(new object[]
         {
-            new { MortgageId = newMortgageId, Lender = "Columbia Bank", OriginalPrincipal = 175_000m, PermittedOn = today, Source = "Request", PaidOffOn = (DateOnly?)null },
+            new { MortgageId = newMortgageId, Lender = "Columbia Bank", NoticeAddress = "PO Box 9, Portland OR", OriginalPrincipal = 175_000m, PermittedOn = today, Source = "Request", PaidOffOn = (DateOnly?)null },
             new { MortgageId = purchaseLoanId, PaidOffOn = (DateOnly?)today },
         }, o => o.WithStrictOrdering());
 

@@ -170,6 +170,7 @@ public static class MortgageRequestsEndpoints
                 mortgageId,
                 request.ClosedOn,
                 [.. request.PaidOffMortgageIds.Select(PermittedMortgageId.Create)],
+                request.NoticeAddress,
                 httpContext.GetUserId()),
             cancellationToken);
 

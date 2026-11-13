@@ -1,17 +1,30 @@
 import { useState } from 'react'
 import type { GroundLeaseResponse, PermittedMortgageDto } from '../../api'
-import { MORTGAGE_SOURCE_LABELS } from '../../hooks/groundLeases'
+import {
+  MORTGAGE_PURPOSE_LABELS,
+  MORTGAGE_REQUEST_STATUS_LABELS,
+  MORTGAGE_SOURCE_LABELS,
+  useMortgageRequests,
+} from '../../hooks/groundLeases'
 import { formatCalendarDate } from '../../lib/calendarDate'
 import { formatPrice } from '../../lib/currency'
 import EditPermittedMortgagePanel from './EditPermittedMortgagePanel'
 import MarkMortgagePaidOffPanel from './MarkMortgagePaidOffPanel'
+import MortgageRequestPanel from './MortgageRequestPanel'
+import RecordMortgageRequestPanel from './RecordMortgageRequestPanel'
 import RecordPermittedMortgagePanel from './RecordPermittedMortgagePanel'
 
-/** The lease's debt cap (Art 8.3) and the mortgages the trust permitted on it (Art 8.1), current ones first. */
+/**
+ * The lease's debt cap (Art 8.3), the mortgages the trust permitted on it (Art 8.1), current ones first, and the
+ * homeowner's requests for new loans, newest first.
+ */
 export default function LeaseMortgagesSection({ lease }: { lease: GroundLeaseResponse }) {
   const [recording, setRecording] = useState(false)
   const [editing, setEditing] = useState<PermittedMortgageDto | null>(null)
   const [payingOff, setPayingOff] = useState<PermittedMortgageDto | null>(null)
+  const [requesting, setRequesting] = useState(false)
+  const [openRequestId, setOpenRequestId] = useState<string | null>(null)
+  const { data: requests } = useMortgageRequests(lease.id ?? null)
   const mortgages = lease.mortgages
   if (!mortgages) return null
   const permitted = mortgages.permitted ?? []
@@ -27,6 +40,11 @@ export default function LeaseMortgagesSection({ lease }: { lease: GroundLeaseRes
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        {lease.status === 'Active' && (
+          <button type="button" className="btn btn-primary" onClick={() => setRequesting(true)}>
+            Record Request
+          </button>
+        )}
         <button type="button" className="btn btn-secondary" onClick={() => setRecording(true)}>
           Record Mortgage
         </button>
@@ -88,6 +106,51 @@ export default function LeaseMortgagesSection({ lease }: { lease: GroundLeaseRes
         </div>
       )}
 
+      {requests && requests.length > 0 && (
+        <div className="registry-table-wrap" style={{ marginTop: 16 }}>
+          <table className="registry-table" aria-label="Mortgage requests">
+            <thead>
+              <tr>
+                <th>Received</th>
+                <th>Purpose</th>
+                <th>Lender</th>
+                <th>Principal</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...requests]
+                .sort((a, b) => (b.receivedOn ?? '').localeCompare(a.receivedOn ?? ''))
+                .map(r => (
+                  <tr
+                    key={r.id}
+                    tabIndex={0}
+                    onClick={() => setOpenRequestId(r.id!)}
+                    onKeyDown={e => { if (e.key === 'Enter') setOpenRequestId(r.id!) }}
+                  >
+                    <td className="cell-mono">{r.receivedOn ? formatCalendarDate(r.receivedOn) : '—'}</td>
+                    <td>{MORTGAGE_PURPOSE_LABELS[r.purpose ?? ''] ?? r.purpose}</td>
+                    <td>{r.lender}</td>
+                    <td className="cell-mono">{formatPrice(r.principal ?? 0)}</td>
+                    <td>{MORTGAGE_REQUEST_STATUS_LABELS[r.status ?? ''] ?? r.status}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {requesting && (
+        <RecordMortgageRequestPanel
+          lease={lease}
+          onClose={() => setRequesting(false)}
+          onRecorded={id => {
+            setRequesting(false)
+            setOpenRequestId(id)
+          }}
+        />
+      )}
+      {openRequestId && <MortgageRequestPanel mortgageRequestId={openRequestId} onClose={() => setOpenRequestId(null)} />}
       {recording && <RecordPermittedMortgagePanel lease={lease} onClose={() => setRecording(false)} />}
       {editing && (
         <EditPermittedMortgagePanel groundLeaseId={lease.id!} mortgage={editing} onClose={() => setEditing(null)} />

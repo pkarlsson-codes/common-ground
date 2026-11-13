@@ -20,8 +20,8 @@
    - **Purchase waiting or stalled**: one button per step not yet recorded (Record eligibility, appraisal, financing, inspection, title, lease signing), or Schedule closing once every step is in; **Closing coming up**: Record closing
    - **Lease fee notice due**: Record notice, which opens the lease, where the letter is printed and the notice recorded
    - **Lease default not cured**: Review default, which opens the lease. Ending the lease (Art 12.4) or working with the homeowner is staff's decision; nothing in the app ends it automatically. To work with the homeowner, staff open a foreclosure prevention case from the lease (see [Open Foreclosure Prevention Case from a Lease Default](../ground-leases/open-foreclosure-prevention-case-from-default.md))
-   - **Mortgage request to decide**: Decide, which opens the request (see [View Mortgage Request](../ground-leases/view-mortgage-request.md))
-   - **Mortgage loan closing to confirm**: Confirm closing, which opens Record Loan Closed (see [Record Mortgage Loan Closed](../ground-leases/record-mortgage-loan-closed.md)); clicking the row opens the request
+   - **Mortgage request to decide**: Decide, or Add appraisal while the request has no appraisal; both open the request (see [View Mortgage Request](../ground-leases/view-mortgage-request.md))
+   - **Mortgage loan closing to confirm**: Confirm closing, which opens Record Loan Closed (see [Record Mortgage Loan Closed](../ground-leases/record-mortgage-loan-closed.md)); clicking the row opens the lease
    - **Document expiring**: none; the row itself opens the document
 7. An action opens its panel over Today; on success Today refreshes and the item leaves or changes. Start selection, Choose household and the purchase steps open the record's detail for now, where the action is
 8. Clicking anywhere else on a row opens the record's detail

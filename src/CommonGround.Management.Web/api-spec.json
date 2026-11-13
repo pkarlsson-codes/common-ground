@@ -2055,6 +2055,499 @@
         }
       }
     },
+    "/api/v1/ground-leases/{groundLeaseId}/mortgage-requests": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "ReceiveMortgageRequest",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "ReceiveMortgageRequestRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceiveMortgageRequestRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiveMortgageRequestResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "GetMortgageRequests",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MortgageRequestResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mortgage-requests/{mortgageRequestId}": {
+      "get": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "GetMortgageRequest",
+        "parameters": [
+          {
+            "name": "mortgageRequestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MortgageRequestResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mortgage-requests/{mortgageRequestId}/loan-closed": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "RecordMortgageLoanClosed",
+        "parameters": [
+          {
+            "name": "mortgageRequestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordMortgageLoanClosedRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordMortgageLoanClosedRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordMortgageLoanClosedResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mortgage-requests/{mortgageRequestId}/appraisal": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "RecordMortgageRequestAppraisal",
+        "parameters": [
+          {
+            "name": "mortgageRequestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordMortgageRequestAppraisalRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordMortgageRequestAppraisalRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mortgage-requests/{mortgageRequestId}/approve": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "ApproveMortgageRequest",
+        "parameters": [
+          {
+            "name": "mortgageRequestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "ApproveMortgageRequestRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveMortgageRequestRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mortgage-requests/{mortgageRequestId}/deny": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "DenyMortgageRequest",
+        "parameters": [
+          {
+            "name": "mortgageRequestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "DenyMortgageRequestRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DenyMortgageRequestRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mortgage-requests/{mortgageRequestId}/withdraw": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "WithdrawMortgageRequest",
+        "parameters": [
+          {
+            "name": "mortgageRequestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "WithdrawMortgageRequestRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawMortgageRequestRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ground-lease-templates": {
       "post": {
         "tags": [
@@ -10764,6 +11257,416 @@
             "type": "string",
             "description": "The day it was paid off; not in the future, not before it was permitted.",
             "format": "date"
+          }
+        }
+      },
+      "ReceiveMortgageRequestResponse": {
+        "type": "object",
+        "description": "The ID of a mortgage request just recorded.",
+        "additionalProperties": false,
+        "properties": {
+          "mortgageRequestId": {
+            "type": "string",
+            "description": "The request ID."
+          }
+        }
+      },
+      "ReceiveMortgageRequestRequest": {
+        "type": "object",
+        "description": "Request to record a homeowner's request for a new loan on the home (Model Lease Art 8.3).",
+        "additionalProperties": false,
+        "required": [
+          "principal",
+          "totalDebtAfterClosing",
+          "interestRatePercent",
+          "termYears",
+          "closingCosts",
+          "appraisedValue",
+          "appraisalDate",
+          "currentIndexValue",
+          "notes"
+        ],
+        "properties": {
+          "receivedOn": {
+            "type": "string",
+            "description": "The day the request reached the trust; not in the future, not before the lease start.",
+            "format": "date"
+          },
+          "lender": {
+            "type": "string",
+            "description": "The lender making the loan."
+          },
+          "purpose": {
+            "type": "string",
+            "description": "Refinance, SecondMortgage, HomeRepair or Other."
+          },
+          "principal": {
+            "type": "number",
+            "description": "The loan amount.",
+            "format": "decimal"
+          },
+          "totalDebtAfterClosing": {
+            "type": "number",
+            "description": "All mortgage debt on the home once the loan closes, the new loan included.",
+            "format": "decimal"
+          },
+          "interestRatePercent": {
+            "type": "number",
+            "description": "The yearly interest rate, in percent.",
+            "format": "decimal"
+          },
+          "rateType": {
+            "type": "string",
+            "description": "Fixed or Adjustable."
+          },
+          "termYears": {
+            "type": "integer",
+            "description": "The loan's term in years, 1 to 50.",
+            "format": "int32"
+          },
+          "expectedClosingOn": {
+            "type": "string",
+            "description": "The day the loan is expected to close; not before the received date.",
+            "format": "date"
+          },
+          "closingCosts": {
+            "type": "number",
+            "description": "The loan's closing costs, or null when not yet known.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "appraisedValue": {
+            "type": "number",
+            "description": "The loan's appraised value, or null when the appraisal hasn't come; sent with AppraisalDate.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "appraisalDate": {
+            "type": "string",
+            "description": "The day of the loan's appraisal, or null when it hasn't come.",
+            "format": "date",
+            "nullable": true
+          },
+          "currentIndexValue": {
+            "type": "number",
+            "description": "The index value on the appraisal date, when the lease's formula is index based; otherwise null.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "description": "Anything staff want to note, or null.",
+            "minLength": 1,
+            "nullable": true
+          }
+        }
+      },
+      "MortgageRequestResponse": {
+        "type": "object",
+        "description": "A homeowner's request for a new loan on the home, with the debt check once the appraisal is in.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The request ID."
+          },
+          "groundLeaseId": {
+            "type": "string",
+            "description": "The homeowner's lease."
+          },
+          "homeId": {
+            "type": "string",
+            "description": "The home the loan is secured on."
+          },
+          "homeownerFullName": {
+            "type": "string",
+            "description": "The homeowner's full name when the request arrived.",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "description": "Pending, Approved, Denied, Closed or Withdrawn."
+          },
+          "receivedOn": {
+            "type": "string",
+            "description": "The day the request reached the trust.",
+            "format": "date"
+          },
+          "lender": {
+            "type": "string",
+            "description": "The lender making the loan."
+          },
+          "purpose": {
+            "type": "string",
+            "description": "Refinance, SecondMortgage, HomeRepair or Other."
+          },
+          "principal": {
+            "type": "number",
+            "description": "The loan amount.",
+            "format": "decimal"
+          },
+          "totalDebtAfterClosing": {
+            "type": "number",
+            "description": "All mortgage debt on the home once the loan closes.",
+            "format": "decimal"
+          },
+          "interestRatePercent": {
+            "type": "number",
+            "description": "The yearly interest rate, in percent.",
+            "format": "decimal"
+          },
+          "rateType": {
+            "type": "string",
+            "description": "Fixed or Adjustable."
+          },
+          "termYears": {
+            "type": "integer",
+            "description": "The loan's term in years.",
+            "format": "int32"
+          },
+          "expectedClosingOn": {
+            "type": "string",
+            "description": "The day the loan is expected to close.",
+            "format": "date"
+          },
+          "businessDaysBeforeClosing": {
+            "type": "integer",
+            "description": "Business days (Monday to Friday) from receipt to the expected closing.",
+            "format": "int32"
+          },
+          "shortNotice": {
+            "type": "boolean",
+            "description": "Whether that is fewer than the 15 business days the lease asks for."
+          },
+          "closingCosts": {
+            "type": "number",
+            "description": "The loan's closing costs, if known.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "description": "Anything staff noted.",
+            "nullable": true
+          },
+          "appraisedValue": {
+            "type": "number",
+            "description": "The loan's appraised value, once recorded.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "appraisalDate": {
+            "type": "string",
+            "description": "The day of the loan's appraisal.",
+            "format": "date",
+            "nullable": true
+          },
+          "currentIndexValue": {
+            "type": "number",
+            "description": "The index value the appraisal used, on an index-based lease.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "purchaseOptionPrice": {
+            "type": "number",
+            "description": "The purchase option price the appraisal gives.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "maxMortgageDebtPercent": {
+            "type": "integer",
+            "description": "The lease's debt cap percent the check used.",
+            "format": "int32",
+            "nullable": true
+          },
+          "debtCapAmount": {
+            "type": "number",
+            "description": "The most total debt may be.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "debtPercent": {
+            "type": "number",
+            "description": "The total debt as a percent of the purchase option price, to one decimal place.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "overCap": {
+            "type": "boolean",
+            "description": "Whether the total debt is above the cap amount; null until the appraisal is in.",
+            "nullable": true
+          },
+          "decidedOn": {
+            "type": "string",
+            "description": "The day the trust approved or denied it.",
+            "format": "date",
+            "nullable": true
+          },
+          "decisionReason": {
+            "type": "string",
+            "description": "Why the trust approved or denied it.",
+            "nullable": true
+          },
+          "closedOn": {
+            "type": "string",
+            "description": "The day the loan closed.",
+            "format": "date",
+            "nullable": true
+          },
+          "permittedMortgageId": {
+            "type": "string",
+            "description": "The permitted mortgage on the lease the closed loan became.",
+            "nullable": true
+          },
+          "paidOffMortgageIds": {
+            "type": "array",
+            "description": "The lease's mortgages the loan paid off.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "withdrawnOn": {
+            "type": "string",
+            "description": "The day the homeowner withdrew it.",
+            "format": "date",
+            "nullable": true
+          },
+          "withdrawnReason": {
+            "type": "string",
+            "description": "Why the homeowner withdrew it.",
+            "nullable": true
+          },
+          "recordedAt": {
+            "type": "string",
+            "description": "When the request was recorded.",
+            "format": "date-time"
+          }
+        }
+      },
+      "RecordMortgageLoanClosedResponse": {
+        "type": "object",
+        "description": "The permitted mortgage a closed loan became.",
+        "additionalProperties": false,
+        "properties": {
+          "permittedMortgageId": {
+            "type": "string",
+            "description": "The new permitted mortgage's ID on the lease."
+          }
+        }
+      },
+      "RecordMortgageLoanClosedRequest": {
+        "type": "object",
+        "description": "Request to record that an approved loan closed.",
+        "additionalProperties": false,
+        "required": [
+          "paidOffMortgageIds",
+          "noticeAddress"
+        ],
+        "properties": {
+          "closedOn": {
+            "type": "string",
+            "description": "The day the loan closed.",
+            "format": "date"
+          },
+          "paidOffMortgageIds": {
+            "type": "array",
+            "description": "The lease's permitted mortgages the loan paid off; empty when none.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "noticeAddress": {
+            "type": "string",
+            "description": "Where the lender takes notices about the home, or null when not known yet.",
+            "minLength": 1,
+            "nullable": true
+          }
+        }
+      },
+      "RecordMortgageRequestAppraisalRequest": {
+        "type": "object",
+        "description": "Request to record the loan's appraisal and closing costs on a request waiting for a decision.",
+        "additionalProperties": false,
+        "required": [
+          "appraisedValue",
+          "currentIndexValue",
+          "closingCosts"
+        ],
+        "properties": {
+          "appraisedValue": {
+            "type": "number",
+            "description": "The home's appraised value for the loan.",
+            "format": "decimal"
+          },
+          "appraisalDate": {
+            "type": "string",
+            "description": "The day of the appraisal; not in the future.",
+            "format": "date"
+          },
+          "currentIndexValue": {
+            "type": "number",
+            "description": "The index value on the appraisal date, when the lease's formula is index based; otherwise null.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "closingCosts": {
+            "type": "number",
+            "description": "The loan's closing costs, or null when not yet known.",
+            "format": "decimal",
+            "nullable": true
+          }
+        }
+      },
+      "ApproveMortgageRequestRequest": {
+        "type": "object",
+        "description": "Request to give the trust's written permission for a requested loan.",
+        "additionalProperties": false,
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "approvedOn": {
+            "type": "string",
+            "description": "The day the trust approved it.",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the trust approved it; required when the debt is over the cap, otherwise may be null.",
+            "minLength": 1,
+            "nullable": true
+          }
+        }
+      },
+      "DenyMortgageRequestRequest": {
+        "type": "object",
+        "description": "Request to refuse a requested loan.",
+        "additionalProperties": false,
+        "properties": {
+          "deniedOn": {
+            "type": "string",
+            "description": "The day the trust refused it.",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why, for the denial letter."
+          }
+        }
+      },
+      "WithdrawMortgageRequestRequest": {
+        "type": "object",
+        "description": "Request to record that the homeowner dropped a requested loan before it closed.",
+        "additionalProperties": false,
+        "properties": {
+          "withdrawnOn": {
+            "type": "string",
+            "description": "The day the homeowner withdrew it.",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the homeowner withdrew it."
           }
         }
       },

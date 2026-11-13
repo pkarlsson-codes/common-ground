@@ -120,4 +120,58 @@ public interface IGroundLeasesApiClient
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task that completes when the mortgage is marked paid off.</returns>
     Task MarkPermittedMortgagePaidOffAsync(string groundLeaseId, string mortgageId, MarkPermittedMortgagePaidOffRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Records a homeowner's request for a new loan on the home.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response.</returns>
+    Task<ReceiveMortgageRequestResponse> ReceiveMortgageRequestAsync(string groundLeaseId, ReceiveMortgageRequestRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Gets a lease's mortgage requests.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response.</returns>
+    Task<IReadOnlyList<MortgageRequestResponse>> GetMortgageRequestsAsync(string groundLeaseId, CancellationToken cancellationToken);
+
+    /// <summary>Gets a mortgage request with its debt check.</summary>
+    /// <param name="mortgageRequestId">The ID of the mortgage request.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response.</returns>
+    Task<MortgageRequestResponse> GetMortgageRequestAsync(string mortgageRequestId, CancellationToken cancellationToken);
+
+    /// <summary>Records the loan's appraisal on a request waiting for a decision.</summary>
+    /// <param name="mortgageRequestId">The ID of the mortgage request.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when it is recorded.</returns>
+    Task RecordMortgageRequestAppraisalAsync(string mortgageRequestId, RecordMortgageRequestAppraisalRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Approves a mortgage request.</summary>
+    /// <param name="mortgageRequestId">The ID of the mortgage request.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when it is recorded.</returns>
+    Task ApproveMortgageRequestAsync(string mortgageRequestId, ApproveMortgageRequestRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Denies a mortgage request.</summary>
+    /// <param name="mortgageRequestId">The ID of the mortgage request.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when it is recorded.</returns>
+    Task DenyMortgageRequestAsync(string mortgageRequestId, DenyMortgageRequestRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Records that an approved loan closed.</summary>
+    /// <param name="mortgageRequestId">The ID of the mortgage request.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response.</returns>
+    Task<RecordMortgageLoanClosedResponse> RecordMortgageLoanClosedAsync(string mortgageRequestId, RecordMortgageLoanClosedRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Withdraws a mortgage request.</summary>
+    /// <param name="mortgageRequestId">The ID of the mortgage request.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when it is recorded.</returns>
+    Task WithdrawMortgageRequestAsync(string mortgageRequestId, WithdrawMortgageRequestRequest request, CancellationToken cancellationToken);
 }

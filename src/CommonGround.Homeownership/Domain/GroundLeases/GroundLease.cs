@@ -556,6 +556,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <param name="request">The approved request on this lease.</param>
     /// <param name="closedOn">The day the loan closed.</param>
     /// <param name="paidOffMortgageIds">The lease's mortgages the loan paid off.</param>
+    /// <param name="noticeAddress">Where the lender takes notices about the home, or null when not known yet.</param>
     /// <param name="today">The trust's today.</param>
     /// <param name="recordedBy">The staff user recording it.</param>
     public IReadOnlyList<IDomainEvent> PermitRequestedMortgage(
@@ -563,6 +564,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         MortgageRequest request,
         DateOnly closedOn,
         IReadOnlyList<PermittedMortgageId> paidOffMortgageIds,
+        string? noticeAddress,
         DateOnly today,
         UserId recordedBy)
     {
@@ -585,7 +587,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
                 Id.Value,
                 mortgageId.Value,
                 request.Terms.Lender,
-                null,
+                OptionalText(noticeAddress),
                 request.Terms.Principal,
                 approvedOn,
                 MortgagePermissionSource.Request,

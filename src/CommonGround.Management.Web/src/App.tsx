@@ -21,6 +21,7 @@ import SignupPage from './pages/SignupPage'
 import TodayPage from './pages/TodayPage'
 import StewardshipPage from './pages/stewardship/StewardshipPage'
 import LeaseFeeNoticesPrintPage from './pages/lease-fee-notices/LeaseFeeNoticesPrintPage'
+import MortgageRequestLetterPage from './pages/ground-leases/MortgageRequestLetterPage'
 import TrustPolicyPage from './pages/trust-policy/TrustPolicyPage'
 import IncomeLimitsPage from './pages/income-limits/IncomeLimitsPage'
 import FunderReportPage from './pages/reports/FunderReportPage'
@@ -118,6 +119,7 @@ export default function App() {
                 <Route path="/portfolio-import"     element={<PortfolioImportPage />} />
               </Route>
               <Route path="/lease-fee-notices/print" element={<LeaseFeeNoticesPrintPage />} />
+              <Route path="/mortgage-requests/:mortgageRequestId/letter" element={<MortgageRequestLetterPage />} />
             </Route>
           </Route>
         </Routes>

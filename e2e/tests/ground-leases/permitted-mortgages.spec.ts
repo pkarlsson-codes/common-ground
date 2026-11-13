@@ -1,32 +1,9 @@
 import { expect, test, type Page } from '@playwright/test'
-import { createHome, createLandParcel, post } from '../support/api'
+import { createGroundLease } from '../support/api'
 import { detailValue, expectToast, field, isoDate, panel, uniqueId } from '../support/ui'
 
 // Journeys: docs/journeys/ground-leases/record-permitted-mortgage, edit-permitted-mortgage, mark-mortgage-paid-off,
 //   view-ground-lease-detail (Mortgages section)
-
-async function createLease(page: Page, homeowner: string) {
-  const { parcelId } = await createLandParcel(page)
-  const homeId = await createHome(page, parcelId)
-  await post(page, '/api/v1/ground-leases', {
-    landParcelId: parcelId,
-    homeId,
-    homeownerFullName: homeowner,
-    homeownerEmail: `${homeowner.toLowerCase().replace(/\s+/g, '.')}@example.com`,
-    homeownerPhone: null,
-    leaseStartDate: isoDate(-365),
-    termYears: 99,
-    optionWindowDays: 60,
-    maxMortgageDebtPercent: 90,
-    landUseFee: 0,
-    repairReserveFee: 0,
-    basePrice: 200000,
-    originalAppraisedValue: 250000,
-    covenantTerms: 'Standard covenant terms',
-    formulaKind: 'AppraisalBased',
-    appreciationShare: 0.25,
-  })
-}
 
 const mortgagesSection = (page: Page) =>
   page.locator('.detail-section').filter({ has: page.locator('.detail-section__title', { hasText: /^Mortgages$/ }) })
@@ -34,7 +11,7 @@ const mortgagesSection = (page: Page) =>
 test('staff record a permitted mortgage, add its notice address, and mark it paid off', async ({ page }) => {
   await page.goto('/ground-leases')
   const homeowner = `Mortgage Owner ${uniqueId()}`
-  await createLease(page, homeowner)
+  await createGroundLease(page, homeowner)
 
   await page.getByRole('searchbox', { name: 'Search ground leases' }).fill(homeowner)
   await expect(page.locator('tbody tr')).toHaveCount(1)

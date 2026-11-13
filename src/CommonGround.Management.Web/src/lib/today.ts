@@ -62,6 +62,8 @@ const KINDS: Record<string, { page: string; area: TodayArea }> = {
   'closing-scheduled': { page: '/purchase-workflows', area: 'purchases' },
   'lease-fee-notice-due': { page: '/stewardship', area: 'stewardship' },
   'lease-default-uncured': { page: '/stewardship', area: 'stewardship' },
+  'mortgage-request-pending': { page: '/ground-leases', area: 'stewardship' },
+  'mortgage-loan-closing-unrecorded': { page: '/ground-leases', area: 'stewardship' },
   'document-expiring': { page: '/documents', area: 'records' },
   'income-limits-missing': { page: '/income-limits', area: 'selections' },
   'income-limits-stale': { page: '/income-limits', area: 'selections' },
@@ -106,6 +108,9 @@ const ACTION_LABELS: Record<string, string> = {
   'record-closing': 'Record closing',
   'record-lease-fee-notice': 'Record notice',
   'review-lease-default': 'Review default',
+  'record-mortgage-request-appraisal': 'Add appraisal',
+  'decide-mortgage-request': 'Decide',
+  'record-mortgage-loan-closed': 'Confirm closing',
   'enter-income-limits': 'Enter limits',
 }
 
@@ -126,6 +131,9 @@ const PANEL_ACTIONS = new Set([
   'record-housing-counseling',
   'record-clt-orientation',
   'record-mortgage-prequalification',
+  'record-mortgage-request-appraisal',
+  'decide-mortgage-request',
+  'record-mortgage-loan-closed',
 ])
 
 export interface RowAction {
