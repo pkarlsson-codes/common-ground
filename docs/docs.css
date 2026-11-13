@@ -92,6 +92,17 @@ th, td { text-align: left; vertical-align: top; padding: 0.5rem 0.75rem; border-
 th { color: var(--muted); font-weight: 600; white-space: nowrap; }
 td code { overflow-wrap: normal; white-space: nowrap; }
 
+pre:not(.mermaid) {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+pre:not(.mermaid) code { background: none; padding: 0; font-size: inherit; overflow-wrap: normal; }
+
 .diagram {
   background: var(--surface);
   border: 1px solid var(--border);

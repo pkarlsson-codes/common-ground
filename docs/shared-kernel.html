@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shared Kernel</title>
+<link rel="stylesheet" href="./docs.css" />
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
+  const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  mermaid.initialize({ startOnLoad: true, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict' });
+</script>
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <p class="toc-title"><a href="./index.html">CommonGround docs</a></p>
+  <ol>
+    <li><a href="#what">What it is</a></li>
+    <li><a href="#layout">Project layout</a></li>
+    <li><a href="#building-blocks">Domain building blocks</a></li>
+    <li><a href="#events">Domain and integration events</a></li>
+    <li><a href="#errors">Errors</a></li>
+    <li><a href="#values">Shared value objects</a></li>
+    <li><a href="#marten">Marten and Wolverine helpers</a></li>
+    <li><a href="#time">The clock</a></li>
+    <li><a href="#work-items">Work items for Today</a></li>
+    <li><a href="#http">HTTP and paging</a></li>
+    <li><a href="#seeding">Seeding</a></li>
+    <li><a href="#unused">Code with no callers</a></li>
+    <li><a href="#changing">Adding to the shared kernel</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <h1>Shared Kernel</h1>
+  <p class="lede">The project every bounded context builds on: base classes for aggregates, entities, IDs, value objects and enumerations; the events and errors they raise; the app's clock; and the Marten, Wolverine and seeding plumbing the contexts share.</p>
+  <p class="meta">Project: <code>src/CommonGround.SharedKernel</code>. Last checked against the code: 2026-11-13. Read the <a href="./architecture.html">Architecture Overview</a> first.</p>
+</header>
+
+<section id="what">
+  <h2>1. What it is</h2>
+  <p>In Domain-Driven Design a <em>shared kernel</em> is the small part of the model that several bounded contexts agree to share, and change only together. Here it is one class library, <code>CommonGround.SharedKernel</code>. All seven bounded contexts, their <code>*.Contracts</code> projects, the API, both gateways, <code>CommonGround.API.Clients</code>, <code>CommonGround.API.Contracts</code> and <code>CommonGround.Testing</code> reference it: 17 projects in all. It references no other project in the solution.</p>
+  <p>It holds three kinds of code:</p>
+  <ul>
+    <li><strong>Domain building blocks</strong> (<code>Domain/</code>): the base classes every domain type derives from, the event and exception base types, and value objects that more than one context uses, such as <code>Money</code> and <code>PersonName</code>.</li>
+    <li><strong>Cross-cutting services</strong>: the clock (<code>TimeProviderContext</code>, <code>ITrustClock</code>) and the work-item shape that Today collects.</li>
+    <li><strong>Infrastructure</strong> (<code>Extensions/</code>, <code>Infrastructure/</code>): Marten setup, aggregate-loading helpers, Wolverine middleware, paging types, the base HTTP client the gateways use, and seeding support.</li>
+  </ul>
+  <p>Because 17 projects depend on it, a change here can break any of them, and a change to a type stored in events (<code>Money</code>, an ID, an <code>Enumeration</code>) changes how stored events read back. Keep it small; see <a href="#changing">Adding to the shared kernel</a>.</p>
+</section>
+
+<section id="layout">
+  <h2>2. Project layout</h2>
+  <table>
+    <thead><tr><th>Folder</th><th>Contents</th></tr></thead>
+    <tbody>
+      <tr><td><code>Domain/</code></td><td><code>Entity</code>, <code>AggregateRoot</code>, <code>ValueObject</code>, <code>Enumeration</code>, <code>IEntityId</code>, <code>TrustId</code>, <code>UserId</code>, and the shared value objects.</td></tr>
+      <tr><td><code>Domain/Events/</code></td><td><code>DomainEvent</code>, <code>IDomainEvent</code>, <code>IntegrationEvent</code>, and <code>IncomeLimitLevelEntry</code> (the stored shape of one income limit level).</td></tr>
+      <tr><td><code>Domain/Exceptions/</code></td><td><code>DomainException</code>, <code>BusinessRuleViolationException</code>, <code>AggregateNotFoundException</code>, <code>ForbiddenException</code>.</td></tr>
+      <tr><td><code>Domain/Errors/</code></td><td><code>BusinessRuleViolation</code> factories for the shared value objects (codes starting <code>shared.</code>).</td></tr>
+      <tr><td><code>Domain/Services/</code></td><td><code>ITimeProvider</code>, <code>TimeProviderContext</code>, <code>ITrustClock</code>.</td></tr>
+      <tr><td><code>Domain/Geography/</code></td><td><code>Coordinates</code>, <code>GeographicArea</code>. No callers; see <a href="#unused">section 12</a>.</td></tr>
+      <tr><td><code>Application/WorkItems/</code></td><td><code>WorkItem</code>, <code>WorkArea</code>, <code>WorkItemList</code>.</td></tr>
+      <tr><td><code>Extensions/</code></td><td><code>AddMartenServices</code>, <code>stream.Decide</code>, <code>LoadAggregateAsync</code>.</td></tr>
+      <tr><td><code>Infrastructure/API/</code></td><td><code>BaseApiClient</code>, <code>PaginatedResponse</code>, <code>QueryStringBuilder</code>, <code>UpstreamApiException</code>, correlation ID middleware.</td></tr>
+      <tr><td><code>Infrastructure/Messaging/</code></td><td><code>EventClockMiddleware</code>.</td></tr>
+      <tr><td><code>Infrastructure/Querying/</code></td><td><code>PageSpec</code>, <code>PaginationQuerySpecV2</code>, sort and cursor helpers.</td></tr>
+      <tr><td><code>Infrastructure/Seeding/</code></td><td><code>IDevelopmentSeeder</code>, <code>SeedRun</code>, <code>SeedDate</code>, <code>SeedClock</code>, <code>PropagationWaiter</code>.</td></tr>
+      <tr><td><code>Infrastructure/Services/</code></td><td><code>SystemTimeProvider</code>, <code>ControllableTimeProvider</code>.</td></tr>
+      <tr><td><code>Specifications/</code></td><td><code>Specification&lt;T&gt;</code>. No callers.</td></tr>
+    </tbody>
+  </table>
+  <p>Tests are in <code>src/CommonGround.SharedKernel.Tests</code>, one test class per type, for the value objects, IDs, the enumeration JSON converter, <code>TimeProviderContext</code>, <code>EventClockMiddleware</code>, <code>stream.Decide</code> and the seeding types.</p>
+</section>
+
+<section id="building-blocks">
+  <h2>3. Domain building blocks</h2>
+  <p>Every domain type in a bounded context derives from one of these. Don't write a domain type as a plain record, class or C# <code>enum</code>. Generate the skeleton with the <code>dotnet new</code> templates in <code>templates/</code> (<code>ddd-aggregate</code>, <code>ddd-entity</code>, <code>ddd-vo</code>, <code>ddd-enum</code>); <code>docs/ai/creating-domain-types.md</code> has the full rules.</p>
+
+  <div class="diagram">
+<pre class="mermaid">
+classDiagram
+  direction LR
+  class IEntityId~TSelf~ {
+    &lt;&lt;interface&gt;&gt;
+    +string Value
+    +Create(string)$ TSelf
+    +Generate()$ TSelf
+  }
+  class Entity~TId~ {
+    +TId Id
+  }
+  class AggregateRoot~TId~
+  class ValueObject {
+    #GetEqualityComponents()
+  }
+  class Enumeration~T~ {
+    +int Value
+    +string DisplayName
+    +FromValue(int)$ T
+    +FromDisplayName(string)$ T
+    +GetAll()$
+  }
+  Entity~TId~ <|-- AggregateRoot~TId~
+  Entity~TId~ ..> IEntityId~TSelf~ : TId implements
+</pre>
+  </div>
+
+  <table>
+    <thead><tr><th>Type</th><th>Use it for</th><th>Rules</th></tr></thead>
+    <tbody>
+      <tr><td><code>IEntityId&lt;TSelf&gt;</code></td><td>Every ID: <code>HouseholdId</code>, <code>LandParcelId</code>, <code>TrustId</code>, <code>UserId</code>.</td><td>A <code>readonly record struct</code> wrapping a string such as <code>household-01jq…</code>: a prefix, a hyphen and a lower-case ULID (<code>EntityIds.New</code>). <code>Create(string)</code> rejects a value without the prefix. Keep the prefix a private <code>const</code>: a public static property stops Marten and Wolverine treating the type as a strong-typed ID. Mark it <code>[JsonConverter(typeof(EntityIdJsonConverter&lt;TSelf&gt;))]</code> so it serializes as a plain string. The non-generic <code>IEntityId</code> has only <code>Value</code>, for code that takes any ID.</td></tr>
+      <tr><td><code>Entity&lt;TId&gt;</code></td><td>An object with identity that lives inside an aggregate.</td><td>Equal when the IDs are equal. The owning aggregate creates and changes it, only in its <code>Apply</code> methods.</td></tr>
+      <tr><td><code>AggregateRoot&lt;TId&gt;</code></td><td>The root of an event stream: <code>Household</code>, <code>GroundLease</code>, <code>LandParcel</code>.</td><td>A <em>decider</em>; see below. Adds no members to <code>Entity</code>: the base class marks the role.</td></tr>
+      <tr><td><code>ValueObject</code></td><td>A value with no identity: <code>Money</code>, <code>PersonName</code>, a lease's terms.</td><td>Private constructor, validation in a static <code>Create</code>, equality from <code>GetEqualityComponents()</code>. Not a record.</td></tr>
+      <tr><td><code>Enumeration&lt;T&gt;</code></td><td>A closed set of named values: a lease status, a violation type.</td><td>Instances are <code>static readonly</code> fields. Events hold the enumeration itself; Marten stores its <code>DisplayName</code> through <code>EnumerationJsonConverter</code>. So <strong>a display name is a stored key</strong>: renaming one breaks every stored event that holds the old name. The web maps display names to the text staff see.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Aggregates are deciders</h3>
+  <p>A decision method checks the request against the aggregate's state and returns the event it decides on, <code>null</code> when there is nothing to do, or a list for several events. It never changes state. Marten builds the aggregate from its stream by calling a public static <code>Create</code> for the first event and a public <code>Apply</code> for each later one. Both must be public: Marten's source generator skips non-public ones without an error, and that event's state is then missing when the aggregate is next loaded.</p>
+  <p>From <code>src/CommonGround.PropertyRegistry</code>:</p>
+<pre><code>// Domain/LandParcels/LandParcel.cs: the decision
+public ParcelDecommissioned? Decommission(UserId changedBy)
+{
+    if (IsDecommissioned)
+        return null;
+
+    return new ParcelDecommissioned(Id.Value, changedBy.Value);
+}
+
+// Domain/LandParcels/LandParcel.cs: the evolution
+public void Apply(ParcelDecommissioned _)
+{
+    IsDecommissioned = true;
+}
+
+// Application/Commands/DecommissionParcel.cs: the handler
+public static ParcelDecommissioned? Handle(
+    DecommissionParcel command,
+    [WriteAggregate] LandParcel parcel)
+    =&gt; parcel.Decommission(command.ChangedBy);</code></pre>
+  <p>Wolverine's <code>[WriteAggregate]</code> loads the stream named by the command's <code>LandParcelId</code>, calls the handler, and appends whatever event it returns. The handler holds no logic of its own. When a check would be needed by two entry points, it belongs in the aggregate.</p>
+</section>
+
+<section id="events">
+  <h2>4. Domain and integration events</h2>
+  <table>
+    <thead><tr><th>Type</th><th>What it is</th><th>Where it lives</th></tr></thead>
+    <tbody>
+      <tr><td><code>DomainEvent(string AggregateId)</code></td><td>A fact an aggregate decided on, stored in its stream. Base record for every domain event.</td><td>The context's <code>Domain/&lt;Aggregate&gt;/Events/</code>.</td></tr>
+      <tr><td><code>IntegrationEvent</code></td><td>A fact one context publishes for others: <code>HomeSelectionStarted</code>, <code>PurchaseClosed</code>. Has its own <code>EventId</code> (a GUID).</td><td>The publishing context's <code>*.Contracts/Events/</code>. Only HomeBuyers, PropertyRegistry and Homeownership have one.</td></tr>
+    </tbody>
+  </table>
+  <p>Both set <code>OccurredAt</code> from <code>TimeProviderContext.Current.UtcNow</code> when the event object is constructed, not from <code>DateTimeOffset.UtcNow</code>. This is what lets seeding and tests fix the time an event happened (<a href="#time">section 8</a>). <code>EventClockMiddleware</code> then runs each handler of the event at that time.</p>
+  <p><code>IntegrationEvent.SourceBoundedContext</code> takes the second segment of the event's namespace (<code>CommonGround.HomeBuyers.Contracts.Events</code> gives <code>HomeBuyers</code>). Moving an event to another namespace changes it. The code has a TODO about this.</p>
+  <p>A domain event's payload uses domain types where they are stable to store: <code>Money</code>, enumerations, <code>IncomeLimitLevelEntry</code>. <code>ParcelDecommissioned</code> above holds its IDs as plain strings (<code>AggregateId</code>, <code>ChangedBy</code>).</p>
+</section>
+
+<section id="errors">
+  <h2>5. Errors</h2>
+  <p>The API turns these exceptions into ProblemDetails responses. The handlers are in <code>src/CommonGround.API/Infrastructure/ExceptionHandling/</code>.</p>
+  <table>
+    <thead><tr><th>Exception</th><th>Thrown when</th><th>HTTP status</th></tr></thead>
+    <tbody>
+      <tr><td><code>BusinessRuleViolationException</code></td><td>A request breaks a domain rule, including bad input the user can supply (a malformed phone number, a fraction of a cent). Carries a stable <code>Code</code> and named <code>Args</code>.</td><td>422, with <code>code</code> in the body and a message from <code>BusinessRuleErrorMessageMap</code>.</td></tr>
+      <tr><td><code>DomainException</code></td><td>Abstract base of the above. Any subclass gets the same 422 handling.</td><td>422</td></tr>
+      <tr><td><code>AggregateNotFoundException</code></td><td>A stream doesn't exist. Thrown by <code>LoadAggregateAsync</code> and <code>stream.Decide</code>.</td><td>404</td></tr>
+      <tr><td><code>ForbiddenException</code></td><td>The caller may not do this.</td><td>403</td></tr>
+    </tbody>
+  </table>
+  <p>Throw a <code>BusinessRuleViolationException</code>, not an <code>ArgumentException</code>, for input a user can get wrong; an <code>ArgumentException</code> becomes a 500. Each context builds its exceptions in an <code>Application/Errors/*BusinessRuleViolation.cs</code> class of static factories; the shared kernel's are in <code>Domain/Errors/SharedKernelBusinessRuleViolation.cs</code>:</p>
+<pre><code>shared.phone.required          shared.phone.invalid_format
+shared.email.required          shared.email.invalid_format
+shared.person_name.required    shared.person_name.too_long
+shared.time_zone.required      shared.time_zone.unknown
+shared.money.fraction_of_cent
+shared.income_limit_level.percent_out_of_range
+shared.income_limit_level.wrong_number_of_limits
+shared.income_limit_level.limit_not_positive</code></pre>
+  <p>Every code needs a message in <code>BusinessRuleErrorMessageMap</code> in the API; <code>BusinessRuleErrorMessageMapTests</code> fails when one is missing. Without a message the user sees a generic one.</p>
+</section>
+
+<section id="values">
+  <h2>6. Shared value objects</h2>
+  <p>These are here because more than one context uses them.</p>
+  <table>
+    <thead><tr><th>Type</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td><code>Money</code></td><td>US dollars in whole cents. <code>Create</code> refuses a fraction of a cent; use it for an amount someone entered or stored. <code>RoundedFrom</code> and <code>Share</code> round a worked-out amount (interest, two-thirds of a balance) to the cent once, half a cent away from zero. Adding, subtracting and multiplying by an <code>int</code> stay in whole cents. May be negative, for a credit. Stored and sent as a plain JSON number (<code>MoneyJsonConverter</code>). Events carry <code>Money</code>; read models and API contracts use <code>decimal</code> and convert at the endpoint.</td></tr>
+      <tr><td><code>PersonName</code></td><td>A name as one string, 200 characters at most.</td></tr>
+      <tr><td><code>EmailAddress</code></td><td>Validated, 254 characters at most.</td></tr>
+      <tr><td><code>PhoneNumber</code></td><td>Parsed and formatted with <code>libphonenumber-csharp</code>. <code>FromOptional</code> returns <code>null</code> for blank input.</td></tr>
+      <tr><td><code>IanaTimeZone</code></td><td>A time zone ID such as <code>America/Chicago</code>. <code>ToDate</code> turns an instant into the calendar date in that zone; <code>ToInstant</code> goes the other way.</td></tr>
+      <tr><td><code>IncomeLimitLevel</code></td><td>One row of a HUD income limit table: a percent of area median income (AMI) and a limit for each household size from 1 to 8.</td></tr>
+      <tr><td><code>IncomeLimitTable</code></td><td>A copy of an income limit schedule as it stood on one day. A home selection keeps the one in effect when it starts and the purchase carries it, so later corrections to the schedule don't change what the purchase is judged by. <code>BandFor(income, householdSize)</code> gives the <code>IncomeBand</code>.</td></tr>
+      <tr><td><code>IncomeBand</code></td><td>Which levels a household's income falls between: over one level's limit and at or under the next. Used by HomeBuyers, Homeownership and reports.</td></tr>
+    </tbody>
+  </table>
+  <p>Not every amount is converted to <code>Money</code> yet. <code>docs/ai/creating-domain-types.md</code> lists the ones still in <code>decimal</code>.</p>
+</section>
+
+<section id="marten">
+  <h2>7. Marten and Wolverine helpers</h2>
+
+  <h3><code>AddMartenServices</code></h3>
+  <p>The API calls this once, in <code>src/CommonGround.API/Infrastructure/DependencyInjection.cs</code>; a second call throws. It sets:</p>
+  <ul>
+    <li>System.Text.Json serialization with <code>EnumerationJsonConverter</code>.</li>
+    <li>String stream keys (<code>StreamIdentity.AsString</code>), in schema <code>commonground_events</code>.</li>
+    <li>Conjoined tenancy for events and every document: one database, each row tagged with its trust's ID.</li>
+    <li>Lightweight sessions, Wolverine integration, and publishing every event to Wolverine.</li>
+    <li>The async projection daemon in <code>Solo</code> mode, and database schema changes applied at startup.</li>
+  </ul>
+  <p>The API passes its own options on top: projections, indexes and document types.</p>
+
+  <h3>Loading and deciding</h3>
+  <table>
+    <thead><tr><th>Helper</th><th>Use it when</th></tr></thead>
+    <tbody>
+      <tr><td><code>[WriteAggregate]</code> (Wolverine)</td><td>The default. A handler that changes one aggregate named by an ID on the command.</td></tr>
+      <tr><td><code>stream.Decide(a =&gt; a.Something(…))</code></td><td><code>[WriteAggregate]</code> can't load the aggregate: the handler writes several streams, or an integration event names the aggregate by a plain string. Fetch the stream with <code>FetchForWriting</code>, then call <code>Decide</code>. A second <code>Decide</code> on the same stream sees the state the first one produced. Throws <code>AggregateNotFoundException</code> if the stream doesn't exist.</td></tr>
+      <tr><td><code>session.LoadAggregateAsync&lt;T&gt;(id)</code></td><td>A handler needs another aggregate's state to decide, without writing to it. Throws <code>AggregateNotFoundException</code> if not found.</td></tr>
+      <tr><td><code>AggregateEvolver.Evolve(aggregate, events)</code></td><td>Apply events to an aggregate in memory, through the same generated code Marten runs on load. Used by <code>stream.Decide</code> and by tests in <code>CommonGround.Testing</code>.</td></tr>
+    </tbody>
+  </table>
+
+  <h3><code>EventClockMiddleware</code></h3>
+  <p>Wolverine delivers an event to its handlers after the event happened: through the Marten subscription or a durable queue. Without this middleware a handler's "now" would be the delivery time. The middleware runs each handler with the clock set to, in order of preference:</p>
+  <ol>
+    <li>the message's own <code>OccurredAt</code>, if it is a domain or integration event;</li>
+    <li>otherwise the <code>cg-clock</code> envelope header, which messages cascaded from a timed handler inherit, or a scheduled message's due time, whichever is later;</li>
+    <li>otherwise the clock is left alone.</li>
+  </ol>
+  <p>This is how a seeded event dated last March gets its reactions dated last March too. The API registers it in <code>Program.cs</code> with <code>EventClockMiddleware.Register(opts)</code>.</p>
+</section>
+
+<section id="time">
+  <h2>8. The clock</h2>
+  <p>App code never reads <code>DateTimeOffset.UtcNow</code> or <code>DateTime.Now</code>. It reads <code>TimeProviderContext.Current.UtcNow</code>, or asks <code>ITrustClock</code> for a date.</p>
+  <table>
+    <thead><tr><th>Type</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>ITimeProvider</code></td><td>One property, <code>UtcNow</code>. Implemented by <code>SystemTimeProvider</code> (the real clock) and <code>ControllableTimeProvider</code> (a clock you set and advance).</td></tr>
+      <tr><td><code>TimeProviderContext</code></td><td>A static holder, so domain events can read the time without dependency injection. <code>Use(provider)</code> sets a clock for the current async call chain only (an <code>AsyncLocal</code>) until the returned scope is disposed; seeding and <code>EventClockMiddleware</code> use it, and other requests keep the real clock. <code>SetCurrent</code> changes the global clock for the whole process; only tests call it.</td></tr>
+      <tr><td><code>ITrustClock</code></td><td>Calendar dates in a trust's time zone: <code>TodayAsync(trustId)</code> and <code>ToTrustDateAsync(trustId, instant)</code>. Implemented by <code>TrustClock</code> in TrustManagement, which reads the trust's <code>IanaTimeZone</code>. A date taken from UTC would put an evening event on the next day.</td></tr>
+    </tbody>
+  </table>
+  <p>Instants are UTC <code>DateTimeOffset</code>; calendar dates are <code>DateOnly</code>. The full rules, including the web side (<code>CalendarDate</code>, <code>trustToday()</code>), are in <code>docs/ai/dates-and-times.md</code>.</p>
+</section>
+
+<section id="work-items">
+  <h2>9. Work items for Today</h2>
+  <p>Today is the staff work queue. It is not a bounded context: the API's Today module asks each context for its work items and lists them together. The shared kernel defines the shape they all return:</p>
+  <ul>
+    <li><code>WorkItem</code>: the area, a kind (such as <code>application-awaiting-decision</code>), the record type and ID to open, a label and detail line, an optional due date, the date it has waited since, and the action keys staff can take, in the order to offer them.</li>
+    <li><code>WorkArea</code>: the five area keys in the order a CLT's work runs: <code>applicants</code>, <code>selections</code>, <code>purchases</code>, <code>stewardship</code>, <code>records</code>.</li>
+    <li><code>WorkItemList</code>: the wrapper a context's work-item query returns. A bare list from a Wolverine handler would be taken as messages to cascade, so it is wrapped.</li>
+  </ul>
+  <p>HomeBuyers, PropertyRegistry, Homeownership and Documents return work items. The web app skips a kind it doesn't know.</p>
+</section>
+
+<section id="http">
+  <h2>10. HTTP and paging</h2>
+  <table>
+    <thead><tr><th>Type</th><th>Used by</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td><code>PaginatedResponse&lt;T&gt;</code></td><td>Every context's list queries, the API, the gateways</td><td>A page of items with page number, size, total count and total pages. Queries fill it from Marten's <code>ToPagedListAsync</code>.</td></tr>
+      <tr><td><code>PageSpec</code></td><td>List queries</td><td>Page number (from 1) and size.</td></tr>
+      <tr><td><code>PaginationQuerySpecV2</code></td><td><code>CommonGround.API.Contracts</code> (17 query types)</td><td>Base class for a list query's parameters: page number, page size (default 20, maximum 100), and the filters a subclass adds. <code>ToQueryString()</code> builds the URL the gateway calls.</td></tr>
+      <tr><td><code>BaseApiClient</code></td><td><code>CommonGround.API.Clients</code> (19 clients)</td><td>Base class for the typed clients the gateways use to call the API: GET, POST, PUT, PATCH, DELETE and form posts, JSON options, a Polly resilience pipeline, and logging. The default pipeline retries 3 times with exponential backoff on a network error, a 429 or any 5xx, for every method including POST, and times out after 30 seconds. A non-success response that isn't retried, or still fails, throws <code>UpstreamApiException</code> with the status code and body; the Management gateway's <code>ErrorHandlingMiddleware</code> passes it on to the browser.</td></tr>
+      <tr><td><code>QueryStringBuilder</code></td><td><code>CommonGround.API.Clients</code></td><td>Builds a query string, skipping blank values.</td></tr>
+      <tr><td><code>CorrelationIdMiddleware</code></td><td>The API (<code>app.UseCorrelationId()</code>)</td><td>Reads or creates an <code>X-Correlation-Id</code> header and returns it on the response.</td></tr>
+      <tr><td><code>SortDescriptorsModelBinderProvider</code></td><td>Registered in the API and both gateways</td><td>Binds sort parameters to <code>SortDescriptor</code>. No endpoint takes a <code>SortDescriptor</code> today.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="seeding">
+  <h2>11. Seeding</h2>
+  <p>The API doesn't seed at startup. <code>npm run db:seed</code> runs <code>dotnet run --project src/CommonGround.API -- seed</code>, which runs every <code>IDevelopmentSeeder</code> and skips what is already seeded. The demo sandbox uses the same seeders for each new demo trust.</p>
+  <table>
+    <thead><tr><th>Type</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>IDevelopmentSeeder</code></td><td>One method, <code>SeedAsync(SeedRun, IDocumentStore, CancellationToken)</code>. Runs after the app has started, so the Marten subscription and Wolverine are running. It is not Marten's <code>IInitialData</code>, which runs during host startup, before events propagate, and in every environment. Implemented in the API, PropertyRegistry and TrustManagement.</td></tr>
+      <tr><td><code>SeedRun</code></td><td>One run of the seeders. <code>SeedRun.Development</code> (key <code>dev</code>) is what <code>db:seed</code> uses. A run with a <code>Trust</code> seeds the seed file's single trust under a new ID and name, which is how a demo trust is made.</td></tr>
+      <tr><td><code>SeedDate</code></td><td>A date in seed JSON: a fixed ISO date (<code>2021-09-15</code>) or one relative to the day seeding runs (<code>today</code>, <code>today-30d</code>, <code>today+2w</code>, <code>today-6m</code>, <code>today-5y</code>), so seeded data doesn't go stale.</td></tr>
+      <tr><td><code>SeedClock</code></td><td><code>SeedClock.RunAsync(timeZone, seed)</code> sets a scoped clock for the seed and lets it <code>MoveTo(date)</code>, at 10:00 in the trust's time zone by default. Events then carry the seeded date in <code>OccurredAt</code>.</td></tr>
+      <tr><td><code>PropagationWaiter</code></td><td>Waits until no events or Wolverine messages are left to deliver (<code>WaitForIdleAsync</code>), or until a record a handler creates appears (<code>WaitForAsync</code>). A seeder calls it before it builds on what another context's handler made, or before it moves the seed clock on. Timeouts use real elapsed time, not the seed clock.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="unused">
+  <h2>12. Code with no callers</h2>
+  <p>These types are in the shared kernel but nothing outside it calls them. I searched <code>src/</code> without the test projects. They are candidates for deletion; don't build on them without checking that they work.</p>
+  <ul>
+    <li><code>Specification&lt;T&gt;</code> and <code>QueryableSpecificationExtensions</code>.</li>
+    <li><code>PaginationQuerySpec</code> and <code>PaginationQuerySpec&lt;TFilter&gt;</code>; <code>PaginationQuerySpecV2</code> replaced them.</li>
+    <li><code>IQueryablePaginationExtensions</code>. Its <code>Sort</code> ignores the sort descriptors (it orders by a constant; a TODO says so), and its <code>TakeAsync</code> uses Entity Framework Core's <code>CountAsync</code> and <code>ToListAsync</code>. It is the only reason the project references <code>Microsoft.EntityFrameworkCore</code>.</li>
+    <li><code>QueryableSortExtensions</code>, <code>SortDescriptor</code>, and the model binder that is registered but never binds anything.</li>
+    <li><code>CursorHelper</code> and <code>CursorPaginatedResponse&lt;T&gt;</code>.</li>
+    <li><code>CorrelationIdHandler</code>: the gateways don't forward the correlation ID to the API.</li>
+    <li><code>PostalAddress</code>, <code>Coordinates</code> and <code>GeographicArea</code>.</li>
+    <li>The <code>CSharpFunctionalExtensions</code> package reference: no file uses it.</li>
+  </ul>
+</section>
+
+<section id="changing">
+  <h2>13. Adding to the shared kernel</h2>
+  <ul>
+    <li><strong>Add a type only when a second context needs it.</strong> Until then it belongs in the one context that uses it. Moving it here later is cheap; taking it out once 17 projects depend on it is not.</li>
+    <li><strong>The same rule in two contexts is a missing type.</strong> <code>Money</code> came from repeated cents rounding in several contexts. When you see the same check twice, give it a name and a home.</li>
+    <li><strong>Types stored in events can't change shape freely.</strong> Renaming an <code>Enumeration</code> display name, an ID prefix, or a <code>Money</code> JSON format changes how stored events read back. Keep accepting the old form, or write a Marten upcaster.</li>
+    <li><strong>No context-specific language.</strong> A type here should mean the same thing in every context. <code>IncomeLimitTable</code> qualifies because HomeBuyers and Homeownership use the same HUD table in the same way.</li>
+    <li><strong>New violations need messages.</strong> Add the factory to <code>SharedKernelBusinessRuleViolation.cs</code> with a <code>shared.</code> code, and its message to <code>BusinessRuleErrorMessageMap</code>.</li>
+    <li><strong>Test it in <code>CommonGround.SharedKernel.Tests</code></strong>, following <code>docs/ai/unit-testing.md</code>.</li>
+  </ul>
+</section>
+</main>
+</div>
+</body>
+</html>
