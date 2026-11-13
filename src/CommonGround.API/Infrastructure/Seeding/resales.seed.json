@@ -30,11 +30,11 @@
     "seedKey": "resale-cedar-lane-013a",
     "trustSeedKey": "dev-default",
     "groundLeaseSeedKey": "gl-cedar-lane-013a",
-    "noticeDate": "today-70d",
+    "noticeDate": "today-400d",
     "channel": "InPerson",
     "notes": "Moving out of state for work.",
-    "appraisal": { "date": "today-60d", "appraisedValue": 270000, "appraiserName": "Hollis Appraisal Group" },
-    "optionExercised": { "date": "today-50d" },
-    "buybackClosed": { "date": "today-21d", "pricePaid": 178000, "holdReason": "Roof replacement scheduled before the home is offered again." }
+    "appraisal": { "date": "today-390d", "appraisedValue": 270000, "appraiserName": "Hollis Appraisal Group" },
+    "optionExercised": { "date": "today-380d" },
+    "buybackClosed": { "date": "today-1y", "pricePaid": 178000, "holdReason": "Roof replacement scheduled before the home is offered again." }
   }
 ]

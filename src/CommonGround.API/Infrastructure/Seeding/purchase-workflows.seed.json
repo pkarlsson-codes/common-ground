@@ -4,39 +4,39 @@
     "trustSeedKey": "dev-default",
     "homeSelectionSeedKey": "sel-downtown-civic-001",
     "eligibility": {
-      "date": "today-262d",
+      "date": "today-437d",
       "notes": "Income and household size checked against the trust's limits for a household of three."
     },
     "appraisal": {
-      "date": "today-258d",
+      "date": "today-433d",
       "appraisedValue": 300500,
       "appraiserName": "Dana Whitfield, Cascade Appraisal Group",
       "notes": "Appraised without the ground lease's resale restrictions."
     },
     "financing": {
-      "date": "today-250d",
+      "date": "today-425d",
       "lenderName": "Cascade Community Credit Union",
       "committedAmount": 207100,
-      "preapprovalLetterDate": "today-253d"
+      "preapprovalLetterDate": "today-428d"
     },
     "inspection": {
-      "date": "today-238d",
+      "date": "today-413d",
       "inspectorName": "Rosa Delacruz, Keystone Home Inspections",
       "notes": "No defects found."
     },
     "title": {
-      "date": "today-222d",
+      "date": "today-397d",
       "titleCompanyName": "Pacific Crest Title"
     },
     "leaseSigning": {
-      "date": "today-209d"
+      "date": "today-384d"
     },
     "closingScheduled": {
-      "date": "today-205d",
-      "closingDate": "today-192d"
+      "date": "today-380d",
+      "closingDate": "today-1y"
     },
     "closed": {
-      "date": "today-192d",
+      "date": "today-1y",
       "notes": "Closed at Pacific Crest Title; keys handed over the same afternoon."
     }
   },
@@ -168,39 +168,39 @@
     "trustSeedKey": "dev-default",
     "homeSelectionSeedKey": "sel-cedar-lane-013a",
     "eligibility": {
-      "date": "today-190d",
+      "date": "today-572d",
       "notes": "Income and household size checked against the trust's limits."
     },
     "appraisal": {
-      "date": "today-186d",
+      "date": "today-568d",
       "appraisedValue": 237000,
       "appraiserName": "Marcus Oyelaran, Northwest Valuation Services",
       "notes": "Appraised without the ground lease's resale restrictions."
     },
     "financing": {
-      "date": "today-178d",
+      "date": "today-560d",
       "lenderName": "Willamette Valley Bank",
       "committedAmount": 163400,
-      "preapprovalLetterDate": "today-182d"
+      "preapprovalLetterDate": "today-564d"
     },
     "inspection": {
-      "date": "today-165d",
+      "date": "today-547d",
       "inspectorName": "Rosa Delacruz, Keystone Home Inspections",
       "notes": "Gutters clogged and one cracked window pane; both fixed by the trust."
     },
     "title": {
-      "date": "today-150d",
+      "date": "today-532d",
       "titleCompanyName": "Pacific Crest Title"
     },
     "leaseSigning": {
-      "date": "today-134d"
+      "date": "today-516d"
     },
     "closingScheduled": {
-      "date": "today-130d",
-      "closingDate": "today-118d"
+      "date": "today-512d",
+      "closingDate": "today-500d"
     },
     "closed": {
-      "date": "today-118d",
+      "date": "today-500d",
       "notes": "Closed at Pacific Crest Title."
     }
   },

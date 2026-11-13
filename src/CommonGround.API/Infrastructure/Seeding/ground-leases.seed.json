@@ -62,7 +62,7 @@
     "trustSeedKey": "dev-default",
     "purchaseWorkflowSeedKey": "pw-cedar-lane-013a",
     "checkIns": [
-      { "date": "today-75d", "notes": "First visit after move-in. Mentioned Lars may be offered a job in Denver." }
+      { "date": "today-430d", "notes": "First visit after move-in. Mentioned Lars may be offered a job in Denver." }
     ]
   }
 ]

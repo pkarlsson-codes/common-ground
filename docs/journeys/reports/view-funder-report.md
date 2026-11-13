@@ -5,7 +5,7 @@ Once a year, staff report to each funder what the trust holds and whom it sold t
 1. User navigates to Funder Report (sidebar, Records)
 2. From and To default to last calendar year (Jan 1 to Dec 31). User can change either date, for a fiscal year
 3. The page shows four sections for the period:
-   - **Portfolio on {To}:** homes registered by then, homes under a ground lease on that day, and homes held by the trust or for sale
+   - **Portfolio on {To}:** homes registered by then (or under a ground lease that had started by then), homes under a ground lease on that day, and homes held by the trust or for sale
    - **Sales:** one row per ground lease that starts in the period: home, start date, price, appraised value, affordability given (appraised value minus price), household size, verified income and income band ("Up to 50% of AMI"). Leases with no purchase in the app show "Not recorded" for size, income and band
    - **Households by income band:** the number of sales in each band, and "Not recorded"
    - **Resales:** one row per buyback that closed in the period: home, the seller's original price, appraised value, purchase option price, price paid, affordability kept (appraised value minus price paid) and the seller's gain (price paid minus original price)

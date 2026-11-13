@@ -6,6 +6,7 @@ using CommonGround.API.Contracts.Homeownership.Requests;
 using CommonGround.API.Contracts.Homeownership.Responses;
 using CommonGround.API.Contracts.PropertyRegistry.Requests;
 using CommonGround.API.Contracts.PropertyRegistry.Responses;
+using CommonGround.API.Contracts.Reports.Responses;
 using CommonGround.API.Contracts.Today.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.Stewardship.Infrastructure.Persistence;
@@ -374,6 +375,93 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
             .Should().BeEquivalentTo(new { Occupancy = "Vacant", SaleStage = "Offered", AvailableAgainCause = "TrustReleased" });
     }
 
+    [Fact]
+    public async Task ClosingThePurchase_PutsTheSaleOnTheFunderReportWithTheBuyersIncomeBand()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var purchase = await SelectHouseholdAsync(client);
+        await SatisfyAllTracksAsync(client, purchase.WorkflowId, verifiedIncome: 40_000m, appraisedValue: 260_000m);
+        (await client.PostAsJsonAsync($"/api/purchase-workflows/{purchase.WorkflowId}/closing/schedule",
+            new ScheduleClosingRequest(ClosingDate)))
+            .StatusCode.Should().Be(HttpStatusCode.NoContent);
+        await TrackAsync(async () =>
+            (await client.PostAsJsonAsync($"/api/purchase-workflows/{purchase.WorkflowId}/closing/record",
+                new RecordPurchaseClosedRequest(ClosingDate, null)))
+                .StatusCode.Should().Be(HttpStatusCode.NoContent));
+
+        var report = await GetFunderReportAsync(client, ClosingDate, ClosingDate);
+
+        report.Sales.Should().ContainSingle(s => s.HomeId == purchase.HomeId).Subject.Should().BeEquivalentTo(new
+        {
+            LeaseStartDate = ClosingDate,
+            Price = 200_000m,
+            AppraisedValue = 260_000m,
+            AffordabilityGiven = 60_000m,
+            HouseholdSize = 1,
+            AnnualIncome = 40_000m,
+            IncomeBandOverPercentOfAmi = (int?)null,
+            IncomeBandUpToPercentOfAmi = 50,
+        });
+        report.IncomeBands.Should().Contain(b => b.OverPercentOfAmi == null && b.UpToPercentOfAmi == 50 && b.Count >= 1);
+    }
+
+    [Fact]
+    public async Task BuyingTheHomeBack_PutsTheBuybackOnTheFunderReportAndTheLeaseWithNoPurchaseShowsNoBand()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var landParcelId = await CreateLandParcelAsync(client);
+        var homeId = await TrackAsync(() => RegisterHomeAsync(client, landParcelId));
+        var leaseStart = new DateOnly(2019, 3, 1);
+        var leaseId = await TrackAsync(async () =>
+            (await (await CreateLeaseAsync(client, landParcelId, homeId, leaseStart))
+                .Content.ReadFromJsonAsync<CreateGroundLeaseResponse>())!.GroundLeaseId);
+        var today = (await GetTodayAsync(client)).Today;
+        var resaleId = await TrackAsync(async () =>
+            (await (await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/intent-to-sell",
+                new RecordIntentToSellRequest(today, "Phone", null))).Content.ReadFromJsonAsync<RecordIntentToSellResponse>())!.ResaleId);
+        await TrackAsync(async () =>
+            (await client.PostAsJsonAsync($"/api/resales/{resaleId}/appraisal",
+                new RecordResaleAppraisalRequest(270_000m, today, "Hollis", null, null))).StatusCode.Should().Be(HttpStatusCode.NoContent));
+        await TrackAsync(async () =>
+            (await client.PostAsJsonAsync($"/api/resales/{resaleId}/exercise-option",
+                new ExercisePurchaseOptionRequest(today, null))).StatusCode.Should().Be(HttpStatusCode.NoContent));
+        await TrackAsync(async () =>
+            (await client.PostAsJsonAsync($"/api/resales/{resaleId}/buyback-closing",
+                new RecordBuybackClosedRequest(today, 205_000m, null, false, "Roof work"))).StatusCode.Should().Be(HttpStatusCode.NoContent));
+
+        var report = await GetFunderReportAsync(client, today, today);
+        report.Resales.Should().ContainSingle(r => r.ResaleId == resaleId).Subject.Should().BeEquivalentTo(new
+        {
+            HomeId = homeId,
+            ClosingDate = today,
+            OriginalPrice = 200_000m,
+            AppraisedValue = 270_000m,
+            PurchaseOptionPrice = 205_000m,
+            PricePaid = 205_000m,
+            AffordabilityKept = 65_000m,
+            SellerGain = 5_000m,
+        });
+
+        var leaseYear = await GetFunderReportAsync(client, leaseStart, leaseStart);
+        leaseYear.Sales.Should().ContainSingle(s => s.GroundLeaseId == leaseId).Subject.Should().BeEquivalentTo(new
+        {
+            Price = 200_000m,
+            AppraisedValue = 250_000m,
+            HouseholdSize = (int?)null,
+            AnnualIncome = (decimal?)null,
+            IncomeBandOverPercentOfAmi = (int?)null,
+            IncomeBandUpToPercentOfAmi = (int?)null,
+        });
+    }
+
+    [Fact]
+    public async Task GettingTheFunderReport_WithToBeforeFrom_IsRefused()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+
+        (await client.GetAsync("/api/reports/funder?from=2025-12-31&to=2025-01-01")).StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
     private Task TrackAsync(Func<Task> action) => _tracker.TrackAsync(action);
 
     private Task<T> TrackAsync<T>(Func<Task<T>> action) => _tracker.TrackAsync(action);
@@ -414,6 +502,9 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
             new CreateGroundLeaseRequest(
                 landParcelId, homeId, "Dana Whitfield", "dana@example.com", null, leaseStart, 99, 60, 0m, 0m, 200_000m, 250_000m, "Signed on paper",
                 "AppraisalBased", 0.25m, null, null, null, null));
+
+    private static async Task<FunderReportResponse> GetFunderReportAsync(HttpClient client, DateOnly from, DateOnly to) =>
+        (await client.GetFromJsonAsync<FunderReportResponse>($"/api/reports/funder?from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}"))!;
 
     private static async Task<TodayResponse> GetTodayAsync(HttpClient client) =>
         (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!;
@@ -483,14 +574,15 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
         return new Applicant(applicationId, householdId);
     }
 
-    private static async Task SatisfyAllTracksAsync(HttpClient client, string workflowId)
+    private static async Task SatisfyAllTracksAsync(
+        HttpClient client, string workflowId, decimal verifiedIncome = 50_000m, decimal appraisedValue = 200000m)
     {
         var responses = new List<HttpResponseMessage>
         {
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/eligibility",
-                new RecordEligibilityVerifiedRequest(new DateOnly(2026, 8, 1), 50_000m, 1, null)),
+                new RecordEligibilityVerifiedRequest(new DateOnly(2026, 8, 1), verifiedIncome, 1, null)),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/appraisal",
-                new RecordAppraisalCompletedRequest(200000m, new DateOnly(2026, 8, 2), "Test Appraiser", null)),
+                new RecordAppraisalCompletedRequest(appraisedValue, new DateOnly(2026, 8, 2), "Test Appraiser", null)),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/financing",
                 new RecordFinancingCommittedRequest("Test Lender", 140000m, new DateOnly(2026, 8, 2))),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/inspection",

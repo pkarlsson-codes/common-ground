@@ -3,12 +3,12 @@
     "seedKey": "sel-downtown-civic-001",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-downtown-civic-001",
-    "startedDate": "today-280d",
+    "startedDate": "today-455d",
     "priority": {
       "householdSeedKey": "hh-whitaker-008",
       "priorities": ["WaitingListTenure", "HouseholdSizeFit"],
       "reason": "Longest on the waiting list, and a household of three suits the three-bedroom townhouse.",
-      "selectedDate": "today-270d",
+      "selectedDate": "today-445d",
       "groundLeaseTemplateSeedKey": "glt-standard-appraisal",
       "purchasePrice": 218000
     }
@@ -59,12 +59,12 @@
     "seedKey": "sel-cedar-lane-013a",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-cedar-lane-013a",
-    "startedDate": "today-205d",
+    "startedDate": "today-587d",
     "priority": {
       "householdSeedKey": "hh-haugen-027",
       "priorities": ["WaitingListTenure", "HouseholdSizeFit"],
       "reason": "Longest on the waiting list, and a couple suits the two-bedroom unit.",
-      "selectedDate": "today-198d",
+      "selectedDate": "today-580d",
       "groundLeaseTemplateSeedKey": "glt-standard-appraisal",
       "purchasePrice": 172000
     }
