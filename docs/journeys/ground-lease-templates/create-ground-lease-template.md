@@ -9,6 +9,7 @@
 7. If Index Based, user selects Index Type (CPI, AMI, or Custom, default CPI) and enters Baseline Index Value (default 100)
 8. If Fixed Percentage, user enters Annual Percentage (decimal fraction, e.g. 0.03 = 3%, default 0.01)
 9. User optionally checks "Set improvements cap" and enters an Improvements Cap ($, default 25000 when first checked)
-10. User clicks "Create Template"
-11. Toast: "Ground lease template created"
-12. Panel closes, new template appears in the Ground Lease Templates table
+10. User enters Debt Cap (% of the purchase option price, whole number, 1 to 200, required, no default; help text "The most total mortgage debt may be when the trust permits a new loan (Art 8.3). Commonly 80–100%."). A lease from this template copies it
+11. User clicks "Create Template"
+12. Toast: "Ground lease template created"
+13. Panel closes, new template appears in the Ground Lease Templates table

@@ -16,10 +16,11 @@ For recording a lease that didn't come from a purchase, such as one signed befor
 12. If Index Based, user selects Index Type (CPI, AMI, or Custom, default CPI) and enters Baseline Index Value (default 100)
 13. If Fixed Percentage, user enters Annual Percentage (decimal fraction, e.g. 0.01 = 1%, default 0.01)
 14. User optionally checks "Set improvements cap" and enters an Improvements Cap ($, default 25000 when first checked)
-15. User clicks "Create Lease" (disabled until Land Parcel and Home are both selected)
-16. If the home already has an active lease, an open home selection, or an open purchase, the panel stays open with an error saying why, and nothing is created
-17. Otherwise: toast "Ground lease created", the panel closes, and the new lease appears at the top of the Ground Leases table (newest first), titled with the homeowner's name
-18. Shortly after:
+15. User enters Debt Cap (% of the purchase option price, whole number, 1 to 200, required, no default; help text "The most total mortgage debt may be when the trust permits a new loan (Art 8.3). Commonly 80–100%.")
+16. User clicks "Create Lease" (disabled until Land Parcel and Home are both selected)
+17. If the home already has an active lease, an open home selection, or an open purchase, the panel stays open with an error saying why, and nothing is created
+18. Otherwise: toast "Ground lease created", the panel closes, and the new lease appears at the top of the Ground Leases table (newest first), titled with the homeowner's name
+19. Shortly after:
     - Stewardship opens a case for the lease, dated the day the lease was recorded (not its start date)
     - The home shows Leased on Homes, leased since the lease start date, and no longer appears on Today as an available home
 
