@@ -108,4 +108,49 @@ public class FileSystemDocumentBlobStoreTests
 
         public void Dispose() => _testBed.Dispose();
     }
+
+    public sealed class TheDeleteAsyncMethod : IDisposable
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public async Task GivenTheDocumentsLastVersion_WhenDeleted_ThenRemovesTheFileAndTheDocumentsFolder()
+        {
+            await _testBed.Upload("documents/doc-1/ver-1.txt", "hello");
+
+            await _testBed.Sut.DeleteAsync("documents/doc-1/ver-1.txt", CancellationToken.None);
+
+            Directory.Exists(Path.Combine(_testBed.Root, "documents", "doc-1")).Should().BeFalse();
+            Directory.Exists(Path.Combine(_testBed.Root, "documents")).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task GivenAnotherVersion_WhenOneIsDeleted_ThenKeepsTheOther()
+        {
+            await _testBed.Upload("documents/doc-1/ver-1.txt", "first");
+            await _testBed.Upload("documents/doc-1/ver-2.txt", "second");
+
+            await _testBed.Sut.DeleteAsync("documents/doc-1/ver-1.txt", CancellationToken.None);
+
+            File.Exists(Path.Combine(_testBed.Root, "documents", "doc-1", "ver-2.txt")).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task GivenNoBlobAtTheKey_WhenDeleted_ThenDoesNotThrow()
+        {
+            var act = () => _testBed.Sut.DeleteAsync("documents/doc-1/ver-1.txt", CancellationToken.None);
+
+            await act.Should().NotThrowAsync();
+        }
+
+        [Fact]
+        public async Task GivenKeyOutsideTheStore_WhenDeleted_ThenThrows()
+        {
+            var act = () => _testBed.Sut.DeleteAsync("../secret.txt", CancellationToken.None);
+
+            await act.Should().ThrowAsync<ArgumentException>();
+        }
+
+        public void Dispose() => _testBed.Dispose();
+    }
 }

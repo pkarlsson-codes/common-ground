@@ -32,6 +32,12 @@ internal sealed class UserViewProjection : SingleStreamProjection<UserView, stri
         view.TrustId = null;
     }
 
+    /// <summary>Clears the trust when it is deleted.</summary>
+    public static void Apply(UserView view, UserTrustDeleted e)
+    {
+        view.TrustId = null;
+    }
+
     /// <summary>Keeps the email address and name from the latest sign-in.</summary>
     public static void Apply(UserView view, UserProfileUpdated e)
     {

@@ -16,6 +16,9 @@ public interface IDocumentBlobStore
         string blobKey,
         TimeSpan expiry,
         CancellationToken cancellationToken);
+
+    /// <summary>Deletes a blob. A key with no blob is not an error, so a delete that was cut short can run again.</summary>
+    Task DeleteAsync(string blobKey, CancellationToken cancellationToken);
 }
 
 /// <summary>The result of an upload: the storage key, hash, and observed byte length.</summary>

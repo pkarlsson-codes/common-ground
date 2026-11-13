@@ -8,7 +8,7 @@ internal static class DemoServiceCollectionExtensions
 {
     /// <summary>
     /// Registers <see cref="DemoOptions"/>, checked at startup, and the <see cref="DemoSandbox"/> document. In demo
-    /// mode, the worker that fills sample trusts runs and the daemon polls faster.
+    /// mode, the workers that fill sample trusts and delete expired sandboxes run, and the daemon polls faster.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="configuration">The configuration.</param>
@@ -26,6 +26,8 @@ internal static class DemoServiceCollectionExtensions
         // visible while services are registered.
         services.AddSingleton<DemoSandboxBacklog>();
         services.AddHostedService<DemoSandboxSeeding>();
+        services.AddScoped<DemoSandboxDeletion>();
+        services.AddHostedService<DemoSandboxCleanup>();
         services.AddSingleton<IConfigureMarten, DemoPolling>();
 
         return services;

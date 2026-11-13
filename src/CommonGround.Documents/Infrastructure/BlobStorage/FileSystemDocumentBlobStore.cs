@@ -81,6 +81,26 @@ public sealed partial class FileSystemDocumentBlobStore : IDocumentBlobStore
         return Task.FromResult<DocumentBlobDownload>(new DocumentBlobDownload.File(content));
     }
 
+    /// <inheritdoc/>
+    public Task DeleteAsync(string blobKey, CancellationToken cancellationToken)
+    {
+        var path = PathFor(blobKey);
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+
+        // Removes the document's folder once its last version is gone.
+        var folder = Path.GetDirectoryName(path);
+        if (folder is not null && folder.Length > _root.Length && Directory.Exists(folder) && !Directory.EnumerateFileSystemEntries(folder).Any())
+        {
+            Directory.Delete(folder);
+        }
+
+        Logs.DeletedBlob(_logger, blobKey);
+        return Task.CompletedTask;
+    }
+
     /// <summary>Maps a key such as <c>documents/{id}/{version}.pdf</c> to a path under the root, refusing keys that leave it.</summary>
     private string PathFor(string blobKey)
     {
@@ -98,5 +118,8 @@ public sealed partial class FileSystemDocumentBlobStore : IDocumentBlobStore
     {
         [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "Stored blob {Key} ({Size} bytes, sha256={Hash})")]
         internal static partial void StoredBlob(ILogger logger, string key, long size, string hash);
+
+        [LoggerMessage(EventId = 2, Level = LogLevel.Debug, Message = "Deleted blob {Key}")]
+        internal static partial void DeletedBlob(ILogger logger, string key);
     }
 }

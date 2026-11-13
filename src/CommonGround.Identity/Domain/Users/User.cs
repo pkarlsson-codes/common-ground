@@ -58,6 +58,12 @@ public sealed class User : AggregateRoot<UserId>
         return new UserRemovedFromTrust(Id.Value, trustId.Value, removedBy.Value);
     }
 
+    /// <summary>Decides to take the user out of a trust that is being deleted.</summary>
+    /// <param name="trustId">The trust being deleted.</param>
+    /// <returns>The event, or <see langword="null"/> when the user doesn't belong to that trust.</returns>
+    public UserTrustDeleted? LeaveDeletedTrust(TrustId trustId) =>
+        TrustId == trustId ? new UserTrustDeleted(Id.Value, trustId.Value) : null;
+
     /// <summary>Decides to keep the email address and name the sign-in server gives on a later sign-in.</summary>
     /// <param name="email">The email address it gave, or <see langword="null"/> to keep the one on record.</param>
     /// <param name="displayName">The name it gave, or <see langword="null"/> to keep the one on record.</param>
@@ -95,6 +101,14 @@ public sealed class User : AggregateRoot<UserId>
 
     /// <summary>Applies <see cref="UserRemovedFromTrust"/>.</summary>
     public void Apply(UserRemovedFromTrust e)
+    {
+        ArgumentNullException.ThrowIfNull(e);
+
+        TrustId = null;
+    }
+
+    /// <summary>Applies <see cref="UserTrustDeleted"/>.</summary>
+    public void Apply(UserTrustDeleted e)
     {
         ArgumentNullException.ThrowIfNull(e);
 

@@ -82,9 +82,26 @@ public sealed partial class S3DocumentBlobStore(
         return new DocumentBlobDownload.Redirect(new Uri(url));
     }
 
+    /// <inheritdoc/>
+    /// <remarks>S3 answers a delete of a missing object with success.</remarks>
+    public async Task DeleteAsync(string blobKey, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(blobKey);
+
+        var args = new RemoveObjectArgs()
+            .WithBucket(_options.Bucket)
+            .WithObject(blobKey);
+
+        await client.RemoveObjectAsync(args, cancellationToken).ConfigureAwait(false);
+        Logs.DeletedBlob(logger, blobKey);
+    }
+
     private static partial class Logs
     {
         [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "Uploaded blob {Key} ({Size} bytes, sha256={Hash})")]
         internal static partial void UploadedBlob(ILogger logger, string key, long size, string hash);
+
+        [LoggerMessage(EventId = 2, Level = LogLevel.Debug, Message = "Deleted blob {Key}")]
+        internal static partial void DeletedBlob(ILogger logger, string key);
     }
 }
