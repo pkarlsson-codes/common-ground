@@ -63,10 +63,12 @@ public static class ApplicationSelectedHandler
             @event.HouseholdId,
             Money.Create(@event.AnnualIncome),
             @event.HouseholdSize,
-            @event.IncomeLimitPercentOfAmi is { } percent && @event.IncomeLimits is { } limits
-                ? IncomeLimitLevel.Create(percent, [.. limits.Select(Money.Create)])
-                : null,
-            @event.IncomeLimitsEffectiveFrom);
+            @event.IncomeLimitPercentOfAmi,
+            @event.IncomeLimitsEffectiveFrom is { } effectiveFrom && @event.IncomeLimitLevels is { } levels
+                ? IncomeLimitTable.Create(
+                    effectiveFrom,
+                    [.. levels.Select(level => IncomeLimitLevel.Create(level.PercentOfAmi, [.. level.Limits.Select(Money.Create)]))])
+                : null);
 
         return (MartenOps.StartStream<PurchaseWorkflow>(workflowId.Value, initiated), selectionEnded);
     }

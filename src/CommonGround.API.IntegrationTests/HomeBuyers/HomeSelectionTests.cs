@@ -129,7 +129,7 @@ public class HomeSelectionTests(ApiFactory factory)
         var selection = await GetSelectionAsync(client, await StartSelectionAsync(client, homeId));
 
         selection.IncomeLimitPercentOfAmi.Should().BeNull();
-        selection.IncomeLimitsEffectiveFrom.Should().BeNull();
+        selection.IncomeLimitsEffectiveFrom.Should().Be(TestIncomeLimitsInitialData.EffectiveFrom);
         selection.Candidates.Single(c => c.ApplicationId == applicant.ApplicationId)
             .Should().BeEquivalentTo(new { IncomeLimit = (decimal?)null, IsOverIncomeLimit = false, CanBeSelected = true });
     }

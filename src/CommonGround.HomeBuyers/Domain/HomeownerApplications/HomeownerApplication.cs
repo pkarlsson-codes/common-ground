@@ -97,16 +97,16 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     /// <param name="selectedDate">The date of the selection.</param>
     /// <param name="selectedBy">The staff user choosing.</param>
     /// <param name="candidate">The application's candidate in the selection: the income and size it was judged on.</param>
-    /// <param name="incomeLimitLevel">The limit row the selection judged by, or <see langword="null"/> when the home had none.</param>
-    /// <param name="incomeLimitsEffectiveFrom">The effective date of the schedule <paramref name="incomeLimitLevel"/> came from.</param>
+    /// <param name="incomeLimitPercentOfAmi">The home's limit the selection judged by, or <see langword="null"/> when the home had none.</param>
+    /// <param name="incomeLimits">The schedule in effect when the selection started, or <see langword="null"/> when none was.</param>
     public ApplicationSelectedForHome SelectForHome(
         Household household,
         HomeSelectionId selectionId,
         string homeId, string landParcelId, string groundLeaseTemplateId,
         decimal purchasePrice, DateOnly selectedDate, UserId selectedBy,
         SelectionCandidate candidate,
-        IncomeLimitLevel? incomeLimitLevel,
-        DateOnly? incomeLimitsEffectiveFrom)
+        int? incomeLimitPercentOfAmi,
+        IncomeLimitTable? incomeLimits)
     {
         ArgumentNullException.ThrowIfNull(household);
         ArgumentNullException.ThrowIfNull(candidate);
@@ -146,9 +146,9 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
             selectedBy.Value,
             candidate.AnnualIncome,
             candidate.HouseholdSize,
-            incomeLimitLevel?.PercentOfAmi,
-            incomeLimitLevel is null ? null : incomeLimitsEffectiveFrom,
-            incomeLimitLevel?.Limits);
+            incomeLimitPercentOfAmi,
+            incomeLimits?.EffectiveFrom,
+            incomeLimits?.ToEntries());
     }
 
     /// <summary>

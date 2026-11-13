@@ -28,7 +28,13 @@ internal sealed class PurchaseWorkflowViewProjection : SingleStreamProjection<Pu
             DeclaredHouseholdSize = e.Data.DeclaredHouseholdSize,
             IncomeLimitPercentOfAmi = e.Data.IncomeLimitPercentOfAmi,
             IncomeLimitsEffectiveFrom = e.Data.IncomeLimitsEffectiveFrom,
-            IncomeLimits = e.Data.IncomeLimits?.Select(limit => limit.Amount).ToList(),
+            IncomeLimitLevels = e.Data.IncomeLimitLevels?
+                .Select(level => new IncomeLimitLevelEntryView
+                {
+                    PercentOfAmi = level.PercentOfAmi,
+                    Limits = [.. level.Limits.Select(limit => limit.Amount)],
+                })
+                .ToList(),
         };
 
     public static void Apply(PurchaseWorkflowView view, BuyerEligibilityVerified e)
@@ -41,6 +47,8 @@ internal sealed class PurchaseWorkflowViewProjection : SingleStreamProjection<Pu
             VerifiedAnnualIncome = e.VerifiedAnnualIncome.Amount,
             VerifiedHouseholdSize = e.VerifiedHouseholdSize,
             IncomeLimit = e.IncomeLimit?.Amount,
+            IncomeBandOverPercentOfAmi = e.IncomeBandOverPercentOfAmi,
+            IncomeBandUpToPercentOfAmi = e.IncomeBandUpToPercentOfAmi,
         };
     }
 

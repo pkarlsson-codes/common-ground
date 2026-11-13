@@ -35,7 +35,8 @@ import {
  * SelectionMethod is "Priority" or "Lottery" once completed.
  * IncomeLimitPercentOfAmi is the home's income limit the candidates were judged against
  * when the selection started, null when it had none, and IncomeLimitsEffectiveFrom the
- * effective date of the income limits used.
+ * effective date of the income limit schedule in effect then, null when none was. A home with no limit
+ * still has the date, since the purchase records the buyer's income band from that schedule.
  * @export
  * @interface HomeSelectionResponse
  */

@@ -115,7 +115,17 @@ public class HomeSelectionTests
             sut.Status.Should().Be(HomeSelectionStatus.Open);
             sut.Candidates.Should().Equal(_testBed.Candidates);
             sut.IncomeLimitPercentOfAmi.Should().BeNull();
-            sut.IncomeLimitsEffectiveFrom.Should().BeNull();
+            sut.IncomeLimits.Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenHomeWithNoIncomeLimitAndAScheduleInEffect_WhenStarted_ThenKeepsTheScheduleButJudgesNoCandidate()
+        {
+            var sut = EventReplay.Replay<HomeSelection>(_testBed.Start(scheduleInEffect: _testBed.Schedule));
+
+            sut.IncomeLimits.Should().Be(_testBed.Schedule.Table);
+            sut.IncomeLimitLevel.Should().BeNull();
+            sut.Candidates.Should().OnlyContain(c => c.IncomeLimit == null);
         }
 
         [Fact]
@@ -151,7 +161,8 @@ public class HomeSelectionTests
             var sut = EventReplay.Replay<HomeSelection>(_testBed.Start(80, _testBed.Schedule));
 
             sut.IncomeLimitPercentOfAmi.Should().Be(80);
-            sut.IncomeLimitsEffectiveFrom.Should().Be(new DateOnly(2026, 4, 1));
+            sut.IncomeLimits.Should().Be(_testBed.Schedule.Table);
+            sut.IncomeLimitLevel.Should().Be(_testBed.Schedule.LevelFor(80));
             sut.Candidates.Select(c => (c.IncomeLimit!.Amount, c.IsOverIncomeLimit)).Should().Equal(
                 (64000m, false),
                 (57000m, true),

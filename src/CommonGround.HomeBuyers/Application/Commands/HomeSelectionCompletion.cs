@@ -94,7 +94,7 @@ public static class HomeSelectionCompletion
             selectedDate,
             selectedBy,
             chosen.Candidate,
-            selection.IncomeLimitLevel,
-            selection.IncomeLimitsEffectiveFrom));
+            selection.IncomeLimitPercentOfAmi,
+            selection.IncomeLimits));
     }
 }

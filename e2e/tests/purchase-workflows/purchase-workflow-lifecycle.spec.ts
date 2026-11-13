@@ -51,20 +51,21 @@ test('eligibility verification judges the verified income by the limit the home 
   await expect(field(detail, 'Verified Annual Income ($)')).toHaveValue('65000')
   await expect(field(detail, 'Verified Household Size')).toHaveValue('1')
   const limitCheck = detail.getByRole('status').filter({ hasText: /^Limit for/ })
-  await expect(limitCheck).toHaveText('Limit for 1 person: $70,000')
+  await expect(limitCheck).toHaveText('Limit for 1 person: $70,000 · Income band: Over 50% to 80% of AMI')
 
   await field(detail, 'Verified Annual Income ($)').fill('75000')
   await expect(limitCheck).toContainText('Over income limit')
+  await expect(limitCheck).toContainText('Income band: Over 80% to 120% of AMI')
   await detail.getByRole('button', { name: 'Record Eligibility' }).click()
   await expectToast(page,
     'The verified income of $75,000 is over the 80% of AMI limit of $70,000 for a household of 1 (limits effective Jan 1, 2000).')
   await expect(track(detail, 'Eligibility')).toContainText('Pending')
 
   await field(detail, 'Verified Household Size').fill('2')
-  await expect(limitCheck).toHaveText('Limit for 2 people: $80,000')
+  await expect(limitCheck).toHaveText('Limit for 2 people: $80,000 · Income band: Over 50% to 80% of AMI')
   await detail.getByRole('button', { name: 'Record Eligibility' }).click()
   await expectToast(page, 'Eligibility recorded')
-  await expect(detail.getByText(`Verified ${isoDate()}: $75,000 income, 2 people, within the $80,000 limit`)).toBeVisible()
+  await expect(detail.getByText(`Verified ${isoDate()}: $75,000 income, 2 people, within the $80,000 limit · Over 50% to 80% of AMI`)).toBeVisible()
 })
 
 test('recording every track, scheduling, and closing a purchase creates the ground lease', async ({ page }) => {

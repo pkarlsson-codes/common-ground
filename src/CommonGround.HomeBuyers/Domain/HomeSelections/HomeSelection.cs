@@ -29,11 +29,12 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
     /// <summary>The home's income limit as a percent of AMI when the selection started, or <see langword="null"/> when it had none.</summary>
     public int? IncomeLimitPercentOfAmi { get; private set; }
 
-    /// <summary>The effective date of the income limit schedule the candidates were judged by, when the home had a limit.</summary>
-    public DateOnly? IncomeLimitsEffectiveFrom { get; private set; }
+    /// <summary>The income limit schedule in effect when the selection started, or <see langword="null"/> when none was.</summary>
+    public IncomeLimitTable? IncomeLimits { get; private set; }
 
     /// <summary>The schedule's row for the home's percent that the candidates were judged by, when the home had a limit.</summary>
-    public IncomeLimitLevel? IncomeLimitLevel { get; private set; }
+    public IncomeLimitLevel? IncomeLimitLevel =>
+        IncomeLimitPercentOfAmi is { } percent ? IncomeLimits?.LevelFor(percent) : null;
     public HomeownerApplicationId? SelectedApplicationId { get; private set; }
     public string? CancellationReason { get; private set; }
 
@@ -90,8 +91,8 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
                 c.WaitingSince,
                 level?.LimitFor(c.HouseholdSize)))],
             incomeLimitPercentOfAmi,
-            level is null ? null : scheduleInEffect!.EffectiveFrom,
-            level?.Limits,
+            scheduleInEffect?.EffectiveFrom,
+            scheduleInEffect?.Table.ToEntries(),
             startedBy.Value);
     }
 
@@ -233,9 +234,8 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
                 c.IncomeLimit))
             .ToList();
         IncomeLimitPercentOfAmi = e.IncomeLimitPercentOfAmi;
-        IncomeLimitsEffectiveFrom = e.IncomeLimitsEffectiveFrom;
-        IncomeLimitLevel = e.IncomeLimitPercentOfAmi is { } percent && e.IncomeLimits is { } limits
-            ? IncomeLimitLevel.Create(percent, limits)
+        IncomeLimits = e.IncomeLimitsEffectiveFrom is { } effectiveFrom && e.IncomeLimitLevels is { } levels
+            ? IncomeLimitTable.FromEntries(effectiveFrom, levels)
             : null;
     }
 

@@ -58,6 +58,18 @@ export interface EligibilityDetailsDto {
      * @memberof EligibilityDetailsDto
      */
     incomeLimit?: number | null;
+    /**
+     * The level the income is over, or null for the lowest band or when no band was recorded.
+     * @type {number}
+     * @memberof EligibilityDetailsDto
+     */
+    incomeBandOverPercentOfAmi?: number | null;
+    /**
+     * The level the income is at or under, or null above the highest level or when no band was recorded.
+     * @type {number}
+     * @memberof EligibilityDetailsDto
+     */
+    incomeBandUpToPercentOfAmi?: number | null;
 }
 
 /**
@@ -82,6 +94,8 @@ export function EligibilityDetailsDtoFromJSONTyped(json: any, ignoreDiscriminato
         'verifiedAnnualIncome': json['verifiedAnnualIncome'] == null ? undefined : json['verifiedAnnualIncome'],
         'verifiedHouseholdSize': json['verifiedHouseholdSize'] == null ? undefined : json['verifiedHouseholdSize'],
         'incomeLimit': json['incomeLimit'] == null ? undefined : json['incomeLimit'],
+        'incomeBandOverPercentOfAmi': json['incomeBandOverPercentOfAmi'] == null ? undefined : json['incomeBandOverPercentOfAmi'],
+        'incomeBandUpToPercentOfAmi': json['incomeBandUpToPercentOfAmi'] == null ? undefined : json['incomeBandUpToPercentOfAmi'],
     };
 }
 
@@ -101,6 +115,8 @@ export function EligibilityDetailsDtoToJSONTyped(value?: EligibilityDetailsDto |
         'verifiedAnnualIncome': value['verifiedAnnualIncome'],
         'verifiedHouseholdSize': value['verifiedHouseholdSize'],
         'incomeLimit': value['incomeLimit'],
+        'incomeBandOverPercentOfAmi': value['incomeBandOverPercentOfAmi'],
+        'incomeBandUpToPercentOfAmi': value['incomeBandUpToPercentOfAmi'],
     };
 }
 

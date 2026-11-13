@@ -51,11 +51,11 @@ public class PurchaseWorkflowView
     /// <summary>Gets or sets the home's limit as a percent of AMI the selection judged by, or null when there is none.</summary>
     public int? IncomeLimitPercentOfAmi { get; set; }
 
-    /// <summary>Gets or sets the effective date of the schedule the limits came from.</summary>
+    /// <summary>Gets or sets the effective date of the schedule in effect when the selection started, or null when none was.</summary>
     public DateOnly? IncomeLimitsEffectiveFrom { get; set; }
 
-    /// <summary>Gets or sets the schedule's limits at that percent for 1 to 8 people.</summary>
-    public List<decimal>? IncomeLimits { get; set; }
+    /// <summary>Gets or sets that schedule's levels, lowest percent first.</summary>
+    public List<IncomeLimitLevelEntryView>? IncomeLimitLevels { get; set; }
 
     /// <summary>Gets or sets the eligibility verification details.</summary>
     public EligibilityDetailsEntry? EligibilityDetails { get; set; }
@@ -117,6 +117,22 @@ public class EligibilityDetailsEntry
 
     /// <summary>Gets or sets the limit the income was checked against, or null when the purchase has no limit.</summary>
     public decimal? IncomeLimit { get; set; }
+
+    /// <summary>Gets or sets the percent of the level the income is over, or null for the lowest band or no schedule.</summary>
+    public int? IncomeBandOverPercentOfAmi { get; set; }
+
+    /// <summary>Gets or sets the percent of the level the income is at or under, or null above the highest level or no schedule.</summary>
+    public int? IncomeBandUpToPercentOfAmi { get; set; }
+}
+
+/// <summary>One level of the schedule a purchase carries.</summary>
+public class IncomeLimitLevelEntryView
+{
+    /// <summary>Gets or sets the percent of area median income.</summary>
+    public int PercentOfAmi { get; set; }
+
+    /// <summary>Gets or sets the limits for 1 to 8 people.</summary>
+    public List<decimal> Limits { get; set; } = [];
 }
 
 /// <summary>Appraisal details.</summary>

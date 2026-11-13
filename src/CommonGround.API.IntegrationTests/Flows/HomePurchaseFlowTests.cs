@@ -86,6 +86,11 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
                 EffectiveFrom = TestIncomeLimitsInitialData.EffectiveFrom,
                 Limits = TestIncomeLimitsInitialData.EightyPercentLimits,
             },
+            IncomeLimitSchedule = new
+            {
+                EffectiveFrom = TestIncomeLimitsInitialData.EffectiveFrom,
+                Levels = new[] { new { PercentOfAmi = 50 }, new { PercentOfAmi = 80 }, new { PercentOfAmi = 120 } },
+            },
         });
 
         var over = await client.PostAsJsonAsync($"{path}/eligibility", new RecordEligibilityVerifiedRequest(SelectedDate, 75_000m, 1, null));
@@ -101,6 +106,8 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
             VerifiedAnnualIncome = 75_000m,
             VerifiedHouseholdSize = 2,
             IncomeLimit = 80_000m,
+            IncomeBandOverPercentOfAmi = 50,
+            IncomeBandUpToPercentOfAmi = 80,
         });
     }
 

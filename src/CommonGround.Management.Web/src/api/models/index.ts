@@ -125,6 +125,8 @@ export * from './PurchaseBoardCardResponse';
 export * from './PurchaseBoardColumnResponse';
 export * from './PurchaseBoardResponse';
 export * from './PurchaseIncomeLimitDto';
+export * from './PurchaseIncomeLimitLevelDto';
+export * from './PurchaseIncomeLimitScheduleDto';
 export * from './PurchaseWorkflowListItemResponse';
 export * from './PurchaseWorkflowResponse';
 export * from './RecordAppraisalCompletedRequest';

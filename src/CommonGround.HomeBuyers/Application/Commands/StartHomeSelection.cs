@@ -25,7 +25,7 @@ public sealed record StartHomeSelection(
 /// <param name="Candidates">Every approved application, waiting since its approval date, longest waiting first.</param>
 /// <param name="ActiveSelectionId">The home's open or completed selection, if any.</param>
 /// <param name="IncomeLimitPercentOfAmi">The home's income limit, or null when it has none.</param>
-/// <param name="ScheduleInEffect">The income limit schedule in effect on <paramref name="Today"/>, loaded only when the home has a limit.</param>
+/// <param name="ScheduleInEffect">The income limit schedule in effect on <paramref name="Today"/>, if any.</param>
 /// <param name="Today">The trust's today.</param>
 public sealed record SelectionStart(
     IReadOnlyList<SelectionCandidate> Candidates,
@@ -89,9 +89,8 @@ public static class StartHomeSelectionHandler
             ?? throw new AggregateNotFoundException(homeId);
 
         var today = await trustClock.TodayAsync(session.TenantId, cancellationToken).ConfigureAwait(false);
-        var scheduleInEffect = home.IncomeLimitPercentOfAmi is null
-            ? null
-            : await LoadScheduleInEffectAsync(session, today, cancellationToken).ConfigureAwait(false);
+        // Loaded for every home: one with no limit still records the buyer's income band from it.
+        var scheduleInEffect = await LoadScheduleInEffectAsync(session, today, cancellationToken).ConfigureAwait(false);
 
         var activeSelectionId = await session.Query<HomeSelectionView>()
             .Where(v => v.HomeId == homeId && ActiveStatuses.Contains(v.Status) && v.Id != endedSelectionId)

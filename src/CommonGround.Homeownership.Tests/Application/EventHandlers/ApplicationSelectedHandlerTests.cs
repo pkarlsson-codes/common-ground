@@ -3,6 +3,7 @@ using CommonGround.Homeownership.Application.EventHandlers;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Domain.Events;
 using FluentAssertions;
 using Wolverine.Marten;
 
@@ -19,7 +20,11 @@ public class ApplicationSelectedHandlerTests
             HouseholdSize: 2,
             IncomeLimitPercentOfAmi: 80,
             IncomeLimitsEffectiveFrom: new DateOnly(2026, 4, 1),
-            IncomeLimits: [50_000m, 57_150m, 64_300m, 71_400m, 77_150m, 82_850m, 88_550m, 94_250m]);
+            IncomeLimitLevels:
+            [
+                new SelectedIncomeLimitLevel(50, [31_650m, 36_200m, 40_700m, 45_200m, 48_850m, 52_450m, 56_100m, 59_700m]),
+                new SelectedIncomeLimitLevel(80, [50_000m, 57_150m, 64_300m, 71_400m, 77_150m, 82_850m, 88_550m, 94_250m]),
+            ]);
 
         [Fact]
         public void GivenNoOpenWorkflow_WhenApplicationSelected_ThenStartsAPurchaseWorkflow()
@@ -30,7 +35,7 @@ public class ApplicationSelectedHandlerTests
         }
 
         [Fact]
-        public void GivenALimitTheSelectionJudgedBy_WhenApplicationSelected_ThenThePurchaseKeepsItAndTheDeclaredIncome()
+        public void GivenALimitTheSelectionJudgedBy_WhenApplicationSelected_ThenThePurchaseKeepsTheWholeScheduleAndTheDeclaredIncome()
         {
             var (purchase, _) = ApplicationSelectedHandler.Handle(Selected, existingOpenWorkflow: null, selection: null);
 
@@ -41,7 +46,9 @@ public class ApplicationSelectedHandlerTests
                 DeclaredHouseholdSize = 2,
                 IncomeLimitPercentOfAmi = 80,
                 IncomeLimitsEffectiveFrom = new DateOnly(2026, 4, 1),
-                IncomeLimits = Selected.IncomeLimits!.Select(Money.Create).ToList(),
+                IncomeLimitLevels = Selected.IncomeLimitLevels!
+                    .Select(level => new IncomeLimitLevelEntry(level.PercentOfAmi, [.. level.Limits.Select(Money.Create)]))
+                    .ToList(),
             });
         }
 

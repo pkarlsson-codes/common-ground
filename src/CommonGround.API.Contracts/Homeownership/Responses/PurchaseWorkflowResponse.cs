@@ -4,6 +4,8 @@ namespace CommonGround.API.Contracts.Homeownership.Responses;
 /// Detail response for a purchase workflow. <c>DeclaredAnnualIncome</c> and <c>DeclaredHouseholdSize</c> are what the
 /// household declared when selected, and <c>IncomeLimit</c> the limit the home's selection judged by; all null when the
 /// purchase didn't start from a selection, and <c>IncomeLimit</c> null when the home had no limit.
+/// <c>IncomeLimitSchedule</c> is the schedule in effect when the selection started, every level of it, which the
+/// income band is worked out from; null when none was in effect or the purchase didn't start from a selection.
 /// </summary>
 public sealed record PurchaseWorkflowResponse(
     string Id,
@@ -23,6 +25,7 @@ public sealed record PurchaseWorkflowResponse(
     decimal? DeclaredAnnualIncome,
     int? DeclaredHouseholdSize,
     PurchaseIncomeLimitDto? IncomeLimit,
+    PurchaseIncomeLimitScheduleDto? IncomeLimitSchedule,
     EligibilityDetailsDto? EligibilityDetails,
     AppraisalDetailsDto? AppraisalDetails,
     FinancingDetailsDto? FinancingDetails,
@@ -44,18 +47,32 @@ public sealed record PurchaseWorkflowResponse(
 /// <param name="Limits">The schedule's limits at that percent for 1 to 8 people, in that order.</param>
 public sealed record PurchaseIncomeLimitDto(int PercentOfAmi, DateOnly EffectiveFrom, IReadOnlyList<decimal> Limits);
 
+/// <summary>The income limit schedule a purchase's home selection started with.</summary>
+/// <param name="EffectiveFrom">The date the schedule applies from.</param>
+/// <param name="Levels">Its levels, lowest percent first.</param>
+public sealed record PurchaseIncomeLimitScheduleDto(DateOnly EffectiveFrom, IReadOnlyList<PurchaseIncomeLimitLevelDto> Levels);
+
+/// <summary>One level of a purchase's income limit schedule.</summary>
+/// <param name="PercentOfAmi">The percent of area median income.</param>
+/// <param name="Limits">The limits for 1 to 8 people, in that order.</param>
+public sealed record PurchaseIncomeLimitLevelDto(int PercentOfAmi, IReadOnlyList<decimal> Limits);
+
 /// <summary>Eligibility verification details.</summary>
 /// <param name="VerifiedDate">Date eligibility was verified.</param>
 /// <param name="Notes">Optional notes.</param>
 /// <param name="VerifiedAnnualIncome">The household's annual income as the documents showed it.</param>
 /// <param name="VerifiedHouseholdSize">The number of people in the household as the documents showed it.</param>
 /// <param name="IncomeLimit">The limit for that size the income was checked against, or null when the purchase has no limit.</param>
+/// <param name="IncomeBandOverPercentOfAmi">The level the income is over, or null for the lowest band or when no band was recorded.</param>
+/// <param name="IncomeBandUpToPercentOfAmi">The level the income is at or under, or null above the highest level or when no band was recorded.</param>
 public sealed record EligibilityDetailsDto(
     DateOnly VerifiedDate,
     string? Notes,
     decimal VerifiedAnnualIncome,
     int VerifiedHouseholdSize,
-    decimal? IncomeLimit);
+    decimal? IncomeLimit,
+    int? IncomeBandOverPercentOfAmi,
+    int? IncomeBandUpToPercentOfAmi);
 
 /// <summary>Appraisal details.</summary>
 /// <param name="AppraisedValue">The home's market value without the lease's restrictions.</param>

@@ -11020,7 +11020,7 @@
       },
       "HomeSelectionResponse": {
         "type": "object",
-        "description": "A home selection with the home's facts and each candidate's priority facts side by side, in\nwaiting-list order. Status is \"Open\", \"Completed\" or \"Cancelled\";\nSelectionMethod is \"Priority\" or \"Lottery\" once completed.\nIncomeLimitPercentOfAmi is the home's income limit the candidates were judged against\nwhen the selection started, null when it had none, and IncomeLimitsEffectiveFrom the\neffective date of the income limits used.",
+        "description": "A home selection with the home's facts and each candidate's priority facts side by side, in\nwaiting-list order. Status is \"Open\", \"Completed\" or \"Cancelled\";\nSelectionMethod is \"Priority\" or \"Lottery\" once completed.\nIncomeLimitPercentOfAmi is the home's income limit the candidates were judged against\nwhen the selection started, null when it had none, and IncomeLimitsEffectiveFrom the\neffective date of the income limit schedule in effect then, null when none was. A home with no limit\nstill has the date, since the purchase records the buyer's income band from that schedule.",
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -12501,7 +12501,7 @@
       },
       "PurchaseWorkflowResponse": {
         "type": "object",
-        "description": "Detail response for a purchase workflow. DeclaredAnnualIncome and DeclaredHouseholdSize are what the\nhousehold declared when selected, and IncomeLimit the limit the home's selection judged by; all null when the\npurchase didn't start from a selection, and IncomeLimit null when the home had no limit.",
+        "description": "Detail response for a purchase workflow. DeclaredAnnualIncome and DeclaredHouseholdSize are what the\nhousehold declared when selected, and IncomeLimit the limit the home's selection judged by; all null when the\npurchase didn't start from a selection, and IncomeLimit null when the home had no limit.\nIncomeLimitSchedule is the schedule in effect when the selection started, every level of it, which the\nincome band is worked out from; null when none was in effect or the purchase didn't start from a selection.",
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -12567,6 +12567,14 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/PurchaseIncomeLimitDto"
+              }
+            ]
+          },
+          "incomeLimitSchedule": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PurchaseIncomeLimitScheduleDto"
               }
             ]
           },
@@ -12681,6 +12689,45 @@
           }
         }
       },
+      "PurchaseIncomeLimitScheduleDto": {
+        "type": "object",
+        "description": "The income limit schedule a purchase's home selection started with.",
+        "additionalProperties": false,
+        "properties": {
+          "effectiveFrom": {
+            "type": "string",
+            "description": "The date the schedule applies from.",
+            "format": "date"
+          },
+          "levels": {
+            "type": "array",
+            "description": "Its levels, lowest percent first.",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseIncomeLimitLevelDto"
+            }
+          }
+        }
+      },
+      "PurchaseIncomeLimitLevelDto": {
+        "type": "object",
+        "description": "One level of a purchase's income limit schedule.",
+        "additionalProperties": false,
+        "properties": {
+          "percentOfAmi": {
+            "type": "integer",
+            "description": "The percent of area median income.",
+            "format": "int32"
+          },
+          "limits": {
+            "type": "array",
+            "description": "The limits for 1 to 8 people, in that order.",
+            "items": {
+              "type": "number",
+              "format": "decimal"
+            }
+          }
+        }
+      },
       "EligibilityDetailsDto": {
         "type": "object",
         "description": "Eligibility verification details.",
@@ -12710,6 +12757,18 @@
             "type": "number",
             "description": "The limit for that size the income was checked against, or null when the purchase has no limit.",
             "format": "decimal",
+            "nullable": true
+          },
+          "incomeBandOverPercentOfAmi": {
+            "type": "integer",
+            "description": "The level the income is over, or null for the lowest band or when no band was recorded.",
+            "format": "int32",
+            "nullable": true
+          },
+          "incomeBandUpToPercentOfAmi": {
+            "type": "integer",
+            "description": "The level the income is at or under, or null above the highest level or when no band was recorded.",
+            "format": "int32",
             "nullable": true
           }
         }

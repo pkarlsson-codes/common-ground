@@ -55,11 +55,15 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <summary>Gets the household size declared when selected, or null when the purchase didn't start from a selection.</summary>
     public int? DeclaredHouseholdSize { get; private set; }
 
-    /// <summary>Gets the limit row the home's selection judged by, or null when there is none.</summary>
-    public IncomeLimitLevel? IncomeLimitLevel { get; private set; }
+    /// <summary>Gets the home's limit as a percent of AMI the selection judged by, or null when there is none.</summary>
+    public int? IncomeLimitPercentOfAmi { get; private set; }
 
-    /// <summary>Gets the effective date of the schedule <see cref="IncomeLimitLevel"/> came from.</summary>
-    public DateOnly? IncomeLimitsEffectiveFrom { get; private set; }
+    /// <summary>Gets the income limit schedule in effect when the home's selection started, or null when none was.</summary>
+    public IncomeLimitTable? IncomeLimits { get; private set; }
+
+    /// <summary>Gets the limit row the home's selection judged by, or null when there is none.</summary>
+    public IncomeLimitLevel? IncomeLimitLevel =>
+        IncomeLimitPercentOfAmi is { } percent ? IncomeLimits?.LevelFor(percent) : null;
 
     /// <summary>Gets eligibility track details, or null if not yet verified.</summary>
     public EligibilityDetails? EligibilityDetails { get; private set; }
@@ -138,8 +142,8 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <param name="householdId">The buying household, or null for manual/resale-initiated workflows.</param>
     /// <param name="declaredAnnualIncome">The income the household declared when selected, or null for manual/resale-initiated workflows.</param>
     /// <param name="declaredHouseholdSize">The household size declared when selected, or null for manual/resale-initiated workflows.</param>
-    /// <param name="incomeLimitLevel">The limit row the home's selection judged by, or null when there is none.</param>
-    /// <param name="incomeLimitsEffectiveFrom">The effective date of the schedule <paramref name="incomeLimitLevel"/> came from.</param>
+    /// <param name="incomeLimitPercentOfAmi">The home's limit the selection judged by, or null when there is none. When set, <paramref name="incomeLimits"/> has a level for it.</param>
+    /// <param name="incomeLimits">The schedule in effect when the home's selection started, or null when none was.</param>
     /// <returns>A new purchase workflow instance.</returns>
     public static PurchaseWorkflowInitiated Initiate(
         PurchaseWorkflowId id,
@@ -153,8 +157,8 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         string? householdId = null,
         Money? declaredAnnualIncome = null,
         int? declaredHouseholdSize = null,
-        IncomeLimitLevel? incomeLimitLevel = null,
-        DateOnly? incomeLimitsEffectiveFrom = null)
+        int? incomeLimitPercentOfAmi = null,
+        IncomeLimitTable? incomeLimits = null)
     {
         ArgumentNullException.ThrowIfNull(landParcelId);
         ArgumentNullException.ThrowIfNull(homeId);
@@ -179,9 +183,9 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
             householdId,
             declaredAnnualIncome,
             declaredHouseholdSize,
-            incomeLimitLevel?.PercentOfAmi,
-            incomeLimitLevel is null ? null : incomeLimitsEffectiveFrom,
-            incomeLimitLevel?.Limits);
+            incomeLimitPercentOfAmi,
+            incomeLimits?.EffectiveFrom,
+            incomeLimits?.ToEntries());
     }
 
     /// <summary>
@@ -210,15 +214,19 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         if (limit is not null && verifiedAnnualIncome > limit)
         {
             throw BusinessRuleViolation.PurchaseWorkflow.RecordEligibilityVerified.OverIncomeLimit(
-                verifiedAnnualIncome, limit, IncomeLimitLevel!.PercentOfAmi, verifiedHouseholdSize, IncomeLimitsEffectiveFrom!.Value);
+                verifiedAnnualIncome, limit, IncomeLimitLevel!.PercentOfAmi, verifiedHouseholdSize, IncomeLimits!.EffectiveFrom);
         }
+
+        var band = IncomeLimits?.BandFor(verifiedAnnualIncome, verifiedHouseholdSize);
 
         return new BuyerEligibilityVerified(
             Id.Value, verifiedDate, notes,
             recordedBy.Value,
             verifiedAnnualIncome,
             verifiedHouseholdSize,
-            limit);
+            limit,
+            band?.OverPercentOfAmi,
+            band?.UpToPercentOfAmi);
     }
 
     /// <summary>Records that the home's appraisal has been completed. Idempotent.</summary>
@@ -431,17 +439,20 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         HouseholdId = e.HouseholdId;
         DeclaredAnnualIncome = e.DeclaredAnnualIncome;
         DeclaredHouseholdSize = e.DeclaredHouseholdSize;
-        IncomeLimitLevel = e.IncomeLimitPercentOfAmi is { } percent && e.IncomeLimits is { } limits
-            ? IncomeLimitLevel.Create(percent, limits)
+        IncomeLimitPercentOfAmi = e.IncomeLimitPercentOfAmi;
+        IncomeLimits = e.IncomeLimitsEffectiveFrom is { } effectiveFrom && e.IncomeLimitLevels is { } levels
+            ? IncomeLimitTable.FromEntries(effectiveFrom, levels)
             : null;
-        IncomeLimitsEffectiveFrom = e.IncomeLimitsEffectiveFrom;
     }
 
     /// <summary>Applies <see cref="BuyerEligibilityVerified"/>.</summary>
     public void Apply(BuyerEligibilityVerified e)
     {
         EligibilityDetails = new EligibilityDetails(
-            e.VerifiedDate, e.EligibilityNotes, e.VerifiedAnnualIncome, e.VerifiedHouseholdSize, e.IncomeLimit);
+            e.VerifiedDate, e.EligibilityNotes, e.VerifiedAnnualIncome, e.VerifiedHouseholdSize, e.IncomeLimit,
+            e.IncomeBandUpToPercentOfAmi is not null || e.IncomeBandOverPercentOfAmi is not null
+                ? IncomeBand.Create(e.IncomeBandOverPercentOfAmi, e.IncomeBandUpToPercentOfAmi)
+                : null);
         AdvancePhaseIfNeeded();
     }
 

@@ -6,6 +6,8 @@ namespace CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
 /// <summary>
 /// Raised when buyer eligibility requirements are verified. <paramref name="IncomeLimit"/> is the limit for
 /// <paramref name="VerifiedHouseholdSize"/> the income was checked against, null when the purchase has no limit.
+/// <paramref name="IncomeBandOverPercentOfAmi"/> and <paramref name="IncomeBandUpToPercentOfAmi"/> are the income band
+/// in the purchase's schedule (see <see cref="IncomeBand"/>); both are null when the purchase carries no schedule.
 /// </summary>
 public sealed record BuyerEligibilityVerified(
     string AggregateId,
@@ -14,4 +16,6 @@ public sealed record BuyerEligibilityVerified(
     string RecordedBy,
     Money VerifiedAnnualIncome,
     int VerifiedHouseholdSize,
-    Money? IncomeLimit) : DomainEvent(AggregateId);
+    Money? IncomeLimit,
+    int? IncomeBandOverPercentOfAmi,
+    int? IncomeBandUpToPercentOfAmi) : DomainEvent(AggregateId);

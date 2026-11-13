@@ -8,9 +8,11 @@ namespace CommonGround.Homeownership.Domain.PurchaseWorkflows.TrackDetails;
 /// <param name="VerifiedAnnualIncome">The household's annual income as the documents show it.</param>
 /// <param name="VerifiedHouseholdSize">The number of people in the household as the documents show it.</param>
 /// <param name="IncomeLimit">The limit for that size the income was checked against, or null when the purchase has no limit.</param>
+/// <param name="IncomeBand">The band the income falls in, or null when the purchase carries no schedule.</param>
 public sealed record EligibilityDetails(
     DateOnly VerifiedDate,
     string? Notes,
     Money VerifiedAnnualIncome,
     int VerifiedHouseholdSize,
-    Money? IncomeLimit);
+    Money? IncomeLimit,
+    IncomeBand? IncomeBand);

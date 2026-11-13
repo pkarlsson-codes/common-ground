@@ -393,9 +393,17 @@ public static class PurchaseWorkflowsEndpoints
                 view.EligibilityDetails.Notes,
                 view.EligibilityDetails.VerifiedAnnualIncome,
                 view.EligibilityDetails.VerifiedHouseholdSize,
-                view.EligibilityDetails.IncomeLimit);
-        var incomeLimit = view is { IncomeLimitPercentOfAmi: { } percent, IncomeLimitsEffectiveFrom: { } effectiveFrom, IncomeLimits: { } limits }
-            ? new PurchaseIncomeLimitDto(percent, effectiveFrom, limits)
+                view.EligibilityDetails.IncomeLimit,
+                view.EligibilityDetails.IncomeBandOverPercentOfAmi,
+                view.EligibilityDetails.IncomeBandUpToPercentOfAmi);
+        var schedule = view is { IncomeLimitsEffectiveFrom: { } effectiveFrom, IncomeLimitLevels: { } levels }
+            ? new PurchaseIncomeLimitScheduleDto(
+                effectiveFrom,
+                [.. levels.Select(level => new PurchaseIncomeLimitLevelDto(level.PercentOfAmi, level.Limits))])
+            : null;
+        var incomeLimit = view.IncomeLimitPercentOfAmi is { } percent
+            && schedule?.Levels.FirstOrDefault(level => level.PercentOfAmi == percent) is { } homeLevel
+            ? new PurchaseIncomeLimitDto(percent, schedule.EffectiveFrom, homeLevel.Limits)
             : null;
         var appraisal = view.AppraisalDetails is null ? null
             : new AppraisalDetailsDto(view.AppraisalDetails.AppraisedValue, view.AppraisalDetails.AppraisalDate, view.AppraisalDetails.AppraiserName, view.AppraisalDetails.Notes);
@@ -426,6 +434,7 @@ public static class PurchaseWorkflowsEndpoints
             view.DeclaredAnnualIncome,
             view.DeclaredHouseholdSize,
             incomeLimit,
+            schedule,
             eligibility,
             appraisal,
             financing,

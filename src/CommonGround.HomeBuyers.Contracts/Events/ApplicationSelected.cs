@@ -6,10 +6,10 @@ namespace CommonGround.HomeBuyers.Contracts.Events;
 /// Integration event published when an applicant is selected for a specific home.
 /// Consumed by Homeownership to initiate a PurchaseWorkflow, and by PropertyRegistry to show the home under contract.
 /// <paramref name="AnnualIncome"/> and <paramref name="HouseholdSize"/> are what the household declared when the
-/// selection started. <paramref name="IncomeLimitPercentOfAmi"/>, <paramref name="IncomeLimitsEffectiveFrom"/> and
-/// <paramref name="IncomeLimits"/> are the income limit the selection judged by: the home's percent of AMI, the
-/// schedule's effective date and the schedule's limits at that percent for 1 to 8 people. All three are null when
-/// the home had no limit.
+/// selection started. <paramref name="IncomeLimitPercentOfAmi"/> is the home's income limit the selection judged by,
+/// null when the home had none. <paramref name="IncomeLimitsEffectiveFrom"/> and <paramref name="IncomeLimitLevels"/>
+/// are the income limit schedule in effect when the selection started, every level of it; both are null when no
+/// schedule was in effect.
 /// </summary>
 public sealed record ApplicationSelected(
     string ApplicationId,
@@ -28,4 +28,9 @@ public sealed record ApplicationSelected(
     int HouseholdSize,
     int? IncomeLimitPercentOfAmi,
     DateOnly? IncomeLimitsEffectiveFrom,
-    IReadOnlyList<decimal>? IncomeLimits) : IntegrationEvent;
+    IReadOnlyList<SelectedIncomeLimitLevel>? IncomeLimitLevels) : IntegrationEvent;
+
+/// <summary>One level of the schedule a selection judged by.</summary>
+/// <param name="PercentOfAmi">The percent of area median income.</param>
+/// <param name="Limits">The limit for 1 to 8 people, in that order.</param>
+public sealed record SelectedIncomeLimitLevel(int PercentOfAmi, IReadOnlyList<decimal> Limits);

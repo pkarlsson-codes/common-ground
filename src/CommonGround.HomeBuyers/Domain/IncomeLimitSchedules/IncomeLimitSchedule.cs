@@ -59,6 +59,9 @@ public sealed class IncomeLimitSchedule : AggregateRoot<IncomeLimitScheduleId>
         return new IncomeLimitScheduleCorrected(Id.Value, effectiveFrom, ToEntries(sorted), correctedBy.Value);
     }
 
+    /// <summary>Gets a copy of the schedule as it stands now.</summary>
+    public IncomeLimitTable Table => IncomeLimitTable.Create(EffectiveFrom, Levels);
+
     /// <summary>Gets the level for <paramref name="percentOfAmi"/>, or <see langword="null"/> when the schedule has none.</summary>
     /// <param name="percentOfAmi">The percent of area median income.</param>
     /// <returns>The level, if the schedule has it.</returns>

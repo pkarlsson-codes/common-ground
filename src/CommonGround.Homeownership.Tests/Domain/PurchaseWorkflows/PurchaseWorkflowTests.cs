@@ -448,7 +448,29 @@ public class PurchaseWorkflowTests
                 VerifiedAnnualIncome = Money.Create(57_150m),
                 VerifiedHouseholdSize = 2,
                 IncomeLimit = Money.Create(57_150m),
+                IncomeBandOverPercentOfAmi = 50,
+                IncomeBandUpToPercentOfAmi = 80,
             });
+        }
+
+        [Fact]
+        public void GivenIncomeAtTheLowestLevel_WhenRecorded_ThenRecordsTheLowestBand()
+        {
+            var sut = _testBed.WorkflowWithLimit();
+
+            var verified = sut.RecordEligibilityVerified(_testBed.VerifiedDate, Money.Create(36_200m), 2, null, _testBed.StaffUser);
+
+            verified.Should().BeEquivalentTo(new { IncomeBandOverPercentOfAmi = (int?)null, IncomeBandUpToPercentOfAmi = 50 });
+        }
+
+        [Fact]
+        public void GivenARecordedBand_WhenReplayed_ThenTheEligibilityDetailsHoldIt()
+        {
+            var sut = _testBed.WorkflowWithLimit();
+
+            sut = sut.Decide(a => a.RecordEligibilityVerified(_testBed.VerifiedDate, Money.Create(40_000m), 2, null, _testBed.StaffUser)).Aggregate;
+
+            sut.EligibilityDetails!.IncomeBand.Should().Be(IncomeBand.Create(50, 80));
         }
 
         [Fact]
@@ -462,13 +484,33 @@ public class PurchaseWorkflowTests
         }
 
         [Fact]
-        public void GivenNoLimit_WhenRecorded_ThenRecordsTheIncomeWithoutALimit()
+        public void GivenNoLimitButASchedule_WhenRecorded_ThenRecordsTheIncomeUncheckedWithItsBand()
         {
             var sut = _testBed.WorkflowWithoutLimit();
 
             var verified = sut.RecordEligibilityVerified(_testBed.VerifiedDate, Money.Create(500_000m), 1, null, _testBed.StaffUser);
 
-            verified!.IncomeLimit.Should().BeNull();
+            verified.Should().BeEquivalentTo(new
+            {
+                IncomeLimit = (Money?)null,
+                IncomeBandOverPercentOfAmi = 80,
+                IncomeBandUpToPercentOfAmi = (int?)null,
+            });
+        }
+
+        [Fact]
+        public void GivenNoSchedule_WhenRecorded_ThenRecordsNoBand()
+        {
+            var sut = _testBed.WorkflowWithoutSchedule();
+
+            var verified = sut.RecordEligibilityVerified(_testBed.VerifiedDate, Money.Create(40_000m), 2, null, _testBed.StaffUser);
+
+            verified.Should().BeEquivalentTo(new
+            {
+                IncomeLimit = (Money?)null,
+                IncomeBandOverPercentOfAmi = (int?)null,
+                IncomeBandUpToPercentOfAmi = (int?)null,
+            });
         }
 
         [Fact]
@@ -501,15 +543,24 @@ public class PurchaseWorkflowTests
 
             public DateOnly LimitsEffectiveFrom { get; } = new(2026, 4, 1);
 
-            public IncomeLimitLevel Level { get; } = IncomeLimitLevel.Create(
-                80,
-                [.. new[] { 50_000m, 57_150m, 64_300m, 71_400m, 77_150m, 82_850m, 88_550m, 94_250m }.Select(Money.Create)]);
+            public IncomeLimitTable Schedule => IncomeLimitTable.Create(
+                LimitsEffectiveFrom,
+                [
+                    IncomeLimitLevel.Create(
+                        50,
+                        [.. new[] { 31_650m, 36_200m, 40_700m, 45_200m, 48_850m, 52_450m, 56_100m, 59_700m }.Select(Money.Create)]),
+                    IncomeLimitLevel.Create(
+                        80,
+                        [.. new[] { 50_000m, 57_150m, 64_300m, 71_400m, 77_150m, 82_850m, 88_550m, 94_250m }.Select(Money.Create)]),
+                ]);
 
-            public PurchaseWorkflow WorkflowWithLimit() => Workflow(Level);
+            public PurchaseWorkflow WorkflowWithLimit() => Workflow(80, Schedule);
 
-            public PurchaseWorkflow WorkflowWithoutLimit() => Workflow(level: null);
+            public PurchaseWorkflow WorkflowWithoutLimit() => Workflow(null, Schedule);
 
-            private PurchaseWorkflow Workflow(IncomeLimitLevel? level) =>
+            public PurchaseWorkflow WorkflowWithoutSchedule() => Workflow(null, null);
+
+            private PurchaseWorkflow Workflow(int? percentOfAmi, IncomeLimitTable? schedule) =>
                 EventReplay.Replay<PurchaseWorkflow>(PurchaseWorkflow.Initiate(
                     PurchaseWorkflowId.Generate(),
                     GroundLeaseTemplateId.Generate(),
@@ -522,8 +573,8 @@ public class PurchaseWorkflowTests
                     "household-1",
                     Money.Create(55_000m),
                     2,
-                    level,
-                    level is null ? null : LimitsEffectiveFrom));
+                    percentOfAmi,
+                    schedule));
         }
     }
 }

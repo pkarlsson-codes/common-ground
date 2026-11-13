@@ -234,10 +234,11 @@ public class HomeownerApplicationTests
             var sut = _testBed.ApprovedApplication();
             var level = IncomeLimitLevel.Create(
                 80, [.. new[] { 50_000m, 57_150m, 64_300m, 71_400m, 77_150m, 82_850m, 88_550m, 94_250m }.Select(Money.Create)]);
+            var limits = IncomeLimitTable.Create(new DateOnly(2026, 4, 1), [level]);
 
             var selected = sut.SelectForHome(
                 _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1", 200000m,
-                _testBed.SelectedDate, _testBed.StaffUser, _testBed.Candidate(sut), level, new DateOnly(2026, 4, 1));
+                _testBed.SelectedDate, _testBed.StaffUser, _testBed.Candidate(sut), 80, limits);
 
             selected.Should().BeEquivalentTo(new
             {
@@ -245,7 +246,7 @@ public class HomeownerApplicationTests
                 HouseholdSize = 2,
                 IncomeLimitPercentOfAmi = 80,
                 IncomeLimitsEffectiveFrom = new DateOnly(2026, 4, 1),
-                IncomeLimits = level.Limits,
+                IncomeLimitLevels = limits.ToEntries(),
             });
         }
     }

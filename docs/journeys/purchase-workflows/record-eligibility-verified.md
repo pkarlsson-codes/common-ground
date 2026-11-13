@@ -5,7 +5,7 @@ Before closing, staff check the buyer's documents (pay stubs, tax returns) again
 1. User navigates to Purchases
 2. User clicks a row for a non-terminal workflow to open the detail panel
 3. In Purchase Tracks, user expands the Eligibility track (only expandable while pending)
-4. The track shows the income limit the selection judged by ("80% of AMI, limits effective Apr 1, 2026"), or "No income limit" when the home had none or the purchase didn't start from a selection
+4. The track shows the income limit the selection judged by ("80% of AMI, limits effective Apr 1, 2026"), or "No income limit" when the home had none or the purchase didn't start from a selection. A home with no limit whose selection started with a schedule shows "No income limit; income band from limits effective Apr 1, 2026"
 5. User enters Verified Date (defaulted to today), Verified Annual Income and Verified Household Size (both defaulted to what the household declared when selected; both required) and optional Notes
 6. When the purchase has a limit, the track shows the limit for the entered household size ("Limit for 3 people: $81,600"), with "Over income limit" when the entered income is higher. Above 8 people it shows "Limit for 9 people: worked out when recorded"
    - When the purchase carries a schedule, the track also shows the band for the entered income and size: "Up to 50% of AMI", "Over 50% to 80% of AMI", or "Over 120% of AMI" when the income is above the highest level

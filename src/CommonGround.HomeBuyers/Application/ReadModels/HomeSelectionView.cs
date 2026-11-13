@@ -21,7 +21,7 @@ public class HomeSelectionView
     /// <summary>Gets or sets the home's income limit as a percent of AMI when the selection started, or null when it had none.</summary>
     public int? IncomeLimitPercentOfAmi { get; set; }
 
-    /// <summary>Gets or sets the effective date of the income limit schedule the candidates were judged by.</summary>
+    /// <summary>Gets or sets the effective date of the income limit schedule in effect when the selection started, or null when none was.</summary>
     public DateOnly? IncomeLimitsEffectiveFrom { get; set; }
 
     /// <summary>Gets or sets the waiting list as it stood when the selection started.</summary>

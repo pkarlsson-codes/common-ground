@@ -144,6 +144,8 @@ models/PurchaseBoardCardResponse.ts
 models/PurchaseBoardColumnResponse.ts
 models/PurchaseBoardResponse.ts
 models/PurchaseIncomeLimitDto.ts
+models/PurchaseIncomeLimitLevelDto.ts
+models/PurchaseIncomeLimitScheduleDto.ts
 models/PurchaseWorkflowListItemResponse.ts
 models/PurchaseWorkflowResponse.ts
 models/RecordAppraisalCompletedRequest.ts

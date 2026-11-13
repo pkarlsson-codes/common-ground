@@ -28,6 +28,8 @@ public static class ApplicationSelectedForHomeHandler
             @event.HouseholdSize,
             @event.IncomeLimitPercentOfAmi,
             @event.IncomeLimitsEffectiveFrom,
-            @event.IncomeLimits?.Select(limit => limit.Amount).ToList());
+            @event.IncomeLimitLevels?
+                .Select(level => new SelectedIncomeLimitLevel(level.PercentOfAmi, [.. level.Limits.Select(limit => limit.Amount)]))
+                .ToList());
     }
 }

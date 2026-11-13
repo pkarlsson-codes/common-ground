@@ -21,6 +21,13 @@ import {
     LeaseExecutionDetailsDtoToJSON,
     LeaseExecutionDetailsDtoToJSONTyped,
 } from './LeaseExecutionDetailsDto';
+import type { PurchaseIncomeLimitScheduleDto } from './PurchaseIncomeLimitScheduleDto';
+import {
+    PurchaseIncomeLimitScheduleDtoFromJSON,
+    PurchaseIncomeLimitScheduleDtoFromJSONTyped,
+    PurchaseIncomeLimitScheduleDtoToJSON,
+    PurchaseIncomeLimitScheduleDtoToJSONTyped,
+} from './PurchaseIncomeLimitScheduleDto';
 import type { CalendarDate } from './CalendarDate';
 import {
     CalendarDateFromJSON,
@@ -75,6 +82,8 @@ import {
  * Detail response for a purchase workflow. DeclaredAnnualIncome and DeclaredHouseholdSize are what the
  * household declared when selected, and IncomeLimit the limit the home's selection judged by; all null when the
  * purchase didn't start from a selection, and IncomeLimit null when the home had no limit.
+ * IncomeLimitSchedule is the schedule in effect when the selection started, every level of it, which the
+ * income band is worked out from; null when none was in effect or the purchase didn't start from a selection.
  * @export
  * @interface PurchaseWorkflowResponse
  */
@@ -181,6 +190,12 @@ export interface PurchaseWorkflowResponse {
      * @memberof PurchaseWorkflowResponse
      */
     incomeLimit?: PurchaseIncomeLimitDto | null;
+    /**
+     * 
+     * @type {PurchaseIncomeLimitScheduleDto}
+     * @memberof PurchaseWorkflowResponse
+     */
+    incomeLimitSchedule?: PurchaseIncomeLimitScheduleDto | null;
     /**
      * 
      * @type {EligibilityDetailsDto}
@@ -301,6 +316,7 @@ export function PurchaseWorkflowResponseFromJSONTyped(json: any, ignoreDiscrimin
         'declaredAnnualIncome': json['declaredAnnualIncome'] == null ? undefined : json['declaredAnnualIncome'],
         'declaredHouseholdSize': json['declaredHouseholdSize'] == null ? undefined : json['declaredHouseholdSize'],
         'incomeLimit': json['incomeLimit'] == null ? undefined : PurchaseIncomeLimitDtoFromJSON(json['incomeLimit']),
+        'incomeLimitSchedule': json['incomeLimitSchedule'] == null ? undefined : PurchaseIncomeLimitScheduleDtoFromJSON(json['incomeLimitSchedule']),
         'eligibilityDetails': json['eligibilityDetails'] == null ? undefined : EligibilityDetailsDtoFromJSON(json['eligibilityDetails']),
         'appraisalDetails': json['appraisalDetails'] == null ? undefined : AppraisalDetailsDtoFromJSON(json['appraisalDetails']),
         'financingDetails': json['financingDetails'] == null ? undefined : FinancingDetailsDtoFromJSON(json['financingDetails']),
@@ -346,6 +362,7 @@ export function PurchaseWorkflowResponseToJSONTyped(value?: PurchaseWorkflowResp
         'declaredAnnualIncome': value['declaredAnnualIncome'],
         'declaredHouseholdSize': value['declaredHouseholdSize'],
         'incomeLimit': PurchaseIncomeLimitDtoToJSON(value['incomeLimit']),
+        'incomeLimitSchedule': PurchaseIncomeLimitScheduleDtoToJSON(value['incomeLimitSchedule']),
         'eligibilityDetails': EligibilityDetailsDtoToJSON(value['eligibilityDetails']),
         'appraisalDetails': AppraisalDetailsDtoToJSON(value['appraisalDetails']),
         'financingDetails': FinancingDetailsDtoToJSON(value['financingDetails']),
