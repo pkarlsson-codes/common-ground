@@ -102,7 +102,7 @@ public static class GroundLeasesEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
 
-        var (view, recordedOn, leaseFees, noticeDue, defaultCure) = await bus.InvokeForTenantAsync<GroundLeaseDetails>(bus.TenantId!,
+        var (view, recordedOn, leaseFees, noticeDue, defaultCure, nextStatementDueOn) = await bus.InvokeForTenantAsync<GroundLeaseDetails>(bus.TenantId!,
             new GetGroundLease(GroundLeaseId.Create(groundLeaseId)),
             cancellationToken);
 
@@ -203,6 +203,17 @@ public static class GroundLeasesEndpoints
                         m.MortgageId, m.Lender, m.NoticeAddress, m.OriginalPrincipal, m.PermittedOn, m.Source, m.PaidOffOn))
                     .ToList()
                     .AsReadOnly()),
+            new ResalePriceStatementsDto(
+                nextStatementDueOn,
+                view.OpenResaleId is not null,
+                view.ResalePriceStatements
+                    .OrderByDescending(r => r.StatementDate)
+                    .ThenByDescending(r => r.RecordedAt)
+                    .Select(r => new ResalePriceStatementDto(
+                        r.StatementDate, r.Delivery, r.YearsOwned, r.MarketValue, r.MarketValueSource, r.IndexValue,
+                        r.ImprovementsCredit, r.Price, r.RecordedBy, r.RecordedAt))
+                    .ToList()
+                    .AsReadOnly()),
             view.CreatedAt,
             recordedOn,
             view.CreatedBy);
@@ -232,30 +243,5 @@ public static class GroundLeasesEndpoints
             cancellationToken);
 
         return Results.NoContent();
-    }
-
-    [WolverinePost("/api/ground-leases/{groundLeaseId}/resale-estimate")]
-    public static async Task<IResult> CalculateResaleEstimate(
-        string groundLeaseId,
-        CalculateResaleEstimateRequest request,
-        HttpContext httpContext,
-        IMessageBus bus,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
-        ArgumentNullException.ThrowIfNull(request);
-
-        var query = new GetResaleEstimate(
-            GroundLeaseId.Create(groundLeaseId),
-            request.OriginalPurchasePrice,
-            request.CurrentAppraisalValue,
-            request.OriginalAppraisalValue,
-            request.OwnershipYears,
-            request.ApprovedImprovements,
-            request.CurrentIndexValue);
-
-        var maxResalePrice = await bus.InvokeForTenantAsync<decimal>(bus.TenantId!, query, cancellationToken);
-
-        return Results.Ok(new ResaleEstimateResponse(maxResalePrice));
     }
 }

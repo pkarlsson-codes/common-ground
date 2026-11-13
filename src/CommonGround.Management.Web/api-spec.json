@@ -1354,68 +1354,6 @@
         }
       }
     },
-    "/api/v1/ground-leases/{groundLeaseId}/resale-estimate": {
-      "post": {
-        "tags": [
-          "GroundLeases"
-        ],
-        "operationId": "CalculateResaleEstimate",
-        "parameters": [
-          {
-            "name": "groundLeaseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "CalculateResaleEstimateRequest",
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CalculateResaleEstimateRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResaleEstimateResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": ""
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/ground-leases/{groundLeaseId}/lease-fee-payments": {
       "post": {
         "tags": [
@@ -10441,6 +10379,9 @@
           "mortgages": {
             "$ref": "#/components/schemas/MortgagesDto"
           },
+          "resalePriceStatements": {
+            "$ref": "#/components/schemas/ResalePriceStatementsDto"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -10898,6 +10839,88 @@
           }
         }
       },
+      "ResalePriceStatementsDto": {
+        "type": "object",
+        "description": "A lease's yearly resale price statements (Ch 23, Disclosure).",
+        "additionalProperties": false,
+        "properties": {
+          "nextDueOn": {
+            "type": "string",
+            "description": "When the next statement is due; null for an ended lease or one with a resale in progress.",
+            "format": "date",
+            "nullable": true
+          },
+          "resaleInProgress": {
+            "type": "boolean",
+            "description": "Whether a resale is in progress, so no statement is due."
+          },
+          "statements": {
+            "type": "array",
+            "description": "Every statement sent, newest first.",
+            "items": {
+              "$ref": "#/components/schemas/ResalePriceStatementDto"
+            }
+          }
+        }
+      },
+      "ResalePriceStatementDto": {
+        "type": "object",
+        "description": "A resale price statement sent to the homeowner, with the figures used.",
+        "additionalProperties": false,
+        "properties": {
+          "statementDate": {
+            "type": "string",
+            "description": "The letter's date, the day the price was worked out on and sent.",
+            "format": "date"
+          },
+          "delivery": {
+            "type": "string",
+            "description": "How it was sent."
+          },
+          "yearsOwned": {
+            "type": "integer",
+            "description": "Full years from the lease start to the statement date.",
+            "format": "int32"
+          },
+          "marketValue": {
+            "type": "number",
+            "description": "The estimated market value used; null unless the formula is appraisal based.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "marketValueSource": {
+            "type": "string",
+            "description": "Where the market value came from.",
+            "nullable": true
+          },
+          "indexValue": {
+            "type": "number",
+            "description": "The index value used; null unless the formula is index based.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "improvementsCredit": {
+            "type": "number",
+            "description": "The improvements credit counted, after the cap; null for none.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "description": "The most the home could sell for on the statement date.",
+            "format": "decimal"
+          },
+          "recordedBy": {
+            "type": "string",
+            "description": "The user who recorded it."
+          },
+          "recordedAt": {
+            "type": "string",
+            "description": "When it was recorded.",
+            "format": "date-time"
+          }
+        }
+      },
       "PaginatedResponseOfGroundLeaseListItemResponse": {
         "type": "object",
         "description": "Generic paginated response wrapper for API endpoints.",
@@ -10999,50 +11022,6 @@
           },
           "notes": {
             "type": "string"
-          }
-        }
-      },
-      "ResaleEstimateResponse": {
-        "type": "object",
-        "description": "Response for a resale price estimate.",
-        "additionalProperties": false,
-        "properties": {
-          "maxResalePrice": {
-            "type": "number",
-            "format": "decimal"
-          }
-        }
-      },
-      "CalculateResaleEstimateRequest": {
-        "type": "object",
-        "description": "Request to calculate a resale price estimate.",
-        "additionalProperties": false,
-        "properties": {
-          "originalPurchasePrice": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "currentAppraisalValue": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "originalAppraisalValue": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "ownershipYears": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "approvedImprovements": {
-            "type": "number",
-            "format": "decimal",
-            "nullable": true
-          },
-          "currentIndexValue": {
-            "type": "number",
-            "format": "decimal",
-            "nullable": true
           }
         }
       },

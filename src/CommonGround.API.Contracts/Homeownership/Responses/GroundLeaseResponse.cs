@@ -26,9 +26,42 @@ public sealed record GroundLeaseResponse(
     IReadOnlyList<StewardshipCheckInDto> StewardshipCheckIns,
     LeaseFeesDto LeaseFees,
     MortgagesDto Mortgages,
+    ResalePriceStatementsDto ResalePriceStatements,
     DateTimeOffset CreatedAt,
     DateOnly RecordedOn,
     string CreatedBy);
+
+/// <summary>A lease's yearly resale price statements (Ch 23, Disclosure).</summary>
+/// <param name="NextDueOn">When the next statement is due; null for an ended lease or one with a resale in progress.</param>
+/// <param name="ResaleInProgress">Whether a resale is in progress, so no statement is due.</param>
+/// <param name="Statements">Every statement sent, newest first.</param>
+public sealed record ResalePriceStatementsDto(
+    DateOnly? NextDueOn,
+    bool ResaleInProgress,
+    IReadOnlyList<ResalePriceStatementDto> Statements);
+
+/// <summary>A resale price statement sent to the homeowner, with the figures used.</summary>
+/// <param name="StatementDate">The letter's date, the day the price was worked out on and sent.</param>
+/// <param name="Delivery">How it was sent.</param>
+/// <param name="YearsOwned">Full years from the lease start to the statement date.</param>
+/// <param name="MarketValue">The estimated market value used; null unless the formula is appraisal based.</param>
+/// <param name="MarketValueSource">Where the market value came from.</param>
+/// <param name="IndexValue">The index value used; null unless the formula is index based.</param>
+/// <param name="ImprovementsCredit">The improvements credit counted, after the cap; null for none.</param>
+/// <param name="Price">The most the home could sell for on the statement date.</param>
+/// <param name="RecordedBy">The user who recorded it.</param>
+/// <param name="RecordedAt">When it was recorded.</param>
+public sealed record ResalePriceStatementDto(
+    DateOnly StatementDate,
+    string Delivery,
+    int YearsOwned,
+    decimal? MarketValue,
+    string? MarketValueSource,
+    decimal? IndexValue,
+    decimal? ImprovementsCredit,
+    decimal Price,
+    string RecordedBy,
+    DateTimeOffset RecordedAt);
 
 /// <summary>A lease's debt cap and the mortgages the trust permitted on it.</summary>
 /// <param name="MaxMortgageDebtPercent">The debt cap (Art 8.3), a whole percent of the purchase option price.</param>

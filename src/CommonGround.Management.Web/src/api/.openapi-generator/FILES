@@ -31,7 +31,6 @@ models/AppraisalDetailsDto.ts
 models/ApproveApplicationRequest.ts
 models/ApproveMortgageRequestRequest.ts
 models/AttachDocumentRequest.ts
-models/CalculateResaleEstimateRequest.ts
 models/CancelHomeSelectionRequest.ts
 models/CancelPropertyInspectionRequest.ts
 models/CloseStewardshipCaseRequest.ts
@@ -206,8 +205,9 @@ models/RegisterHouseholdResponse.ts
 models/RegisterLandParcelRequest.ts
 models/RegisterLandParcelResponse.ts
 models/RequestForbearanceRequest.ts
-models/ResaleEstimateResponse.ts
 models/ResalePriceResponse.ts
+models/ResalePriceStatementDto.ts
+models/ResalePriceStatementsDto.ts
 models/ResaleResponse.ts
 models/ResolveForeclosurePreventionCaseRequest.ts
 models/ScheduleClosingRequest.ts

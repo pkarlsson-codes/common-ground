@@ -343,6 +343,9 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
             (await (await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/intent-to-sell",
                 new RecordIntentToSellRequest(today, "Phone", null))).Content.ReadFromJsonAsync<RecordIntentToSellResponse>())!.ResaleId);
 
+        (await client.GetFromJsonAsync<GroundLeaseResponse>($"/api/ground-leases/{leaseId}"))!.ResalePriceStatements
+            .Should().BeEquivalentTo(new { NextDueOn = (DateOnly?)null, ResaleInProgress = true }, "the resale appraisal sets the price");
+
         var preview = await client.PostAsJsonAsync($"/api/resales/{resaleId}/price-preview",
             new PreviewResalePriceRequest(270_000m, today, null, null));
         (await preview.Content.ReadFromJsonAsync<ResalePriceResponse>())!

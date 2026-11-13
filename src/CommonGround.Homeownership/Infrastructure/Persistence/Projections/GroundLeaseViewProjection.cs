@@ -106,6 +106,25 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
         view.EndedOn = e.TerminatedDate;
     }
 
+    public static void Apply(GroundLeaseView view, ResaleStarted e) => view.OpenResaleId = e.ResaleId;
+
+    public static void Apply(GroundLeaseView view, ResaleClosed e) => view.OpenResaleId = null;
+
+    public static void Apply(GroundLeaseView view, ResalePriceStatementRecorded e) =>
+        view.ResalePriceStatements.Add(new ResalePriceStatementEntry
+        {
+            StatementDate = e.StatementDate,
+            Delivery = e.Delivery.DisplayName,
+            YearsOwned = e.YearsOwned,
+            MarketValue = e.MarketValue?.Amount,
+            MarketValueSource = e.MarketValueSource,
+            IndexValue = e.IndexValue,
+            ImprovementsCredit = e.ImprovementsCredit?.Amount,
+            Price = e.Price.Amount,
+            RecordedBy = e.RecordedBy,
+            RecordedAt = e.OccurredAt,
+        });
+
     public static void Apply(GroundLeaseView view, LeaseFeePaymentRecorded e) =>
         view.LeaseFeePayments.Add(new LeaseFeePaymentEntry
         {

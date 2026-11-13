@@ -14,6 +14,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { ResalePriceStatementsDto } from './ResalePriceStatementsDto';
+import {
+    ResalePriceStatementsDtoFromJSON,
+    ResalePriceStatementsDtoFromJSONTyped,
+    ResalePriceStatementsDtoToJSON,
+    ResalePriceStatementsDtoToJSONTyped,
+} from './ResalePriceStatementsDto';
 import type { CalendarDate } from './CalendarDate';
 import {
     CalendarDateFromJSON,
@@ -195,6 +202,12 @@ export interface GroundLeaseResponse {
     mortgages?: MortgagesDto;
     /**
      * 
+     * @type {ResalePriceStatementsDto}
+     * @memberof GroundLeaseResponse
+     */
+    resalePriceStatements?: ResalePriceStatementsDto;
+    /**
+     * 
      * @type {Date}
      * @memberof GroundLeaseResponse
      */
@@ -254,6 +267,7 @@ export function GroundLeaseResponseFromJSONTyped(json: any, ignoreDiscriminator:
         'stewardshipCheckIns': json['stewardshipCheckIns'] == null ? undefined : ((json['stewardshipCheckIns'] as Array<any>).map(StewardshipCheckInDtoFromJSON)),
         'leaseFees': json['leaseFees'] == null ? undefined : LeaseFeesDtoFromJSON(json['leaseFees']),
         'mortgages': json['mortgages'] == null ? undefined : MortgagesDtoFromJSON(json['mortgages']),
+        'resalePriceStatements': json['resalePriceStatements'] == null ? undefined : ResalePriceStatementsDtoFromJSON(json['resalePriceStatements']),
         'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
         'recordedOn': json['recordedOn'] == null ? undefined : CalendarDateFromJSON(json['recordedOn']),
         'createdBy': json['createdBy'] == null ? undefined : json['createdBy'],
@@ -295,6 +309,7 @@ export function GroundLeaseResponseToJSONTyped(value?: GroundLeaseResponse | nul
         'stewardshipCheckIns': value['stewardshipCheckIns'] == null ? undefined : ((value['stewardshipCheckIns'] as Array<any>).map(StewardshipCheckInDtoToJSON)),
         'leaseFees': LeaseFeesDtoToJSON(value['leaseFees']),
         'mortgages': MortgagesDtoToJSON(value['mortgages']),
+        'resalePriceStatements': ResalePriceStatementsDtoToJSON(value['resalePriceStatements']),
         'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
         'recordedOn': CalendarDateToJSON(value['recordedOn']),
         'createdBy': value['createdBy'],

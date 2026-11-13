@@ -29,20 +29,6 @@ public class GroundLeasesTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task CalculateResaleEstimate_IndexBasedWithoutCurrentIndexValue_Returns422()
-    {
-        var client = factory.CreateClient().WithAuthToken();
-        var id = await CreateLease(client, Guid.NewGuid().ToString(), "IndexBased", indexType: "CPI", baselineIndexValue: 100m);
-
-        var response = await client.PostAsJsonAsync($"/api/ground-leases/{id}/resale-estimate",
-            new CalculateResaleEstimateRequest(200_000m, 300_000m, 200_000m, 5, null, null));
-
-        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
-        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-        problem!.Detail.Should().Be("Current index value is required to estimate an index-based resale price.");
-    }
-
-    [Fact]
     public async Task GetGroundLease_LeaseCreatedDirectly_ShowsItsHomeownerAndTheDayItWasRecorded()
     {
         var client = factory.CreateClient().WithAuthToken();

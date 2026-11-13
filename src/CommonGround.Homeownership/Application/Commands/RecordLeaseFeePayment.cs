@@ -25,16 +25,16 @@ public sealed record RecordLeaseFeePayment(
     string? Reference,
     UserId RecordedBy);
 
-/// <summary>What recording a payment or a notice on a lease decides from.</summary>
+/// <summary>What a command that needs the trust's today decides on a lease from.</summary>
 /// <param name="Lease">The lease stream, fetched for writing.</param>
 /// <param name="Today">The trust's today.</param>
-public sealed record LeaseFeePaymentDecision(IEventStream<GroundLease> Lease, DateOnly Today);
+public sealed record LeaseDecision(IEventStream<GroundLease> Lease, DateOnly Today);
 
 /// <summary>Handles <see cref="RecordLeaseFeePayment"/>.</summary>
 public static class RecordLeaseFeePaymentHandler
 {
     /// <summary>Fetches the lease for writing and the trust's today.</summary>
-    public static async Task<LeaseFeePaymentDecision> LoadAsync(
+    public static async Task<LeaseDecision> LoadAsync(
         RecordLeaseFeePayment command,
         IDocumentSession session,
         ITrustClock trustClock,
@@ -49,11 +49,11 @@ public static class RecordLeaseFeePaymentHandler
             .ConfigureAwait(false);
         var today = await trustClock.TodayAsync(session.TenantId, cancellationToken).ConfigureAwait(false);
 
-        return new LeaseFeePaymentDecision(lease, today);
+        return new LeaseDecision(lease, today);
     }
 
     /// <summary>Records the payment on the lease.</summary>
-    public static void Handle(RecordLeaseFeePayment command, LeaseFeePaymentDecision decision)
+    public static void Handle(RecordLeaseFeePayment command, LeaseDecision decision)
     {
         ArgumentNullException.ThrowIfNull(command);
         ArgumentNullException.ThrowIfNull(decision);

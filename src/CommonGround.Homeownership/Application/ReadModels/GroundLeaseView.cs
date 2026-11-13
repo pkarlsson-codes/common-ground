@@ -110,6 +110,46 @@ public class GroundLeaseView
 
     /// <summary>Gets or sets every permitted mortgage, paid-off ones included, in the order recorded.</summary>
     public List<PermittedMortgageEntry> PermittedMortgages { get; set; } = [];
+
+    /// <summary>Gets or sets the resale in progress on the lease, or null when none is.</summary>
+    public string? OpenResaleId { get; set; }
+
+    /// <summary>Gets or sets every resale price statement sent, in the order recorded.</summary>
+    public List<ResalePriceStatementEntry> ResalePriceStatements { get; set; } = [];
+}
+
+/// <summary>A resale price statement sent to the homeowner, in a ground lease view.</summary>
+public class ResalePriceStatementEntry
+{
+    /// <summary>Gets or sets the letter's date, the day the price was worked out on and sent.</summary>
+    public DateOnly StatementDate { get; set; }
+
+    /// <summary>Gets or sets how it was sent, as the delivery's display name.</summary>
+    public string Delivery { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the full years from the lease start to the statement date.</summary>
+    public int YearsOwned { get; set; }
+
+    /// <summary>Gets or sets the estimated market value used; null unless the formula is appraisal based.</summary>
+    public decimal? MarketValue { get; set; }
+
+    /// <summary>Gets or sets where the market value came from.</summary>
+    public string? MarketValueSource { get; set; }
+
+    /// <summary>Gets or sets the index value used; null unless the formula is index based.</summary>
+    public decimal? IndexValue { get; set; }
+
+    /// <summary>Gets or sets the improvements credit counted, after the cap; null for none.</summary>
+    public decimal? ImprovementsCredit { get; set; }
+
+    /// <summary>Gets or sets the price stated.</summary>
+    public decimal Price { get; set; }
+
+    /// <summary>Gets or sets the user who recorded it.</summary>
+    public string RecordedBy { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets when it was recorded.</summary>
+    public DateTimeOffset RecordedAt { get; set; }
 }
 
 /// <summary>A mortgage the trust permitted, in a ground lease view.</summary>

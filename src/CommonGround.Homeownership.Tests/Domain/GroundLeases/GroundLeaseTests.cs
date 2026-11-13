@@ -396,6 +396,58 @@ public class GroundLeaseTests
         }
     }
 
+    public class TheRecordResalePriceStatementMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        private static readonly ResalePriceStatementFigures MarketValue = new(330_000m, "County assessment 2026", null, null);
+
+        [Fact]
+        public void GivenActiveLease_WhenRecorded_ThenKeepsTheFiguresThePriceAndTheDelivery()
+        {
+            var sut = _testBed.Lease();
+
+            var recorded = sut.RecordResalePriceStatement(
+                new DateOnly(2026, 6, 1), MarketValue, NoticeDelivery.Email, new DateOnly(2026, 6, 1), _testBed.StaffUser);
+
+            recorded.Should().BeEquivalentTo(new
+            {
+                StatementDate = new DateOnly(2026, 6, 1),
+                Delivery = NoticeDelivery.Email,
+                YearsOwned = 1,
+                MarketValue = Money.Create(330_000m),
+                MarketValueSource = "County assessment 2026",
+                Price = Money.Create(220_000m),
+                RecordedBy = _testBed.StaffUser.Value,
+            });
+        }
+
+        [Fact]
+        public void GivenOpenResale_WhenRecorded_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = _testBed.Lease().Evolve(new ResaleStarted(_testBed.LeaseId.Value, ResaleId.Generate().Value))!;
+
+            var act = () => sut.RecordResalePriceStatement(
+                new DateOnly(2026, 6, 1), MarketValue, NoticeDelivery.Email, new DateOnly(2026, 6, 1), _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.record_resale_price_statement.resale_in_progress");
+        }
+
+        [Fact]
+        public void GivenTerminatedLease_WhenRecorded_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = _testBed.Lease().Evolve(
+                new GroundLeaseTerminated(_testBed.LeaseId.Value, "Moved", new DateOnly(2026, 1, 1), _testBed.StaffUser.Value))!;
+
+            var act = () => sut.RecordResalePriceStatement(
+                new DateOnly(2026, 6, 1), MarketValue, NoticeDelivery.Email, new DateOnly(2026, 6, 1), _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.record_resale_price_statement.status_not_active");
+        }
+    }
+
     public class TheCloseResaleMethod
     {
         private readonly TestBed _testBed = new();

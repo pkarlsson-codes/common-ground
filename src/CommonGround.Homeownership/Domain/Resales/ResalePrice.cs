@@ -37,7 +37,8 @@ public sealed record ResalePrice(Money FormulaPrice, Money PurchaseOptionPrice)
         return new ResalePrice(formulaPrice, Money.Min(formulaPrice, Money.Create(appraisedValue)));
     }
 
-    private static int WholeYears(DateOnly from, DateOnly to)
+    /// <summary>The full years from one day to another; zero when the second is earlier.</summary>
+    internal static int WholeYears(DateOnly from, DateOnly to)
     {
         var years = to.Year - from.Year;
         if (to < from.AddYears(years))

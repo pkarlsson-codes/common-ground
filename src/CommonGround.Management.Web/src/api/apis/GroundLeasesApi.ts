@@ -17,7 +17,6 @@
 import * as runtime from '../runtime';
 import type {
   ApproveMortgageRequestRequest,
-  CalculateResaleEstimateRequest,
   CorrectLeaseFeeTrackingRequest,
   CreateGroundLeaseRequest,
   CreateGroundLeaseResponse,
@@ -43,7 +42,6 @@ import type {
   RecordPermittedMortgageRequest,
   RecordPermittedMortgageResponse,
   RecordStewardshipCheckInRequest,
-  ResaleEstimateResponse,
   SetLeaseFeeNoticePolicyRequest,
   VoidLeaseFeePaymentRequest,
   WaiveLeaseFeeInterestRequest,
@@ -53,8 +51,6 @@ import type {
 import {
     ApproveMortgageRequestRequestFromJSON,
     ApproveMortgageRequestRequestToJSON,
-    CalculateResaleEstimateRequestFromJSON,
-    CalculateResaleEstimateRequestToJSON,
     CorrectLeaseFeeTrackingRequestFromJSON,
     CorrectLeaseFeeTrackingRequestToJSON,
     CreateGroundLeaseRequestFromJSON,
@@ -105,8 +101,6 @@ import {
     RecordPermittedMortgageResponseToJSON,
     RecordStewardshipCheckInRequestFromJSON,
     RecordStewardshipCheckInRequestToJSON,
-    ResaleEstimateResponseFromJSON,
-    ResaleEstimateResponseToJSON,
     SetLeaseFeeNoticePolicyRequestFromJSON,
     SetLeaseFeeNoticePolicyRequestToJSON,
     VoidLeaseFeePaymentRequestFromJSON,
@@ -122,11 +116,6 @@ import {
 export interface ApproveMortgageRequestOperationRequest {
     mortgageRequestId: string;
     approveMortgageRequestRequest: ApproveMortgageRequestRequest;
-}
-
-export interface CalculateResaleEstimateOperationRequest {
-    groundLeaseId: string;
-    calculateResaleEstimateRequest: CalculateResaleEstimateRequest;
 }
 
 export interface CorrectLeaseFeeTrackingOperationRequest {
@@ -263,20 +252,6 @@ export interface GroundLeasesApiInterface {
     /**
      */
     approveMortgageRequest(requestParameters: ApproveMortgageRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
-
-    /**
-     * 
-     * @param {string} groundLeaseId 
-     * @param {CalculateResaleEstimateRequest} calculateResaleEstimateRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof GroundLeasesApiInterface
-     */
-    calculateResaleEstimateRaw(requestParameters: CalculateResaleEstimateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResaleEstimateResponse>>;
-
-    /**
-     */
-    calculateResaleEstimate(requestParameters: CalculateResaleEstimateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResaleEstimateResponse>;
 
     /**
      * 
@@ -659,51 +634,6 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
             default:
                 return await response.value();
         }
-    }
-
-    /**
-     */
-    async calculateResaleEstimateRaw(requestParameters: CalculateResaleEstimateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResaleEstimateResponse>> {
-        if (requestParameters['groundLeaseId'] == null) {
-            throw new runtime.RequiredError(
-                'groundLeaseId',
-                'Required parameter "groundLeaseId" was null or undefined when calling calculateResaleEstimate().'
-            );
-        }
-
-        if (requestParameters['calculateResaleEstimateRequest'] == null) {
-            throw new runtime.RequiredError(
-                'calculateResaleEstimateRequest',
-                'Required parameter "calculateResaleEstimateRequest" was null or undefined when calling calculateResaleEstimate().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-
-        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/resale-estimate`;
-        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: CalculateResaleEstimateRequestToJSON(requestParameters['calculateResaleEstimateRequest']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => ResaleEstimateResponseFromJSON(jsonValue));
-    }
-
-    /**
-     */
-    async calculateResaleEstimate(requestParameters: CalculateResaleEstimateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResaleEstimateResponse> {
-        const response = await this.calculateResaleEstimateRaw(requestParameters, initOverrides);
-        return await response.value();
     }
 
     /**

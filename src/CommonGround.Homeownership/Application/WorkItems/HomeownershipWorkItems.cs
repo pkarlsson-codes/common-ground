@@ -75,6 +75,36 @@ public static class HomeownershipWorkItems
     /// <summary>Record that the approved loan closed, or that the homeowner withdrew it.</summary>
     public const string RecordMortgageLoanClosed = "record-mortgage-loan-closed";
 
+    /// <summary>An active lease with no resale in progress whose yearly resale price statement is due (Ch 23).</summary>
+    public const string ResalePriceStatementDue = "resale-price-statement-due";
+
+    /// <summary>Prepare the statement, print the letter, and record it sent.</summary>
+    public const string RecordResalePriceStatement = "record-resale-price-statement";
+
+    /// <summary>
+    /// The item for a lease whose yearly resale price statement is due: due and waiting since the day it fell due,
+    /// and gone once a statement is recorded.
+    /// </summary>
+    /// <param name="schedule">The lease's statement schedule.</param>
+    /// <returns>The lease's work item.</returns>
+    public static WorkItem ForResalePriceStatement(ResalePriceStatementSchedule schedule)
+    {
+        ArgumentNullException.ThrowIfNull(schedule);
+
+        var usd = CultureInfo.GetCultureInfo("en-US");
+        var last = schedule.LastStatementDate is { } date
+            ? $"last sent {date.ToString("MMM d, yyyy", usd)}"
+            : "none sent yet";
+
+        return new WorkItem(
+            WorkArea.Stewardship, ResalePriceStatementDue, "ground-lease", schedule.Lease.Id,
+            schedule.HomeLabel ?? "Home",
+            $"{schedule.Lease.HomeownerFullName}: resale price statement due, {last}",
+            schedule.NextDueOn,
+            schedule.NextDueOn,
+            [RecordResalePriceStatement]);
+    }
+
     /// <summary>
     /// The item for a mortgage request: a pending one from the day it arrived, due on its expected closing; an
     /// approved one from the day after its expected closing, until it is recorded closed or withdrawn. Other requests,

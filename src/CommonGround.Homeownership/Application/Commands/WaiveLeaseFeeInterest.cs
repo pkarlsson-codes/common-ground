@@ -24,7 +24,7 @@ public sealed record WaiveLeaseFeeInterest(
 public static class WaiveLeaseFeeInterestHandler
 {
     /// <summary>Fetches the lease for writing and the trust's today.</summary>
-    public static async Task<LeaseFeePaymentDecision> LoadAsync(
+    public static async Task<LeaseDecision> LoadAsync(
         WaiveLeaseFeeInterest command,
         IDocumentSession session,
         ITrustClock trustClock,
@@ -39,11 +39,11 @@ public static class WaiveLeaseFeeInterestHandler
             .ConfigureAwait(false);
         var today = await trustClock.TodayAsync(session.TenantId, cancellationToken).ConfigureAwait(false);
 
-        return new LeaseFeePaymentDecision(lease, today);
+        return new LeaseDecision(lease, today);
     }
 
     /// <summary>Waives the interest on the lease.</summary>
-    public static void Handle(WaiveLeaseFeeInterest command, LeaseFeePaymentDecision decision)
+    public static void Handle(WaiveLeaseFeeInterest command, LeaseDecision decision)
     {
         ArgumentNullException.ThrowIfNull(command);
         ArgumentNullException.ThrowIfNull(decision);

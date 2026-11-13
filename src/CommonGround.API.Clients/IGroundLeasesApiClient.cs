@@ -32,13 +32,6 @@ public interface IGroundLeasesApiClient
     /// <returns>A task representing the asynchronous operation.</returns>
     Task RecordStewardshipCheckInAsync(string groundLeaseId, RecordStewardshipCheckInRequest request, CancellationToken cancellationToken);
 
-    /// <summary>Calculates a resale price estimate for a ground lease.</summary>
-    /// <param name="groundLeaseId">The ID of the ground lease.</param>
-    /// <param name="request">The calculation inputs.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>The estimated maximum resale price.</returns>
-    Task<ResaleEstimateResponse> CalculateResaleEstimateAsync(string groundLeaseId, CalculateResaleEstimateRequest request, CancellationToken cancellationToken);
-
     /// <summary>Records a lease fee payment the trust received on a lease.</summary>
     /// <param name="groundLeaseId">The ID of the ground lease.</param>
     /// <param name="request">The payment details.</param>

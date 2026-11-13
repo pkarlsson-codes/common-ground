@@ -315,6 +315,51 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         OpenResaleId == resaleId ? new ResaleClosed(Id.Value, resaleId.Value) : null;
 
     /// <summary>
+    /// Works out what the home may sell for on a statement date under the lease's formula, with the same rules as
+    /// recording a statement. Refused for an ended lease, while a resale is in progress (its appraisal sets the price),
+    /// and as <see cref="ResalePriceStatementPrice.Calculate"/> refuses.
+    /// </summary>
+    public ResalePriceStatementPrice ResalePriceStatementPriceOn(DateOnly statementDate, ResalePriceStatementFigures figures, DateOnly today)
+    {
+        if (Status != GroundLeaseStatus.Active)
+            throw BusinessRuleViolation.GroundLease.RecordResalePriceStatement.StatusNotActive(Status);
+
+        if (OpenResaleId is { } openResaleId)
+            throw BusinessRuleViolation.GroundLease.RecordResalePriceStatement.ResaleInProgress(openResaleId.Value);
+
+        return ResalePriceStatementPrice.Calculate(
+            ResalePolicyTerms, BasePrice, OriginalAppraisedValue, LeaseStartDate, statementDate, today, figures);
+    }
+
+    /// <summary>
+    /// Records that a resale price statement was sent to the homeowner (Ch 23, Disclosure), keeping the figures used
+    /// and the price. Refused as <see cref="ResalePriceStatementPriceOn"/> refuses.
+    /// </summary>
+    public ResalePriceStatementRecorded RecordResalePriceStatement(
+        DateOnly statementDate,
+        ResalePriceStatementFigures figures,
+        NoticeDelivery delivery,
+        DateOnly today,
+        UserId recordedBy)
+    {
+        ArgumentNullException.ThrowIfNull(delivery);
+
+        var price = ResalePriceStatementPriceOn(statementDate, figures, today);
+
+        return new ResalePriceStatementRecorded(
+            Id.Value,
+            price.StatementDate,
+            delivery,
+            price.YearsOwned,
+            price.MarketValue,
+            price.MarketValueSource,
+            price.IndexValue,
+            price.ImprovementsCredit,
+            price.Price,
+            recordedBy.Value);
+    }
+
+    /// <summary>
     /// Records a lease fee payment the trust received. Refused for an amount of zero or less, a received date in the
     /// future or before the lease started. An ended lease still takes payments, so arrears can be collected.
     /// </summary>

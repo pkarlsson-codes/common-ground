@@ -58,20 +58,6 @@ public static class GroundLeasesEndpoints
         return Results.NoContent();
     }
 
-    [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/resale-estimate")]
-    [ProducesResponseType<ResaleEstimateResponse>(StatusCodes.Status200OK)]
-    public static async Task<IResult> CalculateResaleEstimate(
-        string groundLeaseId,
-        CalculateResaleEstimateRequest request,
-        IGroundLeasesApiClient client,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
-        ArgumentNullException.ThrowIfNull(request);
-        var result = await client.CalculateResaleEstimateAsync(groundLeaseId, request, cancellationToken).ConfigureAwait(false);
-        return Results.Ok(result);
-    }
-
     [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/lease-fee-payments")]
     [ProducesResponseType<RecordLeaseFeePaymentResponse>(StatusCodes.Status201Created)]
     public static async Task<IResult> RecordLeaseFeePayment(

@@ -334,6 +334,82 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class RecordResalePriceStatement
+        {
+            private const string Prefix = "homeownership.ground_lease.record_resale_price_statement.";
+
+            public static BusinessRuleViolationException StatusNotActive(GroundLeaseStatus status)
+                => new(
+                    Prefix + "status_not_active",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                        ["requiredStatus"] = GroundLeaseStatus.Active.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException ResaleInProgress(string resaleId)
+                => new(
+                    Prefix + "resale_in_progress",
+                    new Dictionary<string, object?>
+                    {
+                        ["resaleId"] = resaleId,
+                    });
+
+            public static BusinessRuleViolationException StatementDateInFuture(DateOnly statementDate, DateOnly today)
+                => new(
+                    Prefix + "statement_date_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["statementDate"] = statementDate,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException StatementDateBeforeLeaseStart(DateOnly statementDate, DateOnly leaseStartDate)
+                => new(
+                    Prefix + "statement_date_before_lease_start",
+                    new Dictionary<string, object?>
+                    {
+                        ["statementDate"] = statementDate,
+                        ["leaseStartDate"] = leaseStartDate,
+                    });
+
+            public static BusinessRuleViolationException OriginalAppraisedValueMissing()
+                => new(Prefix + "original_appraised_value_missing");
+
+            public static BusinessRuleViolationException MarketValueRequired()
+                => new(Prefix + "market_value_required");
+
+            public static BusinessRuleViolationException MarketValueNonPositive(decimal marketValue)
+                => new(
+                    Prefix + "market_value_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["marketValue"] = marketValue,
+                    });
+
+            public static BusinessRuleViolationException MarketValueSourceRequired()
+                => new(Prefix + "market_value_source_required");
+
+            public static BusinessRuleViolationException IndexValueRequired()
+                => new(Prefix + "index_value_required");
+
+            public static BusinessRuleViolationException IndexValueNonPositive(decimal indexValue)
+                => new(
+                    Prefix + "index_value_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["indexValue"] = indexValue,
+                    });
+
+            public static BusinessRuleViolationException ImprovementsCreditNegative(decimal improvementsCredit)
+                => new(
+                    Prefix + "improvements_credit_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["improvementsCredit"] = improvementsCredit,
+                    });
+        }
+
         public static class WaiveLeaseFeeInterest
         {
             public static BusinessRuleViolationException ReasonRequired()
