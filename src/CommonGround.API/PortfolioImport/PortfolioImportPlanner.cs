@@ -5,6 +5,7 @@ using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.PropertyRegistry.Application.Commands;
 using CommonGround.PropertyRegistry.Application.Queries;
@@ -293,15 +294,16 @@ internal static class PortfolioImportPlanner
             var resaleTerms = ResalePolicyTerms.FromString(
                 template.FormulaKind, template.AppreciationShare, template.IndexType, template.BaselineIndexValue,
                 template.AnnualPercentage, template.ImprovementsCap);
+            var debtCap = MortgageDebtCap.Create(template.MaxMortgageDebtPercent);
             var tracking = LeaseFeeTracking.Create(trackFrom, Money.Create(amountOwed ?? 0m), leaseStart.Value);
 
             GroundLease.Establish(
-                id, parcelId, home.Id, homeowner, leaseStart.Value, template.TermYears, template.OptionWindowDays, feeTerms,
+                id, parcelId, home.Id, homeowner, leaseStart.Value, template.TermYears, template.OptionWindowDays, feeTerms, debtCap,
                 basePrice.Value, appraisedValue.Value, template.CovenantTerms, resaleTerms, HomeCommitments.Create(null, null, null),
                 context.ImportedBy, tracking);
 
             command = new CreateGroundLease(
-                id, parcelId, home.Id, homeowner, leaseStart.Value, template.TermYears, template.OptionWindowDays, feeTerms,
+                id, parcelId, home.Id, homeowner, leaseStart.Value, template.TermYears, template.OptionWindowDays, feeTerms, debtCap,
                 basePrice.Value, appraisedValue.Value, template.CovenantTerms, resaleTerms, context.ImportedBy, tracking);
         });
         if (!valid || command is null)

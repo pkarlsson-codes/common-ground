@@ -14,6 +14,7 @@ public sealed record GroundLeaseTemplateCreated(
     Money RepairReserveFee,
     decimal LateInterestRate,
     int InterestWaiverDays,
+    int MaxMortgageDebtPercent,
     string CovenantTerms,
     FormulaKind FormulaKind,
     decimal? AppreciationShare,

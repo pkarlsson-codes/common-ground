@@ -69,6 +69,12 @@ export interface GroundLeaseTemplateResponse {
      */
     interestWaiverDays?: number;
     /**
+     * Debt cap a lease from it sets, a whole percent of the purchase option price.
+     * @type {number}
+     * @memberof GroundLeaseTemplateResponse
+     */
+    maxMortgageDebtPercent?: number;
+    /**
      * Covenant terms text.
      * @type {string}
      * @memberof GroundLeaseTemplateResponse
@@ -155,6 +161,7 @@ export function GroundLeaseTemplateResponseFromJSONTyped(json: any, ignoreDiscri
         'repairReserveFee': json['repairReserveFee'] == null ? undefined : json['repairReserveFee'],
         'lateInterestRate': json['lateInterestRate'] == null ? undefined : json['lateInterestRate'],
         'interestWaiverDays': json['interestWaiverDays'] == null ? undefined : json['interestWaiverDays'],
+        'maxMortgageDebtPercent': json['maxMortgageDebtPercent'] == null ? undefined : json['maxMortgageDebtPercent'],
         'covenantTerms': json['covenantTerms'] == null ? undefined : json['covenantTerms'],
         'status': json['status'] == null ? undefined : json['status'],
         'formulaKind': json['formulaKind'] == null ? undefined : json['formulaKind'],
@@ -187,6 +194,7 @@ export function GroundLeaseTemplateResponseToJSONTyped(value?: GroundLeaseTempla
         'repairReserveFee': value['repairReserveFee'],
         'lateInterestRate': value['lateInterestRate'],
         'interestWaiverDays': value['interestWaiverDays'],
+        'maxMortgageDebtPercent': value['maxMortgageDebtPercent'],
         'covenantTerms': value['covenantTerms'],
         'status': value['status'],
         'formulaKind': value['formulaKind'],

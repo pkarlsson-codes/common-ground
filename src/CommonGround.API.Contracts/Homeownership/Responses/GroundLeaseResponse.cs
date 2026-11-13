@@ -25,9 +25,34 @@ public sealed record GroundLeaseResponse(
     string? HomeownerPhone,
     IReadOnlyList<StewardshipCheckInDto> StewardshipCheckIns,
     LeaseFeesDto LeaseFees,
+    MortgagesDto Mortgages,
     DateTimeOffset CreatedAt,
     DateOnly RecordedOn,
     string CreatedBy);
+
+/// <summary>A lease's debt cap and the mortgages the trust permitted on it.</summary>
+/// <param name="MaxMortgageDebtPercent">The debt cap (Art 8.3), a whole percent of the purchase option price.</param>
+/// <param name="Permitted">Every permitted mortgage, current ones first, then paid off; each newest permitted first.</param>
+public sealed record MortgagesDto(
+    int MaxMortgageDebtPercent,
+    IReadOnlyList<PermittedMortgageDto> Permitted);
+
+/// <summary>A mortgage the trust permitted on a lease.</summary>
+/// <param name="MortgageId">The mortgage's ID.</param>
+/// <param name="Lender">The lender or servicer.</param>
+/// <param name="NoticeAddress">Where the trust sends copies of notices, or null when not on file.</param>
+/// <param name="OriginalPrincipal">The loan amount when it closed.</param>
+/// <param name="PermittedOn">The day the trust permitted it.</param>
+/// <param name="Source">How: LeaseSigning, Request or Recorded.</param>
+/// <param name="PaidOffOn">The day it was paid off, or null while it is current.</param>
+public sealed record PermittedMortgageDto(
+    string MortgageId,
+    string Lender,
+    string? NoticeAddress,
+    decimal OriginalPrincipal,
+    DateOnly PermittedOn,
+    string Source,
+    DateOnly? PaidOffOn);
 
 /// <summary>A lease's fee terms, what it owes as of the trust's today, and its payments.</summary>
 /// <param name="LandUseFee">Monthly land use fee.</param>

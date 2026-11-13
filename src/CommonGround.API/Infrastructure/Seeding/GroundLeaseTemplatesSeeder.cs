@@ -1,5 +1,6 @@
 using System.Text.Json;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Infrastructure.Seeding;
@@ -66,6 +67,7 @@ public sealed class GroundLeaseTemplatesSeeder : IDevelopmentSeeder
                 entry.CovenantTerms,
                 ToResalePolicyTerms(entry),
                 LeaseFeeTerms.Create(Money.Create(entry.LandUseFee), Money.Create(entry.RepairReserveFee), entry.LateInterestRate, entry.InterestWaiverDays),
+                MortgageDebtCap.Create(entry.MaxMortgageDebtPercent),
                 SeederUserId);
 
             object[] events = entry.Archived
@@ -150,6 +152,8 @@ public sealed class GroundLeaseTemplatesSeeder : IDevelopmentSeeder
         public decimal LateInterestRate { get; set; }
 
         public int InterestWaiverDays { get; set; } = LeaseFeeTerms.DefaultInterestWaiverDays;
+
+        public int MaxMortgageDebtPercent { get; set; }
 
         public string CovenantTerms { get; set; } = string.Empty;
 

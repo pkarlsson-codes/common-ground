@@ -58,7 +58,7 @@ public class PurchaseBoardTests(ApiFactory factory)
     {
         var template = await client.PostAsJsonAsync("/api/ground-lease-templates",
             new CreateGroundLeaseTemplateRequest(
-                $"Board Template {Guid.NewGuid():N}", 99, 60, 45m, 15m, "Standard covenant terms", "AppraisalBased", 0.25m, null, null, null, null));
+                $"Board Template {Guid.NewGuid():N}", 99, 60, 45m, 15m, "Standard covenant terms", "AppraisalBased", 0.25m, null, null, null, null, 90));
         template.StatusCode.Should().Be(HttpStatusCode.Created);
         var templateId = (await template.Content.ReadFromJsonAsync<CreateGroundLeaseTemplateResponse>())!.GroundLeaseTemplateId;
 

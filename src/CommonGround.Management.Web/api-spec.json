@@ -9312,6 +9312,9 @@
         "type": "object",
         "description": "Request to create a ground lease directly, rather than from a purchase closing.",
         "additionalProperties": false,
+        "required": [
+          "maxMortgageDebtPercent"
+        ],
         "properties": {
           "landParcelId": {
             "type": "string"
@@ -9386,6 +9389,10 @@
             "type": "number",
             "format": "decimal",
             "nullable": true
+          },
+          "maxMortgageDebtPercent": {
+            "type": "integer",
+            "format": "int32"
           },
           "lateInterestRate": {
             "type": "number",
@@ -9503,6 +9510,9 @@
           },
           "leaseFees": {
             "$ref": "#/components/schemas/LeaseFeesDto"
+          },
+          "mortgages": {
+            "$ref": "#/components/schemas/MortgagesDto"
           },
           "createdAt": {
             "type": "string",
@@ -9875,6 +9885,65 @@
           "status": {
             "type": "string",
             "description": "Curing, Cured, PaidAfterDeadline or Uncured."
+          }
+        }
+      },
+      "MortgagesDto": {
+        "type": "object",
+        "description": "A lease's debt cap and the mortgages the trust permitted on it.",
+        "additionalProperties": false,
+        "properties": {
+          "maxMortgageDebtPercent": {
+            "type": "integer",
+            "description": "The debt cap (Art 8.3), a whole percent of the purchase option price.",
+            "format": "int32"
+          },
+          "permitted": {
+            "type": "array",
+            "description": "Every permitted mortgage, current ones first, then paid off; each newest permitted first.",
+            "items": {
+              "$ref": "#/components/schemas/PermittedMortgageDto"
+            }
+          }
+        }
+      },
+      "PermittedMortgageDto": {
+        "type": "object",
+        "description": "A mortgage the trust permitted on a lease.",
+        "additionalProperties": false,
+        "properties": {
+          "mortgageId": {
+            "type": "string",
+            "description": "The mortgage's ID."
+          },
+          "lender": {
+            "type": "string",
+            "description": "The lender or servicer."
+          },
+          "noticeAddress": {
+            "type": "string",
+            "description": "Where the trust sends copies of notices, or null when not on file.",
+            "nullable": true
+          },
+          "originalPrincipal": {
+            "type": "number",
+            "description": "The loan amount when it closed.",
+            "format": "decimal"
+          },
+          "permittedOn": {
+            "type": "string",
+            "description": "The day the trust permitted it.",
+            "format": "date"
+          },
+          "source": {
+            "type": "string",
+            "description": "How: LeaseSigning, Request or Recorded."
+          },
+          "paidOffOn": {
+            "type": "string",
+            "description": "The day it was paid off, or null while it is current.",
+            "format": "date",
+            "nullable": true
           }
         }
       },
@@ -10418,6 +10487,9 @@
         "type": "object",
         "description": "Request to create a new ground lease template.",
         "additionalProperties": false,
+        "required": [
+          "maxMortgageDebtPercent"
+        ],
         "properties": {
           "templateName": {
             "type": "string"
@@ -10467,6 +10539,10 @@
             "type": "number",
             "format": "decimal",
             "nullable": true
+          },
+          "maxMortgageDebtPercent": {
+            "type": "integer",
+            "format": "int32"
           },
           "lateInterestRate": {
             "type": "number",
@@ -10582,6 +10658,11 @@
           "interestWaiverDays": {
             "type": "integer",
             "description": "Days after the due date within which a payment owes no interest.",
+            "format": "int32"
+          },
+          "maxMortgageDebtPercent": {
+            "type": "integer",
+            "description": "Debt cap a lease from it sets, a whole percent of the purchase option price.",
             "format": "int32"
           },
           "covenantTerms": {

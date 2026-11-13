@@ -27,6 +27,7 @@ async function createBuyback(page: Page) {
     leaseStartDate: '2020-01-01',
     termYears: 99,
     optionWindowDays: 60,
+    maxMortgageDebtPercent: 90,
     basePrice: 200000,
     originalAppraisedValue: 250000,
     covenantTerms: 'Standard covenant terms',

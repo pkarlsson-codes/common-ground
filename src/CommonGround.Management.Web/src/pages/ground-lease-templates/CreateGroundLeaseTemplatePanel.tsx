@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import DebtCapField from '../ground-leases/DebtCapField'
 import SlideOver from '../../components/SlideOver'
 import { useCreateGroundLeaseTemplate } from '../../hooks/groundLeaseTemplates'
 import {
@@ -27,6 +28,7 @@ const emptyCreate = (): CreateGroundLeaseTemplateForm => ({
   annualPercentage: 0.01,
   improvementsCap: null,
   hasImprovementsCap: false,
+  maxMortgageDebtPercent: null,
 })
 
 interface Props {
@@ -223,6 +225,10 @@ export default function CreateGroundLeaseTemplatePanel({ onClose }: Props) {
               />
             </div>
           )}
+          <DebtCapField
+            value={form.maxMortgageDebtPercent}
+            onChange={maxMortgageDebtPercent => setForm(f => ({ ...f, maxMortgageDebtPercent }))}
+          />
         </div>
 
         {error && (

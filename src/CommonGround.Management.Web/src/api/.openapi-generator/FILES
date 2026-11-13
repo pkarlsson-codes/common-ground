@@ -120,6 +120,7 @@ models/LeaseViolationResponse.ts
 models/MakeCounselingReferralRequest.ts
 models/MarkOccupancyVerificationOverdueRequest.ts
 models/MortgagePrequalificationDto.ts
+models/MortgagesDto.ts
 models/OccupancyVerificationResponse.ts
 models/OpenForeclosurePreventionCaseForLeaseDefaultRequest.ts
 models/OpenForeclosurePreventionCaseRequest.ts
@@ -142,6 +143,7 @@ models/PaginatedResponseOfResaleResponse.ts
 models/PaginatedResponseOfStewardshipCaseResponse.ts
 models/PaginatedResponseOfWaitingListEntryResponse.ts
 models/PassOverDto.ts
+models/PermittedMortgageDto.ts
 models/PortfolioImportErrorDto.ts
 models/PortfolioImportRequest.ts
 models/PortfolioImportResponse.ts

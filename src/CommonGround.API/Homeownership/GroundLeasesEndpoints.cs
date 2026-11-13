@@ -6,6 +6,7 @@ using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Infrastructure.API;
@@ -51,6 +52,7 @@ public static class GroundLeasesEndpoints
             request.TermYears,
             request.OptionWindowDays,
             LeaseFeeTerms.Create(Money.Create(request.LandUseFee), Money.Create(request.RepairReserveFee), request.LateInterestRate, request.InterestWaiverDays),
+            MortgageDebtCap.Create(request.MaxMortgageDebtPercent),
             request.BasePrice,
             request.OriginalAppraisedValue,
             request.CovenantTerms,
@@ -191,6 +193,15 @@ public static class GroundLeasesEndpoints
                     .ToList()
                     .AsReadOnly(),
                 LeaseFeesEndpoints.ToResponse(defaultCure)),
+            new MortgagesDto(
+                view.MaxMortgageDebtPercent,
+                view.PermittedMortgages
+                    .OrderBy(m => m.PaidOffOn is not null)
+                    .ThenByDescending(m => m.PermittedOn)
+                    .Select(m => new PermittedMortgageDto(
+                        m.MortgageId, m.Lender, m.NoticeAddress, m.OriginalPrincipal, m.PermittedOn, m.Source, m.PaidOffOn))
+                    .ToList()
+                    .AsReadOnly()),
             view.CreatedAt,
             recordedOn,
             view.CreatedBy);

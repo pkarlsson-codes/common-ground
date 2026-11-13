@@ -1,4 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.SharedKernel.Domain;
@@ -15,6 +16,7 @@ public sealed record CreateGroundLeaseTemplate(
     string CovenantTerms,
     ResalePolicyTerms ResalePolicyTerms,
     LeaseFeeTerms LeaseFeeTerms,
+    MortgageDebtCap MortgageDebtCap,
     UserId CreatedBy);
 
 /// <summary>Handles <see cref="CreateGroundLeaseTemplate"/>.</summary>
@@ -33,6 +35,7 @@ public static class CreateGroundLeaseTemplateHandler
             command.CovenantTerms,
             command.ResalePolicyTerms,
             command.LeaseFeeTerms,
+            command.MortgageDebtCap,
             command.CreatedBy);
 
         return MartenOps.StartStream<GroundLeaseTemplate>(command.TemplateId.Value, started);

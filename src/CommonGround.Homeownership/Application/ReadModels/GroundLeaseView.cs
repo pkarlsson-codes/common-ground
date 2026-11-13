@@ -87,6 +87,9 @@ public class GroundLeaseView
     /// <summary>Gets or sets the days after the due date within which a payment owes no interest.</summary>
     public int InterestWaiverDays { get; set; }
 
+    /// <summary>Gets or sets the debt cap, a whole percent of the purchase option price.</summary>
+    public int MaxMortgageDebtPercent { get; set; }
+
     /// <summary>Gets or sets the first day the trust tracks the lease's fees in CommonGround.</summary>
     public DateOnly FeesTrackedFrom { get; set; }
 
@@ -104,6 +107,34 @@ public class GroundLeaseView
 
     /// <summary>Gets or sets every late-fee interest waiver, in the order recorded.</summary>
     public List<LeaseFeeInterestWaiverEntry> LeaseFeeInterestWaivers { get; set; } = [];
+
+    /// <summary>Gets or sets every permitted mortgage, paid-off ones included, in the order recorded.</summary>
+    public List<PermittedMortgageEntry> PermittedMortgages { get; set; } = [];
+}
+
+/// <summary>A mortgage the trust permitted, in a ground lease view.</summary>
+public class PermittedMortgageEntry
+{
+    /// <summary>Gets or sets the mortgage ID.</summary>
+    public string MortgageId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the lender or servicer.</summary>
+    public string Lender { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets where the trust sends copies of notices, or null when not on file.</summary>
+    public string? NoticeAddress { get; set; }
+
+    /// <summary>Gets or sets the loan amount when it closed.</summary>
+    public decimal OriginalPrincipal { get; set; }
+
+    /// <summary>Gets or sets the day the trust permitted it.</summary>
+    public DateOnly PermittedOn { get; set; }
+
+    /// <summary>Gets or sets how the trust permitted it, as the source's display name.</summary>
+    public string Source { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the day it was paid off, or null while it is current.</summary>
+    public DateOnly? PaidOffOn { get; set; }
 }
 
 /// <summary>Late-fee interest waived, in a ground lease view.</summary>

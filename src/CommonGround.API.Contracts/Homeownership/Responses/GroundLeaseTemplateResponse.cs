@@ -9,6 +9,7 @@ namespace CommonGround.API.Contracts.Homeownership.Responses;
 /// <param name="RepairReserveFee">Monthly repair reserve fee.</param>
 /// <param name="LateInterestRate">Yearly interest rate on a late fee, in percent; zero charges none.</param>
 /// <param name="InterestWaiverDays">Days after the due date within which a payment owes no interest.</param>
+/// <param name="MaxMortgageDebtPercent">Debt cap a lease from it sets, a whole percent of the purchase option price.</param>
 /// <param name="CovenantTerms">Covenant terms text.</param>
 /// <param name="Status">Current status (e.g. Active, Inactive).</param>
 /// <param name="FormulaKind">Resale formula kind.</param>
@@ -28,6 +29,7 @@ public sealed record GroundLeaseTemplateResponse(
     decimal RepairReserveFee,
     decimal LateInterestRate,
     int InterestWaiverDays,
+    int MaxMortgageDebtPercent,
     string CovenantTerms,
     string Status,
     string FormulaKind,

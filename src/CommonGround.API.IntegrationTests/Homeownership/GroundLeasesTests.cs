@@ -84,7 +84,7 @@ public class GroundLeasesTests(ApiFactory factory)
         var homeId = Guid.NewGuid().ToString();
         var template = await client.PostAsJsonAsync("/api/ground-lease-templates",
             new CreateGroundLeaseTemplateRequest(
-                $"Template {Guid.NewGuid():N}", 99, 60, 45m, 15m, "Standard covenant terms", "AppraisalBased", 0.25m, null, null, null, null));
+                $"Template {Guid.NewGuid():N}", 99, 60, 45m, 15m, "Standard covenant terms", "AppraisalBased", 0.25m, null, null, null, null, 90));
         var templateId = (await template.Content.ReadFromJsonAsync<CreateGroundLeaseTemplateResponse>())!.GroundLeaseTemplateId;
         (await client.PostAsJsonAsync("/api/purchase-workflows",
             new InitiatePurchaseWorkflowRequest(templateId, landParcelId, homeId, "Buyer Name", "buyer@example.com", null, 200_000m)))
@@ -125,5 +125,5 @@ public class GroundLeasesTests(ApiFactory factory)
             new CreateGroundLeaseRequest(
                 landParcelId, homeId, "Dana Whitfield", "dana@example.com", "(503) 555-0123",
                 new DateOnly(2018, 1, 1), 99, 60, 0m, 0m, 200_000m, 250_000m, "Standard covenant", formulaKind,
-                appreciationShare, indexType, baselineIndexValue, null, null));
+                appreciationShare, indexType, baselineIndexValue, null, null, 90));
 }

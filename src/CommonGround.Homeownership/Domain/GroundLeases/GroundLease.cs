@@ -1,5 +1,6 @@
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Application.Errors;
@@ -80,6 +81,12 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// </summary>
     public LeaseFeeTerms LeaseFeeTerms { get; private set; }
 
+    /// <summary>
+    /// Gets the most total mortgage debt may be when the trust permits a new loan (Art 8.3). Copied from the template
+    /// when the lease was created, so editing the template later doesn't change it.
+    /// </summary>
+    public MortgageDebtCap MortgageDebtCap { get; private set; }
+
     /// <summary>Gets the day the lease's fees are tracked from and what was owed then.</summary>
     public LeaseFeeTracking LeaseFeeTracking { get; private set; }
 
@@ -101,6 +108,11 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <summary>Gets every late-fee interest waiver on this lease, in the order recorded.</summary>
     public IReadOnlyList<LeaseFeeInterestWaiver> LeaseFeeInterestWaivers => _leaseFeeInterestWaivers;
 
+    private readonly List<PermittedMortgage> _permittedMortgages = [];
+
+    /// <summary>Gets every mortgage the trust permitted on this lease, paid-off ones included, in the order recorded.</summary>
+    public IReadOnlyList<PermittedMortgage> PermittedMortgages => _permittedMortgages;
+
     /// <summary>
     /// Creates a ground lease that didn't come from a purchase, such as one signed before the trust used
     /// CommonGround. Refused while the home is already leased, being sold, or in a home selection. Fees are tracked
@@ -115,6 +127,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         int termYears,
         int optionWindowDays,
         LeaseFeeTerms leaseFeeTerms,
+        MortgageDebtCap mortgageDebtCap,
         decimal basePrice,
         decimal originalAppraisedValue,
         string covenantTerms,
@@ -124,6 +137,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         LeaseFeeTracking? leaseFeeTracking = null)
     {
         ArgumentNullException.ThrowIfNull(leaseFeeTerms);
+        ArgumentNullException.ThrowIfNull(mortgageDebtCap);
         ArgumentNullException.ThrowIfNull(landParcelId);
         ArgumentNullException.ThrowIfNull(unitId);
         ArgumentNullException.ThrowIfNull(homeowner);
@@ -169,6 +183,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             leaseFeeTerms.RepairReserveFee,
             leaseFeeTerms.LateInterestRate,
             leaseFeeTerms.InterestWaiverDays,
+            mortgageDebtCap.Percent,
             tracking.TrackedFrom,
             tracking.OpeningBalance,
             basePrice,
@@ -186,12 +201,16 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             homeowner.Phone?.Value);
     }
 
-    /// <summary>Creates a new ground lease from an active template.</summary>
+    /// <summary>
+    /// Creates a new ground lease from an active template when a purchase closes. The purchase loan becomes the
+    /// lease's first permitted mortgage, permitted by signing the lease (Art 8.2), with no notice address yet.
+    /// </summary>
     public static GroundLeaseCreatedFromPurchase CreateFromPurchase(
         GroundLeaseId id,
         GroundLeaseTemplate template,
         PurchaseWorkflow purchaseWorkflow,
         DateOnly leaseStartDate,
+        PermittedMortgageId purchaseMortgageId,
         UserId createdBy)
     {
         ArgumentNullException.ThrowIfNull(template);
@@ -201,6 +220,10 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         {
             throw BusinessRuleViolation.GroundLease.CreateFromTemplate.TemplateNotActive(template.Status);
         }
+
+        // The financing step doesn't refuse a zero amount or a fraction of a cent, and a refusal here would stop the
+        // lease being created at closing; a zero commitment is no loan.
+        var purchaseLoan = purchaseWorkflow.FinancingDetails is { CommittedAmount: > 0 } financing ? financing : null;
 
         return new GroundLeaseCreatedFromPurchase(
             id.Value,
@@ -215,6 +238,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             template.LeaseFeeTerms.RepairReserveFee,
             template.LeaseFeeTerms.LateInterestRate,
             template.LeaseFeeTerms.InterestWaiverDays,
+            template.MortgageDebtCap.Percent,
             purchaseWorkflow.PurchasePrice,
             purchaseWorkflow.AppraisalDetails?.AppraisedValue,
             template.CovenantTerms,
@@ -227,7 +251,10 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             createdBy.Value,
             purchaseWorkflow.Buyer.FullName.Value,
             purchaseWorkflow.Buyer.Email.Value,
-            purchaseWorkflow.Buyer.Phone?.Value);
+            purchaseWorkflow.Buyer.Phone?.Value,
+            purchaseLoan is null ? null : purchaseMortgageId.Value,
+            purchaseLoan?.LenderName,
+            purchaseLoan is null ? null : Money.RoundedFrom(purchaseLoan.CommittedAmount));
     }
 
     /// <summary>Terminates this ground lease.</summary>
@@ -428,6 +455,99 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         return new LeaseFeeInterestWaived(Id.Value, waiverId.Value, today, amount, reason.Trim(), waivedBy.Value);
     }
 
+    /// <summary>
+    /// Records a mortgage the trust permitted outside CommonGround, such as one on a lease created before the trust
+    /// used it (Art 8.1). Refused without a lender, for a principal of zero or less, or a permitted date in the future
+    /// or before the lease started. An ended lease takes one too, to complete its record.
+    /// </summary>
+    public PermittedMortgageRecorded RecordPermittedMortgage(
+        PermittedMortgageId mortgageId,
+        string lender,
+        string? noticeAddress,
+        Money originalPrincipal,
+        DateOnly permittedOn,
+        DateOnly today,
+        UserId recordedBy)
+    {
+        ArgumentNullException.ThrowIfNull(originalPrincipal);
+
+        if (string.IsNullOrWhiteSpace(lender))
+            throw BusinessRuleViolation.GroundLease.RecordPermittedMortgage.LenderRequired();
+
+        if (!originalPrincipal.IsPositive)
+            throw BusinessRuleViolation.GroundLease.RecordPermittedMortgage.PrincipalNonPositive(originalPrincipal.Amount);
+
+        if (permittedOn > today)
+            throw BusinessRuleViolation.GroundLease.RecordPermittedMortgage.PermittedOnInFuture(permittedOn, today);
+
+        if (permittedOn < LeaseStartDate)
+            throw BusinessRuleViolation.GroundLease.RecordPermittedMortgage.PermittedOnBeforeLeaseStart(permittedOn, LeaseStartDate);
+
+        return new PermittedMortgageRecorded(
+            Id.Value,
+            mortgageId.Value,
+            lender.Trim(),
+            OptionalText(noticeAddress),
+            originalPrincipal,
+            permittedOn,
+            MortgagePermissionSource.Recorded,
+            recordedBy.Value);
+    }
+
+    /// <summary>
+    /// Changes a permitted mortgage's lender and notice address, such as when servicing moves to another company.
+    /// Refused without a lender, for a mortgage not on this lease, or one paid off. Nothing to do if both are unchanged.
+    /// </summary>
+    public PermittedMortgageEdited? EditPermittedMortgage(
+        PermittedMortgageId mortgageId,
+        string lender,
+        string? noticeAddress,
+        UserId editedBy)
+    {
+        if (string.IsNullOrWhiteSpace(lender))
+            throw BusinessRuleViolation.GroundLease.EditPermittedMortgage.LenderRequired();
+
+        var mortgage = _permittedMortgages.FirstOrDefault(m => m.Id == mortgageId)
+            ?? throw BusinessRuleViolation.GroundLease.EditPermittedMortgage.MortgageNotFound(mortgageId.Value);
+
+        if (mortgage.IsPaidOff)
+            throw BusinessRuleViolation.GroundLease.EditPermittedMortgage.MortgagePaidOff(mortgageId.Value);
+
+        var newLender = lender.Trim();
+        var newAddress = OptionalText(noticeAddress);
+        if (newLender == mortgage.Lender && newAddress == mortgage.NoticeAddress)
+            return null;
+
+        return new PermittedMortgageEdited(Id.Value, mortgageId.Value, newLender, newAddress, editedBy.Value);
+    }
+
+    /// <summary>
+    /// Marks a permitted mortgage paid off, so it no longer gets copies of notices. Refused for a mortgage not on this
+    /// lease, one already paid off, or a date in the future or before the trust permitted it.
+    /// </summary>
+    public PermittedMortgagePaidOff MarkPermittedMortgagePaidOff(
+        PermittedMortgageId mortgageId,
+        DateOnly paidOffOn,
+        DateOnly today,
+        UserId recordedBy)
+    {
+        var mortgage = _permittedMortgages.FirstOrDefault(m => m.Id == mortgageId)
+            ?? throw BusinessRuleViolation.GroundLease.MarkPermittedMortgagePaidOff.MortgageNotFound(mortgageId.Value);
+
+        if (mortgage.IsPaidOff)
+            throw BusinessRuleViolation.GroundLease.MarkPermittedMortgagePaidOff.AlreadyPaidOff(mortgageId.Value);
+
+        if (paidOffOn > today)
+            throw BusinessRuleViolation.GroundLease.MarkPermittedMortgagePaidOff.PaidOffOnInFuture(paidOffOn, today);
+
+        if (paidOffOn < mortgage.PermittedOn)
+            throw BusinessRuleViolation.GroundLease.MarkPermittedMortgagePaidOff.PaidOffOnBeforePermitted(paidOffOn, mortgage.PermittedOn);
+
+        return new PermittedMortgagePaidOff(Id.Value, mortgageId.Value, paidOffOn, recordedBy.Value);
+    }
+
+    private static string? OptionalText(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
+
     /// <summary>Works out what the lease owes as of a day, usually the trust's today.</summary>
     public LeaseFeeStatement LeaseFeeStatementAsOf(DateOnly asOf) =>
         LeaseFeeStatement.Calculate(
@@ -483,6 +603,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         OptionWindowDays = e.OptionWindowDays;
         LeaseFeeTerms = LeaseFeeTerms.Create(e.LandUseFee, e.RepairReserveFee, e.LateInterestRate, e.InterestWaiverDays);
         LeaseFeeTracking = LeaseFeeTracking.Create(e.FeesTrackedFrom, e.OpeningBalance, e.LeaseStartDate);
+        MortgageDebtCap = MortgageDebtCap.Create(e.MaxMortgageDebtPercent);
         BasePrice = e.BasePrice;
         OriginalAppraisedValue = e.OriginalAppraisedValue;
         CovenantTerms = e.CovenantTerms;
@@ -525,6 +646,13 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         OptionWindowDays = e.OptionWindowDays;
         LeaseFeeTerms = LeaseFeeTerms.Create(e.LandUseFee, e.RepairReserveFee, e.LateInterestRate, e.InterestWaiverDays);
         LeaseFeeTracking = LeaseFeeTracking.FromLeaseStart(e.LeaseStartDate);
+        MortgageDebtCap = MortgageDebtCap.Create(e.MaxMortgageDebtPercent);
+        if (e.PurchaseMortgageId is { } purchaseMortgageId)
+        {
+            _permittedMortgages.Add(PermittedMortgage.Create(
+                PermittedMortgageId.Create(purchaseMortgageId), e.PurchaseLender!, null, e.PurchaseLoanPrincipal!,
+                e.LeaseStartDate, MortgagePermissionSource.LeaseSigning));
+        }
         BasePrice = e.BasePrice;
         OriginalAppraisedValue = e.OriginalAppraisedValue;
         CovenantTerms = e.CovenantTerms;
@@ -580,5 +708,18 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <summary>Applies <see cref="LeaseFeePaymentVoided"/>.</summary>
     public void Apply(LeaseFeePaymentVoided e) =>
         _leaseFeePayments.First(p => p.Id.Value == e.PaymentId).MarkVoided(e.Reason);
+
+    /// <summary>Applies <see cref="PermittedMortgageRecorded"/>.</summary>
+    public void Apply(PermittedMortgageRecorded e) =>
+        _permittedMortgages.Add(PermittedMortgage.Create(
+            PermittedMortgageId.Create(e.MortgageId), e.Lender, e.NoticeAddress, e.OriginalPrincipal, e.PermittedOn, e.Source));
+
+    /// <summary>Applies <see cref="PermittedMortgageEdited"/>.</summary>
+    public void Apply(PermittedMortgageEdited e) =>
+        _permittedMortgages.First(m => m.Id.Value == e.MortgageId).ChangeLender(e.Lender, e.NoticeAddress);
+
+    /// <summary>Applies <see cref="PermittedMortgagePaidOff"/>.</summary>
+    public void Apply(PermittedMortgagePaidOff e) =>
+        _permittedMortgages.First(m => m.Id.Value == e.MortgageId).MarkPaidOff(e.PaidOffOn);
 
 }

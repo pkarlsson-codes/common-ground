@@ -97,6 +97,12 @@ export interface CreateGroundLeaseTemplateRequest {
      * @type {number}
      * @memberof CreateGroundLeaseTemplateRequest
      */
+    maxMortgageDebtPercent: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateGroundLeaseTemplateRequest
+     */
     lateInterestRate?: number;
     /**
      * 
@@ -110,6 +116,7 @@ export interface CreateGroundLeaseTemplateRequest {
  * Check if a given object implements the CreateGroundLeaseTemplateRequest interface.
  */
 export function instanceOfCreateGroundLeaseTemplateRequest(value: object): value is CreateGroundLeaseTemplateRequest {
+    if (!('maxMortgageDebtPercent' in value) || value['maxMortgageDebtPercent'] === undefined) return false;
     return true;
 }
 
@@ -135,6 +142,7 @@ export function CreateGroundLeaseTemplateRequestFromJSONTyped(json: any, ignoreD
         'baselineIndexValue': json['baselineIndexValue'] == null ? undefined : json['baselineIndexValue'],
         'annualPercentage': json['annualPercentage'] == null ? undefined : json['annualPercentage'],
         'improvementsCap': json['improvementsCap'] == null ? undefined : json['improvementsCap'],
+        'maxMortgageDebtPercent': json['maxMortgageDebtPercent'],
         'lateInterestRate': json['lateInterestRate'] == null ? undefined : json['lateInterestRate'],
         'interestWaiverDays': json['interestWaiverDays'] == null ? undefined : json['interestWaiverDays'],
     };
@@ -163,6 +171,7 @@ export function CreateGroundLeaseTemplateRequestToJSONTyped(value?: CreateGround
         'baselineIndexValue': value['baselineIndexValue'],
         'annualPercentage': value['annualPercentage'],
         'improvementsCap': value['improvementsCap'],
+        'maxMortgageDebtPercent': value['maxMortgageDebtPercent'],
         'lateInterestRate': value['lateInterestRate'],
         'interestWaiverDays': value['interestWaiverDays'],
     };

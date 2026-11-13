@@ -10,6 +10,7 @@
       "recordedOn": "today-2y",
       "termYears": 75,
       "optionWindowDays": 90,
+      "maxMortgageDebtPercent": 90,
       "landUseFee": 40,
       "repairReserveFee": 10,
       "lateInterestRate": 10,

@@ -1,6 +1,7 @@
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Domain;
@@ -19,6 +20,7 @@ public sealed record CreateGroundLease(
     int TermYears,
     int OptionWindowDays,
     LeaseFeeTerms LeaseFeeTerms,
+    MortgageDebtCap MortgageDebtCap,
     decimal BasePrice,
     decimal OriginalAppraisedValue,
     string CovenantTerms,
@@ -73,6 +75,7 @@ public static class CreateGroundLeaseHandler
             command.TermYears,
             command.OptionWindowDays,
             command.LeaseFeeTerms,
+            command.MortgageDebtCap,
             command.BasePrice,
             command.OriginalAppraisedValue,
             command.CovenantTerms,

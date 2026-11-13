@@ -356,6 +356,97 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class RecordPermittedMortgage
+        {
+            public static BusinessRuleViolationException LenderRequired()
+                => new("homeownership.ground_lease.record_permitted_mortgage.lender_required");
+
+            public static BusinessRuleViolationException PrincipalNonPositive(decimal principal)
+                => new(
+                    "homeownership.ground_lease.record_permitted_mortgage.principal_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["principal"] = principal,
+                    });
+
+            public static BusinessRuleViolationException PermittedOnInFuture(DateOnly permittedOn, DateOnly today)
+                => new(
+                    "homeownership.ground_lease.record_permitted_mortgage.permitted_on_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["permittedOn"] = permittedOn,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException PermittedOnBeforeLeaseStart(DateOnly permittedOn, DateOnly leaseStartDate)
+                => new(
+                    "homeownership.ground_lease.record_permitted_mortgage.permitted_on_before_lease_start",
+                    new Dictionary<string, object?>
+                    {
+                        ["permittedOn"] = permittedOn,
+                        ["leaseStartDate"] = leaseStartDate,
+                    });
+        }
+
+        public static class EditPermittedMortgage
+        {
+            public static BusinessRuleViolationException LenderRequired()
+                => new("homeownership.ground_lease.edit_permitted_mortgage.lender_required");
+
+            public static BusinessRuleViolationException MortgageNotFound(string mortgageId)
+                => new(
+                    "homeownership.ground_lease.edit_permitted_mortgage.mortgage_not_found",
+                    new Dictionary<string, object?>
+                    {
+                        ["mortgageId"] = mortgageId,
+                    });
+
+            public static BusinessRuleViolationException MortgagePaidOff(string mortgageId)
+                => new(
+                    "homeownership.ground_lease.edit_permitted_mortgage.mortgage_paid_off",
+                    new Dictionary<string, object?>
+                    {
+                        ["mortgageId"] = mortgageId,
+                    });
+        }
+
+        public static class MarkPermittedMortgagePaidOff
+        {
+            public static BusinessRuleViolationException MortgageNotFound(string mortgageId)
+                => new(
+                    "homeownership.ground_lease.mark_permitted_mortgage_paid_off.mortgage_not_found",
+                    new Dictionary<string, object?>
+                    {
+                        ["mortgageId"] = mortgageId,
+                    });
+
+            public static BusinessRuleViolationException AlreadyPaidOff(string mortgageId)
+                => new(
+                    "homeownership.ground_lease.mark_permitted_mortgage_paid_off.already_paid_off",
+                    new Dictionary<string, object?>
+                    {
+                        ["mortgageId"] = mortgageId,
+                    });
+
+            public static BusinessRuleViolationException PaidOffOnInFuture(DateOnly paidOffOn, DateOnly today)
+                => new(
+                    "homeownership.ground_lease.mark_permitted_mortgage_paid_off.paid_off_on_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["paidOffOn"] = paidOffOn,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException PaidOffOnBeforePermitted(DateOnly paidOffOn, DateOnly permittedOn)
+                => new(
+                    "homeownership.ground_lease.mark_permitted_mortgage_paid_off.paid_off_on_before_permitted",
+                    new Dictionary<string, object?>
+                    {
+                        ["paidOffOn"] = paidOffOn,
+                        ["permittedOn"] = permittedOn,
+                    });
+        }
+
         public static class CorrectLeaseFeeTracking
         {
             public static BusinessRuleViolationException PaymentBeforeFeesTracked(DateOnly receivedDate, DateOnly feesTrackedFrom)
@@ -480,6 +571,20 @@ public static class BusinessRuleViolation
                     new Dictionary<string, object?>
                     {
                         ["interestWaiverDays"] = interestWaiverDays,
+                    });
+        }
+    }
+
+    public static class MortgageDebtCap
+    {
+        public static class Create
+        {
+            public static BusinessRuleViolationException PercentOutOfRange(int percent)
+                => new(
+                    "homeownership.mortgage_debt_cap.create.percent_out_of_range",
+                    new Dictionary<string, object?>
+                    {
+                        ["percent"] = percent,
                     });
         }
     }

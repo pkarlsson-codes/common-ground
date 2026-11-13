@@ -98,6 +98,7 @@ export async function createGroundLeaseTemplate(page: Page) {
     templateName,
     termYears: 99,
     optionWindowDays: 60,
+    maxMortgageDebtPercent: 90,
     covenantTerms: 'Standard covenant terms',
     formulaKind: 'AppraisalBased',
     appreciationShare: 0.25,

@@ -23,6 +23,7 @@ internal sealed class GroundLeaseTemplateDetailViewProjection : SingleStreamProj
             RepairReserveFee = e.RepairReserveFee.Amount,
             LateInterestRate = e.LateInterestRate,
             InterestWaiverDays = e.InterestWaiverDays,
+            MaxMortgageDebtPercent = e.MaxMortgageDebtPercent,
             CovenantTerms = e.CovenantTerms,
             Status = "Active",
             FormulaKind = e.FormulaKind.ToString(),

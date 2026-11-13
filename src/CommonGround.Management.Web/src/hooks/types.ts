@@ -82,6 +82,8 @@ export interface CreateGroundLeaseForm {
   annualPercentage: number
   improvementsCap: number
   hasImprovementsCap: boolean
+  /** Debt cap, % of the purchase option price; null until entered. */
+  maxMortgageDebtPercent: number | null
 }
 
 export interface OnboardHomeownerForm {
@@ -169,6 +171,8 @@ export interface CreateGroundLeaseTemplateForm {
   annualPercentage: number | null
   improvementsCap: number | null
   hasImprovementsCap: boolean
+  /** Debt cap, % of the purchase option price; null until entered. */
+  maxMortgageDebtPercent: number | null
 }
 
 // ── Stewardship ────────────────────────────────────────────────────────────

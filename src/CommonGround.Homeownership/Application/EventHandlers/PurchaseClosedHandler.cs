@@ -1,4 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows.Events;
@@ -11,7 +12,7 @@ namespace CommonGround.Homeownership.Application.EventHandlers;
 
 /// <summary>
 /// Applies purchase-closing outcomes to the linked ground lease.
-/// On close, the workflow buyer becomes the lease homeowner.
+/// On close, the workflow buyer becomes the lease homeowner and the purchase loan its first permitted mortgage.
 /// </summary>
 public static class PurchaseClosedHandler
 {
@@ -33,7 +34,7 @@ public static class PurchaseClosedHandler
         ArgumentNullException.ThrowIfNull(@event);
 
         var leaseId = GroundLeaseId.Generate();
-        var created = GroundLease.CreateFromPurchase(leaseId, template, workflow, @event.ActualClosingDate, UserId.Create(@event.RecordedBy));
+        var created = GroundLease.CreateFromPurchase(leaseId, template, workflow, @event.ActualClosingDate, PermittedMortgageId.Generate(), UserId.Create(@event.RecordedBy));
 
         return MartenOps.StartStream<GroundLease>(leaseId.Value, created);
     }

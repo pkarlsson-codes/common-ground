@@ -39,6 +39,7 @@ const createLeaseDirectly = (page: Page, landParcelId: string, homeId: string, h
     leaseStartDate: '2020-01-01',
     termYears: 99,
     optionWindowDays: 60,
+    maxMortgageDebtPercent: 90,
     basePrice: 200000,
     originalAppraisedValue: 250000,
     covenantTerms: 'Standard covenant terms',
@@ -93,6 +94,8 @@ test('creating a lease on a parcel\'s home lists it first, shows its homeowner a
   await field(form, 'Annual Percentage').fill('0.02')
   await form.getByRole('checkbox', { name: 'Set improvements cap' }).check()
   await field(form, 'Improvements Cap ($)').fill('10000')
+  await expect(field(form, 'Debt Cap (% of purchase option price)')).toHaveValue('')
+  await field(form, 'Debt Cap (% of purchase option price)').fill('85')
   await create.click()
   await expectToast(page, 'Ground lease created')
   await expect(form).toBeHidden()
@@ -150,6 +153,7 @@ test('creating a lease on a home that already has one is refused and keeps the p
   await field(form, 'Base Price ($)').fill('180000')
   await field(form, 'Original Appraised Value ($)').fill('240000')
   await field(form, 'Covenant Terms').fill('Standard covenant terms')
+  await field(form, 'Debt Cap (% of purchase option price)').fill('90')
   await form.getByRole('button', { name: 'Create Lease' }).click()
 
   await expect(form.locator('.form-error')).toHaveText('This home already has an active ground lease.')

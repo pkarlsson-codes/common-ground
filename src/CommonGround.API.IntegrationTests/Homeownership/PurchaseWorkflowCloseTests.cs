@@ -60,6 +60,22 @@ public class PurchaseWorkflowCloseTests(ApiFactory factory)
         detail.TermYears.Should().Be(99);
         detail.HomeownerFullName.Should().Be("Test Buyer");
         detail.HomeownerEmail.Should().Be("buyer@example.com");
+        detail.Mortgages.Should().BeEquivalentTo(new
+        {
+            MaxMortgageDebtPercent = 90,
+            Permitted = new[]
+            {
+                new
+                {
+                    Lender = "Test Lender",
+                    NoticeAddress = (string?)null,
+                    OriginalPrincipal = 140000m,
+                    PermittedOn = ClosingDate,
+                    Source = "LeaseSigning",
+                    PaidOffOn = (DateOnly?)null,
+                },
+            },
+        });
     }
 
     [Fact]
@@ -151,7 +167,8 @@ public class PurchaseWorkflowCloseTests(ApiFactory factory)
                 null,
                 null,
                 null,
-                null));
+                null,
+                90));
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var created = await response.Content.ReadFromJsonAsync<CreateGroundLeaseTemplateResponse>();

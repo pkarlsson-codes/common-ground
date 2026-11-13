@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { HomesApi, LandParcelsApi } from '../../api'
 import EntityCombobox from '../../components/EntityCombobox'
+import DebtCapField from './DebtCapField'
 import SlideOver from '../../components/SlideOver'
 import { tracksFeesFromLater, useCreateGroundLease } from '../../hooks/groundLeases'
 import {
@@ -45,6 +46,7 @@ const emptyCreate = (): CreateGroundLeaseForm => ({
   annualPercentage: 0.01,
   improvementsCap: 25000,
   hasImprovementsCap: false,
+  maxMortgageDebtPercent: null,
 })
 
 interface Props {
@@ -366,6 +368,10 @@ export default function GroundLeaseCreatePanel({ onClose }: Props) {
               />
             </div>
           )}
+          <DebtCapField
+            value={createForm.maxMortgageDebtPercent}
+            onChange={maxMortgageDebtPercent => setCreateForm(f => ({ ...f, maxMortgageDebtPercent }))}
+          />
         </div>
         {createError && (
           <div className="form-error">{createError}</div>

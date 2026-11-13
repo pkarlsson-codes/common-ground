@@ -532,7 +532,8 @@ public class HomeSelectionTests(ApiFactory factory)
                 null,
                 null,
                 null,
-                null));
+                null,
+                90));
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         return (await response.Content.ReadFromJsonAsync<CreateGroundLeaseTemplateResponse>())!.GroundLeaseTemplateId;
     }

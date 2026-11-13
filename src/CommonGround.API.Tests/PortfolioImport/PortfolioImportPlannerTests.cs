@@ -34,6 +34,7 @@ public class PortfolioImportPlannerTests
                 TemplateName = "Lease 2005",
                 TermYears = 99,
                 OptionWindowDays = 90,
+                MaxMortgageDebtPercent = 85,
                 LandUseFee = 25m,
                 RepairReserveFee = 10m,
                 CovenantTerms = "Covenant",
@@ -119,7 +120,7 @@ public class PortfolioImportPlannerTests
             var plan = _testBed.Plan(TestBed.Csv(row));
 
             var lease = plan.Steps.Select(s => s.Command).OfType<CreateGroundLease>().Single();
-            (lease.TermYears, lease.OptionWindowDays, lease.CovenantTerms).Should().Be((99, 90, "Covenant"));
+            (lease.TermYears, lease.OptionWindowDays, lease.MortgageDebtCap.Percent, lease.CovenantTerms).Should().Be((99, 90, 85, "Covenant"));
             lease.LeaseFeeTerms.LandUseFee.Should().Be(Money.Create(20m));
             lease.LeaseFeeTerms.RepairReserveFee.Should().Be(Money.Create(10m));
         }

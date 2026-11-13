@@ -1,5 +1,6 @@
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
+using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using JasperFx.Events;
 using Marten.Events.Aggregation;
 
@@ -21,6 +22,7 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             RepairReserveFee = e.Data.RepairReserveFee.Amount,
             LateInterestRate = e.Data.LateInterestRate,
             InterestWaiverDays = e.Data.InterestWaiverDays,
+            MaxMortgageDebtPercent = e.Data.MaxMortgageDebtPercent,
             FeesTrackedFrom = e.Data.FeesTrackedFrom,
             OpeningBalance = e.Data.OpeningBalance.Amount,
             BasePrice = e.Data.BasePrice,
@@ -43,6 +45,19 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
     public static GroundLeaseView Create(IEvent<GroundLeaseCreatedFromPurchase> e) =>
         new()
         {
+            PermittedMortgages = e.Data.PurchaseMortgageId is { } mortgageId
+                ?
+                [
+                    new PermittedMortgageEntry
+                    {
+                        MortgageId = mortgageId,
+                        Lender = e.Data.PurchaseLender!,
+                        OriginalPrincipal = e.Data.PurchaseLoanPrincipal!.Amount,
+                        PermittedOn = e.Data.LeaseStartDate,
+                        Source = MortgagePermissionSource.LeaseSigning.DisplayName,
+                    },
+                ]
+                : [],
             Id = e.Data.AggregateId,
             GroundLeaseTemplateId = e.Data.GroundLeaseTemplateId,
             PurchaseWorkflowId = e.Data.PurchaseWorkflowId,
@@ -55,6 +70,7 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             RepairReserveFee = e.Data.RepairReserveFee.Amount,
             LateInterestRate = e.Data.LateInterestRate,
             InterestWaiverDays = e.Data.InterestWaiverDays,
+            MaxMortgageDebtPercent = e.Data.MaxMortgageDebtPercent,
             FeesTrackedFrom = e.Data.LeaseStartDate,
             BasePrice = e.Data.BasePrice,
             OriginalAppraisedValue = e.Data.OriginalAppraisedValue,
@@ -142,5 +158,35 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
         payment.VoidReason = e.Reason;
         payment.VoidedBy = e.VoidedBy;
         payment.VoidedAt = e.OccurredAt;
+    }
+
+    public static void Apply(GroundLeaseView view, PermittedMortgageRecorded e) =>
+        view.PermittedMortgages.Add(new PermittedMortgageEntry
+        {
+            MortgageId = e.MortgageId,
+            Lender = e.Lender,
+            NoticeAddress = e.NoticeAddress,
+            OriginalPrincipal = e.OriginalPrincipal.Amount,
+            PermittedOn = e.PermittedOn,
+            Source = e.Source.DisplayName,
+        });
+
+    public static void Apply(GroundLeaseView view, PermittedMortgageEdited e)
+    {
+        var mortgage = view.PermittedMortgages.Find(m => m.MortgageId == e.MortgageId);
+        if (mortgage is null)
+            return;
+
+        mortgage.Lender = e.Lender;
+        mortgage.NoticeAddress = e.NoticeAddress;
+    }
+
+    public static void Apply(GroundLeaseView view, PermittedMortgagePaidOff e)
+    {
+        var mortgage = view.PermittedMortgages.Find(m => m.MortgageId == e.MortgageId);
+        if (mortgage is null)
+            return;
+
+        mortgage.PaidOffOn = e.PaidOffOn;
     }
 }

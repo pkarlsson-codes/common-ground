@@ -23,6 +23,7 @@ async function fillCommonFields(form: Locator) {
   const name = `Template ${uniqueId()}`
   await field(form, 'Template Name').fill(name)
   await field(form, 'Covenant Terms').fill('Owner-occupied, permanently affordable')
+  await field(form, 'Debt Cap (% of purchase option price)').fill('90')
   return name
 }
 
@@ -47,6 +48,7 @@ test('creating an appraisal-based template with an improvements cap shows its te
   await expect(field(form, 'Resale Formula')).toHaveValue('AppraisalBased')
   await expect(field(form, 'Appreciation Share')).toHaveValue('0.25')
   await expect(field(form, 'Improvements Cap ($)')).toHaveCount(0)
+  await expect(field(form, 'Debt Cap (% of purchase option price)')).toHaveValue('')
 
   const name = await fillCommonFields(form)
   await field(form, 'Term (years)').fill('75')

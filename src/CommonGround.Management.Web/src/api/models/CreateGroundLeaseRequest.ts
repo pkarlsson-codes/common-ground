@@ -147,6 +147,12 @@ export interface CreateGroundLeaseRequest {
      * @type {number}
      * @memberof CreateGroundLeaseRequest
      */
+    maxMortgageDebtPercent: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateGroundLeaseRequest
+     */
     lateInterestRate?: number;
     /**
      * 
@@ -172,6 +178,7 @@ export interface CreateGroundLeaseRequest {
  * Check if a given object implements the CreateGroundLeaseRequest interface.
  */
 export function instanceOfCreateGroundLeaseRequest(value: object): value is CreateGroundLeaseRequest {
+    if (!('maxMortgageDebtPercent' in value) || value['maxMortgageDebtPercent'] === undefined) return false;
     return true;
 }
 
@@ -204,6 +211,7 @@ export function CreateGroundLeaseRequestFromJSONTyped(json: any, ignoreDiscrimin
         'baselineIndexValue': json['baselineIndexValue'] == null ? undefined : json['baselineIndexValue'],
         'annualPercentage': json['annualPercentage'] == null ? undefined : json['annualPercentage'],
         'improvementsCap': json['improvementsCap'] == null ? undefined : json['improvementsCap'],
+        'maxMortgageDebtPercent': json['maxMortgageDebtPercent'],
         'lateInterestRate': json['lateInterestRate'] == null ? undefined : json['lateInterestRate'],
         'interestWaiverDays': json['interestWaiverDays'] == null ? undefined : json['interestWaiverDays'],
         'feesTrackedFrom': json['feesTrackedFrom'] == null ? undefined : CalendarDateFromJSON(json['feesTrackedFrom']),
@@ -241,6 +249,7 @@ export function CreateGroundLeaseRequestToJSONTyped(value?: CreateGroundLeaseReq
         'baselineIndexValue': value['baselineIndexValue'],
         'annualPercentage': value['annualPercentage'],
         'improvementsCap': value['improvementsCap'],
+        'maxMortgageDebtPercent': value['maxMortgageDebtPercent'],
         'lateInterestRate': value['lateInterestRate'],
         'interestWaiverDays': value['interestWaiverDays'],
         'feesTrackedFrom': CalendarDateToJSON(value['feesTrackedFrom']),

@@ -5,6 +5,7 @@ using CommonGround.Homeownership.Application.Commands;
 using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.SharedKernel.Domain;
@@ -46,6 +47,7 @@ public static class GroundLeaseTemplatesEndpoints
             request.CovenantTerms,
             resalePolicyTerms,
             LeaseFeeTerms.Create(Money.Create(request.LandUseFee), Money.Create(request.RepairReserveFee), request.LateInterestRate, request.InterestWaiverDays),
+            MortgageDebtCap.Create(request.MaxMortgageDebtPercent),
             userId);
 
         await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);
@@ -85,7 +87,7 @@ public static class GroundLeaseTemplatesEndpoints
             bus.TenantId!, new GetGroundLeaseTemplate(templateId), cancellationToken);
         return Results.Ok(new GroundLeaseTemplateResponse(
             view.Id, view.TemplateName, view.TermYears, view.OptionWindowDays, view.LandUseFee, view.RepairReserveFee,
-            view.LateInterestRate, view.InterestWaiverDays,
+            view.LateInterestRate, view.InterestWaiverDays, view.MaxMortgageDebtPercent,
             view.CovenantTerms, view.Status,
             view.FormulaKind, view.AppreciationShare, view.IndexType, view.BaselineIndexValue,
             view.AnnualPercentage, view.ImprovementsCap,

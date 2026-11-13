@@ -32,6 +32,7 @@ async function createLeaseOwingInterest(page: Page, homeowner: string) {
     leaseStartDate: firstOfMonth(2),
     termYears: 99,
     optionWindowDays: 60,
+    maxMortgageDebtPercent: 90,
     landUseFee: 45,
     repairReserveFee: 15,
     lateInterestRate: 36.5,

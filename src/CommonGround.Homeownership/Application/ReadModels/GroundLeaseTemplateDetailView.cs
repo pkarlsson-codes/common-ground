@@ -27,6 +27,9 @@ public class GroundLeaseTemplateDetailView
     /// <summary>Gets or sets the days after the due date within which a payment owes no interest.</summary>
     public int InterestWaiverDays { get; set; }
 
+    /// <summary>Gets or sets the debt cap a lease from this template sets, a whole percent of the purchase option price.</summary>
+    public int MaxMortgageDebtPercent { get; set; }
+
     /// <summary>Gets or sets the covenant terms text.</summary>
     public string CovenantTerms { get; set; } = string.Empty;
 

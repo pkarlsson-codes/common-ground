@@ -72,6 +72,8 @@ export function useCreateGroundLease() {
           baselineIndexValue: form.formulaKind === 'IndexBased' ? form.baselineIndexValue : undefined,
           annualPercentage: form.formulaKind === 'FixedPercentage' ? form.annualPercentage : undefined,
           improvementsCap: form.hasImprovementsCap ? form.improvementsCap : undefined,
+          // The input is required, so the form can't submit without it.
+          maxMortgageDebtPercent: form.maxMortgageDebtPercent!,
         },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['ground-leases'] }),

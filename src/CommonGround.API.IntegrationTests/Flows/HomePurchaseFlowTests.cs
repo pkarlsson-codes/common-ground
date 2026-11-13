@@ -501,7 +501,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
         client.PostAsJsonAsync("/api/ground-leases",
             new CreateGroundLeaseRequest(
                 landParcelId, homeId, "Dana Whitfield", "dana@example.com", null, leaseStart, 99, 60, 0m, 0m, 200_000m, 250_000m, "Signed on paper",
-                "AppraisalBased", 0.25m, null, null, null, null));
+                "AppraisalBased", 0.25m, null, null, null, null, 90));
 
     private static async Task<FunderReportResponse> GetFunderReportAsync(HttpClient client, DateOnly from, DateOnly to) =>
         (await client.GetFromJsonAsync<FunderReportResponse>($"/api/reports/funder?from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}"))!;
@@ -530,7 +530,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
     {
         var response = await client.PostAsJsonAsync("/api/ground-lease-templates",
             new CreateGroundLeaseTemplateRequest(
-                $"Standard 99-Year {Guid.NewGuid():N}", 99, 60, 45m, 15m, "Standard covenant terms", "AppraisalBased", 0.25m, null, null, null, null));
+                $"Standard 99-Year {Guid.NewGuid():N}", 99, 60, 45m, 15m, "Standard covenant terms", "AppraisalBased", 0.25m, null, null, null, null, 90));
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         return (await response.Content.ReadFromJsonAsync<CreateGroundLeaseTemplateResponse>())!.GroundLeaseTemplateId;
     }

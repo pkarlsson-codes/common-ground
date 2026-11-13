@@ -1,5 +1,6 @@
 using System.Globalization;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
@@ -37,7 +38,7 @@ public class GroundLeaseTests
         public GroundLeaseCreated Established(
             ResalePolicyTerms? terms = null, LeaseFeeTerms? fees = null, LeaseFeeTracking? tracking = null) =>
             GroundLease.Establish(
-                LeaseId, ParcelId, HomeId, Homeowner, LeaseStart, 99, 60, fees ?? Fees, 200_000m, 250_000m, "Standard affordability covenant",
+                LeaseId, ParcelId, HomeId, Homeowner, LeaseStart, 99, 60, fees ?? Fees, MortgageDebtCap.Create(90), 200_000m, 250_000m, "Standard affordability covenant",
                 terms ?? ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, StaffUser, tracking);
 
         public GroundLease Lease(ResalePolicyTerms? terms = null, LeaseFeeTerms? fees = null, LeaseFeeTracking? tracking = null) =>
@@ -49,7 +50,7 @@ public class GroundLeaseTests
 
         public GroundLeaseTemplate ActiveTemplate(string covenantTerms, int termYears, ResalePolicyTerms terms) =>
             EventReplay.Replay<GroundLeaseTemplate>(
-                GroundLeaseTemplate.Define(GroundLeaseTemplateId.Generate(), "Template", termYears, 45, covenantTerms, terms, Fees, StaffUser));
+                GroundLeaseTemplate.Define(GroundLeaseTemplateId.Generate(), "Template", termYears, 45, covenantTerms, terms, Fees, MortgageDebtCap.Create(90), StaffUser));
 
         public LeaseFeePaymentRecorded Payment(GroundLease lease, decimal amount, DateOnly received) =>
             lease.RecordLeaseFeePayment(LeaseFeePaymentId.Generate(), received, Money.Create(amount), PaymentMethod.Check, null, received, StaffUser);
@@ -66,7 +67,7 @@ public class GroundLeaseTests
                 Homeowner.From("Buyer Name", "buyer@example.com"), 250000m, StaffUser));
 
         public GroundLeaseCreatedFromPurchase FromPurchase(GroundLeaseTemplate template) =>
-            GroundLease.CreateFromPurchase(LeaseId, template, Workflow(), new DateOnly(2026, 1, 1), StaffUser);
+            GroundLease.CreateFromPurchase(LeaseId, template, Workflow(), new DateOnly(2026, 1, 1), PermittedMortgageId.Generate(), StaffUser);
     }
 
     public class TheEstablishMethod
@@ -91,6 +92,8 @@ public class GroundLeaseTests
                 PurchaseWorkflowId = (PurchaseWorkflowId?)null,
                 CreatedBy = _testBed.StaffUser,
                 LeaseFeeTracking = LeaseFeeTracking.FromLeaseStart(new DateOnly(2025, 1, 1)),
+                MortgageDebtCap = MortgageDebtCap.Create(90),
+                PermittedMortgages = Array.Empty<PermittedMortgage>(),
             });
         }
 
@@ -122,7 +125,7 @@ public class GroundLeaseTests
         {
             var act = () => GroundLease.Establish(
                 _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, _testBed.Homeowner, new DateOnly(2025, 1, 1),
-                99, 60, LeaseFeeTerms.None, 200_000m, 250_000m, "Terms", ResalePolicyTerms.AppraisalBased(0.25m),
+                99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), 200_000m, 250_000m, "Terms", ResalePolicyTerms.AppraisalBased(0.25m),
                 HomeCommitments.Create(activeLeaseId, openPurchaseWorkflowId, openHomeSelectionId), _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
@@ -139,7 +142,7 @@ public class GroundLeaseTests
         {
             var act = () => GroundLease.Establish(
                 _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, _testBed.Homeowner, new DateOnly(2025, 1, 1),
-                termYears, optionWindowDays, LeaseFeeTerms.None, basePrice, originalAppraisedValue, covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser);
+                termYears, optionWindowDays, LeaseFeeTerms.None, MortgageDebtCap.Create(90), basePrice, originalAppraisedValue, covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }
@@ -282,6 +285,53 @@ public class GroundLeaseTests
             var created = _testBed.FromPurchase(template);
 
             EventReplay.Replay<GroundLease>(created).ResalePolicyTerms.Should().BeEquivalentTo(terms);
+        }
+
+        [Fact]
+        public void GivenFinancingCommitted_WhenCreated_ThenThePurchaseLoanIsTheFirstPermittedMortgage()
+        {
+            var template = _testBed.ActiveTemplate("Covenants", 99, ResalePolicyTerms.AppraisalBased(0.25m));
+            var workflow = _testBed.Workflow()
+                .Decide(w => w.RecordFinancingCommitted("First Community Bank", 180_000m, new DateOnly(2025, 11, 1), _testBed.StaffUser))
+                .Aggregate;
+            var mortgageId = PermittedMortgageId.Generate();
+
+            var created = GroundLease.CreateFromPurchase(
+                _testBed.LeaseId, template, workflow, new DateOnly(2026, 1, 1), mortgageId, _testBed.StaffUser);
+
+            EventReplay.Replay<GroundLease>(created).Should().BeEquivalentTo(new
+            {
+                MortgageDebtCap = MortgageDebtCap.Create(90),
+                PermittedMortgages = new[]
+                {
+                    new
+                    {
+                        Id = mortgageId,
+                        Lender = "First Community Bank",
+                        NoticeAddress = (string?)null,
+                        OriginalPrincipal = Money.Create(180_000m),
+                        PermittedOn = new DateOnly(2026, 1, 1),
+                        Source = MortgagePermissionSource.LeaseSigning,
+                        PaidOffOn = (DateOnly?)null,
+                    },
+                },
+            });
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GivenNoLoan_WhenCreated_ThenNoMortgageIsPermitted(bool zeroCommitment)
+        {
+            var template = _testBed.ActiveTemplate("Covenants", 99, ResalePolicyTerms.AppraisalBased(0.25m));
+            var workflow = zeroCommitment
+                ? _testBed.Workflow().Decide(w => w.RecordFinancingCommitted("Cash", 0m, new DateOnly(2025, 11, 1), _testBed.StaffUser)).Aggregate
+                : _testBed.Workflow();
+
+            var created = GroundLease.CreateFromPurchase(
+                _testBed.LeaseId, template, workflow, new DateOnly(2026, 1, 1), PermittedMortgageId.Generate(), _testBed.StaffUser);
+
+            EventReplay.Replay<GroundLease>(created).PermittedMortgages.Should().BeEmpty();
         }
 
         public static TheoryData<ResalePolicyTerms> TemplateTerms() => new()
@@ -571,7 +621,7 @@ public class GroundLeaseTests
         {
             var template = EventReplay.Replay<GroundLeaseTemplate>(GroundLeaseTemplate.Define(
                 GroundLeaseTemplateId.Generate(), "Template", 99, 45, "Covenants", ResalePolicyTerms.AppraisalBased(0.25m),
-                LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m), 12m, 20), _testBed.StaffUser));
+                LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m), 12m, 20), MortgageDebtCap.Create(90), _testBed.StaffUser));
 
             var sut = EventReplay.Replay<GroundLease>(_testBed.FromPurchase(template));
 
@@ -762,6 +812,179 @@ public class GroundLeaseTests
                 Amount = Money.Create(1.86m),
                 Reason = "Job loss",
             });
+        }
+    }
+
+    public class TheRecordPermittedMortgageMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        private static readonly DateOnly Today = new(2025, 6, 1);
+
+        [Theory]
+        [InlineData(" ", 150_000, "2025-03-01", "homeownership.ground_lease.record_permitted_mortgage.lender_required")]
+        [InlineData("Bank", 0, "2025-03-01", "homeownership.ground_lease.record_permitted_mortgage.principal_non_positive")]
+        [InlineData("Bank", 150_000, "2025-06-02", "homeownership.ground_lease.record_permitted_mortgage.permitted_on_in_future")]
+        [InlineData("Bank", 150_000, "2024-12-31", "homeownership.ground_lease.record_permitted_mortgage.permitted_on_before_lease_start")]
+        public void GivenInvalidMortgage_WhenRecorded_ThenThrowsBusinessRuleViolation(
+            string lender, int principal, string permittedOn, string expectedCode)
+        {
+            var sut = _testBed.Lease();
+
+            var act = () => sut.RecordPermittedMortgage(
+                PermittedMortgageId.Generate(), lender, null, Money.Create(principal),
+                DateOnly.Parse(permittedOn, CultureInfo.InvariantCulture), Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
+        }
+
+        [Fact]
+        public void GivenValidMortgage_WhenRecorded_ThenTheLeaseListsItAsRecordedWithTrimmedText()
+        {
+            var mortgageId = PermittedMortgageId.Generate();
+
+            var (sut, _) = _testBed.Lease().Decide(l => l.RecordPermittedMortgage(
+                mortgageId, "  Columbia Credit Union ", "  PO Box 12, Salem OR  ", Money.Create(150_000m),
+                TestBed.LeaseStart, Today, _testBed.StaffUser));
+
+            sut.PermittedMortgages.Should().ContainSingle().Which.Should().BeEquivalentTo(new
+            {
+                Id = mortgageId,
+                Lender = "Columbia Credit Union",
+                NoticeAddress = "PO Box 12, Salem OR",
+                OriginalPrincipal = Money.Create(150_000m),
+                PermittedOn = TestBed.LeaseStart,
+                Source = MortgagePermissionSource.Recorded,
+            });
+        }
+
+        [Fact]
+        public void GivenBlankNoticeAddress_WhenRecorded_ThenItHasNone()
+        {
+            var recorded = _testBed.Lease().RecordPermittedMortgage(
+                PermittedMortgageId.Generate(), "Bank", "  ", Money.Create(150_000m), TestBed.LeaseStart, Today, _testBed.StaffUser);
+
+            recorded.NoticeAddress.Should().BeNull();
+        }
+    }
+
+    public class TheEditPermittedMortgageMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        private readonly PermittedMortgageId _mortgageId = PermittedMortgageId.Generate();
+
+        private GroundLease LeaseWithMortgage() => _testBed.Lease()
+            .Decide(l => l.RecordPermittedMortgage(
+                _mortgageId, "Bank", null, Money.Create(150_000m), TestBed.LeaseStart, TestBed.LeaseStart, _testBed.StaffUser))
+            .Aggregate;
+
+        [Fact]
+        public void GivenNewLenderAndAddress_WhenEdited_ThenTheMortgageHasThem()
+        {
+            var (sut, _) = LeaseWithMortgage().Decide(l => l.EditPermittedMortgage(
+                _mortgageId, " Mr. Cooper ", "8950 Cypress Waters Blvd, Coppell TX", _testBed.StaffUser));
+
+            sut.PermittedMortgages.Should().ContainSingle().Which.Should().BeEquivalentTo(new
+            {
+                Lender = "Mr. Cooper",
+                NoticeAddress = "8950 Cypress Waters Blvd, Coppell TX",
+                OriginalPrincipal = Money.Create(150_000m),
+            });
+        }
+
+        [Fact]
+        public void GivenSameLenderAndAddress_WhenEdited_ThenNothingToDo()
+        {
+            var edited = LeaseWithMortgage().EditPermittedMortgage(_mortgageId, "Bank", " ", _testBed.StaffUser);
+
+            edited.Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenBlankLender_WhenEdited_ThenThrowsBusinessRuleViolation()
+        {
+            var act = () => LeaseWithMortgage().EditPermittedMortgage(_mortgageId, " ", null, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.edit_permitted_mortgage.lender_required");
+        }
+
+        [Fact]
+        public void GivenMortgageNotOnTheLease_WhenEdited_ThenThrowsBusinessRuleViolation()
+        {
+            var act = () => LeaseWithMortgage().EditPermittedMortgage(PermittedMortgageId.Generate(), "Bank", null, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.edit_permitted_mortgage.mortgage_not_found");
+        }
+
+        [Fact]
+        public void GivenPaidOffMortgage_WhenEdited_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = LeaseWithMortgage()
+                .Decide(l => l.MarkPermittedMortgagePaidOff(_mortgageId, new DateOnly(2025, 5, 1), new DateOnly(2025, 6, 1), _testBed.StaffUser))
+                .Aggregate;
+
+            var act = () => sut.EditPermittedMortgage(_mortgageId, "Other Bank", null, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.edit_permitted_mortgage.mortgage_paid_off");
+        }
+    }
+
+    public class TheMarkPermittedMortgagePaidOffMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        private readonly PermittedMortgageId _mortgageId = PermittedMortgageId.Generate();
+
+        private static readonly DateOnly PermittedOn = new(2025, 3, 1);
+
+        private static readonly DateOnly Today = new(2025, 6, 1);
+
+        private GroundLease LeaseWithMortgage() => _testBed.Lease()
+            .Decide(l => l.RecordPermittedMortgage(
+                _mortgageId, "Bank", null, Money.Create(150_000m), PermittedOn, Today, _testBed.StaffUser))
+            .Aggregate;
+
+        [Fact]
+        public void GivenCurrentMortgage_WhenMarkedPaidOff_ThenItKeepsTheDay()
+        {
+            var (sut, _) = LeaseWithMortgage().Decide(l => l.MarkPermittedMortgagePaidOff(_mortgageId, PermittedOn, Today, _testBed.StaffUser));
+
+            sut.PermittedMortgages.Should().ContainSingle().Which.Should().BeEquivalentTo(new { PaidOffOn = PermittedOn, IsPaidOff = true });
+        }
+
+        [Theory]
+        [InlineData("2025-06-02", "homeownership.ground_lease.mark_permitted_mortgage_paid_off.paid_off_on_in_future")]
+        [InlineData("2025-02-28", "homeownership.ground_lease.mark_permitted_mortgage_paid_off.paid_off_on_before_permitted")]
+        public void GivenInvalidDay_WhenMarkedPaidOff_ThenThrowsBusinessRuleViolation(string paidOffOn, string expectedCode)
+        {
+            var act = () => LeaseWithMortgage().MarkPermittedMortgagePaidOff(
+                _mortgageId, DateOnly.Parse(paidOffOn, CultureInfo.InvariantCulture), Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
+        }
+
+        [Fact]
+        public void GivenAlreadyPaidOff_WhenMarkedPaidOff_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = LeaseWithMortgage().Decide(l => l.MarkPermittedMortgagePaidOff(_mortgageId, Today, Today, _testBed.StaffUser)).Aggregate;
+
+            var act = () => sut.MarkPermittedMortgagePaidOff(_mortgageId, Today, Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.mark_permitted_mortgage_paid_off.already_paid_off");
+        }
+
+        [Fact]
+        public void GivenMortgageNotOnTheLease_WhenMarkedPaidOff_ThenThrowsBusinessRuleViolation()
+        {
+            var act = () => LeaseWithMortgage().MarkPermittedMortgagePaidOff(PermittedMortgageId.Generate(), Today, Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.mark_permitted_mortgage_paid_off.mortgage_not_found");
         }
     }
 

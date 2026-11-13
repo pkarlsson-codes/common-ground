@@ -74,7 +74,7 @@ public class PortfolioImportTests(ApiFactory factory)
     private static async Task<string> CreateTemplate(HttpClient client, string name)
     {
         var response = await client.PostAsJsonAsync("/api/ground-lease-templates",
-            new CreateGroundLeaseTemplateRequest(name, 99, 60, 45m, 15m, "Standard covenant", "AppraisalBased", 0.25m, null, null, null, null));
+            new CreateGroundLeaseTemplateRequest(name, 99, 60, 45m, 15m, "Standard covenant", "AppraisalBased", 0.25m, null, null, null, null, 90));
         response.EnsureSuccessStatusCode();
         return name;
     }
