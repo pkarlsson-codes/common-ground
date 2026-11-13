@@ -686,6 +686,13 @@ body {
   padding-top: 20px;
   border-top: 1px solid var(--border);
 }
+/* The page header's bottom border already divides the first section from it. */
+.page-header + .detail-section,
+.page-header + form > .detail-section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
 .detail-section__title {
   font-family: var(--font-display);
   font-size: 20px;
