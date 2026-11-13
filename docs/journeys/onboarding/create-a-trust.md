@@ -12,3 +12,6 @@
 10. On any other failure, a generic error message is shown ("Could not create trust. Please try again." or the server-provided message)
 11. On success, user's session is refreshed and they are taken into the app (landing on [Today](../today/work-through-today.md))
 12. A user who already belongs to a trust and opens Onboarding or Create Trust is redirected into the app
+
+Notes:
+- On a server with demo mode on, Onboarding offers "Try it with sample data" before "Create an empty trust", and every trust is deleted after a set number of days. See [Try the Demo](try-the-demo.md).
