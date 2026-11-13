@@ -15,8 +15,9 @@ public sealed class TrustsSeeder : IDevelopmentSeeder
     };
 
     /// <inheritdoc/>
-    public async Task SeedAsync(IDocumentStore store, CancellationToken cancellation)
+    public async Task SeedAsync(SeedRun run, IDocumentStore store, CancellationToken cancellation)
     {
+        ArgumentNullException.ThrowIfNull(run);
         ArgumentNullException.ThrowIfNull(store);
 
         var entries = await LoadEntriesAsync(cancellation).ConfigureAwait(false);
@@ -29,7 +30,7 @@ public sealed class TrustsSeeder : IDevelopmentSeeder
 
         foreach (var entry in entries)
         {
-            var lookupId = TrustSeedLookup.BuildId(entry.SeedKey);
+            var lookupId = TrustSeedLookup.BuildId(run, entry.SeedKey);
             var lookup = await session.LoadAsync<TrustSeedLookup>(lookupId, cancellation).ConfigureAwait(false);
             if (lookup is not null)
             {
@@ -46,6 +47,7 @@ public sealed class TrustsSeeder : IDevelopmentSeeder
             session.Store(new TrustSeedLookup
             {
                 Id = lookupId,
+                RunKey = run.Key,
                 SeedKey = entry.SeedKey,
                 TrustId = trustId.Value,
                 SeededAt = DateTimeOffset.UtcNow,

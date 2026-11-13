@@ -35,7 +35,7 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
     ];
 
     /// <inheritdoc/>
-    public async Task SeedAsync(IDocumentStore store, CancellationToken cancellation)
+    public async Task SeedAsync(SeedRun run, IDocumentStore store, CancellationToken cancellation)
     {
         ArgumentNullException.ThrowIfNull(store);
 
@@ -50,7 +50,7 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
         foreach (var entry in entries)
         {
             var trustLookup = await defaultSession
-                .LoadAsync<TrustSeedLookup>(TrustSeedLookup.BuildId(entry.TrustSeedKey), cancellation)
+                .LoadAsync<TrustSeedLookup>(TrustSeedLookup.BuildId(run, entry.TrustSeedKey), cancellation)
                 .ConfigureAwait(false)
                 ?? throw new InvalidOperationException(
                     $"Trust seed '{entry.TrustSeedKey}' not found for purchase workflow seed '{entry.SeedKey}'. Ensure TrustsSeeder runs first.");

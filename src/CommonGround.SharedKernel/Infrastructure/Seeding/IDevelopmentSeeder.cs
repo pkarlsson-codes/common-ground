@@ -13,8 +13,9 @@ namespace CommonGround.SharedKernel.Infrastructure.Seeding;
 public interface IDevelopmentSeeder
 {
     /// <summary>Seeds this seeder's data, skipping anything already seeded.</summary>
+    /// <param name="run">The seed run. Trusts are looked up in this run's namespace.</param>
     /// <param name="store">The document store.</param>
     /// <param name="cancellation">A cancellation token.</param>
     /// <returns>A task that completes when seeding has finished.</returns>
-    Task SeedAsync(IDocumentStore store, CancellationToken cancellation);
+    Task SeedAsync(SeedRun run, IDocumentStore store, CancellationToken cancellation);
 }

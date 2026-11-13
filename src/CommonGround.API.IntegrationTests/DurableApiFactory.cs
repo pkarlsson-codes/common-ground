@@ -1,4 +1,5 @@
 using CommonGround.API.IntegrationTests.Flows;
+using Marten;
 using Microsoft.Extensions.DependencyInjection;
 using Wolverine;
 
@@ -26,6 +27,15 @@ internal sealed class SoloDurabilityExtension : IWolverineExtension
 public class DurableApiFactory : ApiFactory
 {
     /// <inheritdoc />
-    protected override void ConfigureWolverine(IServiceCollection services) =>
+    protected override void ConfigureWolverine(IServiceCollection services)
+    {
         services.AddWolverineExtension<SoloDurabilityExtension>();
+
+        // Seed runs wait for the daemon after every seed entry; at the default 1 s polling a run takes minutes.
+        services.ConfigureMarten(opts =>
+        {
+            opts.Projections.SlowPollingTime = TimeSpan.FromMilliseconds(50);
+            opts.Projections.FastPollingTime = TimeSpan.FromMilliseconds(50);
+        });
+    }
 }

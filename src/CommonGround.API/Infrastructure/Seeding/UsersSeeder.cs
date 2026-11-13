@@ -17,9 +17,17 @@ public sealed class UsersSeeder : IDevelopmentSeeder
     };
 
     /// <inheritdoc/>
-    public async Task SeedAsync(IDocumentStore store, CancellationToken cancellation)
+    public async Task SeedAsync(SeedRun run, IDocumentStore store, CancellationToken cancellation)
     {
+        ArgumentNullException.ThrowIfNull(run);
         ArgumentNullException.ThrowIfNull(store);
+
+        // Users aren't in a trust's tenant: a second run would register the same Keycloak subjects again.
+        // A run's trust gets its users some other way.
+        if (!run.IsDevelopment)
+        {
+            return;
+        }
 
         var entries = await LoadEntriesAsync(cancellation).ConfigureAwait(false);
         if (entries.Count == 0)
@@ -33,7 +41,7 @@ public sealed class UsersSeeder : IDevelopmentSeeder
         foreach (var entry in entries)
         {
             var trustLookup = await session
-                .LoadAsync<TrustSeedLookup>(TrustSeedLookup.BuildId(entry.TrustSeedKey), cancellation)
+                .LoadAsync<TrustSeedLookup>(TrustSeedLookup.BuildId(run, entry.TrustSeedKey), cancellation)
                 .ConfigureAwait(false)
                 ?? throw new InvalidOperationException(
                     $"Trust seed '{entry.TrustSeedKey}' not found for user seed '{entry.SeedKey}'. Ensure TrustsSeeder runs first.");

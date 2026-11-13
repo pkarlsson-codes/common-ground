@@ -1,14 +1,10 @@
 using CommonGround.PropertyRegistry.Infrastructure.Seeding;
 using CommonGround.SharedKernel.Infrastructure.Seeding;
 using CommonGround.TrustManagement.Infrastructure.Seeding;
-using Marten;
 
 namespace CommonGround.API.Infrastructure.Seeding;
 
-/// <summary>
-/// Registers and runs the development seeders for <see cref="SeedCommand"/>, once the event subscription
-/// and Wolverine are running.
-/// </summary>
+/// <summary>Registers the development seeders and the <see cref="SeedRunner"/> that runs them.</summary>
 internal static class DevelopmentSeeder
 {
     /// <summary>
@@ -37,6 +33,7 @@ internal static class DevelopmentSeeder
     {
         services.AddSingleton<IPropagationProbe, MartenWolverinePropagationProbe>();
         services.AddSingleton<PropagationWaiter>(sp => new PropagationWaiter(sp.GetRequiredService<IPropagationProbe>()));
+        services.AddSingleton<SeedRunner>();
 
         services.AddTransient<IDevelopmentSeeder, TrustsSeeder>();
         services.AddTransient<IDevelopmentSeeder, LandParcelsSeeder>();
@@ -54,32 +51,5 @@ internal static class DevelopmentSeeder
         services.AddTransient<IDevelopmentSeeder, ResalesSeeder>();
         services.AddTransient<IDevelopmentSeeder, LeaseFeesSeeder>();
         return services;
-    }
-
-    /// <summary>Runs the registered <see cref="IDevelopmentSeeder"/>s in order.</summary>
-    /// <param name="services">The started host's services.</param>
-    /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>A task that completes when all development seeders have finished.</returns>
-    public static async Task SeedAsync(IServiceProvider services, CancellationToken cancellationToken)
-    {
-        using var scope = services.CreateScope();
-        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("CommonGround.DevelopmentSeeder");
-        var store = scope.ServiceProvider.GetRequiredService<IDocumentStore>();
-        var propagation = scope.ServiceProvider.GetRequiredService<PropagationWaiter>();
-
-        foreach (var seeder in scope.ServiceProvider.GetServices<IDevelopmentSeeder>())
-        {
-            if (logger.IsEnabled(LogLevel.Information))
-            {
-                logger.LogInformation("Running development seeder {SeederType}", seeder.GetType().Name);
-            }
-
-            await seeder.SeedAsync(store, cancellationToken).ConfigureAwait(false);
-
-            // The next seeder may build on this one's propagated records, or set the clock back.
-            await propagation.WaitForIdleAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        logger.LogInformation("Completed development seeders.");
     }
 }

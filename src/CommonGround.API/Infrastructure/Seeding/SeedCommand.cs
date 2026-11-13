@@ -1,3 +1,4 @@
+using CommonGround.SharedKernel.Infrastructure.Seeding;
 using Marten;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Http.Features;
@@ -17,7 +18,7 @@ internal static class SeedCommand
     public static bool IsRequested(string[] args) =>
         args.Length > 0 && string.Equals(args[0], "seed", StringComparison.OrdinalIgnoreCase);
 
-    /// <summary>Configures the host for seeding: no web server, the seeders, and fast daemon polling.</summary>
+    /// <summary>Configures the host for seeding: no web server and fast daemon polling.</summary>
     /// <param name="builder">The web application builder, after the API's services are added.</param>
     public static void Configure(WebApplicationBuilder builder)
     {
@@ -25,7 +26,6 @@ internal static class SeedCommand
 
         // Replaces Kestrel, so the command doesn't bind the API's port and can run while the API is up.
         builder.Services.AddSingleton<IServer, NoServer>();
-        builder.Services.AddDevelopmentSeeders();
 
         // The seeders wait for the daemon after every seed entry. The defaults (1 s slow, 250 ms fast)
         // make each wait about 1 s; at 50 ms a fresh seed takes about 12 s instead of 160 s.
@@ -53,7 +53,9 @@ internal static class SeedCommand
         await app.StartAsync().ConfigureAwait(false);
         try
         {
-            await DevelopmentSeeder.SeedAsync(app.Services, app.Lifetime.ApplicationStopping).ConfigureAwait(false);
+            await app.Services.GetRequiredService<SeedRunner>()
+                .RunAsync(SeedRun.Development, app.Lifetime.ApplicationStopping)
+                .ConfigureAwait(false);
             return 0;
         }
         catch (Exception ex) when (ex is not OperationCanceledException)

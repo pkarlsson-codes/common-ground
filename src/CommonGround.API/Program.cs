@@ -41,6 +41,9 @@ try
     builder.Services.AddCommonGroundServices(builder.Configuration, builder.Environment);
     builder.Services.AddWolverineHttp();
 
+    // The seed command runs the seeders; the API runs them to fill a new trust.
+    builder.Services.AddDevelopmentSeeders();
+
     var seeding = SeedCommand.IsRequested(args);
     if (seeding)
     {

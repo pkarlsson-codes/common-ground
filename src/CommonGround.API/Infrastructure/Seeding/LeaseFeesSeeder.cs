@@ -30,14 +30,14 @@ public sealed class LeaseFeesSeeder(ITrustClock trustClock) : IDevelopmentSeeder
     private static readonly UserId SeederUserId = UserId.Create("user-seeder-system");
 
     /// <inheritdoc/>
-    public async Task SeedAsync(IDocumentStore store, CancellationToken cancellation)
+    public async Task SeedAsync(SeedRun run, IDocumentStore store, CancellationToken cancellation)
     {
         ArgumentNullException.ThrowIfNull(store);
 
         var entries = await LoadEntriesAsync(cancellation).ConfigureAwait(false);
 
         using var defaultSession = store.LightweightSession();
-        var trusts = await defaultSession.Query<TrustSeedLookup>().ToListAsync(cancellation).ConfigureAwait(false);
+        var trusts = await defaultSession.Query<TrustSeedLookup>().Where(t => t.RunKey == run.Key).ToListAsync(cancellation).ConfigureAwait(false);
 
         foreach (var trust in trusts)
         {

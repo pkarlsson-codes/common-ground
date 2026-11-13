@@ -40,7 +40,7 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
         [HomeSelectionStatus.Open.DisplayName, HomeSelectionStatus.Completed.DisplayName];
 
     /// <inheritdoc/>
-    public async Task SeedAsync(IDocumentStore store, CancellationToken cancellation)
+    public async Task SeedAsync(SeedRun run, IDocumentStore store, CancellationToken cancellation)
     {
         ArgumentNullException.ThrowIfNull(store);
 
@@ -55,7 +55,7 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
         foreach (var entry in entries)
         {
             var trustLookup = await defaultSession
-                .LoadAsync<TrustSeedLookup>(TrustSeedLookup.BuildId(entry.TrustSeedKey), cancellation)
+                .LoadAsync<TrustSeedLookup>(TrustSeedLookup.BuildId(run, entry.TrustSeedKey), cancellation)
                 .ConfigureAwait(false)
                 ?? throw new InvalidOperationException(
                     $"Trust seed '{entry.TrustSeedKey}' not found for home selection seed '{entry.SeedKey}'. Ensure TrustsSeeder runs first.");
