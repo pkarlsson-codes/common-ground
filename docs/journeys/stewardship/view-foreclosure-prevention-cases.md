@@ -2,7 +2,7 @@
 
 1. User navigates to Stewardship
 2. User clicks the Foreclosure Prevention tab
-3. Table lists every unresolved (Opened or Active) case, newest first: Homeowner, Address, Status, Trigger, Delinquency (latest recorded servicer delinquency, e.g. "First National · 3 mo"), Open interventions (unresolved counseling referrals plus unresolved forbearance requests), Opened
+3. Table lists every unresolved (Opened or Active) case, newest first: Homeowner, Address, Status, Trigger, Delinquency (latest recorded servicer delinquency, e.g. "First National · 3 mo"; for a case opened from a lease default with no servicer delinquency recorded, the lease fees still to pay when it opened, e.g. "Lease fees · $450.00"), Open interventions (unresolved counseling referrals plus unresolved forbearance requests), Opened
 4. User optionally types in the search box to filter by homeowner name or address
 5. User optionally pages through results (20 per page)
 6. If no cases exist, empty state shows "No foreclosure prevention cases" / "No open or active cases."; if the search matches nothing, "No matching foreclosure prevention cases"

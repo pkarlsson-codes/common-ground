@@ -7,4 +7,6 @@
 5. User clicks "Open Case" (disabled until Ground Lease, Servicer Name, and Delinquent Months are filled)
 6. Toast: "Foreclosure prevention case opened"
 7. Panel closes, new case appears at the top of the Foreclosure Prevention table with status Opened and its delinquency in the Delinquency column
-8. If the API rejects the request, its error is shown above the form and the panel stays open
+8. If the API rejects the request, its error is shown above the form and the panel stays open. A lease that already has an unresolved case is refused: "This lease already has an open foreclosure prevention case."
+
+A case for unpaid lease fees is opened from the lease instead: [Open Foreclosure Prevention Case from a Lease Default](../ground-leases/open-foreclosure-prevention-case-from-default.md)
