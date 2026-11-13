@@ -186,10 +186,15 @@ test('the trust policy page saves the letter sign-off and refuses a second notic
   }
 })
 
-test('a lease 60 days behind gets a notice of default sent by certified mail, whose cure period ends when it is paid', async ({ page }) => {
+test('a lease 60 days behind gets a notice of default sent by certified mail, copied to its lenders, whose cure period ends when it is paid', async ({ page }) => {
   await page.goto('/')
   const homeowner = `Default Owner ${uniqueId()}`
   const leaseId = await createLease(page, homeowner, firstOfMonth(3))
+  for (const [lender, noticeAddress] of [['Columbia Bank', 'PO Box 12\nSalem OR 97301'], ['Repair Fund', null]])
+    await post(page, `/api/v1/ground-leases/${leaseId}/permitted-mortgages`,
+      { lender, noticeAddress, originalPrincipal: 150000, permittedOn: firstOfMonth(3) })
+  await expect.poll(async () =>
+    (await get<{ mortgages?: { permitted?: unknown[] } }>(page, `/api/v1/ground-leases/${leaseId}`)).mortgages?.permitted?.length).toBe(2)
   const cureBy = new Date(`${isoDate(30)}T00:00:00Z`)
     .toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })
 
@@ -200,10 +205,17 @@ test('a lease 60 days behind gets a notice of default sent by certified mail, wh
   const popupPromise = page.waitForEvent('popup')
   await section.getByRole('button', { name: 'Print Letter' }).click()
   const letters = await popupPromise
-  const letter = letters.getByRole('article', { name: `Notice to ${homeowner}` })
+  const letter = letters.getByRole('article', { name: `Notice to ${homeowner}`, exact: true })
   await expect(letter).toContainText('Notice of default: lease fee unpaid')
   await expect(letter).toContainText(`To cure the default, you must pay the $240.00 owed within 30 days of the date of this notice, by ${cureBy}.`)
   await expect(letter).toContainText('If you pay at least two-thirds of this amount ($160.00)')
+  await expect(letters.getByText('1 letter, 2 lender copies')).toBeVisible()
+  await expect(letters.getByText('1 lender copy has no notice address on file')).toBeVisible()
+  const bankCopy = letters.getByRole('article', { name: `Copy to Columbia Bank of notice to ${homeowner}` })
+  await expect(bankCopy).toContainText('Salem OR 97301')
+  await expect(bankCopy).toContainText('Notice of default: lease fee unpaid')
+  await expect(letters.getByRole('article', { name: `Copy to Repair Fund of notice to ${homeowner}` }))
+    .toContainText('Notice address not on file')
   await letters.close()
 
   await section.getByRole('button', { name: 'Record Notice' }).click()
@@ -214,6 +226,9 @@ test('a lease 60 days behind gets a notice of default sent by certified mail, wh
   await record.getByRole('button', { name: 'Record Notice' }).click()
   await expectToast(page, 'Notice recorded')
   await expect(record).toBeHidden()
+
+  await expect(section.getByRole('table', { name: 'Lease fee notices' }).locator('tbody tr').first())
+    .toContainText('Columbia Bank, Repair Fund')
 
   const cure = section.getByRole('status', { name: 'Notice of default' })
   await expect(cure).toContainText(`for $240.00. Cure by ${cureBy}: $240.00 still to pay.`)

@@ -169,10 +169,18 @@ public class LeaseFeesTests(ApiFactory factory)
     {
         var client = factory.CreateClient().WithAuthToken();
         var today = (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Today;
-        var leaseId = await CreateLease(client, UniqueName(), leaseStart: new DateOnly(today.Year, today.Month, 1).AddMonths(-3));
+        var leaseStart = new DateOnly(today.Year, today.Month, 1).AddMonths(-3);
+        var leaseId = await CreateLease(client, UniqueName(), leaseStart: leaseStart);
+        (await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/permitted-mortgages",
+            new RecordPermittedMortgageRequest("Columbia Bank", "PO Box 12", 180_000m, leaseStart))).EnsureSuccessStatusCode();
 
         var due = await client.GetFromJsonAsync<LeaseFeeNoticesDueResponse>($"/api/lease-fee-notices/due?groundLeaseId={leaseId}");
-        due!.Should().BeEquivalentTo(new { CureDays = 30, CureExtensionDays = 30, Notices = new[] { new { NoticeDue = "Default" } } });
+        due!.Should().BeEquivalentTo(new
+        {
+            CureDays = 30,
+            CureExtensionDays = 30,
+            Notices = new[] { new { NoticeDue = "Default", Mortgagees = new[] { new MortgageeCopyDto("Columbia Bank", "PO Box 12") } } },
+        });
 
         var refused = await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/lease-fee-notices",
             new RecordLeaseFeeNoticeRequest("Default", today, "FirstClassMail"));
@@ -187,7 +195,10 @@ public class LeaseFeesTests(ApiFactory factory)
         lease!.LeaseFees.Should().BeEquivalentTo(new
         {
             NoticeDue = (string?)null,
-            Notices = new[] { new { Level = "Default", CureDays = 30, CureExtensionDays = 30 } },
+            Notices = new[]
+            {
+                new { Level = "Default", CureDays = 30, CureExtensionDays = 30, CopiedTo = new[] { new MortgageeCopyDto("Columbia Bank", "PO Box 12") } },
+            },
             DefaultCure = new { SentOn = today, AmountOwed = 240m, CureBy = today.AddDays(30), Status = "Curing", StillToPay = 240m },
         });
 

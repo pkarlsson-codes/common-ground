@@ -125,6 +125,7 @@ models/MarkOccupancyVerificationOverdueRequest.ts
 models/MarkPermittedMortgagePaidOffRequest.ts
 models/MortgagePrequalificationDto.ts
 models/MortgageRequestResponse.ts
+models/MortgageeCopyDto.ts
 models/MortgagesDto.ts
 models/OccupancyVerificationResponse.ts
 models/OpenForeclosurePreventionCaseForLeaseDefaultRequest.ts

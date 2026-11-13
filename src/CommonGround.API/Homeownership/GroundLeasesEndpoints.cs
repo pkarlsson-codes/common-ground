@@ -183,7 +183,8 @@ public static class GroundLeasesEndpoints
                         n.RecordedBy,
                         n.RecordedAt,
                         n.CureDays,
-                        n.CureExtensionDays))
+                        n.CureExtensionDays,
+                        n.CopiedTo?.Select(c => new MortgageeCopyDto(c.Lender, c.NoticeAddress)).ToList().AsReadOnly()))
                     .ToList()
                     .AsReadOnly(),
                 view.LeaseFeeInterestWaivers

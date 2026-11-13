@@ -21,6 +21,13 @@ import {
     CalendarDateToJSON,
     CalendarDateToJSONTyped,
 } from './CalendarDate';
+import type { MortgageeCopyDto } from './MortgageeCopyDto';
+import {
+    MortgageeCopyDtoFromJSON,
+    MortgageeCopyDtoFromJSONTyped,
+    MortgageeCopyDtoToJSON,
+    MortgageeCopyDtoToJSONTyped,
+} from './MortgageeCopyDto';
 
 /**
  * A late lease fee notice the trust sent.
@@ -88,6 +95,12 @@ export interface LeaseFeeNoticeDto {
      * @memberof LeaseFeeNoticeDto
      */
     cureExtensionDays?: number | null;
+    /**
+     * The permitted mortgagees a notice of default was copied to; null for other notices.
+     * @type {Array<MortgageeCopyDto>}
+     * @memberof LeaseFeeNoticeDto
+     */
+    copiedTo?: Array<MortgageeCopyDto> | null;
 }
 
 /**
@@ -117,6 +130,7 @@ export function LeaseFeeNoticeDtoFromJSONTyped(json: any, ignoreDiscriminator: b
         'recordedAt': json['recordedAt'] == null ? undefined : (new Date(json['recordedAt'])),
         'cureDays': json['cureDays'] == null ? undefined : json['cureDays'],
         'cureExtensionDays': json['cureExtensionDays'] == null ? undefined : json['cureExtensionDays'],
+        'copiedTo': json['copiedTo'] == null ? undefined : ((json['copiedTo'] as Array<any>).map(MortgageeCopyDtoFromJSON)),
     };
 }
 
@@ -141,6 +155,7 @@ export function LeaseFeeNoticeDtoToJSONTyped(value?: LeaseFeeNoticeDto | null, i
         'recordedAt': value['recordedAt'] == null ? undefined : ((value['recordedAt']).toISOString()),
         'cureDays': value['cureDays'],
         'cureExtensionDays': value['cureExtensionDays'],
+        'copiedTo': value['copiedTo'] == null ? undefined : ((value['copiedTo'] as Array<any>).map(MortgageeCopyDtoToJSON)),
     };
 }
 

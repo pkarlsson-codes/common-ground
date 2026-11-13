@@ -66,6 +66,10 @@ public sealed class PermittedMortgage : Entity<PermittedMortgageId>
     /// <summary>Gets whether it is paid off.</summary>
     public bool IsPaidOff => PaidOffOn is not null;
 
+    /// <summary>Gets whether it was permitted and not yet paid off on a day.</summary>
+    /// <param name="day">The day to check.</param>
+    public bool IsCurrentOn(DateOnly day) => PermittedOn <= day && (PaidOffOn is not { } paidOff || paidOff > day);
+
     /// <summary>Changes the lender and notice address. Called only from the lease's Apply.</summary>
     internal void ChangeLender(string lender, string? noticeAddress)
     {

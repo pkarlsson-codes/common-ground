@@ -21,6 +21,13 @@ import {
     CalendarDateToJSON,
     CalendarDateToJSONTyped,
 } from './CalendarDate';
+import type { MortgageeCopyDto } from './MortgageeCopyDto';
+import {
+    MortgageeCopyDtoFromJSON,
+    MortgageeCopyDtoFromJSONTyped,
+    MortgageeCopyDtoToJSON,
+    MortgageeCopyDtoToJSONTyped,
+} from './MortgageeCopyDto';
 import type { DefaultCureDto } from './DefaultCureDto';
 import {
     DefaultCureDtoFromJSON,
@@ -143,6 +150,12 @@ export interface LeaseFeeBalanceResponse {
      * @memberof LeaseFeeBalanceResponse
      */
     defaultCure?: DefaultCureDto | null;
+    /**
+     * The lease's current permitted mortgagees, who get a copy of a notice of default.
+     * @type {Array<MortgageeCopyDto>}
+     * @memberof LeaseFeeBalanceResponse
+     */
+    mortgagees?: Array<MortgageeCopyDto>;
 }
 
 /**
@@ -180,6 +193,7 @@ export function LeaseFeeBalanceResponseFromJSONTyped(json: any, ignoreDiscrimina
         'interestAccruing': json['interestAccruing'] == null ? undefined : json['interestAccruing'],
         'interestWaivedIfPaidBy': json['interestWaivedIfPaidBy'] == null ? undefined : CalendarDateFromJSON(json['interestWaivedIfPaidBy']),
         'defaultCure': json['defaultCure'] == null ? undefined : DefaultCureDtoFromJSON(json['defaultCure']),
+        'mortgagees': json['mortgagees'] == null ? undefined : ((json['mortgagees'] as Array<any>).map(MortgageeCopyDtoFromJSON)),
     };
 }
 
@@ -212,6 +226,7 @@ export function LeaseFeeBalanceResponseToJSONTyped(value?: LeaseFeeBalanceRespon
         'interestAccruing': value['interestAccruing'],
         'interestWaivedIfPaidBy': CalendarDateToJSON(value['interestWaivedIfPaidBy']),
         'defaultCure': DefaultCureDtoToJSON(value['defaultCure']),
+        'mortgagees': value['mortgagees'] == null ? undefined : ((value['mortgagees'] as Array<any>).map(MortgageeCopyDtoToJSON)),
     };
 }
 

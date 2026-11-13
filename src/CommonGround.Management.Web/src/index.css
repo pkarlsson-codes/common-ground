@@ -1326,6 +1326,21 @@ body {
   margin-bottom: 1em;
 }
 
+.notice-letter__copy {
+  margin-bottom: 2em;
+  padding-bottom: 1em;
+  border-bottom: 1px solid var(--ink);
+}
+
+.notice-letter__copy .notice-letter__heading {
+  margin-top: 0;
+}
+
+.notice-letter .notice-letter__missing {
+  color: var(--red);
+  font-weight: bold;
+}
+
 @media print {
   @page {
     size: letter;

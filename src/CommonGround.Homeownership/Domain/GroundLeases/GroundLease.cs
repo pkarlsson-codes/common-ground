@@ -387,8 +387,9 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// Records a late notice the trust sent, keeping the balance and oldest unpaid month on the day it was sent.
     /// Refused for a sent date in the future or before the lease started, or when nothing was owed that day. A
     /// notice can be recorded before it falls due, and on an ended lease. A notice of default also keeps the trust's
-    /// cure period, and is refused unless delivered as the notice clause requires (Art 14.2), or while an earlier
-    /// notice of default's cure period is still running.
+    /// cure period and the permitted mortgagees it was copied to (those current on the sent date), and is refused unless
+    /// delivered as the notice clause requires (Art 14.2), or while an earlier notice of default's cure period is still
+    /// running.
     /// </summary>
     public LeaseFeeNoticeRecorded RecordLeaseFeeNotice(
         LeaseFeeNoticeId noticeId,
@@ -427,7 +428,10 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
 
         return new LeaseFeeNoticeRecorded(
             Id.Value, noticeId.Value, level, sentOn, delivery, statement.Balance, oldestUnpaid, recordedBy.Value,
-            curePeriod.CureDays, curePeriod.ExtensionDays);
+            curePeriod.CureDays, curePeriod.ExtensionDays,
+            [.. _permittedMortgages
+                .Where(m => m.IsCurrentOn(sentOn))
+                .Select(m => new MortgageeCopy(m.Id.Value, m.Lender, m.NoticeAddress))]);
     }
 
     /// <summary>

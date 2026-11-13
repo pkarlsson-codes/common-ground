@@ -107,6 +107,7 @@ public sealed record LeaseFeeInterestWaiverDto(
 /// <param name="RecordedAt">When it was recorded.</param>
 /// <param name="CureDays">A notice of default's cure days; null for other notices.</param>
 /// <param name="CureExtensionDays">A notice of default's extension days; null for other notices.</param>
+/// <param name="CopiedTo">The permitted mortgagees a notice of default was copied to; null for other notices.</param>
 public sealed record LeaseFeeNoticeDto(
     string NoticeId,
     string Level,
@@ -117,7 +118,13 @@ public sealed record LeaseFeeNoticeDto(
     string RecordedBy,
     DateTimeOffset RecordedAt,
     int? CureDays,
-    int? CureExtensionDays);
+    int? CureExtensionDays,
+    IReadOnlyList<MortgageeCopyDto>? CopiedTo);
+
+/// <summary>A permitted mortgagee who gets, or got, a copy of a notice of default.</summary>
+/// <param name="Lender">The lender or servicer.</param>
+/// <param name="NoticeAddress">Where the copy goes; null when none is on file.</param>
+public sealed record MortgageeCopyDto(string Lender, string? NoticeAddress);
 
 /// <summary>What a lease owes as of a day.</summary>
 /// <param name="AsOf">The day it is worked out for.</param>

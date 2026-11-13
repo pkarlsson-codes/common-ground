@@ -1,10 +1,44 @@
-import { useEffect, useRef } from 'react'
+import { Fragment, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useLeaseFeeNoticesDue } from '../../hooks/groundLeases'
-import { leaseFeeLetter } from '../ground-leases/leaseFeeLetter'
+import { leaseFeeLetter, type LeaseFeeLetter } from '../ground-leases/leaseFeeLetter'
+
+/** Who a lender copy goes to. */
+interface LetterCopy {
+  lender: string
+  noticeAddress?: string | null
+}
+
+/** One printed letter; a lender copy starts with "Copy to {lender}" and the notice address, or a red warning. */
+function NoticeLetter({ letter, copy, label }: { letter: LeaseFeeLetter; copy?: LetterCopy; label: string }) {
+  return (
+    <article className="notice-letter" aria-label={label}>
+      {copy && (
+        <div className="notice-letter__copy">
+          <div className="notice-letter__heading">Copy to {copy.lender}</div>
+          {copy.noticeAddress
+            ? <div className="notice-letter__lines">{copy.noticeAddress.split('\n').map(line => <div key={line}>{line}</div>)}</div>
+            : <p className="notice-letter__missing">Notice address not on file</p>}
+        </div>
+      )}
+      <p>{letter.date}</p>
+      <div className="notice-letter__lines">
+        {letter.recipient.map(line => <div key={line}>{line}</div>)}
+      </div>
+      <div className="notice-letter__heading">{letter.heading}</div>
+      <p>{letter.greeting}</p>
+      {letter.paragraphs.map(text => <p key={text}>{text}</p>)}
+      <p>Sincerely,</p>
+      <div className="notice-letter__lines">
+        {letter.signOff.map(line => <div key={line}>{line}</div>)}
+      </div>
+    </article>
+  )
+}
 
 /**
- * Every late notice due, one letter per printed page, or one lease's with ?lease=. Opens the print dialog once the
+ * Every late notice due, one letter per printed page, or one lease's with ?lease=. A notice of default is followed by
+ * one copy per current permitted mortgagee (Exhibit: Permitted Mortgages, B.6). Opens the print dialog once the
  * letters have loaded. Outside the app's layout, so only the letters print.
  */
 export default function LeaseFeeNoticesPrintPage() {
@@ -14,6 +48,9 @@ export default function LeaseFeeNoticesPrintPage() {
   const printed = useRef(false)
   const notices = data?.notices ?? []
   const today = data?.today
+  const lenderCopies = notices.flatMap(n => (n.noticeDue === 'Default' ? n.mortgagees ?? [] : []))
+  const copies = lenderCopies.length
+  const noAddress = lenderCopies.filter(m => !m.noticeAddress).length
 
   useEffect(() => {
     if (printed.current || notices.length === 0) return
@@ -25,7 +62,17 @@ export default function LeaseFeeNoticesPrintPage() {
     <div>
       <div className="letters-toolbar">
         <h1 className="page-header__title" style={{ fontSize: 20 }}>Lease Fee Notices</h1>
-        {data && <span className="page-header__count">{notices.length === 1 ? '1 letter' : `${notices.length} letters`}</span>}
+        {data && (
+          <span className="page-header__count">
+            {notices.length === 1 ? '1 letter' : `${notices.length} letters`}
+            {copies > 0 && (copies === 1 ? ', 1 lender copy' : `, ${copies} lender copies`)}
+          </span>
+        )}
+        {noAddress > 0 && (
+          <span style={{ color: 'var(--red)' }}>
+            {noAddress === 1 ? '1 lender copy has' : `${noAddress} lender copies have`} no notice address on file
+          </span>
+        )}
         <button type="button" className="btn btn-primary" onClick={() => window.print()} disabled={notices.length === 0}>
           Print
         </button>
@@ -50,20 +97,20 @@ export default function LeaseFeeNoticesPrintPage() {
             cureDays: data?.cureDays ?? 30,
             extensionDays: data?.cureExtensionDays ?? 30,
           })
+          const name = n.homeownerFullName ?? 'homeowner'
+          const copiesOfThis = n.noticeDue === 'Default' ? n.mortgagees ?? [] : []
           return (
-            <article key={n.groundLeaseId} className="notice-letter" aria-label={`Notice to ${n.homeownerFullName ?? 'homeowner'}`}>
-              <p>{letter.date}</p>
-              <div className="notice-letter__lines">
-                {letter.recipient.map(line => <div key={line}>{line}</div>)}
-              </div>
-              <div className="notice-letter__heading">{letter.heading}</div>
-              <p>{letter.greeting}</p>
-              {letter.paragraphs.map(text => <p key={text}>{text}</p>)}
-              <p>Sincerely,</p>
-              <div className="notice-letter__lines">
-                {letter.signOff.map(line => <div key={line}>{line}</div>)}
-              </div>
-            </article>
+            <Fragment key={n.groundLeaseId}>
+              <NoticeLetter letter={letter} label={`Notice to ${name}`} />
+              {copiesOfThis.map((m, i) => (
+                <NoticeLetter
+                  key={`${m.lender}-${i}`}
+                  letter={letter}
+                  copy={{ lender: m.lender ?? 'Lender', noticeAddress: m.noticeAddress }}
+                  label={`Copy to ${m.lender ?? 'lender'} of notice to ${name}`}
+                />
+              ))}
+            </Fragment>
           )
         })}
       </div>

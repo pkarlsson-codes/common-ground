@@ -19,6 +19,7 @@ namespace CommonGround.API.Contracts.Homeownership.Responses;
 /// <param name="InterestAccruing">Interest running on fees still within the waiver days; not in the balance.</param>
 /// <param name="InterestWaivedIfPaidBy">The last day the oldest unpaid fee can be paid without interest, if that is still ahead.</param>
 /// <param name="DefaultCure">Where the lease's last notice of default stands, or null if none was sent.</param>
+/// <param name="Mortgagees">The lease's current permitted mortgagees, who get a copy of a notice of default.</param>
 public sealed record LeaseFeeBalanceResponse(
     string GroundLeaseId,
     string HomeId,
@@ -37,7 +38,8 @@ public sealed record LeaseFeeBalanceResponse(
     decimal InterestDue,
     decimal InterestAccruing,
     DateOnly? InterestWaivedIfPaidBy,
-    DefaultCureDto? DefaultCure);
+    DefaultCureDto? DefaultCure,
+    IReadOnlyList<MortgageeCopyDto> Mortgagees);
 
 /// <summary>Where a notice of default stands as of the trust's today (Art 12.1).</summary>
 /// <param name="SentOn">The day the notice was sent.</param>

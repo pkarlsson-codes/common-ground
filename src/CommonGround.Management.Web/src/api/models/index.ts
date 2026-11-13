@@ -105,6 +105,7 @@ export * from './MarkOccupancyVerificationOverdueRequest';
 export * from './MarkPermittedMortgagePaidOffRequest';
 export * from './MortgagePrequalificationDto';
 export * from './MortgageRequestResponse';
+export * from './MortgageeCopyDto';
 export * from './MortgagesDto';
 export * from './OccupancyVerificationResponse';
 export * from './OpenForeclosurePreventionCaseForLeaseDefaultRequest';

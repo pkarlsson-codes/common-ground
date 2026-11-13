@@ -183,11 +183,27 @@ public class LeaseFeeNoticeEntry
     /// <summary>Gets or sets a notice of default's extension days; null for other notices.</summary>
     public int? CureExtensionDays { get; set; }
 
+    /// <summary>Gets or sets the permitted mortgagees a notice of default was copied to; null for other notices.</summary>
+    public List<MortgageeCopyEntry>? CopiedTo { get; set; }
+
     /// <summary>Gets or sets the user who recorded it.</summary>
     public string RecordedBy { get; set; } = string.Empty;
 
     /// <summary>Gets or sets when it was recorded.</summary>
     public DateTimeOffset RecordedAt { get; set; }
+}
+
+/// <summary>A permitted mortgagee sent a copy of a notice of default, in a ground lease view.</summary>
+public class MortgageeCopyEntry
+{
+    /// <summary>Gets or sets the permitted mortgage ID.</summary>
+    public string MortgageId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the lender or servicer.</summary>
+    public string Lender { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets where the copy went; null when none was on file.</summary>
+    public string? NoticeAddress { get; set; }
 }
 
 /// <summary>A lease fee payment in a ground lease view.</summary>

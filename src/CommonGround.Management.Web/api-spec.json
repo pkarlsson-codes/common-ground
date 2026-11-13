@@ -10518,6 +10518,30 @@
             "description": "A notice of default's extension days; null for other notices.",
             "format": "int32",
             "nullable": true
+          },
+          "copiedTo": {
+            "type": "array",
+            "description": "The permitted mortgagees a notice of default was copied to; null for other notices.",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/MortgageeCopyDto"
+            }
+          }
+        }
+      },
+      "MortgageeCopyDto": {
+        "type": "object",
+        "description": "A permitted mortgagee who gets, or got, a copy of a notice of default.",
+        "additionalProperties": false,
+        "properties": {
+          "lender": {
+            "type": "string",
+            "description": "The lender or servicer."
+          },
+          "noticeAddress": {
+            "type": "string",
+            "description": "Where the copy goes; null when none is on file.",
+            "nullable": true
           }
         }
       },
@@ -10998,6 +11022,13 @@
                 "$ref": "#/components/schemas/DefaultCureDto"
               }
             ]
+          },
+          "mortgagees": {
+            "type": "array",
+            "description": "The lease's current permitted mortgagees, who get a copy of a notice of default.",
+            "items": {
+              "$ref": "#/components/schemas/MortgageeCopyDto"
+            }
           }
         }
       },

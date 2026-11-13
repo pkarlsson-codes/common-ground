@@ -767,6 +767,38 @@ public class GroundLeaseTests
         }
 
         [Fact]
+        public void GivenPermittedMortgages_WhenRecorded_ThenCopiesTheOnesCurrentOnTheSentDate()
+        {
+            var current = PermittedMortgageId.Generate();
+            var paidOff = PermittedMortgageId.Generate();
+            var sentOn = new DateOnly(2025, 3, 3);
+            var sut = _testBed.Lease()
+                .Decide(l => l.RecordPermittedMortgage(
+                    current, "Columbia Credit Union", "PO Box 12, Salem OR", Money.Create(150_000m), TestBed.LeaseStart, Today, _testBed.StaffUser))
+                .Aggregate
+                .Decide(l => l.RecordPermittedMortgage(
+                    paidOff, "Old Bank", null, Money.Create(20_000m), TestBed.LeaseStart, Today, _testBed.StaffUser))
+                .Aggregate
+                .Decide(l => l.MarkPermittedMortgagePaidOff(paidOff, sentOn, Today, _testBed.StaffUser))
+                .Aggregate
+                .Decide(l => l.RecordPermittedMortgage(
+                    PermittedMortgageId.Generate(), "Later Bank", null, Money.Create(10_000m), Today, Today, _testBed.StaffUser))
+                .Aggregate;
+
+            var recorded = Default(sut, sentOn, NoticeDelivery.CertifiedMail);
+
+            recorded.CopiedTo.Should().BeEquivalentTo([new MortgageeCopy(current.Value, "Columbia Credit Union", "PO Box 12, Salem OR")]);
+        }
+
+        [Fact]
+        public void GivenNoPermittedMortgages_WhenRecorded_ThenCopiedToNobody()
+        {
+            var recorded = Default(_testBed.Lease(), Today, NoticeDelivery.CertifiedMail);
+
+            recorded.CopiedTo.Should().BeEmpty();
+        }
+
+        [Fact]
         public void GivenLateNotice_WhenRecorded_ThenItHasNoCurePeriod()
         {
             var (noticed, _) = _testBed.Lease().Decide(l => l.RecordLeaseFeeNotice(

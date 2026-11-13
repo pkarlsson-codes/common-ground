@@ -273,6 +273,7 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
                     <th>Notice</th>
                     <th>Delivery</th>
                     <th>Balance Then</th>
+                    <th>Copied To</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -286,6 +287,11 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
                         {n.oldestUnpaidDueDate && (
                           <span style={{ color: 'var(--text-dim)' }}> since {formatDueMonth(n.oldestUnpaidDueDate)}</span>
                         )}
+                      </td>
+                      <td>
+                        {n.copiedTo == null
+                          ? <span style={{ color: 'var(--text-dim)' }}>—</span>
+                          : n.copiedTo.length === 0 ? 'None' : n.copiedTo.map(c => c.lender).join(', ')}
                       </td>
                     </tr>
                   ))}

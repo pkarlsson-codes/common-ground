@@ -3,6 +3,7 @@ using CommonGround.API.Contracts.Homeownership.Responses;
 using CommonGround.API.Infrastructure.Auth;
 using CommonGround.Homeownership.Application.Commands;
 using CommonGround.Homeownership.Application.Queries;
+using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.SharedKernel.Domain;
@@ -276,5 +277,9 @@ public static class LeaseFeesEndpoints
             b.Statement.InterestDue.Amount,
             b.Statement.InterestAccruing.Amount,
             b.Statement.InterestWaivedIfPaidBy,
-            ToResponse(b.DefaultCure));
+            ToResponse(b.DefaultCure),
+            CurrentMortgagees(b.Lease));
+
+    private static List<MortgageeCopyDto> CurrentMortgagees(GroundLeaseView lease) =>
+        [.. lease.PermittedMortgages.Where(m => m.PaidOffOn is null).Select(m => new MortgageeCopyDto(m.Lender, m.NoticeAddress))];
 }

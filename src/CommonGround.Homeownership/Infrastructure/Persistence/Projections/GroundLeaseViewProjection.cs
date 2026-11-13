@@ -129,6 +129,9 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             OldestUnpaidDueDate = e.OldestUnpaidDueDate,
             CureDays = e.CureDays,
             CureExtensionDays = e.CureExtensionDays,
+            CopiedTo = e.CopiedTo?
+                .Select(c => new MortgageeCopyEntry { MortgageId = c.MortgageId, Lender = c.Lender, NoticeAddress = c.NoticeAddress })
+                .ToList(),
             RecordedBy = e.RecordedBy,
             RecordedAt = e.OccurredAt,
         });
