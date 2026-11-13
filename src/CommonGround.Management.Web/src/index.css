@@ -296,6 +296,24 @@ body {
   flex-direction: column;
 }
 
+/* Demo servers only: sample data warning above every page. */
+.demo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 40px;
+  background: var(--warning-surface);
+  color: var(--warning);
+  font-size: 13px;
+}
+.demo-banner__feedback {
+  flex-shrink: 0;
+  color: var(--warning);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 .page {
   flex: 1;
   padding: 36px 40px;

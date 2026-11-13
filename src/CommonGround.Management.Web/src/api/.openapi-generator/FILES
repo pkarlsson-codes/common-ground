@@ -1,5 +1,6 @@
 .openapi-generator-ignore
 apis/AuthApi.ts
+apis/DemoApi.ts
 apis/DevelopmentProjectsApi.ts
 apis/DocumentsApi.ts
 apis/GroundLeaseTemplatesApi.ts
@@ -49,6 +50,7 @@ models/CurePeriodActivationResponse.ts
 models/CureViolationRequest.ts
 models/CurrentUserDto.ts
 models/DefaultCureDto.ts
+models/DemoResponse.ts
 models/DenyApplicationRequest.ts
 models/DenyMortgageRequestRequest.ts
 models/DevelopmentProjectListItemResponse.ts

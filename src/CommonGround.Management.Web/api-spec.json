@@ -13,6 +13,44 @@
     }
   ],
   "paths": {
+    "/api/v1/demo": {
+      "get": {
+        "tags": [
+          "Demo"
+        ],
+        "operationId": "GetDemo",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/development-projects": {
       "get": {
         "tags": [
@@ -9439,6 +9477,51 @@
   },
   "components": {
     "schemas": {
+      "DemoResponse": {
+        "type": "object",
+        "description": "What the demo banner shows for the current trust.",
+        "additionalProperties": false,
+        "properties": {
+          "deletesOn": {
+            "type": "string",
+            "description": "The date the trust is deleted, in the trust's time zone.",
+            "format": "date"
+          },
+          "feedbackUrl": {
+            "type": "string",
+            "description": "Where \"Send feedback\" goes: a mailto: link or a form's web address."
+          }
+        }
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "PaginatedResponseOfDevelopmentProjectListItemResponse": {
         "type": "object",
         "description": "Generic paginated response wrapper for API endpoints.",
@@ -9512,35 +9595,6 @@
           "projectType": {
             "type": "string",
             "description": "The project type: NewConstruction or Rehabilitation."
-          }
-        }
-      },
-      "ProblemDetails": {
-        "type": "object",
-        "additionalProperties": {
-          "nullable": true
-        },
-        "properties": {
-          "type": {
-            "type": "string",
-            "nullable": true
-          },
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "detail": {
-            "type": "string",
-            "nullable": true
-          },
-          "instance": {
-            "type": "string",
-            "nullable": true
           }
         }
       },

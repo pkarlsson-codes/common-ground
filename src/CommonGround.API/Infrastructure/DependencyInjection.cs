@@ -1,4 +1,5 @@
 using System.Text;
+using CommonGround.API.Demo;
 using CommonGround.API.Infrastructure.ExceptionHandling;
 using CommonGround.Documents.Infrastructure;
 using CommonGround.Documents.Infrastructure.Persistence;
@@ -49,6 +50,7 @@ internal static class CommonGroundServiceCollectionExtensions
         services.AddTrustManagement();
         services.AddStewardship();
         services.AddDocuments(configuration, environment);
+        services.AddDemo(configuration);
         return services;
     }
 

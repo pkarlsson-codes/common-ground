@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export * from './AuthApi';
+export * from './DemoApi';
 export * from './DevelopmentProjectsApi';
 export * from './DocumentsApi';
 export * from './GroundLeaseTemplatesApi';

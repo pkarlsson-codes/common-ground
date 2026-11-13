@@ -5,6 +5,7 @@ import { useToday } from '../hooks/today'
 import { useNavPreferences } from '../hooks/useNavPreferences'
 import { FOCUSES, NAV_ITEMS, isFocus, splitWork, type Focus, type NavItem } from '../lib/navigation'
 import { countForFocus, countsByPage } from '../lib/today'
+import DemoBanner from './DemoBanner'
 
 // The count is left out of the link's accessible name, so the link keeps its label's name.
 function NavItemLink({ item, count }: { item: Pick<NavItem, 'to' | 'icon' | 'label'>; count?: number }) {
@@ -102,6 +103,7 @@ export default function Layout() {
         <div className="sidebar-footer">Property Registry · v0.1</div>
       </aside>
       <main className="main-content">
+        <DemoBanner />
         <Outlet context={{ focus } satisfies LayoutContext} />
       </main>
     </div>

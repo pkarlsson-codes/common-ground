@@ -29,6 +29,7 @@ export * from './CurePeriodActivationResponse';
 export * from './CureViolationRequest';
 export * from './CurrentUserDto';
 export * from './DefaultCureDto';
+export * from './DemoResponse';
 export * from './DenyApplicationRequest';
 export * from './DenyMortgageRequestRequest';
 export * from './DevelopmentProjectListItemResponse';

@@ -68,6 +68,9 @@ internal static class CorePlatformClientExtensions
         services.AddApiClient<ITrustsApiClient, TrustsApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
+        services.AddApiClient<IDemoApiClient, DemoApiClient>(corePlatformUri)
+            .AddHttpMessageHandler<InternalGatewayAuthHandler>();
+
         services.AddApiClient<IStewardshipApiClient, StewardshipApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 

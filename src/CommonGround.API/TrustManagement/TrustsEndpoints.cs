@@ -1,13 +1,17 @@
 using CommonGround.API.Contracts.TrustManagement.Requests;
 using CommonGround.API.Contracts.TrustManagement.Responses;
+using CommonGround.API.Demo;
 using CommonGround.API.Infrastructure.Auth;
 using CommonGround.Identity.Application.Commands;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Domain.Services;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.TrustManagement.Application.Commands;
 using CommonGround.TrustManagement.Application.Queries;
 using CommonGround.TrustManagement.Domain.Trusts;
+using Marten;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
 using Wolverine;
 using Wolverine.Http;
 
@@ -37,6 +41,9 @@ public static class TrustsEndpoints
         CreateTrustRequest request,
         HttpContext httpContext,
         IMessageBus bus,
+        IOptions<DemoOptions> demoOptions,
+        IDocumentStore store,
+        ILogger<DemoSandbox> logger,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -50,6 +57,23 @@ public static class TrustsEndpoints
         var correlationId = httpContext.GetCorrelationId() ?? httpContext.TraceIdentifier;
 
         var trustId = TrustId.Generate();
+
+        // On a demo server every trust is a sandbox. Its record is stored first, so a trust never exists
+        // without a delete date.
+        var demo = demoOptions.Value;
+        if (demo.Enabled)
+        {
+            var sandbox = DemoSandbox.Start(trustId.Value, userId.Value, TimeProviderContext.Current.UtcNow, demo.SandboxDays, DemoSandboxStatus.Ready);
+            var session = store.LightweightSession();
+            await using var sessionDisposal = session.ConfigureAwait(false);
+            session.Store(sandbox);
+            await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Demo sandbox {TrustId} created empty by {UserId}, deleted after {DeletesAt}", sandbox.Id, sandbox.OwnerUserId, sandbox.DeletesAt);
+            }
+        }
+
         await bus.InvokeAsync(
             new CreateTrust(trustId, request.Name, request.TimeZone, userId, correlationId),
             cancellationToken).ConfigureAwait(false);
