@@ -1,8 +1,9 @@
 import PageEyebrow from '../../components/PageEyebrow'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import StewardshipCasesTab from './StewardshipCasesTab'
-import ForeclosurePreventionTab from './ForeclosurePreventionTab'
+import ForeclosurePreventionTab, { type OpenCaseRequest } from './ForeclosurePreventionTab'
 import LeaseFeesTab from './LeaseFeesTab'
 
 type TabId = 'leases' | 'fpc' | 'fees'
@@ -63,11 +64,27 @@ function TabBar({
 }
 
 export default function StewardshipPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<TabId>('leases')
+  const [fpcRequest, setFpcRequest] = useState<OpenCaseRequest | null>(null)
+
+  // Another page opens a foreclosure prevention case here with navigate('/stewardship', { state: { openFpcId } }).
+  // Each navigation has its own location key, so following the same link twice opens the case twice.
+  const requestedFpcId = (location.state as { openFpcId?: string } | null)?.openFpcId
+  if (requestedFpcId && fpcRequest?.key !== location.key) {
+    setActiveTab('fpc')
+    setFpcRequest({ id: requestedFpcId, key: location.key })
+  }
+
+  useEffect(() => {
+    if (!requestedFpcId) return
+    navigate({ pathname: location.pathname, search: location.search, hash: location.hash }, { replace: true, state: null })
+  }, [requestedFpcId, location, navigate])
 
   const tabContent: Record<TabId, ReactNode> = {
     leases: <StewardshipCasesTab />,
-    fpc: <ForeclosurePreventionTab />,
+    fpc: <ForeclosurePreventionTab openRequest={fpcRequest} />,
     fees: <LeaseFeesTab />,
   }
 

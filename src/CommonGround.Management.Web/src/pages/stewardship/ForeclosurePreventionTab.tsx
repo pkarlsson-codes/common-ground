@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { ForeclosurePreventionCaseResponse } from '../../api/models/ForeclosurePreventionCaseResponse'
 import { useForeclosurePreventionQueue } from '../../hooks/stewardship'
 import { statusLabel } from '../../hooks/types'
+import { formatPrice } from '../../lib/currency'
 import StatusBadge from '../../components/StatusBadge'
 import Pagination from '../../components/Pagination'
 import StewardshipFpcDetailPanel from '../../components/stewardship/StewardshipFpcDetailPanel'
@@ -11,10 +12,14 @@ const PAGE_SIZE = 20
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-/** The most recently recorded servicer delinquency, e.g. "First National · 3 mo". */
+/**
+ * The most recently recorded servicer delinquency, e.g. "First National · 3 mo". Without one, for a case opened
+ * from a lease default, the lease fees still to pay when it opened, e.g. "Lease fees · $450.00".
+ */
 function delinquencySummary(fpc: ForeclosurePreventionCaseResponse): string | null {
   const latest = (fpc.servicerDelinquencies ?? []).at(-1)
-  return latest ? `${latest.servicerName} · ${latest.delinquentMonths} mo` : null
+  if (latest) return `${latest.servicerName} · ${latest.delinquentMonths} mo`
+  return fpc.leaseFeeArrears ? `Lease fees · ${formatPrice(fpc.leaseFeeArrears.stillToPay ?? 0)}` : null
 }
 
 function openInterventionCount(fpc: ForeclosurePreventionCaseResponse): number {
@@ -39,13 +44,27 @@ interface SelectedCase {
 
 // ── Main component ───────────────────────────────────────────────────────────
 
-export default function ForeclosurePreventionTab() {
+/** A case another page asked to open, e.g. a lease's "View Case" link. `key` is the navigation's location key. */
+export interface OpenCaseRequest {
+  id: string
+  key: string
+}
+
+export default function ForeclosurePreventionTab({ openRequest = null }: { openRequest?: OpenCaseRequest | null }) {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<SelectedCase | null>(null)
   const [openingNewCase, setOpeningNewCase] = useState(false)
 
   const { data: queue, isLoading, isError } = useForeclosurePreventionQueue()
+
+  // Open the requested case once the queue has loaded, so the panel has the homeowner and address.
+  const [handledRequestKey, setHandledRequestKey] = useState<string | null>(null)
+  if (openRequest && queue && openRequest.key !== handledRequestKey) {
+    const item = queue.find(i => i.foreclosurePreventionCase?.id === openRequest.id)
+    setHandledRequestKey(openRequest.key)
+    setSelected({ id: openRequest.id, homeownerFullName: item?.homeownerFullName ?? null, address: item?.address ?? null })
+  }
 
   const filtered = useMemo(() => {
     const items = queue ?? []

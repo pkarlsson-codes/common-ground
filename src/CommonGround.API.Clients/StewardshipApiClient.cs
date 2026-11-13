@@ -141,6 +141,14 @@ public sealed class StewardshipApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task<OpenForeclosurePreventionCaseResponse> OpenForeclosurePreventionCaseForLeaseDefaultAsync(OpenForeclosurePreventionCaseForLeaseDefaultRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return await PostAsync<OpenForeclosurePreventionCaseForLeaseDefaultRequest, OpenForeclosurePreventionCaseResponse>(
+            "api/stewardship/foreclosure-prevention/lease-default", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task<ForeclosurePreventionCaseResponse> GetForeclosurePreventionCaseAsync(string caseId, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(caseId);

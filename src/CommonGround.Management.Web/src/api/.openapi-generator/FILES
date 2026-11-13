@@ -107,6 +107,7 @@ models/IssueViolationNoticeRequest.ts
 models/LandParcelListItemResponse.ts
 models/LandParcelResponse.ts
 models/LeaseExecutionDetailsDto.ts
+models/LeaseFeeArrearsResponse.ts
 models/LeaseFeeBalanceResponse.ts
 models/LeaseFeeInterestWaiverDto.ts
 models/LeaseFeeNoticeDto.ts
@@ -120,6 +121,7 @@ models/MakeCounselingReferralRequest.ts
 models/MarkOccupancyVerificationOverdueRequest.ts
 models/MortgagePrequalificationDto.ts
 models/OccupancyVerificationResponse.ts
+models/OpenForeclosurePreventionCaseForLeaseDefaultRequest.ts
 models/OpenForeclosurePreventionCaseRequest.ts
 models/OpenForeclosurePreventionCaseResponse.ts
 models/PaginatedResponseOfDevelopmentProjectListItemResponse.ts

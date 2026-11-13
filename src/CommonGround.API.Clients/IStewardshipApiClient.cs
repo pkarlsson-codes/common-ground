@@ -129,6 +129,12 @@ public interface IStewardshipApiClient
     /// <returns>The response containing the new case ID.</returns>
     Task<OpenForeclosurePreventionCaseResponse> OpenForeclosurePreventionCaseAsync(OpenForeclosurePreventionCaseRequest request, CancellationToken cancellationToken);
 
+    /// <summary>Opens a foreclosure prevention case for a lease whose notice of default is unpaid.</summary>
+    /// <param name="request">The ground lease the case is for.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response containing the new case ID.</returns>
+    Task<OpenForeclosurePreventionCaseResponse> OpenForeclosurePreventionCaseForLeaseDefaultAsync(OpenForeclosurePreventionCaseForLeaseDefaultRequest request, CancellationToken cancellationToken);
+
     /// <summary>Gets a foreclosure prevention case by its ID.</summary>
     /// <param name="caseId">The ID of the foreclosure prevention case.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>

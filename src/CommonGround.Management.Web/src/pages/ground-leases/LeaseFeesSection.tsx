@@ -1,7 +1,11 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { DefaultCureDto, GroundLeaseResponse, LeaseFeePaymentDto } from '../../api'
 import { NOTICE_DELIVERY_LABELS, NOTICE_LEVEL_LABELS, PAYMENT_METHOD_LABELS } from '../../hooks/groundLeases'
-import { formatCalendarDate, type CalendarDate } from '../../lib/calendarDate'
+import { useOpenForeclosurePreventionCaseForLeaseDefault, useUnresolvedForeclosurePreventionCase } from '../../hooks/stewardship'
+import { useToast } from '../../hooks/useToast'
+import { formatCalendarDate, longDate as longDateFormat, type CalendarDate } from '../../lib/calendarDate'
+import { getErrorMessage } from '../../lib/getErrorMessage'
 import { formatPrice } from '../../lib/currency'
 import { formatBalance, formatDaysOverdue, formatDueMonth } from './leaseFeeFormat'
 import { lateInterestText } from './lateInterest'
@@ -12,10 +16,20 @@ import VoidLeaseFeePaymentPanel from './VoidLeaseFeePaymentPanel'
 import WaiveLeaseFeeInterestPanel from './WaiveLeaseFeeInterestPanel'
 import CorrectLeaseFeeTrackingPanel from './CorrectLeaseFeeTrackingPanel'
 
-const longDate = (d?: CalendarDate | null) => (d ? formatCalendarDate(d, { year: 'numeric', month: 'long', day: 'numeric' }) : '—')
+const longDate = (d?: CalendarDate | null) => (d ? formatCalendarDate(d, longDateFormat) : '—')
 
-/** Where the lease's last notice of default stands (Art 12.1): the cure deadline, what is left to pay, or how it ended. */
-function DefaultCureStatus({ cure }: { cure: DefaultCureDto }) {
+/**
+ * Where the lease's last notice of default stands (Art 12.1): the cure deadline, what is left to pay, or how it ended.
+ * While it is unpaid, staff can open a foreclosure prevention case from it; once the lease has an unresolved case,
+ * the box links to it instead.
+ */
+function DefaultCureStatus({ cure, groundLeaseId }: { cure: DefaultCureDto; groundLeaseId: string }) {
+  const navigate = useNavigate()
+  const { success } = useToast()
+  const [openError, setOpenError] = useState<string | null>(null)
+  const { data: openCase, isLoading: caseLoading } = useUnresolvedForeclosurePreventionCase(groundLeaseId)
+  const openCaseMutation = useOpenForeclosurePreventionCaseForLeaseDefault()
+
   const sent = longDate(cure.sentOn)
   const owed = formatPrice(cure.amountOwed ?? 0)
   const left = formatPrice(cure.stillToPay ?? 0)
@@ -31,6 +45,16 @@ function DefaultCureStatus({ cure }: { cure: DefaultCureDto }) {
   }[cure.status ?? ''] ?? ''
   const active = cure.status === 'Curing' || uncured
 
+  const openPreventionCase = async () => {
+    setOpenError(null)
+    try {
+      await openCaseMutation.mutateAsync(groundLeaseId)
+      success('Foreclosure prevention case opened')
+    } catch (err) {
+      setOpenError(await getErrorMessage(err, 'Could not open the foreclosure prevention case.'))
+    }
+  }
+
   return (
     <div
       role="status"
@@ -42,6 +66,30 @@ function DefaultCureStatus({ cure }: { cure: DefaultCureDto }) {
       }}
     >
       {text}
+      {openCase ? (
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginTop: 8, color: 'var(--text-primary)' }}>
+          Foreclosure prevention case open since {longDate(openCase.openedDate)}.
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => navigate('/stewardship', { state: { openFpcId: openCase.id } })}
+          >
+            View Case
+          </button>
+        </div>
+      ) : active && !caseLoading && (
+        <div style={{ marginTop: 8 }}>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            disabled={openCaseMutation.isPending}
+            onClick={openPreventionCase}
+          >
+            {openCaseMutation.isPending ? 'Opening…' : 'Open Prevention Case'}
+          </button>
+        </div>
+      )}
+      {openError && <div role="alert" style={{ marginTop: 8, color: 'var(--red)' }}>{openError}</div>}
     </div>
   )
 }
@@ -132,7 +180,7 @@ export default function LeaseFeesSection({ lease }: { lease: GroundLeaseResponse
             </p>
           )}
 
-          {fees.defaultCure && <DefaultCureStatus cure={fees.defaultCure} />}
+          {fees.defaultCure && <DefaultCureStatus cure={fees.defaultCure} groundLeaseId={lease.id!} />}
 
           {noticeDue && (
             <div

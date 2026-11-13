@@ -52,6 +52,18 @@ export function useForeclosurePreventionCase(caseId: string | null) {
   })
 }
 
+/** The lease's unresolved foreclosure prevention case, or null. A lease has at most one. */
+export function useUnresolvedForeclosurePreventionCase(groundLeaseId: string | null) {
+  return useQuery({
+    queryKey: [...STEWARDSHIP_KEY, 'fpc', 'lease', groundLeaseId],
+    queryFn: async () => {
+      const page = await api.getForeclosurePreventionCases({ groundLeaseId: groundLeaseId!, pageSize: 100 })
+      return (page.items ?? []).find(c => c.status !== 'Resolved') ?? null
+    },
+    enabled: !!groundLeaseId,
+  })
+}
+
 // ── Occupancy verification mutations ─────────────────────────────────────────
 
 export function useInitiateOccupancyVerification() {
@@ -243,6 +255,14 @@ export function useOpenForeclosurePreventionCase() {
   }) =>
     api.openForeclosurePreventionCase({
       openForeclosurePreventionCaseRequest: { ...body, recordedDate: body.recordedDate },
+    }))
+}
+
+/** Opens a case for the lease's unpaid notice of default; the API takes the figures from the fee ledger. */
+export function useOpenForeclosurePreventionCaseForLeaseDefault() {
+  return useStewardshipMutation((groundLeaseId: string) =>
+    api.openForeclosurePreventionCaseForLeaseDefault({
+      openForeclosurePreventionCaseForLeaseDefaultRequest: { groundLeaseId },
     }))
 }
 

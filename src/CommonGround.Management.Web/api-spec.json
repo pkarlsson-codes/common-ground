@@ -7467,6 +7467,67 @@
         }
       }
     },
+    "/api/v1/stewardship/foreclosure-prevention/lease-default": {
+      "post": {
+        "tags": [
+          "Stewardship"
+        ],
+        "operationId": "OpenForeclosurePreventionCaseForLeaseDefault",
+        "requestBody": {
+          "x-name": "OpenForeclosurePreventionCaseForLeaseDefaultRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenForeclosurePreventionCaseForLeaseDefaultRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "202": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenForeclosurePreventionCaseResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/stewardship/foreclosure-prevention/{caseId}": {
       "get": {
         "tags": [
@@ -14289,6 +14350,14 @@
             "format": "date",
             "nullable": true
           },
+          "leaseFeeArrears": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LeaseFeeArrearsResponse"
+              }
+            ]
+          },
           "servicerDelinquencies": {
             "type": "array",
             "items": {
@@ -14312,6 +14381,33 @@
             "items": {
               "$ref": "#/components/schemas/CurePeriodActivationResponse"
             }
+          }
+        }
+      },
+      "LeaseFeeArrearsResponse": {
+        "type": "object",
+        "description": "The unpaid notice of default a case opened from a lease default was opened for.",
+        "additionalProperties": false,
+        "properties": {
+          "noticeSentOn": {
+            "type": "string",
+            "description": "The day the notice of default was sent.",
+            "format": "date"
+          },
+          "amountOwed": {
+            "type": "number",
+            "description": "What the notice said was owed.",
+            "format": "decimal"
+          },
+          "cureBy": {
+            "type": "string",
+            "description": "The last day to pay the amount owed, after any extension.",
+            "format": "date"
+          },
+          "stillToPay": {
+            "type": "number",
+            "description": "What was still to pay of the amount owed when the case opened.",
+            "format": "decimal"
           }
         }
       },
@@ -14486,6 +14582,17 @@
           "recordedDate": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "OpenForeclosurePreventionCaseForLeaseDefaultRequest": {
+        "type": "object",
+        "description": "Request to open a foreclosure prevention case for a lease whose notice of default is unpaid. The case takes\ntoday's date and the notice's figures from the lease's fee ledger.",
+        "additionalProperties": false,
+        "properties": {
+          "groundLeaseId": {
+            "type": "string",
+            "description": "The lease the case is for."
           }
         }
       },

@@ -8,7 +8,7 @@ import {
   useActivateCurePeriod,
   useResolveForeclosurePreventionCase,
 } from '../../hooks/stewardship'
-import type { ForeclosurePreventionCaseResponse } from '../../api/models'
+import type { ForeclosurePreventionCaseResponse, LeaseFeeArrearsResponse } from '../../api/models'
 import { useToast } from '../../hooks/useToast'
 import { getErrorMessage } from '../../lib/getErrorMessage'
 import {
@@ -17,7 +17,8 @@ import {
   FORECLOSURE_PREVENTION_OUTCOME_LABELS,
   statusLabel,
 } from '../../hooks/types'
-import { trustToday } from '../../lib/calendarDate'
+import { formatCalendarDate, longDate, trustToday, type CalendarDate } from '../../lib/calendarDate'
+import { formatPrice } from '../../lib/currency'
 import { DateInput } from '../DateInput'
 
 interface Props {
@@ -33,6 +34,13 @@ const itemStyle = {
 } as const
 
 const sectionTitleStyle = { fontSize: 12, fontWeight: 600, marginBottom: 8 } as const
+
+/** The unpaid notice of default the case was opened for, with what was still to pay when it opened. */
+function leaseFeeArrearsText(a: LeaseFeeArrearsResponse) {
+  const date = (d?: CalendarDate) => (d ? formatCalendarDate(d, longDate) : '—')
+  return `Notice of default sent ${date(a.noticeSentOn)} for ${formatPrice(a.amountOwed ?? 0)}. `
+    + `Cure by ${date(a.cureBy)}. ${formatPrice(a.stillToPay ?? 0)} still to pay when the case opened.`
+}
 
 export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
   const caseId = fpc.id!
@@ -136,6 +144,15 @@ export default function ForeclosurePreventionCaseCard({ fpc }: Props) {
         {fpc.resolvedDate && ` · Resolved ${fpc.resolvedDate}`}
         {fpc.outcome && ` · ${FORECLOSURE_PREVENTION_OUTCOME_LABELS[fpc.outcome] ?? fpc.outcome}`}
       </div>
+
+      {fpc.leaseFeeArrears && (
+        <div style={{ marginBottom: 12 }}>
+          <div style={sectionTitleStyle}>Lease Fee Arrears</div>
+          <div style={itemStyle} aria-label="Lease fee arrears">
+            {leaseFeeArrearsText(fpc.leaseFeeArrears)}
+          </div>
+        </div>
+      )}
 
       {/* Delinquencies */}
       <div style={{ marginBottom: 12 }}>

@@ -30,6 +30,7 @@ import type {
   IssueViolationNoticeRequest,
   MakeCounselingReferralRequest,
   MarkOccupancyVerificationOverdueRequest,
+  OpenForeclosurePreventionCaseForLeaseDefaultRequest,
   OpenForeclosurePreventionCaseRequest,
   OpenForeclosurePreventionCaseResponse,
   PaginatedResponseOfForeclosurePreventionCaseResponse,
@@ -75,6 +76,8 @@ import {
     MakeCounselingReferralRequestToJSON,
     MarkOccupancyVerificationOverdueRequestFromJSON,
     MarkOccupancyVerificationOverdueRequestToJSON,
+    OpenForeclosurePreventionCaseForLeaseDefaultRequestFromJSON,
+    OpenForeclosurePreventionCaseForLeaseDefaultRequestToJSON,
     OpenForeclosurePreventionCaseRequestFromJSON,
     OpenForeclosurePreventionCaseRequestToJSON,
     OpenForeclosurePreventionCaseResponseFromJSON,
@@ -196,6 +199,10 @@ export interface MarkOccupancyVerificationOverdueOperationRequest {
 
 export interface OpenForeclosurePreventionCaseOperationRequest {
     openForeclosurePreventionCaseRequest: OpenForeclosurePreventionCaseRequest;
+}
+
+export interface OpenForeclosurePreventionCaseForLeaseDefaultOperationRequest {
+    openForeclosurePreventionCaseForLeaseDefaultRequest: OpenForeclosurePreventionCaseForLeaseDefaultRequest;
 }
 
 export interface RecordCounselingOutcomeOperationRequest {
@@ -516,6 +523,19 @@ export interface StewardshipApiInterface {
     /**
      */
     openForeclosurePreventionCase(requestParameters: OpenForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {OpenForeclosurePreventionCaseForLeaseDefaultRequest} openForeclosurePreventionCaseForLeaseDefaultRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StewardshipApiInterface
+     */
+    openForeclosurePreventionCaseForLeaseDefaultRaw(requestParameters: OpenForeclosurePreventionCaseForLeaseDefaultOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    openForeclosurePreventionCaseForLeaseDefault(requestParameters: OpenForeclosurePreventionCaseForLeaseDefaultOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
     /**
      * 
@@ -1556,6 +1576,43 @@ export class StewardshipApi extends runtime.BaseAPI implements StewardshipApiInt
      */
     async openForeclosurePreventionCase(requestParameters: OpenForeclosurePreventionCaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.openForeclosurePreventionCaseRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async openForeclosurePreventionCaseForLeaseDefaultRaw(requestParameters: OpenForeclosurePreventionCaseForLeaseDefaultOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['openForeclosurePreventionCaseForLeaseDefaultRequest'] == null) {
+            throw new runtime.RequiredError(
+                'openForeclosurePreventionCaseForLeaseDefaultRequest',
+                'Required parameter "openForeclosurePreventionCaseForLeaseDefaultRequest" was null or undefined when calling openForeclosurePreventionCaseForLeaseDefault().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/stewardship/foreclosure-prevention/lease-default`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: OpenForeclosurePreventionCaseForLeaseDefaultRequestToJSON(requestParameters['openForeclosurePreventionCaseForLeaseDefaultRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async openForeclosurePreventionCaseForLeaseDefault(requestParameters: OpenForeclosurePreventionCaseForLeaseDefaultOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.openForeclosurePreventionCaseForLeaseDefaultRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

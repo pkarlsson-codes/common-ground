@@ -68,8 +68,9 @@ export const setTrustTimeZone = (timeZone: string | undefined) => {
 export const trustToday = (offsetDays = 0): CalendarDate => addDays(todayIn(trustTimeZone ?? browserTimeZone()), offsetDays)
 
 export const numericDate: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'numeric', day: 'numeric' }
+export const longDate: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' }
 
-/** "Oct 28, 2026" by default; "10/28/2026" with numericDate. */
+/** "Oct 28, 2026" by default; "10/28/2026" with numericDate; "October 28, 2026" with longDate. */
 export const formatCalendarDate = (
   date: CalendarDate,
   options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' },

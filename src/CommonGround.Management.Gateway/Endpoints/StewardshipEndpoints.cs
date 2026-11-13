@@ -297,6 +297,18 @@ public static class StewardshipEndpoints
         return Results.Accepted($"/api/v1/stewardship/foreclosure-prevention/{result.Id}", result);
     }
 
+    [WolverinePost("/api/v1/stewardship/foreclosure-prevention/lease-default")]
+    [ProducesResponseType<OpenForeclosurePreventionCaseResponse>(StatusCodes.Status202Accepted)]
+    public static async Task<IResult> OpenForeclosurePreventionCaseForLeaseDefault(
+        OpenForeclosurePreventionCaseForLeaseDefaultRequest request,
+        IStewardshipApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        var result = await client.OpenForeclosurePreventionCaseForLeaseDefaultAsync(request, cancellationToken).ConfigureAwait(false);
+        return Results.Accepted($"/api/v1/stewardship/foreclosure-prevention/{result.Id}", result);
+    }
+
     [WolverineGet("/api/v1/stewardship/foreclosure-prevention/{caseId}")]
     [ProducesResponseType<ForeclosurePreventionCaseResponse>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetForeclosurePreventionCase(

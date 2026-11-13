@@ -3,7 +3,8 @@ import { createHome, createLandParcel, get, post, put } from '../support/api'
 import { expectToast, field, isoDate, panel, uniqueId } from '../support/ui'
 
 // Journeys: docs/journeys/ground-leases/record-lease-fee-notice, docs/journeys/stewardship/send-lease-fee-notices,
-//   docs/journeys/trust-policy/set-lease-fee-notice-policy, docs/journeys/today/work-through-today (Stewardship)
+//   docs/journeys/trust-policy/set-lease-fee-notice-policy, docs/journeys/today/work-through-today (Stewardship),
+//   docs/journeys/ground-leases/open-foreclosure-prevention-case-from-default
 
 /** The 1st of the month `monthsBack` months before the trust's today, as YYYY-MM-DD. */
 const firstOfMonth = (monthsBack: number) => {
@@ -238,4 +239,61 @@ test('a notice of default not cured by its deadline shows on Today and the lease
 
   await openLease(page, homeowner)
   await expect(leaseFees(page).getByRole('status', { name: 'Notice of default' })).toContainText('not cured by')
+})
+
+/** A lease three months behind whose notice of default, sent 35 days ago by hand, wasn't cured by its deadline. */
+async function createLeaseWithUncuredDefault(page: Page, homeowner: string) {
+  const leaseId = await createLease(page, homeowner, firstOfMonth(3))
+  await post(page, `/api/v1/ground-leases/${leaseId}/lease-fee-notices`,
+    { level: 'Default', sentOn: isoDate(-35), delivery: 'HandDelivered' })
+  return leaseId
+}
+
+test('an uncured notice of default opens a foreclosure prevention case in one click, which takes it off Today', async ({ page }) => {
+  await page.goto('/')
+  const homeowner = `Arrears Owner ${uniqueId()}`
+  await createLeaseWithUncuredDefault(page, homeowner)
+
+  await openLease(page, homeowner)
+  const box = leaseFees(page).getByRole('status', { name: 'Notice of default' })
+  await box.getByRole('button', { name: 'Open Prevention Case' }).click()
+  await expectToast(page, 'Foreclosure prevention case opened')
+  await expect(box).toContainText('Foreclosure prevention case open since')
+  await expect(box.getByRole('button', { name: 'Open Prevention Case' })).toHaveCount(0)
+
+  await box.getByRole('button', { name: 'View Case' }).click()
+  await expect(page).toHaveURL(/\/stewardship$/)
+  const detail = panel(page, homeowner)
+  await expect(detail).toContainText('Lease Fee Arrears · Opened')
+  const arrears = detail.getByLabel('Lease fee arrears')
+  await expect(arrears).toContainText(`Notice of default sent `)
+  await expect(arrears).toContainText(' still to pay when the case opened.')
+  await page.keyboard.press('Escape')
+  await expect(detail).toBeHidden()
+
+  await page.getByRole('searchbox', { name: 'Search foreclosure prevention cases' }).fill(homeowner)
+  const row = page.locator('tbody tr')
+  await expect(row).toHaveCount(1)
+  await expect(row).toContainText('Lease Fee Arrears')
+  await expect(row).toContainText(/Lease fees · \$\d/)
+
+  const todayLoaded = page.waitForResponse(r => r.url().includes('/api/v1/today') && r.ok())
+  await page.goto('/')
+  await todayLoaded
+  await expect(page.locator('tbody tr', { hasText: homeowner })).toHaveCount(0)
+})
+
+test('opening a prevention case for a lease that got one meanwhile shows the refusal in the notice of default box', async ({ page }) => {
+  await page.goto('/')
+  const homeowner = `Raced Owner ${uniqueId()}`
+  const leaseId = await createLeaseWithUncuredDefault(page, homeowner)
+
+  await openLease(page, homeowner)
+  const box = leaseFees(page).getByRole('status', { name: 'Notice of default' })
+  const open = box.getByRole('button', { name: 'Open Prevention Case' })
+  await expect(open).toBeVisible()
+  await post(page, '/api/v1/stewardship/foreclosure-prevention/lease-default', { groundLeaseId: leaseId })
+
+  await open.click()
+  await expect(box.getByRole('alert')).toHaveText('This lease already has an open foreclosure prevention case.')
 })
