@@ -13,6 +13,7 @@ using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Services;
 using CommonGround.SharedKernel.Extensions;
 using CommonGround.SharedKernel.Infrastructure.Seeding;
+using CommonGround.SharedKernel.Specifications;
 using CommonGround.TrustManagement.Infrastructure.Seeding;
 using Marten;
 
@@ -216,7 +217,7 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
         CancellationToken cancellation)
     {
         var approved = await session.Query<HomeownerApplicationView>()
-            .Where(v => v.Phase == ApplicationPhase.Approved.DisplayName)
+            .Matching(OnWaitingList<HomeownerApplicationView>.Instance)
             .OrderBy(v => v.ApprovedDate)
             .ThenBy(v => v.SubmittedAt)
             .ToListAsync(cancellation)

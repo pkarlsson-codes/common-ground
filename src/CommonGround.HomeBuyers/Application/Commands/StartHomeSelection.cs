@@ -7,6 +7,7 @@ using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using CommonGround.SharedKernel.Domain.Services;
 using CommonGround.SharedKernel.Extensions;
+using CommonGround.SharedKernel.Specifications;
 using Marten;
 using Wolverine.Marten;
 
@@ -99,7 +100,7 @@ public static class StartHomeSelectionHandler
             .ConfigureAwait(false);
 
         var approved = await session.Query<HomeownerApplicationView>()
-            .Where(v => v.Phase == ApplicationPhase.Approved.DisplayName)
+            .Matching(OnWaitingList<HomeownerApplicationView>.Instance)
             .OrderBy(v => v.ApprovedDate)
             .ThenBy(v => v.SubmittedAt)
             .ToListAsync(cancellationToken)

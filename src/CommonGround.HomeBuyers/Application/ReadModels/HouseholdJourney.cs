@@ -56,7 +56,7 @@ public sealed record HouseholdJourney(
             return new HouseholdJourney(Purchasing, readyDate, selected.ApprovedDate, selected.SelectedDate,
                 null, selected.Id, selected.SelectedHomeId);
 
-        var approved = applications.FirstOrDefault(a => a.Phase == ApplicationPhase.Approved.DisplayName);
+        var approved = applications.FirstOrDefault(OnWaitingList<HomeownerApplicationListItemView>.Instance.IsSatisfiedBy);
         if (approved is not null)
             return new HouseholdJourney(Waiting, readyDate, approved.ApprovedDate, null, null, approved.Id, null);
 

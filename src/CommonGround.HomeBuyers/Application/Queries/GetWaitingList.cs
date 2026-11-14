@@ -1,8 +1,8 @@
 using CommonGround.HomeBuyers.Application.ReadModels;
-using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.SharedKernel.Domain.Services;
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
+using CommonGround.SharedKernel.Specifications;
 using Marten;
 using Marten.Pagination;
 
@@ -34,7 +34,7 @@ public static class GetWaitingListHandler
         ArgumentNullException.ThrowIfNull(request);
 
         var query = session.Query<HomeownerApplicationListItemView>()
-            .Where(v => v.Phase == ApplicationPhase.Approved.DisplayName);
+            .Matching(OnWaitingList<HomeownerApplicationListItemView>.Instance);
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {

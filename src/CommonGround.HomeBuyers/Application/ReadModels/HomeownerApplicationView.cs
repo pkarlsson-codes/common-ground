@@ -1,7 +1,7 @@
 namespace CommonGround.HomeBuyers.Application.ReadModels;
 
 /// <summary>Detail read model for a homeowner application.</summary>
-public class HomeownerApplicationView
+public class HomeownerApplicationView : IHomeownerApplicationPhaseView
 {
     /// <summary>Gets or sets the unique identifier.</summary>
     public string Id { get; set; } = string.Empty;
