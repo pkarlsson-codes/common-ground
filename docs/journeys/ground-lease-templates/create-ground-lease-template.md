@@ -10,6 +10,7 @@
 8. If Fixed Percentage, user enters Annual Percentage (decimal fraction, e.g. 0.03 = 3%, default 0.01)
 9. User optionally checks "Set improvements cap" and enters an Improvements Cap ($, default 25000 when first checked)
 10. User enters Debt Cap (% of the purchase option price, whole number, 1 to 200, required, no default; help text "The most total mortgage debt may be when the trust permits a new loan (Art 8.3). Commonly 80–100%."). A lease from this template copies it
-11. User clicks "Create Template"
-12. Toast: "Ground lease template created"
-13. Panel closes, new template appears in the Ground Lease Templates table
+11. User optionally enters Liability per Occurrence ($, help text "Liability insurance the homeowner must carry, with the trust named as additional insured (Art 9.4)."). A lease from this template copies it
+12. User clicks "Create Template"
+13. Toast: "Ground lease template created"
+14. Panel closes, new template appears in the Ground Lease Templates table

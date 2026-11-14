@@ -5,6 +5,6 @@
 3. User clicks a row in the Ground Lease Templates table
 4. Detail panel opens (header shows term and status) showing status (Active or Inactive), resale formula, and term (years)
 5. Depending on the formula, the panel shows Appreciation Share, Index Type, Baseline Index, and/or Annual %
-6. Panel shows Option Window (days), Monthly Lease Fee with its Land Use Fee and Repair Reserve Fee, Late Interest ("12% a year, waived if paid within 20 days", or "None"), Improvements Cap if one is set, Debt Cap ("90% of the purchase option price"), and Covenant Terms if present
+6. Panel shows Option Window (days), Monthly Lease Fee with its Land Use Fee and Repair Reserve Fee, Late Interest ("12% a year, waived if paid within 20 days", or "None"), Improvements Cap if one is set, Debt Cap ("90% of the purchase option price"), Liability per Occurrence if set, and Covenant Terms if present
 7. Panel shows Created (date/time)
 8. User closes the panel
