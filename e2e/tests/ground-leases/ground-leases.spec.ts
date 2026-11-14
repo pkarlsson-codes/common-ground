@@ -96,6 +96,7 @@ test('creating a lease on a parcel\'s home lists it first, shows its homeowner a
   await field(form, 'Improvements Cap ($)').fill('10000')
   await expect(field(form, 'Debt Cap (% of purchase option price)')).toHaveValue('')
   await field(form, 'Debt Cap (% of purchase option price)').fill('85')
+  await field(form, 'Replacement Value ($)').fill('260000')
   await create.click()
   await expectToast(page, 'Ground lease created')
   await expect(form).toBeHidden()
@@ -125,6 +126,8 @@ test('creating a lease on a parcel\'s home lists it first, shows its homeowner a
   await expect(detailValue(detail, 'Original Appraised Value')).toHaveText('$240,000')
   await expect(detailValue(detail, 'Covenant Terms')).toHaveText('Owner-occupied, permanently affordable')
   await expect(detail.locator('.detail-field__label').filter({ hasText: /^Appreciation Share$/ })).toHaveCount(0)
+  await expect(detailValue(detail, 'Replacement Value')).toHaveText('$260,000.00')
+  await expect(detailValue(detail, 'Liability per Occurrence')).toHaveText('Not set')
   await expect(checkIns(page)).not.toContainText('by ')
 
   await detail.getByRole('button', { name: 'Open Land Parcel' }).click()

@@ -114,6 +114,13 @@ public interface IGroundLeasesApiClient
     /// <returns>A task that completes when the mortgage is marked paid off.</returns>
     Task MarkPermittedMortgagePaidOffAsync(string groundLeaseId, string mortgageId, MarkPermittedMortgagePaidOffRequest request, CancellationToken cancellationToken);
 
+    /// <summary>Changes the insurance a lease requires from a day on (Art 9.4).</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="request">The required amounts and the day they apply from.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when the requirements are set.</returns>
+    Task SetInsuranceRequirementsAsync(string groundLeaseId, SetInsuranceRequirementsRequest request, CancellationToken cancellationToken);
+
     /// <summary>Records a homeowner's request for a new loan on the home.</summary>
     /// <param name="groundLeaseId">The ID of the ground lease.</param>
     /// <param name="request">The request body.</param>

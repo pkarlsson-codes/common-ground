@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { HomesApi, LandParcelsApi } from '../../api'
 import EntityCombobox from '../../components/EntityCombobox'
 import DebtCapField from './DebtCapField'
+import OptionalAmountField from './OptionalAmountField'
 import SlideOver from '../../components/SlideOver'
 import { tracksFeesFromLater, useCreateGroundLease } from '../../hooks/groundLeases'
 import {
@@ -47,6 +48,8 @@ const emptyCreate = (): CreateGroundLeaseForm => ({
   improvementsCap: 25000,
   hasImprovementsCap: false,
   maxMortgageDebtPercent: null,
+  insuranceReplacementValue: null,
+  insuranceLiabilityPerOccurrence: null,
 })
 
 interface Props {
@@ -372,6 +375,25 @@ export default function GroundLeaseCreatePanel({ onClose }: Props) {
             value={createForm.maxMortgageDebtPercent}
             onChange={maxMortgageDebtPercent => setCreateForm(f => ({ ...f, maxMortgageDebtPercent }))}
           />
+          <OptionalAmountField
+            id="lease-replacement-value"
+            label="Replacement Value ($)"
+            value={createForm.insuranceReplacementValue}
+            onChange={insuranceReplacementValue => setCreateForm(f => ({ ...f, insuranceReplacementValue }))}
+            hintId="lease-insurance-hint"
+          />
+          <OptionalAmountField
+            id="lease-liability"
+            label="Liability per Occurrence ($)"
+            value={createForm.insuranceLiabilityPerOccurrence}
+            onChange={insuranceLiabilityPerOccurrence => setCreateForm(f => ({ ...f, insuranceLiabilityPerOccurrence }))}
+            hintId="lease-insurance-hint"
+          />
+          <div className="form-field full">
+            <p id="lease-insurance-hint" className="form-hint" style={{ margin: 0 }}>
+              Insurance the homeowner must carry (Art 9.4). Left empty, the app doesn't check that amount.
+            </p>
+          </div>
         </div>
         {createError && (
           <div className="form-error">{createError}</div>

@@ -74,6 +74,8 @@ export function useCreateGroundLease() {
           improvementsCap: form.hasImprovementsCap ? form.improvementsCap : undefined,
           // The input is required, so the form can't submit without it.
           maxMortgageDebtPercent: form.maxMortgageDebtPercent!,
+          insuranceReplacementValue: form.insuranceReplacementValue,
+          insuranceLiabilityPerOccurrence: form.insuranceLiabilityPerOccurrence,
         },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['ground-leases'] }),
@@ -608,5 +610,22 @@ export function useResalePriceStatementPreviews(
     }),
     enabled: enabled && !!statementDate && leases.length > 0,
     retry: false,
+  })
+}
+
+export function useSetInsuranceRequirements() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ groundLeaseId, ...request }: {
+      groundLeaseId: string
+      replacementValue: number | null
+      liabilityPerOccurrence: number | null
+      effectiveFrom: CalendarDate
+    }) => api.setInsuranceRequirements({ groundLeaseId, setInsuranceRequirementsRequest: request }),
+    onSuccess: (_d, v) => {
+      invalidateLease(qc, v.groundLeaseId)
+      // The current certificate's check moves with the requirements, and with it the Today shortfall item.
+      qc.invalidateQueries({ queryKey: ['today'] })
+    },
   })
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import DebtCapField from '../ground-leases/DebtCapField'
+import OptionalAmountField from '../ground-leases/OptionalAmountField'
 import SlideOver from '../../components/SlideOver'
 import { useCreateGroundLeaseTemplate } from '../../hooks/groundLeaseTemplates'
 import {
@@ -29,6 +30,7 @@ const emptyCreate = (): CreateGroundLeaseTemplateForm => ({
   improvementsCap: null,
   hasImprovementsCap: false,
   maxMortgageDebtPercent: null,
+  insuranceLiabilityPerOccurrence: null,
 })
 
 interface Props {
@@ -229,6 +231,18 @@ export default function CreateGroundLeaseTemplatePanel({ onClose }: Props) {
             value={form.maxMortgageDebtPercent}
             onChange={maxMortgageDebtPercent => setForm(f => ({ ...f, maxMortgageDebtPercent }))}
           />
+          <OptionalAmountField
+            id="template-liability"
+            label="Liability per Occurrence ($)"
+            value={form.insuranceLiabilityPerOccurrence}
+            onChange={insuranceLiabilityPerOccurrence => setForm(f => ({ ...f, insuranceLiabilityPerOccurrence }))}
+            hintId="template-liability-hint"
+          />
+          <div className="form-field full">
+            <p id="template-liability-hint" className="form-hint" style={{ margin: 0 }}>
+              Liability insurance the homeowner must carry, with the trust named as additional insured (Art 9.4).
+            </p>
+          </div>
         </div>
 
         {error && (

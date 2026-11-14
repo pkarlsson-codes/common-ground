@@ -15,6 +15,7 @@ import { DateInput } from '../../components/DateInput'
 import LeaseResaleSection from './LeaseResaleSection'
 import LeaseFeesSection from './LeaseFeesSection'
 import LeaseMortgagesSection from './LeaseMortgagesSection'
+import LeaseInsuranceSection from './LeaseInsuranceSection'
 import LeaseResalePriceStatementsSection from './LeaseResalePriceStatementsSection'
 
 function SkeletonRows() {
@@ -163,6 +164,8 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
           <LeaseFeesSection lease={detail} />
 
           <LeaseMortgagesSection lease={detail} />
+
+          <LeaseInsuranceSection lease={detail} />
 
           <div className="detail-section">
             <div className="detail-section__title">Stewardship Check-Ins</div>

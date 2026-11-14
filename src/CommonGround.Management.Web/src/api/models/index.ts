@@ -208,6 +208,7 @@ export * from './SchedulePropertyInspectionRequest';
 export * from './SelectHouseholdByPriorityRequest';
 export * from './ServicerDelinquencyResponse';
 export * from './SetHomeIncomeLimitRequest';
+export * from './SetInsuranceRequirementsRequest';
 export * from './SetLeaseFeeNoticePolicyRequest';
 export * from './SoftDeleteDocumentRequest';
 export * from './StallWorkflowRequest';

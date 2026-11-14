@@ -84,6 +84,9 @@ export interface CreateGroundLeaseForm {
   hasImprovementsCap: boolean
   /** Debt cap, % of the purchase option price; null until entered. */
   maxMortgageDebtPercent: number | null
+  /** Insurance the lease requires (Art 9.4); null means the app doesn't check that amount. */
+  insuranceReplacementValue: number | null
+  insuranceLiabilityPerOccurrence: number | null
 }
 
 export interface OnboardHomeownerForm {
@@ -173,6 +176,7 @@ export interface CreateGroundLeaseTemplateForm {
   hasImprovementsCap: boolean
   /** Debt cap, % of the purchase option price; null until entered. */
   maxMortgageDebtPercent: number | null
+  insuranceLiabilityPerOccurrence: number | null
 }
 
 // ── Stewardship ────────────────────────────────────────────────────────────

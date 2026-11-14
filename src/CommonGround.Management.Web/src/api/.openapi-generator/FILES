@@ -229,6 +229,7 @@ models/SchedulePropertyInspectionRequest.ts
 models/SelectHouseholdByPriorityRequest.ts
 models/ServicerDelinquencyResponse.ts
 models/SetHomeIncomeLimitRequest.ts
+models/SetInsuranceRequirementsRequest.ts
 models/SetLeaseFeeNoticePolicyRequest.ts
 models/SoftDeleteDocumentRequest.ts
 models/StallWorkflowRequest.ts

@@ -48,6 +48,7 @@ import type {
   ResalePriceStatementPreviewsResponse,
   ResalePriceStatementPriceResponse,
   ResalePriceStatementsDueResponse,
+  SetInsuranceRequirementsRequest,
   SetLeaseFeeNoticePolicyRequest,
   VoidLeaseFeePaymentRequest,
   WaiveLeaseFeeInterestRequest,
@@ -119,6 +120,8 @@ import {
     ResalePriceStatementPriceResponseToJSON,
     ResalePriceStatementsDueResponseFromJSON,
     ResalePriceStatementsDueResponseToJSON,
+    SetInsuranceRequirementsRequestFromJSON,
+    SetInsuranceRequirementsRequestToJSON,
     SetLeaseFeeNoticePolicyRequestFromJSON,
     SetLeaseFeeNoticePolicyRequestToJSON,
     VoidLeaseFeePaymentRequestFromJSON,
@@ -247,6 +250,11 @@ export interface RecordResalePriceStatementOperationRequest {
 export interface RecordStewardshipCheckInOperationRequest {
     groundLeaseId: string;
     recordStewardshipCheckInRequest: RecordStewardshipCheckInRequest;
+}
+
+export interface SetInsuranceRequirementsOperationRequest {
+    groundLeaseId: string;
+    setInsuranceRequirementsRequest: SetInsuranceRequirementsRequest;
 }
 
 export interface SetLeaseFeeNoticePolicyOperationRequest {
@@ -612,6 +620,20 @@ export interface GroundLeasesApiInterface {
     /**
      */
     recordStewardshipCheckIn(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
+     * @param {SetInsuranceRequirementsRequest} setInsuranceRequirementsRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    setInsuranceRequirementsRaw(requestParameters: SetInsuranceRequirementsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    setInsuranceRequirements(requestParameters: SetInsuranceRequirementsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -1738,6 +1760,58 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
      */
     async recordStewardshipCheckIn(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
         const response = await this.recordStewardshipCheckInRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
+    async setInsuranceRequirementsRaw(requestParameters: SetInsuranceRequirementsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling setInsuranceRequirements().'
+            );
+        }
+
+        if (requestParameters['setInsuranceRequirementsRequest'] == null) {
+            throw new runtime.RequiredError(
+                'setInsuranceRequirementsRequest',
+                'Required parameter "setInsuranceRequirementsRequest" was null or undefined when calling setInsuranceRequirements().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/insurance-requirements`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: SetInsuranceRequirementsRequestToJSON(requestParameters['setInsuranceRequirementsRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async setInsuranceRequirements(requestParameters: SetInsuranceRequirementsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.setInsuranceRequirementsRaw(requestParameters, initOverrides);
         switch (response.raw.status) {
             case 204:
                 return null;

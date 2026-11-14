@@ -270,6 +270,20 @@ public static class GroundLeasesEndpoints
         return Results.NoContent();
     }
 
+    [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/insurance-requirements")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> SetInsuranceRequirements(
+        string groundLeaseId,
+        SetInsuranceRequirementsRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.SetInsuranceRequirementsAsync(groundLeaseId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
     [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/mortgage-requests")]
     [ProducesResponseType<ReceiveMortgageRequestResponse>(StatusCodes.Status201Created)]
     public static async Task<IResult> ReceiveMortgageRequest(

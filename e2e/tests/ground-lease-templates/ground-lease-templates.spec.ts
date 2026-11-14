@@ -63,6 +63,7 @@ test('creating an appraisal-based template with an improvements cap shows its te
   await form.getByRole('checkbox', { name: 'Set improvements cap' }).check()
   await expect(field(form, 'Improvements Cap ($)')).toHaveValue('25000')
   await field(form, 'Improvements Cap ($)').fill('30000')
+  await field(form, 'Liability per Occurrence ($)').fill('300000')
 
   const detail = await createAndOpen(page, form, name)
   await expect(detail.locator('.slideover-header')).toContainText('75 yr · Active')
@@ -73,6 +74,7 @@ test('creating an appraisal-based template with an improvements cap shows its te
   await expect(detailValue(detail, 'Monthly Lease Fee')).toContainText('$45.00 land use + $15.00 repair reserve')
   await expect(detailValue(detail, 'Late Interest')).toHaveText('12% a year, waived if paid within 20 days')
   await expect(detailValue(detail, 'Appreciation Share')).toHaveText('30.0%')
+  await expect(detailValue(detail, 'Liability per Occurrence')).toHaveText('$300,000')
   await expect(detailValue(detail, 'Improvements Cap')).toHaveText('$30,000')
   await expect(detailValue(detail, 'Covenant Terms')).toHaveText('Owner-occupied, permanently affordable')
   await expect(detailValue(detail, 'Created')).not.toBeEmpty()

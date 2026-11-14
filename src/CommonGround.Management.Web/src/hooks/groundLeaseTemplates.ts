@@ -34,6 +34,7 @@ export function useCreateGroundLeaseTemplate() {
           improvementsCap: form.improvementsCap ?? undefined,
           // The input is required, so the form can't submit without it.
           maxMortgageDebtPercent: form.maxMortgageDebtPercent!,
+          insuranceLiabilityPerOccurrence: form.insuranceLiabilityPerOccurrence,
         },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['ground-lease-templates'] }),
