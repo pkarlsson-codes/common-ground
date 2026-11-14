@@ -6,7 +6,7 @@
    - Intake is current from registration until housing counseling, CLT orientation and a mortgage prequalification have all been recorded; Ready is current from then until an application is approved
    - Approval marks Approved done and makes Waiting current (shown from the approved date); selection for a home marks Selected done and makes Purchasing current; closing the purchase makes Homeowner current
    - A purchase that fails or is withdrawn returns the household to Waiting with its original approved date, so it keeps its place on the waiting list, and Selected and Purchasing are no longer marked done
-   - An application that is denied or withdrawn returns the household to Ready (or Intake, if its readiness is no longer complete)
+   - An application that is denied, withdrawn or removed from the waiting list returns the household to Ready (or Intake, if its readiness is no longer complete)
 4. A Next Step card under the stepper says in one sentence what the household is waiting on, with one primary button:
    - Intake: which readiness items are still missing, with "Record" for the first one
    - Ready: "Start Application", or "Open Application" while one is awaiting a decision; a failed start shows the error on the card
