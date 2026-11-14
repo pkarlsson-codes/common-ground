@@ -150,6 +150,48 @@ public class HomeownershipWorkItemsTests
         }
     }
 
+    public class TheForImprovementRequestMethod
+    {
+        private static ImprovementRequestView Request(string status) => new()
+        {
+            Id = "improvementrequest-1",
+            GroundLeaseId = "groundlease-1",
+            HomeId = "home-1",
+            HomeownerFullName = "Dana Whitfield",
+            Status = status,
+            ReceivedOn = new DateOnly(2026, 10, 20),
+            ReplyDueOn = new DateOnly(2026, 11, 3),
+            Description = "Replace the roof",
+        };
+
+        [Fact]
+        public void GivenWaitingRequest_WhenDerived_ThenWaitsSinceReceiptDueTwoWeeksLaterAndAsksForTheDecision()
+        {
+            var item = HomeownershipWorkItems.ForImprovementRequest(Request("Waiting for decision"), "14 Alder Lane");
+
+            item.Should().BeEquivalentTo(new
+            {
+                Kind = HomeownershipWorkItems.ImprovementRequestWaiting,
+                RecordType = "ground-lease",
+                RecordId = "groundlease-1",
+                Detail = "Dana Whitfield: improvement request to decide, Replace the roof",
+                DueDate = (DateOnly?)new DateOnly(2026, 11, 3),
+                WaitingSince = new DateOnly(2026, 10, 20),
+                Actions = new[] { HomeownershipWorkItems.DecideImprovementRequest },
+            });
+        }
+
+        [Theory]
+        [InlineData("Approved")]
+        [InlineData("Denied")]
+        [InlineData("Completed")]
+        [InlineData("Withdrawn")]
+        public void GivenRequestPastTheDecision_WhenDerived_ThenHasNoItem(string status)
+        {
+            HomeownershipWorkItems.ForImprovementRequest(Request(status), null).Should().BeNull();
+        }
+    }
+
     public class TheForMortgageRequestMethod
     {
         private readonly TestBed _testBed = new();

@@ -2,6 +2,7 @@ using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Application.WorkItems;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.Homeownership.Domain.ImprovementRequests;
 using CommonGround.Homeownership.Domain.MortgageRequests;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Application.WorkItems;
@@ -68,6 +69,16 @@ public static class GetHomeownershipWorkItemsHandler
             .ConfigureAwait(false))
             .ToDictionary(v => v.Id, v => v.Label);
 
+        var waitingStatus = ImprovementRequestStatus.Waiting.DisplayName;
+        var improvementRequests = await session.Query<ImprovementRequestView>()
+            .Where(v => v.Status == waitingStatus)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        var improvementLabels = (await session
+            .LoadManyAsync<HomeLabelView>(cancellationToken, improvementRequests.Select(r => r.HomeId).Distinct())
+            .ConfigureAwait(false))
+            .ToDictionary(v => v.Id, v => v.Label);
+
         var statements = (await ResalePriceStatementSchedule.LoadAllAsync(session, cancellationToken).ConfigureAwait(false))
             .Where(s => s.NextDueOn <= request.Today);
 
@@ -84,6 +95,9 @@ public static class GetHomeownershipWorkItemsHandler
             .. uncured.Select(HomeownershipWorkItems.ForUncuredDefault),
             .. requests
                 .Select(r => HomeownershipWorkItems.ForMortgageRequest(r, requestLabels.GetValueOrDefault(r.HomeId), request.Today))
+                .OfType<WorkItem>(),
+            .. improvementRequests
+                .Select(r => HomeownershipWorkItems.ForImprovementRequest(r, improvementLabels.GetValueOrDefault(r.HomeId)))
                 .OfType<WorkItem>(),
             .. statements.Select(HomeownershipWorkItems.ForResalePriceStatement),
             .. insurance

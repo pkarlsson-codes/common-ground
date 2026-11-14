@@ -1,6 +1,7 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
+using CommonGround.Homeownership.Domain.ImprovementRequests;
 using CommonGround.Homeownership.Domain.MortgageRequests;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.Homeownership.Domain.Resales;
@@ -1439,6 +1440,200 @@ public static class BusinessRuleViolation
             public static BusinessRuleViolationException WithdrawnOnInFuture(DateOnly withdrawnOn, DateOnly today)
                 => new(
                     "homeownership.mortgage_request.withdraw.withdrawn_on_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["withdrawnOn"] = withdrawnOn,
+                        ["today"] = today,
+                    });
+        }
+    }
+
+    public static class ImprovementRequest
+    {
+        public static class Receive
+        {
+            public static BusinessRuleViolationException LeaseNotActive(GroundLeaseStatus status)
+                => new(
+                    "homeownership.improvement_request.receive.lease_not_active",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException DescriptionRequired()
+                => new("homeownership.improvement_request.receive.description_required");
+
+            public static BusinessRuleViolationException EstimatedCostNotPositive(decimal estimatedCost)
+                => new(
+                    "homeownership.improvement_request.receive.estimated_cost_not_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["estimatedCost"] = estimatedCost,
+                    });
+
+            public static BusinessRuleViolationException ReceivedOnInFuture(DateOnly receivedOn, DateOnly today)
+                => new(
+                    "homeownership.improvement_request.receive.received_on_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["receivedOn"] = receivedOn,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException ReceivedOnBeforeLeaseStart(DateOnly receivedOn, DateOnly leaseStartDate)
+                => new(
+                    "homeownership.improvement_request.receive.received_on_before_lease_start",
+                    new Dictionary<string, object?>
+                    {
+                        ["receivedOn"] = receivedOn,
+                        ["leaseStartDate"] = leaseStartDate,
+                    });
+        }
+
+        public static class Approve
+        {
+            public static BusinessRuleViolationException NotWaiting(ImprovementRequestStatus status)
+                => new(
+                    "homeownership.improvement_request.approve.not_waiting",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException CreditOutOfRange(decimal preApprovedCredit, decimal estimatedCost)
+                => new(
+                    "homeownership.improvement_request.approve.credit_out_of_range",
+                    new Dictionary<string, object?>
+                    {
+                        ["preApprovedCredit"] = preApprovedCredit,
+                        ["estimatedCost"] = estimatedCost,
+                    });
+
+            public static BusinessRuleViolationException ApprovedOnBeforeReceived(DateOnly approvedOn, DateOnly receivedOn)
+                => new(
+                    "homeownership.improvement_request.approve.approved_on_before_received",
+                    new Dictionary<string, object?>
+                    {
+                        ["approvedOn"] = approvedOn,
+                        ["receivedOn"] = receivedOn,
+                    });
+
+            public static BusinessRuleViolationException ApprovedOnInFuture(DateOnly approvedOn, DateOnly today)
+                => new(
+                    "homeownership.improvement_request.approve.approved_on_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["approvedOn"] = approvedOn,
+                        ["today"] = today,
+                    });
+        }
+
+        public static class Deny
+        {
+            public static BusinessRuleViolationException NotWaiting(ImprovementRequestStatus status)
+                => new(
+                    "homeownership.improvement_request.deny.not_waiting",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException ReasonRequired()
+                => new("homeownership.improvement_request.deny.reason_required");
+
+            public static BusinessRuleViolationException DeniedOnBeforeReceived(DateOnly deniedOn, DateOnly receivedOn)
+                => new(
+                    "homeownership.improvement_request.deny.denied_on_before_received",
+                    new Dictionary<string, object?>
+                    {
+                        ["deniedOn"] = deniedOn,
+                        ["receivedOn"] = receivedOn,
+                    });
+
+            public static BusinessRuleViolationException DeniedOnInFuture(DateOnly deniedOn, DateOnly today)
+                => new(
+                    "homeownership.improvement_request.deny.denied_on_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["deniedOn"] = deniedOn,
+                        ["today"] = today,
+                    });
+        }
+
+        public static class RecordCompleted
+        {
+            public static BusinessRuleViolationException NotApproved(ImprovementRequestStatus status)
+                => new(
+                    "homeownership.improvement_request.record_completed.not_approved",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException ReceiptsRequired()
+                => new("homeownership.improvement_request.record_completed.receipts_required");
+
+            public static BusinessRuleViolationException ActualCostNotPositive(decimal actualCost)
+                => new(
+                    "homeownership.improvement_request.record_completed.actual_cost_not_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["actualCost"] = actualCost,
+                    });
+
+            public static BusinessRuleViolationException CreditOutOfRange(decimal confirmedCredit, decimal preApprovedCredit)
+                => new(
+                    "homeownership.improvement_request.record_completed.credit_out_of_range",
+                    new Dictionary<string, object?>
+                    {
+                        ["confirmedCredit"] = confirmedCredit,
+                        ["preApprovedCredit"] = preApprovedCredit,
+                    });
+
+            public static BusinessRuleViolationException CompletedOnBeforeApproved(DateOnly completedOn, DateOnly approvedOn)
+                => new(
+                    "homeownership.improvement_request.record_completed.completed_on_before_approved",
+                    new Dictionary<string, object?>
+                    {
+                        ["completedOn"] = completedOn,
+                        ["approvedOn"] = approvedOn,
+                    });
+
+            public static BusinessRuleViolationException CompletedOnInFuture(DateOnly completedOn, DateOnly today)
+                => new(
+                    "homeownership.improvement_request.record_completed.completed_on_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["completedOn"] = completedOn,
+                        ["today"] = today,
+                    });
+        }
+
+        public static class Withdraw
+        {
+            public static BusinessRuleViolationException NotOpen(ImprovementRequestStatus status)
+                => new(
+                    "homeownership.improvement_request.withdraw.not_open",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException ReasonRequired()
+                => new("homeownership.improvement_request.withdraw.reason_required");
+
+            public static BusinessRuleViolationException WithdrawnOnBeforeReceived(DateOnly withdrawnOn, DateOnly receivedOn)
+                => new(
+                    "homeownership.improvement_request.withdraw.withdrawn_on_before_received",
+                    new Dictionary<string, object?>
+                    {
+                        ["withdrawnOn"] = withdrawnOn,
+                        ["receivedOn"] = receivedOn,
+                    });
+
+            public static BusinessRuleViolationException WithdrawnOnInFuture(DateOnly withdrawnOn, DateOnly today)
+                => new(
+                    "homeownership.improvement_request.withdraw.withdrawn_on_in_future",
                     new Dictionary<string, object?>
                     {
                         ["withdrawnOn"] = withdrawnOn,

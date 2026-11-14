@@ -3,6 +3,7 @@ using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases.Insurance;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.Homeownership.Domain.ImprovementRequests;
 using CommonGround.Homeownership.Domain.MortgageRequests;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Application.WorkItems;
@@ -77,6 +78,12 @@ public static class HomeownershipWorkItems
 
     /// <summary>Record that the approved loan closed, or that the homeowner withdrew it.</summary>
     public const string RecordMortgageLoanClosed = "record-mortgage-loan-closed";
+
+    /// <summary>A homeowner's request to alter or add to the home, waiting for the trust's reply (Art 7.3).</summary>
+    public const string ImprovementRequestWaiting = "improvement-request-waiting";
+
+    /// <summary>Approve or deny the improvement request.</summary>
+    public const string DecideImprovementRequest = "decide-improvement-request";
 
     /// <summary>An active lease with no resale in progress whose yearly resale price statement is due (Ch 23).</summary>
     public const string ResalePriceStatementDue = "resale-price-statement-due";
@@ -218,6 +225,29 @@ public static class HomeownershipWorkItems
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// The item for an improvement request waiting for a decision: from the day it arrived, due two weeks after
+    /// receipt. Requests in any other status have none.
+    /// </summary>
+    /// <param name="request">The request.</param>
+    /// <param name="homeLabel">The label of the home, if known.</param>
+    /// <returns>The request's work item, or null when it isn't waiting.</returns>
+    public static WorkItem? ForImprovementRequest(ImprovementRequestView request, string? homeLabel)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (request.Status != ImprovementRequestStatus.Waiting.DisplayName)
+            return null;
+
+        return new WorkItem(
+            WorkArea.Stewardship, ImprovementRequestWaiting, "ground-lease", request.GroundLeaseId,
+            homeLabel ?? "Home",
+            $"{request.HomeownerFullName}: improvement request to decide, {request.Description}",
+            request.ReplyDueOn,
+            request.ReceivedOn,
+            [DecideImprovementRequest]);
     }
 
     private static bool DebtCheckMissing(this MortgageRequestView request) => request.PurchaseOptionPrice is null;
