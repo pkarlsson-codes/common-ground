@@ -167,4 +167,18 @@ public interface IGroundLeasesApiClient
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task that completes when it is recorded.</returns>
     Task WithdrawMortgageRequestAsync(string mortgageRequestId, WithdrawMortgageRequestRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Works out a lease's resale price statement without recording it.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="request">The statement date and the figures the formula needs.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The price and the figures used.</returns>
+    Task<ResalePriceStatementPriceResponse> PreviewResalePriceStatementAsync(string groundLeaseId, PreviewResalePriceStatementRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Records that a resale price statement was sent on a lease.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="request">The statement date, figures and delivery.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when it is recorded.</returns>
+    Task RecordResalePriceStatementAsync(string groundLeaseId, RecordResalePriceStatementRequest request, CancellationToken cancellationToken);
 }

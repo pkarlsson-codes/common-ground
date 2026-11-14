@@ -64,6 +64,7 @@ const KINDS: Record<string, { page: string; area: TodayArea }> = {
   'lease-default-uncured': { page: '/stewardship', area: 'stewardship' },
   'mortgage-request-pending': { page: '/ground-leases', area: 'stewardship' },
   'mortgage-loan-closing-unrecorded': { page: '/ground-leases', area: 'stewardship' },
+  'resale-price-statement-due': { page: '/ground-leases', area: 'stewardship' },
   'document-expiring': { page: '/documents', area: 'records' },
   'income-limits-missing': { page: '/income-limits', area: 'selections' },
   'income-limits-stale': { page: '/income-limits', area: 'selections' },
@@ -111,6 +112,7 @@ const ACTION_LABELS: Record<string, string> = {
   'record-mortgage-request-appraisal': 'Add appraisal',
   'decide-mortgage-request': 'Decide',
   'record-mortgage-loan-closed': 'Confirm closing',
+  'record-resale-price-statement': 'Prepare statement',
   'enter-income-limits': 'Enter limits',
 }
 
@@ -134,6 +136,7 @@ const PANEL_ACTIONS = new Set([
   'record-mortgage-request-appraisal',
   'decide-mortgage-request',
   'record-mortgage-loan-closed',
+  'record-resale-price-statement',
 ])
 
 export interface RowAction {

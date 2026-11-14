@@ -158,6 +158,7 @@ models/PortfolioImportErrorDto.ts
 models/PortfolioImportRequest.ts
 models/PortfolioImportResponse.ts
 models/PreviewResalePriceRequest.ts
+models/PreviewResalePriceStatementRequest.ts
 models/ProblemDetails.ts
 models/PropertyInspectionResponse.ts
 models/PurchaseBoardCardResponse.ts
@@ -195,6 +196,7 @@ models/RecordPermittedMortgageRequest.ts
 models/RecordPermittedMortgageResponse.ts
 models/RecordPurchaseClosedRequest.ts
 models/RecordResaleAppraisalRequest.ts
+models/RecordResalePriceStatementRequest.ts
 models/RecordServicerDelinquencyRequest.ts
 models/RecordStewardshipCheckInRequest.ts
 models/RecordTitleClearedRequest.ts
@@ -207,6 +209,7 @@ models/RegisterLandParcelResponse.ts
 models/RequestForbearanceRequest.ts
 models/ResalePriceResponse.ts
 models/ResalePriceStatementDto.ts
+models/ResalePriceStatementPriceResponse.ts
 models/ResalePriceStatementsDto.ts
 models/ResaleResponse.ts
 models/ResolveForeclosurePreventionCaseRequest.ts

@@ -1727,6 +1727,133 @@
         }
       }
     },
+    "/api/v1/ground-leases/{groundLeaseId}/resale-price-statements/preview": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "PreviewResalePriceStatement",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "PreviewResalePriceStatementRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewResalePriceStatementRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResalePriceStatementPriceResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ground-leases/{groundLeaseId}/resale-price-statements": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "RecordResalePriceStatement",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordResalePriceStatementRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordResalePriceStatementRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ground-leases/{groundLeaseId}/lease-fee-tracking": {
       "put": {
         "tags": [
@@ -11280,6 +11407,125 @@
           "reason": {
             "type": "string",
             "description": "Why, such as hardship."
+          }
+        }
+      },
+      "ResalePriceStatementPriceResponse": {
+        "type": "object",
+        "description": "A lease's resale price on a statement date, with the figures used.",
+        "additionalProperties": false,
+        "properties": {
+          "statementDate": {
+            "type": "string",
+            "description": "The day the price is worked out on.",
+            "format": "date"
+          },
+          "yearsOwned": {
+            "type": "integer",
+            "description": "Full years from the lease start to the statement date.",
+            "format": "int32"
+          },
+          "marketValue": {
+            "type": "number",
+            "description": "The market value used; null unless the formula is appraisal based.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "marketValueSource": {
+            "type": "string",
+            "description": "Where the market value came from.",
+            "nullable": true
+          },
+          "indexValue": {
+            "type": "number",
+            "description": "The index value used; null unless the formula is index based.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "improvementsCredit": {
+            "type": "number",
+            "description": "The improvements credit counted, after the cap; null for none.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "description": "The most the home may sell for on the statement date.",
+            "format": "decimal"
+          }
+        }
+      },
+      "PreviewResalePriceStatementRequest": {
+        "type": "object",
+        "description": "Request for a lease's resale price statement, without recording it.",
+        "additionalProperties": false,
+        "properties": {
+          "statementDate": {
+            "type": "string",
+            "description": "The day to work the price out on; not in the future or before the lease start.",
+            "format": "date"
+          },
+          "marketValue": {
+            "type": "number",
+            "description": "Estimated market value; required for an appraisal-based lease, ignored otherwise.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "marketValueSource": {
+            "type": "string",
+            "description": "Where the market value came from; required with it.",
+            "nullable": true
+          },
+          "indexValue": {
+            "type": "number",
+            "description": "Index value on the statement date; required for an index-based lease, ignored otherwise.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "improvementsCredit": {
+            "type": "number",
+            "description": "Approved improvements; counted up to the lease's improvements cap, ignored without one.",
+            "format": "decimal",
+            "nullable": true
+          }
+        }
+      },
+      "RecordResalePriceStatementRequest": {
+        "type": "object",
+        "description": "Request to record that a resale price statement was sent.",
+        "additionalProperties": false,
+        "properties": {
+          "statementDate": {
+            "type": "string",
+            "description": "The letter's date, the day the price is worked out on and the day it was sent.",
+            "format": "date"
+          },
+          "marketValue": {
+            "type": "number",
+            "description": "Estimated market value; required for an appraisal-based lease, ignored otherwise.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "marketValueSource": {
+            "type": "string",
+            "description": "Where the market value came from; required with it.",
+            "nullable": true
+          },
+          "indexValue": {
+            "type": "number",
+            "description": "Index value on the statement date; required for an index-based lease, ignored otherwise.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "improvementsCredit": {
+            "type": "number",
+            "description": "Approved improvements; counted up to the lease's improvements cap, ignored without one.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "delivery": {
+            "type": "string",
+            "description": "How it was sent: FirstClassMail, CertifiedMail, RegisteredMail, HandDelivered or Email."
           }
         }
       },

@@ -15,6 +15,7 @@ import { DateInput } from '../../components/DateInput'
 import LeaseResaleSection from './LeaseResaleSection'
 import LeaseFeesSection from './LeaseFeesSection'
 import LeaseMortgagesSection from './LeaseMortgagesSection'
+import LeaseResalePriceStatementsSection from './LeaseResalePriceStatementsSection'
 
 function SkeletonRows() {
   return (
@@ -156,6 +157,8 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
           <LeaseConnectedRecords lease={detail} />
 
           <LeaseResaleSection groundLeaseId={groundLeaseId} leaseActive={detail.status === 'Active'} />
+
+          <LeaseResalePriceStatementsSection lease={detail} />
 
           <LeaseFeesSection lease={detail} />
 

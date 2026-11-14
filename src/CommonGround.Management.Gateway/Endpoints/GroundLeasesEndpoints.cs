@@ -127,6 +127,33 @@ public static class GroundLeasesEndpoints
         return Results.Created($"/api/v1/ground-leases/{groundLeaseId}/lease-fee-interest-waivers/{result.WaiverId}", result);
     }
 
+    [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/resale-price-statements/preview")]
+    [ProducesResponseType<ResalePriceStatementPriceResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> PreviewResalePriceStatement(
+        string groundLeaseId,
+        PreviewResalePriceStatementRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        return Results.Ok(await client.PreviewResalePriceStatementAsync(groundLeaseId, request, cancellationToken).ConfigureAwait(false));
+    }
+
+    [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/resale-price-statements")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> RecordResalePriceStatement(
+        string groundLeaseId,
+        RecordResalePriceStatementRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.RecordResalePriceStatementAsync(groundLeaseId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
     [WolverinePut("/api/v1/ground-leases/{groundLeaseId}/lease-fee-tracking")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> CorrectLeaseFeeTracking(

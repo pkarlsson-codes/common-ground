@@ -517,3 +517,58 @@ export function useWithdrawMortgageRequest() {
     onSuccess: (_d, v) => invalidateMortgageRequests(qc, v.request.groundLeaseId!),
   })
 }
+
+/** The figures a resale price statement needs beyond what the lease holds; which count depends on the formula. */
+export interface ResalePriceStatementFigures {
+  marketValue: number | null
+  marketValueSource: string
+  indexValue: number | null
+  improvementsCredit: number | null
+}
+
+const statementFiguresRequest = (statementDate: CalendarDate, figures: ResalePriceStatementFigures) => ({
+  statementDate,
+  marketValue: figures.marketValue,
+  marketValueSource: figures.marketValueSource.trim() || null,
+  indexValue: figures.indexValue,
+  improvementsCredit: figures.improvementsCredit,
+})
+
+/** A lease's resale price on a statement date, worked out by the API; off until the figures are complete. */
+export function useResalePriceStatementPreview(
+  groundLeaseId: string | null,
+  statementDate: CalendarDate | null,
+  figures: ResalePriceStatementFigures,
+  enabled: boolean,
+) {
+  return useQuery({
+    queryKey: ['resale-price-statement-preview', groundLeaseId, statementDate, figures],
+    queryFn: () => api.previewResalePriceStatement({
+      groundLeaseId: groundLeaseId!,
+      previewResalePriceStatementRequest: statementFiguresRequest(statementDate!, figures),
+    }),
+    enabled: enabled && !!groundLeaseId && !!statementDate,
+    retry: false,
+  })
+}
+
+export function useRecordResalePriceStatement() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ groundLeaseId, statementDate, figures, delivery }: {
+      groundLeaseId: string
+      statementDate: CalendarDate
+      figures: ResalePriceStatementFigures
+      delivery: NoticeDelivery
+    }) =>
+      api.recordResalePriceStatement({
+        groundLeaseId,
+        recordResalePriceStatementRequest: { ...statementFiguresRequest(statementDate, figures), delivery },
+      }),
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ['ground-lease', v.groundLeaseId] })
+      qc.invalidateQueries({ queryKey: ['resale-price-statements-due'] })
+      qc.invalidateQueries({ queryKey: ['today'] })
+    },
+  })
+}

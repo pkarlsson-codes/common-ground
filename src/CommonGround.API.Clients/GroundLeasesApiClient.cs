@@ -194,4 +194,20 @@ public sealed class GroundLeasesApiClient(
         ArgumentNullException.ThrowIfNull(request);
         await PostAsync($"api/mortgage-requests/{mortgageRequestId}/withdraw", request, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task<ResalePriceStatementPriceResponse> PreviewResalePriceStatementAsync(string groundLeaseId, PreviewResalePriceStatementRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        return await PostAsync<PreviewResalePriceStatementRequest, ResalePriceStatementPriceResponse>($"api/ground-leases/{groundLeaseId}/resale-price-statements/preview", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task RecordResalePriceStatementAsync(string groundLeaseId, RecordResalePriceStatementRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/ground-leases/{groundLeaseId}/resale-price-statements", request, cancellationToken).ConfigureAwait(false);
+    }
 }

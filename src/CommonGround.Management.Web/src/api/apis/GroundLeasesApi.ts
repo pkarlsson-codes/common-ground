@@ -29,6 +29,7 @@ import type {
   MortgageRequestResponse,
   PaginatedResponseOfGroundLeaseListItemResponse,
   PaginatedResponseOfLeaseFeeBalanceResponse,
+  PreviewResalePriceStatementRequest,
   ProblemDetails,
   ReceiveMortgageRequestRequest,
   ReceiveMortgageRequestResponse,
@@ -41,7 +42,9 @@ import type {
   RecordMortgageRequestAppraisalRequest,
   RecordPermittedMortgageRequest,
   RecordPermittedMortgageResponse,
+  RecordResalePriceStatementRequest,
   RecordStewardshipCheckInRequest,
+  ResalePriceStatementPriceResponse,
   SetLeaseFeeNoticePolicyRequest,
   VoidLeaseFeePaymentRequest,
   WaiveLeaseFeeInterestRequest,
@@ -75,6 +78,8 @@ import {
     PaginatedResponseOfGroundLeaseListItemResponseToJSON,
     PaginatedResponseOfLeaseFeeBalanceResponseFromJSON,
     PaginatedResponseOfLeaseFeeBalanceResponseToJSON,
+    PreviewResalePriceStatementRequestFromJSON,
+    PreviewResalePriceStatementRequestToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
     ReceiveMortgageRequestRequestFromJSON,
@@ -99,8 +104,12 @@ import {
     RecordPermittedMortgageRequestToJSON,
     RecordPermittedMortgageResponseFromJSON,
     RecordPermittedMortgageResponseToJSON,
+    RecordResalePriceStatementRequestFromJSON,
+    RecordResalePriceStatementRequestToJSON,
     RecordStewardshipCheckInRequestFromJSON,
     RecordStewardshipCheckInRequestToJSON,
+    ResalePriceStatementPriceResponseFromJSON,
+    ResalePriceStatementPriceResponseToJSON,
     SetLeaseFeeNoticePolicyRequestFromJSON,
     SetLeaseFeeNoticePolicyRequestToJSON,
     VoidLeaseFeePaymentRequestFromJSON,
@@ -177,6 +186,11 @@ export interface MarkPermittedMortgagePaidOffOperationRequest {
     markPermittedMortgagePaidOffRequest: MarkPermittedMortgagePaidOffRequest;
 }
 
+export interface PreviewResalePriceStatementOperationRequest {
+    groundLeaseId: string;
+    previewResalePriceStatementRequest: PreviewResalePriceStatementRequest;
+}
+
 export interface ReceiveMortgageRequestOperationRequest {
     groundLeaseId: string;
     receiveMortgageRequestRequest: ReceiveMortgageRequestRequest;
@@ -205,6 +219,11 @@ export interface RecordMortgageRequestAppraisalOperationRequest {
 export interface RecordPermittedMortgageOperationRequest {
     groundLeaseId: string;
     recordPermittedMortgageRequest: RecordPermittedMortgageRequest;
+}
+
+export interface RecordResalePriceStatementOperationRequest {
+    groundLeaseId: string;
+    recordResalePriceStatementRequest: RecordResalePriceStatementRequest;
 }
 
 export interface RecordStewardshipCheckInOperationRequest {
@@ -426,6 +445,20 @@ export interface GroundLeasesApiInterface {
     /**
      * 
      * @param {string} groundLeaseId 
+     * @param {PreviewResalePriceStatementRequest} previewResalePriceStatementRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    previewResalePriceStatementRaw(requestParameters: PreviewResalePriceStatementOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResalePriceStatementPriceResponse>>;
+
+    /**
+     */
+    previewResalePriceStatement(requestParameters: PreviewResalePriceStatementOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResalePriceStatementPriceResponse>;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
      * @param {ReceiveMortgageRequestRequest} receiveMortgageRequestRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -506,6 +539,20 @@ export interface GroundLeasesApiInterface {
     /**
      */
     recordPermittedMortgage(requestParameters: RecordPermittedMortgageOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
+     * @param {RecordResalePriceStatementRequest} recordResalePriceStatementRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    recordResalePriceStatementRaw(requestParameters: RecordResalePriceStatementOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    recordResalePriceStatement(requestParameters: RecordResalePriceStatementOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -1160,6 +1207,51 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
 
     /**
      */
+    async previewResalePriceStatementRaw(requestParameters: PreviewResalePriceStatementOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResalePriceStatementPriceResponse>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling previewResalePriceStatement().'
+            );
+        }
+
+        if (requestParameters['previewResalePriceStatementRequest'] == null) {
+            throw new runtime.RequiredError(
+                'previewResalePriceStatementRequest',
+                'Required parameter "previewResalePriceStatementRequest" was null or undefined when calling previewResalePriceStatement().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/resale-price-statements/preview`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: PreviewResalePriceStatementRequestToJSON(requestParameters['previewResalePriceStatementRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ResalePriceStatementPriceResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async previewResalePriceStatement(requestParameters: PreviewResalePriceStatementOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResalePriceStatementPriceResponse> {
+        const response = await this.previewResalePriceStatementRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
     async receiveMortgageRequestRaw(requestParameters: ReceiveMortgageRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['groundLeaseId'] == null) {
             throw new runtime.RequiredError(
@@ -1433,6 +1525,58 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
     async recordPermittedMortgage(requestParameters: RecordPermittedMortgageOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.recordPermittedMortgageRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async recordResalePriceStatementRaw(requestParameters: RecordResalePriceStatementOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling recordResalePriceStatement().'
+            );
+        }
+
+        if (requestParameters['recordResalePriceStatementRequest'] == null) {
+            throw new runtime.RequiredError(
+                'recordResalePriceStatementRequest',
+                'Required parameter "recordResalePriceStatementRequest" was null or undefined when calling recordResalePriceStatement().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/resale-price-statements`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RecordResalePriceStatementRequestToJSON(requestParameters['recordResalePriceStatementRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async recordResalePriceStatement(requestParameters: RecordResalePriceStatementOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordResalePriceStatementRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
