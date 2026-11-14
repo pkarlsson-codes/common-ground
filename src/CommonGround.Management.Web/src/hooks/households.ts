@@ -33,9 +33,10 @@ const shouldRetryQuery = (failureCount: number, error: unknown): boolean => {
   return failureCount < 2
 }
 
-const OPEN_PHASES = ['Submitted', 'Approved']
+// Selected counts as open: it returns to Approved if the purchase falls through.
+const OPEN_PHASES = ['Submitted', 'Approved', 'Selected']
 
-/** The household's open (Submitted or Approved) application, if any. */
+/** The household's open (Submitted, Approved or Selected) application, if any. */
 export const findOpenApplication = (household?: HouseholdResponse) =>
   household?.applications?.find(a => OPEN_PHASES.includes(a.phase ?? ''))
 

@@ -17,9 +17,12 @@ public sealed class ApplicationPhase : Enumeration<ApplicationPhase>
     public static readonly ApplicationPhase Selected = new(4, nameof(Selected));
     /// <summary>The purchase of the home the applicant was selected for has closed.</summary>
     public static readonly ApplicationPhase Purchased = new(5, nameof(Purchased));
-    /// <summary>Whether this phase allows no further transitions.</summary>
+    /// <summary>
+    /// Whether this phase allows no further transitions. <see cref="Selected"/> is not terminal: it returns
+    /// to <see cref="Approved"/> when the purchase falls through, or moves on to <see cref="Purchased"/>.
+    /// </summary>
     public bool IsTerminal =>
-        this == Denied || this == Withdrawn || this == Selected || this == Purchased;
+        this == Denied || this == Withdrawn || this == Purchased;
 
     private ApplicationPhase(int value, string name) : base(value, name) { }
 }

@@ -120,6 +120,9 @@ public static class BusinessRuleViolation
                     {
                         ["phase"] = phase.DisplayName,
                     });
+
+            public static BusinessRuleViolationException SelectedForPurchase()
+                => new("home_buyers.homeowner_application.modify.selected_for_purchase", new Dictionary<string, object?>());
         }
     }
 

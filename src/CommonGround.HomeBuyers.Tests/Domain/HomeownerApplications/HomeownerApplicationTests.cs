@@ -142,6 +142,43 @@ public class HomeownerApplicationTests
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.homeowner_application.modify.terminal_phase");
         }
+
+        [Fact]
+        public void GivenSelectedApplication_WhenWithdrawn_ThenThrowsSelectedForPurchase()
+        {
+            var sut = _testBed.SelectedApplication();
+
+            var act = () => sut.Withdraw(_testBed.SelectedDate.AddDays(1), null, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.modify.selected_for_purchase");
+        }
+
+        [Fact]
+        public void GivenSelectedApplication_WhenDenied_ThenThrowsSelectedForPurchase()
+        {
+            var sut = _testBed.SelectedApplication();
+
+            var act = () => sut.DenyApplication("No longer eligible", _testBed.SelectedDate.AddDays(1), _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.modify.selected_for_purchase");
+        }
+    }
+
+    public class TheIsTerminalProperty
+    {
+        private readonly TestBed _testBed = new();
+
+        // Selected counts as open, so a household in a purchase can't submit a second application that
+        // would sit beside the first once the purchase falls through and the first returns to Approved.
+        [Fact]
+        public void GivenSelectedApplication_ThenIsNotTerminal()
+        {
+            var sut = _testBed.SelectedApplication();
+
+            sut.IsTerminal.Should().BeFalse();
+        }
     }
 
     public class TheSelectForHomeMethod

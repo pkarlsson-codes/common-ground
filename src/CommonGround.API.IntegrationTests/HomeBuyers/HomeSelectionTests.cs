@@ -267,6 +267,24 @@ public class HomeSelectionTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task SubmitApplication_ForHouseholdSelectedForAHome_Returns422()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var homeId = await CreateHomeAsync(client);
+        var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
+        var chosen = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
+        var selectionId = await StartSelectionAsync(client, homeId);
+        (await client.PostAsJsonAsync($"/api/home-selections/{selectionId}/select-by-priority",
+            new SelectHouseholdByPriorityRequest(chosen.ApplicationId, ["WaitingListTenure"], "Only candidate", templateId, 200000m, SelectedDate)))
+            .StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var response = await client.PostAsJsonAsync("/api/homeowner-applications", new SubmitApplicationRequest(chosen.HouseholdId));
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await ReadProblemCodeAsync(response)).Should().Be("home_buyers.homeowner_application.submit.household_has_open_application");
+    }
+
+    [Fact]
     public async Task SelectByPriority_WithUnrecognizedPriority_Returns400()
     {
         var client = factory.CreateClient().WithAuthToken();

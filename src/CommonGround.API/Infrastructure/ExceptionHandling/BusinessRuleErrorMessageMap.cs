@@ -35,6 +35,7 @@ internal static class BusinessRuleErrorMessageMap
             ["home_buyers.homeowner_application.approve.phase_not_submitted"] = "Only submitted applications can be approved. This application is {phase}.",
             ["home_buyers.homeowner_application.deny.phase_not_submitted"] = "Only submitted applications can be denied. This application is {phase}.",
             ["home_buyers.homeowner_application.deny.reason_required"] = "A reason is required to deny an application.",
+            ["home_buyers.homeowner_application.modify.selected_for_purchase"] = "This application is selected for a home. Fail or withdraw that purchase first; the application then returns to the waiting list.",
             ["home_buyers.homeowner_application.modify.terminal_phase"] = "This application is {phase} and can no longer be changed.",
             ["home_buyers.homeowner_application.record_purchase_closed.phase_not_selected"] = "Only a selected application can record a closed purchase. This application is {phase}.",
             ["home_buyers.homeowner_application.return_to_waiting_list.phase_not_selected"] = "Only a selected application can return to the waiting list. This application is {phase}.",

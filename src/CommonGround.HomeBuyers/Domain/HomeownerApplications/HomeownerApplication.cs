@@ -287,5 +287,10 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     {
         if (IsTerminal)
             throw BusinessRuleViolation.HomeownerApplication.Modify.TerminalPhase(Phase);
+
+        // A selected application belongs to a purchase in progress. It leaves Selected only through that
+        // purchase: back to the waiting list if it falls through, or Purchased when it closes.
+        if (Phase == ApplicationPhase.Selected)
+            throw BusinessRuleViolation.HomeownerApplication.Modify.SelectedForPurchase();
     }
 }
