@@ -6,6 +6,7 @@ using CommonGround.HomeBuyers.Application.Commands;
 using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.SharedKernel.Infrastructure.API;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Wolverine;
 
@@ -13,7 +14,7 @@ namespace CommonGround.API.IntegrationTests.HomeBuyers;
 
 /// <summary>
 /// Covers the waiting list query: which applications are on it, their order, and the readiness
-/// and re-verification state derived from the household as of today.
+/// and re-verification state derived from the household as of today; and how staff take a household off it.
 /// </summary>
 [Collection(IntegrationCollection.Name)]
 public class WaitingListTests(ApiFactory factory)
@@ -115,6 +116,58 @@ public class WaitingListTests(ApiFactory factory)
             $"/api/waiting-list{new GetWaitingListQuerySpec(search: $"SECOND {marker}").ToQueryString()}");
 
         page!.Items.Select(e => e.ApplicationId).Should().Equal(matchingId);
+    }
+
+    [Fact]
+    public async Task RemoveFromWaitingList_EndsTheApplicationWithTheReasonAndTheHouseholdCanApplyAgain()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var householdId = await RegisterHouseholdAsync(client, "waiting-removed@example.com");
+        var applicationId = await SubmitAndApproveAsync(client, householdId, new DateOnly(2026, 6, 1));
+
+        (await client.PostAsJsonAsync($"/api/homeowner-applications/{applicationId}/remove-from-waiting-list",
+            new RemoveFromWaitingListRequest("NoResponse", "Three calls and a letter", new DateOnly(2026, 6, 10))))
+            .StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var application = await client.GetFromJsonAsync<HomeownerApplicationResponse>($"/api/homeowner-applications/{applicationId}");
+        application.Should().BeEquivalentTo(new
+        {
+            Phase = "Removed",
+            ApprovedDate = new DateOnly(2026, 6, 1),
+            RemovalReason = "NoResponse",
+            RemovalNote = "Three calls and a letter",
+            RemovedDate = new DateOnly(2026, 6, 10),
+        });
+        (await GetWholeWaitingListAsync(client)).Select(e => e.ApplicationId).Should().NotContain(applicationId);
+        await SubmitAsync(client, householdId);
+    }
+
+    [Fact]
+    public async Task RemoveFromWaitingList_WithAnUnknownReason_IsABadRequest()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var applicationId = await SubmitAndApproveAsync(
+            client, await RegisterHouseholdAsync(client, "waiting-unknown-reason@example.com"), new DateOnly(2026, 6, 1));
+
+        var response = await client.PostAsJsonAsync($"/api/homeowner-applications/{applicationId}/remove-from-waiting-list",
+            new RemoveFromWaitingListRequest("MovedAway", null, new DateOnly(2026, 6, 10)));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task DenyApplication_OnAnApprovedApplication_IsRefused()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var applicationId = await SubmitAndApproveAsync(
+            client, await RegisterHouseholdAsync(client, "waiting-deny-approved@example.com"), new DateOnly(2026, 6, 1));
+
+        var response = await client.PostAsJsonAsync($"/api/homeowner-applications/{applicationId}/deny",
+            new DenyApplicationRequest("Moved away", new DateOnly(2026, 6, 10)));
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await response.Content.ReadFromJsonAsync<ProblemDetails>())!.Extensions["code"]!.ToString()
+            .Should().Be("home_buyers.homeowner_application.deny.phase_not_submitted");
     }
 
     private static async Task<List<WaitingListEntryResponse>> GetWholeWaitingListAsync(HttpClient client)

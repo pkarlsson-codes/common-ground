@@ -173,6 +173,34 @@ public static class HomeownerApplicationsEndpoints
         return Results.NoContent();
     }
 
+    [WolverinePost("/api/homeowner-applications/{applicationId}/remove-from-waiting-list")]
+    public static async Task<IResult> RemoveFromWaitingList(
+        string applicationId,
+        RemoveFromWaitingListRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (!WaitingListRemovalReason.TryFromDisplayName(request.Reason, out var reason))
+        {
+            return Results.BadRequest($"Unrecognized waiting list removal reason: '{request.Reason}'.");
+        }
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new RemoveFromWaitingList(
+                HomeownerApplicationId.Create(applicationId),
+                reason,
+                request.Note,
+                request.RemovedDate,
+                httpContext.GetUserId()),
+            cancellationToken);
+
+        return Results.NoContent();
+    }
+
     private static HomeownerApplicationResponse MapToResponse(HomeownerApplicationDetails details)
     {
         var view = details.Application;
@@ -190,6 +218,9 @@ public static class HomeownerApplicationsEndpoints
             view.ApprovedDate,
             view.DenialReason,
             view.WithdrawalReason,
+            view.RemovalReason,
+            view.RemovalNote,
+            view.RemovedDate,
             view.SelectedDate,
             view.SelectedHomeId,
             view.SelectedLandParcelId,

@@ -125,6 +125,95 @@ public class HomeownerApplicationTests
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("home_buyers.homeowner_application.deny.reason_required");
         }
+
+        [Fact]
+        public void GivenApprovedApplication_WhenDenied_ThenThrowsPhaseNotSubmitted()
+        {
+            var sut = _testBed.ApprovedApplication();
+
+            var act = () => sut.DenyApplication("Moved away", new DateOnly(2026, 7, 1), _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.deny.phase_not_submitted");
+        }
+    }
+
+    public class TheRemoveFromWaitingListMethod
+    {
+        private static readonly DateOnly Today = new(2026, 9, 1);
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenSubmittedApplication_WhenRemoved_ThenThrowsPhaseNotApproved()
+        {
+            var sut = _testBed.SubmittedApplication();
+
+            var act = () => sut.RemoveFromWaitingList(WaitingListRemovalReason.NoResponse, null, Today, Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.remove_from_waiting_list.phase_not_approved");
+        }
+
+        [Fact]
+        public void GivenSelectedApplication_WhenRemoved_ThenThrowsSelectedForPurchase()
+        {
+            var sut = _testBed.SelectedApplication();
+
+            var act = () => sut.RemoveFromWaitingList(WaitingListRemovalReason.NoResponse, null, Today, Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.modify.selected_for_purchase");
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("  ")]
+        public void GivenOtherWithoutNote_WhenRemoved_ThenThrowsNoteRequired(string? note)
+        {
+            var sut = _testBed.ApprovedApplication();
+
+            var act = () => sut.RemoveFromWaitingList(WaitingListRemovalReason.Other, note, Today, Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.remove_from_waiting_list.note_required");
+        }
+
+        [Fact]
+        public void GivenDateAfterToday_WhenRemoved_ThenThrowsRemovedDateInFuture()
+        {
+            var sut = _testBed.ApprovedApplication();
+
+            var act = () => sut.RemoveFromWaitingList(WaitingListRemovalReason.NoResponse, null, Today.AddDays(1), Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.remove_from_waiting_list.removed_date_in_future");
+        }
+
+        [Fact]
+        public void GivenDateBeforeApproval_WhenRemoved_ThenThrowsRemovedDateBeforeApproval()
+        {
+            var sut = _testBed.ApprovedApplication();
+
+            var act = () => sut.RemoveFromWaitingList(WaitingListRemovalReason.NoResponse, null, sut.ApprovedDate!.Value.AddDays(-1), Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.remove_from_waiting_list.removed_date_before_approval");
+        }
+
+        [Fact]
+        public void GivenApprovedApplication_WhenRemovedOnTheApprovedDate_ThenIsRemovedAndTerminal()
+        {
+            var sut = _testBed.ApprovedApplication();
+
+            var (removed, events) = sut.Decide(a => a.RemoveFromWaitingList(
+                WaitingListRemovalReason.NoResponse, "  Three calls and a letter  ", sut.ApprovedDate!.Value, Today, _testBed.StaffUser));
+
+            removed.Phase.Should().Be(ApplicationPhase.Removed);
+            removed.IsTerminal.Should().BeTrue();
+            events.Should().ContainSingle().Which.Should().BeOfType<ApplicationRemovedFromWaitingList>()
+                .Which.Should().Match<ApplicationRemovedFromWaitingList>(e =>
+                    e.Reason == WaitingListRemovalReason.NoResponse && e.Note == "Three calls and a letter" && e.RemovedDate == sut.ApprovedDate);
+        }
     }
 
     public class TheWithdrawMethod

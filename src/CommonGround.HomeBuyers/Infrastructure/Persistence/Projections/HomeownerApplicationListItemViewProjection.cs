@@ -57,4 +57,10 @@ internal sealed class HomeownerApplicationListItemViewProjection : SingleStreamP
         view.Phase = ApplicationPhase.Withdrawn.DisplayName;
         view.ClosedDate = e.WithdrawnDate;
     }
+
+    public static void Apply(HomeownerApplicationListItemView view, ApplicationRemovedFromWaitingList e)
+    {
+        view.Phase = ApplicationPhase.Removed.DisplayName;
+        view.ClosedDate = e.RemovedDate;
+    }
 }

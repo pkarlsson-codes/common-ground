@@ -62,4 +62,12 @@ internal sealed class HomeownerApplicationViewProjection : SingleStreamProjectio
         view.Phase = ApplicationPhase.Withdrawn.DisplayName;
         view.WithdrawalReason = e.Reason;
     }
+
+    public static void Apply(HomeownerApplicationView view, ApplicationRemovedFromWaitingList e)
+    {
+        view.Phase = ApplicationPhase.Removed.DisplayName;
+        view.RemovalReason = e.Reason.DisplayName;
+        view.RemovalNote = e.Note;
+        view.RemovedDate = e.RemovedDate;
+    }
 }

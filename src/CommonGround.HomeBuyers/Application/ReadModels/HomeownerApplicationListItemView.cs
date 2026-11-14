@@ -33,6 +33,6 @@ public class HomeownerApplicationListItemView : IHomeownerApplicationPhaseView
     /// <summary>Gets or sets the closing date of the purchase, once purchased.</summary>
     public DateOnly? PurchasedDate { get; set; }
 
-    /// <summary>Gets or sets the date the application last closed (denied or withdrawn), if it has.</summary>
+    /// <summary>Gets or sets the date the application last closed (denied, withdrawn or removed from the waiting list), if it has.</summary>
     public DateOnly? ClosedDate { get; set; }
 }

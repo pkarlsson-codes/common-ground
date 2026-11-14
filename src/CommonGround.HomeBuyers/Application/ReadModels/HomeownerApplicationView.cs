@@ -36,6 +36,15 @@ public class HomeownerApplicationView : IHomeownerApplicationPhaseView
     /// <summary>Gets or sets the withdrawal reason, if any.</summary>
     public string? WithdrawalReason { get; set; }
 
+    /// <summary>Gets or sets why the application was removed from the waiting list, if it was.</summary>
+    public string? RemovalReason { get; set; }
+
+    /// <summary>Gets or sets staff's note on the removal, if any.</summary>
+    public string? RemovalNote { get; set; }
+
+    /// <summary>Gets or sets the day the application was removed from the waiting list.</summary>
+    public DateOnly? RemovedDate { get; set; }
+
     /// <summary>Gets or sets when the applicant was selected.</summary>
     public DateOnly? SelectedDate { get; set; }
 

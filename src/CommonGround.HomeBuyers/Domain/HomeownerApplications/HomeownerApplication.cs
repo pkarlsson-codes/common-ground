@@ -26,6 +26,9 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     public string? DenialReason { get; private set; }
     public string? WithdrawalReason { get; private set; }
 
+    /// <summary>The day the application was approved; <see langword="null"/> before approval.</summary>
+    public DateOnly? ApprovedDate { get; private set; }
+
     private readonly HashSet<HomeSelectionId> _passedOverIn = [];
 
     /// <summary>The home selections that completed with another household chosen while this application could have been.</summary>
@@ -204,13 +207,47 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
         return new ApplicationPurchaseClosed(Id.Value, HouseholdId.Value, homeId, closingDate);
     }
 
+    /// <summary>Denies an application under review. An approved household leaves through <see cref="RemoveFromWaitingList"/>.</summary>
     public ApplicationDenied DenyApplication(string reason, DateOnly deniedDate, UserId recordedBy)
     {
         if (string.IsNullOrWhiteSpace(reason))
             throw BusinessRuleViolation.HomeownerApplication.Deny.ReasonRequired();
         GuardNotTerminal();
 
+        if (Phase != ApplicationPhase.Submitted)
+            throw BusinessRuleViolation.HomeownerApplication.Deny.PhaseNotSubmitted(Phase);
+
         return new ApplicationDenied(Id.Value, reason, deniedDate, recordedBy.Value);
+    }
+
+    /// <summary>
+    /// Takes an approved application off the waiting list for a reason that arose after approval.
+    /// </summary>
+    /// <param name="reason">Why.</param>
+    /// <param name="note">Staff's note; required when <paramref name="reason"/> is Other.</param>
+    /// <param name="removedDate">The day of removal; not after <paramref name="today"/> or before the approved date.</param>
+    /// <param name="today">Today in the trust's time zone.</param>
+    /// <param name="recordedBy">The staff user recording it.</param>
+    public ApplicationRemovedFromWaitingList RemoveFromWaitingList(
+        WaitingListRemovalReason reason, string? note, DateOnly removedDate, DateOnly today, UserId recordedBy)
+    {
+        ArgumentNullException.ThrowIfNull(reason);
+        GuardNotTerminal();
+
+        if (Phase != ApplicationPhase.Approved)
+            throw BusinessRuleViolation.HomeownerApplication.RemoveFromWaitingList.PhaseNotApproved(Phase);
+
+        var trimmedNote = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
+        if (reason == WaitingListRemovalReason.Other && trimmedNote is null)
+            throw BusinessRuleViolation.HomeownerApplication.RemoveFromWaitingList.NoteRequired();
+
+        if (removedDate > today)
+            throw BusinessRuleViolation.HomeownerApplication.RemoveFromWaitingList.RemovedDateInFuture(removedDate, today);
+
+        if (removedDate < ApprovedDate)
+            throw BusinessRuleViolation.HomeownerApplication.RemoveFromWaitingList.RemovedDateBeforeApproval(removedDate, ApprovedDate.Value);
+
+        return new ApplicationRemovedFromWaitingList(Id.Value, reason, trimmedNote, removedDate, recordedBy.Value);
     }
 
     public ApplicationWithdrawn Withdraw(DateOnly withdrawnDate, string? reason, UserId recordedBy)
@@ -249,6 +286,7 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     public void Apply(ApplicationApproved e)
     {
         Phase = ApplicationPhase.Approved;
+        ApprovedDate = e.ApprovedDate;
     }
     
     /// <summary>Applies <see cref="ApplicationReturnedToWaitingList"/>.</summary>
@@ -281,6 +319,12 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     {
         WithdrawalReason = e.Reason;
         Phase = ApplicationPhase.Withdrawn;
+    }
+
+    /// <summary>Applies <see cref="ApplicationRemovedFromWaitingList"/>.</summary>
+    public void Apply(ApplicationRemovedFromWaitingList _)
+    {
+        Phase = ApplicationPhase.Removed;
     }
 
     private void GuardNotTerminal()

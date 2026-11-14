@@ -76,6 +76,41 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class RemoveFromWaitingList
+        {
+            private const string Prefix = "home_buyers.homeowner_application.remove_from_waiting_list.";
+
+            public static BusinessRuleViolationException PhaseNotApproved(ApplicationPhase phase)
+                => new(
+                    Prefix + "phase_not_approved",
+                    new Dictionary<string, object?>
+                    {
+                        ["phase"] = phase.DisplayName,
+                        ["requiredPhase"] = ApplicationPhase.Approved.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException NoteRequired()
+                => new(Prefix + "note_required", new Dictionary<string, object?>());
+
+            public static BusinessRuleViolationException RemovedDateInFuture(DateOnly removedDate, DateOnly today)
+                => new(
+                    Prefix + "removed_date_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["removedDate"] = removedDate,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException RemovedDateBeforeApproval(DateOnly removedDate, DateOnly approvedDate)
+                => new(
+                    Prefix + "removed_date_before_approval",
+                    new Dictionary<string, object?>
+                    {
+                        ["removedDate"] = removedDate,
+                        ["approvedDate"] = approvedDate,
+                    });
+        }
+
         public static class ReturnToWaitingList
         {
             public static BusinessRuleViolationException PhaseNotSelected(ApplicationPhase phase)
