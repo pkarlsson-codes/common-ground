@@ -4,6 +4,7 @@ using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Specifications;
 using Marten;
 using Wolverine.Marten;
 
@@ -15,12 +16,6 @@ namespace CommonGround.Homeownership.Application.EventHandlers;
 /// </summary>
 public static class ApplicationSelectedHandler
 {
-    private static readonly string[] TerminalPhaseNames =
-    [
-        WorkflowPhase.Closed.DisplayName,
-        WorkflowPhase.Failed.DisplayName,
-        WorkflowPhase.Withdrawn.DisplayName,
-    ];
 
     /// <summary>Finds the application's purchase workflow that is still open, if any, and the home's selection.</summary>
     public static async Task<(PurchaseWorkflowView?, HomeSelectionView?)> LoadAsync(ApplicationSelected @event, IDocumentSession session, CancellationToken ct)
@@ -29,7 +24,8 @@ public static class ApplicationSelectedHandler
         ArgumentNullException.ThrowIfNull(session);
 
         var existingOpenWorkflow = await session.Query<PurchaseWorkflowView>()
-            .Where(v => v.ApplicationId == @event.ApplicationId && !TerminalPhaseNames.Contains(v.Phase))
+            .Where(v => v.ApplicationId == @event.ApplicationId)
+            .Matching(PurchaseWorkflowInProgress<PurchaseWorkflowView>.Instance)
             .FirstOrDefaultAsync(ct)
             .ConfigureAwait(false);
         var selection = await HomeSelectionUpdate.LoadAsync(session, @event.HomeSelectionId, ct).ConfigureAwait(false);

@@ -1,11 +1,13 @@
 // Site navigation for the static pages in docs/.
 // Every page loads this file with <script src="./nav.js" defer>. It adds the
-// header bar, turns the page's own contents list into a site sidebar with that
-// list nested under the current page, and adds previous/next links.
+// header bar, a site sidebar with the current page's sections nested under it
+// (built from each <section id> and its <h2>), previous/next links, and fills
+// the context cards on the home page.
 // A plain script, not a module, so it also works when a page is opened from disk.
 //
 // To add a page: add it to SITE below. Set planned: true for a page that
-// isn't written yet; it shows in the sidebar without a link.
+// isn't written yet; it shows in the sidebar and on the home page without a link.
+// `about` is the one-line description on the page's home page card.
 
 const SITE = [
   { group: 'Start here', pages: [
@@ -13,14 +15,14 @@ const SITE = [
     { file: 'architecture.html', title: 'Architecture Overview' },
   ] },
   { group: 'Bounded contexts', pages: [
-    { file: 'shared-kernel.html', title: 'Shared Kernel' },
-    { file: 'property-registry.html', title: 'Property Registry' },
-    { file: 'home-buyers.html', title: 'Home Buyers', planned: true },
-    { file: 'homeownership.html', title: 'Homeownership', planned: true },
-    { file: 'stewardship.html', title: 'Stewardship', planned: true },
-    { file: 'trust-management.html', title: 'Trust Management', planned: true },
-    { file: 'identity.html', title: 'Identity', planned: true },
-    { file: 'documents.html', title: 'Documents', planned: true },
+    { file: 'shared-kernel.html', title: 'Shared Kernel', about: 'Base classes, shared value objects, errors, the clock, and the Marten and Wolverine helpers every context uses.' },
+    { file: 'property-registry.html', title: 'Property Registry', about: 'Land parcels, homes, development projects, and where each home stands in being sold.' },
+    { file: 'home-buyers.html', title: 'Home Buyers', about: 'Households, applications, choosing a household for a home, income limits.', planned: true },
+    { file: 'homeownership.html', title: 'Homeownership', about: 'Purchase workflow, mortgages, ground leases, lease fee notices, resales.', planned: true },
+    { file: 'stewardship.html', title: 'Stewardship', about: 'Stewardship cases and foreclosure prevention.', planned: true },
+    { file: 'trust-management.html', title: 'Trust Management', about: 'The trust\'s settings, policy, members and invitations.', planned: true },
+    { file: 'identity.html', title: 'Identity', about: 'Users, linked to their Keycloak account.', planned: true },
+    { file: 'documents.html', title: 'Documents', about: 'Uploaded files attached to any record.', planned: true },
   ] },
   { group: 'Topics', pages: [
     { file: 'auth-flow.html', title: 'Authentication flow' },
@@ -40,17 +42,14 @@ const SITE = [
 
   document.documentElement.classList.add('has-site-nav');
 
-  // Sidebar: reuse the page's <nav class="toc">, keep its <ol> of sections.
+  // Sidebar, with this page's sections nested under its entry.
   const layout = document.querySelector('.layout');
-  let sidebar = document.querySelector('nav.toc');
-  const pageToc = sidebar ? sidebar.querySelector('ol') : null;
-  if (!sidebar) {
-    sidebar = el('nav', { class: 'toc' });
-    layout.prepend(sidebar);
+  const sidebar = el('nav', { class: 'toc', id: 'site-nav', 'aria-label': 'Site' });
+  layout.prepend(sidebar);
+  const pageToc = el('ol', { class: 'page-toc' });
+  for (const h of document.querySelectorAll('main section[id] > h2')) {
+    pageToc.append(el('li', {}, el('a', { href: '#' + h.parentElement.id }, h.textContent.replace(/^\d+\.\s*/, ''))));
   }
-  sidebar.replaceChildren();
-  sidebar.id = 'site-nav';
-  sidebar.setAttribute('aria-label', 'Site');
 
   for (const g of SITE) {
     const list = el('ul');
@@ -59,7 +58,7 @@ const SITE = [
         list.append(el('li', { class: 'planned' }, p.title, el('span', { class: 'tag' }, 'not written yet')));
       } else if (p.file === here) {
         const li = el('li', { class: 'current' }, el('a', { href: './' + p.file, 'aria-current': 'page' }, p.title));
-        if (pageToc) { pageToc.classList.add('page-toc'); li.append(pageToc); }
+        if (pageToc.children.length) li.append(pageToc);
         list.append(li);
       } else {
         list.append(el('li', {}, el('a', { href: './' + p.file }, p.title)));
@@ -95,10 +94,34 @@ const SITE = [
     main.append(pager);
   }
 
+  // Home page cards: <div class="ctx" data-page="file.html"></div> gets the
+  // page's title and description, as a link once the page is written.
+  const byFile = Object.fromEntries(SITE.flatMap(g => g.pages).map(p => [p.file, p]));
+  for (const card of document.querySelectorAll('[data-page]')) {
+    const p = byFile[card.dataset.page];
+    if (!p) { console.error('nav.js: no SITE entry for', card.dataset.page); continue; }
+    const body = [el('strong', {}, p.title), el('span', {}, p.about || '')];
+    card.replaceWith(p.planned
+      ? el('div', { class: 'ctx planned' }, ...body, el('em', {}, 'Page not written yet'))
+      : el('a', { class: 'ctx', href: './' + p.file }, ...body));
+  }
+
+  // Mermaid diagrams render after the browser has jumped to #section, and push
+  // the section down. Re-scroll to it while the page grows, until the reader
+  // scrolls or 5 seconds pass.
+  const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (target && main) {
+    const ro = new ResizeObserver(() => target.scrollIntoView());
+    ro.observe(main);
+    const stop = () => ro.disconnect();
+    for (const ev of ['wheel', 'touchstart', 'keydown', 'mousedown']) window.addEventListener(ev, stop, { once: true, passive: true });
+    setTimeout(stop, 5000);
+  }
+
   // Mark the section being read in the nested contents list.
   // The current section is the last one whose top has passed the header,
   // or the last section once the page is scrolled to the bottom.
-  if (pageToc) {
+  {
     const targets = [...pageToc.querySelectorAll('a[href^="#"]')]
       .map(a => ({ a, s: document.getElementById(a.getAttribute('href').slice(1)) }))
       .filter(t => t.s);

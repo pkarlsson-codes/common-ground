@@ -9,17 +9,6 @@
 </head>
 <body>
 <div class="layout">
-<nav class="toc" aria-label="Contents">
-  <p class="toc-title"><a href="./index.html">CommonGround docs</a></p>
-  <ol>
-    <li><a href="#map">The system, step by step</a></li>
-    <li><a href="#events">Who tells whom</a></li>
-    <li><a href="#first-day">Your first day</a></li>
-    <li><a href="#markdown">Other docs in the repo</a></li>
-    <li><a href="#about">About these pages</a></li>
-  </ol>
-</nav>
-
 <main>
 <header>
   <h1>CommonGround developer docs</h1>
@@ -33,35 +22,35 @@
   <ol class="lifecycle">
     <li>
       <p class="step"><b>1.</b> The trust gets land and builds or buys homes on it.</p>
-      <a class="ctx" href="./property-registry.html"><strong>Property Registry</strong><span>Land parcels, homes, development projects, and where each home stands in being sold.</span></a>
+      <div class="ctx" data-page="property-registry.html"></div>
     </li>
     <li>
       <p class="step"><b>2.</b> Households apply to buy, and the trust picks one for each home.</p>
-      <div class="ctx planned"><strong>Home Buyers</strong><span>Households, applications, choosing a household for a home, income limits.</span><em>Page not written yet</em></div>
+      <div class="ctx" data-page="home-buyers.html"></div>
     </li>
     <li>
       <p class="step"><b>3.</b> The household buys the house and leases the land. Later they resell at a capped price.</p>
-      <div class="ctx planned"><strong>Homeownership</strong><span>Purchase workflow, mortgages, ground leases, lease fee notices, resales.</span><em>Page not written yet</em></div>
+      <div class="ctx" data-page="homeownership.html"></div>
     </li>
     <li>
       <p class="step"><b>4.</b> The trust helps owners keep their homes.</p>
-      <div class="ctx planned"><strong>Stewardship</strong><span>Stewardship cases and foreclosure prevention.</span><em>Page not written yet</em></div>
+      <div class="ctx" data-page="stewardship.html"></div>
     </li>
   </ol>
 
   <div class="band">
     <p class="band-label">Used at every step</p>
     <ul class="band-items">
-      <li><div class="ctx planned"><strong>Trust Management</strong><span>The trust's settings, policy, members and invitations.</span><em>Page not written yet</em></div></li>
-      <li><div class="ctx planned"><strong>Identity</strong><span>Users, linked to their Keycloak account.</span><em>Page not written yet</em></div></li>
-      <li><div class="ctx planned"><strong>Documents</strong><span>Uploaded files attached to any record.</span><em>Page not written yet</em></div></li>
+      <li><div class="ctx" data-page="trust-management.html"></div></li>
+      <li><div class="ctx" data-page="identity.html"></div></li>
+      <li><div class="ctx" data-page="documents.html"></div></li>
     </ul>
   </div>
 
   <div class="band">
     <p class="band-label">Under all of them</p>
     <ul class="band-items">
-      <li><a class="ctx" href="./shared-kernel.html"><strong>Shared Kernel</strong><span>Base classes, shared value objects, errors, the clock, and the Marten and Wolverine helpers every context uses.</span></a></li>
+      <li><div class="ctx" data-page="shared-kernel.html"></div></li>
     </ul>
   </div>
 
@@ -118,9 +107,9 @@
   <p>The pages are static HTML with no build step. Open <code>docs/index.html</code> from disk or serve the folder with any static file server. Diagrams use Mermaid 11.4.1 from jsDelivr, so they need a network connection.</p>
   <ul>
     <li><code>docs/docs.css</code> holds the styles for light and dark mode.</li>
-    <li><code>docs/nav.js</code> builds the header, the sidebar and the Previous and Next links. Its <code>SITE</code> list is the one place that lists the pages.</li>
+    <li><code>docs/nav.js</code> builds the header, the sidebar, the Previous and Next links and the cards on this page. Its <code>SITE</code> list is the one place that lists the pages.</li>
   </ul>
-  <p><strong>To add a page:</strong> copy an existing context page, add it to <code>SITE</code> in <code>nav.js</code> (or remove <code>planned: true</code> from its entry), and change its card on this page from a <code>div</code> to a link. Check it at 390px wide: the page must not scroll sideways.</p>
+  <p><strong>To add a page:</strong> copy an existing context page and add it to <code>SITE</code> in <code>nav.js</code>, or remove <code>planned: true</code> from its entry. The sidebar, the Previous and Next links and its card on this page follow from that. The sidebar lists every <code>&lt;section id&gt;</code> in <code>&lt;main&gt;</code> by its <code>&lt;h2&gt;</code>, so a page needs no contents list of its own. Check it at 390px wide: the page must not scroll sideways.</p>
 </section>
 </main>
 </div>

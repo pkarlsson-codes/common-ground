@@ -14,25 +14,6 @@
 </head>
 <body>
 <div class="layout">
-<nav class="toc" aria-label="Contents">
-  <p class="toc-title"><a href="./index.html">CommonGround docs</a></p>
-  <ol>
-    <li><a href="#what">What it is</a></li>
-    <li><a href="#layout">Project layout</a></li>
-    <li><a href="#building-blocks">Domain building blocks</a></li>
-    <li><a href="#events">Domain and integration events</a></li>
-    <li><a href="#errors">Errors</a></li>
-    <li><a href="#values">Shared value objects</a></li>
-    <li><a href="#marten">Marten and Wolverine helpers</a></li>
-    <li><a href="#time">The clock</a></li>
-    <li><a href="#work-items">Work items for Today</a></li>
-    <li><a href="#http">HTTP and paging</a></li>
-    <li><a href="#seeding">Seeding</a></li>
-    <li><a href="#unused">Code with no callers</a></li>
-    <li><a href="#changing">Adding to the shared kernel</a></li>
-  </ol>
-</nav>
-
 <main>
 <header>
   <h1>Shared Kernel</h1>
@@ -70,7 +51,7 @@
       <tr><td><code>Infrastructure/Querying/</code></td><td><code>PageSpec</code>, <code>PaginationQuerySpecV2</code>, sort and cursor helpers.</td></tr>
       <tr><td><code>Infrastructure/Seeding/</code></td><td><code>IDevelopmentSeeder</code>, <code>SeedRun</code>, <code>SeedDate</code>, <code>SeedClock</code>, <code>PropagationWaiter</code>.</td></tr>
       <tr><td><code>Infrastructure/Services/</code></td><td><code>SystemTimeProvider</code>, <code>ControllableTimeProvider</code>.</td></tr>
-      <tr><td><code>Specifications/</code></td><td><code>Specification&lt;T&gt;</code>. No callers.</td></tr>
+      <tr><td><code>Specifications/</code></td><td><code>Specification&lt;T&gt;</code>: a named rule on a read model, used in queries (<code>query.Matching(spec)</code>) and in memory (<code>spec.IsSatisfiedBy(view)</code>). Build a rule from the domain's own check, such as <code>WorkflowPhase.IsTerminal</code>, not from a hand-written list of phase names. Example: <code>PurchaseWorkflowInProgress&lt;TView&gt;</code> in Homeownership.</td></tr>
     </tbody>
   </table>
   <p>Tests are in <code>src/CommonGround.SharedKernel.Tests</code>, one test class per type, for the value objects, IDs, the enumeration JSON converter, <code>TimeProviderContext</code>, <code>EventClockMiddleware</code>, <code>stream.Decide</code> and the seeding types.</p>
@@ -298,7 +279,6 @@ shared.income_limit_level.limit_not_positive</code></pre>
   <h2>12. Code with no callers</h2>
   <p>These types are in the shared kernel but nothing outside it calls them. I searched <code>src/</code> without the test projects. They are candidates for deletion; don't build on them without checking that they work.</p>
   <ul>
-    <li><code>Specification&lt;T&gt;</code> and <code>QueryableSpecificationExtensions</code>.</li>
     <li><code>PaginationQuerySpec</code> and <code>PaginationQuerySpec&lt;TFilter&gt;</code>; <code>PaginationQuerySpecV2</code> replaced them.</li>
     <li><code>IQueryablePaginationExtensions</code>. Its <code>Sort</code> ignores the sort descriptors (it orders by a constant; a TODO says so), and its <code>TakeAsync</code> uses Entity Framework Core's <code>CountAsync</code> and <code>ToListAsync</code>. It is the only reason the project references <code>Microsoft.EntityFrameworkCore</code>.</li>
     <li><code>QueryableSortExtensions</code>, <code>SortDescriptor</code>, and the model binder that is registered but never binds anything.</li>

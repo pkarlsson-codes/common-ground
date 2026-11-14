@@ -5,6 +5,7 @@ using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Specifications;
 using Marten;
 using Wolverine.Marten;
 
@@ -31,12 +32,6 @@ public sealed record CreateGroundLease(
 /// <summary>Handles <see cref="CreateGroundLease"/>.</summary>
 public static class CreateGroundLeaseHandler
 {
-    private static readonly string[] TerminalPhaseNames =
-    [
-        WorkflowPhase.Closed.DisplayName,
-        WorkflowPhase.Failed.DisplayName,
-        WorkflowPhase.Withdrawn.DisplayName,
-    ];
 
     /// <summary>Finds what the home is already committed to: an active lease, an open purchase or an open selection.</summary>
     public static async Task<HomeCommitments> LoadAsync(CreateGroundLease command, IQuerySession session, CancellationToken cancellationToken)
@@ -50,7 +45,8 @@ public static class CreateGroundLeaseHandler
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
         var openPurchase = await session.Query<PurchaseWorkflowListItemView>()
-            .Where(v => v.HomeId == command.UnitId && !TerminalPhaseNames.Contains(v.Phase))
+            .Where(v => v.HomeId == command.UnitId)
+            .Matching(PurchaseWorkflowInProgress<PurchaseWorkflowListItemView>.Instance)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
         var openSelection = await session.Query<HomeSelectionView>()

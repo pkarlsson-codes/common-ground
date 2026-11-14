@@ -13,6 +13,8 @@ public abstract class Specification<T>
     /// </summary>
     public static readonly Specification<T> All = new IdentitySpecification<T>();
 
+    private Func<T, bool>? _compiled;
+
     /// <summary>
     /// Determines whether the specified entity satisfies this specification.
     /// </summary>
@@ -25,8 +27,8 @@ public abstract class Specification<T>
             throw new ArgumentNullException(nameof(entity));
         }
 
-        Func<T, bool> predicate = ToExpression().Compile();
-        return predicate(entity);
+        _compiled ??= ToExpression().Compile();
+        return _compiled(entity);
     }
 
     /// <summary>

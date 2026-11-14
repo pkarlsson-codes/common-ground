@@ -1,6 +1,7 @@
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Domain.Services;
+using CommonGround.SharedKernel.Specifications;
 using Marten;
 
 namespace CommonGround.Homeownership.Application.Queries;
@@ -26,12 +27,6 @@ public sealed record PurchaseBoard(IReadOnlyList<PurchaseBoardColumn> Columns);
 /// <summary>Handles <see cref="GetPurchaseBoard"/>.</summary>
 public static class GetPurchaseBoardHandler
 {
-    private static readonly string[] TerminalPhaseNames =
-    [
-        WorkflowPhase.Closed.DisplayName,
-        WorkflowPhase.Failed.DisplayName,
-        WorkflowPhase.Withdrawn.DisplayName,
-    ];
 
     /// <summary>Loads the open purchases and their home labels and puts each in its step's column.</summary>
     public static async Task<PurchaseBoard> Handle(
@@ -45,7 +40,7 @@ public static class GetPurchaseBoardHandler
         var zone = await trustClock.GetTimeZoneAsync(session.TenantId, cancellationToken).ConfigureAwait(false);
 
         var workflows = await session.Query<PurchaseWorkflowListItemView>()
-            .Where(v => !TerminalPhaseNames.Contains(v.Phase))
+            .Matching(PurchaseWorkflowInProgress<PurchaseWorkflowListItemView>.Instance)
             .OrderBy(v => v.StepEnteredAt)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);

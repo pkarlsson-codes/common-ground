@@ -7,6 +7,7 @@ using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Services;
 using CommonGround.SharedKernel.Extensions;
 using CommonGround.SharedKernel.Infrastructure.Seeding;
+using CommonGround.SharedKernel.Specifications;
 using CommonGround.TrustManagement.Infrastructure.Seeding;
 using Marten;
 
@@ -26,13 +27,6 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
     };
 
     private static readonly UserId SeederUserId = UserId.Create("user-seeder-system");
-
-    private static readonly string[] TerminalPhaseNames =
-    [
-        WorkflowPhase.Closed.DisplayName,
-        WorkflowPhase.Failed.DisplayName,
-        WorkflowPhase.Withdrawn.DisplayName,
-    ];
 
     /// <inheritdoc/>
     public async Task SeedAsync(SeedRun run, IDocumentStore store, CancellationToken cancellation)
@@ -76,7 +70,8 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
             var workflow = await propagation.WaitForAsync(
                 $"purchase workflow for application {applicationId} to start",
                 ct => trustSession.Query<PurchaseWorkflowView>()
-                    .Where(v => v.ApplicationId == applicationId && !TerminalPhaseNames.Contains(v.Phase))
+                    .Where(v => v.ApplicationId == applicationId)
+                    .Matching(PurchaseWorkflowInProgress<PurchaseWorkflowView>.Instance)
                     .FirstOrDefaultAsync(ct),
                 cancellation).ConfigureAwait(false);
 

@@ -1,7 +1,7 @@
 namespace CommonGround.Homeownership.Application.ReadModels;
 
 /// <summary>Summary read model for purchase workflow list views.</summary>
-public class PurchaseWorkflowListItemView
+public class PurchaseWorkflowListItemView : IPurchaseWorkflowPhaseView
 {
     /// <summary>Gets or sets the unique identifier.</summary>
     public string Id { get; set; } = string.Empty;

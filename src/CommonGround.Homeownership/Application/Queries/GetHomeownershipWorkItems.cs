@@ -6,6 +6,7 @@ using CommonGround.Homeownership.Domain.MortgageRequests;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.SharedKernel.Application.WorkItems;
 using CommonGround.SharedKernel.Domain.Services;
+using CommonGround.SharedKernel.Specifications;
 using Marten;
 
 namespace CommonGround.Homeownership.Application.Queries;
@@ -24,12 +25,6 @@ public sealed record GetHomeownershipWorkItems(DateOnly Today, IReadOnlySet<stri
 /// <summary>Handles <see cref="GetHomeownershipWorkItems"/>.</summary>
 public static class GetHomeownershipWorkItemsHandler
 {
-    private static readonly string[] TerminalPhaseNames =
-    [
-        WorkflowPhase.Closed.DisplayName,
-        WorkflowPhase.Failed.DisplayName,
-        WorkflowPhase.Withdrawn.DisplayName,
-    ];
 
     /// <summary>Loads the open purchases and derives their work items.</summary>
     public static async Task<WorkItemList> Handle(
@@ -43,7 +38,7 @@ public static class GetHomeownershipWorkItemsHandler
         var zone = await trustClock.GetTimeZoneAsync(session.TenantId, cancellationToken).ConfigureAwait(false);
 
         var workflows = await session.Query<PurchaseWorkflowView>()
-            .Where(v => !TerminalPhaseNames.Contains(v.Phase))
+            .Matching(PurchaseWorkflowInProgress<PurchaseWorkflowView>.Instance)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         var listItems = (await session
