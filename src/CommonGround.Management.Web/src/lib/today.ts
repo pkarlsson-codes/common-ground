@@ -65,6 +65,8 @@ const KINDS: Record<string, { page: string; area: TodayArea }> = {
   'mortgage-request-pending': { page: '/ground-leases', area: 'stewardship' },
   'mortgage-loan-closing-unrecorded': { page: '/ground-leases', area: 'stewardship' },
   'resale-price-statement-due': { page: '/stewardship', area: 'stewardship' },
+  'insurance-certificate-due': { page: '/ground-leases', area: 'stewardship' },
+  'insurance-short-of-lease': { page: '/ground-leases', area: 'stewardship' },
   'document-expiring': { page: '/documents', area: 'records' },
   'income-limits-missing': { page: '/income-limits', area: 'selections' },
   'income-limits-stale': { page: '/income-limits', area: 'selections' },
@@ -113,6 +115,7 @@ const ACTION_LABELS: Record<string, string> = {
   'decide-mortgage-request': 'Decide',
   'record-mortgage-loan-closed': 'Confirm closing',
   'record-resale-price-statement': 'Prepare statement',
+  'record-insurance-certificate': 'Record certificate',
   'enter-income-limits': 'Enter limits',
 }
 
@@ -137,6 +140,7 @@ const PANEL_ACTIONS = new Set([
   'decide-mortgage-request',
   'record-mortgage-loan-closed',
   'record-resale-price-statement',
+  'record-insurance-certificate',
 ])
 
 export interface RowAction {

@@ -11,6 +11,7 @@ import RecordCltOrientationPanel from './households/RecordCltOrientationPanel'
 import RecordHousingCounselingPanel from './households/RecordHousingCounselingPanel'
 import RecordMortgagePrequalificationPanel from './households/RecordMortgagePrequalificationPanel'
 import TodayMortgageRequestPanel from './ground-leases/TodayMortgageRequestPanel'
+import TodayInsuranceCertificatePanel from './ground-leases/TodayInsuranceCertificatePanel'
 import TodayResalePriceStatementPanel from './ground-leases/TodayResalePriceStatementPanel'
 
 const KIND_LABELS: Record<string, string> = {
@@ -27,6 +28,8 @@ const KIND_LABELS: Record<string, string> = {
   'mortgage-request-pending': 'Mortgage request to decide',
   'mortgage-loan-closing-unrecorded': 'Mortgage loan closing to confirm',
   'resale-price-statement-due': 'Resale price statement due',
+  'insurance-certificate-due': 'Insurance certificate due',
+  'insurance-short-of-lease': 'Insurance short of the lease',
   'document-expiring': 'Document expiring',
   'income-limits-missing': 'Income limits missing',
   'income-limits-stale': 'Income limits out of date',
@@ -46,6 +49,7 @@ const ACTION_PANELS: Record<string, (recordId: string, onClose: () => void) => R
   'decide-mortgage-request': (id, onClose) => <TodayMortgageRequestPanel groundLeaseId={id} open="pending" onClose={onClose} />,
   'record-mortgage-loan-closed': (id, onClose) => <TodayMortgageRequestPanel groundLeaseId={id} open="closing" onClose={onClose} />,
   'record-resale-price-statement': (id, onClose) => <TodayResalePriceStatementPanel groundLeaseId={id} onClose={onClose} />,
+  'record-insurance-certificate': (id, onClose) => <TodayInsuranceCertificatePanel groundLeaseId={id} onClose={onClose} />,
 }
 
 const plural = (n: number, word: string) => `${n.toLocaleString()} ${word}${n === 1 ? '' : 's'}`

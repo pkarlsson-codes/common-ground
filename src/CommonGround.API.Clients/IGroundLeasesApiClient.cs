@@ -121,6 +121,21 @@ public interface IGroundLeasesApiClient
     /// <returns>A task that completes when the requirements are set.</returns>
     Task SetInsuranceRequirementsAsync(string groundLeaseId, SetInsuranceRequirementsRequest request, CancellationToken cancellationToken);
 
+    /// <summary>Records a certificate of the homeowner's insurance on a lease.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response.</returns>
+    Task<RecordInsuranceCertificateResponse> RecordInsuranceCertificateAsync(string groundLeaseId, RecordInsuranceCertificateRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Removes an insurance certificate recorded in error.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="certificateId">The ID of the certificate.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when the certificate is removed.</returns>
+    Task RemoveInsuranceCertificateAsync(string groundLeaseId, string certificateId, RemoveInsuranceCertificateRequest request, CancellationToken cancellationToken);
+
     /// <summary>Records a homeowner's request for a new loan on the home.</summary>
     /// <param name="groundLeaseId">The ID of the ground lease.</param>
     /// <param name="request">The request body.</param>

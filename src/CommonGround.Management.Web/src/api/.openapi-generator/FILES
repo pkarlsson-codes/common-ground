@@ -186,6 +186,8 @@ models/RecordForbearanceOutcomeRequest.ts
 models/RecordHomeAssessmentRequest.ts
 models/RecordHousingCounselingRequest.ts
 models/RecordInspectionCompletedRequest.ts
+models/RecordInsuranceCertificateRequest.ts
+models/RecordInsuranceCertificateResponse.ts
 models/RecordIntentToSellRequest.ts
 models/RecordIntentToSellResponse.ts
 models/RecordLeaseExecutedRequest.ts
@@ -212,6 +214,7 @@ models/RegisterHouseholdResponse.ts
 models/RegisterLandParcelRequest.ts
 models/RegisterLandParcelResponse.ts
 models/RemoveFromWaitingListRequest.ts
+models/RemoveInsuranceCertificateRequest.ts
 models/RequestForbearanceRequest.ts
 models/ResalePriceResponse.ts
 models/ResalePriceStatementDto.ts

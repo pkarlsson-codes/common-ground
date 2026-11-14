@@ -34,6 +34,8 @@ import type {
   ProblemDetails,
   ReceiveMortgageRequestRequest,
   ReceiveMortgageRequestResponse,
+  RecordInsuranceCertificateRequest,
+  RecordInsuranceCertificateResponse,
   RecordLeaseFeeNoticeRequest,
   RecordLeaseFeeNoticeResponse,
   RecordLeaseFeePaymentRequest,
@@ -45,6 +47,7 @@ import type {
   RecordPermittedMortgageResponse,
   RecordResalePriceStatementRequest,
   RecordStewardshipCheckInRequest,
+  RemoveInsuranceCertificateRequest,
   ResalePriceStatementPreviewsResponse,
   ResalePriceStatementPriceResponse,
   ResalePriceStatementsDueResponse,
@@ -92,6 +95,10 @@ import {
     ReceiveMortgageRequestRequestToJSON,
     ReceiveMortgageRequestResponseFromJSON,
     ReceiveMortgageRequestResponseToJSON,
+    RecordInsuranceCertificateRequestFromJSON,
+    RecordInsuranceCertificateRequestToJSON,
+    RecordInsuranceCertificateResponseFromJSON,
+    RecordInsuranceCertificateResponseToJSON,
     RecordLeaseFeeNoticeRequestFromJSON,
     RecordLeaseFeeNoticeRequestToJSON,
     RecordLeaseFeeNoticeResponseFromJSON,
@@ -114,6 +121,8 @@ import {
     RecordResalePriceStatementRequestToJSON,
     RecordStewardshipCheckInRequestFromJSON,
     RecordStewardshipCheckInRequestToJSON,
+    RemoveInsuranceCertificateRequestFromJSON,
+    RemoveInsuranceCertificateRequestToJSON,
     ResalePriceStatementPreviewsResponseFromJSON,
     ResalePriceStatementPreviewsResponseToJSON,
     ResalePriceStatementPriceResponseFromJSON,
@@ -217,6 +226,11 @@ export interface ReceiveMortgageRequestOperationRequest {
     receiveMortgageRequestRequest: ReceiveMortgageRequestRequest;
 }
 
+export interface RecordInsuranceCertificateOperationRequest {
+    groundLeaseId: string;
+    recordInsuranceCertificateRequest: RecordInsuranceCertificateRequest;
+}
+
 export interface RecordLeaseFeeNoticeOperationRequest {
     groundLeaseId: string;
     recordLeaseFeeNoticeRequest: RecordLeaseFeeNoticeRequest;
@@ -250,6 +264,12 @@ export interface RecordResalePriceStatementOperationRequest {
 export interface RecordStewardshipCheckInOperationRequest {
     groundLeaseId: string;
     recordStewardshipCheckInRequest: RecordStewardshipCheckInRequest;
+}
+
+export interface RemoveInsuranceCertificateOperationRequest {
+    groundLeaseId: string;
+    certificateId: string;
+    removeInsuranceCertificateRequest: RemoveInsuranceCertificateRequest;
 }
 
 export interface SetInsuranceRequirementsOperationRequest {
@@ -526,6 +546,20 @@ export interface GroundLeasesApiInterface {
     /**
      * 
      * @param {string} groundLeaseId 
+     * @param {RecordInsuranceCertificateRequest} recordInsuranceCertificateRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    recordInsuranceCertificateRaw(requestParameters: RecordInsuranceCertificateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    recordInsuranceCertificate(requestParameters: RecordInsuranceCertificateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
      * @param {RecordLeaseFeeNoticeRequest} recordLeaseFeeNoticeRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -620,6 +654,21 @@ export interface GroundLeasesApiInterface {
     /**
      */
     recordStewardshipCheckIn(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
+     * @param {string} certificateId 
+     * @param {RemoveInsuranceCertificateRequest} removeInsuranceCertificateRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    removeInsuranceCertificateRaw(requestParameters: RemoveInsuranceCertificateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    removeInsuranceCertificate(requestParameters: RemoveInsuranceCertificateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -1436,6 +1485,51 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
 
     /**
      */
+    async recordInsuranceCertificateRaw(requestParameters: RecordInsuranceCertificateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling recordInsuranceCertificate().'
+            );
+        }
+
+        if (requestParameters['recordInsuranceCertificateRequest'] == null) {
+            throw new runtime.RequiredError(
+                'recordInsuranceCertificateRequest',
+                'Required parameter "recordInsuranceCertificateRequest" was null or undefined when calling recordInsuranceCertificate().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/insurance-certificates`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RecordInsuranceCertificateRequestToJSON(requestParameters['recordInsuranceCertificateRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async recordInsuranceCertificate(requestParameters: RecordInsuranceCertificateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.recordInsuranceCertificateRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
     async recordLeaseFeeNoticeRaw(requestParameters: RecordLeaseFeeNoticeOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['groundLeaseId'] == null) {
             throw new runtime.RequiredError(
@@ -1760,6 +1854,66 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
      */
     async recordStewardshipCheckIn(requestParameters: RecordStewardshipCheckInOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
         const response = await this.recordStewardshipCheckInRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
+    async removeInsuranceCertificateRaw(requestParameters: RemoveInsuranceCertificateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling removeInsuranceCertificate().'
+            );
+        }
+
+        if (requestParameters['certificateId'] == null) {
+            throw new runtime.RequiredError(
+                'certificateId',
+                'Required parameter "certificateId" was null or undefined when calling removeInsuranceCertificate().'
+            );
+        }
+
+        if (requestParameters['removeInsuranceCertificateRequest'] == null) {
+            throw new runtime.RequiredError(
+                'removeInsuranceCertificateRequest',
+                'Required parameter "removeInsuranceCertificateRequest" was null or undefined when calling removeInsuranceCertificate().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/insurance-certificates/{certificateId}/remove`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+        urlPath = urlPath.replace(`{${"certificateId"}}`, encodeURIComponent(String(requestParameters['certificateId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RemoveInsuranceCertificateRequestToJSON(requestParameters['removeInsuranceCertificateRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async removeInsuranceCertificate(requestParameters: RemoveInsuranceCertificateOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.removeInsuranceCertificateRaw(requestParameters, initOverrides);
         switch (response.raw.status) {
             case 204:
                 return null;

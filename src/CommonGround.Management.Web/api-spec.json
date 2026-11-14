@@ -2449,6 +2449,152 @@
         }
       }
     },
+    "/api/v1/ground-leases/{groundLeaseId}/insurance-certificates": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "RecordInsuranceCertificate",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordInsuranceCertificateRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordInsuranceCertificateRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordInsuranceCertificateResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ground-leases/{groundLeaseId}/insurance-certificates/{certificateId}/remove": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "RemoveInsuranceCertificate",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "certificateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "RemoveInsuranceCertificateRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveInsuranceCertificateRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 3
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ground-leases/{groundLeaseId}/mortgage-requests": {
       "post": {
         "tags": [
@@ -12400,6 +12546,94 @@
             "type": "string",
             "description": "The first day they apply, on or after the lease start and the latest change.",
             "format": "date"
+          }
+        }
+      },
+      "RecordInsuranceCertificateResponse": {
+        "type": "object",
+        "description": "Response after recording an insurance certificate.",
+        "additionalProperties": false,
+        "properties": {
+          "certificateId": {
+            "type": "string",
+            "description": "The new certificate's ID."
+          }
+        }
+      },
+      "RecordInsuranceCertificateRequest": {
+        "type": "object",
+        "description": "Request to record a certificate of the homeowner's insurance on a lease (Art 9.4).",
+        "additionalProperties": false,
+        "required": [
+          "policyStart",
+          "policyEnd",
+          "dwellingCoverage",
+          "liabilityPerOccurrence",
+          "trustNamedAdditionalInsured",
+          "receivedOn",
+          "notes",
+          "documentId"
+        ],
+        "properties": {
+          "insurer": {
+            "type": "string",
+            "description": "The insurer."
+          },
+          "policyNumber": {
+            "type": "string",
+            "description": "The policy number."
+          },
+          "policyStart": {
+            "type": "string",
+            "description": "The first day of the policy period.",
+            "format": "date"
+          },
+          "policyEnd": {
+            "type": "string",
+            "description": "The last day of the policy period; after the start.",
+            "format": "date"
+          },
+          "dwellingCoverage": {
+            "type": "number",
+            "description": "The dwelling coverage; zero or more.",
+            "format": "decimal"
+          },
+          "liabilityPerOccurrence": {
+            "type": "number",
+            "description": "The liability coverage per occurrence; zero or more.",
+            "format": "decimal"
+          },
+          "trustNamedAdditionalInsured": {
+            "type": "boolean",
+            "description": "Whether the trust is named as additional insured."
+          },
+          "receivedOn": {
+            "type": "string",
+            "description": "The day the trust received the certificate; not in the future.",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Notes, such as flood cover, or null for none.",
+            "minLength": 1,
+            "nullable": true
+          },
+          "documentId": {
+            "type": "string",
+            "description": "The certificate file already uploaded to Documents, or null when none was added.",
+            "minLength": 1,
+            "nullable": true
+          }
+        }
+      },
+      "RemoveInsuranceCertificateRequest": {
+        "type": "object",
+        "description": "Request to remove an insurance certificate recorded in error.",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Why it is removed."
           }
         }
       },

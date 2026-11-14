@@ -284,6 +284,36 @@ public static class GroundLeasesEndpoints
         return Results.NoContent();
     }
 
+    [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/insurance-certificates")]
+    [ProducesResponseType<RecordInsuranceCertificateResponse>(StatusCodes.Status201Created)]
+    public static async Task<IResult> RecordInsuranceCertificate(
+        string groundLeaseId,
+        RecordInsuranceCertificateRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        var result = await client.RecordInsuranceCertificateAsync(groundLeaseId, request, cancellationToken).ConfigureAwait(false);
+        return Results.Created($"/api/v1/ground-leases/{groundLeaseId}", result);
+    }
+
+    [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/insurance-certificates/{certificateId}/remove")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> RemoveInsuranceCertificate(
+        string groundLeaseId,
+        string certificateId,
+        RemoveInsuranceCertificateRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(certificateId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.RemoveInsuranceCertificateAsync(groundLeaseId, certificateId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
     [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/mortgage-requests")]
     [ProducesResponseType<ReceiveMortgageRequestResponse>(StatusCodes.Status201Created)]
     public static async Task<IResult> ReceiveMortgageRequest(

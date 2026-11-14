@@ -629,3 +629,39 @@ export function useSetInsuranceRequirements() {
     },
   })
 }
+
+export function useRecordInsuranceCertificate() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ groundLeaseId, ...request }: {
+      groundLeaseId: string
+      insurer: string
+      policyNumber: string
+      policyStart: CalendarDate
+      policyEnd: CalendarDate
+      dwellingCoverage: number
+      liabilityPerOccurrence: number
+      trustNamedAdditionalInsured: boolean
+      receivedOn: CalendarDate
+      notes: string | null
+      documentId: string | null
+    }) => api.recordInsuranceCertificate({ groundLeaseId, recordInsuranceCertificateRequest: request }),
+    onSuccess: (_d, v) => {
+      invalidateLease(qc, v.groundLeaseId)
+      // Covered-through and the check decide both Today insurance items.
+      qc.invalidateQueries({ queryKey: ['today'] })
+    },
+  })
+}
+
+export function useRemoveInsuranceCertificate() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ groundLeaseId, certificateId, reason }: { groundLeaseId: string; certificateId: string; reason: string }) =>
+      api.removeInsuranceCertificate({ groundLeaseId, certificateId, removeInsuranceCertificateRequest: { reason } }),
+    onSuccess: (_d, v) => {
+      invalidateLease(qc, v.groundLeaseId)
+      qc.invalidateQueries({ queryKey: ['today'] })
+    },
+  })
+}

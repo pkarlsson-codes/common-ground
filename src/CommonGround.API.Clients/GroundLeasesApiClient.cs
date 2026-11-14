@@ -142,6 +142,23 @@ public sealed class GroundLeasesApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task<RecordInsuranceCertificateResponse> RecordInsuranceCertificateAsync(string groundLeaseId, RecordInsuranceCertificateRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        return await PostAsync<RecordInsuranceCertificateRequest, RecordInsuranceCertificateResponse>($"api/ground-leases/{groundLeaseId}/insurance-certificates", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task RemoveInsuranceCertificateAsync(string groundLeaseId, string certificateId, RemoveInsuranceCertificateRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(certificateId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/ground-leases/{groundLeaseId}/insurance-certificates/{certificateId}/remove", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task<ReceiveMortgageRequestResponse> ReceiveMortgageRequestAsync(string groundLeaseId, ReceiveMortgageRequestRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
