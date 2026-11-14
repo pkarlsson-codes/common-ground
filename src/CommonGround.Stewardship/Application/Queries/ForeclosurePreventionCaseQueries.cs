@@ -1,5 +1,6 @@
 using CommonGround.SharedKernel.Infrastructure.API;
 using CommonGround.SharedKernel.Infrastructure.Querying;
+using CommonGround.SharedKernel.Specifications;
 using CommonGround.Stewardship.Infrastructure.Persistence;
 using Marten;
 using Marten.Pagination;
@@ -64,7 +65,7 @@ public static class GetAllForeclosurePreventionCasesHandler
     public static async Task<PaginatedResponse<ForeclosurePreventionCaseView>> Handle(GetAllForeclosurePreventionCasesQuery query, IQuerySession session, CancellationToken ct)
     {
         var page = await session.Query<ForeclosurePreventionCaseView>()
-            .Where(x => x.Status != "Resolved")
+            .Matching(ForeclosurePreventionCaseOpen.Instance)
             .OrderByDescending(x => x.OpenedDate)
             .ThenByDescending(x => x.Id)
             .ToPagedListAsync(query.Page.Number, query.Page.Size, ct)
@@ -98,7 +99,7 @@ public static class GetGroundLeasesWithUnresolvedForeclosurePreventionCaseHandle
         ArgumentNullException.ThrowIfNull(session);
 
         var ids = await session.Query<ForeclosurePreventionCaseView>()
-            .Where(x => x.Status != "Resolved")
+            .Matching(ForeclosurePreventionCaseOpen.Instance)
             .Select(x => x.GroundLeaseId)
             .ToListAsync(ct)
             .ConfigureAwait(false);

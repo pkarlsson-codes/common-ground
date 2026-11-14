@@ -14,5 +14,8 @@ public sealed class ForeclosurePreventionCaseStatus : Enumeration<ForeclosurePre
     /// <summary>The case has been resolved.</summary>
     public static readonly ForeclosurePreventionCaseStatus Resolved = new(2, "Resolved");
 
+    /// <summary>Gets a value indicating whether the case is closed for good. Only <see cref="Resolved"/> is.</summary>
+    public bool IsTerminal => this == Resolved;
+
     private ForeclosurePreventionCaseStatus(int value, string displayName) : base(value, displayName) { }
 }

@@ -1,4 +1,6 @@
+using CommonGround.SharedKernel.Specifications;
 using CommonGround.Stewardship.Application.Commands.ForeclosurePreventionCases;
+using CommonGround.Stewardship.Application.Queries;
 using CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
 using CommonGround.Stewardship.Domain.ForeclosurePreventionCases.Events;
 using CommonGround.Stewardship.Infrastructure.Persistence;
@@ -19,7 +21,8 @@ public sealed record UnresolvedForeclosurePreventionCase(ForeclosurePreventionCa
         ArgumentNullException.ThrowIfNull(session);
 
         var id = await session.Query<ForeclosurePreventionCaseView>()
-            .Where(x => x.GroundLeaseId == groundLeaseId && x.Status != nameof(ForeclosurePreventionCaseStatus.Resolved))
+            .Where(x => x.GroundLeaseId == groundLeaseId)
+            .Matching(ForeclosurePreventionCaseOpen.Instance)
             .Select(x => x.Id)
             .FirstOrDefaultAsync(ct)
             .ConfigureAwait(false);

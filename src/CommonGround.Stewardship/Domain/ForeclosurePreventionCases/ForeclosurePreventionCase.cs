@@ -306,7 +306,7 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
 
     private void GuardNotResolved()
     {
-        if (Status == ForeclosurePreventionCaseStatus.Resolved)
+        if (Status.IsTerminal)
             throw BusinessRuleViolation.ForeclosurePreventionCase.GuardNotResolved.InvalidStatus(Status);
     }
 
