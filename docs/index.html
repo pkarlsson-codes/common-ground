@@ -5,18 +5,123 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>CommonGround Docs</title>
 <link rel="stylesheet" href="./docs.css" />
+<script src="./nav.js" defer></script>
 </head>
 <body>
-<div class="layout" style="grid-template-columns: minmax(0, 1fr);">
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <p class="toc-title"><a href="./index.html">CommonGround docs</a></p>
+  <ol>
+    <li><a href="#map">The system, step by step</a></li>
+    <li><a href="#events">Who tells whom</a></li>
+    <li><a href="#first-day">Your first day</a></li>
+    <li><a href="#markdown">Other docs in the repo</a></li>
+    <li><a href="#about">About these pages</a></li>
+  </ol>
+</nav>
+
 <main>
-  <h1>CommonGround docs</h1>
-  <p class="lede">Documentation for developers working on CommonGround.</p>
-  <ul class="cards">
-    <li><a href="./architecture.html">Architecture Overview</a><p>Processes, bounded contexts, persistence, messaging, sign-in, deployment, and why.</p></li>
-    <li><a href="./shared-kernel.html">Shared Kernel</a><p>The base classes, events, errors, value objects, clock and plumbing every bounded context builds on.</p></li>
-    <li><a href="./property-registry.html">Property Registry</a><p>Land parcels, homes and development projects; the events it publishes; and how it tracks where each home stands in being sold.</p></li>
-    <li><a href="./auth-flow.html">Authentication flow</a><p>Sequence diagrams for login, an authenticated API call, token refresh and logout.</p></li>
+<header>
+  <h1>CommonGround developer docs</h1>
+  <p class="lede">CommonGround is software for community land trusts (CLTs). These pages explain how it is built, for a developer who joins or forks the project.</p>
+</header>
+
+<section id="map">
+  <h2>The system, step by step</h2>
+  <p>A community land trust buys land and keeps it for good. It sells the homes on that land to households with modest incomes and leases them the land under a ground lease. The lease caps the resale price, so the home stays affordable for the next buyer. Each step of that work has its own bounded context in the code.</p>
+
+  <ol class="lifecycle">
+    <li>
+      <p class="step"><b>1.</b> The trust gets land and builds or buys homes on it.</p>
+      <a class="ctx" href="./property-registry.html"><strong>Property Registry</strong><span>Land parcels, homes, development projects, and where each home stands in being sold.</span></a>
+    </li>
+    <li>
+      <p class="step"><b>2.</b> Households apply to buy, and the trust picks one for each home.</p>
+      <div class="ctx planned"><strong>Home Buyers</strong><span>Households, applications, choosing a household for a home, income limits.</span><em>Page not written yet</em></div>
+    </li>
+    <li>
+      <p class="step"><b>3.</b> The household buys the house and leases the land. Later they resell at a capped price.</p>
+      <div class="ctx planned"><strong>Homeownership</strong><span>Purchase workflow, mortgages, ground leases, lease fee notices, resales.</span><em>Page not written yet</em></div>
+    </li>
+    <li>
+      <p class="step"><b>4.</b> The trust helps owners keep their homes.</p>
+      <div class="ctx planned"><strong>Stewardship</strong><span>Stewardship cases and foreclosure prevention.</span><em>Page not written yet</em></div>
+    </li>
+  </ol>
+
+  <div class="band">
+    <p class="band-label">Used at every step</p>
+    <ul class="band-items">
+      <li><div class="ctx planned"><strong>Trust Management</strong><span>The trust's settings, policy, members and invitations.</span><em>Page not written yet</em></div></li>
+      <li><div class="ctx planned"><strong>Identity</strong><span>Users, linked to their Keycloak account.</span><em>Page not written yet</em></div></li>
+      <li><div class="ctx planned"><strong>Documents</strong><span>Uploaded files attached to any record.</span><em>Page not written yet</em></div></li>
+    </ul>
+  </div>
+
+  <div class="band">
+    <p class="band-label">Under all of them</p>
+    <ul class="band-items">
+      <li><a class="ctx" href="./shared-kernel.html"><strong>Shared Kernel</strong><span>Base classes, shared value objects, errors, the clock, and the Marten and Wolverine helpers every context uses.</span></a></li>
+    </ul>
+  </div>
+
+  <p>The API also has four modules that aren't bounded contexts: <code>Today</code> (the staff work queue), <code>Reports</code>, <code>PortfolioImport</code> and <code>Demo</code>. They work through the contexts' commands and queries. See <a href="./architecture.html#contexts">Architecture Overview, section 4</a>.</p>
+</section>
+
+<section id="events">
+  <h2>Who tells whom</h2>
+  <p>Contexts don't call each other. Three of them publish integration events, and the others react. Rows are the publishers, columns the consumers. Each context page lists the handlers.</p>
+  <table>
+    <thead><tr><th>Publisher</th><th>Home Buyers</th><th>Property Registry</th><th>Homeownership</th><th>Stewardship</th></tr></thead>
+    <tbody>
+      <tr><th scope="row"><a href="./property-registry.html#events">Property Registry</a></th><td><code>HomeRegistered</code><br><code>HomeIncomeLimitSet</code></td><td class="none">—</td><td><code>HomeRegistered</code></td><td class="none">—</td></tr>
+      <tr><th scope="row">Home Buyers</th><td class="none">—</td><td><code>HomeSelectionStarted</code><br><code>HomeSelectionCancelled</code><br><code>ApplicationSelected</code></td><td><code>HomeSelectionStarted</code><br><code>HomeSelectionCancelled</code><br><code>ApplicationSelected</code></td><td class="none">—</td></tr>
+      <tr><th scope="row">Homeownership</th><td><code>PurchaseClosed</code><br><code>PurchaseFellThrough</code></td><td><code>GroundLeaseCreated</code><br><code>PurchaseFellThrough</code><br><code>ResaleOpened</code><br><code>ResaleWithdrawn</code><br><code>ResaleBoughtBack</code></td><td class="none">—</td><td><code>GroundLeaseCreated</code><br><code>GroundLeaseTerminated</code></td></tr>
+    </tbody>
+  </table>
+  <p>Trust Management, Identity and Documents neither publish nor consume integration events. The table leaves out events a context handles from itself, such as Homeownership reacting to its own <code>ResaleOpened</code>.</p>
+</section>
+
+<section id="first-day">
+  <h2>Your first day</h2>
+  <ol>
+    <li><a href="./architecture.html">Architecture Overview</a>. Section 3 shows how to start the stack and seed data. Section 17 says which code files to read first.</li>
+    <li><a href="./shared-kernel.html">Shared Kernel</a>. Every context page assumes you know its base classes and errors.</li>
+    <li><a href="./property-registry.html">Property Registry</a>. It is the first step of the CLT work, and of the three contexts that publish events it has the fewest aggregates.</li>
+    <li><a href="./auth-flow.html">Authentication flow</a>, before you work on the gateways or sign-in.</li>
+  </ol>
+  <p>Each page has Previous and Next links at the bottom that follow the order of the sidebar.</p>
+</section>
+
+<section id="markdown">
+  <h2>Other docs in the repo</h2>
+  <p>These are Markdown files. Open them in your editor or on your Git host. The links work when the docs are opened from a clone of the repo.</p>
+  <dl>
+    <dt>Rules for changing the code</dt>
+    <dd><a href="./ai/creating-domain-types.md"><code>docs/ai/creating-domain-types.md</code></a>: aggregates, entities, IDs, value objects and enumerations.</dd>
+    <dd><a href="./ai/api-contracts.md"><code>docs/ai/api-contracts.md</code></a>: requests, responses, integration events and error codes.</dd>
+    <dd><a href="./ai/dates-and-times.md"><code>docs/ai/dates-and-times.md</code></a>: instants, calendar dates and the trust's "today".</dd>
+    <dd><a href="./ai/unit-testing.md"><code>docs/ai/unit-testing.md</code></a>: how unit tests are laid out and what is worth testing.</dd>
+    <dd><a href="../CLAUDE.md"><code>CLAUDE.md</code></a>: the short version of all of the above, read by Claude Code.</dd>
+    <dt>What staff do in the app</dt>
+    <dd><a href="./journeys/README.md"><code>docs/journeys/</code></a>: one file per user journey in the Management app, grouped by page area.</dd>
+    <dt>Tools</dt>
+    <dd><a href="../templates/README.md"><code>templates/README.md</code></a>: <code>dotnet new</code> templates for domain types.</dd>
+    <dd><a href="../e2e/README.md"><code>e2e/README.md</code></a>: Playwright tests that drive the Management app through the real stack.</dd>
+    <dt>Product</dt>
+    <dd><a href="./manual-coverage-matrix.md"><code>docs/manual-coverage-matrix.md</code></a>: which parts of CLT work the product covers, and the roadmap.</dd>
+  </dl>
+</section>
+
+<section id="about">
+  <h2>About these pages</h2>
+  <p>The pages are static HTML with no build step. Open <code>docs/index.html</code> from disk or serve the folder with any static file server. Diagrams use Mermaid 11.4.1 from jsDelivr, so they need a network connection.</p>
+  <ul>
+    <li><code>docs/docs.css</code> holds the styles for light and dark mode.</li>
+    <li><code>docs/nav.js</code> builds the header, the sidebar and the Previous and Next links. Its <code>SITE</code> list is the one place that lists the pages.</li>
   </ul>
+  <p><strong>To add a page:</strong> copy an existing context page, add it to <code>SITE</code> in <code>nav.js</code> (or remove <code>planned: true</code> from its entry), and change its card on this page from a <code>div</code> to a link. Check it at 390px wide: the page must not scroll sideways.</p>
+</section>
 </main>
 </div>
 </body>

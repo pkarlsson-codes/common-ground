@@ -1,91 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CommonGround — Authentication Flow</title>
-  <script src="./diagram-panzoom.js"></script>
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
-    await mermaid.run();
-    setupPanZoom();
-  </script>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background: #0f1117;
-      color: #e2e8f0;
-      margin: 0;
-      padding: 2rem;
-      box-sizing: border-box;
-    }
-    h1 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-      color: #f8fafc;
-    }
-    h2 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #f8fafc;
-      margin-top: 2.5rem;
-    }
-    p.subtitle {
-      color: #94a3b8;
-      margin-top: 0;
-      margin-bottom: 2rem;
-      font-size: 0.9rem;
-    }
-    p.note {
-      color: #94a3b8;
-      font-size: 0.875rem;
-      max-width: 70ch;
-    }
-    code {
-      background: #1e2330;
-      border-radius: 0.25rem;
-      padding: 0.1rem 0.35rem;
-      font-size: 0.85em;
-    }
-    .diagram-container {
-      background: #1e2330;
-      border: 1px solid #2d3748;
-      border-radius: 0.75rem;
-      padding: 0;
-      height: 70vh;
-      min-height: 300px;
-      overflow: hidden;
-      position: relative;
-      cursor: grab;
-    }
-    .diagram-container:active {
-      cursor: grabbing;
-    }
-    .diagram-container .mermaid {
-      display: block;
-    }
-    .diagram-hint {
-      position: absolute;
-      bottom: 0.75rem;
-      right: 1rem;
-      font-size: 0.75rem;
-      color: #475569;
-      pointer-events: none;
-      z-index: 10;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Authentication Flow</title>
+<link rel="stylesheet" href="./docs.css" />
+<script src="./nav.js" defer></script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
+  const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  mermaid.initialize({ startOnLoad: true, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict' });
+</script>
 </head>
 <body>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <p class="toc-title"><a href="./index.html">CommonGround docs</a></p>
+  <ol>
+    <li><a href="#login">Login</a></li>
+    <li><a href="#api-call">Authenticated API call</a></li>
+    <li><a href="#refresh">Token refresh and logout</a></li>
+  </ol>
+</nav>
 
-  <h1>CommonGround — Authentication Flow</h1>
-  <p class="subtitle">How a user gets a session and how that session becomes an authenticated API call. Management Gateway (:4000); the Homeowner Gateway follows the same pattern. Source of truth: <code>docs/auth-flow.md</code>.</p>
+<main>
+<header>
+  <h1>Authentication flow</h1>
+  <p class="lede">How a user gets a session and how that session becomes an authenticated API call.</p>
+  <p class="meta">Shown for the Management Gateway (port 4000); the Homeowner Gateway follows the same pattern. Source of truth: <code>docs/auth-flow.md</code>. Read the <a href="./architecture.html#tenancy">Architecture Overview, section 9</a> first.</p>
+</header>
 
-  <h2>Login</h2>
-  <div class="diagram-container">
-    <div class="diagram-hint">scroll to zoom · drag to pan</div>
-    <div class="mermaid">
+<section id="login">
+  <h2>1. Login</h2>
+  <div class="diagram">
+<pre class="mermaid">
 sequenceDiagram
     autonumber
     participant B as Browser
@@ -106,14 +54,15 @@ sequenceDiagram
     A-->>G: canonical userId + trustId (created if new)
     G->>R: save tokens under random sessionId<br/>(userId, trustId, access/refresh/id)
     G-->>B: Set-Cookie cg_auth, cg_session (HttpOnly), cg_csrf<br/>302 to returnUrl
-    </div>
+</pre>
   </div>
-  <p class="note">User provisioning is just-in-time — the gateway calls the API's <code>EnsureUser</code> during login using a <em>service</em> token (no <code>user_id</code> yet), and the API's canonical user ID is what goes into the session, not the Keycloak subject.</p>
+  <p>User provisioning is just-in-time — the gateway calls the API's <code>EnsureUser</code> during login using a <em>service</em> token (no <code>user_id</code> yet), and the API's canonical user ID is what goes into the session, not the Keycloak subject.</p>
+</section>
 
-  <h2>Authenticated API call</h2>
-  <div class="diagram-container">
-    <div class="diagram-hint">scroll to zoom · drag to pan</div>
-    <div class="mermaid">
+<section id="api-call">
+  <h2>2. Authenticated API call</h2>
+  <div class="diagram">
+<pre class="mermaid">
 sequenceDiagram
     autonumber
     participant B as Browser
@@ -132,14 +81,15 @@ sequenceDiagram
     Note over A: validate issuer/audience/signature,<br/>identity = user_id claim
     A-->>G: response
     G-->>B: response
-    </div>
+</pre>
   </div>
-  <p class="note">The trust ID always comes from the session lookup, not from claims — a request with a valid <code>cg_auth</code> cookie but no session row gets a JWT without <code>tenant_id</code>. Keycloak tokens never cross the gateway→API boundary; the internal JWT is the only credential the API ever sees.</p>
+  <p>The trust ID always comes from the session lookup, not from claims — a request with a valid <code>cg_auth</code> cookie but no session row gets a JWT without <code>tenant_id</code>. Keycloak tokens never cross the gateway→API boundary; the internal JWT is the only credential the API ever sees.</p>
+</section>
 
-  <h2>Token refresh</h2>
-  <div class="diagram-container">
-    <div class="diagram-hint">scroll to zoom · drag to pan</div>
-    <div class="mermaid">
+<section id="refresh">
+  <h2>3. Token refresh and logout</h2>
+  <div class="diagram">
+<pre class="mermaid">
 sequenceDiagram
     autonumber
     participant B as Browser
@@ -156,9 +106,12 @@ sequenceDiagram
     K-->>G: new access (+ refresh) token
     G->>R: remove old sessionId,<br/>save tokens under NEW sessionId
     G-->>B: Set-Cookie new cg_session + cg_csrf, 200
-    </div>
+</pre>
   </div>
-  <p class="note">Refresh rotates the session ID: the old session row is deleted and new cookies are issued, so a captured <code>cg_session</code> value goes stale after the next refresh. Logout (<code>GET /auth/logout</code>) deletes the session row and cookies, then signs out of both the cookie scheme and Keycloak using the stored <code>id_token</code> as the logout hint.</p>
+  <p>Refresh rotates the session ID: the old session row is deleted and new cookies are issued, so a captured <code>cg_session</code> value goes stale after the next refresh. Logout (<code>GET /auth/logout</code>) deletes the session row and cookies, then signs out of both the cookie scheme and Keycloak using the stored <code>id_token</code> as the logout hint.</p>
+</section>
 
+</main>
+</div>
 </body>
 </html>

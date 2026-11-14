@@ -31,6 +31,7 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 1rem; }
+html.has-site-nav { scroll-padding-top: 4.5rem; }
 body {
   margin: 0;
   background: var(--bg);
@@ -118,8 +119,148 @@ pre:not(.mermaid) code { background: none; padding: 0; font-size: inherit; overf
 .cards a { font-weight: 600; }
 .cards p { margin: 0.25rem 0 0; color: var(--muted); }
 
+/* Site navigation, added by nav.js. Without JavaScript, pages keep their plain contents list. */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.site-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 3.25rem;
+}
+.brand { font-weight: 650; color: var(--text); text-decoration: none; white-space: nowrap; }
+.brand:hover { color: var(--accent); }
+.crumb { color: var(--muted); font-size: 0.9rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crumb-group { opacity: 0.8; }
+.menu-button {
+  display: none;
+  margin-left: auto;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+}
+.has-site-nav .toc { top: 4.75rem; max-height: calc(100vh - 6rem); }
+.nav-group {
+  margin: 1.25rem 0 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.nav-group:first-child { margin-top: 0; }
+.toc ul { list-style: none; margin: 0; padding: 0; }
+.toc ul > li { margin: 0; }
+.toc ul > li > a {
+  display: block;
+  padding: 0.25rem 0.6rem;
+  border-left: 2px solid transparent;
+  color: var(--text);
+  text-decoration: none;
+}
+.toc ul > li > a:hover { color: var(--accent); }
+.toc li.current > a { border-left-color: var(--accent); color: var(--accent); font-weight: 600; }
+.toc li.planned { padding: 0.25rem 0.6rem; border-left: 2px solid transparent; color: var(--muted); }
+.toc .tag { display: block; font-size: 0.72rem; opacity: 0.85; }
+.toc ol.page-toc { margin: 0.25rem 0 0.5rem 0.6rem; padding-left: 1.1rem; border-left: 1px solid var(--border); font-size: 0.85rem; }
+.toc ol.page-toc li { margin: 0.2rem 0; }
+.toc ol.page-toc a.reading { color: var(--accent); font-weight: 600; }
+
+.pager { display: flex; gap: 1rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+.pager a {
+  flex: 1;
+  display: block;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  text-decoration: none;
+  font-weight: 600;
+}
+.pager a:hover { border-color: var(--accent); }
+.pager .next { text-align: right; margin-left: auto; }
+.pager .prev { margin-right: auto; }
+.pager-label { display: block; font-size: 0.8rem; font-weight: 400; color: var(--muted); }
+
+/* Home page: the context map. */
+/* Each step is two rows of a shared grid (subgrid), so the cards line up whatever the length of the step text. */
+.lifecycle { list-style: none; padding: 0; margin: 1.25rem 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: auto 1fr; column-gap: 1.25rem; }
+.lifecycle > li { margin: 0; display: grid; grid-row: span 2; grid-template-rows: subgrid; row-gap: 0.4rem; }
+.lifecycle > li + li .ctx::before {
+  content: "→";
+  position: absolute;
+  left: -1.1rem;
+  top: 0.7rem;
+  color: var(--muted);
+}
+.step { font-size: 0.85rem; color: var(--muted); margin: 0; }
+.step b { color: var(--text); }
+.ctx {
+  display: block;
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 0.9rem;
+  color: var(--text);
+  text-decoration: none;
+}
+a.ctx:hover { border-color: var(--accent); }
+.ctx strong { display: block; color: var(--accent); }
+a.ctx strong::after { content: " →"; }
+.ctx span { display: block; font-size: 0.88rem; color: var(--muted); margin-top: 0.25rem; }
+.ctx.planned { border-style: dashed; background: transparent; }
+.ctx.planned strong { color: var(--text); }
+.ctx.planned em { display: block; font-style: normal; font-size: 0.75rem; color: var(--muted); margin-top: 0.4rem; }
+.band { display: grid; grid-template-columns: 10rem minmax(0, 1fr); gap: 1.25rem; align-items: start; margin: 1.25rem 0; }
+.band-label { font-size: 0.85rem; color: var(--muted); margin: 0.75rem 0 0; }
+.band-items { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 1rem; }
+.band-items li { margin: 0; }
+.band-items .ctx { height: 100%; }
+td.none { color: var(--muted); }
+
 @media (max-width: 800px) {
   .layout { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; padding: 1.5rem 16px 3rem; }
   .toc { position: static; max-height: none; }
   h1 { font-size: 1.6rem; }
+  .site-header-inner { padding: 0 16px; }
+  .menu-button { display: block; }
+  .has-site-nav .toc { display: none; }
+  .nav-open .toc {
+    display: block;
+    position: fixed;
+    top: 3.25rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9;
+    align-self: stretch;
+    max-height: none;
+    overflow-y: auto;
+    padding: 1rem 16px 2rem;
+    background: var(--bg);
+  }
+  .nav-open body { overflow: hidden; }
+  .lifecycle { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; row-gap: 1.75rem; }
+  .lifecycle > li { grid-row: auto; grid-template-rows: none; }
+  .lifecycle > li + li .ctx::before { content: none; }
+  .lifecycle > li + li { position: relative; }
+  .lifecycle > li + li::before { content: "↓"; position: absolute; left: 0.9rem; top: -1.5rem; color: var(--muted); }
+  .crumb-group { display: none; }
+  .band { grid-template-columns: minmax(0, 1fr); gap: 0.5rem; }
+  .band-label { margin: 0; }
+  .pager { flex-direction: column; }
 }
