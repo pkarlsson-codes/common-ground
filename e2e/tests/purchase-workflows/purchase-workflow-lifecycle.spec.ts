@@ -4,7 +4,7 @@ import { detailValue, expectToast, field, isoDate, panel, uniqueId } from '../su
 
 // Journeys: docs/journeys/purchase-workflows/
 //   view-purchase-workflow-detail, record-eligibility-verified, record-appraisal-completed, record-financing-committed,
-//   record-inspection-completed, record-title-cleared, record-lease-executed, schedule-closing,
+//   record-inspection-completed, record-title-cleared, record-lease-executed, record-disclosure-acknowledged, schedule-closing,
 //   record-purchase-closed, fail-purchase-workflow, withdraw-purchase-workflow
 
 /** Opens a workflow's detail panel via the lease template filter (the template is unique to each test). */
@@ -26,10 +26,18 @@ const trackLabel = (detail: Locator, label: string) =>
 /** The header row of a track: its label, summary, and (while pending) Expand/Collapse button. */
 const track = (detail: Locator, label: string) => trackLabel(detail, label).locator('xpath=../..')
 
-async function recordTrack(detail: Locator, label: string, fields: Record<string, string>, submit: string, toast: string) {
+/** A small text file to choose in a file input. */
+const textFile = (name: string) => ({ name, mimeType: 'text/plain', buffer: Buffer.from(name) })
+
+async function recordTrack(
+  detail: Locator, label: string, fields: Record<string, string>, submit: string, toast: string, files: Record<string, string> = {},
+) {
   await track(detail, label).getByRole('button', { name: 'Expand' }).click()
   for (const [name, value] of Object.entries(fields)) {
     await field(detail, name).fill(value)
+  }
+  for (const [name, fileName] of Object.entries(files)) {
+    await detail.getByLabel(name).setInputFiles(textFile(fileName))
   }
   await detail.getByRole('button', { name: submit }).click()
   await expectToast(detail.page(), toast)
@@ -56,6 +64,9 @@ test('eligibility verification judges the verified income by the limit the home 
   await field(detail, 'Verified Annual Income ($)').fill('75000')
   await expect(limitCheck).toContainText('Over income limit')
   await expect(limitCheck).toContainText('Income band: Over 80% to 120% of AMI')
+  // Recording needs an income document.
+  await expect(detail.getByRole('button', { name: 'Record Eligibility' })).toBeDisabled()
+  await detail.getByLabel('Income Documents').setInputFiles(textFile('pay-stub.txt'))
   await detail.getByRole('button', { name: 'Record Eligibility' }).click()
   await expectToast(page,
     'The verified income of $75,000 is over the 80% of AMI limit of $70,000 for a household of 1 (limits effective Jan 1, 2000).')
@@ -83,10 +94,10 @@ test('recording every track, scheduling, and closing a purchase creates the grou
   // Initiated directly rather than from an application, so there's nothing to link back to.
   await expect(detail.getByRole('button', { name: 'Open Application' })).toHaveCount(0)
   await expect(detail.getByRole('button', { name: 'Open Household' })).toHaveCount(0)
-  for (const label of ['Eligibility', 'Appraisal', 'Financing', 'Inspection', 'Title', 'Lease Execution']) {
+  for (const label of ['Eligibility', 'Appraisal', 'Financing', 'Inspection', 'Title', 'Lease Execution', 'Disclosure']) {
     await expect(track(detail, label)).toContainText('Pending')
   }
-  // Closing can't be scheduled until the six tracks are complete.
+  // Closing can't be scheduled until the seven tracks are complete.
   await expect(trackLabel(detail, 'Closing')).toHaveCount(0)
 
   const eligibilityDate = isoDate(-10)
@@ -95,7 +106,7 @@ test('recording every track, scheduling, and closing a purchase creates the grou
     'Verified Annual Income ($)': '52000',
     'Verified Household Size': '2',
     'Notes (optional)': 'Income verified',
-  }, 'Record Eligibility', 'Eligibility recorded')
+  }, 'Record Eligibility', 'Eligibility recorded', { 'Income Documents': 'pay-stub.txt' })
   await expect(trackLabel(detail, 'Eligibility')).toHaveText('✓ Eligibility')
   // Initiated directly, so there was no selection and no limit to check against.
   await expect(detail.getByText(`Verified ${eligibilityDate}: $52,000 income, 2 people`, { exact: true })).toBeVisible()
@@ -127,7 +138,16 @@ test('recording every track, scheduling, and closing a purchase creates the grou
   await recordTrack(detail, 'Lease Execution', { 'Signed Date': signedDate }, 'Record Lease Executed', 'Lease executed')
   await expect(detail.getByText(`Signed ${signedDate}`)).toBeVisible()
 
-  for (const label of ['Eligibility', 'Appraisal', 'Financing', 'Inspection', 'Title', 'Lease Execution']) {
+  // Closing can't be scheduled yet: the buyer's signed disclosure is the seventh track.
+  await expect(trackLabel(detail, 'Closing')).toHaveCount(0)
+  const disclosureDate = isoDate(-5)
+  await recordTrack(detail, 'Disclosure', { 'Acknowledged Date': disclosureDate },
+    'Record Disclosure', 'Disclosure recorded', { 'Signed Disclosure': 'signed-disclosure.txt' })
+  await expect(detail.getByText(`Acknowledged ${disclosureDate}`)).toBeVisible()
+  await expect(detail.getByRole('button', { name: 'Income document' })).toBeVisible()
+  await expect(detail.getByRole('button', { name: 'Signed disclosure' })).toBeVisible()
+
+  for (const label of ['Eligibility', 'Appraisal', 'Financing', 'Inspection', 'Title', 'Lease Execution', 'Disclosure']) {
     await expect(trackLabel(detail, label)).toHaveText(`✓ ${label}`)
     // Completed tracks can't be re-opened.
     await expect(track(detail, label).getByRole('button')).toHaveCount(0)

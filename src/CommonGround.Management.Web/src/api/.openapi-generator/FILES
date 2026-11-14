@@ -57,6 +57,7 @@ models/DenyApplicationRequest.ts
 models/DenyMortgageRequestRequest.ts
 models/DevelopmentProjectListItemResponse.ts
 models/DevelopmentProjectResponse.ts
+models/DisclosureDetailsDto.ts
 models/DocumentAttachmentResponse.ts
 models/DocumentLibraryItemResponse.ts
 models/DocumentResponse.ts
@@ -180,6 +181,7 @@ models/RecordAppraisalCompletedRequest.ts
 models/RecordBuybackClosedRequest.ts
 models/RecordCltOrientationRequest.ts
 models/RecordCounselingOutcomeRequest.ts
+models/RecordDisclosureAcknowledgedRequest.ts
 models/RecordEligibilityVerifiedRequest.ts
 models/RecordFinancingCommittedRequest.ts
 models/RecordForbearanceOutcomeRequest.ts

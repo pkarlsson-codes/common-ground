@@ -24,6 +24,7 @@ import type {
   PurchaseBoardResponse,
   PurchaseWorkflowResponse,
   RecordAppraisalCompletedRequest,
+  RecordDisclosureAcknowledgedRequest,
   RecordEligibilityVerifiedRequest,
   RecordFinancingCommittedRequest,
   RecordInspectionCompletedRequest,
@@ -51,6 +52,8 @@ import {
     PurchaseWorkflowResponseToJSON,
     RecordAppraisalCompletedRequestFromJSON,
     RecordAppraisalCompletedRequestToJSON,
+    RecordDisclosureAcknowledgedRequestFromJSON,
+    RecordDisclosureAcknowledgedRequestToJSON,
     RecordEligibilityVerifiedRequestFromJSON,
     RecordEligibilityVerifiedRequestToJSON,
     RecordFinancingCommittedRequestFromJSON,
@@ -97,6 +100,11 @@ export interface InitiatePurchaseWorkflowOperationRequest {
 export interface RecordAppraisalCompletedOperationRequest {
     workflowId: string;
     recordAppraisalCompletedRequest: RecordAppraisalCompletedRequest;
+}
+
+export interface RecordDisclosureAcknowledgedOperationRequest {
+    workflowId: string;
+    recordDisclosureAcknowledgedRequest: RecordDisclosureAcknowledgedRequest;
 }
 
 export interface RecordEligibilityVerifiedOperationRequest {
@@ -235,6 +243,20 @@ export interface PurchaseWorkflowsApiInterface {
     /**
      */
     recordAppraisalCompleted(requestParameters: RecordAppraisalCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {string} workflowId 
+     * @param {RecordDisclosureAcknowledgedRequest} recordDisclosureAcknowledgedRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PurchaseWorkflowsApiInterface
+     */
+    recordDisclosureAcknowledgedRaw(requestParameters: RecordDisclosureAcknowledgedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    recordDisclosureAcknowledged(requestParameters: RecordDisclosureAcknowledgedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -617,6 +639,58 @@ export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWor
      */
     async recordAppraisalCompleted(requestParameters: RecordAppraisalCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
         const response = await this.recordAppraisalCompletedRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
+    async recordDisclosureAcknowledgedRaw(requestParameters: RecordDisclosureAcknowledgedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['workflowId'] == null) {
+            throw new runtime.RequiredError(
+                'workflowId',
+                'Required parameter "workflowId" was null or undefined when calling recordDisclosureAcknowledged().'
+            );
+        }
+
+        if (requestParameters['recordDisclosureAcknowledgedRequest'] == null) {
+            throw new runtime.RequiredError(
+                'recordDisclosureAcknowledgedRequest',
+                'Required parameter "recordDisclosureAcknowledgedRequest" was null or undefined when calling recordDisclosureAcknowledged().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/purchase-workflows/{workflowId}/disclosure`;
+        urlPath = urlPath.replace(`{${"workflowId"}}`, encodeURIComponent(String(requestParameters['workflowId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RecordDisclosureAcknowledgedRequestToJSON(requestParameters['recordDisclosureAcknowledgedRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async recordDisclosureAcknowledged(requestParameters: RecordDisclosureAcknowledgedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordDisclosureAcknowledgedRaw(requestParameters, initOverrides);
         switch (response.raw.status) {
             case 204:
                 return null;

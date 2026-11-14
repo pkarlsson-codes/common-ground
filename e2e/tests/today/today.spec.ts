@@ -98,7 +98,7 @@ test('with a focus, Today shows only its areas plus Records until All areas is c
 test('a purchase with eligibility recorded waits on its appraisal, and Today opens the purchase to record it', async ({ page }) => {
   const buyer = `Today appraisal ${uniqueId()}`
   const { workflowId, apn } = await createPurchaseWorkflow(page, buyer)
-  await post(page, `/api/v1/purchase-workflows/${workflowId}/eligibility`, eligibilityVerified(isoDate()))
+  await post(page, `/api/v1/purchase-workflows/${workflowId}/eligibility`, await eligibilityVerified(page, isoDate()))
 
   // Today reads the purchase view, which catches up with the recorded eligibility after the POST returns.
   const row = section(page, 'Purchases').getByRole('row', { name: new RegExp(apn) })

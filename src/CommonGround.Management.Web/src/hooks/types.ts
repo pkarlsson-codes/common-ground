@@ -106,6 +106,15 @@ export interface RecordEligibilityForm {
   verifiedAnnualIncome: string
   verifiedHouseholdSize: string
   notes: string
+  /** The income documents chosen, uploaded to Documents when the verification is recorded. */
+  incomeFiles: File[]
+}
+
+export interface RecordDisclosureForm {
+  acknowledgedDate: CalendarDate
+  notes: string
+  /** The signed acknowledgment, uploaded to Documents when it is recorded. */
+  file: File | null
 }
 
 export interface RecordAppraisalForm {

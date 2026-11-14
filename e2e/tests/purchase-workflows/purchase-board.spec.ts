@@ -15,7 +15,7 @@ test('the board puts a purchase in the column of the step it waits on, and moves
 
   await page.goto('/purchase-workflows')
   await expect(page.getByRole('button', { name: 'Board', exact: true })).toHaveAttribute('aria-pressed', 'true')
-  for (const step of ['Eligibility', 'Appraisal', 'Financing', 'Inspection', 'Title', 'Lease signing', 'Closing']) {
+  for (const step of ['Eligibility', 'Appraisal', 'Financing', 'Inspection', 'Title', 'Lease signing', 'Disclosure', 'Closing']) {
     await expect(column(page, step)).toBeVisible()
   }
   const card = column(page, 'Eligibility').getByRole('button', { name: new RegExp(buyer) })
@@ -32,6 +32,7 @@ test('the board puts a purchase in the column of the step it waits on, and moves
   await field(detail, 'Verified Date').fill(isoDate())
   await field(detail, 'Verified Annual Income ($)').fill('52000')
   await field(detail, 'Verified Household Size').fill('2')
+  await detail.getByLabel('Income Documents').setInputFiles({ name: 'pay-stub.txt', mimeType: 'text/plain', buffer: Buffer.from('pay stub') })
   await detail.getByRole('button', { name: 'Record Eligibility' }).click()
   await expectToast(page, 'Eligibility recorded')
 

@@ -10,7 +10,7 @@ Art 1 has the trust give the buyer a disclosure letter before the buyer commits:
 6. User clicks "Record Disclosure"
 7. The file uploads to Documents, attached to the purchase with the role `disclosure-acknowledgement`; the API then records the track
 8. Toast: "Disclosure recorded"
-9. Track collapses and shows "Acknowledged {date}" with a link to the file; the Disclosure track is marked complete
+9. Track collapses and shows "Acknowledged {date}" and is marked complete; a Closing Documents section lists a link to the signed file
 
 ## Outcomes
 

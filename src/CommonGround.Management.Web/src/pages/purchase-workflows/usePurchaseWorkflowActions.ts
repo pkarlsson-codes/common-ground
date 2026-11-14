@@ -4,6 +4,7 @@ import type {
   FailWorkflowForm,
   RecordClosedForm,
   RecordAppraisalForm,
+  RecordDisclosureForm,
   RecordEligibilityForm,
   RecordFinancingForm,
   RecordInspectionForm,
@@ -31,6 +32,7 @@ interface UsePurchaseWorkflowActionsParams {
   inspMutation: TrackMutation<RecordInspectionForm>
   titleMutation: TrackMutation<RecordTitleForm>
   leaseExecMutation: TrackMutation<RecordLeaseExecutedForm>
+  disclosureMutation: TrackMutation<RecordDisclosureForm>
   scheduleMutation: TrackMutation<ScheduleClosingForm>
   closeMutation: TrackMutation<RecordClosedForm>
   failMutation: TrackMutation<FailWorkflowForm>
@@ -47,7 +49,8 @@ const allTracksComplete = (wf: PurchaseWorkflowResponse) =>
   !!wf.financingDetails &&
   !!wf.inspectionResult &&
   !!wf.titleDetails &&
-  !!wf.leaseExecutionDetails
+  !!wf.leaseExecutionDetails &&
+  !!wf.disclosureDetails
 
 export function usePurchaseWorkflowActions({
   selectedId,
@@ -59,6 +62,7 @@ export function usePurchaseWorkflowActions({
   inspMutation,
   titleMutation,
   leaseExecMutation,
+  disclosureMutation,
   scheduleMutation,
   closeMutation,
   failMutation,
@@ -120,6 +124,7 @@ export function usePurchaseWorkflowActions({
   const handleInsp = makeTrackHandler(inspMutation.mutateAsync, 'workflow:record-inspection', 'Inspection recorded', { toState: 'InProgress', trackKey: 'inspection' })
   const handleTitle = makeTrackHandler(titleMutation.mutateAsync, 'workflow:record-title', 'Title cleared', { toState: 'InProgress', trackKey: 'title' })
   const handleLeaseEx = makeTrackHandler(leaseExecMutation.mutateAsync, 'workflow:record-lease-executed', 'Lease executed', { toState: 'InProgress', trackKey: 'leaseExecution' })
+  const handleDisclosure = makeTrackHandler(disclosureMutation.mutateAsync, 'workflow:record-disclosure', 'Disclosure recorded', { toState: 'InProgress', trackKey: 'disclosure' })
   const handleSchedule = makeTrackHandler(scheduleMutation.mutateAsync, 'workflow:schedule-closing', 'Closing scheduled', { toState: 'ClosingScheduled', trackKey: 'closing' })
   const handleClose = makeTrackHandler(closeMutation.mutateAsync, 'workflow:record-closed', 'Purchase closed', { toState: 'Closed', trackKey: 'closing' })
   const handleFail = makeTrackHandler(failMutation.mutateAsync, 'workflow:fail', 'Workflow marked failed', { toState: 'Failed' })
@@ -138,6 +143,7 @@ export function usePurchaseWorkflowActions({
     handleInsp,
     handleTitle,
     handleLeaseEx,
+    handleDisclosure,
     handleSchedule,
     handleClose,
     handleFail,

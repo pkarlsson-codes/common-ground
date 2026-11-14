@@ -3,6 +3,7 @@ import type { PurchaseWorkflowResponse } from '../../api'
 import {
   useFailPurchase,
   useRecordAppraisalCompleted,
+  useRecordDisclosureAcknowledged,
   useRecordEligibilityVerified,
   useRecordFinancingCommitted,
   useRecordInspectionCompleted,
@@ -16,6 +17,7 @@ import type {
   FailWorkflowForm,
   RecordClosedForm,
   RecordAppraisalForm,
+  RecordDisclosureForm,
   RecordEligibilityForm,
   RecordFinancingForm,
   RecordInspectionForm,
@@ -27,7 +29,7 @@ import type {
 import { usePurchaseWorkflowActions } from './usePurchaseWorkflowActions'
 import { trustToday } from '../../lib/calendarDate'
 
-export type TrackKey = 'eligibility' | 'appraisal' | 'financing' | 'inspection' | 'title' | 'leaseExecution' | 'closing'
+export type TrackKey = 'eligibility' | 'appraisal' | 'financing' | 'inspection' | 'title' | 'leaseExecution' | 'disclosure' | 'closing'
 
 const today = () => trustToday()
 
@@ -37,7 +39,7 @@ type EligibilityDraft = Omit<RecordEligibilityForm, 'verifiedAnnualIncome' | 've
   verifiedHouseholdSize: string | null
 }
 
-const emptyEligibility = (): EligibilityDraft => ({ verifiedDate: today(), verifiedAnnualIncome: null, verifiedHouseholdSize: null, notes: '' })
+const emptyEligibility = (): EligibilityDraft => ({ verifiedDate: today(), verifiedAnnualIncome: null, verifiedHouseholdSize: null, notes: '', incomeFiles: [] })
 
 /** Fills untouched fields with what the household declared when selected, or leaves them empty when it wasn't. */
 const resolveEligibility = (draft: EligibilityDraft, detail: PurchaseWorkflowResponse | undefined): RecordEligibilityForm => ({
@@ -50,6 +52,7 @@ const emptyFinancing = (): RecordFinancingForm => ({ lenderName: '', committedAm
 const emptyInspection = (): RecordInspectionForm => ({ inspectionDate: today(), inspectorName: '', notes: '' })
 const emptyTitle = (): RecordTitleForm => ({ clearedDate: today(), titleCompanyName: '' })
 const emptyLeaseExec = (): RecordLeaseExecutedForm => ({ signedDate: today() })
+const emptyDisclosure = (): RecordDisclosureForm => ({ acknowledgedDate: today(), notes: '', file: null })
 const emptySchedule = (): ScheduleClosingForm => ({ scheduledDate: today() })
 const emptyClose = (): RecordClosedForm => ({ actualClosingDate: today(), closingNotes: '' })
 const emptyFail = (): FailWorkflowForm => ({ reason: '' })
@@ -74,6 +77,7 @@ export function usePurchaseWorkflowDetailController({
   const [inspForm, setInspForm] = useState<RecordInspectionForm>(emptyInspection)
   const [titleForm, setTitleForm] = useState<RecordTitleForm>(emptyTitle)
   const [leaseExecForm, setLeaseExecForm] = useState<RecordLeaseExecutedForm>(emptyLeaseExec)
+  const [disclosureForm, setDisclosureForm] = useState<RecordDisclosureForm>(emptyDisclosure)
   const [scheduleForm, setScheduleForm] = useState<ScheduleClosingForm>(emptySchedule)
   const [closeForm, setCloseForm] = useState<RecordClosedForm>(emptyClose)
   const [failForm, setFailForm] = useState<FailWorkflowForm>(emptyFail)
@@ -86,6 +90,7 @@ export function usePurchaseWorkflowDetailController({
   const inspMutation = useRecordInspectionCompleted()
   const titleMutation = useRecordTitleCleared()
   const leaseExecMutation = useRecordLeaseExecuted()
+  const disclosureMutation = useRecordDisclosureAcknowledged()
   const scheduleMutation = useScheduleClosing()
   const closeMutation = useRecordPurchaseClosed()
   const failMutation = useFailPurchase()
@@ -102,6 +107,7 @@ export function usePurchaseWorkflowDetailController({
     setInspForm(emptyInspection())
     setTitleForm(emptyTitle())
     setLeaseExecForm(emptyLeaseExec())
+    setDisclosureForm(emptyDisclosure())
     setScheduleForm(emptySchedule())
     setCloseForm(emptyClose())
     setFailForm(emptyFail())
@@ -140,6 +146,7 @@ export function usePurchaseWorkflowDetailController({
     inspMutation,
     titleMutation,
     leaseExecMutation,
+    disclosureMutation,
     scheduleMutation,
     closeMutation,
     failMutation,
@@ -167,6 +174,8 @@ export function usePurchaseWorkflowDetailController({
     setTitleForm,
     leaseExecForm,
     setLeaseExecForm,
+    disclosureForm,
+    setDisclosureForm,
     scheduleForm,
     setScheduleForm,
     closeForm,
@@ -181,6 +190,7 @@ export function usePurchaseWorkflowDetailController({
     handleInsp: actions.handleInsp,
     handleTitle: actions.handleTitle,
     handleLeaseEx: actions.handleLeaseEx,
+    handleDisclosure: actions.handleDisclosure,
     handleSchedule: actions.handleSchedule,
     handleClose: actions.handleClose,
     handleFail: actions.handleFail,
@@ -191,6 +201,7 @@ export function usePurchaseWorkflowDetailController({
     inspPending: inspMutation.isPending,
     titlePending: titleMutation.isPending,
     leaseExecPending: leaseExecMutation.isPending,
+    disclosurePending: disclosureMutation.isPending,
     schedulePending: scheduleMutation.isPending,
     scheduleError: scheduleMutation.isError,
     closePending: closeMutation.isPending,

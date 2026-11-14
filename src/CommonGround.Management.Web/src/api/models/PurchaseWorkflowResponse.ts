@@ -42,6 +42,13 @@ import {
     InspectionResultDtoToJSON,
     InspectionResultDtoToJSONTyped,
 } from './InspectionResultDto';
+import type { DisclosureDetailsDto } from './DisclosureDetailsDto';
+import {
+    DisclosureDetailsDtoFromJSON,
+    DisclosureDetailsDtoFromJSONTyped,
+    DisclosureDetailsDtoToJSON,
+    DisclosureDetailsDtoToJSONTyped,
+} from './DisclosureDetailsDto';
 import type { FinancingDetailsDto } from './FinancingDetailsDto';
 import {
     FinancingDetailsDtoFromJSON,
@@ -234,6 +241,12 @@ export interface PurchaseWorkflowResponse {
     leaseExecutionDetails?: LeaseExecutionDetailsDto | null;
     /**
      * 
+     * @type {DisclosureDetailsDto}
+     * @memberof PurchaseWorkflowResponse
+     */
+    disclosureDetails?: DisclosureDetailsDto | null;
+    /**
+     * 
      * @type {CalendarDate}
      * @memberof PurchaseWorkflowResponse
      */
@@ -323,6 +336,7 @@ export function PurchaseWorkflowResponseFromJSONTyped(json: any, ignoreDiscrimin
         'inspectionResult': json['inspectionResult'] == null ? undefined : InspectionResultDtoFromJSON(json['inspectionResult']),
         'titleDetails': json['titleDetails'] == null ? undefined : TitleDetailsDtoFromJSON(json['titleDetails']),
         'leaseExecutionDetails': json['leaseExecutionDetails'] == null ? undefined : LeaseExecutionDetailsDtoFromJSON(json['leaseExecutionDetails']),
+        'disclosureDetails': json['disclosureDetails'] == null ? undefined : DisclosureDetailsDtoFromJSON(json['disclosureDetails']),
         'scheduledClosingDate': json['scheduledClosingDate'] == null ? undefined : CalendarDateFromJSON(json['scheduledClosingDate']),
         'actualClosingDate': json['actualClosingDate'] == null ? undefined : CalendarDateFromJSON(json['actualClosingDate']),
         'closingNotes': json['closingNotes'] == null ? undefined : json['closingNotes'],
@@ -369,6 +383,7 @@ export function PurchaseWorkflowResponseToJSONTyped(value?: PurchaseWorkflowResp
         'inspectionResult': InspectionResultDtoToJSON(value['inspectionResult']),
         'titleDetails': TitleDetailsDtoToJSON(value['titleDetails']),
         'leaseExecutionDetails': LeaseExecutionDetailsDtoToJSON(value['leaseExecutionDetails']),
+        'disclosureDetails': DisclosureDetailsDtoToJSON(value['disclosureDetails']),
         'scheduledClosingDate': CalendarDateToJSON(value['scheduledClosingDate']),
         'actualClosingDate': CalendarDateToJSON(value['actualClosingDate']),
         'closingNotes': value['closingNotes'],

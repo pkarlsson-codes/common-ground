@@ -107,6 +107,7 @@ const ACTION_LABELS: Record<string, string> = {
   'record-inspection': 'Record inspection',
   'record-title': 'Record title',
   'record-lease-execution': 'Record lease signing',
+  'record-disclosure': 'Record disclosure',
   'schedule-closing': 'Schedule closing',
   'record-closing': 'Record closing',
   'record-lease-fee-notice': 'Record notice',

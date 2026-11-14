@@ -76,36 +76,35 @@ export function useExpiringDocuments(daysAhead: number, page = 1) {
 // ── Mutations ────────────────────────────────────────
 
 /** Multipart upload — the generated client can't handle this, so we use fetch directly. */
+export interface UploadDocumentMetadata {
+  title: string
+  sensitivity: string
+  retention: string
+  initialAttachment?: { entityType: string; entityId: string; role?: string } | null
+}
+
+/** Uploads one file to Documents and returns the new document's ID. */
+export async function uploadDocument(metadata: UploadDocumentMetadata, file: File): Promise<{ documentId: string }> {
+  const form = new FormData()
+  form.append('metadata', JSON.stringify(metadata))
+  form.append('file', file, file.name)
+
+  const csrf = getCsrfToken() ?? ''
+
+  const res = await fetch('/api/v1/documents', {
+    method: 'POST',
+    body: form,
+    credentials: 'include',
+    headers: csrf ? { 'X-CSRF-Token': csrf } : {},
+  })
+  if (!res.ok) throw new Error(`Upload failed: ${res.statusText}`)
+  return res.json() as Promise<{ documentId: string }>
+}
+
 export function useUploadDocument() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async ({
-      metadata,
-      file,
-    }: {
-      metadata: {
-        title: string
-        sensitivity: string
-        retention: string
-        initialAttachment?: { entityType: string; entityId: string; role?: string } | null
-      }
-      file: File
-    }) => {
-      const form = new FormData()
-      form.append('metadata', JSON.stringify(metadata))
-      form.append('file', file, file.name)
-
-      const csrf = getCsrfToken() ?? ''
-
-      const res = await fetch('/api/v1/documents', {
-        method: 'POST',
-        body: form,
-        credentials: 'include',
-        headers: csrf ? { 'X-CSRF-Token': csrf } : {},
-      })
-      if (!res.ok) throw new Error(`Upload failed: ${res.statusText}`)
-      return res.json() as Promise<{ documentId: string }>
-    },
+    mutationFn: ({ metadata, file }: { metadata: UploadDocumentMetadata; file: File }) => uploadDocument(metadata, file),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['documents'] })
       qc.invalidateQueries({ queryKey: ['entity-documents'] })

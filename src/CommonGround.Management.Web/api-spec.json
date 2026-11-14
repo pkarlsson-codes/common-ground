@@ -6622,6 +6622,71 @@
         }
       }
     },
+    "/api/v1/purchase-workflows/{workflowId}/disclosure": {
+      "post": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "operationId": "RecordDisclosureAcknowledged",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordDisclosureAcknowledgedRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordDisclosureAcknowledgedRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/purchase-workflows/{workflowId}/closing/schedule": {
       "post": {
         "tags": [
@@ -15447,6 +15512,14 @@
               }
             ]
           },
+          "disclosureDetails": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DisclosureDetailsDto"
+              }
+            ]
+          },
           "scheduledClosingDate": {
             "type": "string",
             "format": "date",
@@ -15591,6 +15664,13 @@
             "description": "The level the income is at or under, or null above the highest level or when no band was recorded.",
             "format": "int32",
             "nullable": true
+          },
+          "incomeDocumentIds": {
+            "type": "array",
+            "description": "The Documents the income was verified from.",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -15688,6 +15768,27 @@
             "type": "string",
             "description": "Date lease was signed.",
             "format": "date"
+          }
+        }
+      },
+      "DisclosureDetailsDto": {
+        "type": "object",
+        "description": "The buyer's signed disclosure acknowledgment.",
+        "additionalProperties": false,
+        "properties": {
+          "acknowledgedDate": {
+            "type": "string",
+            "description": "The date the buyer signed.",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes.",
+            "nullable": true
+          },
+          "documentId": {
+            "type": "string",
+            "description": "The signed acknowledgment in Documents."
           }
         }
       },
@@ -15791,7 +15892,8 @@
         "additionalProperties": false,
         "required": [
           "verifiedAnnualIncome",
-          "verifiedHouseholdSize"
+          "verifiedHouseholdSize",
+          "incomeDocumentIds"
         ],
         "properties": {
           "verifiedDate": {
@@ -15808,6 +15910,13 @@
             "type": "integer",
             "description": "The number of people in the household as the documents show it. Required.",
             "format": "int32"
+          },
+          "incomeDocumentIds": {
+            "type": "array",
+            "description": "The Documents the income was verified from. At least one.",
+            "items": {
+              "type": "string"
+            }
           },
           "notes": {
             "type": "string",
@@ -15897,6 +16006,31 @@
           "signedDate": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "RecordDisclosureAcknowledgedRequest": {
+        "type": "object",
+        "description": "Request to record the buyer's signed disclosure acknowledgment.",
+        "additionalProperties": false,
+        "required": [
+          "documentId"
+        ],
+        "properties": {
+          "acknowledgedDate": {
+            "type": "string",
+            "description": "The date the buyer signed. Not in the future.",
+            "format": "date"
+          },
+          "documentId": {
+            "type": "string",
+            "description": "The signed acknowledgment in Documents.",
+            "minLength": 1
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes.",
+            "nullable": true
           }
         }
       },

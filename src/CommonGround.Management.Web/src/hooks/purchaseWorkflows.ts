@@ -4,6 +4,7 @@ import { apiConfig } from '../lib/apiConfig'
 import type {
   FailWorkflowForm,
   RecordClosedForm,
+  RecordDisclosureForm,
   RecordEligibilityForm,
   RecordAppraisalForm,
   RecordFinancingForm,
@@ -17,6 +18,7 @@ import type {
 import type { PurchaseWorkflowResponse } from '../api/models/PurchaseWorkflowResponse'
 import type { PurchaseWorkflowListItemResponse } from '../api/models/PurchaseWorkflowListItemResponse'
 import { trustToday } from '../lib/calendarDate'
+import { uploadDocument } from './documents'
 
 const api = new PurchaseWorkflowsApi(apiConfig)
 
@@ -53,6 +55,7 @@ export const PURCHASE_STEP_LABELS: Record<string, string> = {
   Inspection: 'Inspection',
   Title: 'Title',
   LeaseSigning: 'Lease signing',
+  Disclosure: 'Disclosure',
   Closing: 'Closing',
 }
 
@@ -70,6 +73,7 @@ export function purchaseWaitingOn(workflow: PurchaseWorkflowResponse): string {
   if (!workflow.inspectionResult) return 'the inspection'
   if (!workflow.titleDetails) return 'title clearance'
   if (!workflow.leaseExecutionDetails) return 'the lease signing'
+  if (!workflow.disclosureDetails) return 'the signed disclosure'
   if (!workflow.scheduledClosingDate) return 'scheduling the closing'
   return 'the closing'
 }
@@ -152,19 +156,47 @@ const rollbackOptimisticTrackDetails = (
   qc.setQueryData(['purchase-workflow', workflowId], context.previousDetail)
 }
 
+/**
+ * Files already uploaded for a purchase, by File object. A record that fails after its upload is retried with the same
+ * File, so Documents gets no duplicate.
+ */
+const uploadedForPurchase = new WeakMap<File, string>()
+
+async function uploadForPurchase(workflowId: string, file: File, title: string, role: string): Promise<string> {
+  const known = uploadedForPurchase.get(file)
+  if (known) return known
+  const { documentId } = await uploadDocument(
+    {
+      title,
+      sensitivity: 'Confidential',
+      retention: 'LongTerm7yr',
+      initialAttachment: { entityType: 'PurchaseWorkflow', entityId: workflowId, role },
+    },
+    file,
+  )
+  uploadedForPurchase.set(file, documentId)
+  return documentId
+}
+
 export function useRecordEligibilityVerified() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ workflowId, form }: { workflowId: string; form: RecordEligibilityForm }) =>
-      api.recordEligibilityVerified({
+    mutationFn: async ({ workflowId, form }: { workflowId: string; form: RecordEligibilityForm }) => {
+      const incomeDocumentIds: string[] = []
+      for (const file of form.incomeFiles) {
+        incomeDocumentIds.push(await uploadForPurchase(workflowId, file, `Income document ${file.name}`, 'income-document'))
+      }
+      return api.recordEligibilityVerified({
         workflowId,
         recordEligibilityVerifiedRequest: {
           verifiedDate: form.verifiedDate,
           verifiedAnnualIncome: Number(form.verifiedAnnualIncome),
           verifiedHouseholdSize: Number(form.verifiedHouseholdSize),
+          incomeDocumentIds,
           notes: form.notes || undefined,
         },
-      }),
+      })
+    },
     onMutate: async ({ workflowId, form }) => {
       await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
       await qc.cancelQueries({ queryKey: ['purchase-workflows'] })
@@ -175,6 +207,7 @@ export function useRecordEligibilityVerified() {
           notes: form.notes || undefined,
           verifiedAnnualIncome: Number(form.verifiedAnnualIncome),
           verifiedHouseholdSize: Number(form.verifiedHouseholdSize),
+          incomeDocumentIds: [],
         },
       })
       return { workflowId, ...context }
@@ -328,6 +361,36 @@ export function useRecordLeaseExecuted() {
 
       const context = applyOptimisticTrackDetails(qc, workflowId, {
         leaseExecutionDetails: { signedDate: form.signedDate },
+      })
+      return { workflowId, ...context }
+    },
+    onError: (_e, vars, context) => {
+      rollbackOptimisticTrackDetails(qc, vars.workflowId, context)
+    },
+    onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
+  })
+}
+
+export function useRecordDisclosureAcknowledged() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ workflowId, form }: { workflowId: string; form: RecordDisclosureForm }) => {
+      const documentId = await uploadForPurchase(workflowId, form.file!, `Signed disclosure ${form.file!.name}`, 'disclosure-acknowledgement')
+      return api.recordDisclosureAcknowledged({
+        workflowId,
+        recordDisclosureAcknowledgedRequest: {
+          acknowledgedDate: form.acknowledgedDate,
+          documentId,
+          notes: form.notes || undefined,
+        },
+      })
+    },
+    onMutate: async ({ workflowId, form }) => {
+      await qc.cancelQueries({ queryKey: ['purchase-workflow', workflowId] })
+      await qc.cancelQueries({ queryKey: ['purchase-workflows'] })
+
+      const context = applyOptimisticTrackDetails(qc, workflowId, {
+        disclosureDetails: { acknowledgedDate: form.acknowledgedDate, notes: form.notes || undefined },
       })
       return { workflowId, ...context }
     },

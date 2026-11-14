@@ -221,8 +221,15 @@ export async function createPurchaseWorkflow(page: Page, buyerName: string, { fr
 /**
  * An eligibility verification body whose income is under every baseline limit (the 50% one-person limit is 43,750).
  */
-export function eligibilityVerified(verifiedDate: string) {
-  return { verifiedDate, verifiedAnnualIncome: 40000, verifiedHouseholdSize: 1, notes: null }
+export async function eligibilityVerified(page: Page, verifiedDate: string) {
+  const { documentId } = await uploadDocument(page, 'Income document')
+  return { verifiedDate, verifiedAnnualIncome: 40000, verifiedHouseholdSize: 1, incomeDocumentIds: [documentId], notes: null }
+}
+
+/** A disclosure acknowledgment body with an uploaded signed file. */
+export async function disclosureAcknowledged(page: Page, acknowledgedDate: string) {
+  const { documentId } = await uploadDocument(page, 'Signed disclosure')
+  return { acknowledgedDate, documentId, notes: null }
 }
 
 /**
@@ -233,12 +240,13 @@ export function eligibilityVerified(verifiedDate: string) {
 export async function createLeaseFromPurchase(page: Page, buyerName: string, { fromApplication = false } = {}) {
   const workflow = await createPurchaseWorkflow(page, buyerName, { fromApplication })
   const path = `/api/v1/purchase-workflows/${workflow.workflowId}`
-  await post(page, `${path}/eligibility`, eligibilityVerified(isoDate(-10)))
+  await post(page, `${path}/eligibility`, await eligibilityVerified(page, isoDate(-10)))
   await post(page, `${path}/appraisal`, { appraisedValue: 250000, appraisalDate: isoDate(-10), appraiserName: 'E2E Appraiser', notes: null })
   await post(page, `${path}/financing`, { lenderName: 'E2E Lender', committedAmount: 180000, preapprovalLetterDate: isoDate(-9) })
   await post(page, `${path}/inspection`, { inspectionDate: isoDate(-8), inspectorName: 'E2E Inspector', notes: null })
   await post(page, `${path}/title`, { clearedDate: isoDate(-7), titleCompanyName: null })
   await post(page, `${path}/lease-execution`, { signedDate: isoDate(-6) })
+  await post(page, `${path}/disclosure`, await disclosureAcknowledged(page, isoDate(-6)))
   await post(page, `${path}/closing/schedule`, { scheduledClosingDate: isoDate(-1) })
   await post(page, `${path}/closing/record`, { actualClosingDate: isoDate(-1), notes: null })
 

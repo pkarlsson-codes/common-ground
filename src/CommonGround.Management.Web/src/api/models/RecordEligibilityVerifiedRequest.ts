@@ -47,6 +47,12 @@ export interface RecordEligibilityVerifiedRequest {
      */
     verifiedHouseholdSize: number;
     /**
+     * The Documents the income was verified from. At least one.
+     * @type {Array<string>}
+     * @memberof RecordEligibilityVerifiedRequest
+     */
+    incomeDocumentIds: Array<string>;
+    /**
      * Optional notes.
      * @type {string}
      * @memberof RecordEligibilityVerifiedRequest
@@ -60,6 +66,7 @@ export interface RecordEligibilityVerifiedRequest {
 export function instanceOfRecordEligibilityVerifiedRequest(value: object): value is RecordEligibilityVerifiedRequest {
     if (!('verifiedAnnualIncome' in value) || value['verifiedAnnualIncome'] === undefined) return false;
     if (!('verifiedHouseholdSize' in value) || value['verifiedHouseholdSize'] === undefined) return false;
+    if (!('incomeDocumentIds' in value) || value['incomeDocumentIds'] === undefined) return false;
     return true;
 }
 
@@ -76,6 +83,7 @@ export function RecordEligibilityVerifiedRequestFromJSONTyped(json: any, ignoreD
         'verifiedDate': json['verifiedDate'] == null ? undefined : CalendarDateFromJSON(json['verifiedDate']),
         'verifiedAnnualIncome': json['verifiedAnnualIncome'],
         'verifiedHouseholdSize': json['verifiedHouseholdSize'],
+        'incomeDocumentIds': json['incomeDocumentIds'],
         'notes': json['notes'] == null ? undefined : json['notes'],
     };
 }
@@ -94,6 +102,7 @@ export function RecordEligibilityVerifiedRequestToJSONTyped(value?: RecordEligib
         'verifiedDate': CalendarDateToJSON(value['verifiedDate']),
         'verifiedAnnualIncome': value['verifiedAnnualIncome'],
         'verifiedHouseholdSize': value['verifiedHouseholdSize'],
+        'incomeDocumentIds': value['incomeDocumentIds'],
         'notes': value['notes'],
     };
 }

@@ -4,13 +4,14 @@ import { useHomeAssessments } from '../../hooks/homes'
 import SlideOver from '../../components/SlideOver'
 import PurchaseTrackSection from './PurchaseTrackSection'
 import PurchaseWorkflowSnapshotSection from './PurchaseWorkflowSnapshotSection'
+import PurchaseDocumentLinks from './PurchaseDocumentLinks'
 import PurchaseExceptionActionsSection from './PurchaseExceptionActionsSection'
 import { usePurchaseWorkflowDetailController } from './usePurchaseWorkflowDetailController'
 import { DateInput } from '../../components/DateInput'
 import { useEffect } from 'react'
 import type { PurchaseWorkflowResponse } from '../../api'
 import type { RecordEligibilityForm } from '../../hooks/types'
-import { formatCalendarDate } from '../../lib/calendarDate'
+import { formatCalendarDate, trustToday } from '../../lib/calendarDate'
 import { incomeBandFor, incomeBandLabel, PRINTED_HOUSEHOLD_SIZES } from '../../lib/incomeBand'
 
 const fmtCurrency = (n: number) =>
@@ -124,7 +125,7 @@ export default function PurchaseWorkflowDetailPanel({
             <div className="detail-section">
               <div className="detail-section__title">Purchase Tracks</div>
               <div style={{ marginBottom: 12, fontSize: 12, color: 'var(--text-secondary)' }}>
-                All six tracks must be complete before closing can be scheduled.
+                All seven tracks must be complete before closing can be scheduled.
               </div>
 
               <PurchaseTrackSection
@@ -179,6 +180,23 @@ export default function PurchaseWorkflowDetailPanel({
                       <EligibilityIncomeCheck detail={detail} form={s.eligForm} />
                     </div>
                     <div className="form-field full">
+                      <label className="form-label" htmlFor="elig-income-files">Income Documents</label>
+                      <input
+                        id="elig-income-files"
+                        type="file"
+                        multiple
+                        accept="application/pdf,image/*"
+                        className="form-input"
+                        style={{ cursor: 'pointer' }}
+                        onChange={e => s.setEligForm(f => ({ ...f, incomeFiles: Array.from(e.target.files ?? []) }))}
+                      />
+                      <p className="form-hint">
+                        {s.eligForm.incomeFiles.length > 0
+                          ? `${s.eligForm.incomeFiles.map(f => f.name).join(', ')} go to Documents, attached to this purchase.`
+                          : 'Pay stubs, tax returns or benefit letters. At least one file.'}
+                      </p>
+                    </div>
+                    <div className="form-field full">
                       <label className="form-label">Notes (optional)</label>
                       <input
                         className="form-input"
@@ -187,7 +205,11 @@ export default function PurchaseWorkflowDetailPanel({
                       />
                     </div>
                   </div>
-                  <button type="submit" className="btn btn-secondary btn-sm" disabled={s.eligPending}>
+                  <button
+                    type="submit"
+                    className="btn btn-secondary btn-sm"
+                    disabled={s.eligPending || s.eligForm.incomeFiles.length === 0}
+                  >
                     {s.eligPending ? 'Saving…' : 'Record Eligibility'}
                   </button>
                 </form>
@@ -418,6 +440,67 @@ export default function PurchaseWorkflowDetailPanel({
                 </form>
               </PurchaseTrackSection>
 
+              <PurchaseTrackSection
+                label="Disclosure"
+                summary={
+                  detail.disclosureDetails
+                    ? `Acknowledged ${detail.disclosureDetails.acknowledgedDate ?? ''}`
+                    : 'Pending'
+                }
+                complete={!!detail.disclosureDetails}
+                expandable={!detail.disclosureDetails}
+                expanded={s.expandedTracks.has('disclosure')}
+                onToggle={() => s.toggleTrack('disclosure')}
+              >
+                <form onSubmit={e => s.handleDisclosure(e, s.disclosureForm)}>
+                  <div className="form-grid" style={{ marginBottom: 10 }}>
+                    <div className="form-field">
+                      <label className="form-label" htmlFor="disclosure-date">Acknowledged Date</label>
+                      <DateInput
+                        id="disclosure-date"
+                        className="form-input"
+                        value={s.disclosureForm.acknowledgedDate}
+                        max={trustToday()}
+                        onChange={v => s.setDisclosureForm(f => ({ ...f, acknowledgedDate: v }))}
+                        required
+                      />
+                    </div>
+                    <div className="form-field full">
+                      <label className="form-label" htmlFor="disclosure-file">Signed Disclosure</label>
+                      <input
+                        id="disclosure-file"
+                        type="file"
+                        accept="application/pdf,image/*"
+                        className="form-input"
+                        style={{ cursor: 'pointer' }}
+                        onChange={e => s.setDisclosureForm(f => ({ ...f, file: e.target.files?.[0] ?? null }))}
+                      />
+                      <p className="form-hint">
+                        {s.disclosureForm.file
+                          ? `${s.disclosureForm.file.name} goes to Documents, attached to this purchase.`
+                          : 'The buyer-signed acknowledgment. PDF or image.'}
+                      </p>
+                    </div>
+                    <div className="form-field full">
+                      <label className="form-label" htmlFor="disclosure-notes">Notes (optional)</label>
+                      <input
+                        id="disclosure-notes"
+                        className="form-input"
+                        value={s.disclosureForm.notes}
+                        onChange={e => s.setDisclosureForm(f => ({ ...f, notes: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    className="btn btn-secondary btn-sm"
+                    disabled={s.disclosurePending || !s.disclosureForm.file}
+                  >
+                    {s.disclosurePending ? 'Saving…' : 'Record Disclosure'}
+                  </button>
+                </form>
+              </PurchaseTrackSection>
+
               {(s.canSchedule || detail.scheduledClosingDate || detail.actualClosingDate) && (() => {
                 const closed = !!detail.actualClosingDate
                 const scheduled = !closed && !!detail.scheduledClosingDate
@@ -485,6 +568,8 @@ export default function PurchaseWorkflowDetailPanel({
               })()}
             </div>
           )}
+
+          <PurchaseDocumentLinks detail={detail} />
 
           {s.canAct && (
             <PurchaseExceptionActionsSection

@@ -12,7 +12,7 @@ Before closing, staff check the buyer's documents (pay stubs, tax returns) again
    - When the purchase carries a schedule, the track also shows the band for the entered income and size: "Up to 50% of AMI", "Over 50% to 80% of AMI", or "Over 120% of AMI" when the income is above the highest level
 7. User clicks "Record Eligibility". The files upload to Documents, attached to the purchase with the role `income-document`; the API then records the track
 8. Toast: "Eligibility recorded"
-9. Track collapses and shows "Verified {date}: $72,000 income, 3 people" and, when the purchase has a limit, "within the $81,600 limit" and the band, with links to the income documents; the Eligibility track is marked complete
+9. Track collapses and shows "Verified {date}: $72,000 income, 3 people" and, when the purchase has a limit, "within the $81,600 limit" and the band, and is marked complete; a Closing Documents section lists links to the income documents
 
 ## Outcomes
 

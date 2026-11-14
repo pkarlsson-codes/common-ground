@@ -70,6 +70,12 @@ export interface EligibilityDetailsDto {
      * @memberof EligibilityDetailsDto
      */
     incomeBandUpToPercentOfAmi?: number | null;
+    /**
+     * The Documents the income was verified from.
+     * @type {Array<string>}
+     * @memberof EligibilityDetailsDto
+     */
+    incomeDocumentIds?: Array<string>;
 }
 
 /**
@@ -96,6 +102,7 @@ export function EligibilityDetailsDtoFromJSONTyped(json: any, ignoreDiscriminato
         'incomeLimit': json['incomeLimit'] == null ? undefined : json['incomeLimit'],
         'incomeBandOverPercentOfAmi': json['incomeBandOverPercentOfAmi'] == null ? undefined : json['incomeBandOverPercentOfAmi'],
         'incomeBandUpToPercentOfAmi': json['incomeBandUpToPercentOfAmi'] == null ? undefined : json['incomeBandUpToPercentOfAmi'],
+        'incomeDocumentIds': json['incomeDocumentIds'] == null ? undefined : json['incomeDocumentIds'],
     };
 }
 
@@ -117,6 +124,7 @@ export function EligibilityDetailsDtoToJSONTyped(value?: EligibilityDetailsDto |
         'incomeLimit': value['incomeLimit'],
         'incomeBandOverPercentOfAmi': value['incomeBandOverPercentOfAmi'],
         'incomeBandUpToPercentOfAmi': value['incomeBandUpToPercentOfAmi'],
+        'incomeDocumentIds': value['incomeDocumentIds'],
     };
 }
 
