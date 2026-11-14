@@ -186,6 +186,7 @@ export * from './RegisterHouseholdRequest';
 export * from './RegisterHouseholdResponse';
 export * from './RegisterLandParcelRequest';
 export * from './RegisterLandParcelResponse';
+export * from './RemoveFromWaitingListRequest';
 export * from './RequestForbearanceRequest';
 export * from './ResalePriceResponse';
 export * from './ResalePriceStatementDto';

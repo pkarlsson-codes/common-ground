@@ -9,6 +9,8 @@ import ApproveApplicationPanel from './ApproveApplicationPanel'
 import DenyApplicationPanel from './DenyApplicationPanel'
 import ApplicationPhaseBadge from './ApplicationPhaseBadge'
 import WithdrawApplicationPanel from './WithdrawApplicationPanel'
+import RemoveFromWaitingListPanel from './RemoveFromWaitingListPanel'
+import { waitingListRemovalReasonLabel } from './waitingListRemovalReasons'
 import { getResponseStatus } from '../../lib/getErrorMessage'
 import { formatPhoneDisplay } from '../../lib/phone'
 
@@ -38,6 +40,7 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
     | 'approve-application'
     | 'deny-application'
     | 'withdraw-application'
+    | 'remove-from-waiting-list'
     | null
   >(null)
 
@@ -47,6 +50,7 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
   const isApprovedPhase = phase === 'approved'
   const isOpen = isSubmittedPhase || isApprovedPhase
   const isSelectedPhase = phase === 'selected'
+  const isRemovedPhase = phase === 'removed'
   const passOvers = detail?.passOvers ?? []
 
   return (
@@ -114,7 +118,7 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
               <div className="detail-field__label">Declared Accessibility Need</div>
               <div className="detail-field__value">{detail.accessibilityRequired ? 'Yes' : 'No'}</div>
             </div>
-            {(isApprovedPhase || isSelectedPhase) && (
+            {(isApprovedPhase || isSelectedPhase || isRemovedPhase) && (
               <div className="detail-field">
                 <div className="detail-field__label">Approved Date</div>
                 <div className="detail-field__value mono">{fmtDate(detail.approvedDate)}</div>
@@ -131,6 +135,24 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
                 <div className="detail-field__label">Denial Reason</div>
                 <div className="detail-field__value">{detail.denialReason ?? '—'}</div>
               </div>
+            )}
+            {isRemovedPhase && (
+              <>
+                <div className="detail-field">
+                  <div className="detail-field__label">Removed Date</div>
+                  <div className="detail-field__value mono">{fmtDate(detail.removedDate)}</div>
+                </div>
+                <div className="detail-field">
+                  <div className="detail-field__label">Removal Reason</div>
+                  <div className="detail-field__value">{waitingListRemovalReasonLabel(detail.removalReason)}</div>
+                </div>
+                {detail.removalNote && (
+                  <div className="detail-field full-span">
+                    <div className="detail-field__label">Removal Note</div>
+                    <div className="detail-field__value">{detail.removalNote}</div>
+                  </div>
+                )}
+              </>
             )}
             {phase === 'withdrawn' && (
               <div className="detail-field full-span">
@@ -202,9 +224,16 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
             </div>
             {isOpen && (
               <div className="workflow-actions__danger">
-                <button className="btn btn-danger-ghost btn-sm" onClick={() => setActionPanel('deny-application')}>
-                  Deny Application
-                </button>
+                {isSubmittedPhase && (
+                  <button className="btn btn-danger-ghost btn-sm" onClick={() => setActionPanel('deny-application')}>
+                    Deny Application
+                  </button>
+                )}
+                {isApprovedPhase && (
+                  <button className="btn btn-danger-ghost btn-sm" onClick={() => setActionPanel('remove-from-waiting-list')}>
+                    Remove from Waiting List
+                  </button>
+                )}
                 <button className="btn btn-danger-ghost btn-sm" onClick={() => setActionPanel('withdraw-application')}>
                   Withdraw Application
                 </button>
@@ -219,6 +248,13 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
       )}
       {actionPanel === 'deny-application' && (
         <DenyApplicationPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />
+      )}
+      {actionPanel === 'remove-from-waiting-list' && (
+        <RemoveFromWaitingListPanel
+          applicationId={applicationId}
+          approvedDate={detail?.approvedDate}
+          onClose={() => setActionPanel(null)}
+        />
       )}
       {actionPanel === 'withdraw-application' && (
         <WithdrawApplicationPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />

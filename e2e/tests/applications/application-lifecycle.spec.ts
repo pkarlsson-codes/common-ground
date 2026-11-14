@@ -4,7 +4,7 @@ import { detailValue, expectToast, field, isoDate, panel, uniqueId } from '../su
 
 // Journeys: docs/journeys/applications/
 //   submit-application, view-application-detail, approve-application,
-//   deny-application, withdraw-application (submit-application covers both New and Existing household)
+//   deny-application, withdraw-application, remove-from-waiting-list (submit-application covers both New and Existing household)
 
 type Member = { name: string; email: string; phone: string }
 
@@ -113,7 +113,38 @@ test('approving a submitted application moves it to Approved', async ({ page }) 
   await expect(detailValue(detail, 'Phase')).toHaveText('Approved · on waiting list')
   await expect(detailValue(detail, 'Approved Date')).not.toHaveText('—')
   const actions = detail.locator('.detail-section', { hasText: 'Workflow Actions' })
-  await expect(actions.getByRole('button')).toHaveText(['Deny Application', 'Withdraw Application'])
+  await expect(actions.getByRole('button')).toHaveText(['Remove from Waiting List', 'Withdraw Application'])
+})
+
+test('removing an approved application takes the household off the waiting list', async ({ page }) => {
+  const { primary } = newHousehold()
+  await submitApplication(page, [primary])
+  const detail = await openApplication(page, primary.name)
+  await detail.getByRole('button', { name: 'Approve Application' }).click()
+  await panel(page, 'Approve Application').getByRole('button', { name: 'Approve', exact: true }).click()
+  await expectToast(page, 'Application approved')
+
+  await detail.getByRole('button', { name: 'Remove from Waiting List' }).click()
+  const remove = panel(page, 'Remove from Waiting List')
+  const submit = remove.getByRole('button', { name: 'Remove', exact: true })
+  await expect(submit).toBeDisabled()
+  await remove.getByRole('radio', { name: /^Other/ }).check()
+  await expect(submit).toBeDisabled()
+  await remove.getByRole('radio', { name: /^No response/ }).check()
+  await remove.getByLabel(/^Note/).fill('Three calls and a letter, no answer')
+  await submit.click()
+  await page.getByRole('dialog').filter({ hasText: 'This action cannot be undone' }).last().getByRole('button', { name: 'Remove', exact: true }).click()
+  await expectToast(page, 'Removed from waiting list')
+
+  await expect(detailValue(detail, 'Phase')).toHaveText('Removed from waiting list')
+  await expect(detailValue(detail, 'Removal Reason')).toHaveText('No response')
+  await expect(detailValue(detail, 'Removal Note')).toHaveText('Three calls and a letter, no answer')
+  await expect(detailValue(detail, 'Removed Date')).not.toHaveText('—')
+  await expect(detail.getByText('No actions available for this phase.')).toBeVisible()
+
+  await page.goto('/waiting-list')
+  await page.getByRole('searchbox', { name: 'Search waiting list' }).fill(primary.name)
+  await expect(page.getByText('No waiting households match your search')).toBeVisible()
 })
 
 test('denying a submitted application ends it', async ({ page }) => {

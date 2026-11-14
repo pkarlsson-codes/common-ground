@@ -96,4 +96,18 @@ public static class HomeownerApplicationsEndpoints
         await client.WithdrawApplicationAsync(applicationId, request, cancellationToken).ConfigureAwait(false);
         return Results.NoContent();
     }
+
+    [WolverinePost("/api/v1/homeowner-applications/{applicationId}/remove-from-waiting-list")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> RemoveFromWaitingList(
+        string applicationId,
+        RemoveFromWaitingListRequest request,
+        IHomeownerApplicationsApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.RemoveFromWaitingListAsync(applicationId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
 }

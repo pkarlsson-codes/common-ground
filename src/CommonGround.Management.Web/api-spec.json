@@ -3602,6 +3602,71 @@
         }
       }
     },
+    "/api/v1/homeowner-applications/{applicationId}/remove-from-waiting-list": {
+      "post": {
+        "tags": [
+          "HomeownerApplications"
+        ],
+        "operationId": "RemoveFromWaitingList",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RemoveFromWaitingListRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveFromWaitingListRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/homes/{homeId}/home-selections": {
       "post": {
         "tags": [
@@ -12809,7 +12874,7 @@
       },
       "HomeownerApplicationResponse": {
         "type": "object",
-        "description": "Detail response for a homeowner application. Household size, income and accessibility are the\nsnapshot taken at submission; current household state is served by HouseholdResponse.\nPassOvers covers all of the household's applications, oldest first.",
+        "description": "Detail response for a homeowner application. Household size, income and accessibility are the\nsnapshot taken at submission; current household state is served by HouseholdResponse.\nRemovalReason (NoLongerEligible, NoResponse, FalseInformation or Other), RemovalNote and\nRemovedDate are set when the application was removed from the waiting list.\nPassOvers covers all of the household's applications, oldest first.",
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -12858,6 +12923,19 @@
           },
           "withdrawalReason": {
             "type": "string",
+            "nullable": true
+          },
+          "removalReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "removalNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "removedDate": {
+            "type": "string",
+            "format": "date",
             "nullable": true
           },
           "selectedDate": {
@@ -13048,6 +13126,27 @@
           "reason": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "RemoveFromWaitingListRequest": {
+        "type": "object",
+        "description": "Request to take an approved application off the waiting list.",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Why: NoLongerEligible, NoResponse, FalseInformation or Other."
+          },
+          "note": {
+            "type": "string",
+            "description": "Staff's note; required when Reason is Other.",
+            "nullable": true
+          },
+          "removedDate": {
+            "type": "string",
+            "description": "The day of removal; not in the future or before the approved date.",
+            "format": "date"
           }
         }
       },

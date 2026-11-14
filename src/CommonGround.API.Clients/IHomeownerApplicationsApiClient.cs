@@ -32,6 +32,9 @@ public interface IHomeownerApplicationsApiClient
 
     /// <summary>Withdraws a homeowner application.</summary>
     Task WithdrawApplicationAsync(string applicationId, WithdrawApplicationRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Takes an approved homeowner application off the waiting list.</summary>
+    Task RemoveFromWaitingListAsync(string applicationId, RemoveFromWaitingListRequest request, CancellationToken cancellationToken);
 }
 
 #pragma warning restore SA1615

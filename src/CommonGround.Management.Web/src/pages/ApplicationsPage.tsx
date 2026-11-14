@@ -16,6 +16,7 @@ const PHASES = [
   'Selected',
   'Denied',
   'Withdrawn',
+  'Removed',
 ]
 
 export default function ApplicationsPage() {

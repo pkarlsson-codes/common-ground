@@ -6,6 +6,7 @@ const PHASE_CLASS: Record<string, string> = {
   Selected: 'badge-closed',
   Denied: 'badge-failed',
   Withdrawn: 'badge-withdrawn',
+  Removed: 'badge-withdrawn',
 }
 
 const PHASE_LABEL: Record<string, string> = {
@@ -14,6 +15,7 @@ const PHASE_LABEL: Record<string, string> = {
   Selected: 'Selected',
   Denied: 'Denied',
   Withdrawn: 'Withdrawn',
+  Removed: 'Removed from waiting list',
 }
 
 type Props = {

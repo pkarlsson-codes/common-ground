@@ -11,6 +11,6 @@ describe('findOpenApplication', () => {
   })
 
   it('finds nothing when every application is closed', () => {
-    expect(findOpenApplication(householdWith('Denied', 'Withdrawn', 'Purchased'))).toBeUndefined()
+    expect(findOpenApplication(householdWith('Denied', 'Withdrawn', 'Removed', 'Purchased'))).toBeUndefined()
   })
 })

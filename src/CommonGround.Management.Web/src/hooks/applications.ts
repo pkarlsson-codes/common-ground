@@ -8,6 +8,7 @@ import {
   type PaginatedResponseOfHomeownerApplicationListItemResponse,
   type PaginatedResponseOfWaitingListEntryResponse,
   type RegisterHouseholdRequest,
+  type RemoveFromWaitingListRequest,
   type RegisterHouseholdResponse,
   type SubmitApplicationResponse,
   type WithdrawApplicationRequest,
@@ -126,6 +127,18 @@ export function useWithdrawApplication() {
       api.withdrawApplication({ applicationId, withdrawApplicationRequest: request }),
     onSuccess: (_data, variables) => {
       invalidateApplication(qc, variables.applicationId)
+    },
+  })
+}
+
+export function useRemoveFromWaitingList() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ applicationId, request }: { applicationId: string; request: RemoveFromWaitingListRequest }) =>
+      api.removeFromWaitingList({ applicationId, removeFromWaitingListRequest: request }),
+    onSuccess: (_data, variables) => {
+      invalidateApplication(qc, variables.applicationId)
+      qc.invalidateQueries({ queryKey: ['households'] })
     },
   })
 }

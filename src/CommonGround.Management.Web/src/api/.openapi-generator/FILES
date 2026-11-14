@@ -207,6 +207,7 @@ models/RegisterHouseholdRequest.ts
 models/RegisterHouseholdResponse.ts
 models/RegisterLandParcelRequest.ts
 models/RegisterLandParcelResponse.ts
+models/RemoveFromWaitingListRequest.ts
 models/RequestForbearanceRequest.ts
 models/ResalePriceResponse.ts
 models/ResalePriceStatementDto.ts
