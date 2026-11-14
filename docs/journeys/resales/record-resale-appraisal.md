@@ -5,7 +5,7 @@ For when the trust has the appraisal the lease requires after a notice of intent
 1. User opens a resale that has no appraisal (see [View Resale Detail](view-resale-detail.md)) and clicks "Record Appraisal" on the Next Step card
 2. "Record Appraisal" panel opens with the home's label as subtitle
 3. User enters Appraised Value (required, above zero), Appraisal Date (default today, not in the future, not before the notice date) and Appraiser (required, free text)
-4. If the lease's formula credits improvements, user enters Approved Improvements (default 0). If the formula is Index Based, user enters Current Index Value (required, above zero)
+4. If the lease's formula credits improvements, user enters Approved Improvements (default the lease's Confirmed Improvements, or 0 when it has none; staff may change it, for improvements made before the lease was in CommonGround). If the formula is Index Based, user enters Current Index Value (required, above zero)
 5. The panel previews the result as the user types: Formula Price, Appraised Value, and the Purchase Option Price (the lesser of the two)
 6. User clicks "Record Appraisal" (disabled until the required fields are valid), or "Cancel"
 7. Toast: "Appraisal recorded"
