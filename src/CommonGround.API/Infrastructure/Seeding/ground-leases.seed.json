@@ -22,6 +22,9 @@
     "checkIns": [
       { "date": "today-14m", "notes": "Annual visit. Home in good repair; the homeowner replaced the back deck last summer and has the receipts for an improvements credit." },
       { "date": "today-2m", "notes": "Annual visit. Living there with two children; no concerns." }
+    ],
+    "statements": [
+      { "date": "today-13m", "delivery": "FirstClassMail", "marketValue": 298000, "marketValueSource": "County assessment" }
     ]
   },
   {
@@ -43,6 +46,9 @@
     "purchaseWorkflowSeedKey": "pw-harbor-view-201",
     "checkIns": [
       { "date": "today-80d", "notes": "First visit after move-in. Asked about the HOA's window replacement assessment; referred to the condo association." }
+    ],
+    "statements": [
+      { "date": "today-20d", "delivery": "Email", "indexValue": 324.10 }
     ]
   },
   {

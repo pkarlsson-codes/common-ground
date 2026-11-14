@@ -19,7 +19,7 @@ namespace CommonGround.API.Infrastructure.Seeding;
 
 /// <summary>
 /// Seeds ground leases from JSON: what happened on the leases that closed purchases created
-/// (stewardship check-ins, a resale's purchase or a termination, which propagates to close the
+/// (stewardship check-ins, resale price statements sent, a resale's purchase or a termination, which propagates to close the
 /// lease's stewardship case), and leases created directly, without a template or a purchase, which
 /// propagate like those from a purchase: the lease opens a stewardship case and marks its home leased.
 /// </summary>
@@ -166,6 +166,18 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
             actions.Add((visited, (_, stream) => stream.Decide(l => l.RecordStewardshipCheckIn(visited, checkIn.Notes, SeederUserId))));
         }
 
+        foreach (var statement in entry.Statements)
+        {
+            var sent = statement.Date.Resolve(today);
+            var figures = new ResalePriceStatementFigures(
+                statement.MarketValue,
+                statement.MarketValueSource,
+                statement.IndexValue,
+                statement.ImprovementsCredit);
+            var delivery = NoticeDelivery.FromDisplayName(statement.Delivery);
+            actions.Add((sent, (_, stream) => stream.Decide(l => l.RecordResalePriceStatement(sent, figures, delivery, sent, SeederUserId))));
+        }
+
         if (entry.Resale is { } resale)
         {
             actions.Add((resale.Date.Resolve(today), (session, stream) =>
@@ -194,7 +206,7 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
             var terminated = termination.Date.Resolve(today);
             if (actions.Any(a => a.Date >= terminated))
             {
-                throw new InvalidOperationException($"Ground lease seed '{entry.SeedKey}' has a check-in on or after its termination.");
+                throw new InvalidOperationException($"Ground lease seed '{entry.SeedKey}' has a check-in or statement on or after its termination.");
             }
 
             actions.Add((terminated, (_, stream) => stream.Decide(l => l.Terminate(termination.Reason, terminated, SeederUserId))));
@@ -283,6 +295,8 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
 
         public List<CheckInSeedEntry> CheckIns { get; set; } = [];
 
+        public List<StatementSeedEntry> Statements { get; set; } = [];
+
         public ResaleSeedEntry? Resale { get; set; }
 
         public TerminationSeedEntry? Termination { get; set; }
@@ -346,6 +360,19 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
     private sealed class CheckInSeedEntry : DatedSeedEntry
     {
         public string Notes { get; set; } = string.Empty;
+    }
+
+    private sealed class StatementSeedEntry : DatedSeedEntry
+    {
+        public string Delivery { get; set; } = string.Empty;
+
+        public decimal? MarketValue { get; set; }
+
+        public string? MarketValueSource { get; set; }
+
+        public decimal? IndexValue { get; set; }
+
+        public decimal? ImprovementsCredit { get; set; }
     }
 
     private sealed class ResaleSeedEntry : DatedSeedEntry
