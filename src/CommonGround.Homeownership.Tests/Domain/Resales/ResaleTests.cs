@@ -37,7 +37,7 @@ public class ResaleTests
         public GroundLease LeaseWithoutFigures() => EventReplay.Replay<GroundLease>(new GroundLeaseCreatedFromPurchase(
             GroundLeaseId.Generate().Value, PurchaseWorkflowId.Generate().Value, GroundLeaseTemplateId.Generate().Value, "land-parcel-1234", "home-5678",
             new DateOnly(2020, 1, 1), 99, 60, Money.Create(0m), Money.Create(0m), 0m, 30, 90, 200_000m, null, "Covenants", FormulaKind.AppraisalBased, 0.25m, null, null, null, null,
-            "user-1", "Dana Whitfield", "dana@example.com", null, null, null, null));
+            "user-1", "Dana Whitfield", "dana@example.com", null, null, null, null, null));
 
         public Resale Appraised(decimal appraisedValue) => OpenResale().Decide(r => r.RecordAppraisal(
             Lease, appraisedValue, NoticeDate, "Hollis", null, null, NoticeDate, StaffUser)).Aggregate;

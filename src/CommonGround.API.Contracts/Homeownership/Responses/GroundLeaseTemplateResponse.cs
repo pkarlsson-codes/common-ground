@@ -10,6 +10,7 @@ namespace CommonGround.API.Contracts.Homeownership.Responses;
 /// <param name="LateInterestRate">Yearly interest rate on a late fee, in percent; zero charges none.</param>
 /// <param name="InterestWaiverDays">Days after the due date within which a payment owes no interest.</param>
 /// <param name="MaxMortgageDebtPercent">Debt cap a lease from it sets, a whole percent of the purchase option price.</param>
+/// <param name="InsuranceLiabilityPerOccurrence">Liability insurance per occurrence a lease from it requires, or null for none.</param>
 /// <param name="CovenantTerms">Covenant terms text.</param>
 /// <param name="Status">Current status (e.g. Active, Inactive).</param>
 /// <param name="FormulaKind">Resale formula kind.</param>
@@ -30,6 +31,7 @@ public sealed record GroundLeaseTemplateResponse(
     decimal LateInterestRate,
     int InterestWaiverDays,
     int MaxMortgageDebtPercent,
+    decimal? InsuranceLiabilityPerOccurrence,
     string CovenantTerms,
     string Status,
     string FormulaKind,

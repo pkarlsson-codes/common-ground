@@ -30,6 +30,9 @@ public class GroundLeaseTemplateDetailView
     /// <summary>Gets or sets the debt cap a lease from this template sets, a whole percent of the purchase option price.</summary>
     public int MaxMortgageDebtPercent { get; set; }
 
+    /// <summary>Gets or sets the liability coverage per occurrence a lease from this template requires, or null for none.</summary>
+    public decimal? LiabilityPerOccurrence { get; set; }
+
     /// <summary>Gets or sets the covenant terms text.</summary>
     public string CovenantTerms { get; set; } = string.Empty;
 

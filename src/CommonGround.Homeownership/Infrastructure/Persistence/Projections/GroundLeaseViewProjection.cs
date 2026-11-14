@@ -23,6 +23,17 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             LateInterestRate = e.Data.LateInterestRate,
             InterestWaiverDays = e.Data.InterestWaiverDays,
             MaxMortgageDebtPercent = e.Data.MaxMortgageDebtPercent,
+            InsuranceRequirements =
+            [
+                new InsuranceRequirementsEntry
+                {
+                    EffectiveFrom = e.Data.LeaseStartDate,
+                    ReplacementValue = e.Data.RequiredReplacementValue?.Amount,
+                    LiabilityPerOccurrence = e.Data.RequiredLiabilityPerOccurrence?.Amount,
+                    SetBy = e.Data.RegisteredBy,
+                    SetAt = e.Data.OccurredAt,
+                },
+            ],
             FeesTrackedFrom = e.Data.FeesTrackedFrom,
             OpeningBalance = e.Data.OpeningBalance.Amount,
             BasePrice = e.Data.BasePrice,
@@ -71,6 +82,16 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             LateInterestRate = e.Data.LateInterestRate,
             InterestWaiverDays = e.Data.InterestWaiverDays,
             MaxMortgageDebtPercent = e.Data.MaxMortgageDebtPercent,
+            InsuranceRequirements =
+            [
+                new InsuranceRequirementsEntry
+                {
+                    EffectiveFrom = e.Data.LeaseStartDate,
+                    LiabilityPerOccurrence = e.Data.RequiredLiabilityPerOccurrence?.Amount,
+                    SetBy = e.Data.RegisteredBy,
+                    SetAt = e.Data.OccurredAt,
+                },
+            ],
             FeesTrackedFrom = e.Data.LeaseStartDate,
             BasePrice = e.Data.BasePrice,
             OriginalAppraisedValue = e.Data.OriginalAppraisedValue,
@@ -105,6 +126,16 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
         view.Status = "Inactive";
         view.EndedOn = e.TerminatedDate;
     }
+
+    public static void Apply(GroundLeaseView view, InsuranceRequirementsSet e) =>
+        view.InsuranceRequirements.Add(new InsuranceRequirementsEntry
+        {
+            EffectiveFrom = e.EffectiveFrom,
+            ReplacementValue = e.ReplacementValue?.Amount,
+            LiabilityPerOccurrence = e.LiabilityPerOccurrence?.Amount,
+            SetBy = e.SetBy,
+            SetAt = e.OccurredAt,
+        });
 
     public static void Apply(GroundLeaseView view, ResaleStarted e) => view.OpenResaleId = e.ResaleId;
 

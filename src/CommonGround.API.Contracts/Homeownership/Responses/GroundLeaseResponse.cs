@@ -27,9 +27,32 @@ public sealed record GroundLeaseResponse(
     LeaseFeesDto LeaseFees,
     MortgagesDto Mortgages,
     ResalePriceStatementsDto ResalePriceStatements,
+    InsuranceDto Insurance,
     DateTimeOffset CreatedAt,
     DateOnly RecordedOn,
     string CreatedBy);
+
+/// <summary>The insurance a lease requires (Art 9.4).</summary>
+/// <param name="RequiredReplacementValue">The replacement value required as of the trust's today, or null when not checked.</param>
+/// <param name="RequiredLiabilityPerOccurrence">The liability per occurrence required as of the trust's today, or null when not checked.</param>
+/// <param name="RequirementsHistory">What the lease started with and each change since, latest effective first.</param>
+public sealed record InsuranceDto(
+    decimal? RequiredReplacementValue,
+    decimal? RequiredLiabilityPerOccurrence,
+    IReadOnlyList<InsuranceRequirementsChangeDto> RequirementsHistory);
+
+/// <summary>The insurance a lease requires from a day on.</summary>
+/// <param name="EffectiveFrom">The first day they apply; the lease start for the ones it started with.</param>
+/// <param name="ReplacementValue">The replacement value required, or null when not checked.</param>
+/// <param name="LiabilityPerOccurrence">The liability per occurrence required, or null when not checked.</param>
+/// <param name="SetBy">The user who set them.</param>
+/// <param name="SetAt">When they were set.</param>
+public sealed record InsuranceRequirementsChangeDto(
+    DateOnly EffectiveFrom,
+    decimal? ReplacementValue,
+    decimal? LiabilityPerOccurrence,
+    string SetBy,
+    DateTimeOffset SetAt);
 
 /// <summary>A lease's yearly resale price statements (Ch 23, Disclosure).</summary>
 /// <param name="NextDueOn">When the next statement is due; null for an ended lease or one with a resale in progress.</param>

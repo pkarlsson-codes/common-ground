@@ -48,7 +48,8 @@ public static class GroundLeaseTemplatesEndpoints
             resalePolicyTerms,
             LeaseFeeTerms.Create(Money.Create(request.LandUseFee), Money.Create(request.RepairReserveFee), request.LateInterestRate, request.InterestWaiverDays),
             MortgageDebtCap.Create(request.MaxMortgageDebtPercent),
-            userId);
+            userId,
+            request.InsuranceLiabilityPerOccurrence is { } liability ? Money.Create(liability) : null);
 
         await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);
 
@@ -87,7 +88,7 @@ public static class GroundLeaseTemplatesEndpoints
             bus.TenantId!, new GetGroundLeaseTemplate(templateId), cancellationToken);
         return Results.Ok(new GroundLeaseTemplateResponse(
             view.Id, view.TemplateName, view.TermYears, view.OptionWindowDays, view.LandUseFee, view.RepairReserveFee,
-            view.LateInterestRate, view.InterestWaiverDays, view.MaxMortgageDebtPercent,
+            view.LateInterestRate, view.InterestWaiverDays, view.MaxMortgageDebtPercent, view.LiabilityPerOccurrence,
             view.CovenantTerms, view.Status,
             view.FormulaKind, view.AppreciationShare, view.IndexType, view.BaselineIndexValue,
             view.AnnualPercentage, view.ImprovementsCap,

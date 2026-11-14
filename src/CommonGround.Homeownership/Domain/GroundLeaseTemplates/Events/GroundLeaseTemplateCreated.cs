@@ -22,4 +22,5 @@ public sealed record GroundLeaseTemplateCreated(
     decimal? BaselineIndexValue,
     decimal? AnnualPercentage,
     decimal? ImprovementsCap,
-    string CreatedBy) : DomainEvent(AggregateId);
+    string CreatedBy,
+    Money? LiabilityPerOccurrence) : DomainEvent(AggregateId);

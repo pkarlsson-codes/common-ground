@@ -3,6 +3,7 @@ using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
+using CommonGround.Homeownership.Domain.GroundLeases.Insurance;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates.Events;
@@ -37,10 +38,14 @@ public class GroundLeaseTests
         public LeaseFeeTerms FeesWithInterest { get; } = LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m), 36.5m);
 
         public GroundLeaseCreated Established(
-            ResalePolicyTerms? terms = null, LeaseFeeTerms? fees = null, LeaseFeeTracking? tracking = null) =>
+            ResalePolicyTerms? terms = null, LeaseFeeTerms? fees = null, LeaseFeeTracking? tracking = null, InsuranceRequirements? insurance = null) =>
             GroundLease.Establish(
                 LeaseId, ParcelId, HomeId, Homeowner, LeaseStart, 99, 60, fees ?? Fees, MortgageDebtCap.Create(90), 200_000m, 250_000m, "Standard affordability covenant",
-                terms ?? ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, StaffUser, tracking);
+                terms ?? ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, StaffUser, tracking, insurance);
+
+        /// <summary>Replacement value $280,000, liability $300,000 per occurrence.</summary>
+        public static InsuranceRequirements Insurance { get; } =
+            InsuranceRequirements.Create(Money.Create(280_000m), Money.Create(300_000m));
 
         public GroundLease Lease(ResalePolicyTerms? terms = null, LeaseFeeTerms? fees = null, LeaseFeeTracking? tracking = null) =>
             EventReplay.Replay<GroundLease>(Established(terms, fees, tracking));
@@ -49,9 +54,9 @@ public class GroundLeaseTests
         public static LeaseFeeTracking TrackedFromMarch15 { get; } =
             LeaseFeeTracking.Create(new DateOnly(2025, 3, 15), Money.Create(200m), LeaseStart);
 
-        public GroundLeaseTemplate ActiveTemplate(string covenantTerms, int termYears, ResalePolicyTerms terms) =>
+        public GroundLeaseTemplate ActiveTemplate(string covenantTerms, int termYears, ResalePolicyTerms terms, Money? liabilityPerOccurrence = null) =>
             EventReplay.Replay<GroundLeaseTemplate>(
-                GroundLeaseTemplate.Define(GroundLeaseTemplateId.Generate(), "Template", termYears, 45, covenantTerms, terms, Fees, MortgageDebtCap.Create(90), StaffUser));
+                GroundLeaseTemplate.Define(GroundLeaseTemplateId.Generate(), "Template", termYears, 45, covenantTerms, terms, Fees, MortgageDebtCap.Create(90), StaffUser, liabilityPerOccurrence));
 
         public LeaseFeePaymentRecorded Payment(GroundLease lease, decimal amount, DateOnly received) =>
             lease.RecordLeaseFeePayment(LeaseFeePaymentId.Generate(), received, Money.Create(amount), PaymentMethod.Check, null, received, StaffUser);
@@ -96,6 +101,23 @@ public class GroundLeaseTests
                 MortgageDebtCap = MortgageDebtCap.Create(90),
                 PermittedMortgages = Array.Empty<PermittedMortgage>(),
             });
+        }
+
+        [Fact]
+        public void GivenNoInsuranceRequirements_WhenEstablished_ThenTheLeaseChecksNoAmounts()
+        {
+            var sut = _testBed.Lease();
+
+            sut.InsuranceRequirements.InEffectOn(TestBed.LeaseStart).Should().Be(InsuranceRequirements.None);
+        }
+
+        [Fact]
+        public void GivenInsuranceRequirements_WhenEstablished_ThenTheyApplyFromTheLeaseStart()
+        {
+            var sut = EventReplay.Replay<GroundLease>(_testBed.Established(insurance: TestBed.Insurance));
+
+            sut.InsuranceRequirements.Changes.Should().ContainSingle()
+                .Which.Should().Be(InsuranceRequirementsChange.Create(TestBed.LeaseStart, TestBed.Insurance));
         }
 
         [Fact]
@@ -247,6 +269,17 @@ public class GroundLeaseTests
                 ResalePolicyTerms = new { FormulaKind = FormulaKind.IndexBased, IndexType = "CPI" },
                 CurrentHomeowner = new { FullName = new { Value = "Buyer Name" }, Email = new { Value = "buyer@example.com" } },
             });
+        }
+
+        [Fact]
+        public void GivenTemplateWithLiability_WhenCreated_ThenRequiresItAndNoReplacementValue()
+        {
+            var template = _testBed.ActiveTemplate("Covenants", 99, ResalePolicyTerms.AppraisalBased(0.25m), Money.Create(300_000m));
+
+            var sut = EventReplay.Replay<GroundLease>(_testBed.FromPurchase(template));
+
+            sut.InsuranceRequirements.InEffectOn(new DateOnly(2026, 1, 1))
+                .Should().Be(InsuranceRequirements.Create(null, Money.Create(300_000m)));
         }
 
         [Fact]
@@ -662,6 +695,76 @@ public class GroundLeaseTests
             var (corrected, _) = sut.Decide(l => l.CorrectLeaseFeeTracking(March15, Money.Zero, _testBed.StaffUser));
 
             corrected.LeaseFeeTracking.TrackedFrom.Should().Be(March15);
+        }
+    }
+
+    public class TheSetInsuranceRequirementsMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        private static readonly DateOnly June1 = new(2025, 6, 1);
+
+        private static readonly InsuranceRequirements Raised =
+            InsuranceRequirements.Create(Money.Create(320_000m), Money.Create(500_000m));
+
+        private GroundLease Lease() => EventReplay.Replay<GroundLease>(_testBed.Established(insurance: TestBed.Insurance));
+
+        [Fact]
+        public void GivenNewAmounts_WhenSet_ThenTheyApplyFromTheEffectiveDayAndTheOldOnesBefore()
+        {
+            var (sut, _) = Lease().Decide(l => l.SetInsuranceRequirements(Raised, June1, _testBed.StaffUser));
+
+            sut.InsuranceRequirements.InEffectOn(June1.AddDays(-1)).Should().Be(TestBed.Insurance);
+            sut.InsuranceRequirements.InEffectOn(June1).Should().Be(Raised);
+        }
+
+        [Fact]
+        public void GivenAnAmountCleared_WhenSet_ThenThatAmountIsNoLongerChecked()
+        {
+            var cleared = InsuranceRequirements.Create(null, Money.Create(300_000m));
+
+            var (sut, _) = Lease().Decide(l => l.SetInsuranceRequirements(cleared, June1, _testBed.StaffUser));
+
+            sut.InsuranceRequirements.InEffectOn(June1).ReplacementValue.Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenTheSameAmounts_WhenSet_ThenNothingHappens()
+        {
+            var set = Lease().SetInsuranceRequirements(TestBed.Insurance, June1, _testBed.StaffUser);
+
+            set.Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenADayBeforeTheLeaseStart_WhenSet_ThenThrowsBusinessRuleViolation()
+        {
+            var act = () => Lease().SetInsuranceRequirements(Raised, TestBed.LeaseStart.AddDays(-1), _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.set_insurance_requirements.effective_from_before_lease_start");
+        }
+
+        [Fact]
+        public void GivenADayBeforeTheLatestChange_WhenSet_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = Lease().Decide(l => l.SetInsuranceRequirements(Raised, June1, _testBed.StaffUser)).Aggregate;
+
+            var act = () => sut.SetInsuranceRequirements(TestBed.Insurance, June1.AddDays(-1), _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.set_insurance_requirements.effective_from_before_latest_change");
+        }
+
+        [Fact]
+        public void GivenEndedLease_WhenSet_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = Lease().Decide(l => l.Terminate("Resold", June1, _testBed.StaffUser)).Aggregate;
+
+            var act = () => sut.SetInsuranceRequirements(Raised, June1, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.set_insurance_requirements.status_not_active");
         }
     }
 

@@ -75,6 +75,12 @@ export interface GroundLeaseTemplateResponse {
      */
     maxMortgageDebtPercent?: number;
     /**
+     * Liability insurance per occurrence a lease from it requires, or null for none.
+     * @type {number}
+     * @memberof GroundLeaseTemplateResponse
+     */
+    insuranceLiabilityPerOccurrence?: number | null;
+    /**
      * Covenant terms text.
      * @type {string}
      * @memberof GroundLeaseTemplateResponse
@@ -162,6 +168,7 @@ export function GroundLeaseTemplateResponseFromJSONTyped(json: any, ignoreDiscri
         'lateInterestRate': json['lateInterestRate'] == null ? undefined : json['lateInterestRate'],
         'interestWaiverDays': json['interestWaiverDays'] == null ? undefined : json['interestWaiverDays'],
         'maxMortgageDebtPercent': json['maxMortgageDebtPercent'] == null ? undefined : json['maxMortgageDebtPercent'],
+        'insuranceLiabilityPerOccurrence': json['insuranceLiabilityPerOccurrence'] == null ? undefined : json['insuranceLiabilityPerOccurrence'],
         'covenantTerms': json['covenantTerms'] == null ? undefined : json['covenantTerms'],
         'status': json['status'] == null ? undefined : json['status'],
         'formulaKind': json['formulaKind'] == null ? undefined : json['formulaKind'],
@@ -195,6 +202,7 @@ export function GroundLeaseTemplateResponseToJSONTyped(value?: GroundLeaseTempla
         'lateInterestRate': value['lateInterestRate'],
         'interestWaiverDays': value['interestWaiverDays'],
         'maxMortgageDebtPercent': value['maxMortgageDebtPercent'],
+        'insuranceLiabilityPerOccurrence': value['insuranceLiabilityPerOccurrence'],
         'covenantTerms': value['covenantTerms'],
         'status': value['status'],
         'formulaKind': value['formulaKind'],

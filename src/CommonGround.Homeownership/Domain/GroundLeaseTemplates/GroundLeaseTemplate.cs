@@ -1,4 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.Homeownership.Domain.GroundLeases.Insurance;
 using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Application.Errors;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
@@ -38,6 +39,12 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
     /// <summary>Gets the debt cap a lease from this template sets.</summary>
     public MortgageDebtCap MortgageDebtCap { get; private set; }
 
+    /// <summary>
+    /// Gets the liability coverage per occurrence a lease from this template requires (Art 9.4), or null when it
+    /// requires none. The replacement value is per home, so the template has none.
+    /// </summary>
+    public Money? LiabilityPerOccurrence { get; private set; }
+
     /// <summary>Gets whether this template is active.</summary>
     public GroundLeaseTemplateStatus Status { get; private set; }
 
@@ -47,7 +54,10 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
     /// <summary>Gets the user who created this template.</summary>
     public UserId CreatedBy { get; private set; }
 
-    /// <summary>Creates a new ground lease template.</summary>
+    /// <summary>
+    /// Creates a new ground lease template. Refused without a name or covenant terms, for a term or option window of
+    /// zero or less, or a liability per occurrence below zero.
+    /// </summary>
     public static GroundLeaseTemplateCreated Define(
         GroundLeaseTemplateId id,
         string templateName,
@@ -57,11 +67,14 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
         ResalePolicyTerms resalePolicyTerms,
         LeaseFeeTerms leaseFeeTerms,
         MortgageDebtCap mortgageDebtCap,
-        UserId createdBy)
+        UserId createdBy,
+        Money? liabilityPerOccurrence = null)
     {
         ArgumentNullException.ThrowIfNull(resalePolicyTerms);
         ArgumentNullException.ThrowIfNull(leaseFeeTerms);
         ArgumentNullException.ThrowIfNull(mortgageDebtCap);
+
+        var insurance = InsuranceRequirements.Create(null, liabilityPerOccurrence);
 
         if (string.IsNullOrWhiteSpace(templateName))
         {
@@ -100,7 +113,8 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
             resalePolicyTerms.BaselineIndexValue,
             resalePolicyTerms.AnnualPercentage,
             resalePolicyTerms.ImprovementsCap,
-            createdBy.Value);
+            createdBy.Value,
+            insurance.LiabilityPerOccurrence);
     }
 
     /// <summary>Restores this template to active status.</summary>
@@ -158,6 +172,7 @@ public sealed class GroundLeaseTemplate : AggregateRoot<GroundLeaseTemplateId>
                 e.AnnualPercentage!.Value, e.ImprovementsCap),
             _ => throw new InvalidOperationException($"Unknown formula kind: {e.FormulaKind}")
         };
+        LiabilityPerOccurrence = e.LiabilityPerOccurrence;
         Status = GroundLeaseTemplateStatus.Active;
         CreatedBy = UserId.Create(e.CreatedBy);
         CreatedAt = e.OccurredAt;

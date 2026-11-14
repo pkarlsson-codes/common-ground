@@ -24,6 +24,7 @@ internal sealed class GroundLeaseTemplateDetailViewProjection : SingleStreamProj
             LateInterestRate = e.LateInterestRate,
             InterestWaiverDays = e.InterestWaiverDays,
             MaxMortgageDebtPercent = e.MaxMortgageDebtPercent,
+            LiabilityPerOccurrence = e.LiabilityPerOccurrence?.Amount,
             CovenantTerms = e.CovenantTerms,
             Status = "Active",
             FormulaKind = e.FormulaKind.ToString(),

@@ -5,6 +5,7 @@ using CommonGround.Homeownership.Application.Commands;
 using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeases.Insurance;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
@@ -58,7 +59,10 @@ public static class GroundLeasesEndpoints
             request.CovenantTerms,
             resalePolicyTerms,
             userId,
-            leaseFeeTracking);
+            leaseFeeTracking,
+            InsuranceRequirements.Create(
+                OptionalMoney(request.InsuranceReplacementValue),
+                OptionalMoney(request.InsuranceLiabilityPerOccurrence)));
 
         await bus.InvokeForTenantAsync(bus.TenantId!, command, cancellationToken);
 
@@ -102,7 +106,7 @@ public static class GroundLeasesEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
 
-        var (view, recordedOn, leaseFees, noticeDue, defaultCure, nextStatementDueOn) = await bus.InvokeForTenantAsync<GroundLeaseDetails>(bus.TenantId!,
+        var (view, recordedOn, leaseFees, noticeDue, defaultCure, nextStatementDueOn, insuranceRequired) = await bus.InvokeForTenantAsync<GroundLeaseDetails>(bus.TenantId!,
             new GetGroundLease(GroundLeaseId.Create(groundLeaseId)),
             cancellationToken);
 
@@ -214,11 +218,42 @@ public static class GroundLeasesEndpoints
                         r.ImprovementsCredit, r.Price, r.RecordedBy, r.RecordedAt))
                     .ToList()
                     .AsReadOnly()),
+            new InsuranceDto(
+                insuranceRequired.ReplacementValue?.Amount,
+                insuranceRequired.LiabilityPerOccurrence?.Amount,
+                view.InsuranceRequirements
+                    .AsEnumerable()
+                    .Reverse()
+                    .Select(r => new InsuranceRequirementsChangeDto(r.EffectiveFrom, r.ReplacementValue, r.LiabilityPerOccurrence, r.SetBy, r.SetAt))
+                    .ToList()
+                    .AsReadOnly()),
             view.CreatedAt,
             recordedOn,
             view.CreatedBy);
 
         return Results.Ok(response);
+    }
+
+    [WolverinePost("/api/ground-leases/{groundLeaseId}/insurance-requirements")]
+    public static async Task<IResult> SetInsuranceRequirements(
+        string groundLeaseId,
+        SetInsuranceRequirementsRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new SetInsuranceRequirements(
+                GroundLeaseId.Create(groundLeaseId),
+                InsuranceRequirements.Create(OptionalMoney(request.ReplacementValue), OptionalMoney(request.LiabilityPerOccurrence)),
+                request.EffectiveFrom,
+                httpContext.GetUserId()),
+            cancellationToken);
+
+        return Results.NoContent();
     }
 
     [WolverinePost("/api/ground-leases/{groundLeaseId}/stewardship-check-ins")]
@@ -244,4 +279,6 @@ public static class GroundLeasesEndpoints
 
         return Results.NoContent();
     }
+
+    private static Money? OptionalMoney(decimal? amount) => amount is { } value ? Money.Create(value) : null;
 }

@@ -41,6 +41,21 @@ public class GroundLeaseTemplatesTests(ApiFactory factory)
         (await List(client, name, "Active")).Should().ContainSingle(t => t.Id == id);
     }
 
+    [Fact]
+    public async Task GetGroundLeaseTemplate_WithLiabilityPerOccurrence_ShowsIt()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var response = await client.PostAsJsonAsync("/api/ground-lease-templates",
+            new CreateGroundLeaseTemplateRequest(
+                $"Insured {Guid.NewGuid():N}", 99, 60, 45m, 15m, "Standard covenant", "AppraisalBased", 0.25m, null, null, null, null, 90,
+                InsuranceLiabilityPerOccurrence: 300_000m));
+        var id = (await response.Content.ReadFromJsonAsync<CreateGroundLeaseTemplateResponse>())!.GroundLeaseTemplateId;
+
+        var template = await client.GetFromJsonAsync<GroundLeaseTemplateResponse>($"/api/ground-lease-templates/{id}");
+
+        template!.InsuranceLiabilityPerOccurrence.Should().Be(300_000m);
+    }
+
     private static async Task<IReadOnlyList<GroundLeaseTemplateListItemResponse>> List(
         HttpClient client, string search, string status)
     {

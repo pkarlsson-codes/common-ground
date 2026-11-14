@@ -49,6 +49,13 @@ import {
     LeaseFeesDtoToJSON,
     LeaseFeesDtoToJSONTyped,
 } from './LeaseFeesDto';
+import type { InsuranceDto } from './InsuranceDto';
+import {
+    InsuranceDtoFromJSON,
+    InsuranceDtoFromJSONTyped,
+    InsuranceDtoToJSON,
+    InsuranceDtoToJSONTyped,
+} from './InsuranceDto';
 
 /**
  * Detail response for a ground lease.
@@ -208,6 +215,12 @@ export interface GroundLeaseResponse {
     resalePriceStatements?: ResalePriceStatementsDto;
     /**
      * 
+     * @type {InsuranceDto}
+     * @memberof GroundLeaseResponse
+     */
+    insurance?: InsuranceDto;
+    /**
+     * 
      * @type {Date}
      * @memberof GroundLeaseResponse
      */
@@ -268,6 +281,7 @@ export function GroundLeaseResponseFromJSONTyped(json: any, ignoreDiscriminator:
         'leaseFees': json['leaseFees'] == null ? undefined : LeaseFeesDtoFromJSON(json['leaseFees']),
         'mortgages': json['mortgages'] == null ? undefined : MortgagesDtoFromJSON(json['mortgages']),
         'resalePriceStatements': json['resalePriceStatements'] == null ? undefined : ResalePriceStatementsDtoFromJSON(json['resalePriceStatements']),
+        'insurance': json['insurance'] == null ? undefined : InsuranceDtoFromJSON(json['insurance']),
         'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
         'recordedOn': json['recordedOn'] == null ? undefined : CalendarDateFromJSON(json['recordedOn']),
         'createdBy': json['createdBy'] == null ? undefined : json['createdBy'],
@@ -310,6 +324,7 @@ export function GroundLeaseResponseToJSONTyped(value?: GroundLeaseResponse | nul
         'leaseFees': LeaseFeesDtoToJSON(value['leaseFees']),
         'mortgages': MortgagesDtoToJSON(value['mortgages']),
         'resalePriceStatements': ResalePriceStatementsDtoToJSON(value['resalePriceStatements']),
+        'insurance': InsuranceDtoToJSON(value['insurance']),
         'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
         'recordedOn': CalendarDateToJSON(value['recordedOn']),
         'createdBy': value['createdBy'],

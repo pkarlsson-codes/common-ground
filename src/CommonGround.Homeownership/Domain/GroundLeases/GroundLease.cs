@@ -1,4 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases.Events;
+using CommonGround.Homeownership.Domain.GroundLeases.Insurance;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
@@ -91,6 +92,12 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <summary>Gets the day the lease's fees are tracked from and what was owed then.</summary>
     public LeaseFeeTracking LeaseFeeTracking { get; private set; }
 
+    /// <summary>
+    /// Gets the insurance the lease has required (Art 9.4): what it started with and each change since. A lease from
+    /// a template starts with the template's liability per occurrence and no replacement value.
+    /// </summary>
+    public InsuranceRequirementsHistory InsuranceRequirements { get; private set; }
+
     /// <summary>Gets the day the lease ended, or null while it is active.</summary>
     public DateOnly? EndedOn { get; private set; }
 
@@ -117,7 +124,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <summary>
     /// Creates a ground lease that didn't come from a purchase, such as one signed before the trust used
     /// CommonGround. Refused while the home is already leased, being sold, or in a home selection. Fees are tracked
-    /// from the lease start unless <paramref name="leaseFeeTracking"/> says otherwise.
+    /// from the lease start unless <paramref name="leaseFeeTracking"/> says otherwise. Without
+    /// <paramref name="insuranceRequirements"/> the lease checks no insurance amounts.
     /// </summary>
     public static GroundLeaseCreated Establish(
         GroundLeaseId id,
@@ -135,7 +143,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         ResalePolicyTerms resalePolicyTerms,
         HomeCommitments homeCommitments,
         UserId createdBy,
-        LeaseFeeTracking? leaseFeeTracking = null)
+        LeaseFeeTracking? leaseFeeTracking = null,
+        InsuranceRequirements? insuranceRequirements = null)
     {
         ArgumentNullException.ThrowIfNull(leaseFeeTerms);
         ArgumentNullException.ThrowIfNull(mortgageDebtCap);
@@ -199,7 +208,9 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             createdBy.Value,
             homeowner.FullName.Value,
             homeowner.Email.Value,
-            homeowner.Phone?.Value);
+            homeowner.Phone?.Value,
+            insuranceRequirements?.ReplacementValue,
+            insuranceRequirements?.LiabilityPerOccurrence);
     }
 
     /// <summary>
@@ -255,7 +266,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             purchaseWorkflow.Buyer.Phone?.Value,
             purchaseLoan is null ? null : purchaseMortgageId.Value,
             purchaseLoan?.LenderName,
-            purchaseLoan is null ? null : Money.RoundedFrom(purchaseLoan.CommittedAmount));
+            purchaseLoan is null ? null : Money.RoundedFrom(purchaseLoan.CommittedAmount),
+            template.LiabilityPerOccurrence);
     }
 
     /// <summary>Terminates this ground lease.</summary>
@@ -645,6 +657,34 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         ];
     }
 
+    /// <summary>
+    /// Changes the insurance the lease requires from a day on (Art 9.4), such as when building costs rise. Refused for
+    /// an ended lease, or a day before the lease started or before the latest change takes effect. Nothing to do if
+    /// the requirements on that day are already these.
+    /// </summary>
+    public InsuranceRequirementsSet? SetInsuranceRequirements(
+        InsuranceRequirements requirements,
+        DateOnly effectiveFrom,
+        UserId setBy)
+    {
+        ArgumentNullException.ThrowIfNull(requirements);
+
+        if (Status != GroundLeaseStatus.Active)
+            throw BusinessRuleViolation.GroundLease.SetInsuranceRequirements.StatusNotActive(Status);
+
+        if (effectiveFrom < LeaseStartDate)
+            throw BusinessRuleViolation.GroundLease.SetInsuranceRequirements.EffectiveFromBeforeLeaseStart(effectiveFrom, LeaseStartDate);
+
+        if (effectiveFrom < InsuranceRequirements.LatestEffectiveFrom)
+            throw BusinessRuleViolation.GroundLease.SetInsuranceRequirements.EffectiveFromBeforeLatestChange(effectiveFrom, InsuranceRequirements.LatestEffectiveFrom);
+
+        if (InsuranceRequirements.InEffectOn(effectiveFrom) == requirements)
+            return null;
+
+        return new InsuranceRequirementsSet(
+            Id.Value, effectiveFrom, requirements.ReplacementValue, requirements.LiabilityPerOccurrence, setBy.Value);
+    }
+
     private static string? OptionalText(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
 
     /// <summary>Works out what the lease owes as of a day, usually the trust's today.</summary>
@@ -703,6 +743,9 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         LeaseFeeTerms = LeaseFeeTerms.Create(e.LandUseFee, e.RepairReserveFee, e.LateInterestRate, e.InterestWaiverDays);
         LeaseFeeTracking = LeaseFeeTracking.Create(e.FeesTrackedFrom, e.OpeningBalance, e.LeaseStartDate);
         MortgageDebtCap = MortgageDebtCap.Create(e.MaxMortgageDebtPercent);
+        InsuranceRequirements = InsuranceRequirementsHistory.Start(
+            e.LeaseStartDate,
+            Insurance.InsuranceRequirements.Create(e.RequiredReplacementValue, e.RequiredLiabilityPerOccurrence));
         BasePrice = e.BasePrice;
         OriginalAppraisedValue = e.OriginalAppraisedValue;
         CovenantTerms = e.CovenantTerms;
@@ -746,6 +789,9 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         LeaseFeeTerms = LeaseFeeTerms.Create(e.LandUseFee, e.RepairReserveFee, e.LateInterestRate, e.InterestWaiverDays);
         LeaseFeeTracking = LeaseFeeTracking.FromLeaseStart(e.LeaseStartDate);
         MortgageDebtCap = MortgageDebtCap.Create(e.MaxMortgageDebtPercent);
+        InsuranceRequirements = InsuranceRequirementsHistory.Start(
+            e.LeaseStartDate,
+            Insurance.InsuranceRequirements.Create(null, e.RequiredLiabilityPerOccurrence));
         if (e.PurchaseMortgageId is { } purchaseMortgageId)
         {
             _permittedMortgages.Add(PermittedMortgage.Create(
@@ -816,6 +862,11 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <summary>Applies <see cref="PermittedMortgageEdited"/>.</summary>
     public void Apply(PermittedMortgageEdited e) =>
         _permittedMortgages.First(m => m.Id.Value == e.MortgageId).ChangeLender(e.Lender, e.NoticeAddress);
+
+    /// <summary>Applies <see cref="InsuranceRequirementsSet"/>.</summary>
+    public void Apply(InsuranceRequirementsSet e) =>
+        InsuranceRequirements = InsuranceRequirements.With(InsuranceRequirementsChange.Create(
+            e.EffectiveFrom, Insurance.InsuranceRequirements.Create(e.ReplacementValue, e.LiabilityPerOccurrence)));
 
     /// <summary>Applies <see cref="PermittedMortgagePaidOff"/>.</summary>
     public void Apply(PermittedMortgagePaidOff e) =>

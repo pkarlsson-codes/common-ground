@@ -83,6 +83,58 @@ public class GroundLeasesTests(ApiFactory factory)
         problem!.Detail.Should().Be("This home has a purchase in progress. Lease it by closing that purchase, or end the purchase first.");
     }
 
+    [Fact]
+    public async Task SetInsuranceRequirements_RaisedFromToday_ShowsTheNewAmountsAndTheHistory()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var created = await PostLease(client, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "AppraisalBased", 0.25m, null, null,
+            replacementValue: 280_000m, liabilityPerOccurrence: 300_000m);
+        var id = (await created.Content.ReadFromJsonAsync<CreateGroundLeaseResponse>())!.GroundLeaseId;
+        var today = (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Today;
+
+        var response = await client.PostAsJsonAsync($"/api/ground-leases/{id}/insurance-requirements",
+            new SetInsuranceRequirementsRequest(320_000m, null, today));
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var lease = await client.GetFromJsonAsync<GroundLeaseResponse>($"/api/ground-leases/{id}");
+        lease!.Insurance.Should().BeEquivalentTo(new
+        {
+            RequiredReplacementValue = 320_000m,
+            RequiredLiabilityPerOccurrence = (decimal?)null,
+            RequirementsHistory = new[]
+            {
+                new { EffectiveFrom = today, ReplacementValue = (decimal?)320_000m, LiabilityPerOccurrence = (decimal?)null },
+                new { EffectiveFrom = new DateOnly(2018, 1, 1), ReplacementValue = (decimal?)280_000m, LiabilityPerOccurrence = (decimal?)300_000m },
+            },
+        });
+    }
+
+    [Fact]
+    public async Task SetInsuranceRequirements_AmountLeftOut_Returns400()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var id = await CreateLease(client, Guid.NewGuid().ToString(), "AppraisalBased", appreciationShare: 0.25m);
+
+        var response = await client.PostAsJsonAsync($"/api/ground-leases/{id}/insurance-requirements",
+            new { replacementValue = 320_000m, effectiveFrom = new DateOnly(2026, 1, 1) });
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task SetInsuranceRequirements_BeforeTheLeaseStart_Returns422()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var id = await CreateLease(client, Guid.NewGuid().ToString(), "AppraisalBased", appreciationShare: 0.25m);
+
+        var response = await client.PostAsJsonAsync($"/api/ground-leases/{id}/insurance-requirements",
+            new SetInsuranceRequirementsRequest(320_000m, null, new DateOnly(2017, 12, 31)));
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        problem!.Detail.Should().StartWith("Effective from can't be before the lease started");
+    }
+
     private static async Task<string> CreateLease(
         HttpClient client,
         string landParcelId,
@@ -106,10 +158,13 @@ public class GroundLeasesTests(ApiFactory factory)
         string formulaKind,
         decimal? appreciationShare,
         string? indexType,
-        decimal? baselineIndexValue) =>
+        decimal? baselineIndexValue,
+        decimal? replacementValue = null,
+        decimal? liabilityPerOccurrence = null) =>
         client.PostAsJsonAsync("/api/ground-leases",
             new CreateGroundLeaseRequest(
                 landParcelId, homeId, "Dana Whitfield", "dana@example.com", "(503) 555-0123",
                 new DateOnly(2018, 1, 1), 99, 60, 0m, 0m, 200_000m, 250_000m, "Standard covenant", formulaKind,
-                appreciationShare, indexType, baselineIndexValue, null, null, 90));
+                appreciationShare, indexType, baselineIndexValue, null, null, 90,
+                InsuranceReplacementValue: replacementValue, InsuranceLiabilityPerOccurrence: liabilityPerOccurrence));
 }

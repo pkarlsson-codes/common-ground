@@ -1,5 +1,6 @@
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeases.Insurance;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
@@ -27,7 +28,8 @@ public sealed record CreateGroundLease(
     string CovenantTerms,
     ResalePolicyTerms ResalePolicyTerms,
     UserId CreatedBy,
-    LeaseFeeTracking? LeaseFeeTracking = null);
+    LeaseFeeTracking? LeaseFeeTracking = null,
+    InsuranceRequirements? InsuranceRequirements = null);
 
 /// <summary>Handles <see cref="CreateGroundLease"/>.</summary>
 public static class CreateGroundLeaseHandler
@@ -78,7 +80,8 @@ public static class CreateGroundLeaseHandler
             command.ResalePolicyTerms,
             homeCommitments,
             command.CreatedBy,
-            command.LeaseFeeTracking);
+            command.LeaseFeeTracking,
+            command.InsuranceRequirements);
 
         return MartenOps.StartStream<GroundLease>(command.GroundLeaseId.Value, started);
     }

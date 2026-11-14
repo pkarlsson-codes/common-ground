@@ -524,6 +524,36 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class SetInsuranceRequirements
+        {
+            public static BusinessRuleViolationException StatusNotActive(GroundLeaseStatus status)
+                => new(
+                    "homeownership.ground_lease.set_insurance_requirements.status_not_active",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                        ["requiredStatus"] = GroundLeaseStatus.Active.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException EffectiveFromBeforeLeaseStart(DateOnly effectiveFrom, DateOnly leaseStartDate)
+                => new(
+                    "homeownership.ground_lease.set_insurance_requirements.effective_from_before_lease_start",
+                    new Dictionary<string, object?>
+                    {
+                        ["effectiveFrom"] = effectiveFrom,
+                        ["leaseStartDate"] = leaseStartDate,
+                    });
+
+            public static BusinessRuleViolationException EffectiveFromBeforeLatestChange(DateOnly effectiveFrom, DateOnly latestEffectiveFrom)
+                => new(
+                    "homeownership.ground_lease.set_insurance_requirements.effective_from_before_latest_change",
+                    new Dictionary<string, object?>
+                    {
+                        ["effectiveFrom"] = effectiveFrom,
+                        ["latestEffectiveFrom"] = latestEffectiveFrom,
+                    });
+        }
+
         public static class CorrectLeaseFeeTracking
         {
             public static BusinessRuleViolationException PaymentBeforeFeesTracked(DateOnly receivedDate, DateOnly feesTrackedFrom)
@@ -662,6 +692,28 @@ public static class BusinessRuleViolation
                     new Dictionary<string, object?>
                     {
                         ["percent"] = percent,
+                    });
+        }
+    }
+
+    public static class InsuranceRequirements
+    {
+        public static class Create
+        {
+            public static BusinessRuleViolationException ReplacementValueNegative(decimal replacementValue)
+                => new(
+                    "homeownership.insurance_requirements.create.replacement_value_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["replacementValue"] = replacementValue,
+                    });
+
+            public static BusinessRuleViolationException LiabilityPerOccurrenceNegative(decimal liabilityPerOccurrence)
+                => new(
+                    "homeownership.insurance_requirements.create.liability_per_occurrence_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["liabilityPerOccurrence"] = liabilityPerOccurrence,
                     });
         }
     }

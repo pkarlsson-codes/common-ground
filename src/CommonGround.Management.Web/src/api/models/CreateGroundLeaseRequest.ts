@@ -172,6 +172,18 @@ export interface CreateGroundLeaseRequest {
      * @memberof CreateGroundLeaseRequest
      */
     openingBalance?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateGroundLeaseRequest
+     */
+    insuranceReplacementValue?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateGroundLeaseRequest
+     */
+    insuranceLiabilityPerOccurrence?: number | null;
 }
 
 /**
@@ -216,6 +228,8 @@ export function CreateGroundLeaseRequestFromJSONTyped(json: any, ignoreDiscrimin
         'interestWaiverDays': json['interestWaiverDays'] == null ? undefined : json['interestWaiverDays'],
         'feesTrackedFrom': json['feesTrackedFrom'] == null ? undefined : CalendarDateFromJSON(json['feesTrackedFrom']),
         'openingBalance': json['openingBalance'] == null ? undefined : json['openingBalance'],
+        'insuranceReplacementValue': json['insuranceReplacementValue'] == null ? undefined : json['insuranceReplacementValue'],
+        'insuranceLiabilityPerOccurrence': json['insuranceLiabilityPerOccurrence'] == null ? undefined : json['insuranceLiabilityPerOccurrence'],
     };
 }
 
@@ -254,6 +268,8 @@ export function CreateGroundLeaseRequestToJSONTyped(value?: CreateGroundLeaseReq
         'interestWaiverDays': value['interestWaiverDays'],
         'feesTrackedFrom': CalendarDateToJSON(value['feesTrackedFrom']),
         'openingBalance': value['openingBalance'],
+        'insuranceReplacementValue': value['insuranceReplacementValue'],
+        'insuranceLiabilityPerOccurrence': value['insuranceLiabilityPerOccurrence'],
     };
 }
 

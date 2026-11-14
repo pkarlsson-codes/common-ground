@@ -10577,6 +10577,16 @@
             "type": "number",
             "format": "decimal",
             "nullable": true
+          },
+          "insuranceReplacementValue": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "insuranceLiabilityPerOccurrence": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
           }
         }
       },
@@ -10682,6 +10692,9 @@
           },
           "resalePriceStatements": {
             "$ref": "#/components/schemas/ResalePriceStatementsDto"
+          },
+          "insurance": {
+            "$ref": "#/components/schemas/InsuranceDto"
           },
           "createdAt": {
             "type": "string",
@@ -11218,6 +11231,65 @@
           "recordedAt": {
             "type": "string",
             "description": "When it was recorded.",
+            "format": "date-time"
+          }
+        }
+      },
+      "InsuranceDto": {
+        "type": "object",
+        "description": "The insurance a lease requires (Art 9.4).",
+        "additionalProperties": false,
+        "properties": {
+          "requiredReplacementValue": {
+            "type": "number",
+            "description": "The replacement value required as of the trust's today, or null when not checked.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "requiredLiabilityPerOccurrence": {
+            "type": "number",
+            "description": "The liability per occurrence required as of the trust's today, or null when not checked.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "requirementsHistory": {
+            "type": "array",
+            "description": "What the lease started with and each change since, latest effective first.",
+            "items": {
+              "$ref": "#/components/schemas/InsuranceRequirementsChangeDto"
+            }
+          }
+        }
+      },
+      "InsuranceRequirementsChangeDto": {
+        "type": "object",
+        "description": "The insurance a lease requires from a day on.",
+        "additionalProperties": false,
+        "properties": {
+          "effectiveFrom": {
+            "type": "string",
+            "description": "The first day they apply; the lease start for the ones it started with.",
+            "format": "date"
+          },
+          "replacementValue": {
+            "type": "number",
+            "description": "The replacement value required, or null when not checked.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "liabilityPerOccurrence": {
+            "type": "number",
+            "description": "The liability per occurrence required, or null when not checked.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "setBy": {
+            "type": "string",
+            "description": "The user who set them."
+          },
+          "setAt": {
+            "type": "string",
+            "description": "When they were set.",
             "format": "date-time"
           }
         }
@@ -12591,6 +12663,11 @@
           "interestWaiverDays": {
             "type": "integer",
             "format": "int32"
+          },
+          "insuranceLiabilityPerOccurrence": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
           }
         }
       },
@@ -12704,6 +12781,12 @@
             "type": "integer",
             "description": "Debt cap a lease from it sets, a whole percent of the purchase option price.",
             "format": "int32"
+          },
+          "insuranceLiabilityPerOccurrence": {
+            "type": "number",
+            "description": "Liability insurance per occurrence a lease from it requires, or null for none.",
+            "format": "decimal",
+            "nullable": true
           },
           "covenantTerms": {
             "type": "string",

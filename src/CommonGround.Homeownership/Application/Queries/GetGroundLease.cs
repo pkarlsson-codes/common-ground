@@ -1,6 +1,8 @@
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeases.Insurance;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using CommonGround.SharedKernel.Domain.Services;
 using Marten;
@@ -14,7 +16,7 @@ public sealed record GetGroundLease(GroundLeaseId GroundLeaseId);
 /// A ground lease, the trust date it was recorded on (for a lease that predates CommonGround, later than its start
 /// date), what it owes in lease fees as of the trust's today, the late notice it needs now, if any, and where its
 /// last notice of default stands, if one was sent, and when its next resale price statement is due (null for a lease
-/// off the yearly cycle: ended, or with a resale in progress).
+/// off the yearly cycle: ended, or with a resale in progress), and the insurance it requires as of the trust's today.
 /// </summary>
 public sealed record GroundLeaseDetails(
     GroundLeaseView Lease,
@@ -22,7 +24,8 @@ public sealed record GroundLeaseDetails(
     LeaseFeeStatement LeaseFees,
     LeaseFeeNoticeLevel? NoticeDue,
     DefaultCure? DefaultCure,
-    DateOnly? NextResalePriceStatementDueOn);
+    DateOnly? NextResalePriceStatementDueOn,
+    InsuranceRequirements InsuranceRequired);
 
 /// <summary>Handles <see cref="GetGroundLease"/>.</summary>
 public static class GetGroundLeaseHandler
@@ -53,6 +56,19 @@ public static class GetGroundLeaseHandler
             statement,
             LeaseFeeStatements.NoticeDue(view, statement, policy.Schedule),
             LeaseFeeStatements.DefaultCureOf(view, today),
-            ResalePriceStatementSchedule.For(view, null)?.NextDueOn);
+            ResalePriceStatementSchedule.For(view, null)?.NextDueOn,
+            InsuranceRequirementsOf(view).InEffectOn(today));
+    }
+
+    /// <summary>The insurance the lease has required, from its read model.</summary>
+    public static InsuranceRequirementsHistory InsuranceRequirementsOf(GroundLeaseView view)
+    {
+        ArgumentNullException.ThrowIfNull(view);
+
+        return InsuranceRequirementsHistory.From(view.InsuranceRequirements.Select(r => InsuranceRequirementsChange.Create(
+            r.EffectiveFrom,
+            InsuranceRequirements.Create(
+                r.ReplacementValue is { } replacementValue ? Money.Create(replacementValue) : null,
+                r.LiabilityPerOccurrence is { } liability ? Money.Create(liability) : null))));
     }
 }

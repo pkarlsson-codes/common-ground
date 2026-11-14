@@ -110,6 +110,8 @@ models/InitiateOccupancyVerificationRequest.ts
 models/InitiatePurchaseWorkflowRequest.ts
 models/InitiatePurchaseWorkflowResponse.ts
 models/InspectionResultDto.ts
+models/InsuranceDto.ts
+models/InsuranceRequirementsChangeDto.ts
 models/IssueViolationNoticeRequest.ts
 models/LandParcelListItemResponse.ts
 models/LandParcelResponse.ts

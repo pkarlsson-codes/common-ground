@@ -39,4 +39,5 @@ public sealed record GroundLeaseCreatedFromPurchase(
     string? BuyerPhone,
     string? PurchaseMortgageId,
     string? PurchaseLender,
-    Money? PurchaseLoanPrincipal) : DomainEvent(AggregateId);
+    Money? PurchaseLoanPrincipal,
+    Money? RequiredLiabilityPerOccurrence) : DomainEvent(AggregateId);

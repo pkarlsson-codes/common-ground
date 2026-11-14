@@ -110,6 +110,12 @@ export interface CreateGroundLeaseTemplateRequest {
      * @memberof CreateGroundLeaseTemplateRequest
      */
     interestWaiverDays?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateGroundLeaseTemplateRequest
+     */
+    insuranceLiabilityPerOccurrence?: number | null;
 }
 
 /**
@@ -145,6 +151,7 @@ export function CreateGroundLeaseTemplateRequestFromJSONTyped(json: any, ignoreD
         'maxMortgageDebtPercent': json['maxMortgageDebtPercent'],
         'lateInterestRate': json['lateInterestRate'] == null ? undefined : json['lateInterestRate'],
         'interestWaiverDays': json['interestWaiverDays'] == null ? undefined : json['interestWaiverDays'],
+        'insuranceLiabilityPerOccurrence': json['insuranceLiabilityPerOccurrence'] == null ? undefined : json['insuranceLiabilityPerOccurrence'],
     };
 }
 
@@ -174,6 +181,7 @@ export function CreateGroundLeaseTemplateRequestToJSONTyped(value?: CreateGround
         'maxMortgageDebtPercent': value['maxMortgageDebtPercent'],
         'lateInterestRate': value['lateInterestRate'],
         'interestWaiverDays': value['interestWaiverDays'],
+        'insuranceLiabilityPerOccurrence': value['insuranceLiabilityPerOccurrence'],
     };
 }
 

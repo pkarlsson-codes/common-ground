@@ -116,6 +116,31 @@ public class GroundLeaseView
 
     /// <summary>Gets or sets every resale price statement sent, in the order recorded.</summary>
     public List<ResalePriceStatementEntry> ResalePriceStatements { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the insurance the lease has required: what it started with, then each change in effective-date
+    /// order.
+    /// </summary>
+    public List<InsuranceRequirementsEntry> InsuranceRequirements { get; set; } = [];
+}
+
+/// <summary>The insurance a lease requires from a day on, in a ground lease view.</summary>
+public class InsuranceRequirementsEntry
+{
+    /// <summary>Gets or sets the first day the requirements apply; the lease start for the ones it started with.</summary>
+    public DateOnly EffectiveFrom { get; set; }
+
+    /// <summary>Gets or sets the replacement value the dwelling coverage must reach, or null when not checked.</summary>
+    public decimal? ReplacementValue { get; set; }
+
+    /// <summary>Gets or sets the liability coverage per occurrence required, or null when not checked.</summary>
+    public decimal? LiabilityPerOccurrence { get; set; }
+
+    /// <summary>Gets or sets the user who set them.</summary>
+    public string SetBy { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets when they were set.</summary>
+    public DateTimeOffset SetAt { get; set; }
 }
 
 /// <summary>A resale price statement sent to the homeowner, in a ground lease view.</summary>

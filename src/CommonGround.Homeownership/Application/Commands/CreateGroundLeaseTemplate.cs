@@ -17,7 +17,8 @@ public sealed record CreateGroundLeaseTemplate(
     ResalePolicyTerms ResalePolicyTerms,
     LeaseFeeTerms LeaseFeeTerms,
     MortgageDebtCap MortgageDebtCap,
-    UserId CreatedBy);
+    UserId CreatedBy,
+    Money? LiabilityPerOccurrence = null);
 
 /// <summary>Handles <see cref="CreateGroundLeaseTemplate"/>.</summary>
 public static class CreateGroundLeaseTemplateHandler
@@ -36,7 +37,8 @@ public static class CreateGroundLeaseTemplateHandler
             command.ResalePolicyTerms,
             command.LeaseFeeTerms,
             command.MortgageDebtCap,
-            command.CreatedBy);
+            command.CreatedBy,
+            command.LiabilityPerOccurrence);
 
         return MartenOps.StartStream<GroundLeaseTemplate>(command.TemplateId.Value, started);
     }

@@ -60,6 +60,11 @@ public class PurchaseWorkflowCloseTests(ApiFactory factory)
         detail.TermYears.Should().Be(99);
         detail.HomeownerFullName.Should().Be("Test Buyer");
         detail.HomeownerEmail.Should().Be("buyer@example.com");
+        detail.Insurance.Should().BeEquivalentTo(new
+        {
+            RequiredReplacementValue = (decimal?)null,
+            RequiredLiabilityPerOccurrence = 300_000m,
+        });
         detail.Mortgages.Should().BeEquivalentTo(new
         {
             MaxMortgageDebtPercent = 90,
@@ -168,7 +173,8 @@ public class PurchaseWorkflowCloseTests(ApiFactory factory)
                 null,
                 null,
                 null,
-                90));
+                90,
+                InsuranceLiabilityPerOccurrence: 300_000m));
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var created = await response.Content.ReadFromJsonAsync<CreateGroundLeaseTemplateResponse>();

@@ -61,6 +61,25 @@ public class GroundLeaseTemplateTests
             act.Should().Throw<BusinessRuleViolationException>();
         }
 
+        [Fact]
+        public void GivenLiabilityPerOccurrence_WhenDefined_ThenALeaseFromItRequiresIt()
+        {
+            var defined = GroundLeaseTemplate.Define(
+                _testBed.TemplateId, "Template", 99, 45, "Terms", ResalePolicyTerms.AppraisalBased(0.25m), LeaseFeeTerms.None, MortgageDebtCap.Create(90), _testBed.StaffUser, Money.Create(300_000m));
+
+            EventReplay.Replay<GroundLeaseTemplate>(defined).LiabilityPerOccurrence.Should().Be(Money.Create(300_000m));
+        }
+
+        [Fact]
+        public void GivenNegativeLiabilityPerOccurrence_WhenDefined_ThenThrowsBusinessRuleViolation()
+        {
+            var act = () => GroundLeaseTemplate.Define(
+                _testBed.TemplateId, "Template", 99, 45, "Terms", ResalePolicyTerms.AppraisalBased(0.25m), LeaseFeeTerms.None, MortgageDebtCap.Create(90), _testBed.StaffUser, Money.Create(-1m));
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.insurance_requirements.create.liability_per_occurrence_negative");
+        }
+
         [Theory]
         [InlineData(0)]
         [InlineData(-30)]
