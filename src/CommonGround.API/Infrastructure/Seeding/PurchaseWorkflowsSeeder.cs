@@ -1,4 +1,6 @@
+using System.Text;
 using System.Text.Json;
+using CommonGround.Documents.Domain.Documents;
 using CommonGround.HomeBuyers.Infrastructure.Seeding;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
@@ -19,11 +21,8 @@ namespace CommonGround.API.Infrastructure.Seeding;
 /// propagates on to its ground lease and stewardship case. A purchase that fails or is withdrawn
 /// propagates back, returning the household to the waiting list and the home to selection.
 /// </summary>
-public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationWaiter propagation) : IDevelopmentSeeder
+public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationWaiter propagation, IDocumentBlobStore blobs) : IDevelopmentSeeder
 {
-    // Story 65 slice 4 replaces this with seeded Documents.
-    private const string PlaceholderDocumentId = "seeded-document";
-
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -83,13 +82,31 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
 
             await SeedClock.RunAsync(timeZone, async clock =>
             {
+                // The income documents and the signed disclosure, attached to the purchase before the
+                // steps that name them.
+                string? incomeDocumentId = null;
+                string? disclosureDocumentId = null;
+                if (entry.Eligibility is not null)
+                {
+                    incomeDocumentId = await UploadAsync(
+                        trustSession, workflow.Id, "income-document", "Income document pay-stubs.txt", "pay-stubs.txt",
+                        "Pay stubs for the household (seeded sample file).", cancellation).ConfigureAwait(false);
+                }
+
+                if (entry.LeaseSigning is not null)
+                {
+                    disclosureDocumentId = await UploadAsync(
+                        trustSession, workflow.Id, "disclosure-acknowledgement", "Signed disclosure disclosure.txt", "disclosure.txt",
+                        "Signed disclosure acknowledgment (seeded sample file).", cancellation).ConfigureAwait(false);
+                }
+
                 var stream = await trustSession.Events
                     .FetchForWriting<PurchaseWorkflow>(workflow.Id, cancellation)
                     .ConfigureAwait(false);
 
                 // Each step is recorded on its own date, in date order, so the purchase reads as having
                 // moved on then.
-                foreach (var (date, decide) in Steps(entry, today).OrderBy(s => s.Date))
+                foreach (var (date, decide) in Steps(entry, today, incomeDocumentId, disclosureDocumentId).OrderBy(s => s.Date))
                 {
                     clock.MoveTo(date);
                     stream.Decide(decide);
@@ -109,7 +126,8 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
         }
     }
 
-    private static List<(DateOnly Date, Func<PurchaseWorkflow, object?> Decide)> Steps(PurchaseWorkflowSeedEntry entry, DateOnly today)
+    private static List<(DateOnly Date, Func<PurchaseWorkflow, object?> Decide)> Steps(
+        PurchaseWorkflowSeedEntry entry, DateOnly today, string? incomeDocumentId, string? disclosureDocumentId)
     {
         List<(DateOnly Date, Func<PurchaseWorkflow, object?> Decide)> steps = [];
 
@@ -122,7 +140,7 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
                 verified,
                 w.DeclaredAnnualIncome ?? throw new InvalidOperationException($"Purchase workflow {w.Id} has no declared income to verify."),
                 w.DeclaredHouseholdSize ?? throw new InvalidOperationException($"Purchase workflow {w.Id} has no declared household size to verify."),
-                [PlaceholderDocumentId],
+                [incomeDocumentId!],
                 eligibility.Notes,
                 SeederUserId)));
         }
@@ -158,7 +176,7 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
             steps.Add((signed, w => w.RecordLeaseExecuted(signed, SeederUserId)));
 
             // A purchase that got as far as signing the lease had the disclosure signed.
-            steps.Add((signed, w => w.RecordDisclosureAcknowledged(signed, PlaceholderDocumentId, null, today, SeederUserId)));
+            steps.Add((signed, w => w.RecordDisclosureAcknowledged(signed, disclosureDocumentId!, null, today, SeederUserId)));
         }
 
         if (entry.ClosingScheduled is { } closing)
@@ -237,6 +255,38 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
 
             return entries;
         }
+    }
+
+    private async Task<string> UploadAsync(
+        Marten.IDocumentSession session,
+        string workflowId,
+        string role,
+        string title,
+        string fileName,
+        string text,
+        CancellationToken cancellation)
+    {
+        var documentId = DocumentId.Generate();
+        var versionId = DocumentVersionId.Generate();
+        var blobKey = $"documents/{documentId.Value}/{versionId.Value}.txt";
+        using var content = new MemoryStream(Encoding.UTF8.GetBytes(text));
+        var uploaded = await blobs.UploadAsync(content, "text/plain", blobKey, cancellation).ConfigureAwait(false);
+
+        var events = Document.Upload(
+            documentId,
+            versionId,
+            title,
+            SensitivityLevel.Confidential,
+            RetentionClass.LongTerm7yr,
+            uploaded.BlobKey,
+            fileName,
+            "text/plain",
+            uploaded.SizeBytes,
+            uploaded.Sha256,
+            SeederUserId,
+            ("PurchaseWorkflow", workflowId, role));
+        session.Events.StartStream<Document>(documentId.Value, [.. events]);
+        return documentId.Value;
     }
 
     private sealed class PurchaseWorkflowSeedEntry
