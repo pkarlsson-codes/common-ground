@@ -7,14 +7,16 @@ Before closing, staff check the buyer's documents (pay stubs, tax returns) again
 3. In Purchase Tracks, user expands the Eligibility track (only expandable while pending)
 4. The track shows the income limit the selection judged by ("80% of AMI, limits effective Apr 1, 2026"), or "No income limit" when the home had none or the purchase didn't start from a selection. A home with no limit whose selection started with a schedule shows "No income limit; income band from limits effective Apr 1, 2026"
 5. User enters Verified Date (defaulted to today), Verified Annual Income and Verified Household Size (both defaulted to what the household declared when selected; both required) and optional Notes
+   - User chooses one or more income documents (pay stubs, tax returns) the figure comes from (at least one required)
 6. When the purchase has a limit, the track shows the limit for the entered household size ("Limit for 3 people: $81,600"), with "Over income limit" when the entered income is higher. Above 8 people it shows "Limit for 9 people: worked out when recorded"
    - When the purchase carries a schedule, the track also shows the band for the entered income and size: "Up to 50% of AMI", "Over 50% to 80% of AMI", or "Over 120% of AMI" when the income is above the highest level
-7. User clicks "Record Eligibility"
+7. User clicks "Record Eligibility". The files upload to Documents, attached to the purchase with the role `income-document`; the API then records the track
 8. Toast: "Eligibility recorded"
-9. Track collapses and shows "Verified {date}: $72,000 income, 3 people" and, when the purchase has a limit, "within the $81,600 limit" and the band; the Eligibility track is marked complete
+9. Track collapses and shows "Verified {date}: $72,000 income, 3 people" and, when the purchase has a limit, "within the $81,600 limit" and the band, with links to the income documents; the Eligibility track is marked complete
 
 ## Outcomes
 
+- **No income document chosen:** the browser stops the form; a request without one is refused (`income_documents_required`). Nothing is recorded.
 - **Income over the limit:** the API refuses (`over_income_limit`) and an error toast shows "The verified income of $90,000 is over the 80% of AMI limit of $81,600 for a household of 3 (limits effective Apr 1, 2026)." Nothing is recorded. If the documents are right, the household can't buy this home: staff mark the purchase Failed from Exception Actions, and the home's next selection starts.
 - **Household size below 1, or income below zero:** the browser stops the form (the fields have minimums); a request that gets past it is refused by the API, and the error toast shows the message. Nothing is recorded.
 - **No limit:** income and household size are recorded and not checked. When a schedule was in effect at the selection's start, the band is still recorded.
