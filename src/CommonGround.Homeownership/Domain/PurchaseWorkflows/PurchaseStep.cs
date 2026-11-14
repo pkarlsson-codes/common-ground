@@ -23,13 +23,16 @@ public sealed class PurchaseStep : Enumeration<PurchaseStep>
     /// <summary>The buyer signing the ground lease.</summary>
     public static readonly PurchaseStep LeaseSigning = new(5, nameof(LeaseSigning));
 
+    /// <summary>Recording the buyer's signed disclosure acknowledgment.</summary>
+    public static readonly PurchaseStep Disclosure = new(6, nameof(Disclosure));
+
     /// <summary>Scheduling the closing, then closing.</summary>
-    public static readonly PurchaseStep Closing = new(6, nameof(Closing));
+    public static readonly PurchaseStep Closing = new(7, nameof(Closing));
 
     private PurchaseStep(int value, string displayName) : base(value, displayName) { }
 
     /// <summary>
-    /// The step a purchase waits on: the first of the six tracks, in order, it hasn't recorded, or
+    /// The step a purchase waits on: the first of the seven tracks, in order, it hasn't recorded, or
     /// <see cref="Closing"/> once it has recorded them all. Tracks can be recorded in any order, so later ones may
     /// already be done.
     /// </summary>
@@ -39,6 +42,7 @@ public sealed class PurchaseStep : Enumeration<PurchaseStep>
     /// <param name="inspectionCompleted">Whether the inspection is recorded.</param>
     /// <param name="titleCleared">Whether title clearance is recorded.</param>
     /// <param name="leaseExecuted">Whether the lease signing is recorded.</param>
+    /// <param name="disclosureAcknowledged">Whether the buyer's signed disclosure acknowledgment is recorded.</param>
     /// <returns>The step the purchase waits on.</returns>
     public static PurchaseStep WaitingOn(
         bool eligibilityVerified,
@@ -46,7 +50,8 @@ public sealed class PurchaseStep : Enumeration<PurchaseStep>
         bool financingCommitted,
         bool inspectionCompleted,
         bool titleCleared,
-        bool leaseExecuted)
+        bool leaseExecuted,
+        bool disclosureAcknowledged)
     {
         if (!eligibilityVerified)
             return Eligibility;
@@ -58,6 +63,8 @@ public sealed class PurchaseStep : Enumeration<PurchaseStep>
             return Inspection;
         if (!titleCleared)
             return Title;
-        return leaseExecuted ? Closing : LeaseSigning;
+        if (!leaseExecuted)
+            return LeaseSigning;
+        return disclosureAcknowledged ? Closing : Disclosure;
     }
 }

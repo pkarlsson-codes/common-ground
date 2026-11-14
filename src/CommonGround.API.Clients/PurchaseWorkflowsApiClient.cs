@@ -80,6 +80,13 @@ public sealed class PurchaseWorkflowsApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task RecordDisclosureAcknowledgedAsync(string workflowId, RecordDisclosureAcknowledgedRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
+        await PostAsync($"api/purchase-workflows/{workflowId}/disclosure", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task ScheduleClosingAsync(string workflowId, ScheduleClosingRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);

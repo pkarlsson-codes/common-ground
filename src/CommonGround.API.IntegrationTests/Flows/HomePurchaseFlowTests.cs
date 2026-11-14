@@ -94,13 +94,13 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
             },
         });
 
-        var over = await client.PostAsJsonAsync($"{path}/eligibility", new RecordEligibilityVerifiedRequest(SelectedDate, 75_000m, 1, null));
+        var over = await client.PostAsJsonAsync($"{path}/eligibility", new RecordEligibilityVerifiedRequest(SelectedDate, 75_000m, 1, ["doc-1"], null));
         over.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
         var problem = (await over.Content.ReadFromJsonAsync<ProblemDetails>())!;
         problem.Extensions["code"]!.ToString().Should().Be("homeownership.purchase_workflow.record_eligibility_verified.over_income_limit");
         problem.Detail.Should().Be("The verified income of $75,000 is over the 80% of AMI limit of $70,000 for a household of 1 (limits effective Jan 1, 2000).");
 
-        (await TrackAsync(() => client.PostAsJsonAsync($"{path}/eligibility", new RecordEligibilityVerifiedRequest(SelectedDate, 75_000m, 2, null))))
+        (await TrackAsync(() => client.PostAsJsonAsync($"{path}/eligibility", new RecordEligibilityVerifiedRequest(SelectedDate, 75_000m, 2, ["doc-1"], null))))
             .StatusCode.Should().Be(HttpStatusCode.NoContent);
         (await client.GetFromJsonAsync<PurchaseWorkflowResponse>(path))!.EligibilityDetails.Should().BeEquivalentTo(new
         {
@@ -583,7 +583,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
         var responses = new List<HttpResponseMessage>
         {
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/eligibility",
-                new RecordEligibilityVerifiedRequest(new DateOnly(2026, 8, 1), verifiedIncome, 1, null)),
+                new RecordEligibilityVerifiedRequest(new DateOnly(2026, 8, 1), verifiedIncome, 1, ["doc-1"], null)),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/appraisal",
                 new RecordAppraisalCompletedRequest(appraisedValue, new DateOnly(2026, 8, 2), "Test Appraiser", null)),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/financing",
@@ -594,6 +594,8 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
                 new RecordTitleClearedRequest(new DateOnly(2026, 8, 4), "Test Title Co")),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/lease-execution",
                 new RecordLeaseExecutedRequest(new DateOnly(2026, 8, 5))),
+            await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/disclosure",
+                new RecordDisclosureAcknowledgedRequest(new DateOnly(2026, 8, 5), "doc-2", null)),
         };
 
         responses.Should().AllSatisfy(r => r.StatusCode.Should().Be(HttpStatusCode.NoContent));

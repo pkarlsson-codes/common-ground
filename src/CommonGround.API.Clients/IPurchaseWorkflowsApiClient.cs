@@ -72,6 +72,13 @@ public interface IPurchaseWorkflowsApiClient
     /// <returns>A task representing the asynchronous operation.</returns>
     Task RecordLeaseExecutedAsync(string workflowId, RecordLeaseExecutedRequest request, CancellationToken cancellationToken);
 
+    /// <summary>Records the buyer's signed disclosure acknowledgment.</summary>
+    /// <param name="workflowId">The ID of the purchase workflow.</param>
+    /// <param name="request">The acknowledgment details.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task RecordDisclosureAcknowledgedAsync(string workflowId, RecordDisclosureAcknowledgedRequest request, CancellationToken cancellationToken);
+
     /// <summary>Schedules the closing date.</summary>
     /// <param name="workflowId">The ID of the purchase workflow.</param>
     /// <param name="request">The scheduled closing date.</param>

@@ -5,12 +5,13 @@ using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
 
-/// <summary>Records that buyer eligibility has been verified, with the income and household size the documents show.</summary>
+/// <summary>Records that buyer eligibility has been verified, with the income and household size the documents show and the documents themselves.</summary>
 public sealed record RecordEligibilityVerified(
     PurchaseWorkflowId WorkflowId,
     DateOnly VerifiedDate,
     Money VerifiedAnnualIncome,
     int VerifiedHouseholdSize,
+    IReadOnlyList<string> IncomeDocumentIds,
     string? Notes,
     UserId RecordedBy);
 
@@ -24,6 +25,6 @@ public static class RecordEligibilityVerifiedHandler
         ArgumentNullException.ThrowIfNull(workflow);
 
         return workflow.RecordEligibilityVerified(
-            command.VerifiedDate, command.VerifiedAnnualIncome, command.VerifiedHouseholdSize, command.Notes, command.RecordedBy);
+            command.VerifiedDate, command.VerifiedAnnualIncome, command.VerifiedHouseholdSize, command.IncomeDocumentIds, command.Notes, command.RecordedBy);
     }
 }

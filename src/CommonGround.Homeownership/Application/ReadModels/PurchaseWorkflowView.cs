@@ -75,6 +75,9 @@ public class PurchaseWorkflowView : IPurchaseWorkflowPhaseView
     /// <summary>Gets or sets the lease execution details.</summary>
     public LeaseExecutionDetailsEntry? LeaseExecutionDetails { get; set; }
 
+    /// <summary>Gets or sets the buyer's signed disclosure acknowledgment, or null when it isn't recorded.</summary>
+    public DisclosureDetailsEntry? DisclosureDetails { get; set; }
+
     /// <summary>Gets or sets the scheduled closing date.</summary>
     public DateOnly? ScheduledClosingDate { get; set; }
 
@@ -123,6 +126,9 @@ public class EligibilityDetailsEntry
 
     /// <summary>Gets or sets the percent of the level the income is at or under, or null above the highest level or no schedule.</summary>
     public int? IncomeBandUpToPercentOfAmi { get; set; }
+
+    /// <summary>Gets or sets the Documents the income was verified from.</summary>
+    public List<string> IncomeDocumentIds { get; set; } = [];
 }
 
 /// <summary>One level of the schedule a purchase carries.</summary>
@@ -192,4 +198,17 @@ public class LeaseExecutionDetailsEntry
 {
     /// <summary>Gets or sets the date the lease was signed.</summary>
     public DateOnly SignedDate { get; set; }
+}
+
+/// <summary>The buyer's signed disclosure acknowledgment.</summary>
+public class DisclosureDetailsEntry
+{
+    /// <summary>Gets or sets the date the buyer signed.</summary>
+    public DateOnly AcknowledgedDate { get; set; }
+
+    /// <summary>Gets or sets optional notes.</summary>
+    public string? Notes { get; set; }
+
+    /// <summary>Gets or sets the signed acknowledgment's Document ID.</summary>
+    public string DocumentId { get; set; } = string.Empty;
 }

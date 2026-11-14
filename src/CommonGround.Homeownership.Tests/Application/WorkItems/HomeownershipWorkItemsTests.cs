@@ -66,14 +66,14 @@ public class HomeownershipWorkItemsTests
             {
                 Kind = HomeownershipWorkItems.PurchaseStepWaiting,
                 Label = "14 Alder Lane",
-                Detail = "Alice Johnson: waiting on appraisal, financing, inspection, title, lease signing",
+                Detail = "Alice Johnson: waiting on appraisal, financing, inspection, title, lease signing, disclosure",
                 DueDate = (DateOnly?)null,
                 WaitingSince = new DateOnly(2026, 10, 9),
                 Actions = new[]
                 {
                     HomeownershipWorkItems.RecordAppraisal, HomeownershipWorkItems.RecordFinancing,
                     HomeownershipWorkItems.RecordInspection, HomeownershipWorkItems.RecordTitle,
-                    HomeownershipWorkItems.RecordLeaseExecution,
+                    HomeownershipWorkItems.RecordLeaseExecution, HomeownershipWorkItems.RecordDisclosure,
                 },
             }, o => o.WithStrictOrdering());
         }
@@ -88,6 +88,7 @@ public class HomeownershipWorkItemsTests
             workflow.InspectionResult = new InspectionResultEntry();
             workflow.TitleDetails = new TitleDetailsEntry();
             workflow.LeaseExecutionDetails = new LeaseExecutionDetailsEntry();
+            workflow.DisclosureDetails = new DisclosureDetailsEntry();
 
             var item = HomeownershipWorkItems.ForPurchase(workflow, _testBed.StepEnteredAt, "14 Alder Lane", _testBed.Today, _testBed.Zone);
 
@@ -119,6 +120,7 @@ public class HomeownershipWorkItemsTests
                     HomeownershipWorkItems.RecordEligibility, HomeownershipWorkItems.RecordAppraisal,
                     HomeownershipWorkItems.RecordFinancing, HomeownershipWorkItems.RecordInspection,
                     HomeownershipWorkItems.RecordTitle, HomeownershipWorkItems.RecordLeaseExecution,
+                    HomeownershipWorkItems.RecordDisclosure,
                 },
             });
         }

@@ -42,6 +42,8 @@ public static class HomeownershipWorkItems
 
     /// <summary>Record that the ground lease was signed.</summary>
     public const string RecordLeaseExecution = "record-lease-execution";
+    /// <summary>Record the buyer's signed disclosure acknowledgment.</summary>
+    public const string RecordDisclosure = "record-disclosure";
 
     /// <summary>Schedule the closing, once every step is recorded.</summary>
     public const string ScheduleClosing = "schedule-closing";
@@ -349,6 +351,8 @@ public static class HomeownershipWorkItems
             missing.Add(("title", RecordTitle));
         if (workflow.LeaseExecutionDetails is null)
             missing.Add(("lease signing", RecordLeaseExecution));
+        if (workflow.DisclosureDetails is null)
+            missing.Add(("disclosure", RecordDisclosure));
         return missing;
     }
 }

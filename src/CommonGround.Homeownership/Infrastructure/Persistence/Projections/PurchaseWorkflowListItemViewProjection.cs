@@ -30,6 +30,7 @@ internal sealed class PurchaseWorkflowListItemViewProjection : SingleStreamProje
     public static void Apply(PurchaseWorkflowListItemView view, InspectionCompleted e) => Record(view, PurchaseStep.Inspection, e.OccurredAt);
     public static void Apply(PurchaseWorkflowListItemView view, TitleCleared e) => Record(view, PurchaseStep.Title, e.OccurredAt);
     public static void Apply(PurchaseWorkflowListItemView view, LeaseExecuted e) => Record(view, PurchaseStep.LeaseSigning, e.OccurredAt);
+    public static void Apply(PurchaseWorkflowListItemView view, BuyerDisclosureAcknowledged e) => Record(view, PurchaseStep.Disclosure, e.OccurredAt);
 
     public static void Apply(PurchaseWorkflowListItemView view, ClosingScheduled e)
     {
@@ -55,7 +56,8 @@ internal sealed class PurchaseWorkflowListItemViewProjection : SingleStreamProje
             Recorded(PurchaseStep.Financing),
             Recorded(PurchaseStep.Inspection),
             Recorded(PurchaseStep.Title),
-            Recorded(PurchaseStep.LeaseSigning)).DisplayName;
+            Recorded(PurchaseStep.LeaseSigning),
+            Recorded(PurchaseStep.Disclosure)).DisplayName;
     }
 
     private static void MoveOn(PurchaseWorkflowListItemView view, string phase, DateTimeOffset at)

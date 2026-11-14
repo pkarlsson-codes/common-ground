@@ -24,8 +24,26 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class RecordDisclosureAcknowledged
+        {
+            public static BusinessRuleViolationException DocumentRequired()
+                => new("homeownership.purchase_workflow.record_disclosure_acknowledged.document_required");
+
+            public static BusinessRuleViolationException AcknowledgedDateInFuture(DateOnly acknowledgedDate, DateOnly today)
+                => new(
+                    "homeownership.purchase_workflow.record_disclosure_acknowledged.acknowledged_date_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["acknowledgedDate"] = acknowledgedDate,
+                        ["today"] = today,
+                    });
+        }
+
         public static class RecordEligibilityVerified
         {
+            public static BusinessRuleViolationException IncomeDocumentsRequired()
+                => new("homeownership.purchase_workflow.record_eligibility_verified.income_documents_required");
+
             public static BusinessRuleViolationException IncomeNegative(Money income)
                 => new(
                     "homeownership.purchase_workflow.record_eligibility_verified.income_negative",

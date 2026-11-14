@@ -138,6 +138,20 @@ public static class PurchaseWorkflowsEndpoints
         return Results.NoContent();
     }
 
+    [WolverinePost("/api/v1/purchase-workflows/{workflowId}/disclosure")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> RecordDisclosureAcknowledged(
+        string workflowId,
+        RecordDisclosureAcknowledgedRequest request,
+        IPurchaseWorkflowsApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.RecordDisclosureAcknowledgedAsync(workflowId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
     [WolverinePost("/api/v1/purchase-workflows/{workflowId}/closing/schedule")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> ScheduleClosing(

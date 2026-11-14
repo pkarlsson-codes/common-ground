@@ -21,6 +21,9 @@ namespace CommonGround.API.Infrastructure.Seeding;
 /// </summary>
 public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationWaiter propagation) : IDevelopmentSeeder
 {
+    // Story 65 slice 4 replaces this with seeded Documents.
+    private const string PlaceholderDocumentId = "seeded-document";
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -119,6 +122,7 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
                 verified,
                 w.DeclaredAnnualIncome ?? throw new InvalidOperationException($"Purchase workflow {w.Id} has no declared income to verify."),
                 w.DeclaredHouseholdSize ?? throw new InvalidOperationException($"Purchase workflow {w.Id} has no declared household size to verify."),
+                [PlaceholderDocumentId],
                 eligibility.Notes,
                 SeederUserId)));
         }
@@ -152,6 +156,9 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
         {
             var signed = leaseSigning.Date.Resolve(today);
             steps.Add((signed, w => w.RecordLeaseExecuted(signed, SeederUserId)));
+
+            // A purchase that got as far as signing the lease had the disclosure signed.
+            steps.Add((signed, w => w.RecordDisclosureAcknowledged(signed, PlaceholderDocumentId, null, today, SeederUserId)));
         }
 
         if (entry.ClosingScheduled is { } closing)

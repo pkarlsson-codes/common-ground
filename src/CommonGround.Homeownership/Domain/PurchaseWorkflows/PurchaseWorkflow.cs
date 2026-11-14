@@ -80,6 +80,9 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <summary>Gets title track details, or null if not yet cleared.</summary>
     public TitleDetails? TitleDetails { get; private set; }
 
+    /// <summary>Gets disclosure track details, or null if the buyer's signed acknowledgment isn't recorded.</summary>
+    public DisclosureDetails? DisclosureDetails { get; private set; }
+
     /// <summary>Gets lease execution track details, or null if not yet executed.</summary>
     public LeaseExecutionDetails? LeaseExecutionDetails { get; private set; }
 
@@ -122,10 +125,13 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <summary>Gets whether the lease has been executed.</summary>
     public bool IsLeaseExecuted => LeaseExecutionDetails is not null;
 
-    /// <summary>Gets whether all six mandatory tracks are satisfied.</summary>
+    /// <summary>Gets whether the buyer's signed disclosure acknowledgment is recorded.</summary>
+    public bool IsDisclosureAcknowledged => DisclosureDetails is not null;
+
+    /// <summary>Gets whether all seven mandatory tracks are satisfied.</summary>
     public bool AllMandatoryTracksSatisfied =>
         IsEligibilityVerified && IsAppraisalCompleted && IsFinancingCommitted &&
-        IsInspectionCompleted && IsTitleCleared && IsLeaseExecuted;
+        IsInspectionCompleted && IsTitleCleared && IsLeaseExecuted && IsDisclosureAcknowledged;
 
     /// <summary>Gets whether the workflow is in a terminal phase.</summary>
     public bool IsTerminal => Phase.IsTerminal;
@@ -195,14 +201,20 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
     /// <param name="verifiedDate">Date of verification.</param>
     /// <param name="verifiedAnnualIncome">The household's annual income as the documents show it, zero or more.</param>
     /// <param name="verifiedHouseholdSize">The number of people in the household as the documents show it, at least 1.</param>
+    /// <param name="incomeDocumentIds">The Documents the income was verified from. At least one.</param>
     /// <param name="notes">Optional notes.</param>
     /// <param name="recordedBy">The user recording this fact.</param>
     public BuyerEligibilityVerified? RecordEligibilityVerified(
-        DateOnly verifiedDate, Money verifiedAnnualIncome, int verifiedHouseholdSize, string? notes, UserId recordedBy)
+        DateOnly verifiedDate, Money verifiedAnnualIncome, int verifiedHouseholdSize,
+        IReadOnlyList<string> incomeDocumentIds, string? notes, UserId recordedBy)
     {
         ArgumentNullException.ThrowIfNull(verifiedAnnualIncome);
+        ArgumentNullException.ThrowIfNull(incomeDocumentIds);
         GuardNotTerminal();
         if (IsEligibilityVerified) return null;
+
+        if (incomeDocumentIds.Count == 0 || incomeDocumentIds.Any(string.IsNullOrWhiteSpace))
+            throw BusinessRuleViolation.PurchaseWorkflow.RecordEligibilityVerified.IncomeDocumentsRequired();
 
         if (verifiedAnnualIncome.IsNegative)
             throw BusinessRuleViolation.PurchaseWorkflow.RecordEligibilityVerified.IncomeNegative(verifiedAnnualIncome);
@@ -226,7 +238,32 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
             verifiedHouseholdSize,
             limit,
             band?.OverPercentOfAmi,
-            band?.UpToPercentOfAmi);
+            band?.UpToPercentOfAmi,
+            [.. incomeDocumentIds]);
+    }
+
+    /// <summary>
+    /// Records the buyer's signed disclosure acknowledgment (Art 1). Idempotent. The date may be before the purchase
+    /// started: the buyer may have signed when selected.
+    /// </summary>
+    /// <param name="acknowledgedDate">The date the buyer signed. Not after <paramref name="today"/>.</param>
+    /// <param name="documentId">The signed acknowledgment in Documents. Required.</param>
+    /// <param name="notes">Optional notes.</param>
+    /// <param name="today">The trust's date.</param>
+    /// <param name="recordedBy">The user recording this fact.</param>
+    public BuyerDisclosureAcknowledged? RecordDisclosureAcknowledged(
+        DateOnly acknowledgedDate, string documentId, string? notes, DateOnly today, UserId recordedBy)
+    {
+        GuardNotTerminal();
+        if (IsDisclosureAcknowledged) return null;
+
+        if (string.IsNullOrWhiteSpace(documentId))
+            throw BusinessRuleViolation.PurchaseWorkflow.RecordDisclosureAcknowledged.DocumentRequired();
+
+        if (acknowledgedDate > today)
+            throw BusinessRuleViolation.PurchaseWorkflow.RecordDisclosureAcknowledged.AcknowledgedDateInFuture(acknowledgedDate, today);
+
+        return new BuyerDisclosureAcknowledged(Id.Value, acknowledgedDate, notes, documentId, recordedBy.Value);
     }
 
     /// <summary>Records that the home's appraisal has been completed. Idempotent.</summary>
@@ -452,7 +489,15 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
             e.VerifiedDate, e.EligibilityNotes, e.VerifiedAnnualIncome, e.VerifiedHouseholdSize, e.IncomeLimit,
             e.IncomeBandUpToPercentOfAmi is not null || e.IncomeBandOverPercentOfAmi is not null
                 ? IncomeBand.Create(e.IncomeBandOverPercentOfAmi, e.IncomeBandUpToPercentOfAmi)
-                : null);
+                : null,
+            e.IncomeDocumentIds);
+        AdvancePhaseIfNeeded();
+    }
+
+    /// <summary>Applies <see cref="BuyerDisclosureAcknowledged"/>.</summary>
+    public void Apply(BuyerDisclosureAcknowledged e)
+    {
+        DisclosureDetails = new DisclosureDetails(e.AcknowledgedDate, e.DisclosureNotes, e.DocumentId);
         AdvancePhaseIfNeeded();
     }
 

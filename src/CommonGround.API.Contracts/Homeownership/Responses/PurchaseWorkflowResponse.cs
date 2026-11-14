@@ -32,6 +32,7 @@ public sealed record PurchaseWorkflowResponse(
     InspectionResultDto? InspectionResult,
     TitleDetailsDto? TitleDetails,
     LeaseExecutionDetailsDto? LeaseExecutionDetails,
+    DisclosureDetailsDto? DisclosureDetails,
     DateOnly? ScheduledClosingDate,
     DateOnly? ActualClosingDate,
     string? ClosingNotes,
@@ -65,6 +66,7 @@ public sealed record PurchaseIncomeLimitLevelDto(int PercentOfAmi, IReadOnlyList
 /// <param name="IncomeLimit">The limit for that size the income was checked against, or null when the purchase has no limit.</param>
 /// <param name="IncomeBandOverPercentOfAmi">The level the income is over, or null for the lowest band or when no band was recorded.</param>
 /// <param name="IncomeBandUpToPercentOfAmi">The level the income is at or under, or null above the highest level or when no band was recorded.</param>
+/// <param name="IncomeDocumentIds">The Documents the income was verified from.</param>
 public sealed record EligibilityDetailsDto(
     DateOnly VerifiedDate,
     string? Notes,
@@ -72,7 +74,8 @@ public sealed record EligibilityDetailsDto(
     int VerifiedHouseholdSize,
     decimal? IncomeLimit,
     int? IncomeBandOverPercentOfAmi,
-    int? IncomeBandUpToPercentOfAmi);
+    int? IncomeBandUpToPercentOfAmi,
+    IReadOnlyList<string> IncomeDocumentIds);
 
 /// <summary>Appraisal details.</summary>
 /// <param name="AppraisedValue">The home's market value without the lease's restrictions.</param>
@@ -101,3 +104,9 @@ public sealed record TitleDetailsDto(DateOnly ClearedDate, string? TitleCompanyN
 /// <summary>Lease execution details.</summary>
 /// <param name="SignedDate">Date lease was signed.</param>
 public sealed record LeaseExecutionDetailsDto(DateOnly SignedDate);
+
+/// <summary>The buyer's signed disclosure acknowledgment.</summary>
+/// <param name="AcknowledgedDate">The date the buyer signed.</param>
+/// <param name="Notes">Optional notes.</param>
+/// <param name="DocumentId">The signed acknowledgment in Documents.</param>
+public sealed record DisclosureDetailsDto(DateOnly AcknowledgedDate, string? Notes, string DocumentId);

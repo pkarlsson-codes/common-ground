@@ -49,6 +49,18 @@ internal sealed class PurchaseWorkflowViewProjection : SingleStreamProjection<Pu
             IncomeLimit = e.IncomeLimit?.Amount,
             IncomeBandOverPercentOfAmi = e.IncomeBandOverPercentOfAmi,
             IncomeBandUpToPercentOfAmi = e.IncomeBandUpToPercentOfAmi,
+            IncomeDocumentIds = [.. e.IncomeDocumentIds],
+        };
+    }
+
+    public static void Apply(PurchaseWorkflowView view, BuyerDisclosureAcknowledged e)
+    {
+        view.Phase = "InProgress";
+        view.DisclosureDetails = new DisclosureDetailsEntry
+        {
+            AcknowledgedDate = e.AcknowledgedDate,
+            Notes = e.DisclosureNotes,
+            DocumentId = e.DocumentId,
         };
     }
 

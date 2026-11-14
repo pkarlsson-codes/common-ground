@@ -122,6 +122,7 @@ public static class PurchaseWorkflowsEndpoints
                 request.VerifiedDate,
                 Money.Create(request.VerifiedAnnualIncome),
                 request.VerifiedHouseholdSize,
+                request.IncomeDocumentIds,
                 request.Notes,
                 userId),
             cancellationToken);
@@ -246,6 +247,31 @@ public static class PurchaseWorkflowsEndpoints
             new RecordLeaseExecuted(
                 PurchaseWorkflowId.Create(workflowId),
                 request.SignedDate,
+                userId),
+            cancellationToken);
+
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/purchase-workflows/{workflowId}/disclosure")]
+    public static async Task<IResult> RecordDisclosureAcknowledged(
+        string workflowId,
+        RecordDisclosureAcknowledgedRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        var userId = httpContext.GetUserId();
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new RecordDisclosureAcknowledged(
+                PurchaseWorkflowId.Create(workflowId),
+                request.AcknowledgedDate,
+                request.DocumentId,
+                request.Notes,
                 userId),
             cancellationToken);
 
@@ -395,7 +421,8 @@ public static class PurchaseWorkflowsEndpoints
                 view.EligibilityDetails.VerifiedHouseholdSize,
                 view.EligibilityDetails.IncomeLimit,
                 view.EligibilityDetails.IncomeBandOverPercentOfAmi,
-                view.EligibilityDetails.IncomeBandUpToPercentOfAmi);
+                view.EligibilityDetails.IncomeBandUpToPercentOfAmi,
+                view.EligibilityDetails.IncomeDocumentIds);
         var schedule = view is { IncomeLimitsEffectiveFrom: { } effectiveFrom, IncomeLimitLevels: { } levels }
             ? new PurchaseIncomeLimitScheduleDto(
                 effectiveFrom,
@@ -415,6 +442,8 @@ public static class PurchaseWorkflowsEndpoints
             : new TitleDetailsDto(view.TitleDetails.ClearedDate, view.TitleDetails.TitleCompanyName);
         var leaseExecution = view.LeaseExecutionDetails is null ? null
             : new LeaseExecutionDetailsDto(view.LeaseExecutionDetails.SignedDate);
+        var disclosure = view.DisclosureDetails is null ? null
+            : new DisclosureDetailsDto(view.DisclosureDetails.AcknowledgedDate, view.DisclosureDetails.Notes, view.DisclosureDetails.DocumentId);
 
         return new PurchaseWorkflowResponse(
             view.Id,
@@ -441,6 +470,7 @@ public static class PurchaseWorkflowsEndpoints
             inspection,
             title,
             leaseExecution,
+            disclosure,
             view.ScheduledClosingDate,
             view.ActualClosingDate,
             view.ClosingNotes,

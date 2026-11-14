@@ -131,6 +131,59 @@ public class PurchaseWorkflowCloseTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task ScheduleClosing_WithoutDisclosure_IsRejectedUntilTheDisclosureIsRecorded()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var templateId = await CreateTemplateAsync(client);
+        var workflowId = await InitiateWorkflowAsync(client, templateId, $"landparc-{Guid.NewGuid():N}", $"home-{Guid.NewGuid():N}");
+        await SatisfyAllTracksAsync(client, workflowId, includeDisclosure: false);
+
+        var rejected = await client.PostAsJsonAsync(
+            $"/api/purchase-workflows/{workflowId}/closing/schedule", new ScheduleClosingRequest(ClosingDate));
+        rejected.IsSuccessStatusCode.Should().BeFalse("a purchase with no disclosure cannot schedule closing");
+
+        var disclosure = await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/disclosure",
+            new RecordDisclosureAcknowledgedRequest(new DateOnly(2026, 6, 5), "doc-2", "Signed at selection"));
+        disclosure.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        await ScheduleClosingAsync(client, workflowId);
+
+        var workflow = await client.GetFromJsonAsync<PurchaseWorkflowResponse>($"/api/purchase-workflows/{workflowId}");
+        workflow!.DisclosureDetails.Should().BeEquivalentTo(
+            new DisclosureDetailsDto(new DateOnly(2026, 6, 5), "Signed at selection", "doc-2"));
+        workflow.EligibilityDetails!.IncomeDocumentIds.Should().Equal("doc-1");
+    }
+
+    [Fact]
+    public async Task RecordDisclosure_DatedInTheFuture_IsRefusedWithItsCode()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var templateId = await CreateTemplateAsync(client);
+        var workflowId = await InitiateWorkflowAsync(client, templateId, $"landparc-{Guid.NewGuid():N}", $"home-{Guid.NewGuid():N}");
+
+        var response = await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/disclosure",
+            new RecordDisclosureAcknowledgedRequest(new DateOnly(2999, 1, 1), "doc-2", null));
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        var problem = (await response.Content.ReadFromJsonAsync<Microsoft.AspNetCore.Mvc.ProblemDetails>())!;
+        problem.Extensions["code"]!.ToString().Should().Be("homeownership.purchase_workflow.record_disclosure_acknowledged.acknowledged_date_in_future");
+    }
+
+    [Fact]
+    public async Task RecordEligibility_WithoutIncomeDocuments_IsRefusedWithItsCode()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var templateId = await CreateTemplateAsync(client);
+        var workflowId = await InitiateWorkflowAsync(client, templateId, $"landparc-{Guid.NewGuid():N}", $"home-{Guid.NewGuid():N}");
+
+        var response = await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/eligibility",
+            new RecordEligibilityVerifiedRequest(new DateOnly(2026, 6, 1), 50_000m, 1, [], null));
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        var problem = (await response.Content.ReadFromJsonAsync<Microsoft.AspNetCore.Mvc.ProblemDetails>())!;
+        problem.Extensions["code"]!.ToString().Should().Be("homeownership.purchase_workflow.record_eligibility_verified.income_documents_required");
+    }
+
+    [Fact]
     public async Task RecordAppraisal_ValueNotAboveZero_IsRejected()
     {
         var client = factory.CreateClient().WithAuthToken();
@@ -199,12 +252,12 @@ public class PurchaseWorkflowCloseTests(ApiFactory factory)
         return created!.PurchaseWorkflowId;
     }
 
-    private static async Task SatisfyAllTracksAsync(HttpClient client, string workflowId, bool includeAppraisal = true)
+    private static async Task SatisfyAllTracksAsync(HttpClient client, string workflowId, bool includeAppraisal = true, bool includeDisclosure = true)
     {
         var responses = new List<HttpResponseMessage>
         {
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/eligibility",
-                new RecordEligibilityVerifiedRequest(new DateOnly(2026, 6, 1), 50_000m, 1, null)),
+                new RecordEligibilityVerifiedRequest(new DateOnly(2026, 6, 1), 50_000m, 1, ["doc-1"], null)),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/financing",
                 new RecordFinancingCommittedRequest("Test Lender", 140000m, new DateOnly(2026, 6, 2))),
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/inspection",
@@ -214,6 +267,12 @@ public class PurchaseWorkflowCloseTests(ApiFactory factory)
             await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/lease-execution",
                 new RecordLeaseExecutedRequest(new DateOnly(2026, 6, 5))),
         };
+
+        if (includeDisclosure)
+        {
+            responses.Add(await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/disclosure",
+                new RecordDisclosureAcknowledgedRequest(new DateOnly(2026, 6, 5), "doc-2", null)));
+        }
 
         if (includeAppraisal)
         {
