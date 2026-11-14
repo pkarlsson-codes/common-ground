@@ -7,6 +7,9 @@ const authFile = 'playwright/.auth/user.json'
 // gateway + Keycloak flow, creating the user's trust on first run, then saves the session
 // for every other test. Also enters the trust's baseline income limits.
 setup('authenticate', async ({ page }) => {
+  // This is the first page load after Playwright starts a fresh Vite server, which transforms all ~500
+  // modules on demand. That took 26 s on a busy machine (a game running), past the default 10 s expect.
+  setup.setTimeout(120_000)
   // Straight to sign-in: on a demo server / shows the Welcome page to a signed-out visitor.
   await page.goto('/auth/login')
 
@@ -18,7 +21,7 @@ setup('authenticate', async ({ page }) => {
   // whichever page it settles on rather than for the URL.
   const today = page.getByRole('heading', { name: 'Today', level: 1 })
   const createTrust = page.getByRole('link', { name: 'Create a trust' })
-  await expect(today.or(createTrust)).toBeVisible()
+  await expect(today.or(createTrust)).toBeVisible({ timeout: 90_000 })
 
   if (await createTrust.isVisible()) {
     await createTrust.click()
