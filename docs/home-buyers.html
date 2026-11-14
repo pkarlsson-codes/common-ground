@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Home Buyers</title>
+<link rel="stylesheet" href="./docs.css" />
+<script src="./nav.js" defer></script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
+  const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  mermaid.initialize({ startOnLoad: true, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict' });
+</script>
+</head>
+<body>
+<div class="layout">
+<main>
+<header>
+  <h1>Home Buyers</h1>
+  <p class="lede">The households who want to buy a CLT home: who they are, whether they are ready to buy, their applications, the waiting list, and how the trust chooses one household for each home.</p>
+  <p class="meta">Projects: <code>src/CommonGround.HomeBuyers</code>, <code>src/CommonGround.HomeBuyers.Contracts</code>. Last checked against the code: 2026-11-13. Read the <a href="./architecture.html">Architecture Overview</a> and the <a href="./shared-kernel.html">Shared Kernel</a> page first.</p>
+</header>
+
+<section id="what">
+  <h2>1. What it is</h2>
+  <p><strong>The CLT idea behind it.</strong> A CLT sells its homes only to households below an income limit, set as a percent of area median income (AMI). HUD or a state agency publishes the dollar limits each year, per household size. Before buying, a household must be ready: it has done housing counseling and the trust's orientation, and a lender has prequalified it for a mortgage. An approved household joins the waiting list. When a home comes up, staff choose one household from the list and must be able to show a funder why they chose it.</p>
+  <p><strong>What it owns:</strong></p>
+  <ul>
+    <li><strong>Households</strong>: the members and their contact details, annual income, whether they need an accessible home, and the three readiness steps.</li>
+    <li><strong>Homeowner applications</strong>: a household's request to buy, from submission to approval (the waiting list) to selection for a home and the closed purchase.</li>
+    <li><strong>Home selections</strong>: staff choosing one household on the waiting list for one home, by stated priorities or by lottery.</li>
+    <li><strong>Income limit schedules</strong>: the published dollar limits, per percent of AMI and household size, from an effective date.</li>
+  </ul>
+</section>
+
+<section id="model">
+  <h2>2. The model</h2>
+  <p>Four aggregates, all deciders. Homes belong to Property Registry, so a home is a <code>string</code> ID here, and its facts are a local copy (<code>HomeFactsView</code>).</p>
+  <div class="diagram">
+<pre class="mermaid">
+classDiagram
+  direction LR
+  class Household {
+    +Members
+    +HouseholdCircumstances Circumstances
+    +MortgagePrequalification
+    +bool IsHousingCounselingCompleted
+    +bool IsCltOrientationCompleted
+    +Register()$
+    +Declare()
+  }
+  class HomeownerApplication {
+    +HouseholdId HouseholdId
+    +Declaration Declaration
+    +ApplicationPhase Phase
+    +PassedOverIn
+    +Submit()$
+    +Approve()
+    +SelectForHome()
+    +PassOver()
+  }
+  class HomeSelection {
+    +string HomeId
+    +HomeSelectionStatus Status
+    +Candidates
+    +int IncomeLimitPercentOfAmi
+    +IncomeLimitTable IncomeLimits
+    +Start()$
+    +SelectByPriority()
+    +DrawLottery()
+  }
+  class IncomeLimitSchedule {
+    +DateOnly EffectiveFrom
+    +Levels
+    +Enter()$
+    +Correct()
+  }
+  HomeownerApplication --> Household : HouseholdId
+  HomeSelection *-- SelectionCandidate
+  SelectionCandidate --> HomeownerApplication : ApplicationId
+</pre>
+  </div>
+  <p>ID prefixes: <code>household-</code>, <code>household-member-</code>, <code>application-</code>, <code>selection-</code>, <code>incomelimitschedule-</code>.</p>
+  <h3>Household</h3>
+  <ul>
+    <li>Household size is the number of members. A household has exactly one primary member, who can't be removed. The primary member is the buyer named on the purchase.</li>
+    <li>Readiness is complete when counseling, orientation and a prequalification are all on record. An expired prequalification still counts for readiness. Selection separately checks that it is valid on the selection date.</li>
+    <li>Recording a prequalification schedules a message that marks it expired at 00:00 UTC on its expiry date. No decision waits for that message: validity is always worked out from <code>ExpiryDate</code>.</li>
+  </ul>
+  <h3>HomeownerApplication</h3>
+  <ul>
+    <li>On submission the application copies the household's size, income and accessibility need (<code>Declaration</code>). Later changes to the household don't change it. Readiness is read from the household when it is selected.</li>
+    <li>A household can have one open application. <code>Selected</code> counts as open (<code>ApplicationOpen</code>).</li>
+    <li>The waiting list is every <code>Approved</code> application, oldest approval first (<code>OnWaitingList</code>). There is no separate list to maintain.</li>
+  </ul>
+  <div class="diagram">
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> Submitted
+  Submitted --> Approved : approve
+  Approved --> Selected : chosen in a selection
+  Selected --> Approved : PurchaseFellThrough
+  Selected --> Purchased : PurchaseClosed
+  Submitted --> Denied
+  Approved --> Denied
+  Submitted --> Withdrawn
+  Approved --> Withdrawn
+</pre>
+  </div>
+  <ul>
+    <li>Staff can't deny or withdraw a <code>Selected</code> application. It leaves <code>Selected</code> only through the purchase in Homeownership. When a purchase falls through, the application goes back with its original approval date, so the household keeps its place.</li>
+  </ul>
+  <h3>IncomeLimitSchedule</h3>
+  <ul>
+    <li>The schedule in effect on a day is the one with the latest <code>EffectiveFrom</code> on or before it. Two schedules can't share a date.</li>
+    <li>Each level holds the printed limits for 1 to 8 people. <code>IncomeLimitLevel.LimitFor</code> works out larger households the way HUD does. Both types are in the Shared Kernel because Homeownership stores the same table on a purchase.</li>
+  </ul>
+</section>
+
+<section id="events">
+  <h2>3. Events in and out</h2>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  PR[PropertyRegistry]
+  HB[HomeBuyers]
+  HO[Homeownership]
+  PR -- "HomeRegistered<br/>HomeIncomeLimitSet" --> HB
+  HB -- "HomeSelectionStarted<br/>HomeSelectionCancelled<br/>ApplicationSelected" --> PR
+  HB -- "HomeSelectionStarted<br/>HomeSelectionCancelled<br/>ApplicationSelected" --> HO
+  HO -- "PurchaseClosed<br/>PurchaseFellThrough" --> HB
+</pre>
+  </div>
+  <ul>
+    <li><code>HomeRegistered</code> creates the <code>HomeFactsView</code> copy: label, parcel, bedrooms, accessibility and income limit. <code>HomeIncomeLimitSet</code> updates it, and fails to the dead letter queue if the copy is missing, rather than leave selection on the old limit.</li>
+    <li><code>ApplicationSelected</code> starts the purchase in Homeownership. It carries the buyer's contact details, the price, the ground lease template, and the income, household size and limits the household was judged by, so the purchase records why the buyer qualified.</li>
+    <li>Selection start and cancel tell Homeownership the home can't be leased by hand meanwhile. Property Registry uses all three for home availability.</li>
+    <li><code>PurchaseClosed</code> and <code>PurchaseFellThrough</code> do nothing when the purchase has no <code>ApplicationId</code>: staff started it directly, without a selection.</li>
+  </ul>
+</section>
+
+<section id="selection">
+  <h2>4. Choosing a household</h2>
+  <p>Funders audit this part, and it changes three aggregates without one transaction.</p>
+  <div class="diagram">
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> Open : start (snapshot waiting list)
+  Open --> Completed : SelectByPriority or DrawLottery
+  Open --> Cancelled : cancel
+  Completed --> FellThrough : PurchaseFellThrough
+</pre>
+  </div>
+  <ul>
+    <li><strong>The candidates are a snapshot.</strong> Starting a selection copies every application on the waiting list, with its declared income and size and the home's dollar limit for that size. The limit comes from the home's percent of AMI and the schedule in effect today. The selection keeps that schedule as evidence.</li>
+    <li><strong>A start is refused</strong> when the home already has an open or completed selection, when nobody is waiting, or when the home has a limit that the schedule in effect has no level for. Today shows that last case as <code>income-limits-missing</code>.</li>
+    <li><strong>A household over the limit can't be chosen</strong>, by priority or by lottery. Priorities (<code>SelectionPriority</code>) rank households that qualify. They never decide who qualifies. Choosing by priority needs at least one priority and a written reason.</li>
+    <li><strong>The lottery can be re-run.</strong> It records its seed and draws with SplitMix64, not <code>System.Random</code>, whose seeded sequence can change between .NET versions. The pool leaves out anyone over the limit or not ready on the selection date, so the winner can always be selected.</li>
+    <li><strong>Completing writes two streams.</strong> The selection and the chosen application, through <code>HomeSelectionCompletion</code>. <code>PassOverCandidatesHandler</code> then sends one <code>PassOverApplication</code> per other candidate, so two selections that share candidates can complete at the same time. A candidate who was over the limit or not ready isn't passed over: they never lost to anyone. <code>HouseholdPassOversView</code> keeps the history per household, across applications.</li>
+    <li><strong>A purchase that falls through starts the next selection.</strong> <code>PurchaseFellThroughHandler</code> marks the selection <code>FellThrough</code>, starts a new one for the home, then returns the application to the waiting list. In that order, so the household isn't a candidate for the home it just fell through on. If nobody is waiting or limits are missing, staff start the new selection by hand.</li>
+  </ul>
+</section>
+
+<section id="code">
+  <h2>5. Where to look</h2>
+  <ul>
+    <li><strong>Layout:</strong> the <a href="./architecture.html#layout">layout every context uses</a>, with no differences.</li>
+    <li><strong>Endpoints:</strong> <code>HouseholdEndpoints</code>, <code>HomeownerApplicationsEndpoints</code>, <code>HomeSelectionsEndpoints</code> and <code>IncomeLimitSchedulesEndpoints</code> in <code>src/CommonGround.API/HomeBuyers</code>.</li>
+    <li><strong>Web pages:</strong> <code>HouseholdsPage</code>, <code>ApplicationsPage</code>, <code>WaitingListPage</code>, <code>HomeSelectionsPage</code>, <code>home-selections/HomeSelectionPage</code>, <code>income-limits/IncomeLimitsPage</code>. Journeys: <code>docs/journeys/households</code>, <code>applications</code>, <code>waiting-list</code>, <code>home-selections</code>, <code>income-limits</code>.</li>
+    <li><strong>Today:</strong> <code>Application/WorkItems/HomeBuyersWorkItems.cs</code> lists the work item kinds and their thresholds.</li>
+    <li><strong>Seed data:</strong> see <a href="./seeding.html">Seeding</a>.</li>
+  </ul>
+</section>
+
+<section id="gaps">
+  <h2>6. Gaps</h2>
+  <ul>
+    <li>A purchase that staff start directly, without a selection, isn't checked against any income limit.</li>
+    <li>The prequalification expiry message runs at 00:00 UTC on the expiry date, not in the trust's time zone, and on the last day the prequalification is still valid.</li>
+    <li><code>DrawSelectionLottery</code> loads every candidate's application and household one at a time to find who is eligible.</li>
+  </ul>
+</section>
+
+<section id="changing">
+  <h2>7. Changing this context</h2>
+  <ul>
+    <li><strong>A new reason a household can't be chosen:</strong> add it to <code>HomeownerApplication.CanBeSelected</code> and <code>SelectForHome</code> together. The lottery pool and pass-overs both use <code>CanBeSelected</code>.</li>
+    <li><strong>A new fact the selection judges by:</strong> put it on <code>SelectionCandidate</code> at start, not read live at completion, and carry it on <code>ApplicationSelected</code> so the purchase keeps it.</li>
+    <li><strong>A new question about the waiting list:</strong> query with <code>OnWaitingList</code>. Don't compare <code>Phase</code> strings in a new place.</li>
+  </ul>
+</section>
+</main>
+</div>
+</body>
+</html>

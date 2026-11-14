@@ -17,7 +17,7 @@ const SITE = [
   { group: 'Bounded contexts', pages: [
     { file: 'shared-kernel.html', title: 'Shared Kernel', about: 'Base classes, shared value objects, errors, the clock, and the Marten and Wolverine helpers every context uses.' },
     { file: 'property-registry.html', title: 'Property Registry', about: 'Land parcels, homes, development projects, and where each home stands in being sold.' },
-    { file: 'home-buyers.html', title: 'Home Buyers', about: 'Households, applications, choosing a household for a home, income limits.', planned: true },
+    { file: 'home-buyers.html', title: 'Home Buyers', about: 'Households, applications, the waiting list, choosing a household for a home, income limits.' },
     { file: 'homeownership.html', title: 'Homeownership', about: 'Purchase workflow, mortgages, ground leases, lease fee notices, resales.', planned: true },
     { file: 'stewardship.html', title: 'Stewardship', about: 'Stewardship cases and foreclosure prevention.', planned: true },
     { file: 'trust-management.html', title: 'Trust Management', about: 'The trust\'s settings, policy, members and invitations.', planned: true },
