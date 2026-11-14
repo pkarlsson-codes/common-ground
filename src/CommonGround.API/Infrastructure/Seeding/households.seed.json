@@ -411,5 +411,19 @@
     "cltOrientationCompleted": "today-701d",
     "prequalification": { "lenderName": "Willamette Valley Bank", "approvedAmount": 195000, "recordedDate": "today-644d", "expiryDate": "today+103d" },
     "application": { "submittedDate": "today-694d", "approvedDate": "today-680d" }
+  },
+  {
+    "seedKey": "hh-okafor-028",
+    "trustSeedKey": "dev-default",
+    "registeredDate": "today-420d",
+    "annualIncome": 52000,
+    "requiresAccessibility": false,
+    "members": [
+      { "name": "Chinedu Okafor", "email": "chinedu.okafor@example.com", "phone": "(503) 555-0411", "isPrimary": true }
+    ],
+    "housingCounseling": { "certificationNumber": "HUD-2025-1610", "completedDate": "today-405d", "counselorOrganization": "Neighborhood Partnerships" },
+    "cltOrientationCompleted": "today-398d",
+    "prequalification": { "lenderName": "Cascade Community Credit Union", "approvedAmount": 215000, "recordedDate": "today-390d", "expiryDate": "today-25d" },
+    "application": { "submittedDate": "today-385d", "approvedDate": "today-370d", "removal": { "date": "today-12d", "reason": "NoResponse", "note": "Three calls and a letter over six weeks; no reply." } }
   }
 ]

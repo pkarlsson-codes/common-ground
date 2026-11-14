@@ -135,6 +135,13 @@ public sealed class HouseholdsSeeder(ITrustClock trustClock, PropagationWaiter p
                         clock.MoveTo(withdrawnDate);
                         applicationEvents.Add(application.Withdraw(withdrawnDate, withdrawal.Reason, SeederUserId));
                     }
+                    else if (applicationEntry.Removal is { } removal)
+                    {
+                        var removedDate = removal.Date.Resolve(today);
+                        clock.MoveTo(removedDate);
+                        applicationEvents.Add(application.RemoveFromWaitingList(
+                            WaitingListRemovalReason.FromDisplayName(removal.Reason), removal.Note, removedDate, today, SeederUserId));
+                    }
 
                     trustSession.Events.StartStream<HomeownerApplication>(id.Value, applicationEvents);
                     applicationId = id.Value;
@@ -252,6 +259,17 @@ public sealed class HouseholdsSeeder(ITrustClock trustClock, PropagationWaiter p
         public ApplicationOutcomeSeedEntry? Denial { get; set; }
 
         public ApplicationOutcomeSeedEntry? Withdrawal { get; set; }
+
+        public ApplicationRemovalSeedEntry? Removal { get; set; }
+    }
+
+    private sealed class ApplicationRemovalSeedEntry
+    {
+        public SeedDate Date { get; set; }
+
+        public string Reason { get; set; } = string.Empty;
+
+        public string? Note { get; set; }
     }
 
     private sealed class ApplicationOutcomeSeedEntry
