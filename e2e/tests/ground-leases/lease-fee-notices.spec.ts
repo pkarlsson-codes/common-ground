@@ -71,7 +71,9 @@ test('a lease with a notice due shows it on Today and the lease, prints its lett
   await createLeaseNeedingSecondNotice(page, homeowner)
 
   await page.reload()
+  // The new lease also has its insurance certificate due, so rows are picked by kind too.
   const todayRow = page.locator('section[aria-labelledby="today-stewardship"] tbody tr', { hasText: homeowner })
+    .filter({ hasText: 'Lease fee notice due' })
   await expect(todayRow).toContainText('Lease fee notice due')
   await expect(todayRow).toContainText(`${homeowner}: second notice due, ${SECOND_NOTICE_BALANCE} owed`)
   await todayRow.getByRole('button', { name: /^Record notice/ }).click()
@@ -108,7 +110,7 @@ test('a lease with a notice due shows it on Today and the lease, prints its lett
   await expect(notice).toContainText(SECOND_NOTICE_BALANCE)
 
   await page.goto('/')
-  await expect(page.locator('tbody tr', { hasText: homeowner })).toHaveCount(0)
+  await expect(todayRow).toHaveCount(0)
 })
 
 test('the Notice due filter prints every letter due and records the ticked ones as sent', async ({ page }) => {
@@ -296,7 +298,7 @@ test('an uncured notice of default opens a foreclosure prevention case in one cl
   const todayLoaded = page.waitForResponse(r => r.url().includes('/api/v1/today') && r.ok())
   await page.goto('/')
   await todayLoaded
-  await expect(page.locator('tbody tr', { hasText: homeowner })).toHaveCount(0)
+  await expect(page.locator('tbody tr', { hasText: homeowner }).filter({ hasText: 'default not cured' })).toHaveCount(0)
 })
 
 test('opening a prevention case for a lease that got one meanwhile shows the refusal in the notice of default box', async ({ page }) => {

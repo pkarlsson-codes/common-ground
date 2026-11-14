@@ -82,5 +82,5 @@ test('a lease whose statement is due waits on Today until it is recorded there',
   await expectToast(page, 'Statement recorded')
 
   await expect(page).toHaveURL(/\/$/)
-  await expect(page.getByRole('row', { name: new RegExp(homeowner) })).toHaveCount(0)
+  await expect(row).toHaveCount(0)
 })

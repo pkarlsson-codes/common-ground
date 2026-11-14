@@ -768,6 +768,202 @@ public class GroundLeaseTests
         }
     }
 
+    public class TheRecordInsuranceCertificateMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        private static readonly DateOnly Today = new(2025, 6, 1);
+
+        private GroundLease Lease() => EventReplay.Replay<GroundLease>(_testBed.Established(insurance: TestBed.Insurance));
+
+        private static InsuranceCoverage Coverage(
+            decimal dwelling = 280_000m, decimal liability = 300_000m, bool trustNamed = true,
+            DateOnly? policyStart = null, DateOnly? policyEnd = null, DateOnly? receivedOn = null) =>
+            InsuranceCoverage.Create(
+                policyStart ?? new DateOnly(2025, 5, 1),
+                policyEnd ?? new DateOnly(2026, 5, 1),
+                Money.Create(dwelling),
+                Money.Create(liability),
+                trustNamed,
+                receivedOn ?? Today);
+
+        private InsuranceCertificateRecorded Record(GroundLease lease, InsuranceCoverage coverage) =>
+            lease.RecordInsuranceCertificate(
+                InsuranceCertificateId.Generate(), " Acme Mutual ", " HO-1234 ", coverage, " Flood: none ", null, Today, _testBed.StaffUser);
+
+        [Fact]
+        public void GivenACertificateThatMeetsTheLease_WhenRecorded_ThenTheLeaseIsCoveredThroughItsPolicyEndWithNoShortfalls()
+        {
+            var (sut, _) = Lease().Decide(l => Record(l, Coverage()));
+
+            sut.InsuranceCover.CoveredThrough.Should().Be(new DateOnly(2026, 5, 1));
+            sut.InsuranceCover.Check!.MeetsLease.Should().BeTrue();
+        }
+
+        [Fact]
+        public void GivenTextWithSpaces_WhenRecorded_ThenItIsTrimmed()
+        {
+            var recorded = Record(Lease(), Coverage());
+
+            recorded.Should().Match<InsuranceCertificateRecorded>(e =>
+                e.Insurer == "Acme Mutual" && e.PolicyNumber == "HO-1234" && e.Notes == "Flood: none" && e.DocumentId == null);
+        }
+
+        [Fact]
+        public void GivenACertificateThatFallsShort_WhenRecorded_ThenItIsRecordedWithItsShortfalls()
+        {
+            var (sut, _) = Lease().Decide(l => Record(l, Coverage(trustNamed: false)));
+
+            sut.InsuranceCover.Check!.Shortfalls.Should().Equal(InsuranceShortfall.TrustNotAdditionalInsured);
+        }
+
+        [Fact]
+        public void GivenAReceivedDateBeforeTheLeaseStart_WhenRecorded_ThenItIsRecorded()
+        {
+            var coverage = Coverage(policyStart: TestBed.LeaseStart, receivedOn: TestBed.LeaseStart.AddDays(-10));
+
+            var recorded = Record(Lease(), coverage);
+
+            recorded.ReceivedOn.Should().Be(TestBed.LeaseStart.AddDays(-10));
+        }
+
+        [Fact]
+        public void GivenAPolicyEndOnItsStart_WhenRecorded_ThenThrowsBusinessRuleViolation()
+        {
+            var coverage = Coverage(policyEnd: new DateOnly(2025, 5, 1));
+
+            var act = () => Record(Lease(), coverage);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.record_insurance_certificate.policy_end_not_after_start");
+        }
+
+        [Fact]
+        public void GivenAReceivedDateInTheFuture_WhenRecorded_ThenThrowsBusinessRuleViolation()
+        {
+            var act = () => Record(Lease(), Coverage(receivedOn: Today.AddDays(1)));
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.record_insurance_certificate.received_on_in_future");
+        }
+
+        [Fact]
+        public void GivenANegativeDwellingCoverage_WhenRecorded_ThenThrowsBusinessRuleViolation()
+        {
+            var act = () => Record(Lease(), Coverage(dwelling: -1m));
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.record_insurance_certificate.dwelling_coverage_negative");
+        }
+
+        [Fact]
+        public void GivenANegativeLiability_WhenRecorded_ThenThrowsBusinessRuleViolation()
+        {
+            var act = () => Record(Lease(), Coverage(liability: -1m));
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.record_insurance_certificate.liability_per_occurrence_negative");
+        }
+
+        [Fact]
+        public void GivenNoInsurer_WhenRecorded_ThenThrowsBusinessRuleViolation()
+        {
+            var act = () => Lease().RecordInsuranceCertificate(
+                InsuranceCertificateId.Generate(), " ", "HO-1234", Coverage(), null, null, Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.record_insurance_certificate.insurer_required");
+        }
+
+        [Fact]
+        public void GivenNoPolicyNumber_WhenRecorded_ThenThrowsBusinessRuleViolation()
+        {
+            var act = () => Lease().RecordInsuranceCertificate(
+                InsuranceCertificateId.Generate(), "Acme Mutual", "", Coverage(), null, null, Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.record_insurance_certificate.policy_number_required");
+        }
+
+        [Fact]
+        public void GivenEndedLease_WhenRecorded_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = Lease().Decide(l => l.Terminate("Resold", Today, _testBed.StaffUser)).Aggregate;
+
+            var act = () => Record(sut, Coverage());
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.record_insurance_certificate.status_not_active");
+        }
+    }
+
+    public class TheRemoveInsuranceCertificateMethod
+    {
+        private readonly TestBed _testBed = new();
+
+        private static readonly DateOnly Today = new(2025, 6, 1);
+
+        private (GroundLease Lease, InsuranceCertificateId CertificateId) LeaseWithTwoCertificates()
+        {
+            var lease = EventReplay.Replay<GroundLease>(_testBed.Established(insurance: TestBed.Insurance));
+            var earlier = InsuranceCoverage.Create(
+                new DateOnly(2024, 5, 1), new DateOnly(2025, 5, 1), Money.Create(280_000m), Money.Create(300_000m), true, Today);
+            var mistyped = InsuranceCoverage.Create(
+                new DateOnly(2025, 5, 1), new DateOnly(2027, 5, 1), Money.Create(280_000m), Money.Create(300_000m), true, Today);
+            var mistypedId = InsuranceCertificateId.Generate();
+            lease = lease.Decide(l => l.RecordInsuranceCertificate(
+                InsuranceCertificateId.Generate(), "Acme Mutual", "HO-1", earlier, null, null, Today, _testBed.StaffUser)).Aggregate;
+            lease = lease.Decide(l => l.RecordInsuranceCertificate(
+                mistypedId, "Acme Mutual", "HO-2", mistyped, null, null, Today, _testBed.StaffUser)).Aggregate;
+            return (lease, mistypedId);
+        }
+
+        [Fact]
+        public void GivenTheLatestCertificate_WhenRemoved_ThenTheCoverFallsBackToTheOneBefore()
+        {
+            var (sut, certificateId) = LeaseWithTwoCertificates();
+
+            var (removed, _) = sut.Decide(l => l.RemoveInsuranceCertificate(certificateId, "Policy end typed as 2027", _testBed.StaffUser));
+
+            removed.InsuranceCover.CoveredThrough.Should().Be(new DateOnly(2025, 5, 1));
+            removed.InsuranceCertificates.Single(c => c.Id == certificateId).RemovedReason.Should().Be("Policy end typed as 2027");
+        }
+
+        [Fact]
+        public void GivenNoReason_WhenRemoved_ThenThrowsBusinessRuleViolation()
+        {
+            var (sut, certificateId) = LeaseWithTwoCertificates();
+
+            var act = () => sut.RemoveInsuranceCertificate(certificateId, " ", _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.remove_insurance_certificate.reason_required");
+        }
+
+        [Fact]
+        public void GivenACertificateNotOnTheLease_WhenRemoved_ThenThrowsBusinessRuleViolation()
+        {
+            var (sut, _) = LeaseWithTwoCertificates();
+
+            var act = () => sut.RemoveInsuranceCertificate(InsuranceCertificateId.Generate(), "Wrong lease", _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.remove_insurance_certificate.certificate_not_found");
+        }
+
+        [Fact]
+        public void GivenARemovedCertificate_WhenRemovedAgain_ThenThrowsBusinessRuleViolation()
+        {
+            var (lease, certificateId) = LeaseWithTwoCertificates();
+            var sut = lease.Decide(l => l.RemoveInsuranceCertificate(certificateId, "Mistyped", _testBed.StaffUser)).Aggregate;
+
+            var act = () => sut.RemoveInsuranceCertificate(certificateId, "Again", _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.ground_lease.remove_insurance_certificate.already_removed");
+        }
+    }
+
     public class TheLeaseFeeStatementAsOfMethod
     {
         private readonly TestBed _testBed = new();

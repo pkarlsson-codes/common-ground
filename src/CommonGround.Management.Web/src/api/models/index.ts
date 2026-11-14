@@ -89,6 +89,8 @@ export * from './InitiateOccupancyVerificationRequest';
 export * from './InitiatePurchaseWorkflowRequest';
 export * from './InitiatePurchaseWorkflowResponse';
 export * from './InspectionResultDto';
+export * from './InsuranceCertificateDto';
+export * from './InsuranceCheckDto';
 export * from './InsuranceDto';
 export * from './InsuranceRequirementsChangeDto';
 export * from './IssueViolationNoticeRequest';

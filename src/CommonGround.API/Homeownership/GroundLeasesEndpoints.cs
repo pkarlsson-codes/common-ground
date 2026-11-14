@@ -106,9 +106,17 @@ public static class GroundLeasesEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
 
-        var (view, recordedOn, leaseFees, noticeDue, defaultCure, nextStatementDueOn, insuranceRequired) = await bus.InvokeForTenantAsync<GroundLeaseDetails>(bus.TenantId!,
+        var (view, recordedOn, leaseFees, noticeDue, defaultCure, nextStatementDueOn, insuranceRequired, insuranceCover) = await bus.InvokeForTenantAsync<GroundLeaseDetails>(bus.TenantId!,
             new GetGroundLease(GroundLeaseId.Create(groundLeaseId)),
             cancellationToken);
+
+        var currentCheck = insuranceCover.Check is { } check
+            ? new InsuranceCheckDto(
+                check.MeetsLease,
+                check.Shortfalls.Select(f => f.DisplayName).ToList().AsReadOnly(),
+                check.Requirements.ReplacementValue?.Amount,
+                check.Requirements.LiabilityPerOccurrence?.Amount)
+            : null;
 
         var response = new GroundLeaseResponse(
             view.Id,
@@ -226,6 +234,19 @@ public static class GroundLeasesEndpoints
                     .Reverse()
                     .Select(r => new InsuranceRequirementsChangeDto(r.EffectiveFrom, r.ReplacementValue, r.LiabilityPerOccurrence, r.SetBy, r.SetAt))
                     .ToList()
+                    .AsReadOnly(),
+                insuranceCover.CoveredThrough,
+                insuranceCover.DueOn,
+                currentCheck,
+                view.InsuranceCertificates
+                    .OrderByDescending(c => c.PolicyEnd)
+                    .ThenByDescending(c => c.ReceivedOn)
+                    .ThenByDescending(c => c.RecordedAt)
+                    .Select(c => new InsuranceCertificateDto(
+                        c.CertificateId, c.Insurer, c.PolicyNumber, c.PolicyStart, c.PolicyEnd, c.DwellingCoverage,
+                        c.LiabilityPerOccurrence, c.TrustNamedAdditionalInsured, c.ReceivedOn, c.Notes, c.DocumentId,
+                        c.RecordedBy, c.RecordedAt, c.RemovedReason, c.RemovedAt))
+                    .ToList()
                     .AsReadOnly()),
             view.CreatedAt,
             recordedOn,
@@ -250,6 +271,66 @@ public static class GroundLeasesEndpoints
                 GroundLeaseId.Create(groundLeaseId),
                 InsuranceRequirements.Create(OptionalMoney(request.ReplacementValue), OptionalMoney(request.LiabilityPerOccurrence)),
                 request.EffectiveFrom,
+                httpContext.GetUserId()),
+            cancellationToken);
+
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/ground-leases/{groundLeaseId}/insurance-certificates")]
+    public static async Task<IResult> RecordInsuranceCertificate(
+        string groundLeaseId,
+        RecordInsuranceCertificateRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        var id = InsuranceCertificateId.Generate();
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new RecordInsuranceCertificate(
+                GroundLeaseId.Create(groundLeaseId),
+                id,
+                request.Insurer,
+                request.PolicyNumber,
+                InsuranceCoverage.Create(
+                    request.PolicyStart,
+                    request.PolicyEnd,
+                    Money.Create(request.DwellingCoverage),
+                    Money.Create(request.LiabilityPerOccurrence),
+                    request.TrustNamedAdditionalInsured,
+                    request.ReceivedOn),
+                request.Notes,
+                request.DocumentId,
+                httpContext.GetUserId()),
+            cancellationToken);
+
+        return Results.Created(
+            $"/api/ground-leases/{groundLeaseId}/insurance-certificates/{id.Value}",
+            new RecordInsuranceCertificateResponse(id.Value));
+    }
+
+    [WolverinePost("/api/ground-leases/{groundLeaseId}/insurance-certificates/{certificateId}/remove")]
+    public static async Task<IResult> RemoveInsuranceCertificate(
+        string groundLeaseId,
+        string certificateId,
+        RemoveInsuranceCertificateRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(certificateId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new RemoveInsuranceCertificate(
+                GroundLeaseId.Create(groundLeaseId),
+                InsuranceCertificateId.Create(certificateId),
+                request.Reason,
                 httpContext.GetUserId()),
             cancellationToken);
 

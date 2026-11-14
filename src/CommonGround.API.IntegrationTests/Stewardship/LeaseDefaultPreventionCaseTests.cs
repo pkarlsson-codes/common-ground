@@ -42,7 +42,7 @@ public class LeaseDefaultPreventionCaseTests(ApiFactory factory)
             OpenedDate = today,
             LeaseFeeArrears = new { NoticeSentOn = today.AddDays(-40), cure.AmountOwed, cure.CureBy, StillToPay = cure.AmountOwed },
         });
-        (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Items.Should().NotContain(i => i.RecordId == leaseId);
+        (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Items.Should().NotContain(i => i.RecordId == leaseId && !i.Kind.StartsWith("insurance-", StringComparison.Ordinal));
 
         var again = await client.PostAsJsonAsync("/api/stewardship/foreclosure-prevention/lease-default",
             new OpenForeclosurePreventionCaseForLeaseDefaultRequest(leaseId));

@@ -121,6 +121,17 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     /// <summary>Gets every mortgage the trust permitted on this lease, paid-off ones included, in the order recorded.</summary>
     public IReadOnlyList<PermittedMortgage> PermittedMortgages => _permittedMortgages;
 
+    private readonly List<InsuranceCertificate> _insuranceCertificates = [];
+
+    /// <summary>Gets every insurance certificate recorded on this lease, removed ones included, in the order recorded.</summary>
+    public IReadOnlyList<InsuranceCertificate> InsuranceCertificates => _insuranceCertificates;
+
+    /// <summary>Gets where the lease's insurance stands from the certificates not removed.</summary>
+    public InsuranceCover InsuranceCover => InsuranceCover.Of(
+        LeaseStartDate,
+        _insuranceCertificates.Where(c => !c.IsRemoved).Select(c => c.Coverage),
+        InsuranceRequirements);
+
     /// <summary>
     /// Creates a ground lease that didn't come from a purchase, such as one signed before the trust used
     /// CommonGround. Refused while the home is already leased, being sold, or in a home selection. Fees are tracked
@@ -685,6 +696,80 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             Id.Value, effectiveFrom, requirements.ReplacementValue, requirements.LiabilityPerOccurrence, setBy.Value);
     }
 
+    /// <summary>
+    /// Records a certificate of the homeowner's insurance (Art 9.4). Refused for an ended lease, without an insurer or
+    /// policy number, for a policy end not after its start, an amount below zero, or a received date in the future. A
+    /// received date before the lease start is allowed: the lease wants a certificate before it starts. A certificate
+    /// that falls short of the lease is still recorded, since it is what the homeowner sent.
+    /// </summary>
+    public InsuranceCertificateRecorded RecordInsuranceCertificate(
+        InsuranceCertificateId certificateId,
+        string insurer,
+        string policyNumber,
+        InsuranceCoverage coverage,
+        string? notes,
+        string? documentId,
+        DateOnly today,
+        UserId recordedBy)
+    {
+        ArgumentNullException.ThrowIfNull(coverage);
+
+        if (Status != GroundLeaseStatus.Active)
+            throw BusinessRuleViolation.GroundLease.RecordInsuranceCertificate.StatusNotActive(Status);
+
+        if (string.IsNullOrWhiteSpace(insurer))
+            throw BusinessRuleViolation.GroundLease.RecordInsuranceCertificate.InsurerRequired();
+
+        if (string.IsNullOrWhiteSpace(policyNumber))
+            throw BusinessRuleViolation.GroundLease.RecordInsuranceCertificate.PolicyNumberRequired();
+
+        if (coverage.PolicyEnd <= coverage.PolicyStart)
+            throw BusinessRuleViolation.GroundLease.RecordInsuranceCertificate.PolicyEndNotAfterStart(coverage.PolicyStart, coverage.PolicyEnd);
+
+        if (coverage.DwellingCoverage.IsNegative)
+            throw BusinessRuleViolation.GroundLease.RecordInsuranceCertificate.DwellingCoverageNegative(coverage.DwellingCoverage.Amount);
+
+        if (coverage.LiabilityPerOccurrence.IsNegative)
+            throw BusinessRuleViolation.GroundLease.RecordInsuranceCertificate.LiabilityPerOccurrenceNegative(coverage.LiabilityPerOccurrence.Amount);
+
+        if (coverage.ReceivedOn > today)
+            throw BusinessRuleViolation.GroundLease.RecordInsuranceCertificate.ReceivedOnInFuture(coverage.ReceivedOn, today);
+
+        return new InsuranceCertificateRecorded(
+            Id.Value,
+            certificateId.Value,
+            insurer.Trim(),
+            policyNumber.Trim(),
+            coverage.PolicyStart,
+            coverage.PolicyEnd,
+            coverage.DwellingCoverage,
+            coverage.LiabilityPerOccurrence,
+            coverage.TrustNamedAdditionalInsured,
+            coverage.ReceivedOn,
+            OptionalText(notes),
+            OptionalText(documentId),
+            recordedBy.Value);
+    }
+
+    /// <summary>
+    /// Removes a certificate recorded in error, so it no longer counts toward the cover. It stays on the lease, and
+    /// its file stays in Documents. Refused without a reason, for a certificate not on this lease, or one already
+    /// removed.
+    /// </summary>
+    public InsuranceCertificateRemoved RemoveInsuranceCertificate(InsuranceCertificateId certificateId, string reason, UserId removedBy)
+    {
+        if (string.IsNullOrWhiteSpace(reason))
+            throw BusinessRuleViolation.GroundLease.RemoveInsuranceCertificate.ReasonRequired();
+
+        var certificate = _insuranceCertificates.FirstOrDefault(c => c.Id == certificateId)
+            ?? throw BusinessRuleViolation.GroundLease.RemoveInsuranceCertificate.CertificateNotFound(certificateId.Value);
+
+        if (certificate.IsRemoved)
+            throw BusinessRuleViolation.GroundLease.RemoveInsuranceCertificate.AlreadyRemoved(certificateId.Value);
+
+        return new InsuranceCertificateRemoved(Id.Value, certificateId.Value, reason.Trim(), removedBy.Value);
+    }
+
     private static string? OptionalText(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
 
     /// <summary>Works out what the lease owes as of a day, usually the trust's today.</summary>
@@ -867,6 +952,21 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     public void Apply(InsuranceRequirementsSet e) =>
         InsuranceRequirements = InsuranceRequirements.With(InsuranceRequirementsChange.Create(
             e.EffectiveFrom, Insurance.InsuranceRequirements.Create(e.ReplacementValue, e.LiabilityPerOccurrence)));
+
+    /// <summary>Applies <see cref="InsuranceCertificateRecorded"/>.</summary>
+    public void Apply(InsuranceCertificateRecorded e) =>
+        _insuranceCertificates.Add(InsuranceCertificate.Create(
+            InsuranceCertificateId.Create(e.CertificateId),
+            e.Insurer,
+            e.PolicyNumber,
+            InsuranceCoverage.Create(
+                e.PolicyStart, e.PolicyEnd, e.DwellingCoverage, e.LiabilityPerOccurrence, e.TrustNamedAdditionalInsured, e.ReceivedOn),
+            e.Notes,
+            e.DocumentId));
+
+    /// <summary>Applies <see cref="InsuranceCertificateRemoved"/>.</summary>
+    public void Apply(InsuranceCertificateRemoved e) =>
+        _insuranceCertificates.First(c => c.Id.Value == e.CertificateId).MarkRemoved(e.Reason);
 
     /// <summary>Applies <see cref="PermittedMortgagePaidOff"/>.</summary>
     public void Apply(PermittedMortgagePaidOff e) =>

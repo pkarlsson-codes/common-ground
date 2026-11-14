@@ -554,6 +554,80 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class RecordInsuranceCertificate
+        {
+            public static BusinessRuleViolationException StatusNotActive(GroundLeaseStatus status)
+                => new(
+                    "homeownership.ground_lease.record_insurance_certificate.status_not_active",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                        ["requiredStatus"] = GroundLeaseStatus.Active.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException InsurerRequired()
+                => new("homeownership.ground_lease.record_insurance_certificate.insurer_required");
+
+            public static BusinessRuleViolationException PolicyNumberRequired()
+                => new("homeownership.ground_lease.record_insurance_certificate.policy_number_required");
+
+            public static BusinessRuleViolationException PolicyEndNotAfterStart(DateOnly policyStart, DateOnly policyEnd)
+                => new(
+                    "homeownership.ground_lease.record_insurance_certificate.policy_end_not_after_start",
+                    new Dictionary<string, object?>
+                    {
+                        ["policyStart"] = policyStart,
+                        ["policyEnd"] = policyEnd,
+                    });
+
+            public static BusinessRuleViolationException DwellingCoverageNegative(decimal dwellingCoverage)
+                => new(
+                    "homeownership.ground_lease.record_insurance_certificate.dwelling_coverage_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["dwellingCoverage"] = dwellingCoverage,
+                    });
+
+            public static BusinessRuleViolationException LiabilityPerOccurrenceNegative(decimal liabilityPerOccurrence)
+                => new(
+                    "homeownership.ground_lease.record_insurance_certificate.liability_per_occurrence_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["liabilityPerOccurrence"] = liabilityPerOccurrence,
+                    });
+
+            public static BusinessRuleViolationException ReceivedOnInFuture(DateOnly receivedOn, DateOnly today)
+                => new(
+                    "homeownership.ground_lease.record_insurance_certificate.received_on_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["receivedOn"] = receivedOn,
+                        ["today"] = today,
+                    });
+        }
+
+        public static class RemoveInsuranceCertificate
+        {
+            public static BusinessRuleViolationException ReasonRequired()
+                => new("homeownership.ground_lease.remove_insurance_certificate.reason_required");
+
+            public static BusinessRuleViolationException CertificateNotFound(string certificateId)
+                => new(
+                    "homeownership.ground_lease.remove_insurance_certificate.certificate_not_found",
+                    new Dictionary<string, object?>
+                    {
+                        ["certificateId"] = certificateId,
+                    });
+
+            public static BusinessRuleViolationException AlreadyRemoved(string certificateId)
+                => new(
+                    "homeownership.ground_lease.remove_insurance_certificate.already_removed",
+                    new Dictionary<string, object?>
+                    {
+                        ["certificateId"] = certificateId,
+                    });
+        }
+
         public static class CorrectLeaseFeeTracking
         {
             public static BusinessRuleViolationException PaymentBeforeFeesTracked(DateOnly receivedDate, DateOnly feesTrackedFrom)

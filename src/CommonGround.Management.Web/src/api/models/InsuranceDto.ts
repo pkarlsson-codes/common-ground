@@ -14,6 +14,20 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CalendarDate } from './CalendarDate';
+import {
+    CalendarDateFromJSON,
+    CalendarDateFromJSONTyped,
+    CalendarDateToJSON,
+    CalendarDateToJSONTyped,
+} from './CalendarDate';
+import type { InsuranceCheckDto } from './InsuranceCheckDto';
+import {
+    InsuranceCheckDtoFromJSON,
+    InsuranceCheckDtoFromJSONTyped,
+    InsuranceCheckDtoToJSON,
+    InsuranceCheckDtoToJSONTyped,
+} from './InsuranceCheckDto';
 import type { InsuranceRequirementsChangeDto } from './InsuranceRequirementsChangeDto';
 import {
     InsuranceRequirementsChangeDtoFromJSON,
@@ -21,9 +35,16 @@ import {
     InsuranceRequirementsChangeDtoToJSON,
     InsuranceRequirementsChangeDtoToJSONTyped,
 } from './InsuranceRequirementsChangeDto';
+import type { InsuranceCertificateDto } from './InsuranceCertificateDto';
+import {
+    InsuranceCertificateDtoFromJSON,
+    InsuranceCertificateDtoFromJSONTyped,
+    InsuranceCertificateDtoToJSON,
+    InsuranceCertificateDtoToJSONTyped,
+} from './InsuranceCertificateDto';
 
 /**
- * The insurance a lease requires (Art 9.4).
+ * The insurance a lease requires (Art 9.4) and the certificates the homeowner sent.
  * @export
  * @interface InsuranceDto
  */
@@ -46,6 +67,30 @@ export interface InsuranceDto {
      * @memberof InsuranceDto
      */
     requirementsHistory?: Array<InsuranceRequirementsChangeDto>;
+    /**
+     * The latest policy end among the certificates not removed, or null when none is on file.
+     * @type {CalendarDate}
+     * @memberof InsuranceDto
+     */
+    coveredThrough?: CalendarDate | null;
+    /**
+     * When the next certificate is due: the covered-through date, or the lease start with none on file.
+     * @type {CalendarDate}
+     * @memberof InsuranceDto
+     */
+    certificateDueOn?: CalendarDate;
+    /**
+     * 
+     * @type {InsuranceCheckDto}
+     * @memberof InsuranceDto
+     */
+    currentCheck?: InsuranceCheckDto | null;
+    /**
+     * Every certificate recorded, removed ones included, latest policy end first.
+     * @type {Array<InsuranceCertificateDto>}
+     * @memberof InsuranceDto
+     */
+    certificates?: Array<InsuranceCertificateDto>;
 }
 
 /**
@@ -68,6 +113,10 @@ export function InsuranceDtoFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'requiredReplacementValue': json['requiredReplacementValue'] == null ? undefined : json['requiredReplacementValue'],
         'requiredLiabilityPerOccurrence': json['requiredLiabilityPerOccurrence'] == null ? undefined : json['requiredLiabilityPerOccurrence'],
         'requirementsHistory': json['requirementsHistory'] == null ? undefined : ((json['requirementsHistory'] as Array<any>).map(InsuranceRequirementsChangeDtoFromJSON)),
+        'coveredThrough': json['coveredThrough'] == null ? undefined : CalendarDateFromJSON(json['coveredThrough']),
+        'certificateDueOn': json['certificateDueOn'] == null ? undefined : CalendarDateFromJSON(json['certificateDueOn']),
+        'currentCheck': json['currentCheck'] == null ? undefined : InsuranceCheckDtoFromJSON(json['currentCheck']),
+        'certificates': json['certificates'] == null ? undefined : ((json['certificates'] as Array<any>).map(InsuranceCertificateDtoFromJSON)),
     };
 }
 
@@ -85,6 +134,10 @@ export function InsuranceDtoToJSONTyped(value?: InsuranceDto | null, ignoreDiscr
         'requiredReplacementValue': value['requiredReplacementValue'],
         'requiredLiabilityPerOccurrence': value['requiredLiabilityPerOccurrence'],
         'requirementsHistory': value['requirementsHistory'] == null ? undefined : ((value['requirementsHistory'] as Array<any>).map(InsuranceRequirementsChangeDtoToJSON)),
+        'coveredThrough': CalendarDateToJSON(value['coveredThrough']),
+        'certificateDueOn': CalendarDateToJSON(value['certificateDueOn']),
+        'currentCheck': InsuranceCheckDtoToJSON(value['currentCheck']),
+        'certificates': value['certificates'] == null ? undefined : ((value['certificates'] as Array<any>).map(InsuranceCertificateDtoToJSON)),
     };
 }
 

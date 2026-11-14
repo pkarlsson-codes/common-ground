@@ -95,7 +95,9 @@ test('a request without its appraisal waits on Today; staff add it there and den
     notes: null,
   })
 
+  // The lease also has its insurance certificate due, so the row is picked by kind too.
   const todayRow = page.locator('section[aria-labelledby="today-stewardship"] tbody tr', { hasText: homeowner })
+    .filter({ hasText: 'Mortgage request' })
   await expect(async () => {
     await page.reload()
     await expect(todayRow).toContainText('Mortgage request to decide', { timeout: 2000 })

@@ -122,6 +122,61 @@ public class GroundLeaseView
     /// order.
     /// </summary>
     public List<InsuranceRequirementsEntry> InsuranceRequirements { get; set; } = [];
+
+    /// <summary>Gets or sets every insurance certificate recorded, removed ones included, in the order recorded.</summary>
+    public List<InsuranceCertificateEntry> InsuranceCertificates { get; set; } = [];
+}
+
+/// <summary>A certificate of the homeowner's insurance, in a ground lease view.</summary>
+public class InsuranceCertificateEntry
+{
+    /// <summary>Gets or sets the certificate ID.</summary>
+    public string CertificateId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the insurer.</summary>
+    public string Insurer { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the policy number.</summary>
+    public string PolicyNumber { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the first day of the policy period.</summary>
+    public DateOnly PolicyStart { get; set; }
+
+    /// <summary>Gets or sets the last day of the policy period.</summary>
+    public DateOnly PolicyEnd { get; set; }
+
+    /// <summary>Gets or sets the dwelling coverage.</summary>
+    public decimal DwellingCoverage { get; set; }
+
+    /// <summary>Gets or sets the liability coverage per occurrence.</summary>
+    public decimal LiabilityPerOccurrence { get; set; }
+
+    /// <summary>Gets or sets whether the trust is named as additional insured.</summary>
+    public bool TrustNamedAdditionalInsured { get; set; }
+
+    /// <summary>Gets or sets the day the trust received the certificate.</summary>
+    public DateOnly ReceivedOn { get; set; }
+
+    /// <summary>Gets or sets the notes, or null for none.</summary>
+    public string? Notes { get; set; }
+
+    /// <summary>Gets or sets the certificate file in Documents, or null when none was added.</summary>
+    public string? DocumentId { get; set; }
+
+    /// <summary>Gets or sets the user who recorded it.</summary>
+    public string RecordedBy { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets when it was recorded.</summary>
+    public DateTimeOffset RecordedAt { get; set; }
+
+    /// <summary>Gets or sets why it was removed, or null while it counts.</summary>
+    public string? RemovedReason { get; set; }
+
+    /// <summary>Gets or sets the user who removed it.</summary>
+    public string? RemovedBy { get; set; }
+
+    /// <summary>Gets or sets when it was removed.</summary>
+    public DateTimeOffset? RemovedAt { get; set; }
 }
 
 /// <summary>The insurance a lease requires from a day on, in a ground lease view.</summary>

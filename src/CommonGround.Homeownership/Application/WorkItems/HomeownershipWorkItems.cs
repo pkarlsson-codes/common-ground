@@ -1,6 +1,7 @@
 using System.Globalization;
 using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Application.ReadModels;
+using CommonGround.Homeownership.Domain.GroundLeases.Insurance;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.MortgageRequests;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
@@ -9,7 +10,7 @@ using CommonGround.SharedKernel.Domain;
 
 namespace CommonGround.Homeownership.Application.WorkItems;
 
-/// <summary>Derives the work items for purchases and lease fee notices from Homeownership's read models.</summary>
+/// <summary>Derives the work items for purchases and leases from Homeownership's read models.</summary>
 public static class HomeownershipWorkItems
 {
     /// <summary>How far ahead a scheduled closing counts as coming up.</summary>
@@ -80,6 +81,76 @@ public static class HomeownershipWorkItems
 
     /// <summary>Prepare the statement, print the letter, and record it sent.</summary>
     public const string RecordResalePriceStatement = "record-resale-price-statement";
+
+    /// <summary>An active lease whose insurance cover ends within 30 days, has ended, or has no certificate on file (Art 9.4).</summary>
+    public const string InsuranceCertificateDue = "insurance-certificate-due";
+
+    /// <summary>Record the homeowner's insurance certificate.</summary>
+    public const string RecordInsuranceCertificate = "record-insurance-certificate";
+
+    /// <summary>An active lease whose current insurance certificate falls short of what the lease requires.</summary>
+    public const string InsuranceShortOfLease = "insurance-short-of-lease";
+
+    /// <summary>
+    /// The item for an active lease whose next insurance certificate is due: due on the day its cover ends (or the
+    /// lease start with no certificate), waiting from <see cref="InsuranceCover.DueWindowDays"/> before, and gone
+    /// once a certificate with a later policy end is recorded.
+    /// </summary>
+    /// <param name="insurance">The lease and its cover.</param>
+    /// <param name="today">The trust's today, against which the policy end is judged passed.</param>
+    /// <returns>The lease's work item.</returns>
+    public static WorkItem ForInsuranceCertificateDue(LeaseInsurance insurance, DateOnly today)
+    {
+        ArgumentNullException.ThrowIfNull(insurance);
+
+        var usd = CultureInfo.GetCultureInfo("en-US");
+        var cover = insurance.Cover;
+        var detail = cover.CoveredThrough switch
+        {
+            null => "no certificate on file",
+            { } end when end < today => $"policy ended {end.ToString("MMM d, yyyy", usd)}",
+            { } end => $"policy ends {end.ToString("MMM d, yyyy", usd)}",
+        };
+
+        return new WorkItem(
+            WorkArea.Stewardship, InsuranceCertificateDue, "ground-lease", insurance.Lease.Id,
+            insurance.HomeLabel ?? "Home",
+            $"{insurance.Lease.HomeownerFullName}: {detail}",
+            cover.DueOn,
+            cover.DueOn.AddDays(-InsuranceCover.DueWindowDays),
+            [RecordInsuranceCertificate]);
+    }
+
+    /// <summary>
+    /// The item for an active lease whose current insurance certificate falls short: due on the day it was received,
+    /// and gone once a certificate that meets the lease is recorded or the requirements change so this one does.
+    /// </summary>
+    /// <param name="insurance">The lease and its cover; the cover must be short.</param>
+    /// <returns>The lease's work item.</returns>
+    public static WorkItem ForInsuranceShortOfLease(LeaseInsurance insurance)
+    {
+        ArgumentNullException.ThrowIfNull(insurance);
+
+        var coverage = insurance.Cover.Current;
+        var check = insurance.Cover.Check;
+        if (coverage is null || check is null || check.MeetsLease)
+            throw new ArgumentException("The lease's insurance isn't short.", nameof(insurance));
+
+        var shortfalls = check.Shortfalls.Select(s =>
+            s == InsuranceShortfall.DwellingBelowReplacementValue
+                ? $"dwelling {coverage.DwellingCoverage} below the {check.Requirements.ReplacementValue} replacement value"
+            : s == InsuranceShortfall.LiabilityBelowRequired
+                ? $"liability {coverage.LiabilityPerOccurrence} below the {check.Requirements.LiabilityPerOccurrence} required"
+            : "trust not named as additional insured");
+
+        return new WorkItem(
+            WorkArea.Stewardship, InsuranceShortOfLease, "ground-lease", insurance.Lease.Id,
+            insurance.HomeLabel ?? "Home",
+            $"{insurance.Lease.HomeownerFullName}: insurance short of the lease, {string.Join("; ", shortfalls)}",
+            coverage.ReceivedOn,
+            coverage.ReceivedOn,
+            []);
+    }
 
     /// <summary>
     /// The item for a lease whose yearly resale price statement is due: due and waiting since the day it fell due,

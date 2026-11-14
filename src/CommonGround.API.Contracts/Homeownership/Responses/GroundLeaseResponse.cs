@@ -32,14 +32,66 @@ public sealed record GroundLeaseResponse(
     DateOnly RecordedOn,
     string CreatedBy);
 
-/// <summary>The insurance a lease requires (Art 9.4).</summary>
+/// <summary>The insurance a lease requires (Art 9.4) and the certificates the homeowner sent.</summary>
 /// <param name="RequiredReplacementValue">The replacement value required as of the trust's today, or null when not checked.</param>
 /// <param name="RequiredLiabilityPerOccurrence">The liability per occurrence required as of the trust's today, or null when not checked.</param>
 /// <param name="RequirementsHistory">What the lease started with and each change since, latest effective first.</param>
+/// <param name="CoveredThrough">The latest policy end among the certificates not removed, or null when none is on file.</param>
+/// <param name="CertificateDueOn">When the next certificate is due: the covered-through date, or the lease start with none on file.</param>
+/// <param name="CurrentCheck">How the current certificate compares with the lease, or null when none is on file.</param>
+/// <param name="Certificates">Every certificate recorded, removed ones included, latest policy end first.</param>
 public sealed record InsuranceDto(
     decimal? RequiredReplacementValue,
     decimal? RequiredLiabilityPerOccurrence,
-    IReadOnlyList<InsuranceRequirementsChangeDto> RequirementsHistory);
+    IReadOnlyList<InsuranceRequirementsChangeDto> RequirementsHistory,
+    DateOnly? CoveredThrough,
+    DateOnly CertificateDueOn,
+    InsuranceCheckDto? CurrentCheck,
+    IReadOnlyList<InsuranceCertificateDto> Certificates);
+
+/// <summary>How the current certificate compares with the requirements in effect on its policy start.</summary>
+/// <param name="MeetsLease">Whether it meets every requirement that is set.</param>
+/// <param name="Shortfalls">Each way it falls short: DwellingBelowReplacementValue, LiabilityBelowRequired, TrustNotAdditionalInsured.</param>
+/// <param name="ReplacementValue">The replacement value it was checked against, or null when not checked.</param>
+/// <param name="LiabilityPerOccurrence">The liability per occurrence it was checked against, or null when not checked.</param>
+public sealed record InsuranceCheckDto(
+    bool MeetsLease,
+    IReadOnlyList<string> Shortfalls,
+    decimal? ReplacementValue,
+    decimal? LiabilityPerOccurrence);
+
+/// <summary>A certificate of the homeowner's insurance.</summary>
+/// <param name="CertificateId">The certificate ID.</param>
+/// <param name="Insurer">The insurer.</param>
+/// <param name="PolicyNumber">The policy number.</param>
+/// <param name="PolicyStart">The first day of the policy period.</param>
+/// <param name="PolicyEnd">The last day of the policy period.</param>
+/// <param name="DwellingCoverage">The dwelling coverage.</param>
+/// <param name="LiabilityPerOccurrence">The liability coverage per occurrence.</param>
+/// <param name="TrustNamedAdditionalInsured">Whether the trust is named as additional insured.</param>
+/// <param name="ReceivedOn">The day the trust received it.</param>
+/// <param name="Notes">Notes, or null for none.</param>
+/// <param name="DocumentId">The certificate file in Documents, or null when none was added.</param>
+/// <param name="RecordedBy">The user who recorded it.</param>
+/// <param name="RecordedAt">When it was recorded.</param>
+/// <param name="RemovedReason">Why it was removed, or null while it counts.</param>
+/// <param name="RemovedAt">When it was removed, or null while it counts.</param>
+public sealed record InsuranceCertificateDto(
+    string CertificateId,
+    string Insurer,
+    string PolicyNumber,
+    DateOnly PolicyStart,
+    DateOnly PolicyEnd,
+    decimal DwellingCoverage,
+    decimal LiabilityPerOccurrence,
+    bool TrustNamedAdditionalInsured,
+    DateOnly ReceivedOn,
+    string? Notes,
+    string? DocumentId,
+    string RecordedBy,
+    DateTimeOffset RecordedAt,
+    string? RemovedReason,
+    DateTimeOffset? RemovedAt);
 
 /// <summary>The insurance a lease requires from a day on.</summary>
 /// <param name="EffectiveFrom">The first day they apply; the lease start for the ones it started with.</param>

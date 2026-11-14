@@ -30,7 +30,7 @@ public class ResalePriceStatementsTests(ApiFactory factory)
             LastStatementDate = (DateOnly?)null,
             NextDueOn = leaseStart.AddYears(1),
         });
-        (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Items.Should().ContainSingle(i => i.RecordId == leaseId)
+        (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Items.Should().ContainSingle(i => i.RecordId == leaseId && !i.Kind.StartsWith("insurance-", StringComparison.Ordinal))
             .Which.Should().BeEquivalentTo(new
             {
                 Area = "stewardship",
@@ -64,7 +64,7 @@ public class ResalePriceStatementsTests(ApiFactory factory)
         (await client.GetFromJsonAsync<ResalePriceStatementsDueResponse>(
             $"/api/resale-price-statements/due?includeAll=true&search={Uri.EscapeDataString(homeowner)}"))!.Leases
             .Should().ContainSingle().Which.Should().BeEquivalentTo(new { LastStatementDate = (DateOnly?)today, NextDueOn = today.AddYears(1) });
-        (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Items.Should().NotContain(i => i.RecordId == leaseId);
+        (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Items.Should().NotContain(i => i.RecordId == leaseId && !i.Kind.StartsWith("insurance-", StringComparison.Ordinal));
     }
 
     [Fact]

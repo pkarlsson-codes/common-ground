@@ -11237,7 +11237,7 @@
       },
       "InsuranceDto": {
         "type": "object",
-        "description": "The insurance a lease requires (Art 9.4).",
+        "description": "The insurance a lease requires (Art 9.4) and the certificates the homeowner sent.",
         "additionalProperties": false,
         "properties": {
           "requiredReplacementValue": {
@@ -11257,6 +11257,33 @@
             "description": "What the lease started with and each change since, latest effective first.",
             "items": {
               "$ref": "#/components/schemas/InsuranceRequirementsChangeDto"
+            }
+          },
+          "coveredThrough": {
+            "type": "string",
+            "description": "The latest policy end among the certificates not removed, or null when none is on file.",
+            "format": "date",
+            "nullable": true
+          },
+          "certificateDueOn": {
+            "type": "string",
+            "description": "When the next certificate is due: the covered-through date, or the lease start with none on file.",
+            "format": "date"
+          },
+          "currentCheck": {
+            "description": "How the current certificate compares with the lease, or null when none is on file.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/InsuranceCheckDto"
+              }
+            ]
+          },
+          "certificates": {
+            "type": "array",
+            "description": "Every certificate recorded, removed ones included, latest policy end first.",
+            "items": {
+              "$ref": "#/components/schemas/InsuranceCertificateDto"
             }
           }
         }
@@ -11291,6 +11318,114 @@
             "type": "string",
             "description": "When they were set.",
             "format": "date-time"
+          }
+        }
+      },
+      "InsuranceCheckDto": {
+        "type": "object",
+        "description": "How the current certificate compares with the requirements in effect on its policy start.",
+        "additionalProperties": false,
+        "properties": {
+          "meetsLease": {
+            "type": "boolean",
+            "description": "Whether it meets every requirement that is set."
+          },
+          "shortfalls": {
+            "type": "array",
+            "description": "Each way it falls short: DwellingBelowReplacementValue, LiabilityBelowRequired, TrustNotAdditionalInsured.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "replacementValue": {
+            "type": "number",
+            "description": "The replacement value it was checked against, or null when not checked.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "liabilityPerOccurrence": {
+            "type": "number",
+            "description": "The liability per occurrence it was checked against, or null when not checked.",
+            "format": "decimal",
+            "nullable": true
+          }
+        }
+      },
+      "InsuranceCertificateDto": {
+        "type": "object",
+        "description": "A certificate of the homeowner's insurance.",
+        "additionalProperties": false,
+        "properties": {
+          "certificateId": {
+            "type": "string",
+            "description": "The certificate ID."
+          },
+          "insurer": {
+            "type": "string",
+            "description": "The insurer."
+          },
+          "policyNumber": {
+            "type": "string",
+            "description": "The policy number."
+          },
+          "policyStart": {
+            "type": "string",
+            "description": "The first day of the policy period.",
+            "format": "date"
+          },
+          "policyEnd": {
+            "type": "string",
+            "description": "The last day of the policy period.",
+            "format": "date"
+          },
+          "dwellingCoverage": {
+            "type": "number",
+            "description": "The dwelling coverage.",
+            "format": "decimal"
+          },
+          "liabilityPerOccurrence": {
+            "type": "number",
+            "description": "The liability coverage per occurrence.",
+            "format": "decimal"
+          },
+          "trustNamedAdditionalInsured": {
+            "type": "boolean",
+            "description": "Whether the trust is named as additional insured."
+          },
+          "receivedOn": {
+            "type": "string",
+            "description": "The day the trust received it.",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Notes, or null for none.",
+            "nullable": true
+          },
+          "documentId": {
+            "type": "string",
+            "description": "The certificate file in Documents, or null when none was added.",
+            "nullable": true
+          },
+          "recordedBy": {
+            "type": "string",
+            "description": "The user who recorded it."
+          },
+          "recordedAt": {
+            "type": "string",
+            "description": "When it was recorded.",
+            "format": "date-time"
+          },
+          "removedReason": {
+            "type": "string",
+            "description": "Why it was removed, or null while it counts.",
+            "nullable": true
+          },
+          "removedAt": {
+            "type": "string",
+            "description": "When it was removed, or null while it counts.",
+            "format": "date-time",
+            "nullable": true
           }
         }
       },

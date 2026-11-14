@@ -137,6 +137,35 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
             SetAt = e.OccurredAt,
         });
 
+    public static void Apply(GroundLeaseView view, InsuranceCertificateRecorded e) =>
+        view.InsuranceCertificates.Add(new InsuranceCertificateEntry
+        {
+            CertificateId = e.CertificateId,
+            Insurer = e.Insurer,
+            PolicyNumber = e.PolicyNumber,
+            PolicyStart = e.PolicyStart,
+            PolicyEnd = e.PolicyEnd,
+            DwellingCoverage = e.DwellingCoverage.Amount,
+            LiabilityPerOccurrence = e.LiabilityPerOccurrence.Amount,
+            TrustNamedAdditionalInsured = e.TrustNamedAdditionalInsured,
+            ReceivedOn = e.ReceivedOn,
+            Notes = e.Notes,
+            DocumentId = e.DocumentId,
+            RecordedBy = e.RecordedBy,
+            RecordedAt = e.OccurredAt,
+        });
+
+    public static void Apply(GroundLeaseView view, InsuranceCertificateRemoved e)
+    {
+        var certificate = view.InsuranceCertificates.Find(c => c.CertificateId == e.CertificateId);
+        if (certificate is null)
+            return;
+
+        certificate.RemovedReason = e.Reason;
+        certificate.RemovedBy = e.RemovedBy;
+        certificate.RemovedAt = e.OccurredAt;
+    }
+
     public static void Apply(GroundLeaseView view, ResaleStarted e) => view.OpenResaleId = e.ResaleId;
 
     public static void Apply(GroundLeaseView view, ResaleClosed e) => view.OpenResaleId = null;

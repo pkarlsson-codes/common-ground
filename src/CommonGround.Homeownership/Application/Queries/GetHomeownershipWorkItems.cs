@@ -15,7 +15,8 @@ namespace CommonGround.Homeownership.Application.Queries;
 /// Returns Homeownership's work items: one for every open purchase, every lease with a late notice due, every
 /// active lease with an uncured notice of default (unless staff are already working with the homeowner in a
 /// foreclosure prevention case), every pending mortgage request, every approved loan past its expected closing, and
-/// every lease whose yearly resale price statement is due.
+/// every lease whose yearly resale price statement is due, every active lease whose insurance certificate is due, and
+/// every active lease whose current insurance certificate falls short.
 /// </summary>
 /// <param name="Today">The trust's today, against which upcoming closings are judged.</param>
 /// <param name="LeasesWithOpenPreventionCase">The leases with an unresolved foreclosure prevention case, from
@@ -70,6 +71,8 @@ public static class GetHomeownershipWorkItemsHandler
         var statements = (await ResalePriceStatementSchedule.LoadAllAsync(session, cancellationToken).ConfigureAwait(false))
             .Where(s => s.NextDueOn <= request.Today);
 
+        var insurance = await LeaseInsurance.LoadActiveAsync(session, cancellationToken).ConfigureAwait(false);
+
         return new WorkItemList([
             .. workflows.Select(w => HomeownershipWorkItems.ForPurchase(
                 w,
@@ -83,6 +86,10 @@ public static class GetHomeownershipWorkItemsHandler
                 .Select(r => HomeownershipWorkItems.ForMortgageRequest(r, requestLabels.GetValueOrDefault(r.HomeId), request.Today))
                 .OfType<WorkItem>(),
             .. statements.Select(HomeownershipWorkItems.ForResalePriceStatement),
+            .. insurance
+                .Where(i => i.Cover.IsCertificateDueOn(request.Today))
+                .Select(i => HomeownershipWorkItems.ForInsuranceCertificateDue(i, request.Today)),
+            .. insurance.Where(i => i.Cover.IsShort).Select(HomeownershipWorkItems.ForInsuranceShortOfLease),
         ]);
     }
 }

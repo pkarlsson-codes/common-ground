@@ -97,7 +97,7 @@ public class LeaseFeesTests(ApiFactory factory)
         var listed = await client.GetFromJsonAsync<PaginatedResponse<LeaseFeeBalanceResponse>>(
             $"/api/lease-fee-balances?noticeDueOnly=true&search={Uri.EscapeDataString(homeowner)}");
         listed!.Items.Should().ContainSingle();
-        (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Items.Should().ContainSingle(i => i.RecordId == leaseId)
+        (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Items.Should().ContainSingle(i => i.RecordId == leaseId && !i.Kind.StartsWith("insurance-", StringComparison.Ordinal))
             .Which.Should().BeEquivalentTo(new
             {
                 Area = "stewardship",
@@ -118,7 +118,7 @@ public class LeaseFeesTests(ApiFactory factory)
         });
         (await client.GetFromJsonAsync<LeaseFeeNoticesDueResponse>($"/api/lease-fee-notices/due?groundLeaseId={leaseId}"))!
             .Notices.Should().BeEmpty();
-        (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Items.Should().NotContain(i => i.RecordId == leaseId);
+        (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Items.Should().NotContain(i => i.RecordId == leaseId && !i.Kind.StartsWith("insurance-", StringComparison.Ordinal));
     }
 
     [Fact]
