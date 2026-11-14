@@ -1968,6 +1968,115 @@
         }
       }
     },
+    "/api/v1/resale-price-statements/due": {
+      "get": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "GetResalePriceStatementsDue",
+        "parameters": [
+          {
+            "name": "includeAll",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "nullable": true
+            },
+            "x-position": 1
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResalePriceStatementsDueResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resale-price-statements/preview": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "PreviewResalePriceStatements",
+        "requestBody": {
+          "x-name": "PreviewResalePriceStatementsRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewResalePriceStatementsRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResalePriceStatementPreviewsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/lease-fee-notice-policy": {
       "get": {
         "tags": [
@@ -11576,6 +11685,205 @@
             "items": {
               "$ref": "#/components/schemas/LeaseFeeBalanceResponse"
             }
+          }
+        }
+      },
+      "ResalePriceStatementsDueResponse": {
+        "type": "object",
+        "description": "The leases on the yearly resale price statement cycle.",
+        "additionalProperties": false,
+        "properties": {
+          "today": {
+            "type": "string",
+            "description": "The trust's today, the default statement date.",
+            "format": "date"
+          },
+          "letterSignOff": {
+            "type": "string",
+            "description": "The trust's sign-off for letters; empty for none."
+          },
+          "leases": {
+            "type": "array",
+            "description": "The leases, soonest due first.",
+            "items": {
+              "$ref": "#/components/schemas/ResalePriceStatementLeaseResponse"
+            }
+          }
+        }
+      },
+      "ResalePriceStatementLeaseResponse": {
+        "type": "object",
+        "description": "A lease on the yearly statement cycle, with what its statement letter and price need.",
+        "additionalProperties": false,
+        "properties": {
+          "groundLeaseId": {
+            "type": "string",
+            "description": "The lease."
+          },
+          "homeownerFullName": {
+            "type": "string",
+            "description": "The homeowner's name.",
+            "nullable": true
+          },
+          "homeId": {
+            "type": "string",
+            "description": "The home."
+          },
+          "homeLabel": {
+            "type": "string",
+            "description": "The home's label, if known.",
+            "nullable": true
+          },
+          "leaseStartDate": {
+            "type": "string",
+            "description": "The lease start.",
+            "format": "date"
+          },
+          "basePrice": {
+            "type": "number",
+            "description": "What the homeowner paid, which the formula starts from.",
+            "format": "decimal"
+          },
+          "originalAppraisedValue": {
+            "type": "number",
+            "description": "The appraised value at purchase, if known.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "formulaKind": {
+            "type": "string",
+            "description": "AppraisalBased, IndexBased or FixedPercentage."
+          },
+          "appreciationShare": {
+            "type": "number",
+            "description": "The homeowner's share of appreciation (appraisal based).",
+            "format": "decimal",
+            "nullable": true
+          },
+          "indexType": {
+            "type": "string",
+            "description": "The index (index based).",
+            "nullable": true
+          },
+          "baselineIndexValue": {
+            "type": "number",
+            "description": "The index value at purchase (index based).",
+            "format": "decimal",
+            "nullable": true
+          },
+          "annualPercentage": {
+            "type": "number",
+            "description": "The yearly rate (fixed rate).",
+            "format": "decimal",
+            "nullable": true
+          },
+          "improvementsCap": {
+            "type": "number",
+            "description": "The most an improvements credit counts for, if the lease credits any.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "lastStatementDate": {
+            "type": "string",
+            "description": "The latest statement's date, or null when none was sent.",
+            "format": "date",
+            "nullable": true
+          },
+          "nextDueOn": {
+            "type": "string",
+            "description": "When the next statement is due.",
+            "format": "date"
+          }
+        }
+      },
+      "ResalePriceStatementPreviewsResponse": {
+        "type": "object",
+        "description": "The prices of a round preview, one per lease asked for, in the same order.",
+        "additionalProperties": false,
+        "properties": {
+          "leases": {
+            "type": "array",
+            "description": "Each lease's price, or why it can't be worked out.",
+            "items": {
+              "$ref": "#/components/schemas/ResalePriceStatementPreviewResponse"
+            }
+          }
+        }
+      },
+      "ResalePriceStatementPreviewResponse": {
+        "type": "object",
+        "description": "One lease's price in a round preview; exactly one of Price and Error is set.",
+        "additionalProperties": false,
+        "properties": {
+          "groundLeaseId": {
+            "type": "string",
+            "description": "The lease."
+          },
+          "price": {
+            "description": "The price and the figures used, or null when it can't be worked out.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ResalePriceStatementPriceResponse"
+              }
+            ]
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "The business rule that refused the price, such as a missing market value.",
+            "nullable": true
+          },
+          "errorMessage": {
+            "type": "string",
+            "description": "The refusal as staff read it.",
+            "nullable": true
+          }
+        }
+      },
+      "PreviewResalePriceStatementsRequest": {
+        "type": "object",
+        "description": "Request for the resale price statements of a yearly round, without recording them.",
+        "additionalProperties": false,
+        "properties": {
+          "statementDate": {
+            "type": "string",
+            "description": "The day to work every price out on; not in the future.",
+            "format": "date"
+          },
+          "leases": {
+            "type": "array",
+            "description": "The leases and their figures; at most 1000.",
+            "items": {
+              "$ref": "#/components/schemas/ResalePriceStatementLeaseFiguresRequest"
+            }
+          }
+        }
+      },
+      "ResalePriceStatementLeaseFiguresRequest": {
+        "type": "object",
+        "description": "One lease in a round preview, with the figures its formula needs. A round has no improvements credit.",
+        "additionalProperties": false,
+        "properties": {
+          "groundLeaseId": {
+            "type": "string",
+            "description": "The lease."
+          },
+          "marketValue": {
+            "type": "number",
+            "description": "Estimated market value; required for an appraisal-based lease, ignored otherwise.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "marketValueSource": {
+            "type": "string",
+            "description": "Where the market value came from; required with it.",
+            "nullable": true
+          },
+          "indexValue": {
+            "type": "number",
+            "description": "Index value on the statement date; required for an index-based lease, ignored otherwise.",
+            "format": "decimal",
+            "nullable": true
           }
         }
       },

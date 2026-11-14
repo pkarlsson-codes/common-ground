@@ -2,6 +2,7 @@ import type { GroundLeaseResponse, ResalePriceStatementPriceResponse } from '../
 import type { ResalePriceStatementFigures } from '../../hooks/groundLeases'
 import { formatCalendarDate, longDate, parseCalendarDate, type CalendarDate } from '../../lib/calendarDate'
 import { formatPrice } from '../../lib/currency'
+import { FORMULA_KIND_LABELS } from '../../hooks/types'
 
 /** What a statement needs from the lease: the homeowner and the resale formula. */
 export type StatementLease = Pick<
@@ -45,6 +46,14 @@ export function statementFiguresComplete(lease: StatementLease, figures: ResaleP
 }
 
 const percent = (fraction: number) => `${(fraction * 100).toLocaleString('en-US', { maximumFractionDigits: 3 })}%`
+/** "Appraisal Based, 25% of the rise in market value". */
+export function formulaText(lease: StatementLease): string {
+  const kind = FORMULA_KIND_LABELS[lease.formulaKind ?? ''] ?? lease.formulaKind ?? ''
+  if (lease.formulaKind === 'AppraisalBased') return `${kind}, ${percent(lease.appreciationShare ?? 0)} of the rise in market value`
+  if (lease.formulaKind === 'IndexBased') return `${kind}, ${lease.indexType ?? 'index'}`
+  return `${kind}, ${percent(lease.annualPercentage ?? 0)} a year`
+}
+
 const indexNumber = (n: number) => n.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 4 })
 const longDay = (date: CalendarDate) => formatCalendarDate(date, longDate)
 

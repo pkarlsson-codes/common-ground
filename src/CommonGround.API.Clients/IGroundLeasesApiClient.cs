@@ -181,4 +181,17 @@ public interface IGroundLeasesApiClient
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task that completes when it is recorded.</returns>
     Task RecordResalePriceStatementAsync(string groundLeaseId, RecordResalePriceStatementRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Gets the leases on the yearly resale price statement cycle.</summary>
+    /// <param name="includeAll">True for every lease on the cycle; false for those due today or earlier.</param>
+    /// <param name="search">Text to match against the homeowner name or home label, or null.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The leases, with the trust's today and letter sign-off.</returns>
+    Task<ResalePriceStatementsDueResponse> GetResalePriceStatementsDueAsync(bool includeAll, string? search, CancellationToken cancellationToken);
+
+    /// <summary>Works out the resale price statements of a round without recording them.</summary>
+    /// <param name="request">The statement date and each lease's figures.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>Each lease's price, or why it can't be worked out.</returns>
+    Task<ResalePriceStatementPreviewsResponse> PreviewResalePriceStatementsAsync(PreviewResalePriceStatementsRequest request, CancellationToken cancellationToken);
 }

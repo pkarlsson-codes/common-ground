@@ -24,6 +24,7 @@ import StewardshipPage from './pages/stewardship/StewardshipPage'
 import LeaseFeeNoticesPrintPage from './pages/lease-fee-notices/LeaseFeeNoticesPrintPage'
 import MortgageRequestLetterPage from './pages/ground-leases/MortgageRequestLetterPage'
 import ResalePriceStatementLetterPage from './pages/ground-leases/ResalePriceStatementLetterPage'
+import ResalePriceStatementsPrintPage from './pages/stewardship/ResalePriceStatementsPrintPage'
 import TrustPolicyPage from './pages/trust-policy/TrustPolicyPage'
 import IncomeLimitsPage from './pages/income-limits/IncomeLimitsPage'
 import FunderReportPage from './pages/reports/FunderReportPage'
@@ -132,6 +133,7 @@ export default function App() {
               <Route path="/lease-fee-notices/print" element={<LeaseFeeNoticesPrintPage />} />
               <Route path="/mortgage-requests/:mortgageRequestId/letter" element={<MortgageRequestLetterPage />} />
               <Route path="/ground-leases/:groundLeaseId/resale-price-statement" element={<ResalePriceStatementLetterPage />} />
+              <Route path="/resale-price-statements/print" element={<ResalePriceStatementsPrintPage />} />
             </Route>
           </Route>
         </Routes>

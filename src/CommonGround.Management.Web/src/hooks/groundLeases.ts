@@ -572,3 +572,41 @@ export function useRecordResalePriceStatement() {
     },
   })
 }
+
+/** The leases on the yearly resale price statement cycle: those due today or earlier, or all of them. */
+export function useResalePriceStatementsDue(includeAll: boolean, search: string) {
+  return useQuery({
+    queryKey: ['resale-price-statements-due', includeAll, search],
+    queryFn: () => api.getResalePriceStatementsDue({ includeAll, search: search || undefined }),
+  })
+}
+
+/** One lease's figures in a round. A round has no improvements credit. */
+export interface RoundLeaseFigures {
+  groundLeaseId: string
+  figures: ResalePriceStatementFigures
+}
+
+/** Every lease's resale price in a round, in one request; each lease gets its price or why it can't be worked out. */
+export function useResalePriceStatementPreviews(
+  statementDate: CalendarDate | null,
+  leases: RoundLeaseFigures[],
+  enabled: boolean,
+) {
+  return useQuery({
+    queryKey: ['resale-price-statement-previews', statementDate, leases],
+    queryFn: () => api.previewResalePriceStatements({
+      previewResalePriceStatementsRequest: {
+        statementDate: statementDate!,
+        leases: leases.map(({ groundLeaseId, figures }) => ({
+          groundLeaseId,
+          marketValue: figures.marketValue,
+          marketValueSource: figures.marketValueSource.trim() || null,
+          indexValue: figures.indexValue,
+        })),
+      },
+    }),
+    enabled: enabled && !!statementDate && leases.length > 0,
+    retry: false,
+  })
+}

@@ -64,7 +64,7 @@ const KINDS: Record<string, { page: string; area: TodayArea }> = {
   'lease-default-uncured': { page: '/stewardship', area: 'stewardship' },
   'mortgage-request-pending': { page: '/ground-leases', area: 'stewardship' },
   'mortgage-loan-closing-unrecorded': { page: '/ground-leases', area: 'stewardship' },
-  'resale-price-statement-due': { page: '/ground-leases', area: 'stewardship' },
+  'resale-price-statement-due': { page: '/stewardship', area: 'stewardship' },
   'document-expiring': { page: '/documents', area: 'records' },
   'income-limits-missing': { page: '/income-limits', area: 'selections' },
   'income-limits-stale': { page: '/income-limits', area: 'selections' },

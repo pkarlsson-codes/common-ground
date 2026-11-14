@@ -179,6 +179,29 @@ public static class GroundLeasesEndpoints
         return Results.Ok(result);
     }
 
+    [WolverineGet("/api/v1/resale-price-statements/due")]
+    [ProducesResponseType<ResalePriceStatementsDueResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetResalePriceStatementsDue(
+        [FromQuery] bool? includeAll,
+        [FromQuery] string? search,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await client.GetResalePriceStatementsDueAsync(includeAll ?? false, search, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+
+    [WolverinePost("/api/v1/resale-price-statements/preview")]
+    [ProducesResponseType<ResalePriceStatementPreviewsResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> PreviewResalePriceStatements(
+        PreviewResalePriceStatementsRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Results.Ok(await client.PreviewResalePriceStatementsAsync(request, cancellationToken).ConfigureAwait(false));
+    }
+
     [WolverineGet("/api/v1/lease-fee-notice-policy")]
     [ProducesResponseType<LeaseFeeNoticePolicyResponse>(StatusCodes.Status200OK)]
     public static async Task<IResult> GetLeaseFeeNoticePolicy(

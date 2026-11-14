@@ -13,7 +13,7 @@ import {
   type ResalePriceStatementFigures,
 } from '../../hooks/groundLeases'
 import { useHome } from '../../hooks/homes'
-import { FORMULA_KIND_LABELS } from '../../hooks/types'
+import { useSettled } from '../../hooks/useSettled'
 import { useToast } from '../../hooks/useToast'
 import { trustToday, type CalendarDate } from '../../lib/calendarDate'
 import { formatPrice } from '../../lib/currency'
@@ -21,6 +21,7 @@ import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage
 import {
   cannotPriceReason,
   emptyStatementFigures,
+  formulaText,
   resalePriceStatementLetterPath,
   statementFiguresComplete,
   statementWorking,
@@ -31,27 +32,7 @@ interface Props {
   onClose: () => void
 }
 
-const percent = (fraction: number) => `${(fraction * 100).toLocaleString('en-US', { maximumFractionDigits: 3 })}%`
-
-/** "Appraisal Based, 25% of the rise in market value". */
-function formulaText(lease: GroundLeaseResponse): string {
-  const kind = FORMULA_KIND_LABELS[lease.formulaKind ?? ''] ?? lease.formulaKind ?? ''
-  if (lease.formulaKind === 'AppraisalBased') return `${kind}, ${percent(lease.appreciationShare ?? 0)} of the rise in market value`
-  if (lease.formulaKind === 'IndexBased') return `${kind}, ${lease.indexType ?? 'index'}`
-  return `${kind}, ${percent(lease.annualPercentage ?? 0)} a year`
-}
-
 const moneyOrNull = (value: string) => (value === '' ? null : Math.max(0, parseFloat(value) || 0))
-
-/** Waits until the value has stopped changing for a moment, so typing a figure asks for one price, not one per key. */
-function useSettled<T>(value: T, ms = 300): T {
-  const [settled, setSettled] = useState(value)
-  useEffect(() => {
-    const timer = setTimeout(() => setSettled(value), ms)
-    return () => clearTimeout(timer)
-  }, [value, ms])
-  return settled
-}
 
 /**
  * Works out one lease's resale price on a statement date (Ch 23, Disclosure), prints the letter, and records it sent.

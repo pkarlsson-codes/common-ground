@@ -27,3 +27,21 @@ public sealed record RecordResalePriceStatementRequest(
     decimal? IndexValue,
     decimal? ImprovementsCredit,
     string Delivery);
+
+/// <summary>Request for the resale price statements of a yearly round, without recording them.</summary>
+/// <param name="StatementDate">The day to work every price out on; not in the future.</param>
+/// <param name="Leases">The leases and their figures; at most 1000.</param>
+public sealed record PreviewResalePriceStatementsRequest(
+    DateOnly StatementDate,
+    IReadOnlyList<ResalePriceStatementLeaseFiguresRequest> Leases);
+
+/// <summary>One lease in a round preview, with the figures its formula needs. A round has no improvements credit.</summary>
+/// <param name="GroundLeaseId">The lease.</param>
+/// <param name="MarketValue">Estimated market value; required for an appraisal-based lease, ignored otherwise.</param>
+/// <param name="MarketValueSource">Where the market value came from; required with it.</param>
+/// <param name="IndexValue">Index value on the statement date; required for an index-based lease, ignored otherwise.</param>
+public sealed record ResalePriceStatementLeaseFiguresRequest(
+    string GroundLeaseId,
+    decimal? MarketValue,
+    string? MarketValueSource,
+    decimal? IndexValue);

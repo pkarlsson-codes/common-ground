@@ -1,11 +1,13 @@
 using CommonGround.API.Contracts.Homeownership.Requests;
 using CommonGround.API.Contracts.Homeownership.Responses;
 using CommonGround.API.Infrastructure.Auth;
+using CommonGround.API.Infrastructure.ExceptionHandling;
 using CommonGround.Homeownership.Application.Commands;
 using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
+using CommonGround.SharedKernel.Domain.Exceptions;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
@@ -15,6 +17,9 @@ namespace CommonGround.API.Homeownership;
 
 public static class ResalePriceStatementsEndpoints
 {
+    /// <summary>The most leases one round preview prices.</summary>
+    internal const int MaxRoundPreviewLeases = 1000;
+
     [WolverinePost("/api/ground-leases/{groundLeaseId}/resale-price-statements/preview")]
     public static async Task<IResult> PreviewResalePriceStatement(
         string groundLeaseId,
@@ -32,14 +37,45 @@ public static class ResalePriceStatementsEndpoints
                 new ResalePriceStatementFigures(request.MarketValue, request.MarketValueSource, request.IndexValue, request.ImprovementsCredit)),
             cancellationToken);
 
-        return Results.Ok(new ResalePriceStatementPriceResponse(
-            price.StatementDate,
-            price.YearsOwned,
-            price.MarketValue?.Amount,
-            price.MarketValueSource,
-            price.IndexValue,
-            price.ImprovementsCredit?.Amount,
-            price.Price.Amount));
+        return Results.Ok(ToResponse(price));
+    }
+
+    [WolverinePost("/api/resale-price-statements/preview")]
+    public static async Task<IResult> PreviewResalePriceStatements(
+        PreviewResalePriceStatementsRequest request,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (request.Leases.Count > MaxRoundPreviewLeases)
+        {
+            return Results.BadRequest($"A round preview prices at most {MaxRoundPreviewLeases} leases.");
+        }
+
+        // One lease at a time with the single-lease query, so a round prices each lease exactly as its own statement
+        // would. A lease that can't be priced gets its refusal; the rest still get prices.
+        var results = new List<ResalePriceStatementPreviewResponse>(request.Leases.Count);
+        foreach (var lease in request.Leases)
+        {
+            try
+            {
+                var price = await bus.InvokeForTenantAsync<ResalePriceStatementPrice>(bus.TenantId!,
+                    new GetResalePriceStatementPreview(
+                        GroundLeaseId.Create(lease.GroundLeaseId),
+                        request.StatementDate,
+                        new ResalePriceStatementFigures(lease.MarketValue, lease.MarketValueSource, lease.IndexValue, null)),
+                    cancellationToken);
+                results.Add(new ResalePriceStatementPreviewResponse(lease.GroundLeaseId, ToResponse(price), null, null));
+            }
+            catch (BusinessRuleViolationException refusal)
+            {
+                results.Add(new ResalePriceStatementPreviewResponse(
+                    lease.GroundLeaseId, null, refusal.Code, DomainExceptionHandler.GetUserFacingMessage(refusal)));
+            }
+        }
+
+        return Results.Ok(new ResalePriceStatementPreviewsResponse(results));
     }
 
     [WolverinePost("/api/ground-leases/{groundLeaseId}/resale-price-statements")]
@@ -99,4 +135,13 @@ public static class ResalePriceStatementsEndpoints
 
         return Results.Ok(new ResalePriceStatementsDueResponse(result.Today, result.LetterSignOff, leases));
     }
+
+    private static ResalePriceStatementPriceResponse ToResponse(ResalePriceStatementPrice price) => new(
+        price.StatementDate,
+        price.YearsOwned,
+        price.MarketValue?.Amount,
+        price.MarketValueSource,
+        price.IndexValue,
+        price.ImprovementsCredit?.Amount,
+        price.Price.Amount);
 }

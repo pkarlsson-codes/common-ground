@@ -58,3 +58,19 @@ public sealed record ResalePriceStatementLeaseResponse(
     decimal? ImprovementsCap,
     DateOnly? LastStatementDate,
     DateOnly NextDueOn);
+
+/// <summary>The prices of a round preview, one per lease asked for, in the same order.</summary>
+/// <param name="Leases">Each lease's price, or why it can't be worked out.</param>
+public sealed record ResalePriceStatementPreviewsResponse(
+    IReadOnlyList<ResalePriceStatementPreviewResponse> Leases);
+
+/// <summary>One lease's price in a round preview; exactly one of Price and Error is set.</summary>
+/// <param name="GroundLeaseId">The lease.</param>
+/// <param name="Price">The price and the figures used, or null when it can't be worked out.</param>
+/// <param name="ErrorCode">The business rule that refused the price, such as a missing market value.</param>
+/// <param name="ErrorMessage">The refusal as staff read it.</param>
+public sealed record ResalePriceStatementPreviewResponse(
+    string GroundLeaseId,
+    ResalePriceStatementPriceResponse? Price,
+    string? ErrorCode,
+    string? ErrorMessage);

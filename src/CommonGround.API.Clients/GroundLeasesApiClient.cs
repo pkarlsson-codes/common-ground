@@ -210,4 +210,23 @@ public sealed class GroundLeasesApiClient(
         ArgumentNullException.ThrowIfNull(request);
         await PostAsync($"api/ground-leases/{groundLeaseId}/resale-price-statements", request, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task<ResalePriceStatementsDueResponse> GetResalePriceStatementsDueAsync(bool includeAll, string? search, CancellationToken cancellationToken)
+    {
+        var query = $"?includeAll={(includeAll ? "true" : "false")}";
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query += $"&search={Uri.EscapeDataString(search)}";
+        }
+
+        return await GetAsync<ResalePriceStatementsDueResponse>($"api/resale-price-statements/due{query}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<ResalePriceStatementPreviewsResponse> PreviewResalePriceStatementsAsync(PreviewResalePriceStatementsRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return await PostAsync<PreviewResalePriceStatementsRequest, ResalePriceStatementPreviewsResponse>("api/resale-price-statements/preview", request, cancellationToken).ConfigureAwait(false);
+    }
 }

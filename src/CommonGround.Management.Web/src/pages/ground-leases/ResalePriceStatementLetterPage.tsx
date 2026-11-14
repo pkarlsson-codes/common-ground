@@ -2,7 +2,11 @@ import { useEffect, useRef } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { useGroundLease, useLeaseFeeNoticePolicy, useResalePriceStatementPreview } from '../../hooks/groundLeases'
 import { useHome } from '../../hooks/homes'
-import { parseResalePriceStatementLetterParams, resalePriceStatementLetter } from './resalePriceStatementLetter'
+import {
+  parseResalePriceStatementLetterParams,
+  resalePriceStatementLetter,
+  type ResalePriceStatementLetter,
+} from './resalePriceStatementLetter'
 
 /**
  * One lease's resale price statement letter, worked out from the statement date and figures in the address. Opens
@@ -49,25 +53,32 @@ export default function ResalePriceStatementLetterPage() {
 
       {letter && (
         <div className="letters">
-          <article className="notice-letter" aria-label={letter.heading}>
-            <p>{letter.date}</p>
-            <div className="notice-letter__lines">
-              {letter.recipient.map(line => <div key={line}>{line}</div>)}
-            </div>
-            <div className="notice-letter__heading">{letter.heading}</div>
-            <p>{letter.greeting}</p>
-            <p>{letter.priceSentence}</p>
-            <ul>
-              {letter.working.map(line => <li key={line}>{line}</li>)}
-            </ul>
-            <p>{letter.closing}</p>
-            <p>Sincerely,</p>
-            <div className="notice-letter__lines">
-              {letter.signOff.map(line => <div key={line}>{line}</div>)}
-            </div>
-          </article>
+          <ResalePriceStatementLetterArticle letter={letter} />
         </div>
       )}
     </div>
+  )
+}
+
+/** One printed resale price statement letter. */
+export function ResalePriceStatementLetterArticle({ letter, label }: { letter: ResalePriceStatementLetter; label?: string }) {
+  return (
+    <article className="notice-letter" aria-label={label ?? letter.heading}>
+      <p>{letter.date}</p>
+      <div className="notice-letter__lines">
+        {letter.recipient.map(line => <div key={line}>{line}</div>)}
+      </div>
+      <div className="notice-letter__heading">{letter.heading}</div>
+      <p>{letter.greeting}</p>
+      <p>{letter.priceSentence}</p>
+      <ul>
+        {letter.working.map(line => <li key={line}>{line}</li>)}
+      </ul>
+      <p>{letter.closing}</p>
+      <p>Sincerely,</p>
+      <div className="notice-letter__lines">
+        {letter.signOff.map(line => <div key={line}>{line}</div>)}
+      </div>
+    </article>
   )
 }

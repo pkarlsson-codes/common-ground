@@ -5,8 +5,9 @@ import type { ReactNode } from 'react'
 import StewardshipCasesTab from './StewardshipCasesTab'
 import ForeclosurePreventionTab, { type OpenCaseRequest } from './ForeclosurePreventionTab'
 import LeaseFeesTab from './LeaseFeesTab'
+import ResalePricesTab from './ResalePricesTab'
 
-type TabId = 'leases' | 'fpc' | 'fees'
+type TabId = 'leases' | 'fpc' | 'fees' | 'resale'
 
 interface Tab {
   id: TabId
@@ -17,6 +18,7 @@ const TABS: Tab[] = [
   { id: 'leases', label: 'Lease Stewardship' },
   { id: 'fpc', label: 'Foreclosure Prevention' },
   { id: 'fees', label: 'Lease Fees' },
+  { id: 'resale', label: 'Resale Prices' },
 ]
 
 function TabBar({
@@ -86,6 +88,7 @@ export default function StewardshipPage() {
     leases: <StewardshipCasesTab />,
     fpc: <ForeclosurePreventionTab openRequest={fpcRequest} />,
     fees: <LeaseFeesTab />,
+    resale: <ResalePricesTab />,
   }
 
   return (

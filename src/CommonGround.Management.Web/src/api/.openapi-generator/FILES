@@ -159,6 +159,7 @@ models/PortfolioImportRequest.ts
 models/PortfolioImportResponse.ts
 models/PreviewResalePriceRequest.ts
 models/PreviewResalePriceStatementRequest.ts
+models/PreviewResalePriceStatementsRequest.ts
 models/ProblemDetails.ts
 models/PropertyInspectionResponse.ts
 models/PurchaseBoardCardResponse.ts
@@ -209,8 +210,13 @@ models/RegisterLandParcelResponse.ts
 models/RequestForbearanceRequest.ts
 models/ResalePriceResponse.ts
 models/ResalePriceStatementDto.ts
+models/ResalePriceStatementLeaseFiguresRequest.ts
+models/ResalePriceStatementLeaseResponse.ts
+models/ResalePriceStatementPreviewResponse.ts
+models/ResalePriceStatementPreviewsResponse.ts
 models/ResalePriceStatementPriceResponse.ts
 models/ResalePriceStatementsDto.ts
+models/ResalePriceStatementsDueResponse.ts
 models/ResaleResponse.ts
 models/ResolveForeclosurePreventionCaseRequest.ts
 models/ScheduleClosingRequest.ts

@@ -30,6 +30,7 @@ import type {
   PaginatedResponseOfGroundLeaseListItemResponse,
   PaginatedResponseOfLeaseFeeBalanceResponse,
   PreviewResalePriceStatementRequest,
+  PreviewResalePriceStatementsRequest,
   ProblemDetails,
   ReceiveMortgageRequestRequest,
   ReceiveMortgageRequestResponse,
@@ -44,7 +45,9 @@ import type {
   RecordPermittedMortgageResponse,
   RecordResalePriceStatementRequest,
   RecordStewardshipCheckInRequest,
+  ResalePriceStatementPreviewsResponse,
   ResalePriceStatementPriceResponse,
+  ResalePriceStatementsDueResponse,
   SetLeaseFeeNoticePolicyRequest,
   VoidLeaseFeePaymentRequest,
   WaiveLeaseFeeInterestRequest,
@@ -80,6 +83,8 @@ import {
     PaginatedResponseOfLeaseFeeBalanceResponseToJSON,
     PreviewResalePriceStatementRequestFromJSON,
     PreviewResalePriceStatementRequestToJSON,
+    PreviewResalePriceStatementsRequestFromJSON,
+    PreviewResalePriceStatementsRequestToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
     ReceiveMortgageRequestRequestFromJSON,
@@ -108,8 +113,12 @@ import {
     RecordResalePriceStatementRequestToJSON,
     RecordStewardshipCheckInRequestFromJSON,
     RecordStewardshipCheckInRequestToJSON,
+    ResalePriceStatementPreviewsResponseFromJSON,
+    ResalePriceStatementPreviewsResponseToJSON,
     ResalePriceStatementPriceResponseFromJSON,
     ResalePriceStatementPriceResponseToJSON,
+    ResalePriceStatementsDueResponseFromJSON,
+    ResalePriceStatementsDueResponseToJSON,
     SetLeaseFeeNoticePolicyRequestFromJSON,
     SetLeaseFeeNoticePolicyRequestToJSON,
     VoidLeaseFeePaymentRequestFromJSON,
@@ -180,6 +189,11 @@ export interface GetMortgageRequestsRequest {
     groundLeaseId: string;
 }
 
+export interface GetResalePriceStatementsDueRequest {
+    includeAll?: boolean | null;
+    search?: string | null;
+}
+
 export interface MarkPermittedMortgagePaidOffOperationRequest {
     groundLeaseId: string;
     mortgageId: string;
@@ -189,6 +203,10 @@ export interface MarkPermittedMortgagePaidOffOperationRequest {
 export interface PreviewResalePriceStatementOperationRequest {
     groundLeaseId: string;
     previewResalePriceStatementRequest: PreviewResalePriceStatementRequest;
+}
+
+export interface PreviewResalePriceStatementsOperationRequest {
+    previewResalePriceStatementsRequest: PreviewResalePriceStatementsRequest;
 }
 
 export interface ReceiveMortgageRequestOperationRequest {
@@ -429,6 +447,20 @@ export interface GroundLeasesApiInterface {
 
     /**
      * 
+     * @param {boolean} [includeAll] 
+     * @param {string} [search] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    getResalePriceStatementsDueRaw(requestParameters: GetResalePriceStatementsDueRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResalePriceStatementsDueResponse>>;
+
+    /**
+     */
+    getResalePriceStatementsDue(requestParameters: GetResalePriceStatementsDueRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResalePriceStatementsDueResponse>;
+
+    /**
+     * 
      * @param {string} groundLeaseId 
      * @param {string} mortgageId 
      * @param {MarkPermittedMortgagePaidOffRequest} markPermittedMortgagePaidOffRequest 
@@ -455,6 +487,19 @@ export interface GroundLeasesApiInterface {
     /**
      */
     previewResalePriceStatement(requestParameters: PreviewResalePriceStatementOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResalePriceStatementPriceResponse>;
+
+    /**
+     * 
+     * @param {PreviewResalePriceStatementsRequest} previewResalePriceStatementsRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    previewResalePriceStatementsRaw(requestParameters: PreviewResalePriceStatementsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResalePriceStatementPreviewsResponse>>;
+
+    /**
+     */
+    previewResalePriceStatements(requestParameters: PreviewResalePriceStatementsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResalePriceStatementPreviewsResponse>;
 
     /**
      * 
@@ -1147,6 +1192,41 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
 
     /**
      */
+    async getResalePriceStatementsDueRaw(requestParameters: GetResalePriceStatementsDueRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResalePriceStatementsDueResponse>> {
+        const queryParameters: any = {};
+
+        if (requestParameters['includeAll'] != null) {
+            queryParameters['includeAll'] = requestParameters['includeAll'];
+        }
+
+        if (requestParameters['search'] != null) {
+            queryParameters['search'] = requestParameters['search'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/resale-price-statements/due`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ResalePriceStatementsDueResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getResalePriceStatementsDue(requestParameters: GetResalePriceStatementsDueRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResalePriceStatementsDueResponse> {
+        const response = await this.getResalePriceStatementsDueRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
     async markPermittedMortgagePaidOffRaw(requestParameters: MarkPermittedMortgagePaidOffOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['groundLeaseId'] == null) {
             throw new runtime.RequiredError(
@@ -1247,6 +1327,43 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
      */
     async previewResalePriceStatement(requestParameters: PreviewResalePriceStatementOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResalePriceStatementPriceResponse> {
         const response = await this.previewResalePriceStatementRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async previewResalePriceStatementsRaw(requestParameters: PreviewResalePriceStatementsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResalePriceStatementPreviewsResponse>> {
+        if (requestParameters['previewResalePriceStatementsRequest'] == null) {
+            throw new runtime.RequiredError(
+                'previewResalePriceStatementsRequest',
+                'Required parameter "previewResalePriceStatementsRequest" was null or undefined when calling previewResalePriceStatements().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/resale-price-statements/preview`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: PreviewResalePriceStatementsRequestToJSON(requestParameters['previewResalePriceStatementsRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ResalePriceStatementPreviewsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async previewResalePriceStatements(requestParameters: PreviewResalePriceStatementsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResalePriceStatementPreviewsResponse> {
+        const response = await this.previewResalePriceStatementsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

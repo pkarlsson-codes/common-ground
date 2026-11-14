@@ -108,6 +108,31 @@ public class ResalePriceStatementsTests(ApiFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
+    [Fact]
+    public async Task PreviewingARound_PricesEachLeaseAndGivesTheRefusalForOneThatCantBePriced()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var today = (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Today;
+        var priced = await CreateIndexLease(client, UniqueName(), today.AddYears(-2));
+        var missingIndex = await CreateIndexLease(client, UniqueName(), today.AddYears(-2));
+
+        var response = await client.PostAsJsonAsync("/api/resale-price-statements/preview",
+            new PreviewResalePriceStatementsRequest(today,
+            [
+                new ResalePriceStatementLeaseFiguresRequest(priced, null, null, 319.0m),
+                new ResalePriceStatementLeaseFiguresRequest(missingIndex, null, null, null),
+            ]));
+
+        response.EnsureSuccessStatusCode();
+        var leases = (await response.Content.ReadFromJsonAsync<ResalePriceStatementPreviewsResponse>())!.Leases;
+        leases.Select(l => l.GroundLeaseId).Should().Equal(priced, missingIndex);
+        leases[0].Price!.Price.Should().Be(198_000m);
+        leases[0].ErrorCode.Should().BeNull();
+        leases[1].Price.Should().BeNull();
+        leases[1].ErrorCode.Should().Be("homeownership.ground_lease.record_resale_price_statement.index_value_required");
+        leases[1].ErrorMessage.Should().Be("Index value on the statement date is required.");
+    }
+
     private static string UniqueName() =>
         "Dana " + string.Concat(Guid.NewGuid().ToString("N").Where(char.IsLetter).Take(8).Select(char.ToUpperInvariant).Select((c, i) => i == 0 ? c : char.ToLowerInvariant(c)));
 
