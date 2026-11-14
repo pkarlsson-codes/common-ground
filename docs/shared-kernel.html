@@ -35,25 +35,30 @@
 
 <section id="layout">
   <h2>2. Project layout</h2>
-  <table>
-    <thead><tr><th>Folder</th><th>Contents</th></tr></thead>
-    <tbody>
-      <tr><td><code>Domain/</code></td><td><code>Entity</code>, <code>AggregateRoot</code>, <code>ValueObject</code>, <code>Enumeration</code>, <code>IEntityId</code>, <code>TrustId</code>, <code>UserId</code>, and the shared value objects.</td></tr>
-      <tr><td><code>Domain/Events/</code></td><td><code>DomainEvent</code>, <code>IDomainEvent</code>, <code>IntegrationEvent</code>, and <code>IncomeLimitLevelEntry</code> (the stored shape of one income limit level).</td></tr>
-      <tr><td><code>Domain/Exceptions/</code></td><td><code>DomainException</code>, <code>BusinessRuleViolationException</code>, <code>AggregateNotFoundException</code>, <code>ForbiddenException</code>.</td></tr>
-      <tr><td><code>Domain/Errors/</code></td><td><code>BusinessRuleViolation</code> factories for the shared value objects (codes starting <code>shared.</code>).</td></tr>
-      <tr><td><code>Domain/Services/</code></td><td><code>ITimeProvider</code>, <code>TimeProviderContext</code>, <code>ITrustClock</code>.</td></tr>
-      <tr><td><code>Domain/Geography/</code></td><td><code>Coordinates</code>, <code>GeographicArea</code>. No callers; see <a href="#unused">section 12</a>.</td></tr>
-      <tr><td><code>Application/WorkItems/</code></td><td><code>WorkItem</code>, <code>WorkArea</code>, <code>WorkItemList</code>.</td></tr>
-      <tr><td><code>Extensions/</code></td><td><code>AddMartenServices</code>, <code>stream.Decide</code>, <code>LoadAggregateAsync</code>.</td></tr>
-      <tr><td><code>Infrastructure/API/</code></td><td><code>BaseApiClient</code>, <code>PaginatedResponse</code>, <code>QueryStringBuilder</code>, <code>UpstreamApiException</code>, correlation ID middleware.</td></tr>
-      <tr><td><code>Infrastructure/Messaging/</code></td><td><code>EventClockMiddleware</code>.</td></tr>
-      <tr><td><code>Infrastructure/Querying/</code></td><td><code>PageSpec</code>, <code>PaginationQuerySpecV2</code>, sort and cursor helpers.</td></tr>
-      <tr><td><code>Infrastructure/Seeding/</code></td><td><code>IDevelopmentSeeder</code>, <code>SeedRun</code>, <code>SeedDate</code>, <code>SeedClock</code>, <code>PropagationWaiter</code>.</td></tr>
-      <tr><td><code>Infrastructure/Services/</code></td><td><code>SystemTimeProvider</code>, <code>ControllableTimeProvider</code>.</td></tr>
-      <tr><td><code>Specifications/</code></td><td><code>Specification&lt;T&gt;</code>: a named rule on a read model, used in queries (<code>query.Matching(spec)</code>) and in memory (<code>spec.IsSatisfiedBy(view)</code>). Build a rule from the domain's own check, such as <code>WorkflowPhase.IsTerminal</code>, not from a hand-written list of phase names. Example: <code>PurchaseWorkflowInProgress&lt;TView&gt;</code> in Homeownership.</td></tr>
-    </tbody>
-  </table>
+<pre class="tree"><code>src/CommonGround.SharedKernel/
+├── Domain/                      <span class="note">Entity, AggregateRoot, ValueObject, Enumeration, IEntityId,</span>
+│   │                            <span class="note">TrustId, UserId, shared value objects</span>
+│   ├── Events/                  <span class="note">DomainEvent, IDomainEvent, IntegrationEvent,</span>
+│   │                            <span class="note">IncomeLimitLevelEntry</span>
+│   ├── Exceptions/              <span class="note">DomainException, BusinessRuleViolationException,</span>
+│   │                            <span class="note">AggregateNotFoundException, ForbiddenException</span>
+│   ├── Errors/                  <span class="note">BusinessRuleViolation factories for shared value objects</span>
+│   │                            <span class="note">(codes start shared.)</span>
+│   ├── Services/                <span class="note">ITimeProvider, TimeProviderContext, ITrustClock</span>
+│   └── Geography/               <span class="note">Coordinates, GeographicArea (no callers, see section 12)</span>
+├── Application/
+│   └── WorkItems/               <span class="note">WorkItem, WorkArea, WorkItemList</span>
+├── Extensions/                  <span class="note">AddMartenServices, stream.Decide, LoadAggregateAsync</span>
+├── Infrastructure/
+│   ├── API/                     <span class="note">BaseApiClient, PaginatedResponse, QueryStringBuilder,</span>
+│   │                            <span class="note">UpstreamApiException, correlation ID middleware</span>
+│   ├── Messaging/               <span class="note">EventClockMiddleware</span>
+│   ├── Querying/                <span class="note">PageSpec, PaginationQuerySpecV2, sort and cursor helpers</span>
+│   ├── Seeding/                 <span class="note">IDevelopmentSeeder, SeedRun, SeedDate, SeedClock,</span>
+│   │                            <span class="note">PropagationWaiter</span>
+│   └── Services/                <span class="note">SystemTimeProvider, ControllableTimeProvider</span>
+└── Specifications/              <span class="note">Specification&lt;T&gt;</span></code></pre>
+  <p><code>Specification&lt;T&gt;</code> is a named rule on a read model, used in queries (<code>query.Matching(spec)</code>) and in memory (<code>spec.IsSatisfiedBy(view)</code>). Build a rule from the domain's own check, such as <code>WorkflowPhase.IsTerminal</code>, not from a hand-written list of phase names. Example: <code>PurchaseWorkflowInProgress&lt;TView&gt;</code> in Homeownership. <code>IncomeLimitLevelEntry</code> in <code>Domain/Events/</code> is the stored shape of one income limit level.</p>
   <p>Tests are in <code>src/CommonGround.SharedKernel.Tests</code>, one test class per type, for the value objects, IDs, the enumeration JSON converter, <code>TimeProviderContext</code>, <code>EventClockMiddleware</code>, <code>stream.Decide</code> and the seeding types.</p>
 </section>
 

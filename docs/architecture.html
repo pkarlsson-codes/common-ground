@@ -96,19 +96,40 @@ flowchart LR
   </table>
   <p>A context that publishes integration events has a <code>CommonGround.&lt;Context&gt;.Contracts</code> project; its <code>Events</code> folder holds the event types other contexts may react to. Which contexts talk to which can be read from the project references to <code>*.Contracts</code>.</p>
 
-  <h3>Project layout</h3>
-  <table>
-    <thead><tr><th>Project</th><th>Holds</th></tr></thead>
-    <tbody>
-      <tr><td><code>CommonGround.&lt;Context&gt;/Domain</code></td><td>Aggregates, entities, value objects, domain events. No infrastructure references.</td></tr>
-      <tr><td><code>CommonGround.&lt;Context&gt;/Application</code></td><td><code>Commands</code>, <code>Queries</code>, <code>EventHandlers</code>, <code>ReadModels</code>, <code>WorkItems</code>, <code>Errors</code>: Wolverine handlers and the records they handle.</td></tr>
-      <tr><td><code>CommonGround.&lt;Context&gt;/Infrastructure</code></td><td>Marten configuration, projections, development seeders.</td></tr>
-      <tr><td><code>CommonGround.API/&lt;Context&gt;</code></td><td>HTTP endpoints for that context. Endpoints translate requests into commands and queries; they hold no business rules.</td></tr>
-      <tr><td><code>CommonGround.API.Contracts</code></td><td>Request and response types of the API.</td></tr>
-      <tr><td><code>CommonGround.API.Clients</code></td><td>Typed <code>HttpClient</code> clients the gateways use to call the API.</td></tr>
-      <tr><td><code>CommonGround.SharedKernel</code></td><td>Base classes (<code>AggregateRoot</code>, <code>Entity</code>, <code>ValueObject</code>, <code>Enumeration</code>), shared value objects (<code>Money</code>, <code>Address</code>, <code>TrustId</code>, <code>UserId</code>, <code>IncomeLimitTable</code>), clocks, Marten and Wolverine setup.</td></tr>
-    </tbody>
-  </table>
+  <h3 id="layout">Project layout</h3>
+  <p>Every bounded context follows the same layout. <code>&lt;Context&gt;</code> is the context's name, such as <code>PropertyRegistry</code>. Each context page lists only where its code differs from this.</p>
+<pre class="tree"><code>src/
+├── CommonGround.&lt;Context&gt;/                <span class="note">the context's class library</span>
+│   ├── Domain/                            <span class="note">no infrastructure references</span>
+│   │   └── &lt;Aggregate&gt;s/                  <span class="note">one per aggregate: root, ID, value objects, enums</span>
+│   │       └── Events/                    <span class="note">its domain events</span>
+│   ├── Application/
+│   │   ├── Commands/                      <span class="note">per file: a command and its Wolverine handler</span>
+│   │   ├── Queries/                       <span class="note">per file: a query and its handler</span>
+│   │   ├── ReadModels/                    <span class="note">documents the queries read</span>
+│   │   ├── EventHandlers/                 <span class="note">reactions to events; publish integration events</span>
+│   │   ├── WorkItems/                     <span class="note">what the context adds to the Today page</span>
+│   │   └── Errors/                        <span class="note">&lt;Context&gt;BusinessRuleViolation.cs: every error code</span>
+│   └── Infrastructure/
+│       ├── Persistence/                   <span class="note">&lt;Context&gt;MartenConfiguration.cs</span>
+│       │   └── Projections/               <span class="note">Marten projections that build the read models</span>
+│       └── Seeding/                       <span class="note">development seeders and their *.seed.json files</span>
+├── CommonGround.&lt;Context&gt;.Contracts/      <span class="note">only if the context publishes integration events</span>
+│   └── Events/                            <span class="note">the events other contexts may react to</span>
+├── CommonGround.&lt;Context&gt;.Tests/          <span class="note">unit tests, in the same folders as the code</span>
+├── CommonGround.API/&lt;Context&gt;/            <span class="note">HTTP endpoints; no business rules</span>
+├── CommonGround.API.Contracts/&lt;Context&gt;/
+│   ├── Requests/                          <span class="note">request records and query specs</span>
+│   └── Responses/                         <span class="note">response records</span>
+└── CommonGround.API.IntegrationTests/&lt;Context&gt;/  <span class="note">tests that call the endpoints</span></code></pre>
+  <p>A folder a context doesn't need is left out. For example, a context with no work items has no <code>WorkItems/</code>. Projects that all contexts share:</p>
+<pre class="tree"><code>src/
+├── CommonGround.SharedKernel/   <span class="note">base classes, value objects, errors, clocks, Marten setup</span>
+├── CommonGround.Testing/        <span class="note">EventReplay, for unit tests of aggregates</span>
+├── CommonGround.API/            <span class="note">the host: Program.cs, auth, error handling, Today, Reports</span>
+├── CommonGround.API.Contracts/  <span class="note">request and response types of the API</span>
+└── CommonGround.API.Clients/    <span class="note">typed HttpClient clients the gateways use</span></code></pre>
+  <p>See <a href="./shared-kernel.html">Shared Kernel</a> for what <code>CommonGround.SharedKernel</code> holds.</p>
   <p>The API project also has modules that aren't bounded contexts: <code>Today</code> (the work queue), <code>Reports</code>, <code>PortfolioImport</code> and <code>Demo</code> (sample-trust sandboxes). They read from or write to the contexts through commands and queries.</p>
 </section>
 

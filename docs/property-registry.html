@@ -30,28 +30,11 @@
     <li><strong>Homes</strong>: each home on a parcel, with its type, bedrooms, bathrooms, size, year built, accessibility, assessment history, and income limit (the most a buying household may earn, as a percent of area median income).</li>
     <li><strong>Development projects</strong>: new construction on a parcel, or rehabilitation of homes already on it.</li>
   </ul>
-  <p><strong>What it doesn't own:</strong> choosing a buyer (HomeBuyers), purchases, ground leases and resales (Homeownership), and files attached to homes (Documents). It keeps a view of where each home stands in being sold, built from those contexts' events (<a href="#availability">section 6</a>), but it never decides any of it.</p>
 </section>
 
 <section id="layout">
   <h2>2. Project layout</h2>
-  <table>
-    <thead><tr><th>Folder</th><th>Contents</th></tr></thead>
-    <tbody>
-      <tr><td><code>Domain/LandParcels</code></td><td><code>LandParcel</code>, <code>LandParcelId</code> (prefix <code>parcel</code>), <code>AcquisitionMethod</code>, events.</td></tr>
-      <tr><td><code>Domain/Homes</code></td><td><code>Home</code>, <code>HomeId</code> (prefix <code>home</code>), <code>HomeType</code>, <code>UnitAssessment</code>, <code>HomeLabel</code>, events.</td></tr>
-      <tr><td><code>Domain/DevelopmentProjects</code></td><td><code>DevelopmentProject</code>, <code>DevelopmentProjectId</code> (prefix <code>project</code>), <code>ProjectType</code>, <code>ProjectStatus</code>, one event.</td></tr>
-      <tr><td><code>Application/Commands</code></td><td>One file per command: the record and its static Wolverine handler.</td></tr>
-      <tr><td><code>Application/EventHandlers</code></td><td>Handlers that publish integration events, and handlers that keep <code>HomeAvailabilityView</code>.</td></tr>
-      <tr><td><code>Application/Queries</code></td><td>One file per query and its handler.</td></tr>
-      <tr><td><code>Application/ReadModels</code></td><td>The documents the queries read.</td></tr>
-      <tr><td><code>Application/Errors</code></td><td><code>PropertyRegistryBusinessRuleViolation.cs</code>: every error code this context raises.</td></tr>
-      <tr><td><code>Application/WorkItems</code></td><td>What this context adds to the Today page.</td></tr>
-      <tr><td><code>Infrastructure/Persistence</code></td><td><code>PropertyRegistryMartenConfiguration</code> and the projections.</td></tr>
-      <tr><td><code>Infrastructure/Seeding</code></td><td>Seeders and their JSON files.</td></tr>
-    </tbody>
-  </table>
-  <p>The HTTP endpoints live in <code>src/CommonGround.API/PropertyRegistry</code>, the request and response records in <code>src/CommonGround.API.Contracts/PropertyRegistry</code>, and the unit tests in <code>src/CommonGround.PropertyRegistry.Tests</code>. Integration tests are in <code>src/CommonGround.API.IntegrationTests/PropertyRegistry</code>.</p>
+  <p>The code follows the <a href="./architecture.html#layout">layout every context uses</a>, with three aggregate folders under <code>Domain/</code>: <code>LandParcels</code>, <code>Homes</code> and <code>DevelopmentProjects</code>. It publishes integration events, so it has a <code>CommonGround.PropertyRegistry.Contracts</code> project.</p>
   <p>Project references: SharedKernel, <code>HomeBuyers.Contracts</code> and <code>Homeownership.Contracts</code> (events it consumes), its own <code>Contracts</code> (events it publishes), and <code>TrustManagement</code>. The <code>TrustManagement</code> reference is only for <code>TrustSeedLookup</code> in the seeders.</p>
   <p><strong>Older names.</strong> A home used to be called a unit, and some code still says so: <code>UnitAssessment</code>, <code>Home.UnitType</code>, <code>GetHome.UnitId</code>, <code>HomeAssessmentView.UnitId</code>, and the file <code>RecordUnitAssessment.cs</code>, which holds <code>RecordHomeAssessment</code>. They all mean a home.</p>
 </section>
@@ -109,6 +92,7 @@ classDiagram
 </pre>
   </div>
   <p>The arrows are IDs, not object references. Each aggregate is its own Marten stream, and no aggregate loads another.</p>
+  <p>ID prefixes: <code>parcel-</code> for <code>LandParcelId</code>, <code>home-</code> for <code>HomeId</code>, <code>project-</code> for <code>DevelopmentProjectId</code>.</p>
 
   <h3>LandParcel</h3>
   <ul>
