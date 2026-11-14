@@ -26,6 +26,7 @@ const SITE = [
   ] },
   { group: 'Topics', pages: [
     { file: 'auth-flow.html', title: 'Authentication flow' },
+    { file: 'seeding.html', title: 'Seeding' },
   ] },
 ];
 

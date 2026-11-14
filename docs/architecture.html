@@ -76,7 +76,7 @@ flowchart LR
       <tr><td>Seq</td><td><code>docker-compose.yml</code></td><td>Port 5341, log search</td><td>Not used; logs go to the console</td></tr>
     </tbody>
   </table>
-  <p>Start the development infrastructure with <code>npm run infra:start</code>, then run the API, gateway and web app (<code>npm run api:start</code>, <code>management:gateway:start</code>, <code>management:web:start</code>). The API doesn't seed data at startup: run <code>npm run db:seed</code>, or <code>npm run db:reset</code> to wipe and seed.</p>
+  <p>Start the development infrastructure with <code>npm run infra:start</code>, then run the API, gateway and web app (<code>npm run api:start</code>, <code>management:gateway:start</code>, <code>management:web:start</code>). The API doesn't seed data at startup: run <code>npm run db:seed</code>, or <code>npm run db:reset</code> to wipe and seed. See <a href="./seeding.html">Seeding</a>.</p>
 </section>
 
 <section id="contexts">
@@ -113,7 +113,7 @@ flowchart LR
 │   └── Infrastructure/
 │       ├── Persistence/                   <span class="note">&lt;Context&gt;MartenConfiguration.cs</span>
 │       │   └── Projections/               <span class="note">Marten projections that build the read models</span>
-│       └── Seeding/                       <span class="note">development seeders and their *.seed.json files</span>
+│       └── Seeding/                       <span class="note">seed lookups; see the Seeding page</span>
 ├── CommonGround.&lt;Context&gt;.Contracts/      <span class="note">only if the context publishes integration events</span>
 │   └── Events/                            <span class="note">the events other contexts may react to</span>
 ├── CommonGround.&lt;Context&gt;.Tests/          <span class="note">unit tests, in the same folders as the code</span>

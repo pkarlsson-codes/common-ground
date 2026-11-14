@@ -267,17 +267,7 @@ shared.income_limit_level.limit_not_positive</code></pre>
 
 <section id="seeding">
   <h2>11. Seeding</h2>
-  <p>The API doesn't seed at startup. <code>npm run db:seed</code> runs <code>dotnet run --project src/CommonGround.API -- seed</code>, which runs every <code>IDevelopmentSeeder</code> and skips what is already seeded. The demo sandbox uses the same seeders for each new demo trust.</p>
-  <table>
-    <thead><tr><th>Type</th><th>What it does</th></tr></thead>
-    <tbody>
-      <tr><td><code>IDevelopmentSeeder</code></td><td>One method, <code>SeedAsync(SeedRun, IDocumentStore, CancellationToken)</code>. Runs after the app has started, so the Marten subscription and Wolverine are running. It is not Marten's <code>IInitialData</code>, which runs during host startup, before events propagate, and in every environment. Implemented in the API, PropertyRegistry and TrustManagement.</td></tr>
-      <tr><td><code>SeedRun</code></td><td>One run of the seeders. <code>SeedRun.Development</code> (key <code>dev</code>) is what <code>db:seed</code> uses. A run with a <code>Trust</code> seeds the seed file's single trust under a new ID and name, which is how a demo trust is made.</td></tr>
-      <tr><td><code>SeedDate</code></td><td>A date in seed JSON: a fixed ISO date (<code>2021-09-15</code>) or one relative to the day seeding runs (<code>today</code>, <code>today-30d</code>, <code>today+2w</code>, <code>today-6m</code>, <code>today-5y</code>), so seeded data doesn't go stale.</td></tr>
-      <tr><td><code>SeedClock</code></td><td><code>SeedClock.RunAsync(timeZone, seed)</code> sets a scoped clock for the seed and lets it <code>MoveTo(date)</code>, at 10:00 in the trust's time zone by default. Events then carry the seeded date in <code>OccurredAt</code>.</td></tr>
-      <tr><td><code>PropagationWaiter</code></td><td>Waits until no events or Wolverine messages are left to deliver (<code>WaitForIdleAsync</code>), or until a record a handler creates appears (<code>WaitForAsync</code>). A seeder calls it before it builds on what another context's handler made, or before it moves the seed clock on. Timeouts use real elapsed time, not the seed clock.</td></tr>
-    </tbody>
-  </table>
+  <p><code>Infrastructure/Seeding/</code> holds the types every seeder uses: <code>IDevelopmentSeeder</code>, <code>SeedRun</code>, <code>SeedDate</code>, <code>SeedClock</code> and <code>PropagationWaiter</code>. The <a href="./seeding.html">Seeding</a> page explains them.</p>
 </section>
 
 <section id="unused">

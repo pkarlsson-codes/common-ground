@@ -32,16 +32,9 @@
   </ul>
 </section>
 
-<section id="layout">
-  <h2>2. Project layout</h2>
-  <p>The code follows the <a href="./architecture.html#layout">layout every context uses</a>, with three aggregate folders under <code>Domain/</code>: <code>LandParcels</code>, <code>Homes</code> and <code>DevelopmentProjects</code>. It publishes integration events, so it has a <code>CommonGround.PropertyRegistry.Contracts</code> project.</p>
-  <p>Project references: SharedKernel, <code>HomeBuyers.Contracts</code> and <code>Homeownership.Contracts</code> (events it consumes), its own <code>Contracts</code> (events it publishes), and <code>TrustManagement</code>. The <code>TrustManagement</code> reference is only for <code>TrustSeedLookup</code> in the seeders.</p>
-  <p><strong>Older names.</strong> A home used to be called a unit, and some code still says so: <code>UnitAssessment</code>, <code>Home.UnitType</code>, <code>GetHome.UnitId</code>, <code>HomeAssessmentView.UnitId</code>, and the file <code>RecordUnitAssessment.cs</code>, which holds <code>RecordHomeAssessment</code>. They all mean a home.</p>
-</section>
-
-<section id="aggregates">
-  <h2>3. Aggregates</h2>
-  <p>All three are deciders (see the <a href="./shared-kernel.html#building-blocks">Shared Kernel</a>): a method checks the rules and returns an event, and <code>Apply</code> or <code>Create</code> changes state from that event.</p>
+<section id="model">
+  <h2>2. The model</h2>
+  <p>Three aggregates, all deciders (see <a href="./shared-kernel.html#building-blocks">Shared Kernel</a>). They point to each other by ID, and no aggregate loads another.</p>
   <div class="diagram">
 <pre class="mermaid">
 classDiagram
@@ -91,59 +84,26 @@ classDiagram
   DevelopmentProject --> Home : HomeIds
 </pre>
   </div>
-  <p>The arrows are IDs, not object references. Each aggregate is its own Marten stream, and no aggregate loads another.</p>
-  <p>ID prefixes: <code>parcel-</code> for <code>LandParcelId</code>, <code>home-</code> for <code>HomeId</code>, <code>project-</code> for <code>DevelopmentProjectId</code>.</p>
-
+  <p>ID prefixes: <code>parcel-</code>, <code>home-</code>, <code>project-</code>.</p>
   <h3>LandParcel</h3>
   <ul>
-    <li><code>Register</code> needs a legal parcel number and an address, and an area above 0 acres. <code>AcquisitionMethod</code> is <code>Purchase</code>, <code>Donation</code> or <code>Transfer</code>.</li>
-    <li><code>Decommission</code> and <code>Recommission</code> return <code>null</code> when the parcel is already in that state, so repeating the call does nothing.</li>
+    <li>A parcel is never sold. It can be decommissioned and recommissioned. Repeating either does nothing.</li>
     <li>A decommissioned parcel is hidden from the parcel list unless the caller asks for it (<code>IncludeDecommissioned</code>).</li>
   </ul>
-
   <h3>Home</h3>
   <ul>
-    <li><code>Register</code> needs bedrooms of 0 or more, bathrooms above 0 (1.5 is allowed), square footage above 0, and a year built from 1800 to five years after the current year. It also takes the first assessment.</li>
-    <li><code>UnitDesignation</code> (for example "Unit B") tells apart homes on the same parcel. <code>HomeLabel.Format</code> joins it to the parcel address: "14 Alder Lane, Unit B". The label is built when read or published, never stored on the home.</li>
-    <li><code>IncomeLimitPercentOfAmi</code> is 1 to 200, or <code>null</code> for a home sold at market rate with no limit. <code>Home.DefaultIncomeLimitPercentOfAmi</code> is 80. The portfolio import and <code>HomesSeeder</code> use it, and the web form starts at 80 from its own constant. <code>Home.Register</code> doesn't apply a default: <code>null</code> means no limit.</li>
-    <li><code>UnitAssessment.Create</code> refuses a negative value and an assessment date after today in the trust's time zone. That is why <code>RegisterHomeHandler.LoadAsync</code> asks <code>ITrustClock</code> for today. <code>RecordAssessment</code> checks only that the value isn't negative; it doesn't check the date.</li>
-    <li>Each assessment is kept, oldest first. Assessed values are plain <code>decimal</code>, not <code>Money</code>.</li>
+    <li>The label a person reads, "14 Alder Lane, Unit B", is the parcel address plus <code>UnitDesignation</code>. <code>HomeLabel.Format</code> builds it when read or published. It is never stored on the home.</li>
+    <li><code>IncomeLimitPercentOfAmi</code> is the most a buying household may earn, as a percent of area median income: 1 to 200, or <code>null</code> for no limit (a market-rate home). <code>Home.Register</code> applies no default. The web form starts at 80.</li>
+    <li>An assessment can't be negative or dated after today in the trust's time zone. Every assessment is kept, as a plain <code>decimal</code>, not <code>Money</code>.</li>
   </ul>
-
   <h3>DevelopmentProject</h3>
   <ul>
-    <li><code>InitiateNewConstruction</code> needs a name and a description. <code>InitiateRehabilitation</code> also needs at least one home ID.</li>
-    <li>The only event is <code>DevelopmentProjectInitiated</code>, so <code>ProjectStatus</code> is always <code>Initiated</code>. See <a href="#gaps">section 12</a>.</li>
+    <li>New construction on a parcel, or rehabilitation of named homes on it. It has one event, so its status is always <code>Initiated</code>.</li>
   </ul>
-</section>
-
-<section id="api">
-  <h2>4. Commands and HTTP routes</h2>
-  <p>Each endpoint builds a command and sends it with <code>bus.InvokeForTenantAsync</code>. Handlers on an existing stream take the aggregate through Wolverine's <code>[WriteAggregate]</code>, which loads it and appends the returned event. Handlers that start a stream return <code>MartenOps.StartStream</code>. The endpoint makes the new ID with <code>Generate()</code> and returns it.</p>
-  <table>
-    <thead><tr><th>Route</th><th>Command</th><th>Result</th></tr></thead>
-    <tbody>
-      <tr><td><code>POST /api/land-parcels</code></td><td><code>RegisterLandParcel</code></td><td><code>LandParcelRegistered</code></td></tr>
-      <tr><td><code>POST /api/land-parcels/{id}/decommission</code></td><td><code>DecommissionParcel</code></td><td><code>ParcelDecommissioned</code> or nothing</td></tr>
-      <tr><td><code>POST /api/land-parcels/{id}/recommission</code></td><td><code>RecommissionParcel</code></td><td><code>ParcelRecommissioned</code> or nothing</td></tr>
-      <tr><td><code>GET /api/land-parcels</code>, <code>GET /api/land-parcels/{id}</code></td><td><code>GetLandParcels</code>, <code>GetLandParcel</code></td><td>Paged list (search on address and parcel number), one parcel</td></tr>
-      <tr><td><code>POST /api/homes</code></td><td><code>RegisterHome</code></td><td><code>HomeRegistered</code></td></tr>
-      <tr><td><code>PUT /api/homes/{id}/income-limit</code></td><td><code>SetHomeIncomeLimit</code></td><td><code>HomeIncomeLimitSet</code></td></tr>
-      <tr><td><code>POST /api/homes/{id}/assessments</code></td><td><code>RecordHomeAssessment</code></td><td><code>HomeAssessed</code></td></tr>
-      <tr><td><code>GET /api/homes/{id}/assessments</code></td><td><code>GetHomeAssessments</code></td><td>Paged assessment history</td></tr>
-      <tr><td><code>POST /api/homes/{id}/release-for-sale</code></td><td><code>ReleaseHomeForSale</code></td><td>Updates <code>HomeAvailabilityView</code>; no event</td></tr>
-      <tr><td><code>GET /api/homes</code>, <code>GET /api/homes/{id}</code></td><td><code>GetHomes</code>, <code>GetHome</code></td><td>Paged list (filter by parcel, occupancy, sale stage), one home with its availability and label</td></tr>
-      <tr><td><code>POST /api/development-projects</code></td><td><code>InitiateNewConstructionProject</code> or <code>InitiateRehabilitationProject</code>, chosen by the request's <code>Type</code></td><td><code>DevelopmentProjectInitiated</code></td></tr>
-      <tr><td><code>GET /api/development-projects</code>, <code>GET /api/development-projects/{id}</code></td><td><code>GetDevelopmentProjects</code>, <code>GetDevelopmentProject</code></td><td>Paged list, one project</td></tr>
-    </tbody>
-  </table>
-  <p><code>RegisterLandParcel</code> and <code>RegisterHome</code> are also sent by the portfolio import (<code>src/CommonGround.API/PortfolioImport/PortfolioImportPlanner.cs</code>), which loads a trust's existing land, homes and ground leases from one CSV file.</p>
-  <p>The Management gateway forwards each route through <code>src/CommonGround.Management.Gateway/Endpoints</code>. The web pages are <code>LandParcelsPage</code>, <code>HomesPage</code> and <code>DevelopmentProjectsPage</code>. Their journeys are in <code>docs/journeys/land-parcels</code>, <code>docs/journeys/homes</code> and <code>docs/journeys/development-projects</code>.</p>
 </section>
 
 <section id="events">
-  <h2>5. Events in and out</h2>
-  <p>The context publishes two integration events and consumes eight. Domain events reach handlers through Marten's <code>PublishEventsToWolverine</code> subscription, which the async daemon runs after the events are saved.</p>
+  <h2>3. Events in and out</h2>
   <div class="diagram">
 <pre class="mermaid">
 flowchart LR
@@ -156,25 +116,18 @@ flowchart LR
   HO -- "PurchaseFellThrough<br/>GroundLeaseCreated<br/>ResaleOpened<br/>ResaleWithdrawn<br/>ResaleBoughtBack" --> PR
 </pre>
   </div>
-
-  <h3>Published (<code>CommonGround.PropertyRegistry.Contracts.Events</code>)</h3>
-  <table>
-    <thead><tr><th>Event</th><th>From</th><th>Used by</th></tr></thead>
-    <tbody>
-      <tr><td><code>HomeRegistered(HomeId, LandParcelId, Label, Bedrooms, IsAccessible, IncomeLimitPercentOfAmi)</code></td><td><code>HomeRegisteredHandler</code> maps the domain event and adds the label from <code>LandParcelView</code>.</td><td>HomeBuyers stores <code>HomeFactsView</code>, which selection compares candidates against. Homeownership stores <code>HomeLabelView</code> to name the home on purchases.</td></tr>
-      <tr><td><code>HomeIncomeLimitSet(HomeId, PercentOfAmi)</code></td><td><code>HomeIncomeLimitSetHandler</code></td><td>HomeBuyers updates <code>HomeFactsView</code>.</td></tr>
-    </tbody>
-  </table>
-  <p>The domain and integration events share the names <code>HomeRegistered</code> and <code>HomeIncomeLimitSet</code>. The handlers use the aliases <code>DomainHomeRegistered</code> and <code>IntegrationHomeRegistered</code> to tell them apart.</p>
-  <p>Land parcel and development project events stay inside this context. No other context hears about a decommissioned parcel.</p>
-
-  <h3>Consumed</h3>
-  <p>Every consumed event updates <code>HomeAvailabilityView</code>, described next.</p>
+  <ul>
+    <li><code>HomeRegistered</code> carries the home's label, bedrooms, accessibility and income limit. HomeBuyers keeps them to check candidates during selection. Homeownership keeps the label to name the home on purchases.</li>
+    <li><code>HomeIncomeLimitSet</code> updates HomeBuyers' copy of the limit.</li>
+    <li>The domain and integration events share these two names. The handlers alias them <code>DomainHomeRegistered</code> and <code>IntegrationHomeRegistered</code>.</li>
+    <li>Parcel and project events stay inside this context.</li>
+    <li>Every event it consumes updates home availability, below.</li>
+  </ul>
 </section>
 
 <section id="availability">
-  <h2>6. Home availability</h2>
-  <p>Staff need to see where each home stands: free to offer, choosing a buyer, under contract, leased, or back with the trust. Those facts belong to HomeBuyers and Homeownership. <code>HomeAvailabilityView</code> collects their events per home and works out two values: <code>Occupancy</code> (<code>Vacant</code> or <code>Occupied</code>) and <code>SaleStage</code>.</p>
+  <h2>4. Home availability</h2>
+  <p>Staff need to see where each home stands in being sold. Those facts belong to HomeBuyers and Homeownership, so this context only listens. <code>HomeAvailabilityView</code> collects their events per home and works out a <code>SaleStage</code>. <code>NotForSale</code> means a homeowner leases the home (<code>Occupied</code>). Every other stage is <code>Vacant</code>.</p>
   <div class="diagram">
 <pre class="mermaid">
 stateDiagram-v2
@@ -192,101 +145,45 @@ stateDiagram-v2
   HeldByTrust --> Offered : release-for-sale
 </pre>
   </div>
-  <p><code>NotForSale</code> means a homeowner leases the home (<code>Occupied</code>). Every other stage is <code>Vacant</code>.</p>
-  <p><strong>Rules the code follows:</strong></p>
   <ul>
-    <li><strong>No view means available.</strong> A home has no <code>HomeAvailabilityView</code> until the first event about it arrives. <code>GetHome</code>, <code>GetHomes</code> and the Today query treat a missing view as <code>Vacant</code> and <code>Offered</code>.</li>
-    <li><strong>It never refuses an event.</strong> The other contexts already decided; this view only records. Events can arrive in any order, so the view stores what it has heard of each selection and each resale, and <code>Refresh()</code> works out the stage from all of it every time. For example, a <code>PurchaseFellThrough</code> that arrives before its <code>ApplicationSelected</code> is kept in <code>FellThroughBeforeSelected</code> until the selection shows up.</li>
-    <li><strong>The latest selection counts.</strong> HomeBuyers runs one selection per home at a time, so <code>Refresh()</code> uses the one that started last.</li>
-    <li><strong>A buyback starts over.</strong> When the trust buys a home back, the lease and the selections before the buyback date no longer count.</li>
-    <li><strong>A purchase with no application changes nothing.</strong> A purchase started directly, not from a selection, never showed the home under contract.</li>
-    <li><strong>Concurrent handlers retry.</strong> The view uses Marten optimistic concurrency, so two handlers updating one home at once don't overwrite each other: the loser gets a <code>ConcurrencyException</code> and Wolverine reruns its handler, up to three times (<code>RetryWithCooldown</code> in <code>src/CommonGround.API/Program.cs</code>).</li>
+    <li><strong>No view means Offered.</strong> A home has no view until the first event about it arrives.</li>
+    <li><strong>It never refuses an event.</strong> The other contexts already decided. Events can arrive in any order, so the view stores everything it has heard and <code>Refresh()</code> works the stage out again each time.</li>
+    <li><strong>A buyback starts over.</strong> Leases and selections before the buyback date stop counting.</li>
+    <li><strong>Release for sale is the one change staff make here.</strong> <code>POST /api/homes/{id}/release-for-sale</code> moves a home the trust held after a buyback to <code>Offered</code>. It raises no event.</li>
+    <li><strong>Today shows every Offered home</strong> as "Available, no selection started" or "Available again after …" (a purchase fell through, a buyback, or a release).</li>
   </ul>
-  <p><strong>Release for sale</strong> is the one change staff make here. After a buyback where the trust chose to hold the home (for repairs, say), <code>POST /api/homes/{id}/release-for-sale</code> calls <code>HomeAvailabilityView.Release</code>, which moves the home to <code>Offered</code>. It raises no event. A home that isn't held gets <code>property_registry.home.release_for_sale.not_held</code>.</p>
-  <p>The view also records why and when a home became available again (<code>AvailableAgainCause</code>: <code>PurchaseFellThrough</code>, <code>TrustBoughtBack</code> or <code>TrustReleased</code>). The Today page shows it.</p>
-  <p>The logic is in <code>Application/ReadModels/HomeAvailabilityView.cs</code>; the handlers all go through <code>Application/EventHandlers/HomeAvailabilityUpdate.cs</code>. Unit tests: <code>HomeAvailabilityViewTests</code> and <code>HomeAvailabilityUpdateTests</code>.</p>
+  <p>Code: <code>Application/ReadModels/HomeAvailabilityView.cs</code>, updated only through <code>Application/EventHandlers/HomeAvailabilityUpdate.cs</code>.</p>
 </section>
 
-<section id="read-models">
-  <h2>7. Read models</h2>
-  <p>All documents live in the Postgres schema <code>property_registry</code>; seed lookups live in <code>property_registry_seed</code>. All projections are inline, so a read straight after a command sees the change.</p>
-  <table>
-    <thead><tr><th>Document</th><th>Written by</th><th>Read by</th></tr></thead>
-    <tbody>
-      <tr><td><code>LandParcelView</code></td><td><code>LandParcelViewProjection</code></td><td><code>GetLandParcel</code>; also loaded for parcel addresses when labelling homes.</td></tr>
-      <tr><td><code>LandParcelListItemView</code></td><td><code>LandParcelListItemViewProjection</code>; indexed on address and parcel number.</td><td><code>GetLandParcels</code>, <code>GetRegisteredProperties</code></td></tr>
-      <tr><td><code>HomeView</code></td><td><code>HomeViewProjection</code>. <code>RegisteredAt</code> is the event's <code>OccurredAt</code>.</td><td><code>GetHome</code>, Today, <code>GetHomeRegistrations</code></td></tr>
-      <tr><td><code>HomeListItemView</code></td><td><code>HomeListItemViewProjection</code></td><td><code>GetHomes</code>, <code>GetRegisteredProperties</code></td></tr>
-      <tr><td><code>HomeAssessmentView</code></td><td><code>HomeAssessmentViewProjection</code>, an <code>EventProjection</code>: one document per assessment, including the first one from <code>HomeRegistered</code>.</td><td><code>GetHomeAssessments</code></td></tr>
-      <tr><td><code>DevelopmentProjectListItemView</code></td><td><code>DevelopmentProjectListItemViewProjection</code></td><td><code>GetDevelopmentProjects</code>, <code>GetDevelopmentProject</code></td></tr>
-      <tr><td><code>HomeAvailabilityView</code></td><td>The event handlers and <code>ReleaseHomeForSale</code>; not a projection.</td><td><code>GetHome</code>, <code>GetHomes</code>, Today</td></tr>
-    </tbody>
-  </table>
-  <p>Occupancy and sale stage are stored as their <code>Enumeration</code> display names, so <code>GetHomes</code> can filter on them in the database.</p>
-</section>
-
-<section id="errors">
-  <h2>8. Errors</h2>
-  <p>Every rule above throws a factory from <code>PropertyRegistryBusinessRuleViolation.cs</code>, which the API returns as 422 with the code. Codes follow <code>property_registry.&lt;aggregate&gt;.&lt;operation&gt;.&lt;rule&gt;</code>, for example <code>property_registry.home.register.year_built_out_of_range</code>. Each code needs a message in <code>BusinessRuleErrorMessageMap</code> (see <code>docs/ai/api-contracts.md</code>).</p>
-  <p>An unknown <code>HomeType</code> or project type is checked in the endpoint and returns 400, not 422. A missing ID returns 404 in two ways: <code>GetHome</code>, <code>GetLandParcel</code> and <code>GetDevelopmentProject</code> throw <code>AggregateNotFoundException</code>, and a <code>[WriteAggregate]</code> command on a missing stream throws <code>RequiredDataMissingException</code> (<code>OnMissing.ThrowException</code> in <code>Program.cs</code>).</p>
-</section>
-
-<section id="today">
-  <h2>9. Work items for Today</h2>
-  <p><code>GetPropertyRegistryWorkItems</code> returns one <code>home-available</code> work item for each home whose sale stage is <code>Offered</code>, in the <code>Selections</code> area, with the action <code>start-selection</code>. The text says why it's available:</p>
+<section id="code">
+  <h2>5. Where to look</h2>
   <ul>
-    <li>"Available, no selection started", dated the day the home was registered (in the trust's time zone), for a home that was never sold.</li>
-    <li>"Available again after a purchase fell through", "after the trust bought it back" or "after the trust released it", dated when that happened.</li>
+    <li><strong>Layout:</strong> the <a href="./architecture.html#layout">layout every context uses</a>.</li>
+    <li><strong>Endpoints:</strong> <code>LandParcelsEndpoints</code>, <code>HomesEndpoints</code> and <code>DevelopmentProjectsEndpoints</code> in <code>src/CommonGround.API/PropertyRegistry</code>.</li>
+    <li><strong>Web pages:</strong> <code>LandParcelsPage</code>, <code>HomesPage</code>, <code>DevelopmentProjectsPage</code>. Journeys: <code>docs/journeys/land-parcels</code>, <code>homes</code>, <code>development-projects</code>.</li>
+    <li><strong>Other callers:</strong> the portfolio import registers parcels and homes and reads <code>GetRegisteredProperties</code>. The funder report reads <code>GetHomeRegistrations</code>.</li>
+    <li><strong>Older names:</strong> a home used to be called a unit. <code>UnitAssessment</code>, <code>Home.UnitType</code>, <code>GetHome.UnitId</code> and <code>RecordUnitAssessment.cs</code> all mean a home.</li>
+    <li><strong>Seed data:</strong> see <a href="./seeding.html">Seeding</a>.</li>
   </ul>
-  <p>The logic is in <code>PropertyRegistryWorkItems.ForHome</code>, tested in <code>PropertyRegistryWorkItemsTests</code>. <code>src/CommonGround.API/Today/TodayEndpoints.cs</code> merges it with the other contexts' lists.</p>
-</section>
-
-<section id="other-callers">
-  <h2>10. Queries for the rest of the API</h2>
-  <p>Two queries exist for callers outside this context's endpoints. Both are sent through the bus, so the caller doesn't touch this context's documents directly.</p>
-  <ul>
-    <li><code>GetRegisteredProperties</code>: every parcel's ID and parcel number, and every home's ID, parcel and unit designation, decommissioned or not. The portfolio import uses it to match spreadsheet rows to what already exists.</li>
-    <li><code>GetHomeRegistrations</code>: every home's ID and <code>RegisteredAt</code>. The funder report (<code>src/CommonGround.API/Reports/FunderReportEndpoints.cs</code>) turns each <code>RegisteredAt</code> into a date in the trust's time zone and uses it to place homes in the report period.</li>
-  </ul>
-</section>
-
-<section id="seeding">
-  <h2>11. Seeding</h2>
-  <p><code>LandParcelsSeeder</code>, <code>HomesSeeder</code> and <code>DevelopmentProjectsSeeder</code> read <code>land-parcels.seed.json</code>, <code>homes.seed.json</code> and <code>development-projects.seed.json</code>, embedded from <code>Infrastructure/Seeding</code>. Entries refer to each other by seed key (a home names its parcel's seed key). The <code>*SeedLookup</code> documents map a seed key to the real ID, so a later seeder can find it and a rerun skips entries that already have a lookup.</p>
-  <p>Each entry names the trust it belongs to by its trust seed key. The seeder throws if <code>TrustsSeeder</code> hasn't run. The seeders don't send commands: they call the aggregate methods (<code>LandParcel.Register</code>, <code>Home.Register</code>, <code>Home.RecordAssessment</code>, <code>DevelopmentProject.Initiate…</code>) and start the streams themselves, inside <code>SeedClock.RunAsync</code> so each event is dated on its seed date. So the seed data passes the same domain rules as the endpoints, including <code>UnitAssessment.Create</code>.</p>
 </section>
 
 <section id="gaps">
-  <h2>12. Gaps and unused code</h2>
-  <h3>Rules nothing enforces</h3>
+  <h2>6. Gaps</h2>
   <ul>
-    <li><code>RegisterHome</code> doesn't check that the land parcel exists or is active. A home can be registered on a decommissioned parcel through the API. If the parcel doesn't exist, the published <code>HomeRegistered</code> carries a label with an empty address.</li>
-    <li><code>DecommissionParcel</code> doesn't check for homes on the parcel or for open ground leases.</li>
-    <li>Development projects don't check that the parcel exists, or that a rehabilitation's homes are on that parcel.</li>
-    <li><code>InitiateDevelopmentProjectRequest.Description</code> is nullable, but the domain refuses a missing description with a 422.</li>
-    <li><code>POST /api/development-projects</code> returns <code>201 Created</code> with the list URL as its location, not the new project's URL.</li>
-  </ul>
-  <h3>Code with no callers</h3>
-  <p>I searched <code>src/</code>; only the unit tests call these.</p>
-  <ul>
-    <li><code>ListParcelForPlacement</code> and its handler: no endpoint or code sends it.</li>
-    <li><code>LandParcel.ListForPlacement</code> and <code>LandParcel.WithdrawForRedevelopment</code>, and their events <code>ParcelListedForPlacement</code> and <code>ParcelWithdrawnForRedevelopment</code>. <code>LandParcel</code> has no <code>Apply</code> for either event, so raising them would change no state.</li>
-    <li><code>ParcelConstructionStarted</code>, <code>ConstructionSuspended</code> and <code>ConstructionCompleted</code>: nothing creates them.</li>
-    <li><code>ProjectStatus.Active</code>, <code>Completed</code> and <code>Abandoned</code>: no event sets them.</li>
-    <li>The <code>pg_trgm</code> extension added in <code>PropertyRegistryMartenConfiguration</code>: no trigram index uses it. The parcel search is a case-insensitive <code>Contains</code>.</li>
-    <li><code>AddPropertyRegistry()</code>: registers nothing.</li>
+    <li><code>RegisterHome</code> doesn't check that the parcel exists or is active. On a missing parcel, <code>HomeRegistered</code> carries a label with an empty address.</li>
+    <li><code>DecommissionParcel</code> doesn't check for homes or open ground leases on the parcel.</li>
+    <li>Development projects don't check the parcel, or that a rehabilitation's homes are on it.</li>
+    <li><code>POST /api/development-projects</code> returns the list URL as its location, not the new project's.</li>
+    <li>No callers outside unit tests: <code>ListParcelForPlacement</code>, <code>LandParcel.ListForPlacement</code> and <code>WithdrawForRedevelopment</code> (their events have no <code>Apply</code>), the three construction events, <code>ProjectStatus</code> values other than <code>Initiated</code>, the <code>pg_trgm</code> extension, and <code>AddPropertyRegistry()</code>.</li>
   </ul>
 </section>
 
 <section id="changing">
-  <h2>13. Changing this context</h2>
+  <h2>7. Changing this context</h2>
   <ul>
-    <li><strong>New aggregate, event or value object:</strong> follow <code>docs/ai/creating-domain-types.md</code> and generate it with the <code>templates/</code>. Every event needs a public <code>Apply</code> (or <code>Create</code>) on the aggregate, or its state is lost when the stream is loaded.</li>
-    <li><strong>New fact other contexts need:</strong> add it to the integration event in <code>PropertyRegistry.Contracts</code>, and update the consumers in HomeBuyers and Homeownership in the same change. Follow <code>docs/ai/api-contracts.md</code>.</li>
-    <li><strong>New event from HomeBuyers or Homeownership that changes a home's stage:</strong> add a handler that goes through <code>HomeAvailabilityUpdate</code>, add a <code>Record…</code> method to <code>HomeAvailabilityView</code>, and handle the event arriving in any order. Add cases to <code>HomeAvailabilityViewTests</code>.</li>
-    <li><strong>New list filter:</strong> filter in the query, not in memory after paging, or page counts go wrong. <code>GetHomes</code> shows the pattern for filtering on <code>HomeAvailabilityView</code>, including homes that have no view yet.</li>
-    <li><strong>Dates:</strong> "today" is the trust's today from <code>ITrustClock</code>. See <code>docs/ai/dates-and-times.md</code>.</li>
-    <li><strong>UI changes:</strong> update the journey doc in <code>docs/journeys/</code> and the e2e spec in <code>e2e/tests/</code>.</li>
+    <li><strong>A fact other contexts need:</strong> add it to the integration event in <code>PropertyRegistry.Contracts</code> and update the HomeBuyers and Homeownership consumers in the same change.</li>
+    <li><strong>A new event that moves a home's stage:</strong> handle it through <code>HomeAvailabilityUpdate</code>, add a <code>Record…</code> method to <code>HomeAvailabilityView</code>, and test it arriving in any order in <code>HomeAvailabilityViewTests</code>.</li>
+    <li><strong>A new list filter:</strong> filter in the query, not after paging. <code>GetHomes</code> shows how, including homes with no availability view yet.</li>
   </ul>
 </section>
 </main>

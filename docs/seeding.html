@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Seeding</title>
+<link rel="stylesheet" href="./docs.css" />
+<script src="./nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+<main>
+<header>
+  <h1>Seeding</h1>
+  <p class="lede">How a development database gets its sample trust, land, homes, households, purchases and leases, and how a demo trust gets the same data.</p>
+  <p class="meta">Code: <code>src/CommonGround.API/Infrastructure/Seeding</code> and <code>src/CommonGround.SharedKernel/Infrastructure/Seeding</code>. Last checked against the code: 2026-11-13.</p>
+</header>
+
+<section id="running">
+  <h2>1. Running it</h2>
+  <ul>
+    <li><code>npm run db:seed</code> seeds and skips what is already seeded. <code>npm run db:reset</code> wipes the database first. The API never seeds at startup, and an empty database gives an empty app.</li>
+    <li>Both run <code>dotnet run --project src/CommonGround.API -- seed</code> (<code>SeedCommand</code>). It starts the API's services without a web server, so it can run while the API is up. It exits with 1 outside Development or when a seeder fails.</li>
+    <li>A fresh seed takes about 12 seconds. <code>SeedCommand</code> sets the Marten daemon to poll every 50 ms, because the seeders wait for it often.</li>
+    <li>An <code>ERR</code> log line with a <code>ConcurrencyException</code> during seeding is a handler's first attempt, which Wolverine retries. It is not a failure.</li>
+  </ul>
+</section>
+
+<section id="order">
+  <h2>2. The seeders and their order</h2>
+  <p><code>SeedRunner</code> runs every <code>IDevelopmentSeeder</code> in the order <code>AddDevelopmentSeeders</code> registers them (<code>DevelopmentSeeder.cs</code>). Between seeders it waits until no events or messages are left to deliver, because each seeder builds on what the earlier ones and their event handlers made.</p>
+  <ol>
+    <li><code>TrustsSeeder</code> (in TrustManagement)</li>
+    <li><code>LandParcelsSeeder</code>, <code>HomesSeeder</code>, <code>DevelopmentProjectsSeeder</code> (in PropertyRegistry)</li>
+    <li><code>UsersSeeder</code></li>
+    <li><code>HouseholdsSeeder</code>, with the households' applications</li>
+    <li><code>IncomeLimitsSeeder</code></li>
+    <li><code>GroundLeaseTemplatesSeeder</code></li>
+    <li><code>HomeSelectionsSeeder</code>: choosing a household for a home starts its purchase.</li>
+    <li><code>PurchaseWorkflowsSeeder</code>: progress on those purchases. A closed purchase creates its ground lease and stewardship case.</li>
+    <li><code>GroundLeasesSeeder</code>: activity on those leases, and leases created directly.</li>
+    <li><code>StewardshipCasesSeeder</code>, <code>ForeclosurePreventionCasesSeeder</code>, <code>ResalesSeeder</code>, <code>LeaseFeesSeeder</code></li>
+  </ol>
+  <p>Seeders from item 3 on are in the API project, because they read records from several contexts. Context projects don't reference each other, with one exception: PropertyRegistry references TrustManagement for <code>TrustSeedLookup</code>.</p>
+</section>
+
+<section id="files">
+  <h2>3. Seed files</h2>
+  <p>Each seeder reads one embedded JSON file next to it, such as <code>homes.seed.json</code>:</p>
+<pre><code>{
+  "seedKey": "home-downtown-civic-001",
+  "trustSeedKey": "dev-default",
+  "landParcelSeedKey": "lp-downtown-civic-001",
+  "registeredDate": "today-4y",
+  ...
+}</code></pre>
+  <ul>
+    <li><strong>Seed keys</strong> name entries and link them: this home sits on the parcel with seed key <code>lp-downtown-civic-001</code>. After writing an entry, the seeder stores a <code>…SeedLookup</code> document that maps the seed key to the real ID. Later seeders find IDs through the lookups, and a rerun skips every entry that has one. The lookups are in each context's <code>Infrastructure/Seeding</code>.</li>
+    <li><strong>Dates</strong> are a fixed ISO date (<code>2021-09-15</code>) or relative to the day seeding runs: <code>today</code>, <code>today-30d</code>, <code>today+2w</code>, <code>today-6m</code>, <code>today-5y</code> (<code>SeedDate</code>). Relative dates keep the data current. <code>today-1y</code> is the only relative date that is always in the last calendar year, which a yearly report needs.</li>
+  </ul>
+</section>
+
+<section id="writing">
+  <h2>4. How a seeder writes</h2>
+  <ul>
+    <li><strong>Through the domain, not the API.</strong> A seeder calls the aggregate's methods (<code>Home.Register</code>, <code>Household.Register</code>) and starts the stream itself. The seed data passes the same rules as the endpoints, and other contexts react to its events as they do in the app.</li>
+    <li><strong>On the seed date.</strong> <code>SeedClock.RunAsync</code> gives the seeder its own clock, and <code>MoveTo(date)</code> sets it, at 10:00 in the trust's time zone by default. Events carry that date in <code>OccurredAt</code>. Event handlers run at the time of the event they react to, so their records get the seed date too.</li>
+    <li><strong>Waiting for other contexts.</strong> When a seeder needs what a handler in another context makes, such as the purchase a home selection starts, it calls <code>PropagationWaiter.WaitForAsync</code> or <code>WaitForIdleAsync</code> first. Their timeouts use real time, not the seed clock.</li>
+  </ul>
+</section>
+
+<section id="demo">
+  <h2>5. Demo trusts</h2>
+  <p>A <code>SeedRun</code> is one pass of the seeders. <code>db:seed</code> uses <code>SeedRun.Development</code> (key <code>dev</code>). A demo sandbox starts a run with its own key and a <code>SeedRunTrust</code>, which seeds the seed file's one trust under a new ID and name. Only the trust lookups are keyed by run. Every other lookup is a document in its trust's tenant, so a new trust starts with none. Seed clocks are scoped to their call chain, so a demo run can go on while the API serves requests and while another run seeds another trust.</p>
+</section>
+
+<section id="changing">
+  <h2>6. Adding seed data</h2>
+  <ul>
+    <li><strong>More of an existing record:</strong> add an entry to its JSON file with a new seed key, then run <code>npm run db:seed</code>.</li>
+    <li><strong>A new kind of record:</strong> write an <code>IDevelopmentSeeder</code> and a seed lookup for it, and register the seeder in <code>AddDevelopmentSeeders</code> after the seeders it builds on. Use <code>SeedClock</code> for dates and <code>PropagationWaiter</code> before reading another context's records.</li>
+  </ul>
+</section>
+</main>
+</div>
+</body>
+</html>
