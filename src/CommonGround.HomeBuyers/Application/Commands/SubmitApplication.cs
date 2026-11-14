@@ -2,6 +2,7 @@ using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Specifications;
 using Marten;
 using Wolverine.Marten;
 
@@ -19,9 +20,6 @@ public sealed record SubmitApplication(
 /// <summary>Handles <see cref="SubmitApplication"/>.</summary>
 public static class SubmitApplicationHandler
 {
-    private static readonly string[] OpenPhases =
-        [.. ApplicationPhase.GetAll().Where(p => !p.IsTerminal).Select(p => p.DisplayName)];
-
     /// <summary>Finds the household's application that is still open, if any.</summary>
     public static async Task<HomeownerApplicationListItemView?> LoadAsync(
         SubmitApplication command,
@@ -32,7 +30,8 @@ public static class SubmitApplicationHandler
         ArgumentNullException.ThrowIfNull(session);
 
         return await session.Query<HomeownerApplicationListItemView>()
-            .Where(v => v.HouseholdId == command.HouseholdId.Value && OpenPhases.Contains(v.Phase))
+            .Where(v => v.HouseholdId == command.HouseholdId.Value)
+            .Matching(ApplicationOpen<HomeownerApplicationListItemView>.Instance)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
     }
