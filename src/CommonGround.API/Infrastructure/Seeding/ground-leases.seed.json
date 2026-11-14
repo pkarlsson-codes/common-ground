@@ -19,6 +19,14 @@
       "covenantTerms": "Owner-occupancy as primary residence required. Resale only to income-eligible buyers at or below the formula price. Signed on paper before the trust adopted lease templates.",
       "resalePolicy": { "formulaKind": "AppraisalBased", "appreciationShare": 0.30 }
     },
+    "insurance": {
+      "requirementsOn": "today-2y",
+      "replacementValue": 240000,
+      "liabilityPerOccurrence": 300000,
+      "certificates": [
+        { "date": "today-5m", "insurer": "Cascade Mutual", "policyNumber": "HO-4471902", "policyStart": "today-5m", "policyEnd": "today+7m", "dwellingCoverage": 260000, "liabilityPerOccurrence": 300000, "trustNamedAdditionalInsured": true }
+      ]
+    },
     "checkIns": [
       { "date": "today-14m", "notes": "Annual visit. Home in good repair; the homeowner replaced the back deck last summer and has the receipts for an improvements credit." },
       { "date": "today-2m", "notes": "Annual visit. Living there with two children; no concerns." }
@@ -44,6 +52,14 @@
     "seedKey": "gl-harbor-view-201",
     "trustSeedKey": "dev-default",
     "purchaseWorkflowSeedKey": "pw-harbor-view-201",
+    "insurance": {
+      "requirementsOn": "today-75d",
+      "replacementValue": 280000,
+      "liabilityPerOccurrence": 300000,
+      "certificates": [
+        { "date": "today-70d", "insurer": "Harbor Home Insurance", "policyNumber": "HV-20881", "policyStart": "today-345d", "policyEnd": "today+20d", "dwellingCoverage": 285000, "liabilityPerOccurrence": 300000, "trustNamedAdditionalInsured": true }
+      ]
+    },
     "checkIns": [
       { "date": "today-80d", "notes": "First visit after move-in. Asked about the HOA's window replacement assessment; referred to the condo association." }
     ],
@@ -55,6 +71,14 @@
     "seedKey": "gl-downtown-civic-003",
     "trustSeedKey": "dev-default",
     "purchaseWorkflowSeedKey": "pw-downtown-civic-003",
+    "insurance": {
+      "requirementsOn": "today-55d",
+      "replacementValue": 250000,
+      "liabilityPerOccurrence": 300000,
+      "certificates": [
+        { "date": "today-45d", "insurer": "Riverbend Insurance", "policyNumber": "DC-90312", "policyStart": "today-50d", "policyEnd": "today+315d", "dwellingCoverage": 250000, "liabilityPerOccurrence": 100000, "trustNamedAdditionalInsured": false, "notes": "Trust not named; asked the agent for an amended certificate." }
+      ]
+    },
     "checkIns": [
       { "date": "today-60d", "notes": "First visit after move-in. Accessibility features working well; the family asked about adding a grab bar in the second bathroom." }
     ]

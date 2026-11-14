@@ -1,6 +1,7 @@
 using System.Text.Json;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeases.Insurance;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases.Mortgages;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
@@ -178,6 +179,42 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
             actions.Add((sent, (_, stream) => stream.Decide(l => l.RecordResalePriceStatement(sent, figures, delivery, sent, SeederUserId))));
         }
 
+        if (entry.Insurance is { } insurance)
+        {
+            var effective = insurance.RequirementsOn.Resolve(today);
+            var requirements = InsuranceRequirements.Create(
+                insurance.ReplacementValue is { } replacement ? Money.Create(replacement) : null,
+                insurance.LiabilityPerOccurrence is { } liability ? Money.Create(liability) : null);
+            actions.Add((effective, (session, stream) =>
+            {
+                if (stream.Aggregate!.SetInsuranceRequirements(requirements, effective, SeederUserId) is { } set)
+                {
+                    stream.AppendOne(set);
+                }
+            }));
+
+            foreach (var certificate in insurance.Certificates)
+            {
+                var received = certificate.Date.Resolve(today);
+                var coverage = InsuranceCoverage.Create(
+                    certificate.PolicyStart.Resolve(today),
+                    certificate.PolicyEnd.Resolve(today),
+                    Money.Create(certificate.DwellingCoverage),
+                    Money.Create(certificate.LiabilityPerOccurrence),
+                    certificate.TrustNamedAdditionalInsured,
+                    received);
+                actions.Add((received, (_, stream) => stream.Decide(l => l.RecordInsuranceCertificate(
+                    InsuranceCertificateId.Generate(),
+                    certificate.Insurer,
+                    certificate.PolicyNumber,
+                    coverage,
+                    certificate.Notes,
+                    null,
+                    received,
+                    SeederUserId))));
+            }
+        }
+
         if (entry.Resale is { } resale)
         {
             actions.Add((resale.Date.Resolve(today), (session, stream) =>
@@ -297,6 +334,8 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
 
         public List<StatementSeedEntry> Statements { get; set; } = [];
 
+        public InsuranceSeedEntry? Insurance { get; set; }
+
         public ResaleSeedEntry? Resale { get; set; }
 
         public TerminationSeedEntry? Termination { get; set; }
@@ -373,6 +412,37 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
         public decimal? IndexValue { get; set; }
 
         public decimal? ImprovementsCredit { get; set; }
+    }
+
+    private sealed class InsuranceSeedEntry
+    {
+        public SeedDate RequirementsOn { get; set; }
+
+        public decimal? ReplacementValue { get; set; }
+
+        public decimal? LiabilityPerOccurrence { get; set; }
+
+        public List<InsuranceCertificateSeedEntry> Certificates { get; set; } = [];
+    }
+
+    /// <summary>A certificate; its date is the day it was received.</summary>
+    private sealed class InsuranceCertificateSeedEntry : DatedSeedEntry
+    {
+        public string Insurer { get; set; } = string.Empty;
+
+        public string PolicyNumber { get; set; } = string.Empty;
+
+        public SeedDate PolicyStart { get; set; }
+
+        public SeedDate PolicyEnd { get; set; }
+
+        public decimal DwellingCoverage { get; set; }
+
+        public decimal LiabilityPerOccurrence { get; set; }
+
+        public bool TrustNamedAdditionalInsured { get; set; }
+
+        public string? Notes { get; set; }
     }
 
     private sealed class ResaleSeedEntry : DatedSeedEntry

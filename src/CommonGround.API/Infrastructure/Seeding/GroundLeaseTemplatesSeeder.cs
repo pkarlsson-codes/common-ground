@@ -68,7 +68,8 @@ public sealed class GroundLeaseTemplatesSeeder : IDevelopmentSeeder
                 ToResalePolicyTerms(entry),
                 LeaseFeeTerms.Create(Money.Create(entry.LandUseFee), Money.Create(entry.RepairReserveFee), entry.LateInterestRate, entry.InterestWaiverDays),
                 MortgageDebtCap.Create(entry.MaxMortgageDebtPercent),
-                SeederUserId);
+                SeederUserId,
+                entry.LiabilityPerOccurrence is { } liability ? Money.Create(liability) : null);
 
             object[] events = entry.Archived
                 ? [defined, GroundLeaseTemplate.Create(defined).Archive(SeederUserId)]
@@ -135,6 +136,8 @@ public sealed class GroundLeaseTemplatesSeeder : IDevelopmentSeeder
 
     private sealed class GroundLeaseTemplateSeedEntry
     {
+        public decimal? LiabilityPerOccurrence { get; set; }
+
         public string SeedKey { get; set; } = string.Empty;
 
         public string TrustSeedKey { get; set; } = string.Empty;

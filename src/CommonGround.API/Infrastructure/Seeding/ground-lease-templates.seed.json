@@ -1,6 +1,7 @@
 [
   {
     "seedKey": "glt-standard-appraisal",
+    "liabilityPerOccurrence": 300000,
     "trustSeedKey": "dev-default",
     "templateName": "Standard 99-Year Lease (Appraisal-Based)",
     "termYears": 99,
