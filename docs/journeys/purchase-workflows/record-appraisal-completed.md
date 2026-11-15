@@ -9,3 +9,5 @@
 7. Track collapses and shows "{appraised value} · appraised {date} by {appraiser name}"; the Appraisal track is marked complete
 
 When the purchase closes, the new ground lease takes this Appraised Value as its Original Appraised Value (see [Record Purchase Closed](record-purchase-closed.md)).
+
+A recorded Appraisal track can be fixed later: see [Correct a Purchase Track](correct-purchase-track.md).

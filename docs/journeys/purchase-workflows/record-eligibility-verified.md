@@ -21,3 +21,5 @@ Before closing, staff check the buyer's documents (pay stubs, tax returns) again
 - **Household size below 1, or income below zero:** the browser stops the form (the fields have minimums); a request that gets past it is refused by the API, and the error toast shows the message. Nothing is recorded.
 - **No limit:** income and household size are recorded and not checked. When a schedule was in effect at the selection's start, the band is still recorded.
 - **No schedule** (no schedule in effect at the selection's start, or the purchase didn't start from a selection): no band is recorded, and the funder report shows "Not recorded".
+
+A recorded Eligibility track can be fixed later: see [Correct a Purchase Track](correct-purchase-track.md).

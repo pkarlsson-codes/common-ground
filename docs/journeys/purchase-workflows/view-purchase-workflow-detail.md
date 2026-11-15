@@ -11,7 +11,7 @@
 6. If the workflow is Stalled, a Stalled banner shows the stalled reason and resolution target date (if set)
 7. Panel shows Phase, Purchase Price, Appraised Value (once the appraisal is recorded), buyer Email and Phone (if present), Scheduled Closing (once scheduled), Failure Reason (if failed), Withdrawal Reason (if withdrawn), Closing Notes (if closed), and Created (date/time)
 8. A Connected Records section links to the home (by its label), land parcel, lease template, and, once the purchase has closed, the ground lease created from it. If the workflow was initiated by selecting an applicant for a home, it also links to the application and household
-9. Unless the workflow is Closed, Failed, or Withdrawn, panel shows Purchase Tracks (Eligibility, Appraisal, Financing, Inspection, Title, Lease Execution, Disclosure, and Closing), each marked complete or pending; a Closing Documents section links to the income documents and the signed disclosure, and an Exception Actions section
+9. Unless the workflow is Closed, Failed, or Withdrawn, panel shows Purchase Tracks (Eligibility, Appraisal, Financing, Inspection, Title, Lease Execution, Disclosure, and Closing), each marked complete or pending; a Corrections list shows each [correction](correct-purchase-track.md) of a recorded track; a Closing Documents section links to the income documents and the signed disclosure, and an Exception Actions section
 10. User closes the panel
 
 Continues in: [View Ground Lease Detail](../ground-leases/view-ground-lease-detail.md)
