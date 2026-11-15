@@ -7,6 +7,8 @@ import {
   type ReceiveImprovementRequestResponse,
   type ReceiveMortgageRequestResponse,
   type RecordHeirRequest,
+  type CompleteHeirTransferRequest,
+  type CloseHeirTransferRequest,
 } from '../api'
 import { apiConfig } from '../lib/apiConfig'
 import { startOfMonth, trustToday, type CalendarDate } from '../lib/calendarDate'
@@ -872,6 +874,24 @@ export function useRecordHeir() {
   return useMutation({
     mutationFn: ({ heirTransferId, request }: { heirTransferId: string; groundLeaseId: string; request: RecordHeirRequest }) =>
       api.recordHeir({ heirTransferId, recordHeirRequest: request }),
+    onSuccess: (_d, v) => invalidateHeirTransfers(qc, v.groundLeaseId),
+  })
+}
+
+export function useCompleteHeirTransfer() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ heirTransferId, request }: { heirTransferId: string; groundLeaseId: string; request: CompleteHeirTransferRequest }) =>
+      api.completeHeirTransfer({ heirTransferId, completeHeirTransferRequest: request }),
+    onSuccess: (_d, v) => invalidateHeirTransfers(qc, v.groundLeaseId),
+  })
+}
+
+export function useCloseHeirTransfer() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ heirTransferId, request }: { heirTransferId: string; groundLeaseId: string; request: CloseHeirTransferRequest }) =>
+      api.closeHeirTransfer({ heirTransferId, closeHeirTransferRequest: request }),
     onSuccess: (_d, v) => invalidateHeirTransfers(qc, v.groundLeaseId),
   })
 }

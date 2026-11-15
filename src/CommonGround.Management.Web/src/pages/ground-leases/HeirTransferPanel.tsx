@@ -5,6 +5,8 @@ import { HEIR_TRANSFER_STATUS_LABELS, useHeirTransfer } from '../../hooks/ground
 import { useHome } from '../../hooks/homes'
 import { formatCalendarDate, type CalendarDate } from '../../lib/calendarDate'
 import { formatPrice } from '../../lib/currency'
+import CloseHeirTransferPanel from './CloseHeirTransferPanel'
+import CompleteHeirTransferPanel from './CompleteHeirTransferPanel'
 import RecordHeirPanel from './RecordHeirPanel'
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
@@ -24,6 +26,8 @@ export default function HeirTransferPanel({ heirTransferId, onClose }: { heirTra
   const { data: home } = useHome(transfer?.homeId ?? null)
   const status = transfer?.status ?? ''
   const [recording, setRecording] = useState(false)
+  const [completing, setCompleting] = useState(false)
+  const [closing, setClosing] = useState(false)
   const { data: leaseDocuments } = useEntityDocuments('GroundLease', transfer?.groundLeaseId ?? null)
   const incomeDocuments = (leaseDocuments?.items ?? []).filter(d => (transfer?.incomeDocumentIds ?? []).includes(d.documentId!))
   const canRecordHeir = status === 'Open' || status === 'Heir recorded'
@@ -35,9 +39,15 @@ export default function HeirTransferPanel({ heirTransferId, onClose }: { heirTra
       onClose={onClose}
       footer={
         canRecordHeir ? (
-          <button type="button" className="btn btn-secondary" onClick={() => setRecording(true)}>
-            {transfer?.heirFullName ? 'Change Heir' : 'Record Heir'}
-          </button>
+          <>
+            <button type="button" className="btn btn-secondary" onClick={() => setClosing(true)}>Close Without Transfer</button>
+            <button type="button" className="btn btn-secondary" onClick={() => setRecording(true)}>
+              {transfer?.heirFullName ? 'Change Heir' : 'Record Heir'}
+            </button>
+            {status === 'Heir recorded' && (
+              <button type="button" className="btn btn-primary" onClick={() => setCompleting(true)}>Complete Transfer</button>
+            )}
+          </>
         ) : undefined
       }
     >
@@ -117,6 +127,8 @@ export default function HeirTransferPanel({ heirTransferId, onClose }: { heirTra
           )}
         </>
       )}
+      {completing && transfer && <CompleteHeirTransferPanel transfer={transfer} onClose={() => setCompleting(false)} />}
+      {closing && transfer && <CloseHeirTransferPanel transfer={transfer} onClose={() => setClosing(false)} />}
       {recording && transfer && <RecordHeirPanel transfer={transfer} onClose={() => setRecording(false)} />}
     </SlideOver>
   )
