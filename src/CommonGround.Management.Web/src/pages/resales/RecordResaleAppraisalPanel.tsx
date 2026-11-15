@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { GroundLeaseResponse, ResaleResponse } from '../../api'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
 import { DateInput } from '../../components/DateInput'
@@ -25,7 +25,11 @@ interface Props {
 
 /** Records the appraisal the lease requires after a notice to sell, previewing the prices it sets. */
 export default function RecordResaleAppraisalPanel({ resale, lease, onClose }: Props) {
-  const [form, setForm] = useState<RecordResaleAppraisalForm>(emptyForm)
+  const [typed, setForm] = useState<RecordResaleAppraisalForm>(emptyForm)
+  // Until staff type a credit, it follows the lease's confirmed improvements, which can load after the panel opens.
+  const [typedImprovements, setTypedImprovements] = useState<number | null>(null)
+  const approvedImprovements = typedImprovements ?? lease?.approvedImprovements ?? 0
+  const form = useMemo(() => ({ ...typed, approvedImprovements }), [typed, approvedImprovements])
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   const mutation = useRecordResaleAppraisal()
   const { success } = useToast()
@@ -139,8 +143,13 @@ export default function RecordResaleAppraisalPanel({ resale, lease, onClose }: P
                 min="0"
                 step="1"
                 value={form.approvedImprovements}
-                onChange={e => setForm(f => ({ ...f, approvedImprovements: parseFloat(e.target.value) || 0 }))}
+                onChange={e => setTypedImprovements(parseFloat(e.target.value) || 0)}
               />
+              <p className="form-hint">
+                {lease?.approvedImprovements
+                  ? `Confirmed on the lease: ${formatPrice(lease.approvedImprovements)}. The cap applies in the price.`
+                  : 'No confirmed improvements on the lease.'}
+              </p>
             </div>
           )}
           {needsIndex && (

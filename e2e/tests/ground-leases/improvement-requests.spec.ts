@@ -99,3 +99,56 @@ test('a request waiting past two weeks shows on Today as overdue; staff deny it 
   await request.getByRole('button', { name: 'Close' }).first().click()
   await expect(todayRow).toHaveCount(0)
 })
+
+// Journeys: docs/journeys/ground-leases/record-improvement-completed, withdraw-improvement-request
+
+test('staff record finished work with a receipt; the lease counts the credit, then a second request is withdrawn', async ({ page }) => {
+  await page.goto('/ground-leases')
+  const homeowner = `Finished Owner ${uniqueId()}`
+  const leaseId = await createGroundLease(page, homeowner)
+  const { improvementRequestId } = await post<{ improvementRequestId: string }>(
+    page, `/api/v1/ground-leases/${leaseId}/improvement-requests`,
+    { receivedOn: isoDate(-10), description: 'Replace the furnace', estimatedCost: 9000 },
+  )
+  await post(page, `/api/v1/improvement-requests/${improvementRequestId}/approve`, {
+    approvedOn: isoDate(-5), preApprovedCredit: 6000, notes: null,
+  })
+  await post(
+    page, `/api/v1/ground-leases/${leaseId}/improvement-requests`,
+    { receivedOn: isoDate(-2), description: 'Paint the fence', estimatedCost: 800 },
+  )
+
+  await page.getByRole('searchbox', { name: 'Search ground leases' }).fill(homeowner)
+  await expect(page.locator('tbody tr')).toHaveCount(1)
+  await page.locator('tbody tr').click()
+  await panel(page, homeowner)
+  const section = improvementsSection(page)
+  await section.getByRole('table', { name: 'Improvement requests' }).getByText('Replace the furnace').click()
+
+  const request = panel(page, 'Replace the furnace')
+  await request.getByRole('button', { name: 'Record Completed' }).click()
+  const complete = panel(page, 'Record Improvement Completed')
+  await field(complete, 'Actual Cost ($)').fill('8000')
+  await expect(field(complete, 'Confirmed Credit ($)')).toHaveValue('6000')
+  await field(complete, 'Receipts').setInputFiles({
+    name: 'furnace-receipt.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.from('%PDF-1.4 furnace receipt'),
+  })
+  await complete.getByRole('button', { name: 'Record Completed' }).click()
+  await expectToast(page, 'Improvement recorded')
+  await expect(request.locator('.slideover-header')).toContainText('Completed')
+  await expect(detailValue(request, 'Confirmed Credit')).toContainText('$6,000.00')
+  await expect(detailValue(request, 'Receipts')).toContainText('furnace-receipt.pdf')
+  await request.getByRole('button', { name: 'Close' }).first().click()
+  await expect(detailValue(section, 'Confirmed Improvements')).toContainText('$6,000.00')
+
+  await section.getByRole('table', { name: 'Improvement requests' }).getByText('Paint the fence').click()
+  const fence = panel(page, 'Paint the fence')
+  await fence.getByRole('button', { name: 'Withdraw' }).click()
+  const withdraw = panel(page, 'Withdraw Improvement Request')
+  await field(withdraw, 'Reason').fill('Waiting until spring.')
+  await withdraw.getByRole('button', { name: 'Withdraw' }).click()
+  await expectToast(page, 'Request withdrawn')
+  await expect(fence.locator('.slideover-header')).toContainText('Withdrawn')
+})

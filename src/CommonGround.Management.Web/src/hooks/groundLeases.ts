@@ -754,3 +754,44 @@ export function useDenyImprovementRequest() {
     onSuccess: (_d, v) => invalidateImprovementRequests(qc, v.request.groundLeaseId!),
   })
 }
+
+export function useRecordImprovementCompleted() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ request, completedOn, actualCost, receiptDocumentIds, confirmedCredit, notes }: {
+      request: ImprovementRequestResponse
+      completedOn: CalendarDate
+      actualCost: number
+      receiptDocumentIds: string[]
+      confirmedCredit: number
+      notes: string
+    }) =>
+      api.recordImprovementCompleted({
+        improvementRequestId: request.id!,
+        recordImprovementCompletedRequest: {
+          completedOn,
+          actualCost,
+          receiptDocumentIds,
+          confirmedCredit,
+          notes: notes.trim() || null,
+        },
+      }),
+    onSuccess: (_d, v) => {
+      invalidateImprovementRequests(qc, v.request.groundLeaseId!)
+      // The lease's confirmed improvements total changes.
+      qc.invalidateQueries({ queryKey: ['ground-lease', v.request.groundLeaseId] })
+    },
+  })
+}
+
+export function useWithdrawImprovementRequest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ request, withdrawnOn, reason }: { request: ImprovementRequestResponse; withdrawnOn: CalendarDate; reason: string }) =>
+      api.withdrawImprovementRequest({
+        improvementRequestId: request.id!,
+        withdrawImprovementRequestRequest: { withdrawnOn, reason: reason.trim() },
+      }),
+    onSuccess: (_d, v) => invalidateImprovementRequests(qc, v.request.groundLeaseId!),
+  })
+}

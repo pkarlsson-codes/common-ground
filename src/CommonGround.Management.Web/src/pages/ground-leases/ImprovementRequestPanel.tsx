@@ -11,6 +11,8 @@ import { daysBetween, formatCalendarDate, trustToday } from '../../lib/calendarD
 import { formatPrice } from '../../lib/currency'
 import ApproveImprovementRequestPanel from './ApproveImprovementRequestPanel'
 import DenyImprovementRequestPanel from './DenyImprovementRequestPanel'
+import RecordImprovementCompletedPanel from './RecordImprovementCompletedPanel'
+import WithdrawImprovementRequestPanel from './WithdrawImprovementRequestPanel'
 import { improvementLetterApplies, openImprovementRequestLetter } from './improvementRequestLetter'
 
 interface Props {
@@ -18,7 +20,7 @@ interface Props {
   onClose: () => void
 }
 
-type Action = 'approve' | 'deny'
+type Action = 'approve' | 'deny' | 'complete' | 'withdraw'
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -41,6 +43,8 @@ export default function ImprovementRequestPanel({ improvementRequestId, onClose 
 
   const status = request?.status ?? ''
   const waiting = status === 'Waiting for decision'
+  const approved = status === 'Approved'
+  const receipts = (documents?.items ?? []).filter(d => d.role === 'improvement-receipt')
   const plans = (documents?.items ?? []).filter(d => d.role === 'improvement-plans')
   const lateDays = request?.replyDueOn && waiting ? daysBetween(request.replyDueOn, trustToday()) : 0
 
@@ -87,6 +91,14 @@ export default function ImprovementRequestPanel({ improvementRequestId, onClose 
                 Approve
               </button>
               <button type="button" className="btn btn-secondary" onClick={() => setAction('deny')}>Deny</button>
+              <button type="button" className="btn btn-ghost" onClick={() => setAction('withdraw')}>Withdraw</button>
+            </div>
+          )}
+
+          {approved && (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <button type="button" className="btn btn-primary" onClick={() => setAction('complete')}>Record Completed</button>
+              <button type="button" className="btn btn-ghost" onClick={() => setAction('withdraw')}>Withdraw</button>
             </div>
           )}
 
@@ -121,6 +133,17 @@ export default function ImprovementRequestPanel({ improvementRequestId, onClose 
               <div className="detail-grid">
                 <Field label="Completed On"><span className="cell-mono">{formatCalendarDate(request.completedOn)}</span></Field>
                 <Field label="Actual Cost">{money(request.actualCost)}</Field>
+                <Field label="Receipts">
+                  {receipts.length === 0
+                    ? 'None'
+                    : receipts.map(r => (
+                      <div key={r.documentId}>
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => downloadDocument(r.documentId!)}>
+                          {r.currentFileName ?? r.title}
+                        </button>
+                      </div>
+                    ))}
+                </Field>
                 <Field label="Confirmed Credit">{money(request.confirmedCredit)}</Field>
                 {request.completionNotes && <Field label="Notes">{request.completionNotes}</Field>}
               </div>
@@ -146,6 +169,8 @@ export default function ImprovementRequestPanel({ improvementRequestId, onClose 
           )}
 
           {action === 'approve' && lease && <ApproveImprovementRequestPanel request={request} lease={lease} onClose={closeAction} />}
+          {action === 'complete' && <RecordImprovementCompletedPanel request={request} onClose={closeAction} />}
+          {action === 'withdraw' && <WithdrawImprovementRequestPanel request={request} onClose={closeAction} />}
           {action === 'deny' && <DenyImprovementRequestPanel request={request} onClose={closeAction} />}
         </>
       )}

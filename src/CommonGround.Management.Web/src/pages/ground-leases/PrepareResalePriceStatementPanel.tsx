@@ -40,8 +40,13 @@ const moneyOrNull = (value: string) => (value === '' ? null : Math.max(0, parseF
  */
 export default function PrepareResalePriceStatementPanel({ lease, onClose }: Props) {
   const today = trustToday()
+  // Confirmed improvement credits on the lease are the starting figure; the cap applies in the price calculation.
+  const initialFigures = () => ({
+    ...emptyStatementFigures(),
+    improvementsCredit: lease.improvementsCap != null && lease.approvedImprovements ? lease.approvedImprovements : null,
+  })
   const [statementDate, setStatementDate] = useState<CalendarDate | null>(today)
-  const [figures, setFigures] = useState<ResalePriceStatementFigures>(emptyStatementFigures)
+  const [figures, setFigures] = useState<ResalePriceStatementFigures>(initialFigures)
   const [delivery, setDelivery] = useState<NoticeDelivery>('FirstClassMail')
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   // The date and figures the letter was last printed with, so a change after printing is pointed out before recording.
@@ -89,7 +94,7 @@ export default function PrepareResalePriceStatementPanel({ lease, onClose }: Pro
     }
   }
 
-  const empty = emptyStatementFigures()
+  const empty = initialFigures()
   const isDirty = statementDate !== today
     || figures.marketValue !== empty.marketValue
     || figures.marketValueSource !== empty.marketValueSource
