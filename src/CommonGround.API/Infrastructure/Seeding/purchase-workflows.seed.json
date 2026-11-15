@@ -284,9 +284,14 @@
     },
     "appraisal": {
       "date": "today-104d",
-      "appraisedValue": 245000,
+      "appraisedValue": 2450000,
       "appraiserName": "Marcus Oyelaran, Northwest Valuation Services",
       "notes": "Appraised without the ground lease's resale restrictions."
+    },
+    "appraisalCorrection": {
+      "date": "today-102d",
+      "appraisedValue": 245000,
+      "reason": "Typo: an extra zero was keyed from the appraisal report."
     },
     "financing": {
       "date": "today-96d",

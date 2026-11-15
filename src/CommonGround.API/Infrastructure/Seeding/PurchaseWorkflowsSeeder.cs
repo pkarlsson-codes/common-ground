@@ -152,6 +152,19 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
                 appraisal.AppraisedValue, appraised, appraisal.AppraiserName, appraisal.Notes, SeederUserId)));
         }
 
+        if (entry.AppraisalCorrection is { } correction)
+        {
+            // Keeps the recorded date, appraiser and notes; only the value changes.
+            steps.Add((correction.Date.Resolve(today), w =>
+            {
+                var recorded = w.AppraisalDetails
+                    ?? throw new InvalidOperationException($"Purchase workflow {w.Id} has no appraisal to correct.");
+                return w.CorrectAppraisal(
+                    correction.AppraisedValue, recorded.AppraisalDate, recorded.AppraiserName, recorded.Notes,
+                    correction.Reason, SeederUserId);
+            }));
+        }
+
         if (entry.Financing is { } financing)
         {
             steps.Add((financing.Date.Resolve(today), w => w.RecordFinancingCommitted(
@@ -301,6 +314,8 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
 
         public AppraisalSeedEntry? Appraisal { get; set; }
 
+        public AppraisalCorrectionSeedEntry? AppraisalCorrection { get; set; }
+
         public FinancingSeedEntry? Financing { get; set; }
 
         public InspectionSeedEntry? Inspection { get; set; }
@@ -337,6 +352,13 @@ public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationW
         public string AppraiserName { get; set; } = string.Empty;
 
         public string? Notes { get; set; }
+    }
+
+    private sealed class AppraisalCorrectionSeedEntry : DatedSeedEntry
+    {
+        public decimal AppraisedValue { get; set; }
+
+        public string Reason { get; set; } = string.Empty;
     }
 
     private sealed class FinancingSeedEntry : DatedSeedEntry
