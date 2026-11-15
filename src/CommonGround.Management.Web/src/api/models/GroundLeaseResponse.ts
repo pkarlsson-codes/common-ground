@@ -173,6 +173,12 @@ export interface GroundLeaseResponse {
     improvementsCap?: number | null;
     /**
      * 
+     * @type {number}
+     * @memberof GroundLeaseResponse
+     */
+    approvedImprovements?: number;
+    /**
+     * 
      * @type {string}
      * @memberof GroundLeaseResponse
      */
@@ -274,6 +280,7 @@ export function GroundLeaseResponseFromJSONTyped(json: any, ignoreDiscriminator:
         'baselineIndexValue': json['baselineIndexValue'] == null ? undefined : json['baselineIndexValue'],
         'annualPercentage': json['annualPercentage'] == null ? undefined : json['annualPercentage'],
         'improvementsCap': json['improvementsCap'] == null ? undefined : json['improvementsCap'],
+        'approvedImprovements': json['approvedImprovements'] == null ? undefined : json['approvedImprovements'],
         'homeownerFullName': json['homeownerFullName'] == null ? undefined : json['homeownerFullName'],
         'homeownerEmail': json['homeownerEmail'] == null ? undefined : json['homeownerEmail'],
         'homeownerPhone': json['homeownerPhone'] == null ? undefined : json['homeownerPhone'],
@@ -317,6 +324,7 @@ export function GroundLeaseResponseToJSONTyped(value?: GroundLeaseResponse | nul
         'baselineIndexValue': value['baselineIndexValue'],
         'annualPercentage': value['annualPercentage'],
         'improvementsCap': value['improvementsCap'],
+        'approvedImprovements': value['approvedImprovements'],
         'homeownerFullName': value['homeownerFullName'],
         'homeownerEmail': value['homeownerEmail'],
         'homeownerPhone': value['homeownerPhone'],

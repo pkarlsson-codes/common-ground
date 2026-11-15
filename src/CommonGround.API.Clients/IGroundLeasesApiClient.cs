@@ -190,6 +190,53 @@ public interface IGroundLeasesApiClient
     /// <returns>A task that completes when it is recorded.</returns>
     Task WithdrawMortgageRequestAsync(string mortgageRequestId, WithdrawMortgageRequestRequest request, CancellationToken cancellationToken);
 
+    /// <summary>Records a homeowner's request to alter or add to the home.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response.</returns>
+    Task<ReceiveImprovementRequestResponse> ReceiveImprovementRequestAsync(string groundLeaseId, ReceiveImprovementRequestRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Gets a lease's improvement requests.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response.</returns>
+    Task<IReadOnlyList<ImprovementRequestResponse>> GetImprovementRequestsAsync(string groundLeaseId, CancellationToken cancellationToken);
+
+    /// <summary>Gets an improvement request.</summary>
+    /// <param name="improvementRequestId">The ID of the improvement request.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response.</returns>
+    Task<ImprovementRequestResponse> GetImprovementRequestAsync(string improvementRequestId, CancellationToken cancellationToken);
+
+    /// <summary>Approves an improvement request with a pre-approved credit.</summary>
+    /// <param name="improvementRequestId">The ID of the improvement request.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when it is recorded.</returns>
+    Task ApproveImprovementRequestAsync(string improvementRequestId, ApproveImprovementRequestRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Denies an improvement request.</summary>
+    /// <param name="improvementRequestId">The ID of the improvement request.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when it is recorded.</returns>
+    Task DenyImprovementRequestAsync(string improvementRequestId, DenyImprovementRequestRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Records the finished work and confirms the credit.</summary>
+    /// <param name="improvementRequestId">The ID of the improvement request.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when it is recorded.</returns>
+    Task RecordImprovementCompletedAsync(string improvementRequestId, RecordImprovementCompletedRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Withdraws an improvement request.</summary>
+    /// <param name="improvementRequestId">The ID of the improvement request.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when it is recorded.</returns>
+    Task WithdrawImprovementRequestAsync(string improvementRequestId, WithdrawImprovementRequestRequest request, CancellationToken cancellationToken);
+
     /// <summary>Works out a lease's resale price statement without recording it.</summary>
     /// <param name="groundLeaseId">The ID of the ground lease.</param>
     /// <param name="request">The statement date and the figures the formula needs.</param>

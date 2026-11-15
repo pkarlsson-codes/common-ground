@@ -418,4 +418,96 @@ public static class GroundLeasesEndpoints
         await client.WithdrawMortgageRequestAsync(mortgageRequestId, request, cancellationToken).ConfigureAwait(false);
         return Results.NoContent();
     }
+
+    [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/improvement-requests")]
+    [ProducesResponseType<ReceiveImprovementRequestResponse>(StatusCodes.Status201Created)]
+    public static async Task<IResult> ReceiveImprovementRequest(
+        string groundLeaseId,
+        ReceiveImprovementRequestRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        var result = await client.ReceiveImprovementRequestAsync(groundLeaseId, request, cancellationToken).ConfigureAwait(false);
+        return Results.Created($"/api/v1/improvement-requests/{result.ImprovementRequestId}", result);
+    }
+
+    [WolverineGet("/api/v1/ground-leases/{groundLeaseId}/improvement-requests")]
+    [ProducesResponseType<IReadOnlyList<ImprovementRequestResponse>>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetImprovementRequests(
+        string groundLeaseId,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        return Results.Ok(await client.GetImprovementRequestsAsync(groundLeaseId, cancellationToken).ConfigureAwait(false));
+    }
+
+    [WolverineGet("/api/v1/improvement-requests/{improvementRequestId}")]
+    [ProducesResponseType<ImprovementRequestResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetImprovementRequest(
+        string improvementRequestId,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(improvementRequestId);
+        return Results.Ok(await client.GetImprovementRequestAsync(improvementRequestId, cancellationToken).ConfigureAwait(false));
+    }
+
+    [WolverinePost("/api/v1/improvement-requests/{improvementRequestId}/approve")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> ApproveImprovementRequest(
+        string improvementRequestId,
+        ApproveImprovementRequestRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(improvementRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.ApproveImprovementRequestAsync(improvementRequestId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/v1/improvement-requests/{improvementRequestId}/deny")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> DenyImprovementRequest(
+        string improvementRequestId,
+        DenyImprovementRequestRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(improvementRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.DenyImprovementRequestAsync(improvementRequestId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/v1/improvement-requests/{improvementRequestId}/completed")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> RecordImprovementCompleted(
+        string improvementRequestId,
+        RecordImprovementCompletedRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(improvementRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.RecordImprovementCompletedAsync(improvementRequestId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/v1/improvement-requests/{improvementRequestId}/withdraw")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> WithdrawImprovementRequest(
+        string improvementRequestId,
+        WithdrawImprovementRequestRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(improvementRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.WithdrawImprovementRequestAsync(improvementRequestId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
 }

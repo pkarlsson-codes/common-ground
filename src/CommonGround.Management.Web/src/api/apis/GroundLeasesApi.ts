@@ -16,13 +16,16 @@
 
 import * as runtime from '../runtime';
 import type {
+  ApproveImprovementRequestRequest,
   ApproveMortgageRequestRequest,
   CorrectLeaseFeeTrackingRequest,
   CreateGroundLeaseRequest,
   CreateGroundLeaseResponse,
+  DenyImprovementRequestRequest,
   DenyMortgageRequestRequest,
   EditPermittedMortgageRequest,
   GroundLeaseResponse,
+  ImprovementRequestResponse,
   LeaseFeeNoticePolicyResponse,
   LeaseFeeNoticesDueResponse,
   MarkPermittedMortgagePaidOffRequest,
@@ -32,8 +35,11 @@ import type {
   PreviewResalePriceStatementRequest,
   PreviewResalePriceStatementsRequest,
   ProblemDetails,
+  ReceiveImprovementRequestRequest,
+  ReceiveImprovementRequestResponse,
   ReceiveMortgageRequestRequest,
   ReceiveMortgageRequestResponse,
+  RecordImprovementCompletedRequest,
   RecordInsuranceCertificateRequest,
   RecordInsuranceCertificateResponse,
   RecordLeaseFeeNoticeRequest,
@@ -56,9 +62,12 @@ import type {
   VoidLeaseFeePaymentRequest,
   WaiveLeaseFeeInterestRequest,
   WaiveLeaseFeeInterestResponse,
+  WithdrawImprovementRequestRequest,
   WithdrawMortgageRequestRequest,
 } from '../models/index';
 import {
+    ApproveImprovementRequestRequestFromJSON,
+    ApproveImprovementRequestRequestToJSON,
     ApproveMortgageRequestRequestFromJSON,
     ApproveMortgageRequestRequestToJSON,
     CorrectLeaseFeeTrackingRequestFromJSON,
@@ -67,12 +76,16 @@ import {
     CreateGroundLeaseRequestToJSON,
     CreateGroundLeaseResponseFromJSON,
     CreateGroundLeaseResponseToJSON,
+    DenyImprovementRequestRequestFromJSON,
+    DenyImprovementRequestRequestToJSON,
     DenyMortgageRequestRequestFromJSON,
     DenyMortgageRequestRequestToJSON,
     EditPermittedMortgageRequestFromJSON,
     EditPermittedMortgageRequestToJSON,
     GroundLeaseResponseFromJSON,
     GroundLeaseResponseToJSON,
+    ImprovementRequestResponseFromJSON,
+    ImprovementRequestResponseToJSON,
     LeaseFeeNoticePolicyResponseFromJSON,
     LeaseFeeNoticePolicyResponseToJSON,
     LeaseFeeNoticesDueResponseFromJSON,
@@ -91,10 +104,16 @@ import {
     PreviewResalePriceStatementsRequestToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
+    ReceiveImprovementRequestRequestFromJSON,
+    ReceiveImprovementRequestRequestToJSON,
+    ReceiveImprovementRequestResponseFromJSON,
+    ReceiveImprovementRequestResponseToJSON,
     ReceiveMortgageRequestRequestFromJSON,
     ReceiveMortgageRequestRequestToJSON,
     ReceiveMortgageRequestResponseFromJSON,
     ReceiveMortgageRequestResponseToJSON,
+    RecordImprovementCompletedRequestFromJSON,
+    RecordImprovementCompletedRequestToJSON,
     RecordInsuranceCertificateRequestFromJSON,
     RecordInsuranceCertificateRequestToJSON,
     RecordInsuranceCertificateResponseFromJSON,
@@ -139,9 +158,16 @@ import {
     WaiveLeaseFeeInterestRequestToJSON,
     WaiveLeaseFeeInterestResponseFromJSON,
     WaiveLeaseFeeInterestResponseToJSON,
+    WithdrawImprovementRequestRequestFromJSON,
+    WithdrawImprovementRequestRequestToJSON,
     WithdrawMortgageRequestRequestFromJSON,
     WithdrawMortgageRequestRequestToJSON,
 } from '../models/index';
+
+export interface ApproveImprovementRequestOperationRequest {
+    improvementRequestId: string;
+    approveImprovementRequestRequest: ApproveImprovementRequestRequest;
+}
 
 export interface ApproveMortgageRequestOperationRequest {
     mortgageRequestId: string;
@@ -155,6 +181,11 @@ export interface CorrectLeaseFeeTrackingOperationRequest {
 
 export interface CreateGroundLeaseOperationRequest {
     createGroundLeaseRequest: CreateGroundLeaseRequest;
+}
+
+export interface DenyImprovementRequestOperationRequest {
+    improvementRequestId: string;
+    denyImprovementRequestRequest: DenyImprovementRequestRequest;
 }
 
 export interface DenyMortgageRequestOperationRequest {
@@ -179,6 +210,14 @@ export interface GetGroundLeasesRequest {
     landParcelId?: string | null;
     homeId?: string | null;
     search?: string | null;
+}
+
+export interface GetImprovementRequestRequest {
+    improvementRequestId: string;
+}
+
+export interface GetImprovementRequestsRequest {
+    groundLeaseId: string;
 }
 
 export interface GetLeaseFeeBalancesRequest {
@@ -221,9 +260,19 @@ export interface PreviewResalePriceStatementsOperationRequest {
     previewResalePriceStatementsRequest: PreviewResalePriceStatementsRequest;
 }
 
+export interface ReceiveImprovementRequestOperationRequest {
+    groundLeaseId: string;
+    receiveImprovementRequestRequest: ReceiveImprovementRequestRequest;
+}
+
 export interface ReceiveMortgageRequestOperationRequest {
     groundLeaseId: string;
     receiveMortgageRequestRequest: ReceiveMortgageRequestRequest;
+}
+
+export interface RecordImprovementCompletedOperationRequest {
+    improvementRequestId: string;
+    recordImprovementCompletedRequest: RecordImprovementCompletedRequest;
 }
 
 export interface RecordInsuranceCertificateOperationRequest {
@@ -292,6 +341,11 @@ export interface WaiveLeaseFeeInterestOperationRequest {
     waiveLeaseFeeInterestRequest: WaiveLeaseFeeInterestRequest;
 }
 
+export interface WithdrawImprovementRequestOperationRequest {
+    improvementRequestId: string;
+    withdrawImprovementRequestRequest: WithdrawImprovementRequestRequest;
+}
+
 export interface WithdrawMortgageRequestOperationRequest {
     mortgageRequestId: string;
     withdrawMortgageRequestRequest: WithdrawMortgageRequestRequest;
@@ -304,6 +358,20 @@ export interface WithdrawMortgageRequestOperationRequest {
  * @interface GroundLeasesApiInterface
  */
 export interface GroundLeasesApiInterface {
+    /**
+     * 
+     * @param {string} improvementRequestId 
+     * @param {ApproveImprovementRequestRequest} approveImprovementRequestRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    approveImprovementRequestRaw(requestParameters: ApproveImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    approveImprovementRequest(requestParameters: ApproveImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
     /**
      * 
      * @param {string} mortgageRequestId 
@@ -344,6 +412,20 @@ export interface GroundLeasesApiInterface {
     /**
      */
     createGroundLease(requestParameters: CreateGroundLeaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {string} improvementRequestId 
+     * @param {DenyImprovementRequestRequest} denyImprovementRequestRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    denyImprovementRequestRaw(requestParameters: DenyImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    denyImprovementRequest(requestParameters: DenyImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -404,6 +486,32 @@ export interface GroundLeasesApiInterface {
     /**
      */
     getGroundLeases(requestParameters: GetGroundLeasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfGroundLeaseListItemResponse>;
+
+    /**
+     * 
+     * @param {string} improvementRequestId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    getImprovementRequestRaw(requestParameters: GetImprovementRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ImprovementRequestResponse>>;
+
+    /**
+     */
+    getImprovementRequest(requestParameters: GetImprovementRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ImprovementRequestResponse>;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    getImprovementRequestsRaw(requestParameters: GetImprovementRequestsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ImprovementRequestResponse>>>;
+
+    /**
+     */
+    getImprovementRequests(requestParameters: GetImprovementRequestsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ImprovementRequestResponse>>;
 
     /**
      * 
@@ -532,6 +640,20 @@ export interface GroundLeasesApiInterface {
     /**
      * 
      * @param {string} groundLeaseId 
+     * @param {ReceiveImprovementRequestRequest} receiveImprovementRequestRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    receiveImprovementRequestRaw(requestParameters: ReceiveImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    receiveImprovementRequest(requestParameters: ReceiveImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
      * @param {ReceiveMortgageRequestRequest} receiveMortgageRequestRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -542,6 +664,20 @@ export interface GroundLeasesApiInterface {
     /**
      */
     receiveMortgageRequest(requestParameters: ReceiveMortgageRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {string} improvementRequestId 
+     * @param {RecordImprovementCompletedRequest} recordImprovementCompletedRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    recordImprovementCompletedRaw(requestParameters: RecordImprovementCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    recordImprovementCompleted(requestParameters: RecordImprovementCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -728,6 +864,20 @@ export interface GroundLeasesApiInterface {
 
     /**
      * 
+     * @param {string} improvementRequestId 
+     * @param {WithdrawImprovementRequestRequest} withdrawImprovementRequestRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    withdrawImprovementRequestRaw(requestParameters: WithdrawImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    withdrawImprovementRequest(requestParameters: WithdrawImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
      * @param {string} mortgageRequestId 
      * @param {WithdrawMortgageRequestRequest} withdrawMortgageRequestRequest 
      * @param {*} [options] Override http request option.
@@ -746,6 +896,58 @@ export interface GroundLeasesApiInterface {
  * 
  */
 export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiInterface {
+
+    /**
+     */
+    async approveImprovementRequestRaw(requestParameters: ApproveImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['improvementRequestId'] == null) {
+            throw new runtime.RequiredError(
+                'improvementRequestId',
+                'Required parameter "improvementRequestId" was null or undefined when calling approveImprovementRequest().'
+            );
+        }
+
+        if (requestParameters['approveImprovementRequestRequest'] == null) {
+            throw new runtime.RequiredError(
+                'approveImprovementRequestRequest',
+                'Required parameter "approveImprovementRequestRequest" was null or undefined when calling approveImprovementRequest().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/improvement-requests/{improvementRequestId}/approve`;
+        urlPath = urlPath.replace(`{${"improvementRequestId"}}`, encodeURIComponent(String(requestParameters['improvementRequestId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ApproveImprovementRequestRequestToJSON(requestParameters['approveImprovementRequestRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async approveImprovementRequest(requestParameters: ApproveImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.approveImprovementRequestRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
 
     /**
      */
@@ -886,6 +1088,58 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
     async createGroundLease(requestParameters: CreateGroundLeaseOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.createGroundLeaseRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async denyImprovementRequestRaw(requestParameters: DenyImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['improvementRequestId'] == null) {
+            throw new runtime.RequiredError(
+                'improvementRequestId',
+                'Required parameter "improvementRequestId" was null or undefined when calling denyImprovementRequest().'
+            );
+        }
+
+        if (requestParameters['denyImprovementRequestRequest'] == null) {
+            throw new runtime.RequiredError(
+                'denyImprovementRequestRequest',
+                'Required parameter "denyImprovementRequestRequest" was null or undefined when calling denyImprovementRequest().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/improvement-requests/{improvementRequestId}/deny`;
+        urlPath = urlPath.replace(`{${"improvementRequestId"}}`, encodeURIComponent(String(requestParameters['improvementRequestId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: DenyImprovementRequestRequestToJSON(requestParameters['denyImprovementRequestRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async denyImprovementRequest(requestParameters: DenyImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.denyImprovementRequestRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
@@ -1083,6 +1337,76 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
      */
     async getGroundLeases(requestParameters: GetGroundLeasesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfGroundLeaseListItemResponse> {
         const response = await this.getGroundLeasesRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getImprovementRequestRaw(requestParameters: GetImprovementRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ImprovementRequestResponse>> {
+        if (requestParameters['improvementRequestId'] == null) {
+            throw new runtime.RequiredError(
+                'improvementRequestId',
+                'Required parameter "improvementRequestId" was null or undefined when calling getImprovementRequest().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/improvement-requests/{improvementRequestId}`;
+        urlPath = urlPath.replace(`{${"improvementRequestId"}}`, encodeURIComponent(String(requestParameters['improvementRequestId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ImprovementRequestResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getImprovementRequest(requestParameters: GetImprovementRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ImprovementRequestResponse> {
+        const response = await this.getImprovementRequestRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getImprovementRequestsRaw(requestParameters: GetImprovementRequestsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ImprovementRequestResponse>>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling getImprovementRequests().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/improvement-requests`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(ImprovementRequestResponseFromJSON));
+    }
+
+    /**
+     */
+    async getImprovementRequests(requestParameters: GetImprovementRequestsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ImprovementRequestResponse>> {
+        const response = await this.getImprovementRequestsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -1440,6 +1764,51 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
 
     /**
      */
+    async receiveImprovementRequestRaw(requestParameters: ReceiveImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling receiveImprovementRequest().'
+            );
+        }
+
+        if (requestParameters['receiveImprovementRequestRequest'] == null) {
+            throw new runtime.RequiredError(
+                'receiveImprovementRequestRequest',
+                'Required parameter "receiveImprovementRequestRequest" was null or undefined when calling receiveImprovementRequest().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/improvement-requests`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ReceiveImprovementRequestRequestToJSON(requestParameters['receiveImprovementRequestRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async receiveImprovementRequest(requestParameters: ReceiveImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.receiveImprovementRequestRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
     async receiveMortgageRequestRaw(requestParameters: ReceiveMortgageRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['groundLeaseId'] == null) {
             throw new runtime.RequiredError(
@@ -1481,6 +1850,58 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
     async receiveMortgageRequest(requestParameters: ReceiveMortgageRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.receiveMortgageRequestRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async recordImprovementCompletedRaw(requestParameters: RecordImprovementCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['improvementRequestId'] == null) {
+            throw new runtime.RequiredError(
+                'improvementRequestId',
+                'Required parameter "improvementRequestId" was null or undefined when calling recordImprovementCompleted().'
+            );
+        }
+
+        if (requestParameters['recordImprovementCompletedRequest'] == null) {
+            throw new runtime.RequiredError(
+                'recordImprovementCompletedRequest',
+                'Required parameter "recordImprovementCompletedRequest" was null or undefined when calling recordImprovementCompleted().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/improvement-requests/{improvementRequestId}/completed`;
+        urlPath = urlPath.replace(`{${"improvementRequestId"}}`, encodeURIComponent(String(requestParameters['improvementRequestId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RecordImprovementCompletedRequestToJSON(requestParameters['recordImprovementCompletedRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async recordImprovementCompleted(requestParameters: RecordImprovementCompletedOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordImprovementCompletedRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
@@ -2116,6 +2537,58 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
     async waiveLeaseFeeInterest(requestParameters: WaiveLeaseFeeInterestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.waiveLeaseFeeInterestRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async withdrawImprovementRequestRaw(requestParameters: WithdrawImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['improvementRequestId'] == null) {
+            throw new runtime.RequiredError(
+                'improvementRequestId',
+                'Required parameter "improvementRequestId" was null or undefined when calling withdrawImprovementRequest().'
+            );
+        }
+
+        if (requestParameters['withdrawImprovementRequestRequest'] == null) {
+            throw new runtime.RequiredError(
+                'withdrawImprovementRequestRequest',
+                'Required parameter "withdrawImprovementRequestRequest" was null or undefined when calling withdrawImprovementRequest().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/improvement-requests/{improvementRequestId}/withdraw`;
+        urlPath = urlPath.replace(`{${"improvementRequestId"}}`, encodeURIComponent(String(requestParameters['improvementRequestId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: WithdrawImprovementRequestRequestToJSON(requestParameters['withdrawImprovementRequestRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async withdrawImprovementRequest(requestParameters: WithdrawImprovementRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.withdrawImprovementRequestRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**

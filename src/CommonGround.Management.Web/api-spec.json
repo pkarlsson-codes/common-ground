@@ -3088,6 +3088,437 @@
         }
       }
     },
+    "/api/v1/ground-leases/{groundLeaseId}/improvement-requests": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "ReceiveImprovementRequest",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "ReceiveImprovementRequestRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceiveImprovementRequestRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiveImprovementRequestResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "GetImprovementRequests",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ImprovementRequestResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/improvement-requests/{improvementRequestId}": {
+      "get": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "GetImprovementRequest",
+        "parameters": [
+          {
+            "name": "improvementRequestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImprovementRequestResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/improvement-requests/{improvementRequestId}/approve": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "ApproveImprovementRequest",
+        "parameters": [
+          {
+            "name": "improvementRequestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "ApproveImprovementRequestRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveImprovementRequestRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/improvement-requests/{improvementRequestId}/deny": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "DenyImprovementRequest",
+        "parameters": [
+          {
+            "name": "improvementRequestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "DenyImprovementRequestRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DenyImprovementRequestRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/improvement-requests/{improvementRequestId}/completed": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "RecordImprovementCompleted",
+        "parameters": [
+          {
+            "name": "improvementRequestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordImprovementCompletedRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordImprovementCompletedRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/improvement-requests/{improvementRequestId}/withdraw": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "WithdrawImprovementRequest",
+        "parameters": [
+          {
+            "name": "improvementRequestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "WithdrawImprovementRequestRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawImprovementRequestRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ground-lease-templates": {
       "post": {
         "tags": [
@@ -10942,6 +11373,10 @@
             "format": "decimal",
             "nullable": true
           },
+          "approvedImprovements": {
+            "type": "number",
+            "format": "decimal"
+          },
           "homeownerFullName": {
             "type": "string",
             "nullable": true
@@ -13099,6 +13534,274 @@
       "WithdrawMortgageRequestRequest": {
         "type": "object",
         "description": "Request to record that the homeowner dropped a requested loan before it closed.",
+        "additionalProperties": false,
+        "properties": {
+          "withdrawnOn": {
+            "type": "string",
+            "description": "The day the homeowner withdrew it.",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the homeowner withdrew it."
+          }
+        }
+      },
+      "ReceiveImprovementRequestResponse": {
+        "type": "object",
+        "description": "The ID of an improvement request just recorded.",
+        "additionalProperties": false,
+        "properties": {
+          "improvementRequestId": {
+            "type": "string",
+            "description": "The request ID."
+          }
+        }
+      },
+      "ReceiveImprovementRequestRequest": {
+        "type": "object",
+        "description": "Request to record a homeowner's request to alter or add to the home (Model Lease Art 7.3).",
+        "additionalProperties": false,
+        "required": [
+          "estimatedCost"
+        ],
+        "properties": {
+          "receivedOn": {
+            "type": "string",
+            "description": "The day the request reached the trust; not in the future, not before the lease start.",
+            "format": "date"
+          },
+          "description": {
+            "type": "string",
+            "description": "What the homeowner wants to do."
+          },
+          "estimatedCost": {
+            "type": "number",
+            "description": "The homeowner's cost estimate; above zero.",
+            "format": "decimal"
+          }
+        }
+      },
+      "ImprovementRequestResponse": {
+        "type": "object",
+        "description": "A homeowner's request to alter or add to the home.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The request ID."
+          },
+          "groundLeaseId": {
+            "type": "string",
+            "description": "The homeowner's lease."
+          },
+          "homeId": {
+            "type": "string",
+            "description": "The home the work is on."
+          },
+          "homeownerFullName": {
+            "type": "string",
+            "description": "The homeowner's full name when the request arrived.",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "description": "Waiting for decision, Approved, Denied, Completed or Withdrawn."
+          },
+          "receivedOn": {
+            "type": "string",
+            "description": "The day the request reached the trust.",
+            "format": "date"
+          },
+          "replyDueOn": {
+            "type": "string",
+            "description": "The day the trust's reply is due: two weeks after receipt.",
+            "format": "date"
+          },
+          "description": {
+            "type": "string",
+            "description": "What the homeowner wants to do."
+          },
+          "estimatedCost": {
+            "type": "number",
+            "description": "The homeowner's cost estimate.",
+            "format": "decimal"
+          },
+          "approvedOn": {
+            "type": "string",
+            "description": "The day the trust approved the work.",
+            "format": "date",
+            "nullable": true
+          },
+          "preApprovedCredit": {
+            "type": "number",
+            "description": "The most the trust agreed to count.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "leaseImprovementsCap": {
+            "type": "number",
+            "description": "The lease's improvements cap when approved; null when the lease has none.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "creditOnLeaseBefore": {
+            "type": "number",
+            "description": "The confirmed credit the lease already had when this was approved.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "approvalNotes": {
+            "type": "string",
+            "description": "What staff noted when approving.",
+            "nullable": true
+          },
+          "deniedOn": {
+            "type": "string",
+            "description": "The day the trust refused the work.",
+            "format": "date",
+            "nullable": true
+          },
+          "denialReason": {
+            "type": "string",
+            "description": "Why the trust refused the work.",
+            "nullable": true
+          },
+          "completedOn": {
+            "type": "string",
+            "description": "The day the work finished.",
+            "format": "date",
+            "nullable": true
+          },
+          "actualCost": {
+            "type": "number",
+            "description": "What the work cost.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "receiptDocumentIds": {
+            "type": "array",
+            "description": "The receipts, as Documents file IDs.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirmedCredit": {
+            "type": "number",
+            "description": "The credit that counts toward the lease's improvements; null until completed.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "completionNotes": {
+            "type": "string",
+            "description": "What staff noted when recording the finished work.",
+            "nullable": true
+          },
+          "withdrawnOn": {
+            "type": "string",
+            "description": "The day the homeowner withdrew it.",
+            "format": "date",
+            "nullable": true
+          },
+          "withdrawnReason": {
+            "type": "string",
+            "description": "Why the homeowner withdrew it.",
+            "nullable": true
+          },
+          "recordedAt": {
+            "type": "string",
+            "description": "When the request was recorded.",
+            "format": "date-time"
+          }
+        }
+      },
+      "ApproveImprovementRequestRequest": {
+        "type": "object",
+        "description": "Request to approve the work with a pre-approved credit.",
+        "additionalProperties": false,
+        "required": [
+          "preApprovedCredit",
+          "notes"
+        ],
+        "properties": {
+          "approvedOn": {
+            "type": "string",
+            "description": "The day the trust approved it; not before receipt, not in the future.",
+            "format": "date"
+          },
+          "preApprovedCredit": {
+            "type": "number",
+            "description": "The most the trust will count, from zero to the estimated cost.",
+            "format": "decimal"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Anything staff want to note, or null.",
+            "minLength": 1,
+            "nullable": true
+          }
+        }
+      },
+      "DenyImprovementRequestRequest": {
+        "type": "object",
+        "description": "Request to refuse the work.",
+        "additionalProperties": false,
+        "properties": {
+          "deniedOn": {
+            "type": "string",
+            "description": "The day the trust refused it.",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why, for the denial letter."
+          }
+        }
+      },
+      "RecordImprovementCompletedRequest": {
+        "type": "object",
+        "description": "Request to record the finished work and confirm the credit.",
+        "additionalProperties": false,
+        "required": [
+          "actualCost",
+          "receiptDocumentIds",
+          "confirmedCredit",
+          "notes"
+        ],
+        "properties": {
+          "completedOn": {
+            "type": "string",
+            "description": "The day the work finished; not before approval, not in the future.",
+            "format": "date"
+          },
+          "actualCost": {
+            "type": "number",
+            "description": "What the work cost; above zero.",
+            "format": "decimal"
+          },
+          "receiptDocumentIds": {
+            "type": "array",
+            "description": "The receipts, as Documents file IDs. At least one.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirmedCredit": {
+            "type": "number",
+            "description": "The credit that counts, from zero to the pre-approved credit.",
+            "format": "decimal"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Anything staff want to note, or null.",
+            "minLength": 1,
+            "nullable": true
+          }
+        }
+      },
+      "WithdrawImprovementRequestRequest": {
+        "type": "object",
+        "description": "Request to record that the homeowner dropped the work.",
         "additionalProperties": false,
         "properties": {
           "withdrawnOn": {

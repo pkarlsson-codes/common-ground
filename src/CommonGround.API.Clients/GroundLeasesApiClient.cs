@@ -221,6 +221,60 @@ public sealed class GroundLeasesApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task<ReceiveImprovementRequestResponse> ReceiveImprovementRequestAsync(string groundLeaseId, ReceiveImprovementRequestRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        return await PostAsync<ReceiveImprovementRequestRequest, ReceiveImprovementRequestResponse>($"api/ground-leases/{groundLeaseId}/improvement-requests", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<ImprovementRequestResponse>> GetImprovementRequestsAsync(string groundLeaseId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        return await GetAsync<IReadOnlyList<ImprovementRequestResponse>>($"api/ground-leases/{groundLeaseId}/improvement-requests", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<ImprovementRequestResponse> GetImprovementRequestAsync(string improvementRequestId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(improvementRequestId);
+        return await GetAsync<ImprovementRequestResponse>($"api/improvement-requests/{improvementRequestId}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task ApproveImprovementRequestAsync(string improvementRequestId, ApproveImprovementRequestRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(improvementRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/improvement-requests/{improvementRequestId}/approve", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task DenyImprovementRequestAsync(string improvementRequestId, DenyImprovementRequestRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(improvementRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/improvement-requests/{improvementRequestId}/deny", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task RecordImprovementCompletedAsync(string improvementRequestId, RecordImprovementCompletedRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(improvementRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/improvement-requests/{improvementRequestId}/completed", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task WithdrawImprovementRequestAsync(string improvementRequestId, WithdrawImprovementRequestRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(improvementRequestId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/improvement-requests/{improvementRequestId}/withdraw", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task<ResalePriceStatementPriceResponse> PreviewResalePriceStatementAsync(string groundLeaseId, PreviewResalePriceStatementRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);

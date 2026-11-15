@@ -29,6 +29,7 @@ models/AddHouseholdMemberRequest.ts
 models/AddHouseholdMemberResponse.ts
 models/AppraisalDetailsDto.ts
 models/ApproveApplicationRequest.ts
+models/ApproveImprovementRequestRequest.ts
 models/ApproveMortgageRequestRequest.ts
 models/AttachDocumentRequest.ts
 models/CancelHomeSelectionRequest.ts
@@ -54,6 +55,7 @@ models/DemoModeResponse.ts
 models/DemoResponse.ts
 models/DemoSandboxResponse.ts
 models/DenyApplicationRequest.ts
+models/DenyImprovementRequestRequest.ts
 models/DenyMortgageRequestRequest.ts
 models/DevelopmentProjectListItemResponse.ts
 models/DevelopmentProjectResponse.ts
@@ -101,6 +103,7 @@ models/HouseholdMemberDto.ts
 models/HouseholdMemberRequest.ts
 models/HouseholdResponse.ts
 models/IdentifyViolationRequest.ts
+models/ImprovementRequestResponse.ts
 models/IncomeLimitLevelRequest.ts
 models/IncomeLimitLevelResponse.ts
 models/IncomeLimitScheduleRequest.ts
@@ -175,6 +178,8 @@ models/PurchaseIncomeLimitLevelDto.ts
 models/PurchaseIncomeLimitScheduleDto.ts
 models/PurchaseWorkflowListItemResponse.ts
 models/PurchaseWorkflowResponse.ts
+models/ReceiveImprovementRequestRequest.ts
+models/ReceiveImprovementRequestResponse.ts
 models/ReceiveMortgageRequestRequest.ts
 models/ReceiveMortgageRequestResponse.ts
 models/RecordAppraisalCompletedRequest.ts
@@ -187,6 +192,7 @@ models/RecordFinancingCommittedRequest.ts
 models/RecordForbearanceOutcomeRequest.ts
 models/RecordHomeAssessmentRequest.ts
 models/RecordHousingCounselingRequest.ts
+models/RecordImprovementCompletedRequest.ts
 models/RecordInspectionCompletedRequest.ts
 models/RecordInsuranceCertificateRequest.ts
 models/RecordInsuranceCertificateResponse.ts
@@ -265,6 +271,7 @@ models/WaitingListEntryResponse.ts
 models/WaiveLeaseFeeInterestRequest.ts
 models/WaiveLeaseFeeInterestResponse.ts
 models/WithdrawApplicationRequest.ts
+models/WithdrawImprovementRequestRequest.ts
 models/WithdrawIntentToSellRequest.ts
 models/WithdrawMortgageRequestRequest.ts
 models/WithdrawPurchaseRequest.ts
