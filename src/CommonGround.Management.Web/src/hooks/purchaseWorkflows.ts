@@ -17,7 +17,7 @@ import type {
 } from './types'
 import type { PurchaseWorkflowResponse } from '../api/models/PurchaseWorkflowResponse'
 import type { PurchaseWorkflowListItemResponse } from '../api/models/PurchaseWorkflowListItemResponse'
-import { trustToday } from '../lib/calendarDate'
+import { trustToday, type CalendarDate } from '../lib/calendarDate'
 import { uploadDocument } from './documents'
 
 const api = new PurchaseWorkflowsApi(apiConfig)
@@ -520,6 +520,90 @@ export function useStallWorkflow() {
     onError: (_e, vars, context) => {
       rollbackOptimisticWorkflowPhase(qc, vars.workflowId, context)
     },
+    onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
+  })
+}
+
+export interface CorrectEligibilityForm {
+  verifiedDate: CalendarDate
+  verifiedAnnualIncome: string
+  verifiedHouseholdSize: string
+  notes: string
+  /** New income documents. Empty keeps the recorded ones. */
+  incomeFiles: File[]
+  reason: string
+}
+
+export interface CorrectAppraisalForm {
+  appraisedValue: string
+  appraisalDate: CalendarDate
+  appraiserName: string
+  notes: string
+  reason: string
+}
+
+export interface CorrectFinancingForm {
+  lenderName: string
+  committedAmount: string
+  preapprovalLetterDate: CalendarDate
+  reason: string
+}
+
+export function useCorrectEligibility() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ workflowId, form }: { workflowId: string; form: CorrectEligibilityForm }) => {
+      const incomeDocumentIds: string[] = []
+      for (const file of form.incomeFiles) {
+        incomeDocumentIds.push(await uploadForPurchase(workflowId, file, `Income document ${file.name}`, 'income-document'))
+      }
+      return api.correctEligibility({
+        workflowId,
+        correctEligibilityRequest: {
+          verifiedDate: form.verifiedDate,
+          verifiedAnnualIncome: Number(form.verifiedAnnualIncome),
+          verifiedHouseholdSize: Number(form.verifiedHouseholdSize),
+          incomeDocumentIds: incomeDocumentIds.length > 0 ? incomeDocumentIds : undefined,
+          notes: form.notes || undefined,
+          reason: form.reason,
+        },
+      })
+    },
+    onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
+  })
+}
+
+export function useCorrectAppraisal() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ workflowId, form }: { workflowId: string; form: CorrectAppraisalForm }) =>
+      api.correctAppraisal({
+        workflowId,
+        correctAppraisalRequest: {
+          appraisedValue: Number(form.appraisedValue),
+          appraisalDate: form.appraisalDate,
+          appraiserName: form.appraiserName,
+          notes: form.notes || undefined,
+          reason: form.reason,
+        },
+      }),
+    onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
+  })
+}
+
+export function useCorrectFinancing() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ workflowId, form }: { workflowId: string; form: CorrectFinancingForm }) =>
+      api.correctFinancing({
+        workflowId,
+        correctFinancingRequest: {
+          lenderName: form.lenderName,
+          committedAmount: Number(form.committedAmount),
+          preapprovalLetterDate: form.preapprovalLetterDate,
+          reason: form.reason,
+        },
+      }),
     onSettled: (_d, _e, vars) => invalidateWorkflow(qc, vars.workflowId),
   })
 }

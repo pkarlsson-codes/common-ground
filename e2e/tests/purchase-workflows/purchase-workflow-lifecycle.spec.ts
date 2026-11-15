@@ -149,8 +149,8 @@ test('recording every track, scheduling, and closing a purchase creates the grou
 
   for (const label of ['Eligibility', 'Appraisal', 'Financing', 'Inspection', 'Title', 'Lease Execution', 'Disclosure']) {
     await expect(trackLabel(detail, label)).toHaveText(`✓ ${label}`)
-    // Completed tracks can't be re-opened.
-    await expect(track(detail, label).getByRole('button')).toHaveCount(0)
+    // Completed Eligibility, Appraisal and Financing tracks offer Correct (correct-purchase-track.spec.ts); the rest can't be re-opened.
+    await expect(track(detail, label).getByRole('button')).toHaveCount(['Eligibility', 'Appraisal', 'Financing'].includes(label) ? 1 : 0)
   }
 
   await expect(track(detail, 'Closing')).toContainText('Awaiting schedule')

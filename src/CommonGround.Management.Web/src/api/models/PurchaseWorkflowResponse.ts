@@ -49,6 +49,13 @@ import {
     DisclosureDetailsDtoToJSON,
     DisclosureDetailsDtoToJSONTyped,
 } from './DisclosureDetailsDto';
+import type { PurchaseCorrectionDto } from './PurchaseCorrectionDto';
+import {
+    PurchaseCorrectionDtoFromJSON,
+    PurchaseCorrectionDtoFromJSONTyped,
+    PurchaseCorrectionDtoToJSON,
+    PurchaseCorrectionDtoToJSONTyped,
+} from './PurchaseCorrectionDto';
 import type { FinancingDetailsDto } from './FinancingDetailsDto';
 import {
     FinancingDetailsDtoFromJSON,
@@ -91,6 +98,7 @@ import {
  * purchase didn't start from a selection, and IncomeLimit null when the home had no limit.
  * IncomeLimitSchedule is the schedule in effect when the selection started, every level of it, which the
  * income band is worked out from; null when none was in effect or the purchase didn't start from a selection.
+ * Corrections lists corrections to recorded tracks, newest first; null or empty means none.
  * @export
  * @interface PurchaseWorkflowResponse
  */
@@ -293,6 +301,12 @@ export interface PurchaseWorkflowResponse {
      * @memberof PurchaseWorkflowResponse
      */
     resolutionTargetDate?: CalendarDate | null;
+    /**
+     * 
+     * @type {Array<PurchaseCorrectionDto>}
+     * @memberof PurchaseWorkflowResponse
+     */
+    corrections?: Array<PurchaseCorrectionDto> | null;
 }
 
 /**
@@ -345,6 +359,7 @@ export function PurchaseWorkflowResponseFromJSONTyped(json: any, ignoreDiscrimin
         'stalledReason': json['stalledReason'] == null ? undefined : json['stalledReason'],
         'stalledDate': json['stalledDate'] == null ? undefined : CalendarDateFromJSON(json['stalledDate']),
         'resolutionTargetDate': json['resolutionTargetDate'] == null ? undefined : CalendarDateFromJSON(json['resolutionTargetDate']),
+        'corrections': json['corrections'] == null ? undefined : ((json['corrections'] as Array<any>).map(PurchaseCorrectionDtoFromJSON)),
     };
 }
 
@@ -392,6 +407,7 @@ export function PurchaseWorkflowResponseToJSONTyped(value?: PurchaseWorkflowResp
         'stalledReason': value['stalledReason'],
         'stalledDate': CalendarDateToJSON(value['stalledDate']),
         'resolutionTargetDate': CalendarDateToJSON(value['resolutionTargetDate']),
+        'corrections': value['corrections'] == null ? undefined : ((value['corrections'] as Array<any>).map(PurchaseCorrectionDtoToJSON)),
     };
 }
 

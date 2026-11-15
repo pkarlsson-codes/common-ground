@@ -7,6 +7,8 @@ interface PurchaseTrackSectionProps {
   expanded: boolean
   onToggle?: () => void
   expandable?: boolean
+  /** Replaces Expand on a recorded track, e.g. "Correct". Collapsing reads "Cancel". */
+  actionLabel?: string
   children?: ReactNode
 }
 
@@ -17,6 +19,7 @@ export default function PurchaseTrackSection({
   expanded,
   onToggle,
   expandable = true,
+  actionLabel,
   children,
 }: PurchaseTrackSectionProps) {
   return (
@@ -57,9 +60,9 @@ export default function PurchaseTrackSection({
             className="btn btn-ghost btn-sm"
             onClick={onToggle}
             aria-expanded={expanded}
-            aria-label={`${expanded ? 'Collapse' : 'Expand'} ${label}`}
+            aria-label={`${actionLabel ? (expanded ? 'Cancel' : actionLabel) : expanded ? 'Collapse' : 'Expand'} ${label}`}
           >
-            {expanded ? 'Collapse' : 'Expand'}
+            {actionLabel ? (expanded ? 'Cancel' : actionLabel) : expanded ? 'Collapse' : 'Expand'}
           </button>
         )}
       </div>

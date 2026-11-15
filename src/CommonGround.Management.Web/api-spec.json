@@ -7141,6 +7141,69 @@
             }
           }
         }
+      },
+      "put": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "operationId": "CorrectEligibility",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "CorrectEligibilityRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorrectEligibilityRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/purchase-workflows/{workflowId}/appraisal": {
@@ -7206,6 +7269,69 @@
             }
           }
         }
+      },
+      "put": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "operationId": "CorrectAppraisal",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "CorrectAppraisalRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorrectAppraisalRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/purchase-workflows/{workflowId}/financing": {
@@ -7232,6 +7358,69 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/RecordFinancingCommittedRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "PurchaseWorkflows"
+        ],
+        "operationId": "CorrectFinancing",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "CorrectFinancingRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorrectFinancingRequest"
               }
             }
           },
@@ -16888,7 +17077,7 @@
       },
       "PurchaseWorkflowResponse": {
         "type": "object",
-        "description": "Detail response for a purchase workflow. DeclaredAnnualIncome and DeclaredHouseholdSize are what the\nhousehold declared when selected, and IncomeLimit the limit the home's selection judged by; all null when the\npurchase didn't start from a selection, and IncomeLimit null when the home had no limit.\nIncomeLimitSchedule is the schedule in effect when the selection started, every level of it, which the\nincome band is worked out from; null when none was in effect or the purchase didn't start from a selection.",
+        "description": "Detail response for a purchase workflow. DeclaredAnnualIncome and DeclaredHouseholdSize are what the\nhousehold declared when selected, and IncomeLimit the limit the home's selection judged by; all null when the\npurchase didn't start from a selection, and IncomeLimit null when the home had no limit.\nIncomeLimitSchedule is the schedule in effect when the selection started, every level of it, which the\nincome band is worked out from; null when none was in effect or the purchase didn't start from a selection.\nCorrections lists corrections to recorded tracks, newest first; null or empty means none.",
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -17056,6 +17245,13 @@
             "type": "string",
             "format": "date",
             "nullable": true
+          },
+          "corrections": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/PurchaseCorrectionDto"
+            }
           }
         }
       },
@@ -17293,6 +17489,62 @@
           }
         }
       },
+      "PurchaseCorrectionDto": {
+        "type": "object",
+        "description": "One correction to a recorded track.",
+        "additionalProperties": false,
+        "properties": {
+          "track": {
+            "type": "string",
+            "description": "The track corrected: Eligibility, Appraisal or Financing."
+          },
+          "correctedAt": {
+            "type": "string",
+            "description": "When the correction was made.",
+            "format": "date-time"
+          },
+          "correctedBy": {
+            "type": "string",
+            "description": "The user who made it."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why it was made."
+          },
+          "changes": {
+            "type": "array",
+            "description": "The fields that changed, at least one.",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseCorrectionChangeDto"
+            }
+          }
+        }
+      },
+      "PurchaseCorrectionChangeDto": {
+        "type": "object",
+        "description": "One field a correction changed.",
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "The field name, such as AppraisedValue."
+          },
+          "kind": {
+            "type": "string",
+            "description": "How to show the values: Money, Date, Number, Text or Documents."
+          },
+          "was": {
+            "type": "string",
+            "description": "The value before, in invariant text, or null when there was none. Documents are comma-separated IDs.",
+            "nullable": true
+          },
+          "now": {
+            "type": "string",
+            "description": "The value after, in invariant text, or null when there is none.",
+            "nullable": true
+          }
+        }
+      },
       "PaginatedResponseOfPurchaseWorkflowListItemResponse": {
         "type": "object",
         "description": "Generic paginated response wrapper for API endpoints.",
@@ -17463,6 +17715,107 @@
           "preapprovalLetterDate": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "CorrectEligibilityRequest": {
+        "type": "object",
+        "description": "Request to correct a recorded eligibility verification. Every field is the value that should stand.",
+        "additionalProperties": false,
+        "required": [
+          "verifiedAnnualIncome",
+          "verifiedHouseholdSize"
+        ],
+        "properties": {
+          "verifiedDate": {
+            "type": "string",
+            "description": "Date eligibility was verified.",
+            "format": "date"
+          },
+          "verifiedAnnualIncome": {
+            "type": "number",
+            "description": "The household's annual income as the documents show it. Required.",
+            "format": "decimal"
+          },
+          "verifiedHouseholdSize": {
+            "type": "integer",
+            "description": "The number of people in the household as the documents show it. Required.",
+            "format": "int32"
+          },
+          "incomeDocumentIds": {
+            "type": "array",
+            "description": "Documents that replace the recorded ones. Null or empty keeps the recorded documents.",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes. Replaces the recorded notes.",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the record is corrected. Required.",
+            "nullable": true
+          }
+        }
+      },
+      "CorrectAppraisalRequest": {
+        "type": "object",
+        "description": "Request to correct a recorded appraisal. Every field is the value that should stand.",
+        "additionalProperties": false,
+        "properties": {
+          "appraisedValue": {
+            "type": "number",
+            "description": "The home's market value without the lease's restrictions.",
+            "format": "decimal"
+          },
+          "appraisalDate": {
+            "type": "string",
+            "description": "Date of the appraisal.",
+            "format": "date"
+          },
+          "appraiserName": {
+            "type": "string",
+            "description": "Name of the appraiser."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes. Replaces the recorded notes.",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the record is corrected. Required.",
+            "nullable": true
+          }
+        }
+      },
+      "CorrectFinancingRequest": {
+        "type": "object",
+        "description": "Request to correct a recorded financing commitment. Every field is the value that should stand.",
+        "additionalProperties": false,
+        "properties": {
+          "lenderName": {
+            "type": "string",
+            "description": "Name of the lender."
+          },
+          "committedAmount": {
+            "type": "number",
+            "description": "Amount committed.",
+            "format": "decimal"
+          },
+          "preapprovalLetterDate": {
+            "type": "string",
+            "description": "Date of the pre-approval letter.",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the record is corrected. Required.",
+            "nullable": true
           }
         }
       },

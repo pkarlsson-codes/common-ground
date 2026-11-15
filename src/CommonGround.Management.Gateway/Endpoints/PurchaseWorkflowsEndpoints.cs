@@ -96,6 +96,48 @@ public static class PurchaseWorkflowsEndpoints
         return Results.NoContent();
     }
 
+    [WolverinePut("/api/v1/purchase-workflows/{workflowId}/eligibility")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> CorrectEligibility(
+        string workflowId,
+        CorrectEligibilityRequest request,
+        IPurchaseWorkflowsApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.CorrectEligibilityAsync(workflowId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
+    [WolverinePut("/api/v1/purchase-workflows/{workflowId}/appraisal")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> CorrectAppraisal(
+        string workflowId,
+        CorrectAppraisalRequest request,
+        IPurchaseWorkflowsApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.CorrectAppraisalAsync(workflowId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
+    [WolverinePut("/api/v1/purchase-workflows/{workflowId}/financing")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> CorrectFinancing(
+        string workflowId,
+        CorrectFinancingRequest request,
+        IPurchaseWorkflowsApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.CorrectFinancingAsync(workflowId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
     [WolverinePost("/api/v1/purchase-workflows/{workflowId}/inspection")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public static async Task<IResult> RecordInspectionCompleted(

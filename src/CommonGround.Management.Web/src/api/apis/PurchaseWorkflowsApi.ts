@@ -16,6 +16,9 @@
 
 import * as runtime from '../runtime';
 import type {
+  CorrectAppraisalRequest,
+  CorrectEligibilityRequest,
+  CorrectFinancingRequest,
   FailPurchaseRequest,
   InitiatePurchaseWorkflowRequest,
   InitiatePurchaseWorkflowResponse,
@@ -36,6 +39,12 @@ import type {
   WithdrawPurchaseRequest,
 } from '../models/index';
 import {
+    CorrectAppraisalRequestFromJSON,
+    CorrectAppraisalRequestToJSON,
+    CorrectEligibilityRequestFromJSON,
+    CorrectEligibilityRequestToJSON,
+    CorrectFinancingRequestFromJSON,
+    CorrectFinancingRequestToJSON,
     FailPurchaseRequestFromJSON,
     FailPurchaseRequestToJSON,
     InitiatePurchaseWorkflowRequestFromJSON,
@@ -73,6 +82,21 @@ import {
     WithdrawPurchaseRequestFromJSON,
     WithdrawPurchaseRequestToJSON,
 } from '../models/index';
+
+export interface CorrectAppraisalOperationRequest {
+    workflowId: string;
+    correctAppraisalRequest: CorrectAppraisalRequest;
+}
+
+export interface CorrectEligibilityOperationRequest {
+    workflowId: string;
+    correctEligibilityRequest: CorrectEligibilityRequest;
+}
+
+export interface CorrectFinancingOperationRequest {
+    workflowId: string;
+    correctFinancingRequest: CorrectFinancingRequest;
+}
 
 export interface FailPurchaseOperationRequest {
     workflowId: string;
@@ -159,6 +183,48 @@ export interface WithdrawPurchaseOperationRequest {
  * @interface PurchaseWorkflowsApiInterface
  */
 export interface PurchaseWorkflowsApiInterface {
+    /**
+     * 
+     * @param {string} workflowId 
+     * @param {CorrectAppraisalRequest} correctAppraisalRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PurchaseWorkflowsApiInterface
+     */
+    correctAppraisalRaw(requestParameters: CorrectAppraisalOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    correctAppraisal(requestParameters: CorrectAppraisalOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {string} workflowId 
+     * @param {CorrectEligibilityRequest} correctEligibilityRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PurchaseWorkflowsApiInterface
+     */
+    correctEligibilityRaw(requestParameters: CorrectEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    correctEligibility(requestParameters: CorrectEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {string} workflowId 
+     * @param {CorrectFinancingRequest} correctFinancingRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PurchaseWorkflowsApiInterface
+     */
+    correctFinancingRaw(requestParameters: CorrectFinancingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    correctFinancing(requestParameters: CorrectFinancingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
     /**
      * 
      * @param {string} workflowId 
@@ -390,6 +456,162 @@ export interface PurchaseWorkflowsApiInterface {
  * 
  */
 export class PurchaseWorkflowsApi extends runtime.BaseAPI implements PurchaseWorkflowsApiInterface {
+
+    /**
+     */
+    async correctAppraisalRaw(requestParameters: CorrectAppraisalOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['workflowId'] == null) {
+            throw new runtime.RequiredError(
+                'workflowId',
+                'Required parameter "workflowId" was null or undefined when calling correctAppraisal().'
+            );
+        }
+
+        if (requestParameters['correctAppraisalRequest'] == null) {
+            throw new runtime.RequiredError(
+                'correctAppraisalRequest',
+                'Required parameter "correctAppraisalRequest" was null or undefined when calling correctAppraisal().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/purchase-workflows/{workflowId}/appraisal`;
+        urlPath = urlPath.replace(`{${"workflowId"}}`, encodeURIComponent(String(requestParameters['workflowId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CorrectAppraisalRequestToJSON(requestParameters['correctAppraisalRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async correctAppraisal(requestParameters: CorrectAppraisalOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.correctAppraisalRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
+    async correctEligibilityRaw(requestParameters: CorrectEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['workflowId'] == null) {
+            throw new runtime.RequiredError(
+                'workflowId',
+                'Required parameter "workflowId" was null or undefined when calling correctEligibility().'
+            );
+        }
+
+        if (requestParameters['correctEligibilityRequest'] == null) {
+            throw new runtime.RequiredError(
+                'correctEligibilityRequest',
+                'Required parameter "correctEligibilityRequest" was null or undefined when calling correctEligibility().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/purchase-workflows/{workflowId}/eligibility`;
+        urlPath = urlPath.replace(`{${"workflowId"}}`, encodeURIComponent(String(requestParameters['workflowId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CorrectEligibilityRequestToJSON(requestParameters['correctEligibilityRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async correctEligibility(requestParameters: CorrectEligibilityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.correctEligibilityRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
+    async correctFinancingRaw(requestParameters: CorrectFinancingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['workflowId'] == null) {
+            throw new runtime.RequiredError(
+                'workflowId',
+                'Required parameter "workflowId" was null or undefined when calling correctFinancing().'
+            );
+        }
+
+        if (requestParameters['correctFinancingRequest'] == null) {
+            throw new runtime.RequiredError(
+                'correctFinancingRequest',
+                'Required parameter "correctFinancingRequest" was null or undefined when calling correctFinancing().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/purchase-workflows/{workflowId}/financing`;
+        urlPath = urlPath.replace(`{${"workflowId"}}`, encodeURIComponent(String(requestParameters['workflowId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CorrectFinancingRequestToJSON(requestParameters['correctFinancingRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async correctFinancing(requestParameters: CorrectFinancingOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.correctFinancingRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
 
     /**
      */

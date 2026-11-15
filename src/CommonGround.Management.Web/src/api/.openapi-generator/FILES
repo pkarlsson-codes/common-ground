@@ -38,6 +38,9 @@ models/CloseHeirTransferRequest.ts
 models/CloseStewardshipCaseRequest.ts
 models/CompleteHeirTransferRequest.ts
 models/CompletePropertyInspectionRequest.ts
+models/CorrectAppraisalRequest.ts
+models/CorrectEligibilityRequest.ts
+models/CorrectFinancingRequest.ts
 models/CorrectLeaseFeeTrackingRequest.ts
 models/CounselingReferralResponse.ts
 models/CreateGroundLeaseRequest.ts
@@ -180,6 +183,8 @@ models/PropertyInspectionResponse.ts
 models/PurchaseBoardCardResponse.ts
 models/PurchaseBoardColumnResponse.ts
 models/PurchaseBoardResponse.ts
+models/PurchaseCorrectionChangeDto.ts
+models/PurchaseCorrectionDto.ts
 models/PurchaseIncomeLimitDto.ts
 models/PurchaseIncomeLimitLevelDto.ts
 models/PurchaseIncomeLimitScheduleDto.ts

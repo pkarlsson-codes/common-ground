@@ -10,9 +10,10 @@ import { usePurchaseWorkflowDetailController } from './usePurchaseWorkflowDetail
 import { DateInput } from '../../components/DateInput'
 import { useEffect } from 'react'
 import type { PurchaseWorkflowResponse } from '../../api'
-import type { RecordEligibilityForm } from '../../hooks/types'
 import { formatCalendarDate, trustToday } from '../../lib/calendarDate'
-import { incomeBandFor, incomeBandLabel, PRINTED_HOUSEHOLD_SIZES } from '../../lib/incomeBand'
+import { incomeBandLabel } from '../../lib/incomeBand'
+import { EligibilityIncomeCheck } from './EligibilityIncomeCheck'
+import { CorrectAppraisalPanel, CorrectEligibilityPanel, CorrectFinancingPanel, CorrectionsList } from './PurchaseTrackCorrections'
 
 const fmtCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
@@ -27,39 +28,6 @@ const incomeLimitDescription = (detail: PurchaseWorkflowResponse) => {
   }
   const effective = limit.effectiveFrom ? `, limits effective ${formatCalendarDate(limit.effectiveFrom)}` : ''
   return `${limit.percentOfAmi}% of AMI${effective}`
-}
-
-/**
- * The limit for the household size typed into the eligibility form, read from the selection's printed row, and
- * the income band the typed income falls in. Above 8 people the API works both out when the verification is recorded.
- */
-function EligibilityIncomeCheck({ detail, form }: { detail: PurchaseWorkflowResponse; form: RecordEligibilityForm }) {
-  const limits = detail.incomeLimit?.limits
-  const levels = detail.incomeLimitSchedule?.levels
-  const size = Number(form.verifiedHouseholdSize)
-  if ((!limits && !levels) || form.verifiedHouseholdSize === '' || !Number.isInteger(size) || size < 1) return null
-
-  const people = `${size} ${size === 1 ? 'person' : 'people'}`
-  if (size > PRINTED_HOUSEHOLD_SIZES) {
-    return (
-      <div className="form-hint" role="status">
-        {limits ? `Limit for ${people}: worked out when recorded` : `Income band for ${people}: worked out when recorded`}
-      </div>
-    )
-  }
-
-  const income = form.verifiedAnnualIncome === '' ? null : Number(form.verifiedAnnualIncome)
-  const limit = limits?.[size - 1]
-  const over = income != null && limit != null && income > limit
-  const band = income != null && levels ? incomeBandFor(levels, income, size) : null
-  const bandText = band ? incomeBandLabel(band) : null
-  return (
-    <div className="form-hint" role="status">
-      {limit != null && <>Limit for {people}: {fmtCurrency(limit)}</>}
-      {over && <> <span className="badge badge-overincomelimit">Over income limit</span></>}
-      {bandText && <>{limit != null ? ' · ' : ''}Income band: {bandText}</>}
-    </div>
-  )
 }
 
 const eligibilitySummary = (detail: PurchaseWorkflowResponse) => {
@@ -132,10 +100,13 @@ export default function PurchaseWorkflowDetailPanel({
                 label="Eligibility"
                 summary={eligibilitySummary(detail)}
                 complete={!!detail.eligibilityDetails}
-                expandable={!detail.eligibilityDetails}
+                actionLabel={detail.eligibilityDetails ? 'Correct' : undefined}
                 expanded={s.expandedTracks.has('eligibility')}
                 onToggle={() => s.toggleTrack('eligibility')}
               >
+                {detail.eligibilityDetails ? (
+                  <CorrectEligibilityPanel detail={detail} showToast={showToast} onDone={() => s.collapseTrack('eligibility')} />
+                ) : (
                 <form onSubmit={e => s.handleElig(e, s.eligForm)}>
                   <div style={{ marginBottom: 10, fontSize: 12, color: 'var(--text-secondary)' }}>
                     Income limit: {incomeLimitDescription(detail)}
@@ -213,6 +184,7 @@ export default function PurchaseWorkflowDetailPanel({
                     {s.eligPending ? 'Saving…' : 'Record Eligibility'}
                   </button>
                 </form>
+                )}
               </PurchaseTrackSection>
 
               <PurchaseTrackSection
@@ -223,10 +195,13 @@ export default function PurchaseWorkflowDetailPanel({
                     : 'Pending'
                 }
                 complete={!!detail.appraisalDetails}
-                expandable={!detail.appraisalDetails}
+                actionLabel={detail.appraisalDetails ? 'Correct' : undefined}
                 expanded={s.expandedTracks.has('appraisal')}
                 onToggle={() => s.toggleTrack('appraisal')}
               >
+                {detail.appraisalDetails ? (
+                  <CorrectAppraisalPanel detail={detail} showToast={showToast} onDone={() => s.collapseTrack('appraisal')} />
+                ) : (
                 <form onSubmit={e => s.handleAppraisal(e, s.appraisalForm)}>
                   <div className="form-grid" style={{ marginBottom: 10 }}>
                     <div className="form-field">
@@ -272,6 +247,7 @@ export default function PurchaseWorkflowDetailPanel({
                     {s.appraisalPending ? 'Saving…' : 'Record Appraisal'}
                   </button>
                 </form>
+                )}
               </PurchaseTrackSection>
 
               <PurchaseTrackSection
@@ -282,10 +258,13 @@ export default function PurchaseWorkflowDetailPanel({
                     : 'Pending'
                 }
                 complete={!!detail.financingDetails}
-                expandable={!detail.financingDetails}
+                actionLabel={detail.financingDetails ? 'Correct' : undefined}
                 expanded={s.expandedTracks.has('financing')}
                 onToggle={() => s.toggleTrack('financing')}
               >
+                {detail.financingDetails ? (
+                  <CorrectFinancingPanel detail={detail} showToast={showToast} onDone={() => s.collapseTrack('financing')} />
+                ) : (
                 <form onSubmit={e => s.handleFin(e, s.finForm)}>
                   <div className="form-grid" style={{ marginBottom: 10 }}>
                     <div className="form-field">
@@ -323,6 +302,7 @@ export default function PurchaseWorkflowDetailPanel({
                     {s.finPending ? 'Saving…' : 'Record Financing'}
                   </button>
                 </form>
+                )}
               </PurchaseTrackSection>
 
               <PurchaseTrackSection
@@ -566,6 +546,12 @@ export default function PurchaseWorkflowDetailPanel({
                   </PurchaseTrackSection>
                 )
               })()}
+            </div>
+          )}
+
+          {(detail.corrections?.length ?? 0) > 0 && (
+            <div className="detail-section">
+              <CorrectionsList corrections={detail.corrections ?? []} />
             </div>
           )}
 
