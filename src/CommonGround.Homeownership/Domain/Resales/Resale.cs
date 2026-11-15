@@ -75,10 +75,10 @@ public sealed class Resale : AggregateRoot<ResaleId>
     /// </summary>
     public ResaleAppraisalRecorded RecordAppraisal(
         GroundLease lease,
-        decimal appraisedValue,
+        Money appraisedValue,
         DateOnly appraisalDate,
         string appraiserName,
-        decimal? approvedImprovements,
+        Money? approvedImprovements,
         decimal? currentIndexValue,
         DateOnly today,
         UserId recordedBy)
@@ -94,8 +94,8 @@ public sealed class Resale : AggregateRoot<ResaleId>
         if (lease.OriginalAppraisedValue is not { } originalAppraisedValue)
             throw BusinessRuleViolation.Resale.RecordAppraisal.LeaseFiguresMissing();
 
-        if (appraisedValue <= 0)
-            throw BusinessRuleViolation.Resale.RecordAppraisal.AppraisedValueNonPositive(appraisedValue);
+        if (!appraisedValue.IsPositive)
+            throw BusinessRuleViolation.Resale.RecordAppraisal.AppraisedValueNonPositive(appraisedValue.Amount);
 
         if (string.IsNullOrWhiteSpace(appraiserName))
             throw BusinessRuleViolation.Resale.RecordAppraisal.AppraiserRequired();
@@ -106,8 +106,8 @@ public sealed class Resale : AggregateRoot<ResaleId>
         if (appraisalDate > today)
             throw BusinessRuleViolation.Resale.RecordAppraisal.AppraisalDateInFuture(appraisalDate, today);
 
-        if (approvedImprovements < 0)
-            throw BusinessRuleViolation.Resale.RecordAppraisal.ApprovedImprovementsNegative(approvedImprovements.Value);
+        if (approvedImprovements is { IsNegative: true })
+            throw BusinessRuleViolation.Resale.RecordAppraisal.ApprovedImprovementsNegative(approvedImprovements.Amount);
 
         if (currentIndexValue <= 0)
             throw BusinessRuleViolation.Resale.RecordAppraisal.CurrentIndexValueNonPositive(currentIndexValue.Value);
@@ -129,8 +129,8 @@ public sealed class Resale : AggregateRoot<ResaleId>
             appraiserName.Trim(),
             approvedImprovements,
             currentIndexValue,
-            price.FormulaPrice.Amount,
-            price.PurchaseOptionPrice.Amount,
+            price.FormulaPrice,
+            price.PurchaseOptionPrice,
             recordedBy.Value);
     }
 
@@ -164,7 +164,7 @@ public sealed class Resale : AggregateRoot<ResaleId>
     /// </summary>
     public BuybackClosed CloseBuyback(
         DateOnly closingDate,
-        decimal pricePaid,
+        Money pricePaid,
         string? notes,
         bool offerForSale,
         string? holdReason,
@@ -183,11 +183,11 @@ public sealed class Resale : AggregateRoot<ResaleId>
         if (closingDate > today)
             throw BusinessRuleViolation.Resale.CloseBuyback.ClosingDateInFuture(closingDate, today);
 
-        if (pricePaid <= 0)
-            throw BusinessRuleViolation.Resale.CloseBuyback.PricePaidNonPositive(pricePaid);
+        if (!pricePaid.IsPositive)
+            throw BusinessRuleViolation.Resale.CloseBuyback.PricePaidNonPositive(pricePaid.Amount);
 
         if (pricePaid > Appraisal.PurchaseOptionPrice)
-            throw BusinessRuleViolation.Resale.CloseBuyback.PricePaidAboveOptionPrice(pricePaid, Appraisal.PurchaseOptionPrice);
+            throw BusinessRuleViolation.Resale.CloseBuyback.PricePaidAboveOptionPrice(pricePaid.Amount, Appraisal.PurchaseOptionPrice.Amount);
 
         if (!offerForSale && string.IsNullOrWhiteSpace(holdReason))
             throw BusinessRuleViolation.Resale.CloseBuyback.HoldReasonRequired();

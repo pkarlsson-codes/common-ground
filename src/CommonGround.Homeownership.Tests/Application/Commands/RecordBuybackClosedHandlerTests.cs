@@ -26,17 +26,17 @@ public class RecordBuybackClosedHandlerTests
             var resaleId = ResaleId.Generate();
             var lease = EventReplay.Replay<GroundLease>(GroundLease.Establish(
                 GroundLeaseId.Generate(), "land-parcel-1234", "home-5678", Homeowner.From("Dana Whitfield", "dana@example.com"),
-                new DateOnly(2020, 1, 1), 99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), 200_000m, 250_000m, "Covenants", ResalePolicyTerms.AppraisalBased(0.25m),
+                new DateOnly(2020, 1, 1), 99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), Money.Create(200_000m), Money.Create(250_000m), "Covenants", ResalePolicyTerms.AppraisalBased(0.25m),
                 HomeCommitments.None, staff));
             var resale = EventReplay.Replay<Resale>(
                 Resale.RecordIntentToSell(resaleId, lease, Today, NoticeChannel.Phone, null, Today, staff));
-            resale = resale.Decide(r => r.RecordAppraisal(lease, 270_000, Today, "Hollis", null, null, Today, staff)).Aggregate;
+            resale = resale.Decide(r => r.RecordAppraisal(lease, Money.Create(270_000), Today, "Hollis", null, null, Today, staff)).Aggregate;
             resale = resale.Decide(r => r.ExerciseOption(Today, null, Today, staff)).Aggregate;
             var resaleStream = new StubEventStream<Resale>(resale);
             var leaseStream = new StubEventStream<GroundLease>(lease.Evolve(new ResaleStarted(lease.Id.Value, resaleId.Value))!);
 
             RecordBuybackClosedHandler.Handle(
-                new RecordBuybackClosed(resaleId, Today, 205_000, null, true, null, staff),
+                new RecordBuybackClosed(resaleId, Today, Money.Create(205_000), null, true, null, staff),
                 new BuybackClosing(resaleStream, leaseStream, Today));
 
             resaleStream.EventsAppended.Should().ContainSingle().Which.Should().BeOfType<BuybackClosed>();

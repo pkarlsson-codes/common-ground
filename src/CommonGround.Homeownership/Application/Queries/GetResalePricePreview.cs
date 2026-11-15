@@ -2,6 +2,7 @@ using CommonGround.Homeownership.Application.Errors;
 using CommonGround.Homeownership.Application.ReadModels;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.Homeownership.Domain.Resales;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using Marten;
 
@@ -10,9 +11,9 @@ namespace CommonGround.Homeownership.Application.Queries;
 /// <summary>Works out the prices a resale appraisal would set, without recording it.</summary>
 public sealed record GetResalePricePreview(
     ResaleId ResaleId,
-    decimal AppraisedValue,
+    Money AppraisedValue,
     DateOnly AppraisalDate,
-    decimal? ApprovedImprovements,
+    Money? ApprovedImprovements,
     decimal? CurrentIndexValue);
 
 /// <summary>Handles <see cref="GetResalePricePreview"/>.</summary>
@@ -35,8 +36,8 @@ public static class GetResalePricePreviewHandler
         if (lease.OriginalAppraisedValue is not { } originalAppraisedValue)
             throw BusinessRuleViolation.Resale.RecordAppraisal.LeaseFiguresMissing();
 
-        if (request.AppraisedValue <= 0)
-            throw BusinessRuleViolation.Resale.RecordAppraisal.AppraisedValueNonPositive(request.AppraisedValue);
+        if (!request.AppraisedValue.IsPositive)
+            throw BusinessRuleViolation.Resale.RecordAppraisal.AppraisedValueNonPositive(request.AppraisedValue.Amount);
 
         var terms = ResalePolicyTerms.FromString(
             lease.FormulaKind,
@@ -48,8 +49,8 @@ public static class GetResalePricePreviewHandler
 
         return ResalePrice.Calculate(
             terms,
-            lease.BasePrice,
-            originalAppraisedValue,
+            Money.Create(lease.BasePrice),
+            Money.Create(originalAppraisedValue),
             lease.LeaseStartDate,
             request.AppraisedValue,
             request.AppraisalDate,

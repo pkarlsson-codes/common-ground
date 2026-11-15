@@ -1,3 +1,5 @@
+using CommonGround.SharedKernel.Domain;
+
 namespace CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 
 /// <summary>Runtime inputs required to calculate a resale price.</summary>
@@ -8,9 +10,9 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 /// <param name="ApprovedImprovements">Value of CLT-approved improvements, if any.</param>
 /// <param name="CurrentIndexValue">Current value of the index (required for IndexBased formula).</param>
 public sealed record ResaleCalculationInput(
-    decimal OriginalPurchasePrice,
-    decimal CurrentAppraisalValue,
-    decimal OriginalAppraisalValue,
+    Money OriginalPurchasePrice,
+    Money CurrentAppraisalValue,
+    Money OriginalAppraisalValue,
     int OwnershipYears,
-    decimal? ApprovedImprovements = null,
+    Money? ApprovedImprovements = null,
     decimal? CurrentIndexValue = null);

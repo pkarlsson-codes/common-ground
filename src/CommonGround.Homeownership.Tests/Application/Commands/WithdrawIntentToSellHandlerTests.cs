@@ -26,7 +26,7 @@ public class WithdrawIntentToSellHandlerTests
             var staff = UserId.Generate();
             var lease = EventReplay.Replay<GroundLease>(GroundLease.Establish(
                 GroundLeaseId.Generate(), "land-parcel-1234", "home-5678", Homeowner.From("Dana Whitfield", "dana@example.com"),
-                new DateOnly(2020, 1, 1), 99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), 200_000m, 250_000m, "Covenants", ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, staff));
+                new DateOnly(2020, 1, 1), 99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), Money.Create(200_000m), Money.Create(250_000m), "Covenants", ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, staff));
             var resale = EventReplay.Replay<Resale>(
                 Resale.RecordIntentToSell(resaleId, lease, Today, NoticeChannel.Phone, null, Today, staff));
             var resaleStream = new StubEventStream<Resale>(resale);

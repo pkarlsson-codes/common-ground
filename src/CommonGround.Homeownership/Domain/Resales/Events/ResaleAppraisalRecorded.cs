@@ -1,3 +1,4 @@
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.Homeownership.Domain.Resales.Events;
@@ -17,11 +18,11 @@ namespace CommonGround.Homeownership.Domain.Resales.Events;
 /// <param name="RecordedBy">The user who recorded the appraisal.</param>
 public sealed record ResaleAppraisalRecorded(
     string AggregateId,
-    decimal AppraisedValue,
+    Money AppraisedValue,
     DateOnly AppraisalDate,
     string AppraiserName,
-    decimal? ApprovedImprovements,
+    Money? ApprovedImprovements,
     decimal? CurrentIndexValue,
-    decimal FormulaPrice,
-    decimal PurchaseOptionPrice,
+    Money FormulaPrice,
+    Money PurchaseOptionPrice,
     string RecordedBy) : DomainEvent(AggregateId);

@@ -21,7 +21,7 @@ public class ResalePriceStatementPriceTests
             DateOnly? statementDate = null,
             decimal? originalAppraisedValue = 260_000m) =>
             ResalePriceStatementPrice.Calculate(
-                terms, 180_000m, originalAppraisedValue, LeaseStart, statementDate ?? Today, Today, figures);
+                terms, Money.Create(180_000m), Money.CreateOrNull(originalAppraisedValue), LeaseStart, statementDate ?? Today, Today, figures);
     }
 
     public class TheCalculateMethod
@@ -31,7 +31,7 @@ public class ResalePriceStatementPriceTests
         {
             var price = TestBed.Price(
                 ResalePolicyTerms.IndexBased("CPI-U", 290.0m),
-                new ResalePriceStatementFigures(320_000m, "County", 312.5m, null));
+                new ResalePriceStatementFigures(Money.Create(320_000m), "County", 312.5m, null));
 
             price.Should().BeEquivalentTo(new
             {
@@ -47,7 +47,7 @@ public class ResalePriceStatementPriceTests
         {
             var price = TestBed.Price(
                 ResalePolicyTerms.AppraisalBased(0.25m),
-                new ResalePriceStatementFigures(320_000m, "  County assessment 2026 ", null, null));
+                new ResalePriceStatementFigures(Money.Create(320_000m), "  County assessment 2026 ", null, null));
 
             price.Should().BeEquivalentTo(new
             {
@@ -74,7 +74,7 @@ public class ResalePriceStatementPriceTests
         [InlineData(4_000, 4_000)]
         public void GivenImprovementsCap_WhenCalculated_ThenCountsTheCreditUpToTheCap(int credit, int counted)
         {
-            var price = TestBed.Price(ResalePolicyTerms.FixedPercentage(0m, 5_000m), new ResalePriceStatementFigures(null, null, null, credit));
+            var price = TestBed.Price(ResalePolicyTerms.FixedPercentage(0m, 5_000m), new ResalePriceStatementFigures(null, null, null, Money.CreateOrNull(credit)));
 
             price.ImprovementsCredit.Should().Be(Money.Create(counted));
             price.Price.Should().Be(Money.Create(180_000m + counted));
@@ -83,7 +83,7 @@ public class ResalePriceStatementPriceTests
         [Fact]
         public void GivenNoImprovementsCap_WhenCalculated_ThenIgnoresTheCredit()
         {
-            var price = TestBed.Price(ResalePolicyTerms.FixedPercentage(0m), new ResalePriceStatementFigures(null, null, null, 4_000m));
+            var price = TestBed.Price(ResalePolicyTerms.FixedPercentage(0m), new ResalePriceStatementFigures(null, null, null, Money.Create(4_000m)));
 
             price.ImprovementsCredit.Should().BeNull();
             price.Price.Should().Be(Money.Create(180_000m));
@@ -108,7 +108,7 @@ public class ResalePriceStatementPriceTests
             int? marketValue, string source, string code)
         {
             var act = () => TestBed.Price(
-                ResalePolicyTerms.AppraisalBased(0.25m), new ResalePriceStatementFigures(marketValue, source, null, null));
+                ResalePolicyTerms.AppraisalBased(0.25m), new ResalePriceStatementFigures(Money.CreateOrNull(marketValue), source, null, null));
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("homeownership.ground_lease.record_resale_price_statement." + code);
@@ -119,7 +119,7 @@ public class ResalePriceStatementPriceTests
         {
             var act = () => TestBed.Price(
                 ResalePolicyTerms.AppraisalBased(0.25m),
-                new ResalePriceStatementFigures(320_000m, "County", null, null),
+                new ResalePriceStatementFigures(Money.Create(320_000m), "County", null, null),
                 originalAppraisedValue: null);
 
             act.Should().Throw<BusinessRuleViolationException>()
@@ -142,7 +142,7 @@ public class ResalePriceStatementPriceTests
         public void GivenNegativeImprovementsCredit_WhenCalculated_ThenThrowsBusinessRuleViolation()
         {
             var act = () => TestBed.Price(
-                ResalePolicyTerms.FixedPercentage(0m, 5_000m), new ResalePriceStatementFigures(null, null, null, -1m));
+                ResalePolicyTerms.FixedPercentage(0m, 5_000m), new ResalePriceStatementFigures(null, null, null, Money.Create(-1m)));
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("homeownership.ground_lease.record_resale_price_statement.improvements_credit_negative");

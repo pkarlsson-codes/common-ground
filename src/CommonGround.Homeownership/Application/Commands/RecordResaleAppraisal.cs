@@ -19,10 +19,10 @@ namespace CommonGround.Homeownership.Application.Commands;
 /// <param name="RecordedBy">The staff user recording it.</param>
 public sealed record RecordResaleAppraisal(
     ResaleId ResaleId,
-    decimal AppraisedValue,
+    Money AppraisedValue,
     DateOnly AppraisalDate,
     string AppraiserName,
-    decimal? ApprovedImprovements,
+    Money? ApprovedImprovements,
     decimal? CurrentIndexValue,
     UserId RecordedBy);
 

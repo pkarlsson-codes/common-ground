@@ -1,3 +1,4 @@
+using CommonGround.SharedKernel.Domain;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using FluentAssertions;
@@ -7,11 +8,11 @@ namespace CommonGround.Homeownership.Tests.Domain.GroundLeases;
 public class ResalePriceCalculatorTests
 {
     private static readonly ResaleCalculationInput StandardInput = new(
-        OriginalPurchasePrice: 200_000m,
-        CurrentAppraisalValue: 300_000m,
-        OriginalAppraisalValue: 200_000m,
+        OriginalPurchasePrice: Money.Create(200_000m),
+        CurrentAppraisalValue: Money.Create(300_000m),
+        OriginalAppraisalValue: Money.Create(200_000m),
         OwnershipYears: 5,
-        ApprovedImprovements: 15_000m,
+        ApprovedImprovements: Money.Create(15_000m),
         CurrentIndexValue: null);
 
     // --- Appraisal-based parity ---
@@ -29,7 +30,7 @@ public class ResalePriceCalculatorTests
     public void AppraisalBased_ZeroAppreciation_ReturnsPurchasePrice()
     {
         var terms = ResalePolicyTerms.AppraisalBased(0.25m);
-        var input = StandardInput with { CurrentAppraisalValue = 200_000m, ApprovedImprovements = null };
+        var input = StandardInput with { CurrentAppraisalValue = Money.Create(200_000m), ApprovedImprovements = null };
 
         ResalePriceCalculator.Calculate(terms, input).Should().Be(200_000m);
     }

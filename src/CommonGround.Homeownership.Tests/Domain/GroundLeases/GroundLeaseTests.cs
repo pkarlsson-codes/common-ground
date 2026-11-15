@@ -40,7 +40,7 @@ public class GroundLeaseTests
         public GroundLeaseCreated Established(
             ResalePolicyTerms? terms = null, LeaseFeeTerms? fees = null, LeaseFeeTracking? tracking = null, InsuranceRequirements? insurance = null) =>
             GroundLease.Establish(
-                LeaseId, ParcelId, HomeId, Homeowner, LeaseStart, 99, 60, fees ?? Fees, MortgageDebtCap.Create(90), 200_000m, 250_000m, "Standard affordability covenant",
+                LeaseId, ParcelId, HomeId, Homeowner, LeaseStart, 99, 60, fees ?? Fees, MortgageDebtCap.Create(90), Money.Create(200_000m), Money.Create(250_000m), "Standard affordability covenant",
                 terms ?? ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, StaffUser, tracking, insurance);
 
         /// <summary>Replacement value $280,000, liability $300,000 per occurrence.</summary>
@@ -148,7 +148,7 @@ public class GroundLeaseTests
         {
             var act = () => GroundLease.Establish(
                 _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, _testBed.Homeowner, new DateOnly(2025, 1, 1),
-                99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), 200_000m, 250_000m, "Terms", ResalePolicyTerms.AppraisalBased(0.25m),
+                99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), Money.Create(200_000m), Money.Create(250_000m), "Terms", ResalePolicyTerms.AppraisalBased(0.25m),
                 HomeCommitments.Create(activeLeaseId, openPurchaseWorkflowId, openHomeSelectionId), _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
@@ -165,7 +165,7 @@ public class GroundLeaseTests
         {
             var act = () => GroundLease.Establish(
                 _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, _testBed.Homeowner, new DateOnly(2025, 1, 1),
-                termYears, optionWindowDays, LeaseFeeTerms.None, MortgageDebtCap.Create(90), basePrice, originalAppraisedValue, covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser);
+                termYears, optionWindowDays, LeaseFeeTerms.None, MortgageDebtCap.Create(90), Money.Create(basePrice), Money.Create(originalAppraisedValue), covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }
@@ -433,7 +433,7 @@ public class GroundLeaseTests
     {
         private readonly TestBed _testBed = new();
 
-        private static readonly ResalePriceStatementFigures MarketValue = new(330_000m, "County assessment 2026", null, null);
+        private static readonly ResalePriceStatementFigures MarketValue = new(Money.Create(330_000m), "County assessment 2026", null, null);
 
         [Fact]
         public void GivenActiveLease_WhenRecorded_ThenKeepsTheFiguresThePriceAndTheDelivery()

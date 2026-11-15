@@ -118,9 +118,9 @@ public static class ResalesEndpoints
         var price = await bus.InvokeForTenantAsync<ResalePrice>(bus.TenantId!,
             new GetResalePricePreview(
                 ResaleId.Create(resaleId),
-                request.AppraisedValue,
+                Money.Create(request.AppraisedValue),
                 request.AppraisalDate,
-                request.ApprovedImprovements,
+                Money.CreateOrNull(request.ApprovedImprovements),
                 request.CurrentIndexValue),
             cancellationToken);
 
@@ -141,10 +141,10 @@ public static class ResalesEndpoints
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new RecordResaleAppraisal(
                 ResaleId.Create(resaleId),
-                request.AppraisedValue,
+                Money.Create(request.AppraisedValue),
                 request.AppraisalDate,
                 request.AppraiserName,
-                request.ApprovedImprovements,
+                Money.CreateOrNull(request.ApprovedImprovements),
                 request.CurrentIndexValue,
                 httpContext.GetUserId()),
             cancellationToken);
@@ -185,7 +185,7 @@ public static class ResalesEndpoints
             new RecordBuybackClosed(
                 ResaleId.Create(resaleId),
                 request.ClosingDate,
-                request.PricePaid,
+                Money.Create(request.PricePaid),
                 request.Notes,
                 request.OfferForSale,
                 request.HoldReason,

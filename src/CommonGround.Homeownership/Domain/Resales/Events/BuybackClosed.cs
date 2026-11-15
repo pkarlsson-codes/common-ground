@@ -1,3 +1,4 @@
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.Homeownership.Domain.Resales.Events;
@@ -17,7 +18,7 @@ public sealed record BuybackClosed(
     string GroundLeaseId,
     string HomeId,
     DateOnly ClosingDate,
-    decimal PricePaid,
+    Money PricePaid,
     string? Notes,
     bool OfferedForSale,
     string? HoldReason,

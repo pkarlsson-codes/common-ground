@@ -97,8 +97,8 @@ public sealed class ResalesSeeder(ITrustClock trustClock, PropagationWaiter prop
                     var resale = await trustSession.Events.FetchForWriting<Resale>(resaleId.Value, cancellation).ConfigureAwait(false);
                     lease = await trustSession.Events.FetchForWriting<GroundLease>(leaseLookup.GroundLeaseId, cancellation).ConfigureAwait(false);
                     resale.Decide(r => r.RecordAppraisal(
-                        lease.Aggregate!, appraisal.AppraisedValue, appraised, appraisal.AppraiserName,
-                        appraisal.ApprovedImprovements, appraisal.CurrentIndexValue, appraised, SeederUserId));
+                        lease.Aggregate!, Money.Create(appraisal.AppraisedValue), appraised, appraisal.AppraiserName,
+                        Money.CreateOrNull(appraisal.ApprovedImprovements), appraisal.CurrentIndexValue, appraised, SeederUserId));
                     await trustSession.SaveChangesAsync(cancellation).ConfigureAwait(false);
                 }
 
@@ -118,7 +118,7 @@ public sealed class ResalesSeeder(ITrustClock trustClock, PropagationWaiter prop
                     var resale = await trustSession.Events.FetchForWriting<Resale>(resaleId.Value, cancellation).ConfigureAwait(false);
                     lease = await trustSession.Events.FetchForWriting<GroundLease>(leaseLookup.GroundLeaseId, cancellation).ConfigureAwait(false);
                     resale.Decide(r => r.CloseBuyback(
-                        closingDate, closed.PricePaid, closed.Notes, closed.HoldReason is null, closed.HoldReason, closingDate, SeederUserId));
+                        closingDate, Money.Create(closed.PricePaid), closed.Notes, closed.HoldReason is null, closed.HoldReason, closingDate, SeederUserId));
                     lease.Decide(l => l.Terminate("Bought by the trust", closingDate, SeederUserId));
                     lease.Decide(l => l.CloseResale(resaleId));
                 }

@@ -14,12 +14,12 @@ public sealed record ResalePrice(Money FormulaPrice, Money PurchaseOptionPrice)
     /// </summary>
     public static ResalePrice Calculate(
         ResalePolicyTerms terms,
-        decimal basePrice,
-        decimal originalAppraisedValue,
+        Money basePrice,
+        Money originalAppraisedValue,
         DateOnly leaseStartDate,
-        decimal appraisedValue,
+        Money appraisedValue,
         DateOnly appraisalDate,
-        decimal? approvedImprovements,
+        Money? approvedImprovements,
         decimal? currentIndexValue)
     {
         ArgumentNullException.ThrowIfNull(terms);
@@ -34,7 +34,7 @@ public sealed record ResalePrice(Money FormulaPrice, Money PurchaseOptionPrice)
 
         var formulaPrice = Money.RoundedFrom(ResalePriceCalculator.Calculate(terms, input));
 
-        return new ResalePrice(formulaPrice, Money.Min(formulaPrice, Money.Create(appraisedValue)));
+        return new ResalePrice(formulaPrice, Money.Min(formulaPrice, appraisedValue));
     }
 
     /// <summary>The full years from one day to another; zero when the second is earlier.</summary>

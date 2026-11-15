@@ -299,12 +299,12 @@ internal static class PortfolioImportPlanner
 
             GroundLease.Establish(
                 id, parcelId, home.Id, homeowner, leaseStart.Value, template.TermYears, template.OptionWindowDays, feeTerms, debtCap,
-                basePrice.Value, appraisedValue.Value, template.CovenantTerms, resaleTerms, HomeCommitments.Create(null, null, null),
+                Money.Create(basePrice.Value), Money.Create(appraisedValue.Value), template.CovenantTerms, resaleTerms, HomeCommitments.Create(null, null, null),
                 context.ImportedBy, tracking);
 
             command = new CreateGroundLease(
                 id, parcelId, home.Id, homeowner, leaseStart.Value, template.TermYears, template.OptionWindowDays, feeTerms, debtCap,
-                basePrice.Value, appraisedValue.Value, template.CovenantTerms, resaleTerms, context.ImportedBy, tracking);
+                Money.Create(basePrice.Value), Money.Create(appraisedValue.Value), template.CovenantTerms, resaleTerms, context.ImportedBy, tracking);
         });
         if (!valid || command is null)
         {

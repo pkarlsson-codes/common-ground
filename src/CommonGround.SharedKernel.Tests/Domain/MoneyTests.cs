@@ -28,6 +28,29 @@ public class MoneyTests
         }
     }
 
+    public class TheCreateOrNullMethod
+    {
+        [Fact]
+        public void GivenNull_WhenCreated_ThenReturnsNull()
+        {
+            Money.CreateOrNull(null).Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenAnAmount_WhenCreated_ThenKeepsTheAmount()
+        {
+            Money.CreateOrNull(12.50m)!.Amount.Should().Be(12.50m);
+        }
+
+        [Fact]
+        public void GivenAFractionOfACent_WhenCreated_ThenThrowsFractionOfCent()
+        {
+            var act = () => Money.CreateOrNull(10.005m);
+
+            act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be("shared.money.fraction_of_cent");
+        }
+    }
+
     public class TheRoundedFromMethod
     {
         [Theory]

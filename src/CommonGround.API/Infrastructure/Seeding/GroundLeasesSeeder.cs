@@ -135,8 +135,8 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
             direct.OptionWindowDays,
             LeaseFeeTerms.Create(Money.Create(direct.LandUseFee), Money.Create(direct.RepairReserveFee), direct.LateInterestRate, direct.InterestWaiverDays),
             MortgageDebtCap.Create(direct.MaxMortgageDebtPercent),
-            direct.BasePrice,
-            direct.OriginalAppraisedValue,
+            Money.Create(direct.BasePrice),
+            Money.Create(direct.OriginalAppraisedValue),
             direct.CovenantTerms,
             ResalePolicyTerms.FromString(
                 resale.FormulaKind,
@@ -171,10 +171,10 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
         {
             var sent = statement.Date.Resolve(today);
             var figures = new ResalePriceStatementFigures(
-                statement.MarketValue,
+                Money.CreateOrNull(statement.MarketValue),
                 statement.MarketValueSource,
                 statement.IndexValue,
-                statement.ImprovementsCredit);
+                Money.CreateOrNull(statement.ImprovementsCredit));
             var delivery = NoticeDelivery.FromDisplayName(statement.Delivery);
             actions.Add((sent, (_, stream) => stream.Decide(l => l.RecordResalePriceStatement(sent, figures, delivery, sent, SeederUserId))));
         }

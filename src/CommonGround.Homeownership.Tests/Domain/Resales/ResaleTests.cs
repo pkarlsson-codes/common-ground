@@ -26,7 +26,7 @@ public class ResaleTests
 
         public GroundLease Lease { get; } = EventReplay.Replay<GroundLease>(GroundLease.Establish(
             GroundLeaseId.Generate(), "land-parcel-1234", "home-5678", Homeowner.From("Dana Whitfield", "dana@example.com"),
-            new DateOnly(2020, 1, 1), 99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), 200_000m, 250_000m, "Covenants", ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None,
+            new DateOnly(2020, 1, 1), 99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), Money.Create(200_000m), Money.Create(250_000m), "Covenants", ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None,
             UserId.Generate()));
 
         public IntentToSellRecorded Recorded() =>
@@ -36,11 +36,11 @@ public class ResaleTests
 
         public GroundLease LeaseWithoutFigures() => EventReplay.Replay<GroundLease>(new GroundLeaseCreatedFromPurchase(
             GroundLeaseId.Generate().Value, PurchaseWorkflowId.Generate().Value, GroundLeaseTemplateId.Generate().Value, "land-parcel-1234", "home-5678",
-            new DateOnly(2020, 1, 1), 99, 60, Money.Create(0m), Money.Create(0m), 0m, 30, 90, 200_000m, null, "Covenants", FormulaKind.AppraisalBased, 0.25m, null, null, null, null,
+            new DateOnly(2020, 1, 1), 99, 60, Money.Create(0m), Money.Create(0m), 0m, 30, 90, Money.Create(200_000m), null, "Covenants", FormulaKind.AppraisalBased, 0.25m, null, null, null, null,
             "user-1", "Dana Whitfield", "dana@example.com", null, null, null, null, null));
 
         public Resale Appraised(decimal appraisedValue) => OpenResale().Decide(r => r.RecordAppraisal(
-            Lease, appraisedValue, NoticeDate, "Hollis", null, null, NoticeDate, StaffUser)).Aggregate;
+            Lease, Money.Create(appraisedValue), NoticeDate, "Hollis", null, null, NoticeDate, StaffUser)).Aggregate;
 
         public Resale Exercised() => Appraised(270_000).Decide(r => r.ExerciseOption(NoticeDate, null, NoticeDate, StaffUser)).Aggregate;
     }
@@ -148,14 +148,14 @@ public class ResaleTests
             var sut = _testBed.OpenResale();
 
             var recorded = sut.RecordAppraisal(
-                _testBed.Lease, appraisedValue, TestBed.NoticeDate, "  Hollis  ", null, null, TestBed.NoticeDate, _testBed.StaffUser);
+                _testBed.Lease, Money.Create(appraisedValue), TestBed.NoticeDate, "  Hollis  ", null, null, TestBed.NoticeDate, _testBed.StaffUser);
 
             recorded.Should().BeEquivalentTo(new
             {
-                AppraisedValue = (decimal)appraisedValue,
+                AppraisedValue = Money.Create(appraisedValue),
                 AppraiserName = "Hollis",
-                FormulaPrice = formulaPrice,
-                PurchaseOptionPrice = optionPrice,
+                FormulaPrice = Money.Create(formulaPrice),
+                PurchaseOptionPrice = Money.Create(optionPrice),
             });
         }
 
@@ -165,9 +165,9 @@ public class ResaleTests
             var sut = _testBed.Appraised(270_000);
 
             var (replaced, _) = sut.Decide(r => r.RecordAppraisal(
-                _testBed.Lease, 190_000, TestBed.NoticeDate, "Hollis", null, null, TestBed.NoticeDate, _testBed.StaffUser));
+                _testBed.Lease, Money.Create(190_000), TestBed.NoticeDate, "Hollis", null, null, TestBed.NoticeDate, _testBed.StaffUser));
 
-            replaced.Appraisal.Should().Be(new ResaleAppraisal(190_000, TestBed.NoticeDate, 185_000, 185_000));
+            replaced.Appraisal.Should().Be(new ResaleAppraisal(Money.Create(190_000), TestBed.NoticeDate, Money.Create(185_000), Money.Create(185_000)));
         }
 
         [Fact]
@@ -176,7 +176,7 @@ public class ResaleTests
             var sut = _testBed.Exercised();
 
             var act = () => sut.RecordAppraisal(
-                _testBed.Lease, 270_000, TestBed.NoticeDate, "Hollis", null, null, TestBed.NoticeDate, _testBed.StaffUser);
+                _testBed.Lease, Money.Create(270_000), TestBed.NoticeDate, "Hollis", null, null, TestBed.NoticeDate, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("homeownership.resale.record_appraisal.option_exercised");
@@ -193,7 +193,7 @@ public class ResaleTests
             var sut = _testBed.OpenResale();
 
             var act = () => sut.RecordAppraisal(
-                _testBed.Lease, appraisedValue, TestBed.NoticeDate.AddDays(dateDaysAfterNotice), appraiser, null, null,
+                _testBed.Lease, Money.Create(appraisedValue), TestBed.NoticeDate.AddDays(dateDaysAfterNotice), appraiser, null, null,
                 TestBed.NoticeDate.AddDays(todayDaysAfterNotice), _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
@@ -206,7 +206,7 @@ public class ResaleTests
             var lease = _testBed.LeaseWithoutFigures();
 
             var act = () => sut.RecordAppraisal(
-                lease, 270_000, TestBed.NoticeDate, "Hollis", null, null, TestBed.NoticeDate, _testBed.StaffUser);
+                lease, Money.Create(270_000), TestBed.NoticeDate, "Hollis", null, null, TestBed.NoticeDate, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("homeownership.resale.record_appraisal.lease_figures_missing");
@@ -298,14 +298,14 @@ public class ResaleTests
             var sut = _testBed.Exercised();
 
             var (closed, closing) = sut.Decide(r => r.CloseBuyback(
-                TestBed.NoticeDate, 200_000, " Done ", true, "ignored", TestBed.NoticeDate, _testBed.StaffUser));
+                TestBed.NoticeDate, Money.Create(200_000), " Done ", true, "ignored", TestBed.NoticeDate, _testBed.StaffUser));
 
             closed.Status.Should().Be(ResaleStatus.Closed);
             closing.Should().ContainSingle().Which.Should().BeEquivalentTo(new
             {
                 GroundLeaseId = _testBed.Lease.Id.Value,
                 HomeId = "home-5678",
-                PricePaid = 200_000m,
+                PricePaid = Money.Create(200_000m),
                 Notes = "Done",
                 OfferedForSale = true,
                 HoldReason = (string?)null,
@@ -318,7 +318,7 @@ public class ResaleTests
             var sut = _testBed.Exercised();
 
             var (_, closing) = sut.Decide(r => r.CloseBuyback(
-                TestBed.NoticeDate, 205_000, null, false, " Roof work ", TestBed.NoticeDate, _testBed.StaffUser));
+                TestBed.NoticeDate, Money.Create(205_000), null, false, " Roof work ", TestBed.NoticeDate, _testBed.StaffUser));
 
             closing.Should().ContainSingle().Which.Should().BeEquivalentTo(new { OfferedForSale = false, HoldReason = "Roof work" });
         }
@@ -328,7 +328,7 @@ public class ResaleTests
         {
             var sut = _testBed.Appraised(270_000);
 
-            var act = () => sut.CloseBuyback(TestBed.NoticeDate, 100_000, null, true, null, TestBed.NoticeDate, _testBed.StaffUser);
+            var act = () => sut.CloseBuyback(TestBed.NoticeDate, Money.Create(100_000), null, true, null, TestBed.NoticeDate, _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("homeownership.resale.close_buyback.option_not_exercised");
@@ -346,7 +346,7 @@ public class ResaleTests
             var sut = _testBed.Exercised();
 
             var act = () => sut.CloseBuyback(
-                TestBed.NoticeDate.AddDays(closingDaysAfterExercised), pricePaid, null, offerForSale, holdReason,
+                TestBed.NoticeDate.AddDays(closingDaysAfterExercised), Money.Create(pricePaid), null, offerForSale, holdReason,
                 TestBed.NoticeDate.AddDays(todayDaysAfterExercised), _testBed.StaffUser);
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);

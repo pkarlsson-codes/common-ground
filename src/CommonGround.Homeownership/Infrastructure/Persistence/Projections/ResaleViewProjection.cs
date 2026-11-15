@@ -34,13 +34,13 @@ internal sealed class ResaleViewProjection : SingleStreamProjection<ResaleView, 
 
     public static void Apply(ResaleView view, ResaleAppraisalRecorded e)
     {
-        view.AppraisedValue = e.AppraisedValue;
+        view.AppraisedValue = e.AppraisedValue.Amount;
         view.AppraisalDate = e.AppraisalDate;
         view.AppraiserName = e.AppraiserName;
-        view.ApprovedImprovements = e.ApprovedImprovements;
+        view.ApprovedImprovements = e.ApprovedImprovements?.Amount;
         view.CurrentIndexValue = e.CurrentIndexValue;
-        view.FormulaPrice = e.FormulaPrice;
-        view.PurchaseOptionPrice = e.PurchaseOptionPrice;
+        view.FormulaPrice = e.FormulaPrice.Amount;
+        view.PurchaseOptionPrice = e.PurchaseOptionPrice.Amount;
     }
 
     public static void Apply(ResaleView view, PurchaseOptionExercised e)
@@ -53,7 +53,7 @@ internal sealed class ResaleViewProjection : SingleStreamProjection<ResaleView, 
     {
         view.Status = ResaleStatus.Closed.DisplayName;
         view.ClosingDate = e.ClosingDate;
-        view.PricePaid = e.PricePaid;
+        view.PricePaid = e.PricePaid.Amount;
         view.ClosingNotes = e.Notes;
         view.OfferedForSale = e.OfferedForSale;
         view.HoldReason = e.HoldReason;

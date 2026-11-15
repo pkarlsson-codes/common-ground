@@ -7,6 +7,7 @@ using CommonGround.Homeownership.Application.Queries;
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
+using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +35,7 @@ public static class ResalePriceStatementsEndpoints
             new GetResalePriceStatementPreview(
                 GroundLeaseId.Create(groundLeaseId),
                 request.StatementDate,
-                new ResalePriceStatementFigures(request.MarketValue, request.MarketValueSource, request.IndexValue, request.ImprovementsCredit)),
+                new ResalePriceStatementFigures(Money.CreateOrNull(request.MarketValue), request.MarketValueSource, request.IndexValue, Money.CreateOrNull(request.ImprovementsCredit))),
             cancellationToken);
 
         return Results.Ok(ToResponse(price));
@@ -64,7 +65,7 @@ public static class ResalePriceStatementsEndpoints
                     new GetResalePriceStatementPreview(
                         GroundLeaseId.Create(lease.GroundLeaseId),
                         request.StatementDate,
-                        new ResalePriceStatementFigures(lease.MarketValue, lease.MarketValueSource, lease.IndexValue, null)),
+                        new ResalePriceStatementFigures(Money.CreateOrNull(lease.MarketValue), lease.MarketValueSource, lease.IndexValue, null)),
                     cancellationToken);
                 results.Add(new ResalePriceStatementPreviewResponse(lease.GroundLeaseId, ToResponse(price), null, null));
             }
@@ -98,7 +99,7 @@ public static class ResalePriceStatementsEndpoints
             new RecordResalePriceStatement(
                 GroundLeaseId.Create(groundLeaseId),
                 request.StatementDate,
-                new ResalePriceStatementFigures(request.MarketValue, request.MarketValueSource, request.IndexValue, request.ImprovementsCredit),
+                new ResalePriceStatementFigures(Money.CreateOrNull(request.MarketValue), request.MarketValueSource, request.IndexValue, Money.CreateOrNull(request.ImprovementsCredit)),
                 delivery,
                 httpContext.GetUserId()),
             cancellationToken);

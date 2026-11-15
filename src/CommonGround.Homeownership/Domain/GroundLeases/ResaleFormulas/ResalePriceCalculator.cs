@@ -21,9 +21,9 @@ public static class ResalePriceCalculator
             _ => throw new InvalidOperationException($"Unknown formula kind: {terms.FormulaKind}")
         };
 
-        if (terms.ImprovementsCap.HasValue && input.ApprovedImprovements.HasValue)
+        if (terms.ImprovementsCap.HasValue && input.ApprovedImprovements is not null)
         {
-            var credit = Math.Min(input.ApprovedImprovements.Value, terms.ImprovementsCap.Value);
+            var credit = Math.Min(input.ApprovedImprovements.Amount, terms.ImprovementsCap.Value);
             return basePrice + credit;
         }
 
@@ -32,8 +32,8 @@ public static class ResalePriceCalculator
 
     private static decimal CalculateAppraisalBased(ResalePolicyTerms terms, ResaleCalculationInput input)
     {
-        var appreciation = input.CurrentAppraisalValue - input.OriginalAppraisalValue;
-        return input.OriginalPurchasePrice + (appreciation * terms.AppreciationShare!.Value);
+        var appreciation = (input.CurrentAppraisalValue - input.OriginalAppraisalValue).Amount;
+        return input.OriginalPurchasePrice.Amount + (appreciation * terms.AppreciationShare!.Value);
     }
 
     private static decimal CalculateIndexBased(ResalePolicyTerms terms, ResaleCalculationInput input)
@@ -41,12 +41,12 @@ public static class ResalePriceCalculator
         if (input.CurrentIndexValue is not { } currentIndexValue)
             throw BusinessRuleViolation.ResalePolicyTerms.IndexBased.CurrentIndexValueRequired();
 
-        return input.OriginalPurchasePrice * (currentIndexValue / terms.BaselineIndexValue!.Value);
+        return input.OriginalPurchasePrice.Amount * (currentIndexValue / terms.BaselineIndexValue!.Value);
     }
 
     private static decimal CalculateFixedPercentage(ResalePolicyTerms terms, ResaleCalculationInput input)
     {
         var factor = (decimal)Math.Pow((double)(1 + terms.AnnualPercentage!.Value), input.OwnershipYears);
-        return input.OriginalPurchasePrice * factor;
+        return input.OriginalPurchasePrice.Amount * factor;
     }
 }

@@ -124,6 +124,12 @@ public sealed class Money : ValueObject, IComparable<Money>
         return new Money(amount);
     }
 
+    /// <summary>Creates an amount that may be absent, as <see cref="Create"/> does.</summary>
+    /// <param name="amount">The amount in dollars, or null.</param>
+    /// <returns>The amount, or null when <paramref name="amount"/> is null.</returns>
+    /// <exception cref="BusinessRuleViolationException">The amount has a fraction of a cent.</exception>
+    public static Money? CreateOrNull(decimal? amount) => amount is { } value ? Create(value) : null;
+
     /// <summary>Creates an amount from one worked out at a finer grain, rounded to the cent, half a cent away from zero.</summary>
     /// <param name="amount">The worked-out amount in dollars.</param>
     /// <returns>The amount rounded to the cent.</returns>

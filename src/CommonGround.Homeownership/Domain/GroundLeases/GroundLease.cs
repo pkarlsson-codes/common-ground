@@ -42,10 +42,10 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     public int OptionWindowDays { get; private set; }
 
     /// <summary>Gets what the homeowner paid for the home, which the resale formula starts from.</summary>
-    public decimal BasePrice { get; private set; }
+    public Money BasePrice { get; private set; } = Money.Zero;
 
     /// <summary>Gets the home's appraised value when the homeowner bought it, if known.</summary>
-    public decimal? OriginalAppraisedValue { get; private set; }
+    public Money? OriginalAppraisedValue { get; private set; }
 
     /// <summary>Gets the covenant terms for this lease.</summary>
     public string CovenantTerms { get; private set; }
@@ -148,8 +148,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         int optionWindowDays,
         LeaseFeeTerms leaseFeeTerms,
         MortgageDebtCap mortgageDebtCap,
-        decimal basePrice,
-        decimal originalAppraisedValue,
+        Money basePrice,
+        Money originalAppraisedValue,
         string covenantTerms,
         ResalePolicyTerms resalePolicyTerms,
         HomeCommitments homeCommitments,
@@ -180,11 +180,11 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         if (optionWindowDays <= 0)
             throw BusinessRuleViolation.GroundLease.Create.OptionWindowDaysNonPositive(optionWindowDays);
 
-        if (basePrice <= 0)
-            throw BusinessRuleViolation.GroundLease.Create.BasePriceNonPositive(basePrice);
+        if (!basePrice.IsPositive)
+            throw BusinessRuleViolation.GroundLease.Create.BasePriceNonPositive(basePrice.Amount);
 
-        if (originalAppraisedValue <= 0)
-            throw BusinessRuleViolation.GroundLease.Create.OriginalAppraisedValueNonPositive(originalAppraisedValue);
+        if (!originalAppraisedValue.IsPositive)
+            throw BusinessRuleViolation.GroundLease.Create.OriginalAppraisedValueNonPositive(originalAppraisedValue.Amount);
 
         if (string.IsNullOrWhiteSpace(covenantTerms))
             throw BusinessRuleViolation.GroundLease.Create.CovenantTermsRequired();
@@ -262,8 +262,8 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             template.LeaseFeeTerms.LateInterestRate,
             template.LeaseFeeTerms.InterestWaiverDays,
             template.MortgageDebtCap.Percent,
-            purchaseWorkflow.PurchasePrice,
-            purchaseWorkflow.AppraisalDetails?.AppraisedValue,
+            Money.Create(purchaseWorkflow.PurchasePrice),
+            purchaseWorkflow.AppraisalDetails?.AppraisedValue is { } appraisedValue ? Money.Create(appraisedValue) : null,
             template.CovenantTerms,
             template.ResalePolicyTerms.FormulaKind,
             template.ResalePolicyTerms.AppreciationShare,

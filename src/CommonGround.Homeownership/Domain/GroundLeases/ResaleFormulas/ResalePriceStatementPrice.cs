@@ -13,10 +13,10 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.ResaleFormulas;
 /// <param name="IndexValue">An index-based lease's index value on the statement date.</param>
 /// <param name="ImprovementsCredit">Approved improvements, for a lease with an improvements cap.</param>
 public sealed record ResalePriceStatementFigures(
-    decimal? MarketValue,
+    Money? MarketValue,
     string? MarketValueSource,
     decimal? IndexValue,
-    decimal? ImprovementsCredit);
+    Money? ImprovementsCredit);
 
 /// <summary>
 /// The most a home may sell for on a statement date under its lease's formula (Ch 23, Disclosure), with the figures
@@ -39,8 +39,8 @@ public sealed record ResalePriceStatementPrice(
     /// </summary>
     public static ResalePriceStatementPrice Calculate(
         ResalePolicyTerms terms,
-        decimal basePrice,
-        decimal? originalAppraisedValue,
+        Money basePrice,
+        Money? originalAppraisedValue,
         DateOnly leaseStartDate,
         DateOnly statementDate,
         DateOnly today,
@@ -67,13 +67,13 @@ public sealed record ResalePriceStatementPrice(
             if (figures.MarketValue is not { } value)
                 throw BusinessRuleViolation.GroundLease.RecordResalePriceStatement.MarketValueRequired();
 
-            if (value <= 0)
-                throw BusinessRuleViolation.GroundLease.RecordResalePriceStatement.MarketValueNonPositive(value);
+            if (!value.IsPositive)
+                throw BusinessRuleViolation.GroundLease.RecordResalePriceStatement.MarketValueNonPositive(value.Amount);
 
             if (string.IsNullOrWhiteSpace(figures.MarketValueSource))
                 throw BusinessRuleViolation.GroundLease.RecordResalePriceStatement.MarketValueSourceRequired();
 
-            marketValue = Money.Create(value);
+            marketValue = value;
             marketValueSource = figures.MarketValueSource.Trim();
         }
         else if (terms.FormulaKind == FormulaKind.IndexBased)
@@ -87,20 +87,20 @@ public sealed record ResalePriceStatementPrice(
             indexValue = value;
         }
 
-        if (figures.ImprovementsCredit < 0)
-            throw BusinessRuleViolation.GroundLease.RecordResalePriceStatement.ImprovementsCreditNegative(figures.ImprovementsCredit.Value);
+        if (figures.ImprovementsCredit is { IsNegative: true } negativeCredit)
+            throw BusinessRuleViolation.GroundLease.RecordResalePriceStatement.ImprovementsCreditNegative(negativeCredit.Amount);
 
-        Money? improvementsCredit = terms.ImprovementsCap is { } cap && figures.ImprovementsCredit is { } credit and > 0
-            ? Money.Create(Math.Min(credit, cap))
+        Money? improvementsCredit = terms.ImprovementsCap is { } cap && figures.ImprovementsCredit is { IsPositive: true } credit
+            ? Money.Min(credit, Money.Create(cap))
             : null;
 
         var yearsOwned = ResalePrice.WholeYears(leaseStartDate, statementDate);
         var input = new ResaleCalculationInput(
             basePrice,
-            marketValue?.Amount ?? 0,
-            originalAppraisedValue ?? 0,
+            marketValue ?? Money.Zero,
+            originalAppraisedValue ?? Money.Zero,
             yearsOwned,
-            improvementsCredit?.Amount,
+            improvementsCredit,
             indexValue);
 
         return new ResalePriceStatementPrice(

@@ -20,7 +20,7 @@ namespace CommonGround.Homeownership.Application.Commands;
 public sealed record RecordBuybackClosed(
     ResaleId ResaleId,
     DateOnly ClosingDate,
-    decimal PricePaid,
+    Money PricePaid,
     string? Notes,
     bool OfferForSale,
     string? HoldReason,

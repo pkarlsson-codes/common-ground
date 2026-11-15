@@ -289,7 +289,7 @@ public sealed class MortgageRequest : AggregateRoot<MortgageRequestId>
             lease.BasePrice,
             originalAppraisedValue,
             lease.LeaseStartDate,
-            appraisal.AppraisedValue.Amount,
+            appraisal.AppraisedValue,
             appraisal.AppraisalDate,
             approvedImprovements: null,
             appraisal.CurrentIndexValue);
