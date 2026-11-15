@@ -20,6 +20,7 @@ public sealed record GroundLeaseResponse(
     decimal? BaselineIndexValue,
     decimal? AnnualPercentage,
     decimal? ImprovementsCap,
+    decimal ApprovedImprovements,
     string? HomeownerFullName,
     string? HomeownerEmail,
     string? HomeownerPhone,

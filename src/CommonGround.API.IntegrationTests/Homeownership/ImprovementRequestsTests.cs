@@ -46,6 +46,9 @@ public class ImprovementRequestsTests(ApiFactory factory)
             ConfirmedCredit = (decimal?)15_000m,
             ReceiptDocumentIds = new[] { "document-1", "document-2" },
         });
+
+        var lease = await client.GetFromJsonAsync<GroundLeaseResponse>($"/api/ground-leases/{leaseId}");
+        lease!.ApprovedImprovements.Should().Be(15_000m);
     }
 
     [Fact]

@@ -106,7 +106,7 @@ public static class GroundLeasesEndpoints
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
 
-        var (view, recordedOn, leaseFees, noticeDue, defaultCure, nextStatementDueOn, insuranceRequired, insuranceCover) = await bus.InvokeForTenantAsync<GroundLeaseDetails>(bus.TenantId!,
+        var (view, recordedOn, leaseFees, noticeDue, defaultCure, nextStatementDueOn, insuranceRequired, insuranceCover, approvedImprovements) = await bus.InvokeForTenantAsync<GroundLeaseDetails>(bus.TenantId!,
             new GetGroundLease(GroundLeaseId.Create(groundLeaseId)),
             cancellationToken);
 
@@ -137,6 +137,7 @@ public static class GroundLeasesEndpoints
             view.BaselineIndexValue,
             view.AnnualPercentage,
             view.ImprovementsCap,
+            approvedImprovements.Amount,
             view.HomeownerFullName,
             view.HomeownerEmail,
             view.HomeownerPhone,

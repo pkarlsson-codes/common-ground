@@ -17,7 +17,7 @@ public sealed record GetGroundLease(GroundLeaseId GroundLeaseId);
 /// date), what it owes in lease fees as of the trust's today, the late notice it needs now, if any, and where its
 /// last notice of default stands, if one was sent, and when its next resale price statement is due (null for a lease
 /// off the yearly cycle: ended, or with a resale in progress), the insurance it requires as of the trust's today,
-/// and where its insurance stands from its certificates.
+/// and where its insurance stands from its certificates, and the credit its completed improvements have confirmed.
 /// </summary>
 public sealed record GroundLeaseDetails(
     GroundLeaseView Lease,
@@ -27,7 +27,8 @@ public sealed record GroundLeaseDetails(
     DefaultCure? DefaultCure,
     DateOnly? NextResalePriceStatementDueOn,
     InsuranceRequirements InsuranceRequired,
-    InsuranceCover InsuranceCover);
+    InsuranceCover InsuranceCover,
+    Money ApprovedImprovements);
 
 /// <summary>Handles <see cref="GetGroundLease"/>.</summary>
 public static class GetGroundLeaseHandler
@@ -60,7 +61,8 @@ public static class GetGroundLeaseHandler
             LeaseFeeStatements.DefaultCureOf(view, today),
             ResalePriceStatementSchedule.For(view, null)?.NextDueOn,
             InsuranceRequirementsOf(view).InEffectOn(today),
-            LeaseInsurance.CoverOf(view));
+            LeaseInsurance.CoverOf(view),
+            await ConfirmedImprovementCredit.ForLeaseAsync(session, view.Id, cancellationToken).ConfigureAwait(false));
     }
 
     /// <summary>The insurance the lease has required, from its read model.</summary>
