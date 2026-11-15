@@ -146,7 +146,7 @@ export default function RecordImprovementCompletedPanel({ request, onClose }: Pr
               id="improvement-completed-on"
               className="form-input"
               value={completedOn}
-              min={request.approvedOn}
+              min={request.approvedOn ?? undefined}
               max={today}
               onChange={setCompletedOn}
               required

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   GroundLeasesApi,
+  type HeirTransferResponse,
   type ImprovementRequestResponse,
   type MortgageRequestResponse,
   type ReceiveImprovementRequestResponse,
@@ -795,3 +796,65 @@ export function useWithdrawImprovementRequest() {
     onSuccess: (_d, v) => invalidateImprovementRequests(qc, v.request.groundLeaseId!),
   })
 }
+
+/** A heir transfer's status, as the app shows it. The API sends the label itself. */
+export const HEIR_TRANSFER_STATUS_LABELS: Record<string, string> = {
+  Open: 'Open',
+  'Heir recorded': 'Heir recorded',
+  Completed: 'Completed',
+  Closed: 'Closed',
+}
+
+/** Days the executor has to notify the trust of the homeowner's death (Art 10.3). */
+export const HEIR_NOTICE_DAYS = 90
+
+function invalidateHeirTransfers(qc: ReturnType<typeof useQueryClient>, groundLeaseId: string) {
+  qc.invalidateQueries({ queryKey: ['heir-transfers', groundLeaseId] })
+  qc.invalidateQueries({ queryKey: ['heir-transfer'] })
+  qc.invalidateQueries({ queryKey: ['ground-lease', groundLeaseId] })
+}
+
+export function useHeirTransfers(groundLeaseId: string | null) {
+  return useQuery({
+    queryKey: ['heir-transfers', groundLeaseId],
+    queryFn: () => api.getHeirTransfers({ groundLeaseId: groundLeaseId! }),
+    enabled: !!groundLeaseId,
+  })
+}
+
+export function useHeirTransfer(heirTransferId: string | null) {
+  return useQuery({
+    queryKey: ['heir-transfer', heirTransferId],
+    queryFn: () => api.getHeirTransfer({ heirTransferId: heirTransferId! }),
+    enabled: !!heirTransferId,
+  })
+}
+
+export function useOpenHeirTransfer() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ groundLeaseId, diedOn, noticeReceivedOn, notifiedBy, notifiedByContact, notes }: {
+      groundLeaseId: string
+      diedOn: CalendarDate
+      noticeReceivedOn: CalendarDate
+      notifiedBy: string
+      notifiedByContact: string
+      notes: string
+    }) => {
+      const result = await api.openHeirTransfer({
+        groundLeaseId,
+        openHeirTransferRequest: {
+          diedOn,
+          noticeReceivedOn,
+          notifiedBy: notifiedBy.trim(),
+          notifiedByContact: notifiedByContact.trim() || null,
+          notes: notes.trim() || null,
+        },
+      })
+      return result as { heirTransferId?: string }
+    },
+    onSuccess: (_d, v) => invalidateHeirTransfers(qc, v.groundLeaseId),
+  })
+}
+
+export type { HeirTransferResponse }
