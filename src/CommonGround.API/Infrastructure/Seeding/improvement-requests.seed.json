@@ -1,0 +1,47 @@
+[
+  {
+    "seedKey": "ir-harbor-view-201-windows",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-harbor-view-201",
+    "receivedOn": "today-70d",
+    "description": "Replace the single-pane living room windows with double-pane units.",
+    "estimatedCost": 9000,
+    "approved": { "date": "today-65d", "preApprovedCredit": 6000, "notes": "Credit counts for the glass and install; trim and paint do not." },
+    "completed": { "date": "today-40d", "actualCost": 9400, "confirmedCredit": 5500, "notes": "Looked at the work on site. Credit set below the agreed figure: one window is the old size." }
+  },
+  {
+    "seedKey": "ir-harbor-view-201-water-heater",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-harbor-view-201",
+    "receivedOn": "today-30d",
+    "description": "Replace the water heater with a heat pump unit.",
+    "estimatedCost": 4200,
+    "approved": { "date": "today-25d", "preApprovedCredit": 3000 }
+  },
+  {
+    "seedKey": "ir-harbor-view-201-deck",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-harbor-view-201",
+    "receivedOn": "today-45d",
+    "description": "Build a roof deck over the garage.",
+    "estimatedCost": 18000,
+    "denied": { "date": "today-40d", "reason": "The lease's covenants and the condominium's rules do not allow a structure above the garage." }
+  },
+  {
+    "seedKey": "ir-harbor-view-201-fence",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-harbor-view-201",
+    "receivedOn": "today-35d",
+    "description": "Replace the back fence.",
+    "estimatedCost": 2600,
+    "withdrawn": { "date": "today-28d", "reason": "The neighbor agreed to share the cost and will build it." }
+  },
+  {
+    "seedKey": "ir-harbor-view-201-kitchen",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-harbor-view-201",
+    "receivedOn": "today-20d",
+    "description": "Remodel the kitchen: new cabinets, counters and a second sink.",
+    "estimatedCost": 22000
+  }
+]

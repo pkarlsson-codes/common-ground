@@ -72,6 +72,9 @@ public static class HomeownershipMartenConfiguration
         options.Schema.For<ResaleSeedLookup>()
             .DatabaseSchemaName(SeedSchemaName)
             .Index(x => x.SeedKey);
+        options.Schema.For<ImprovementRequestSeedLookup>()
+            .DatabaseSchemaName(SeedSchemaName)
+            .Index(x => x.SeedKey);
     }
 
     private static void ConfigureProjections(StoreOptions options)
