@@ -78,6 +78,9 @@ public class PurchaseWorkflowView : IPurchaseWorkflowPhaseView
     /// <summary>Gets or sets the buyer's signed disclosure acknowledgment, or null when it isn't recorded.</summary>
     public DisclosureDetailsEntry? DisclosureDetails { get; set; }
 
+    /// <summary>Gets or sets the corrections made to recorded tracks, oldest first.</summary>
+    public List<PurchaseCorrectionEntry> Corrections { get; set; } = [];
+
     /// <summary>Gets or sets the scheduled closing date.</summary>
     public DateOnly? ScheduledClosingDate { get; set; }
 
@@ -211,4 +214,39 @@ public class DisclosureDetailsEntry
 
     /// <summary>Gets or sets the signed acknowledgment's Document ID.</summary>
     public string DocumentId { get; set; } = string.Empty;
+}
+
+/// <summary>One correction to a recorded track.</summary>
+public class PurchaseCorrectionEntry
+{
+    /// <summary>Gets or sets the track corrected: Eligibility, Appraisal or Financing.</summary>
+    public string Track { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets when the correction was made.</summary>
+    public DateTimeOffset CorrectedAt { get; set; }
+
+    /// <summary>Gets or sets the user who made it.</summary>
+    public string CorrectedBy { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets why it was made.</summary>
+    public string Reason { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the fields that changed, at least one.</summary>
+    public List<PurchaseCorrectionChange> Changes { get; set; } = [];
+}
+
+/// <summary>One field a correction changed.</summary>
+public class PurchaseCorrectionChange
+{
+    /// <summary>Gets or sets the field name, such as AppraisedValue.</summary>
+    public string Field { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets how to show the values: Money, Date, Number, Text or Documents.</summary>
+    public string Kind { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the value before, in invariant text, or null when there was none.</summary>
+    public string? Was { get; set; }
+
+    /// <summary>Gets or sets the value after, in invariant text, or null when there is none.</summary>
+    public string? Now { get; set; }
 }

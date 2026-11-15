@@ -156,6 +156,87 @@ public static class PurchaseWorkflowsEndpoints
         return Results.NoContent();
     }
 
+    [WolverinePut("/api/purchase-workflows/{workflowId}/eligibility")]
+    public static async Task<IResult> CorrectEligibility(
+        string workflowId,
+        CorrectEligibilityRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        var userId = httpContext.GetUserId();
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new CorrectEligibility(
+                PurchaseWorkflowId.Create(workflowId),
+                request.VerifiedDate,
+                Money.Create(request.VerifiedAnnualIncome),
+                request.VerifiedHouseholdSize,
+                request.IncomeDocumentIds,
+                request.Notes,
+                request.Reason,
+                userId),
+            cancellationToken);
+
+        return Results.NoContent();
+    }
+
+    [WolverinePut("/api/purchase-workflows/{workflowId}/appraisal")]
+    public static async Task<IResult> CorrectAppraisal(
+        string workflowId,
+        CorrectAppraisalRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        var userId = httpContext.GetUserId();
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new CorrectAppraisal(
+                PurchaseWorkflowId.Create(workflowId),
+                request.AppraisedValue,
+                request.AppraisalDate,
+                request.AppraiserName,
+                request.Notes,
+                request.Reason,
+                userId),
+            cancellationToken);
+
+        return Results.NoContent();
+    }
+
+    [WolverinePut("/api/purchase-workflows/{workflowId}/financing")]
+    public static async Task<IResult> CorrectFinancing(
+        string workflowId,
+        CorrectFinancingRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        var userId = httpContext.GetUserId();
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new CorrectFinancing(
+                PurchaseWorkflowId.Create(workflowId),
+                request.LenderName,
+                request.CommittedAmount,
+                request.PreapprovalLetterDate,
+                request.Reason,
+                userId),
+            cancellationToken);
+
+        return Results.NoContent();
+    }
+
     [WolverinePost("/api/purchase-workflows/{workflowId}/financing")]
     public static async Task<IResult> RecordFinancingCommitted(
         string workflowId,
@@ -478,6 +559,12 @@ public static class PurchaseWorkflowsEndpoints
             view.WithdrawalReason,
             view.StalledReason,
             view.StalledDate,
-            view.ResolutionTargetDate);
+            view.ResolutionTargetDate,
+            view.Corrections
+                .OrderByDescending(c => c.CorrectedAt)
+                .Select(c => new PurchaseCorrectionDto(
+                    c.Track, c.CorrectedAt, c.CorrectedBy, c.Reason,
+                    [.. c.Changes.Select(ch => new PurchaseCorrectionChangeDto(ch.Field, ch.Kind, ch.Was, ch.Now))]))
+                .ToList());
     }
 }

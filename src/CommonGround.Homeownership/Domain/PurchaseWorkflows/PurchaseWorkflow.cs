@@ -306,6 +306,138 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
             preapprovalLetterDate, recordedBy.Value);
     }
 
+    /// <summary>
+    /// Corrects the recorded eligibility verification, running the same checks as recording, including the income
+    /// limit. Refused when eligibility isn't recorded, when nothing changes, or when no reason is given.
+    /// </summary>
+    /// <param name="verifiedDate">Date of verification.</param>
+    /// <param name="verifiedAnnualIncome">The household's annual income as the documents show it, zero or more.</param>
+    /// <param name="verifiedHouseholdSize">The number of people in the household as the documents show it, at least 1.</param>
+    /// <param name="incomeDocumentIds">The Documents that replace the recorded ones, or null or empty to keep them.</param>
+    /// <param name="notes">Optional notes. Replaces the recorded notes.</param>
+    /// <param name="reason">Why the record is corrected. Required.</param>
+    /// <param name="correctedBy">The user making the correction.</param>
+    public BuyerEligibilityCorrected CorrectEligibility(
+        DateOnly verifiedDate, Money verifiedAnnualIncome, int verifiedHouseholdSize,
+        IReadOnlyList<string>? incomeDocumentIds, string? notes, string? reason, UserId correctedBy)
+    {
+        ArgumentNullException.ThrowIfNull(verifiedAnnualIncome);
+        GuardNotTerminal();
+        var recorded = EligibilityDetails
+            ?? throw BusinessRuleViolation.PurchaseWorkflow.CorrectEligibility.TrackNotRecorded();
+
+        if (string.IsNullOrWhiteSpace(reason))
+            throw BusinessRuleViolation.PurchaseWorkflow.CorrectEligibility.ReasonRequired();
+
+        var documentIds = incomeDocumentIds is { Count: > 0 } ? incomeDocumentIds : recorded.IncomeDocumentIds;
+        if (documentIds.Any(string.IsNullOrWhiteSpace))
+            throw BusinessRuleViolation.PurchaseWorkflow.CorrectEligibility.IncomeDocumentsRequired();
+
+        if (verifiedAnnualIncome.IsNegative)
+            throw BusinessRuleViolation.PurchaseWorkflow.CorrectEligibility.IncomeNegative(verifiedAnnualIncome);
+
+        if (verifiedHouseholdSize < 1)
+            throw BusinessRuleViolation.PurchaseWorkflow.CorrectEligibility.HouseholdSizeBelowOne(verifiedHouseholdSize);
+
+        var limit = IncomeLimitLevel?.LimitFor(verifiedHouseholdSize);
+        if (limit is not null && verifiedAnnualIncome > limit)
+        {
+            throw BusinessRuleViolation.PurchaseWorkflow.CorrectEligibility.OverIncomeLimit(
+                verifiedAnnualIncome, limit, IncomeLimitLevel!.PercentOfAmi, verifiedHouseholdSize, IncomeLimits!.EffectiveFrom);
+        }
+
+        var cleanNotes = NullIfBlank(notes);
+        if (verifiedDate == recorded.VerifiedDate
+            && cleanNotes == NullIfBlank(recorded.Notes)
+            && verifiedAnnualIncome.Equals(recorded.VerifiedAnnualIncome)
+            && verifiedHouseholdSize == recorded.VerifiedHouseholdSize
+            && documentIds.SequenceEqual(recorded.IncomeDocumentIds))
+        {
+            throw BusinessRuleViolation.PurchaseWorkflow.CorrectEligibility.NoChange();
+        }
+
+        var band = IncomeLimits?.BandFor(verifiedAnnualIncome, verifiedHouseholdSize);
+
+        return new BuyerEligibilityCorrected(
+            Id.Value, verifiedDate, cleanNotes,
+            verifiedAnnualIncome,
+            verifiedHouseholdSize,
+            limit,
+            band?.OverPercentOfAmi,
+            band?.UpToPercentOfAmi,
+            [.. documentIds],
+            reason.Trim(),
+            correctedBy.Value);
+    }
+
+    /// <summary>
+    /// Corrects the recorded appraisal, running the same checks as recording. Refused when the appraisal isn't
+    /// recorded, when nothing changes, or when no reason is given.
+    /// </summary>
+    /// <param name="appraisedValue">The home's market value without the lease's restrictions. Must be above zero.</param>
+    /// <param name="appraisalDate">Date of the appraisal.</param>
+    /// <param name="appraiserName">Name of the appraiser.</param>
+    /// <param name="notes">Optional notes. Replaces the recorded notes.</param>
+    /// <param name="reason">Why the record is corrected. Required.</param>
+    /// <param name="correctedBy">The user making the correction.</param>
+    public AppraisalCorrected CorrectAppraisal(
+        decimal appraisedValue, DateOnly appraisalDate, string appraiserName,
+        string? notes, string? reason, UserId correctedBy)
+    {
+        GuardNotTerminal();
+        var recorded = AppraisalDetails
+            ?? throw BusinessRuleViolation.PurchaseWorkflow.CorrectAppraisal.TrackNotRecorded();
+
+        if (string.IsNullOrWhiteSpace(reason))
+            throw BusinessRuleViolation.PurchaseWorkflow.CorrectAppraisal.ReasonRequired();
+
+        if (appraisedValue <= 0)
+            throw BusinessRuleViolation.PurchaseWorkflow.CorrectAppraisal.AppraisedValueNonPositive(appraisedValue);
+
+        var cleanNotes = NullIfBlank(notes);
+        if (appraisedValue == recorded.AppraisedValue
+            && appraisalDate == recorded.AppraisalDate
+            && appraiserName == recorded.AppraiserName
+            && cleanNotes == NullIfBlank(recorded.Notes))
+        {
+            throw BusinessRuleViolation.PurchaseWorkflow.CorrectAppraisal.NoChange();
+        }
+
+        return new AppraisalCorrected(
+            Id.Value, appraisedValue, appraisalDate, appraiserName, cleanNotes, reason.Trim(), correctedBy.Value);
+    }
+
+    /// <summary>
+    /// Corrects the recorded financing commitment. Refused when financing isn't recorded, when nothing changes, or
+    /// when no reason is given.
+    /// </summary>
+    /// <param name="lenderName">Name of the lender.</param>
+    /// <param name="committedAmount">Amount committed.</param>
+    /// <param name="preapprovalLetterDate">Date of pre-approval letter.</param>
+    /// <param name="reason">Why the record is corrected. Required.</param>
+    /// <param name="correctedBy">The user making the correction.</param>
+    public FinancingCorrected CorrectFinancing(
+        string lenderName, decimal committedAmount, DateOnly preapprovalLetterDate,
+        string? reason, UserId correctedBy)
+    {
+        GuardNotTerminal();
+        var recorded = FinancingDetails
+            ?? throw BusinessRuleViolation.PurchaseWorkflow.CorrectFinancing.TrackNotRecorded();
+
+        if (string.IsNullOrWhiteSpace(reason))
+            throw BusinessRuleViolation.PurchaseWorkflow.CorrectFinancing.ReasonRequired();
+
+        if (lenderName == recorded.LenderName
+            && committedAmount == recorded.CommittedAmount
+            && preapprovalLetterDate == recorded.PreapprovalLetterDate)
+        {
+            throw BusinessRuleViolation.PurchaseWorkflow.CorrectFinancing.NoChange();
+        }
+
+        return new FinancingCorrected(
+            Id.Value, lenderName, committedAmount, preapprovalLetterDate, reason.Trim(), correctedBy.Value);
+    }
+
     /// <summary>Records that a home inspection has been completed. Idempotent.</summary>
     /// <param name="inspectionDate">Date of the inspection.</param>
     /// <param name="inspectorName">Name of the inspector.</param>
@@ -517,6 +649,31 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
         AdvancePhaseIfNeeded();
     }
 
+    /// <summary>Applies <see cref="BuyerEligibilityCorrected"/>.</summary>
+    public void Apply(BuyerEligibilityCorrected e)
+    {
+        EligibilityDetails = new EligibilityDetails(
+            e.VerifiedDate, e.EligibilityNotes, e.VerifiedAnnualIncome, e.VerifiedHouseholdSize, e.IncomeLimit,
+            e.IncomeBandUpToPercentOfAmi is not null || e.IncomeBandOverPercentOfAmi is not null
+                ? IncomeBand.Create(e.IncomeBandOverPercentOfAmi, e.IncomeBandUpToPercentOfAmi)
+                : null,
+            e.IncomeDocumentIds);
+    }
+
+    /// <summary>Applies <see cref="AppraisalCorrected"/>.</summary>
+    public void Apply(AppraisalCorrected e)
+    {
+        AppraisalDetails = new AppraisalDetails(
+            e.AppraisedValue, e.AppraisalDate, e.AppraiserName, e.AppraisalNotes);
+    }
+
+    /// <summary>Applies <see cref="FinancingCorrected"/>.</summary>
+    public void Apply(FinancingCorrected e)
+    {
+        FinancingDetails = new FinancingDetails(
+            e.LenderName, e.CommittedAmount, e.PreapprovalLetterDate);
+    }
+
     /// <summary>Applies <see cref="InspectionCompleted"/>.</summary>
     public void Apply(InspectionCompleted e)
     {
@@ -583,6 +740,8 @@ public sealed class PurchaseWorkflow : AggregateRoot<PurchaseWorkflowId>
             Phase = WorkflowPhase.InProgress;
         }
     }
+
+    private static string? NullIfBlank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private void GuardNotTerminal()
     {

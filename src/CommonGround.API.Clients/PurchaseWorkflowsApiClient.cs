@@ -52,6 +52,27 @@ public sealed class PurchaseWorkflowsApiClient(
     }
 
     /// <inheritdoc/>
+    public async Task CorrectEligibilityAsync(string workflowId, CorrectEligibilityRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
+        await PutAsync($"api/purchase-workflows/{workflowId}/eligibility", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task CorrectAppraisalAsync(string workflowId, CorrectAppraisalRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
+        await PutAsync($"api/purchase-workflows/{workflowId}/appraisal", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task CorrectFinancingAsync(string workflowId, CorrectFinancingRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);
+        await PutAsync($"api/purchase-workflows/{workflowId}/financing", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task RecordFinancingCommittedAsync(string workflowId, RecordFinancingCommittedRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowId);

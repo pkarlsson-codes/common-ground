@@ -44,6 +44,27 @@ public interface IPurchaseWorkflowsApiClient
     /// <returns>A task representing the asynchronous operation.</returns>
     Task RecordAppraisalCompletedAsync(string workflowId, RecordAppraisalCompletedRequest request, CancellationToken cancellationToken);
 
+    /// <summary>Corrects the recorded eligibility verification.</summary>
+    /// <param name="workflowId">The ID of the purchase workflow.</param>
+    /// <param name="request">The values that should stand, and the reason.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task CorrectEligibilityAsync(string workflowId, CorrectEligibilityRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Corrects the recorded appraisal.</summary>
+    /// <param name="workflowId">The ID of the purchase workflow.</param>
+    /// <param name="request">The values that should stand, and the reason.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task CorrectAppraisalAsync(string workflowId, CorrectAppraisalRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Corrects the recorded financing commitment.</summary>
+    /// <param name="workflowId">The ID of the purchase workflow.</param>
+    /// <param name="request">The values that should stand, and the reason.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task CorrectFinancingAsync(string workflowId, CorrectFinancingRequest request, CancellationToken cancellationToken);
+
     /// <summary>Records financing committed.</summary>
     /// <param name="workflowId">The ID of the purchase workflow.</param>
     /// <param name="request">The financing commitment details.</param>

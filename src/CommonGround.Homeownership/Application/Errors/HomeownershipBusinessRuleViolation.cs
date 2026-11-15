@@ -87,6 +87,82 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class CorrectEligibility
+        {
+            public static BusinessRuleViolationException TrackNotRecorded()
+                => new("homeownership.purchase_workflow.correct_eligibility.track_not_recorded");
+
+            public static BusinessRuleViolationException ReasonRequired()
+                => new("homeownership.purchase_workflow.correct_eligibility.reason_required");
+
+            public static BusinessRuleViolationException NoChange()
+                => new("homeownership.purchase_workflow.correct_eligibility.no_change");
+
+            public static BusinessRuleViolationException IncomeDocumentsRequired()
+                => new("homeownership.purchase_workflow.correct_eligibility.income_documents_required");
+
+            public static BusinessRuleViolationException IncomeNegative(Money income)
+                => new(
+                    "homeownership.purchase_workflow.correct_eligibility.income_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["income"] = income,
+                    });
+
+            public static BusinessRuleViolationException HouseholdSizeBelowOne(int householdSize)
+                => new(
+                    "homeownership.purchase_workflow.correct_eligibility.household_size_below_one",
+                    new Dictionary<string, object?>
+                    {
+                        ["householdSize"] = householdSize,
+                    });
+
+            public static BusinessRuleViolationException OverIncomeLimit(
+                Money income, Money limit, int percentOfAmi, int householdSize, DateOnly effectiveFrom)
+                => new(
+                    "homeownership.purchase_workflow.correct_eligibility.over_income_limit",
+                    new Dictionary<string, object?>
+                    {
+                        ["income"] = income,
+                        ["limit"] = limit,
+                        ["percentOfAmi"] = percentOfAmi,
+                        ["householdSize"] = householdSize,
+                        ["effectiveFrom"] = effectiveFrom,
+                    });
+        }
+
+        public static class CorrectAppraisal
+        {
+            public static BusinessRuleViolationException TrackNotRecorded()
+                => new("homeownership.purchase_workflow.correct_appraisal.track_not_recorded");
+
+            public static BusinessRuleViolationException ReasonRequired()
+                => new("homeownership.purchase_workflow.correct_appraisal.reason_required");
+
+            public static BusinessRuleViolationException NoChange()
+                => new("homeownership.purchase_workflow.correct_appraisal.no_change");
+
+            public static BusinessRuleViolationException AppraisedValueNonPositive(decimal appraisedValue)
+                => new(
+                    "homeownership.purchase_workflow.correct_appraisal.appraised_value_non_positive",
+                    new Dictionary<string, object?>
+                    {
+                        ["appraisedValue"] = appraisedValue,
+                    });
+        }
+
+        public static class CorrectFinancing
+        {
+            public static BusinessRuleViolationException TrackNotRecorded()
+                => new("homeownership.purchase_workflow.correct_financing.track_not_recorded");
+
+            public static BusinessRuleViolationException ReasonRequired()
+                => new("homeownership.purchase_workflow.correct_financing.reason_required");
+
+            public static BusinessRuleViolationException NoChange()
+                => new("homeownership.purchase_workflow.correct_financing.no_change");
+        }
+
         public static class ScheduleClosing
         {
             public static BusinessRuleViolationException MandatoryTracksIncomplete()

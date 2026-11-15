@@ -196,6 +196,86 @@ public class PurchaseWorkflowCloseTests(ApiFactory factory)
         response.IsSuccessStatusCode.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task CorrectAppraisal_BeforeClosing_ShowsTheCorrectionAndTheLeaseGetsTheCorrectedValue()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var landParcelId = $"landparc-{Guid.NewGuid():N}";
+        var templateId = await CreateTemplateAsync(client);
+        var workflowId = await InitiateWorkflowAsync(client, templateId, landParcelId, $"home-{Guid.NewGuid():N}");
+        await SatisfyAllTracksAsync(client, workflowId);
+
+        var corrected = await client.PutAsJsonAsync($"/api/purchase-workflows/{workflowId}/appraisal",
+            new CorrectAppraisalRequest(210_000m, new DateOnly(2026, 6, 2), "Test Appraiser", null, "Typo"));
+        corrected.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var workflow = await GetWorkflowAsync(client, workflowId);
+        workflow.AppraisalDetails!.AppraisedValue.Should().Be(210_000m);
+        workflow.Corrections.Should().ContainSingle().Which.Should().BeEquivalentTo(new
+        {
+            Track = "Appraisal",
+            Reason = "Typo",
+            Changes = new[] { new { Field = "AppraisedValue", Kind = "Money", Was = "200000", Now = "210000" } },
+        });
+
+        await ScheduleClosingAsync(client, workflowId);
+        (await client.PostAsJsonAsync($"/api/purchase-workflows/{workflowId}/closing/record",
+            new RecordPurchaseClosedRequest(ClosingDate, null))).StatusCode.Should().Be(HttpStatusCode.NoContent);
+        await InvokePurchaseClosedHandlerAsync(workflowId);
+
+        var lease = await FindGroundLeaseAsync(client, landParcelId);
+        var detail = await (await client.GetAsync($"/api/ground-leases/{lease!.Id}"))
+            .Content.ReadFromJsonAsync<GroundLeaseResponse>();
+        detail!.OriginalAppraisedValue.Should().Be(210_000m);
+    }
+
+    [Fact]
+    public async Task CorrectEligibility_ChangingIncome_ReplacesTheFiguresAndKeepsTheDocuments()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var workflowId = await InitiateWorkflowAsync(client, await CreateTemplateAsync(client), $"landparc-{Guid.NewGuid():N}", $"home-{Guid.NewGuid():N}");
+        await SatisfyAllTracksAsync(client, workflowId);
+
+        var corrected = await client.PutAsJsonAsync($"/api/purchase-workflows/{workflowId}/eligibility",
+            new CorrectEligibilityRequest(new DateOnly(2026, 6, 1), 45_000m, 1, null, null, "Rechecked pay stubs"));
+        corrected.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var workflow = await GetWorkflowAsync(client, workflowId);
+        workflow.EligibilityDetails.Should().BeEquivalentTo(new { VerifiedAnnualIncome = 45_000m, IncomeDocumentIds = new[] { "doc-1" } });
+    }
+
+    [Fact]
+    public async Task CorrectFinancing_NothingChanged_IsRefusedWithItsCode()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var workflowId = await InitiateWorkflowAsync(client, await CreateTemplateAsync(client), $"landparc-{Guid.NewGuid():N}", $"home-{Guid.NewGuid():N}");
+        await SatisfyAllTracksAsync(client, workflowId);
+
+        var response = await client.PutAsJsonAsync($"/api/purchase-workflows/{workflowId}/financing",
+            new CorrectFinancingRequest("Test Lender", 140000m, new DateOnly(2026, 6, 2), "Typo"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        var problem = (await response.Content.ReadFromJsonAsync<Microsoft.AspNetCore.Mvc.ProblemDetails>())!;
+        problem.Extensions["code"]!.ToString().Should().Be("homeownership.purchase_workflow.correct_financing.no_change");
+    }
+
+    [Fact]
+    public async Task CorrectAppraisal_NotRecorded_IsRefusedWithItsCode()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var workflowId = await InitiateWorkflowAsync(client, await CreateTemplateAsync(client), $"landparc-{Guid.NewGuid():N}", $"home-{Guid.NewGuid():N}");
+
+        var response = await client.PutAsJsonAsync($"/api/purchase-workflows/{workflowId}/appraisal",
+            new CorrectAppraisalRequest(210_000m, new DateOnly(2026, 6, 2), "Test Appraiser", null, "Typo"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        var problem = (await response.Content.ReadFromJsonAsync<Microsoft.AspNetCore.Mvc.ProblemDetails>())!;
+        problem.Extensions["code"]!.ToString().Should().Be("homeownership.purchase_workflow.correct_appraisal.track_not_recorded");
+    }
+
+    private static async Task<PurchaseWorkflowResponse> GetWorkflowAsync(HttpClient client, string workflowId) =>
+        (await (await client.GetAsync($"/api/purchase-workflows/{workflowId}")).Content.ReadFromJsonAsync<PurchaseWorkflowResponse>())!;
+
     private async Task InvokePurchaseClosedHandlerAsync(string workflowId)
     {
         using var scope = factory.Services.CreateScope();

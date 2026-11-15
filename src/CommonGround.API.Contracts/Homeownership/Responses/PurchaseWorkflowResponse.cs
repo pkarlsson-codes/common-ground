@@ -6,6 +6,7 @@ namespace CommonGround.API.Contracts.Homeownership.Responses;
 /// purchase didn't start from a selection, and <c>IncomeLimit</c> null when the home had no limit.
 /// <c>IncomeLimitSchedule</c> is the schedule in effect when the selection started, every level of it, which the
 /// income band is worked out from; null when none was in effect or the purchase didn't start from a selection.
+/// <c>Corrections</c> lists corrections to recorded tracks, newest first; null or empty means none.
 /// </summary>
 public sealed record PurchaseWorkflowResponse(
     string Id,
@@ -40,7 +41,8 @@ public sealed record PurchaseWorkflowResponse(
     string? WithdrawalReason,
     string? StalledReason,
     DateOnly? StalledDate,
-    DateOnly? ResolutionTargetDate);
+    DateOnly? ResolutionTargetDate,
+    IReadOnlyList<PurchaseCorrectionDto>? Corrections = null);
 
 /// <summary>The income limit a purchase's home selection judged by.</summary>
 /// <param name="PercentOfAmi">The home's limit as a percent of AMI.</param>
@@ -110,3 +112,23 @@ public sealed record LeaseExecutionDetailsDto(DateOnly SignedDate);
 /// <param name="Notes">Optional notes.</param>
 /// <param name="DocumentId">The signed acknowledgment in Documents.</param>
 public sealed record DisclosureDetailsDto(DateOnly AcknowledgedDate, string? Notes, string DocumentId);
+
+/// <summary>One correction to a recorded track.</summary>
+/// <param name="Track">The track corrected: Eligibility, Appraisal or Financing.</param>
+/// <param name="CorrectedAt">When the correction was made.</param>
+/// <param name="CorrectedBy">The user who made it.</param>
+/// <param name="Reason">Why it was made.</param>
+/// <param name="Changes">The fields that changed, at least one.</param>
+public sealed record PurchaseCorrectionDto(
+    string Track,
+    DateTimeOffset CorrectedAt,
+    string CorrectedBy,
+    string Reason,
+    IReadOnlyList<PurchaseCorrectionChangeDto> Changes);
+
+/// <summary>One field a correction changed.</summary>
+/// <param name="Field">The field name, such as AppraisedValue.</param>
+/// <param name="Kind">How to show the values: Money, Date, Number, Text or Documents.</param>
+/// <param name="Was">The value before, in invariant text, or null when there was none. Documents are comma-separated IDs.</param>
+/// <param name="Now">The value after, in invariant text, or null when there is none.</param>
+public sealed record PurchaseCorrectionChangeDto(string Field, string Kind, string? Was, string? Now);
