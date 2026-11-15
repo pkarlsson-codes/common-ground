@@ -7,6 +7,7 @@ import { formatCalendarDate, type CalendarDate } from '../../lib/calendarDate'
 import { formatPrice } from '../../lib/currency'
 import CloseHeirTransferPanel from './CloseHeirTransferPanel'
 import CompleteHeirTransferPanel from './CompleteHeirTransferPanel'
+import { heirLetterApplies, openHeirTransferLetter } from './heirTransferLetter'
 import RecordHeirPanel from './RecordHeirPanel'
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
@@ -30,6 +31,7 @@ export default function HeirTransferPanel({ heirTransferId, onClose }: { heirTra
   const [closing, setClosing] = useState(false)
   const { data: leaseDocuments } = useEntityDocuments('GroundLease', transfer?.groundLeaseId ?? null)
   const incomeDocuments = (leaseDocuments?.items ?? []).filter(d => (transfer?.incomeDocumentIds ?? []).includes(d.documentId!))
+  const signedLetters = (leaseDocuments?.items ?? []).filter(d => d.role === 'heir-letter-of-agreement' || d.role === 'heir-attorney-acknowledgement')
   const canRecordHeir = status === 'Open' || status === 'Heir recorded'
 
   return (
@@ -110,8 +112,26 @@ export default function HeirTransferPanel({ heirTransferId, onClose }: { heirTra
               <div className="detail-section__title">Transfer</div>
               <div className="detail-grid">
                 <Field label="Transfer Date">{date(transfer.transferredOn)}</Field>
+                {signedLetters.length > 0 && (
+                  <Field label="Signed Letters">
+                    {signedLetters.map(d => (
+                      <div key={d.documentId}>
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => downloadDocument(d.documentId!)}>
+                          {d.role === 'heir-letter-of-agreement' ? 'Letter of Agreement' : "Attorney's Acknowledgment"}
+                        </button>
+                      </div>
+                    ))}
+                  </Field>
+                )}
                 {transfer.completionNotes && <Field label="Notes">{transfer.completionNotes}</Field>}
               </div>
+              {heirLetterApplies(status) && (
+                <div style={{ marginTop: 12 }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => openHeirTransferLetter(transfer.id!)}>
+                    Print Letter
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
