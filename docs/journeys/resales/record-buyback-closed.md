@@ -5,6 +5,7 @@ Simplified for the first slice. The system records that the closing happened; th
 1. User opens a resale whose option is exercised (see [View Resale Detail](view-resale-detail.md)) and clicks "Record Closing"
 2. "Record Closing" panel opens, showing the Purchase Option Price
 3. User enters Closing Date (default today, not in the future, not before the Exercised Date), Purchase Price Paid (default the Purchase Option Price, required, at most the Purchase Option Price) and optional Closing Notes
+   - Fees Paid from Proceeds (default the lease's Total Owed on the Closing Date, zero or more). Above zero, a lease fee payment with method "Sale proceeds" is recorded on the lease before it ends
    - User chooses What Happens Next: "Offer to the waiting list" (default) or "Hold for now"
    - Choosing "Hold for now" adds Hold Reason (required, free text)
 4. User clicks "Record Closing", or "Cancel"

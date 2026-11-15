@@ -16,12 +16,14 @@
 7. Once the option is exercised, panel shows the Exercised Date
 8. A resale the trust bought shows the Closing Date, Purchase Price Paid and Closing Notes. A resale sold to a buyer shows the Closing Date and the sale price
 9. A Connected Records section links to the ground lease, the home, the home selection and the buyer's purchase (once they exist) and, after closing, the ended lease and the buyer's new lease
-10. "Withdraw" is available in the panel's actions until the trust exercises the option or a household is selected as the buyer
-11. User closes the panel
+10. A Payoff Statements list shows each statement printed: date, user, Good Through, Total Owed. "Payoff Statement" opens [Record Payoff Statement](record-payoff-statement.md) while the resale is open
+11. "Withdraw" is available in the panel's actions until the trust exercises the option or a household is selected as the buyer
+12. User closes the panel
 
 Not built yet: "Decline to Buy" and the Buyer step. Until [Decline Purchase Option](decline-purchase-option.md) is built, the Decision step offers only "Buy the Home", and the tracker ends at Closing for the trust's purchase.
 
 Continues in: [Record Resale Appraisal](record-resale-appraisal.md)
+Continues in: [Record Payoff Statement](record-payoff-statement.md)
 Continues in: [Exercise Purchase Option](exercise-purchase-option.md)
 Continues in: [Decline Purchase Option](decline-purchase-option.md)
 Continues in: [Record Buyback Closed](record-buyback-closed.md)
