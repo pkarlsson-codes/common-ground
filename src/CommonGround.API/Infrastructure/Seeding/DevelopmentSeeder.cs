@@ -50,6 +50,7 @@ internal static class DevelopmentSeeder
         services.AddTransient<IDevelopmentSeeder, ForeclosurePreventionCasesSeeder>();
         services.AddTransient<IDevelopmentSeeder, ResalesSeeder>();
         services.AddTransient<IDevelopmentSeeder, ImprovementRequestsSeeder>();
+        services.AddTransient<IDevelopmentSeeder, HeirTransfersSeeder>();
         services.AddTransient<IDevelopmentSeeder, LeaseFeesSeeder>();
         return services;
     }

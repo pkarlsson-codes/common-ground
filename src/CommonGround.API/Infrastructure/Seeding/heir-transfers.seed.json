@@ -1,0 +1,36 @@
+[
+  {
+    "seedKey": "ht-cedar-lane-013b-spouse",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-cedar-lane-013b",
+    "diedOn": "today-200d",
+    "noticeReceivedOn": "today-185d",
+    "notifiedBy": "Jan Kowalczyk, brother",
+    "notifiedByContact": "(503) 555-0142",
+    "notes": "Called the office the week after the funeral.",
+    "heir": {
+      "date": "today-170d",
+      "fullName": "Halina Kowalczyk",
+      "email": "halina.kowalczyk@example.com",
+      "phone": "(503) 555-0187",
+      "relationship": "Spouse"
+    },
+    "completed": { "date": "today-150d", "notes": "Both letters signed at the office. Fee notices and the insurance record now name Halina." }
+  },
+  {
+    "seedKey": "ht-willow-007a-child",
+    "trustSeedKey": "dev-default",
+    "groundLeaseSeedKey": "gl-willow-007a",
+    "diedOn": "today-130d",
+    "noticeReceivedOn": "today-20d",
+    "notifiedBy": "Ruth Abernathy, executor",
+    "notifiedByContact": "ruth.abernathy@example.com",
+    "notes": "Notice came after the 90 days. The executor was out of the country.",
+    "heir": {
+      "date": "today-12d",
+      "fullName": "Devon Okafor",
+      "email": "devon.okafor@example.com",
+      "relationship": "Child"
+    }
+  }
+]
