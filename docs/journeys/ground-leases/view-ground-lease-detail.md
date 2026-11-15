@@ -13,7 +13,8 @@
 11. Panel shows a Mortgages section: Debt Cap ("90% of the purchase option price"), then the permitted mortgages, current first: Lender, Original Principal, Permitted On and how ("Lease signing", "Request" or "Recorded"), and the Notice Address, or "Notice address not on file" in amber. Each current mortgage has "Edit" and "Paid Off"; a paid-off one is greyed with "Paid off {date}". With none: "No permitted mortgages recorded". Buttons: "Record Request" (Active leases only) and "Record Mortgage". Below, Requests newest first (Received, Purpose, Lender, Principal, Status); clicking one opens it
 12. Panel shows an Insurance section: Replacement Value and Liability per Occurrence required ("Not set" when absent) with a "Set Requirements" button (Active leases only) and, when they have changed, their history (latest first, including what the lease started with); Covered Through (the latest policy end among the certificates; red when passed, amber within 30 days; "No certificate on file" in red when there is none; absent on an Inactive lease); the current certificate's check ("Meets the lease", or each shortfall in amber); a "Record Certificate" button (Active leases only); and the certificates, newest policy first (Policy period, Insurer, Policy Number, Dwelling, Liability, Additional Insured yes/no, Received, a "Download" link when a file was added, and "Remove"). A removed certificate is greyed with "Removed: {reason}". With none: "No certificates recorded"
 13. Panel shows an Improvements section: Confirmed Improvements (the sum of Confirmed Credit on completed requests, "$0.00" when none), the Improvements Cap and what counts at resale ("Counted at resale: $X of $Y cap"; "No improvements cap on this lease, so credits aren't counted" when none), a "Record Request" button (Active leases only), and the requests, newest first: description, estimated cost, status and, for a waiting request, the reply due date (red when passed). Clicking a request opens it
-14. User closes the panel
+14. Panel shows an Heir Transfer section: the transfers on the lease with status (Open, Heir recorded, Completed, Closed), "Open Heir Transfer" (Active leases with no open transfer only), and Previous Homeowners with the transfer date when a transfer has completed. Click a transfer to open it (see [View Heir Transfer](view-heir-transfer.md))
+15. User closes the panel
 
 Continues in: [View Home Detail](../homes/view-home-detail.md)
 Continues in: [View Land Parcel Detail](../land-parcels/view-land-parcel-detail.md)
@@ -36,3 +37,5 @@ Continues in: [Mark Mortgage Paid Off](mark-mortgage-paid-off.md)
 Continues in: [Set Insurance Requirements](set-insurance-requirements.md)
 Continues in: [Record Insurance Certificate](record-insurance-certificate.md)
 Continues in: [Remove Insurance Certificate](remove-insurance-certificate.md)
+
+Continues in: [Open Heir Transfer](open-heir-transfer.md)
