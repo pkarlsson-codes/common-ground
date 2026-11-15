@@ -23,6 +23,7 @@ import TodayPage from './pages/TodayPage'
 import StewardshipPage from './pages/stewardship/StewardshipPage'
 import LeaseFeeNoticesPrintPage from './pages/lease-fee-notices/LeaseFeeNoticesPrintPage'
 import MortgageRequestLetterPage from './pages/ground-leases/MortgageRequestLetterPage'
+import ImprovementRequestLetterPage from './pages/ground-leases/ImprovementRequestLetterPage'
 import ResalePriceStatementLetterPage from './pages/ground-leases/ResalePriceStatementLetterPage'
 import ResalePriceStatementsPrintPage from './pages/stewardship/ResalePriceStatementsPrintPage'
 import TrustPolicyPage from './pages/trust-policy/TrustPolicyPage'
@@ -132,6 +133,7 @@ export default function App() {
               </Route>
               <Route path="/lease-fee-notices/print" element={<LeaseFeeNoticesPrintPage />} />
               <Route path="/mortgage-requests/:mortgageRequestId/letter" element={<MortgageRequestLetterPage />} />
+              <Route path="/improvement-requests/:improvementRequestId/letter" element={<ImprovementRequestLetterPage />} />
               <Route path="/ground-leases/:groundLeaseId/resale-price-statement" element={<ResalePriceStatementLetterPage />} />
               <Route path="/resale-price-statements/print" element={<ResalePriceStatementsPrintPage />} />
             </Route>

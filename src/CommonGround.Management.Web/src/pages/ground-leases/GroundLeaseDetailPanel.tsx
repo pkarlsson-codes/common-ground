@@ -15,6 +15,7 @@ import { DateInput } from '../../components/DateInput'
 import LeaseResaleSection from './LeaseResaleSection'
 import LeaseFeesSection from './LeaseFeesSection'
 import LeaseMortgagesSection from './LeaseMortgagesSection'
+import LeaseImprovementsSection from './LeaseImprovementsSection'
 import LeaseInsuranceSection from './LeaseInsuranceSection'
 import LeaseResalePriceStatementsSection from './LeaseResalePriceStatementsSection'
 
@@ -164,6 +165,8 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
           <LeaseFeesSection lease={detail} />
 
           <LeaseMortgagesSection lease={detail} />
+
+          <LeaseImprovementsSection lease={detail} />
 
           <LeaseInsuranceSection lease={detail} />
 

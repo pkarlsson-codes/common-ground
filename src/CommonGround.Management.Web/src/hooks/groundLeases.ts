@@ -1,5 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { GroundLeasesApi, type MortgageRequestResponse, type ReceiveMortgageRequestResponse } from '../api'
+import {
+  GroundLeasesApi,
+  type ImprovementRequestResponse,
+  type MortgageRequestResponse,
+  type ReceiveImprovementRequestResponse,
+  type ReceiveMortgageRequestResponse,
+} from '../api'
 import { apiConfig } from '../lib/apiConfig'
 import { startOfMonth, trustToday, type CalendarDate } from '../lib/calendarDate'
 import type {
@@ -663,5 +669,88 @@ export function useRemoveInsuranceCertificate() {
       invalidateLease(qc, v.groundLeaseId)
       qc.invalidateQueries({ queryKey: ['today'] })
     },
+  })
+}
+
+/** An improvement request's status, as the app shows it. The API sends the label itself. */
+export const IMPROVEMENT_REQUEST_STATUS_LABELS: Record<string, string> = {
+  'Waiting for decision': 'Waiting for decision',
+  Approved: 'Approved',
+  Denied: 'Denied',
+  Completed: 'Completed',
+  Withdrawn: 'Withdrawn',
+}
+
+/** How long the trust has to reply to an improvement request (Art 7.3). */
+export const IMPROVEMENT_REPLY_DAYS = 14
+
+function invalidateImprovementRequests(qc: ReturnType<typeof useQueryClient>, groundLeaseId: string) {
+  qc.invalidateQueries({ queryKey: ['improvement-requests', groundLeaseId] })
+  qc.invalidateQueries({ queryKey: ['improvement-request'] })
+  qc.invalidateQueries({ queryKey: ['ground-lease', groundLeaseId] })
+  qc.invalidateQueries({ queryKey: ['today'] })
+}
+
+export function useImprovementRequests(groundLeaseId: string | null) {
+  return useQuery({
+    queryKey: ['improvement-requests', groundLeaseId],
+    queryFn: () => api.getImprovementRequests({ groundLeaseId: groundLeaseId! }),
+    enabled: !!groundLeaseId,
+  })
+}
+
+export function useImprovementRequest(improvementRequestId: string | null) {
+  return useQuery({
+    queryKey: ['improvement-request', improvementRequestId],
+    queryFn: () => api.getImprovementRequest({ improvementRequestId: improvementRequestId! }),
+    enabled: !!improvementRequestId,
+  })
+}
+
+export function useReceiveImprovementRequest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ groundLeaseId, receivedOn, description, estimatedCost }: {
+      groundLeaseId: string
+      receivedOn: CalendarDate
+      description: string
+      estimatedCost: number
+    }) => {
+      const result = await api.receiveImprovementRequest({
+        groundLeaseId,
+        receiveImprovementRequestRequest: { receivedOn, description: description.trim(), estimatedCost },
+      })
+      return result as ReceiveImprovementRequestResponse
+    },
+    onSuccess: (_d, v) => invalidateImprovementRequests(qc, v.groundLeaseId),
+  })
+}
+
+export function useApproveImprovementRequest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ request, approvedOn, preApprovedCredit, notes }: {
+      request: ImprovementRequestResponse
+      approvedOn: CalendarDate
+      preApprovedCredit: number
+      notes: string
+    }) =>
+      api.approveImprovementRequest({
+        improvementRequestId: request.id!,
+        approveImprovementRequestRequest: { approvedOn, preApprovedCredit, notes: notes.trim() || null },
+      }),
+    onSuccess: (_d, v) => invalidateImprovementRequests(qc, v.request.groundLeaseId!),
+  })
+}
+
+export function useDenyImprovementRequest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ request, deniedOn, reason }: { request: ImprovementRequestResponse; deniedOn: CalendarDate; reason: string }) =>
+      api.denyImprovementRequest({
+        improvementRequestId: request.id!,
+        denyImprovementRequestRequest: { deniedOn, reason: reason.trim() },
+      }),
+    onSuccess: (_d, v) => invalidateImprovementRequests(qc, v.request.groundLeaseId!),
   })
 }
