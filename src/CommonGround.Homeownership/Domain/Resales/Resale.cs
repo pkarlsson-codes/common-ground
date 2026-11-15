@@ -33,6 +33,9 @@ public sealed class Resale : AggregateRoot<ResaleId>
     /// <summary>Gets the latest appraisal, if one has been recorded.</summary>
     public ResaleAppraisal? Appraisal { get; private set; }
 
+    /// <summary>Gets how many payoff statements have been printed for this resale.</summary>
+    public int PayoffStatementCount { get; private set; }
+
     /// <summary>Gets the day the trust decided to buy the home, if it has.</summary>
     public DateOnly? OptionExercisedOn { get; private set; }
 
@@ -169,7 +172,8 @@ public sealed class Resale : AggregateRoot<ResaleId>
         bool offerForSale,
         string? holdReason,
         DateOnly today,
-        UserId closedBy)
+        UserId closedBy,
+        Money? feesPaidFromProceeds = null)
     {
         if (Status != ResaleStatus.Open)
             throw BusinessRuleViolation.Resale.CloseBuyback.NotOpen(Status);
@@ -192,6 +196,9 @@ public sealed class Resale : AggregateRoot<ResaleId>
         if (!offerForSale && string.IsNullOrWhiteSpace(holdReason))
             throw BusinessRuleViolation.Resale.CloseBuyback.HoldReasonRequired();
 
+        if (feesPaidFromProceeds is { IsNegative: true })
+            throw BusinessRuleViolation.Resale.CloseBuyback.FeesPaidFromProceedsNegative(feesPaidFromProceeds.Amount);
+
         return new BuybackClosed(
             Id.Value,
             GroundLeaseId.Value,
@@ -201,7 +208,43 @@ public sealed class Resale : AggregateRoot<ResaleId>
             string.IsNullOrWhiteSpace(notes) ? null : notes.Trim(),
             offerForSale,
             offerForSale ? null : holdReason!.Trim(),
-            closedBy.Value);
+            closedBy.Value,
+            feesPaidFromProceeds is { IsPositive: true } ? feesPaidFromProceeds : null);
+    }
+
+    /// <summary>
+    /// Works out what the seller's lease owes as of a day the closing agent will pay it, from the lease's own fee
+    /// statement. Refused for a resale no longer open, a lease no longer active, a day before today or more than
+    /// <see cref="MaxPayoffDaysAhead"/> days ahead.
+    /// </summary>
+    public PayoffStatement PayoffStatementOn(GroundLease lease, DateOnly goodThrough, DateOnly today)
+    {
+        ArgumentNullException.ThrowIfNull(lease);
+
+        if (Status != ResaleStatus.Open)
+            throw BusinessRuleViolation.Resale.PayoffStatement.NotOpen(Status);
+
+        if (lease.Status != GroundLeaseStatus.Active)
+            throw BusinessRuleViolation.Resale.PayoffStatement.LeaseNotActive();
+
+        if (goodThrough < today)
+            throw BusinessRuleViolation.Resale.PayoffStatement.GoodThroughInPast(goodThrough, today);
+
+        if (goodThrough > today.AddDays(MaxPayoffDaysAhead))
+            throw BusinessRuleViolation.Resale.PayoffStatement.GoodThroughTooFar(goodThrough, today.AddDays(MaxPayoffDaysAhead));
+
+        return PayoffStatement.From(lease.LeaseFeeStatementAsOf(goodThrough));
+    }
+
+    /// <summary>The furthest ahead of today a payoff statement may be good through.</summary>
+    public const int MaxPayoffDaysAhead = 60;
+
+    /// <summary>Records that a payoff statement was printed for the closing agent. Same rules as <see cref="PayoffStatementOn"/>.</summary>
+    public PayoffStatementRecorded RecordPayoffStatement(GroundLease lease, DateOnly goodThrough, DateOnly today, UserId recordedBy)
+    {
+        var statement = PayoffStatementOn(lease, goodThrough, today);
+
+        return new PayoffStatementRecorded(Id.Value, GroundLeaseId.Value, goodThrough, statement.TotalOwed, recordedBy.Value);
     }
 
     /// <summary>Withdraws the resale because the homeowner decided not to sell.</summary>
@@ -250,6 +293,9 @@ public sealed class Resale : AggregateRoot<ResaleId>
 
     /// <summary>Applies <see cref="BuybackClosed"/>.</summary>
     public void Apply(BuybackClosed _) => Status = ResaleStatus.Closed;
+
+    /// <summary>Applies <see cref="PayoffStatementRecorded"/>.</summary>
+    public void Apply(PayoffStatementRecorded _) => PayoffStatementCount++;
 
     /// <summary>Applies <see cref="ResaleWithdrawn"/>.</summary>
     public void Apply(ResaleWithdrawn _) => Status = ResaleStatus.Withdrawn;

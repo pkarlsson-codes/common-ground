@@ -13,6 +13,7 @@ namespace CommonGround.Homeownership.Domain.Resales.Events;
 /// <param name="OfferedForSale">Whether the home goes to the waiting list now, rather than being held by the trust.</param>
 /// <param name="HoldReason">Why the trust is holding the home, when it is.</param>
 /// <param name="ClosedBy">The user who recorded the closing.</param>
+/// <param name="FeesPaidFromProceeds">Lease fees paid to the trust from the seller's proceeds at the closing; null for none.</param>
 public sealed record BuybackClosed(
     string AggregateId,
     string GroundLeaseId,
@@ -22,4 +23,5 @@ public sealed record BuybackClosed(
     string? Notes,
     bool OfferedForSale,
     string? HoldReason,
-    string ClosedBy) : DomainEvent(AggregateId);
+    string ClosedBy,
+    Money? FeesPaidFromProceeds = null) : DomainEvent(AggregateId);

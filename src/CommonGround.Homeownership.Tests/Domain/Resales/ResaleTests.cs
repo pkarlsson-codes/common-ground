@@ -352,4 +352,158 @@ public class ResaleTests
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }
     }
+
+    public class ThePayoffStatementMethods
+    {
+        private static readonly DateOnly Today = new(2026, 3, 10);
+        private readonly TestBed _testBed = new();
+
+        private GroundLease FeeLease() => EventReplay.Replay<GroundLease>(GroundLease.Establish(
+            GroundLeaseId.Generate(), "land-parcel-1234", "home-5678", Homeowner.From("Dana Whitfield", "dana@example.com"),
+            new DateOnly(2026, 1, 1), 99, 60, LeaseFeeTerms.Create(Money.Create(50m), Money.Create(10m)), MortgageDebtCap.Create(90),
+            Money.Create(200_000m), Money.Create(250_000m), "Covenants", ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser));
+
+        private Resale ResaleOn(GroundLease lease) => EventReplay.Replay<Resale>(
+            Resale.RecordIntentToSell(_testBed.ResaleId, lease, Today, NoticeChannel.Phone, null, Today, _testBed.StaffUser));
+
+        [Fact]
+        public void GivenThreeUnpaidMonths_WhenWorkedOut_ThenOwesThreeMonthlyFees()
+        {
+            var lease = FeeLease();
+
+            var statement = ResaleOn(lease).PayoffStatementOn(lease, Today, Today);
+
+            statement.Should().BeEquivalentTo(new
+            {
+                GoodThrough = Today,
+                FeesOwed = Money.Create(180m),
+                InterestOwed = Money.Zero,
+                Credit = Money.Zero,
+                TotalOwed = Money.Create(180m),
+                OldestUnpaidMonth = (DateOnly?)new DateOnly(2026, 1, 1),
+            });
+        }
+
+        [Fact]
+        public void GivenGoodThroughAfterNextFirst_WhenWorkedOut_ThenCountsThatMonthToo()
+        {
+            var lease = FeeLease();
+
+            var statement = ResaleOn(lease).PayoffStatementOn(lease, new DateOnly(2026, 4, 2), Today);
+
+            statement.TotalOwed.Should().Be(Money.Create(240m));
+        }
+
+        [Fact]
+        public void GivenPaymentsAboveFees_WhenWorkedOut_ThenShowsCreditAndOwesNothing()
+        {
+            var lease = FeeLease();
+            lease = lease.Evolve(lease.RecordLeaseFeePayment(
+                LeaseFeePaymentId.Generate(), new DateOnly(2026, 3, 1), Money.Create(200m), PaymentMethod.Check, null, Today, _testBed.StaffUser))!;
+
+            var statement = ResaleOn(lease).PayoffStatementOn(lease, Today, Today);
+
+            statement.Should().BeEquivalentTo(new { FeesOwed = Money.Zero, Credit = Money.Create(20m), TotalOwed = Money.Zero, OldestUnpaidMonth = (DateOnly?)null });
+        }
+
+        [Fact]
+        public void GivenValidGoodThrough_WhenRecorded_ThenRecordsTheTotalOwed()
+        {
+            var lease = FeeLease();
+            var sut = ResaleOn(lease);
+
+            var (recorded, events) = sut.Decide(r => r.RecordPayoffStatement(lease, new DateOnly(2026, 4, 1), Today, _testBed.StaffUser));
+
+            recorded.PayoffStatementCount.Should().Be(1);
+            events.Should().ContainSingle().Which.Should().BeEquivalentTo(new
+            {
+                GroundLeaseId = lease.Id.Value,
+                GoodThrough = new DateOnly(2026, 4, 1),
+                TotalOwed = Money.Create(240m),
+            });
+        }
+
+        [Theory]
+        [InlineData(-1, "homeownership.resale.payoff_statement.good_through_in_past")]
+        [InlineData(61, "homeownership.resale.payoff_statement.good_through_too_far")]
+        public void GivenGoodThroughOutsideTheRange_WhenWorkedOut_ThenThrowsBusinessRuleViolation(int daysFromToday, string expectedCode)
+        {
+            var lease = FeeLease();
+            var sut = ResaleOn(lease);
+
+            var act = () => sut.PayoffStatementOn(lease, Today.AddDays(daysFromToday), Today);
+
+            act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
+        }
+
+        [Fact]
+        public void GivenGoodThroughSixtyDaysAhead_WhenWorkedOut_ThenAllowsIt()
+        {
+            var lease = FeeLease();
+
+            var act = () => ResaleOn(lease).PayoffStatementOn(lease, Today.AddDays(60), Today);
+
+            act.Should().NotThrow();
+        }
+
+        [Fact]
+        public void GivenEndedLease_WhenWorkedOut_ThenThrowsLeaseNotActive()
+        {
+            var lease = FeeLease();
+            var sut = ResaleOn(lease);
+            lease = lease.Evolve(lease.Terminate("Bought by the trust", Today, _testBed.StaffUser))!;
+
+            var act = () => sut.PayoffStatementOn(lease, Today, Today);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.resale.payoff_statement.lease_not_active");
+        }
+
+        [Fact]
+        public void GivenWithdrawnResale_WhenWorkedOut_ThenThrowsNotOpen()
+        {
+            var lease = FeeLease();
+            var sut = ResaleOn(lease).Decide(r => r.Withdraw(Today, "Staying", Today, _testBed.StaffUser)).Aggregate;
+
+            var act = () => sut.PayoffStatementOn(lease, Today, Today);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.resale.payoff_statement.not_open");
+        }
+    }
+
+    public class TheCloseBuybackFeesPaidFromProceeds
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenAmountAboveZero_WhenClosed_ThenRecordsItOnTheEvent()
+        {
+            var (_, events) = _testBed.Exercised().Decide(r => r.CloseBuyback(
+                TestBed.NoticeDate, Money.Create(200_000), null, true, null, TestBed.NoticeDate, _testBed.StaffUser, Money.Create(180m)));
+
+            events.Should().ContainSingle().Which.Should().BeEquivalentTo(new { FeesPaidFromProceeds = Money.Create(180m) });
+        }
+
+        [Fact]
+        public void GivenZero_WhenClosed_ThenRecordsNone()
+        {
+            var (_, events) = _testBed.Exercised().Decide(r => r.CloseBuyback(
+                TestBed.NoticeDate, Money.Create(200_000), null, true, null, TestBed.NoticeDate, _testBed.StaffUser, Money.Zero));
+
+            events.Should().ContainSingle().Which.Should().BeEquivalentTo(new { FeesPaidFromProceeds = (Money?)null });
+        }
+
+        [Fact]
+        public void GivenNegativeAmount_WhenClosed_ThenThrowsBusinessRuleViolation()
+        {
+            var sut = _testBed.Exercised();
+
+            var act = () => sut.CloseBuyback(
+                TestBed.NoticeDate, Money.Create(200_000), null, true, null, TestBed.NoticeDate, _testBed.StaffUser, Money.Create(-1m));
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("homeownership.resale.close_buyback.fees_paid_from_proceeds_negative");
+        }
+    }
 }

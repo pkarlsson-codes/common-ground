@@ -1172,6 +1172,48 @@ public static class BusinessRuleViolation
             public static BusinessRuleViolationException HoldReasonRequired()
                 => new(
                     "homeownership.resale.close_buyback.hold_reason_required");
+
+            public static BusinessRuleViolationException FeesPaidFromProceedsNegative(decimal amount)
+                => new(
+                    "homeownership.resale.close_buyback.fees_paid_from_proceeds_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["amount"] = amount,
+                    });
+        }
+
+        public static class PayoffStatement
+        {
+            public static BusinessRuleViolationException NotOpen(ResaleStatus status)
+                => new(
+                    "homeownership.resale.payoff_statement.not_open",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                        ["requiredStatus"] = ResaleStatus.Open.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException LeaseNotActive()
+                => new(
+                    "homeownership.resale.payoff_statement.lease_not_active");
+
+            public static BusinessRuleViolationException GoodThroughInPast(DateOnly goodThrough, DateOnly today)
+                => new(
+                    "homeownership.resale.payoff_statement.good_through_in_past",
+                    new Dictionary<string, object?>
+                    {
+                        ["goodThrough"] = goodThrough,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException GoodThroughTooFar(DateOnly goodThrough, DateOnly latest)
+                => new(
+                    "homeownership.resale.payoff_statement.good_through_too_far",
+                    new Dictionary<string, object?>
+                    {
+                        ["goodThrough"] = goodThrough,
+                        ["latest"] = latest,
+                    });
         }
     }
 

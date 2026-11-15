@@ -86,4 +86,17 @@ public class ResaleView
 
     /// <summary>Gets or sets when the notice was recorded.</summary>
     public DateTimeOffset RecordedAt { get; set; }
+
+    /// <summary>Gets or sets the payoff statements printed for the closing agent, oldest first.</summary>
+    public List<PayoffStatementPrint> PayoffStatements { get; set; } = [];
+
+    /// <summary>Gets or sets the lease fees paid from the seller's proceeds at the closing, if any.</summary>
+    public decimal? FeesPaidFromProceeds { get; set; }
 }
+
+/// <summary>A payoff statement printed for a resale's closing agent.</summary>
+/// <param name="PrintedAt">When it was printed.</param>
+/// <param name="PrintedBy">The staff user who printed it.</param>
+/// <param name="GoodThrough">The day the figures were worked out for.</param>
+/// <param name="TotalOwed">The amount the letter asked for.</param>
+public sealed record PayoffStatementPrint(DateTimeOffset PrintedAt, string PrintedBy, DateOnly GoodThrough, decimal TotalOwed);

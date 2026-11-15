@@ -1,4 +1,5 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
+using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.Resales;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Exceptions;
@@ -16,6 +17,7 @@ namespace CommonGround.Homeownership.Application.Commands;
 /// <param name="Notes">Anything staff want to note about the closing.</param>
 /// <param name="OfferForSale">Whether the home goes to the waiting list now, rather than being held.</param>
 /// <param name="HoldReason">Why the trust is holding the home, when it is.</param>
+/// <param name="FeesPaidFromProceeds">Lease fees paid to the trust from the seller's proceeds at the closing; null or zero for none.</param>
 /// <param name="ClosedBy">The staff user recording it.</param>
 public sealed record RecordBuybackClosed(
     ResaleId ResaleId,
@@ -24,6 +26,7 @@ public sealed record RecordBuybackClosed(
     string? Notes,
     bool OfferForSale,
     string? HoldReason,
+    Money? FeesPaidFromProceeds,
     UserId ClosedBy);
 
 /// <summary>What closing a buyback writes to, and the trust's today.</summary>
@@ -37,6 +40,9 @@ public static class RecordBuybackClosedHandler
 {
     /// <summary>The reason the seller's lease is terminated with.</summary>
     public const string LeaseEndedReason = "Bought by the trust";
+
+    /// <summary>Prefix of the payment reference that ties a lease fee payment to its resale.</summary>
+    public const string PaymentReferencePrefix = "Resale ";
 
     /// <summary>Fetches the resale and its lease for writing, and the trust's today.</summary>
     public static async Task<BuybackClosing> LoadAsync(
@@ -62,7 +68,7 @@ public static class RecordBuybackClosedHandler
         return new BuybackClosing(resale, lease, today);
     }
 
-    /// <summary>Closes the resale, then ends the seller's lease and clears its open resale, in the same session.</summary>
+    /// <summary>Closes the resale, records the fees paid from proceeds on the seller's lease, then ends the seller's lease and clears its open resale, in the same session.</summary>
     public static void Handle(RecordBuybackClosed command, BuybackClosing closing)
     {
         ArgumentNullException.ThrowIfNull(command);
@@ -75,7 +81,20 @@ public static class RecordBuybackClosedHandler
             command.OfferForSale,
             command.HoldReason,
             closing.Today,
-            command.ClosedBy));
+            command.ClosedBy,
+            command.FeesPaidFromProceeds));
+        if (command.FeesPaidFromProceeds is { IsPositive: true } feesPaid)
+        {
+            closing.Lease.Decide(l => l.RecordLeaseFeePayment(
+                LeaseFeePaymentId.Generate(),
+                command.ClosingDate,
+                feesPaid,
+                PaymentMethod.SaleProceeds,
+                PaymentReferencePrefix + command.ResaleId.Value,
+                closing.Today,
+                command.ClosedBy));
+        }
+
         closing.Lease.Decide(l => l.Terminate(LeaseEndedReason, command.ClosingDate, command.ClosedBy));
         closing.Lease.Decide(l => l.CloseResale(command.ResaleId));
     }

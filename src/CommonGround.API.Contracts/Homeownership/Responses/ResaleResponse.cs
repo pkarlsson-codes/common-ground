@@ -29,6 +29,8 @@ namespace CommonGround.API.Contracts.Homeownership.Responses;
 /// <param name="ClosingNotes">Anything staff noted about the closing.</param>
 /// <param name="OfferedForSale">Whether the home was offered to the waiting list at the closing, rather than held.</param>
 /// <param name="HoldReason">Why the trust is holding the home, if it is.</param>
+/// <param name="FeesPaidFromProceeds">Lease fees paid to the trust from the seller's proceeds at the closing, if any.</param>
+/// <param name="PayoffStatements">The payoff statements printed for the closing agent, oldest first.</param>
 public sealed record ResaleResponse(
     string Id,
     string GroundLeaseId,
@@ -57,4 +59,28 @@ public sealed record ResaleResponse(
     decimal? PricePaid,
     string? ClosingNotes,
     bool? OfferedForSale,
-    string? HoldReason);
+    string? HoldReason,
+    decimal? FeesPaidFromProceeds,
+    IReadOnlyList<PayoffStatementPrintDto> PayoffStatements);
+
+/// <summary>A payoff statement printed for a resale's closing agent.</summary>
+/// <param name="PrintedAt">When it was printed.</param>
+/// <param name="PrintedBy">The staff user who printed it.</param>
+/// <param name="GoodThrough">The day the figures were worked out for.</param>
+/// <param name="TotalOwed">The amount the letter asked for.</param>
+public sealed record PayoffStatementPrintDto(DateTimeOffset PrintedAt, string PrintedBy, DateOnly GoodThrough, decimal TotalOwed);
+
+/// <summary>What a resale's seller owes the trust as of a day, for the closing agent to pay from proceeds.</summary>
+/// <param name="GoodThrough">The day the figures are worked out for.</param>
+/// <param name="FeesOwed">Lease fees owed, less payments; zero if paid up or over.</param>
+/// <param name="InterestOwed">Interest owed after waivers.</param>
+/// <param name="Credit">What was paid beyond the fees charged; zero if none.</param>
+/// <param name="TotalOwed">Fees and interest less credit, never below zero.</param>
+/// <param name="OldestUnpaidMonth">The due date of the oldest unpaid fee, or null when none is unpaid.</param>
+public sealed record PayoffStatementResponse(
+    DateOnly GoodThrough,
+    decimal FeesOwed,
+    decimal InterestOwed,
+    decimal Credit,
+    decimal TotalOwed,
+    DateOnly? OldestUnpaidMonth);

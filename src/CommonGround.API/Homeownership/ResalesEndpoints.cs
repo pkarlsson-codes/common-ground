@@ -170,6 +170,45 @@ public static class ResalesEndpoints
         return Results.NoContent();
     }
 
+    [WolverineGet("/api/resales/{resaleId}/payoff-statement")]
+    public static async Task<IResult> GetPayoffStatement(
+        string resaleId,
+        [FromQuery] DateOnly goodThrough,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+
+        var statement = await bus.InvokeForTenantAsync<PayoffStatement>(
+            bus.TenantId!, new GetPayoffStatement(ResaleId.Create(resaleId), goodThrough), cancellationToken);
+
+        return Results.Ok(new PayoffStatementResponse(
+            statement.GoodThrough,
+            statement.FeesOwed.Amount,
+            statement.InterestOwed.Amount,
+            statement.Credit.Amount,
+            statement.TotalOwed.Amount,
+            statement.OldestUnpaidMonth));
+    }
+
+    [WolverinePost("/api/resales/{resaleId}/payoff-statements")]
+    public static async Task<IResult> RecordPayoffStatement(
+        string resaleId,
+        RecordPayoffStatementRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new RecordPayoffStatement(ResaleId.Create(resaleId), request.GoodThrough, httpContext.GetUserId()),
+            cancellationToken);
+
+        return Results.NoContent();
+    }
+
     [WolverinePost("/api/resales/{resaleId}/buyback-closing")]
     public static async Task<IResult> RecordBuybackClosed(
         string resaleId,
@@ -189,6 +228,7 @@ public static class ResalesEndpoints
                 request.Notes,
                 request.OfferForSale,
                 request.HoldReason,
+                request.FeesPaidFromProceeds is { } feesPaid ? Money.Create(feesPaid) : null,
                 httpContext.GetUserId()),
             cancellationToken);
 
@@ -223,5 +263,7 @@ public static class ResalesEndpoints
         item.Resale.PricePaid,
         item.Resale.ClosingNotes,
         item.Resale.OfferedForSale,
-        item.Resale.HoldReason);
+        item.Resale.HoldReason,
+        item.Resale.FeesPaidFromProceeds,
+        item.Resale.PayoffStatements.Select(p => new PayoffStatementPrintDto(p.PrintedAt, p.PrintedBy, p.GoodThrough, p.TotalOwed)).ToList());
 }

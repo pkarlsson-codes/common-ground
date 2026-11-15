@@ -23,5 +23,8 @@ public sealed class PaymentMethod : Enumeration<PaymentMethod>
     /// <summary>Any other way.</summary>
     public static readonly PaymentMethod Other = new(6, "Other");
 
+    /// <summary>Paid to the trust out of a seller's proceeds at a resale closing.</summary>
+    public static readonly PaymentMethod SaleProceeds = new(7, "SaleProceeds");
+
     private PaymentMethod(int value, string displayName) : base(value, displayName) { }
 }

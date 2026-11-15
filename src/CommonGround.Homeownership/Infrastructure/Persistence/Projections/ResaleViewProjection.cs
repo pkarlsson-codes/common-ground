@@ -57,5 +57,9 @@ internal sealed class ResaleViewProjection : SingleStreamProjection<ResaleView, 
         view.ClosingNotes = e.Notes;
         view.OfferedForSale = e.OfferedForSale;
         view.HoldReason = e.HoldReason;
+        view.FeesPaidFromProceeds = e.FeesPaidFromProceeds?.Amount;
     }
+
+    public static void Apply(ResaleView view, PayoffStatementRecorded e) =>
+        view.PayoffStatements.Add(new PayoffStatementPrint(e.OccurredAt, e.RecordedBy, e.GoodThrough, e.TotalOwed.Amount));
 }
