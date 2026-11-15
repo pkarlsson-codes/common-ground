@@ -1,6 +1,7 @@
 using CommonGround.Homeownership.Domain.GroundLeases;
 using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.GroundLeaseTemplates;
+using CommonGround.Homeownership.Domain.HeirTransfers;
 using CommonGround.Homeownership.Domain.ImprovementRequests;
 using CommonGround.Homeownership.Domain.MortgageRequests;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
@@ -1638,6 +1639,187 @@ public static class BusinessRuleViolation
                     {
                         ["withdrawnOn"] = withdrawnOn,
                         ["today"] = today,
+                    });
+        }
+    }
+
+    public static class HeirTransfer
+    {
+        public static class Open
+        {
+            public static BusinessRuleViolationException LeaseNotActive(GroundLeaseStatus status)
+                => new(
+                    "homeownership.heir_transfer.open.lease_not_active",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException AlreadyOpen(string openTransferId)
+                => new(
+                    "homeownership.heir_transfer.open.already_open",
+                    new Dictionary<string, object?>
+                    {
+                        ["openTransferId"] = openTransferId,
+                    });
+
+            public static BusinessRuleViolationException NotifiedByRequired()
+                => new("homeownership.heir_transfer.open.notified_by_required");
+
+            public static BusinessRuleViolationException DiedOnInFuture(DateOnly diedOn, DateOnly today)
+                => new(
+                    "homeownership.heir_transfer.open.died_on_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["diedOn"] = diedOn,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException NoticeBeforeDeath(DateOnly noticeReceivedOn, DateOnly diedOn)
+                => new(
+                    "homeownership.heir_transfer.open.notice_before_death",
+                    new Dictionary<string, object?>
+                    {
+                        ["noticeReceivedOn"] = noticeReceivedOn,
+                        ["diedOn"] = diedOn,
+                    });
+
+            public static BusinessRuleViolationException NoticeInFuture(DateOnly noticeReceivedOn, DateOnly today)
+                => new(
+                    "homeownership.heir_transfer.open.notice_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["noticeReceivedOn"] = noticeReceivedOn,
+                        ["today"] = today,
+                    });
+        }
+
+        public static class RecordHeir
+        {
+            public static BusinessRuleViolationException NotOpen(HeirTransferStatus status)
+                => new(
+                    "homeownership.heir_transfer.record_heir.not_open",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException MovedInOnRequired()
+                => new("homeownership.heir_transfer.record_heir.moved_in_on_required");
+
+            public static BusinessRuleViolationException HouseholdMemberUnderOneYear(DateOnly movedInOn, DateOnly diedOn)
+                => new(
+                    "homeownership.heir_transfer.record_heir.household_member_under_one_year",
+                    new Dictionary<string, object?>
+                    {
+                        ["movedInOn"] = movedInOn,
+                        ["diedOn"] = diedOn,
+                    });
+
+            public static BusinessRuleViolationException IncomeRequired()
+                => new("homeownership.heir_transfer.record_heir.income_required");
+
+            public static BusinessRuleViolationException HouseholdSizeRequired()
+                => new("homeownership.heir_transfer.record_heir.household_size_required");
+
+            public static BusinessRuleViolationException IncomeDocumentsRequired()
+                => new("homeownership.heir_transfer.record_heir.income_documents_required");
+
+            public static BusinessRuleViolationException IncomeNegative(decimal income)
+                => new(
+                    "homeownership.heir_transfer.record_heir.income_negative",
+                    new Dictionary<string, object?>
+                    {
+                        ["income"] = income,
+                    });
+
+            public static BusinessRuleViolationException HouseholdSizeBelowOne(int householdSize)
+                => new(
+                    "homeownership.heir_transfer.record_heir.household_size_below_one",
+                    new Dictionary<string, object?>
+                    {
+                        ["householdSize"] = householdSize,
+                    });
+
+            public static BusinessRuleViolationException IncomeLimitsMissing(int percentOfAmi, DateOnly on)
+                => new(
+                    "homeownership.heir_transfer.record_heir.income_limits_missing",
+                    new Dictionary<string, object?>
+                    {
+                        ["percentOfAmi"] = percentOfAmi,
+                        ["on"] = on,
+                    });
+
+            public static BusinessRuleViolationException OverIncomeLimit(
+                decimal income, decimal limit, int percentOfAmi, int householdSize, DateOnly effectiveFrom)
+                => new(
+                    "homeownership.heir_transfer.record_heir.over_income_limit",
+                    new Dictionary<string, object?>
+                    {
+                        ["income"] = income,
+                        ["limit"] = limit,
+                        ["percentOfAmi"] = percentOfAmi,
+                        ["householdSize"] = householdSize,
+                        ["effectiveFrom"] = effectiveFrom,
+                    });
+        }
+
+        public static class Complete
+        {
+            public static BusinessRuleViolationException NoHeirRecorded(HeirTransferStatus status)
+                => new(
+                    "homeownership.heir_transfer.complete.no_heir_recorded",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException LettersRequired()
+                => new("homeownership.heir_transfer.complete.letters_required");
+
+            public static BusinessRuleViolationException TransferredOnBeforeDeath(DateOnly transferredOn, DateOnly diedOn)
+                => new(
+                    "homeownership.heir_transfer.complete.transferred_on_before_death",
+                    new Dictionary<string, object?>
+                    {
+                        ["transferredOn"] = transferredOn,
+                        ["diedOn"] = diedOn,
+                    });
+
+            public static BusinessRuleViolationException TransferredOnInFuture(DateOnly transferredOn, DateOnly today)
+                => new(
+                    "homeownership.heir_transfer.complete.transferred_on_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["transferredOn"] = transferredOn,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException LeaseNotActive(GroundLeaseStatus status)
+                => new(
+                    "homeownership.heir_transfer.complete.lease_not_active",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException OpenResale(string resaleId)
+                => new(
+                    "homeownership.heir_transfer.complete.open_resale",
+                    new Dictionary<string, object?>
+                    {
+                        ["resaleId"] = resaleId,
+                    });
+        }
+
+        public static class Close
+        {
+            public static BusinessRuleViolationException NotOpen(HeirTransferStatus status)
+                => new(
+                    "homeownership.heir_transfer.close.not_open",
+                    new Dictionary<string, object?>
+                    {
+                        ["status"] = status.DisplayName,
                     });
         }
     }

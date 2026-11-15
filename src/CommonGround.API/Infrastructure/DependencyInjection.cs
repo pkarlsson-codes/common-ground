@@ -46,6 +46,7 @@ internal static class CommonGroundServiceCollectionExtensions
         services.AddHomeBuyers();
         services.AddPropertyRegistry();
         services.AddHomeownership();
+        services.AddSingleton<CommonGround.Homeownership.Application.Services.IHomeIncomeLimits, CommonGround.API.Homeownership.HomeIncomeLimits>();
         services.AddIdentity();
         services.AddTrustManagement();
         services.AddStewardship();

@@ -10,6 +10,7 @@ using CommonGround.SharedKernel.Domain.Events;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
 using CommonGround.Homeownership.Domain.MortgageRequests;
 using CommonGround.Homeownership.Domain.Resales;
+using CommonGround.Homeownership.Domain.HeirTransfers;
 
 namespace CommonGround.Homeownership.Domain.GroundLeases;
 
@@ -100,6 +101,11 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
 
     /// <summary>Gets the day the lease ended, or null while it is active.</summary>
     public DateOnly? EndedOn { get; private set; }
+
+    private readonly List<PreviousHomeowner> _previousHomeowners = [];
+
+    /// <summary>Gets who held the home before the current homeowner, in the order the home passed on.</summary>
+    public IReadOnlyList<PreviousHomeowner> PreviousHomeowners => _previousHomeowners;
 
     private readonly List<LeaseFeePayment> _leaseFeePayments = [];
 
@@ -331,6 +337,49 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
             throw BusinessRuleViolation.GroundLease.StartResale.ResaleAlreadyOpen(openResaleId.Value);
 
         return new ResaleStarted(Id.Value, resaleId.Value);
+    }
+
+    /// <summary>
+    /// Passes the home to the heir of a completed transfer (Model Lease Art 10.3). The lease keeps its base price,
+    /// fee ledger, mortgages and insurance; the heir becomes the homeowner and the previous homeowner goes on the
+    /// lease's history. Refused unless the lease is active, and while a resale is open on it.
+    /// </summary>
+    /// <param name="transfer">The transfer being completed, on this lease, with its heir recorded.</param>
+    /// <param name="transferredOn">The day the home passes to the heir; the transfer has checked it.</param>
+    /// <param name="recordedBy">The staff user completing it.</param>
+    public HomeownerPassedToHeir PassToHeir(HeirTransfer transfer, DateOnly transferredOn, UserId recordedBy)
+    {
+        ArgumentNullException.ThrowIfNull(transfer);
+
+        if (transfer.GroundLeaseId != Id)
+            throw new ArgumentException("The transfer isn't on this lease.", nameof(transfer));
+
+        if (transfer.Status != HeirTransferStatus.HeirRecorded)
+            throw new ArgumentException("The transfer has no heir recorded.", nameof(transfer));
+
+        var heir = transfer.Heir
+            ?? throw new ArgumentException("The transfer has no heir.", nameof(transfer));
+        var relationship = transfer.Relationship
+            ?? throw new ArgumentException("The transfer has no relationship.", nameof(transfer));
+
+        if (Status != GroundLeaseStatus.Active)
+            throw BusinessRuleViolation.HeirTransfer.Complete.LeaseNotActive(Status);
+
+        if (OpenResaleId is { } openResaleId)
+            throw BusinessRuleViolation.HeirTransfer.Complete.OpenResale(openResaleId.Value);
+
+        return new HomeownerPassedToHeir(
+            Id.Value,
+            transfer.Id.Value,
+            transferredOn,
+            relationship.DisplayName,
+            CurrentHomeowner?.FullName.Value,
+            CurrentHomeowner?.Email.Value,
+            CurrentHomeowner?.Phone?.Value,
+            heir.FullName.Value,
+            heir.Email.Value,
+            heir.Phone?.Value,
+            recordedBy.Value);
     }
 
     /// <summary>Closes the lease's open resale, so its homeowner can give notice again. Nothing to do if it isn't open.</summary>
@@ -907,6 +956,15 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
 
     /// <summary>Applies <see cref="ResaleClosed"/>.</summary>
     public void Apply(ResaleClosed _) => OpenResaleId = null;
+
+    /// <summary>Applies <see cref="HomeownerPassedToHeir"/>.</summary>
+    public void Apply(HomeownerPassedToHeir e)
+    {
+        if (CurrentHomeowner is { } previous)
+            _previousHomeowners.Add(PreviousHomeowner.Create(previous, e.TransferredOn, HeirTransferId.Create(e.HeirTransferId)));
+
+        CurrentHomeowner = Homeowner.From(e.HomeownerFullName, e.HomeownerEmail, e.HomeownerPhone);
+    }
 
     /// <summary>Applies <see cref="GroundLeaseTerminated"/>.</summary>
     public void Apply(GroundLeaseTerminated e)

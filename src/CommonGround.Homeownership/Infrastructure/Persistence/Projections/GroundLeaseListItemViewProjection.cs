@@ -39,5 +39,11 @@ internal sealed class GroundLeaseListItemViewProjection : SingleStreamProjection
             HomeownerEmail = e.Data.BuyerEmail,
         };
 
+    public static void Apply(GroundLeaseListItemView view, HomeownerPassedToHeir e)
+    {
+        view.HomeownerFullName = e.HomeownerFullName;
+        view.HomeownerEmail = e.HomeownerEmail;
+    }
+
     public static void Apply(GroundLeaseListItemView view, GroundLeaseTerminated _) => view.Status = "Inactive";
 }

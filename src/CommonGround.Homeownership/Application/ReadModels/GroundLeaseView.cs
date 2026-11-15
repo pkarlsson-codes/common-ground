@@ -72,6 +72,9 @@ public class GroundLeaseView
     /// <summary>Gets or sets the current homeowner's phone number.</summary>
     public string? HomeownerPhone { get; set; }
 
+    /// <summary>Gets or sets who held the home before the current homeowner, in the order the home passed on.</summary>
+    public List<PreviousHomeownerEntry> PreviousHomeowners { get; set; } = [];
+
     /// <summary>Gets or sets the stewardship check-in history.</summary>
     public List<StewardshipCheckInEntry> StewardshipCheckIns { get; set; } = [];
 
@@ -374,4 +377,23 @@ public class StewardshipCheckInEntry
 
     /// <summary>Gets or sets when the check-in was recorded.</summary>
     public DateTimeOffset OccurredAt { get; set; }
+}
+
+/// <summary>A homeowner who held the home before the current one, in a ground lease view.</summary>
+public class PreviousHomeownerEntry
+{
+    /// <summary>Gets or sets the previous homeowner's full name.</summary>
+    public string FullName { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the previous homeowner's email.</summary>
+    public string Email { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the previous homeowner's phone number.</summary>
+    public string? Phone { get; set; }
+
+    /// <summary>Gets or sets the day the home passed to the next homeowner.</summary>
+    public DateOnly TransferredOn { get; set; }
+
+    /// <summary>Gets or sets the heir transfer that moved the home on.</summary>
+    public string HeirTransferId { get; set; } = string.Empty;
 }

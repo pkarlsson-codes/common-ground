@@ -141,6 +141,12 @@ public static class GroundLeasesEndpoints
             view.HomeownerFullName,
             view.HomeownerEmail,
             view.HomeownerPhone,
+            view.PreviousHomeowners.Select(h => new PreviousHomeownerDto(
+                h.FullName,
+                h.Email,
+                h.Phone,
+                h.TransferredOn,
+                h.HeirTransferId)).ToList().AsReadOnly(),
             view.StewardshipCheckIns.Select(c => new StewardshipCheckInDto(
                 c.CheckInDate,
                 c.Notes,

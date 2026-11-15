@@ -24,6 +24,7 @@ public sealed record GroundLeaseResponse(
     string? HomeownerFullName,
     string? HomeownerEmail,
     string? HomeownerPhone,
+    IReadOnlyList<PreviousHomeownerDto> PreviousHomeowners,
     IReadOnlyList<StewardshipCheckInDto> StewardshipCheckIns,
     LeaseFeesDto LeaseFees,
     MortgagesDto Mortgages,
@@ -32,6 +33,19 @@ public sealed record GroundLeaseResponse(
     DateTimeOffset CreatedAt,
     DateOnly RecordedOn,
     string CreatedBy);
+
+/// <summary>Someone who held the home before the current homeowner.</summary>
+/// <param name="FullName">Their full name.</param>
+/// <param name="Email">Their email address.</param>
+/// <param name="Phone">Their phone number, or null when not given.</param>
+/// <param name="TransferredOn">The day the home passed to the next homeowner.</param>
+/// <param name="HeirTransferId">The heir transfer that moved the home on.</param>
+public sealed record PreviousHomeownerDto(
+    string FullName,
+    string Email,
+    string? Phone,
+    DateOnly TransferredOn,
+    string HeirTransferId);
 
 /// <summary>The insurance a lease requires (Art 9.4) and the certificates the homeowner sent.</summary>
 /// <param name="RequiredReplacementValue">The replacement value required as of the trust's today, or null when not checked.</param>

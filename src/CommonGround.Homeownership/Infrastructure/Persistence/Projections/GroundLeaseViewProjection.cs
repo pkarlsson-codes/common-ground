@@ -166,6 +166,25 @@ internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundL
         certificate.RemovedAt = e.OccurredAt;
     }
 
+    public static void Apply(GroundLeaseView view, HomeownerPassedToHeir e)
+    {
+        if (e.PreviousFullName is { } previousName && e.PreviousEmail is { } previousEmail)
+        {
+            view.PreviousHomeowners.Add(new PreviousHomeownerEntry
+            {
+                FullName = previousName,
+                Email = previousEmail,
+                Phone = e.PreviousPhone,
+                TransferredOn = e.TransferredOn,
+                HeirTransferId = e.HeirTransferId,
+            });
+        }
+
+        view.HomeownerFullName = e.HomeownerFullName;
+        view.HomeownerEmail = e.HomeownerEmail;
+        view.HomeownerPhone = e.HomeownerPhone;
+    }
+
     public static void Apply(GroundLeaseView view, ResaleStarted e) => view.OpenResaleId = e.ResaleId;
 
     public static void Apply(GroundLeaseView view, ResaleClosed e) => view.OpenResaleId = null;
