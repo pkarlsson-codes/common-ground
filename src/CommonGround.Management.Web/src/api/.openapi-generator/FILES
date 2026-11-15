@@ -34,7 +34,9 @@ models/ApproveMortgageRequestRequest.ts
 models/AttachDocumentRequest.ts
 models/CancelHomeSelectionRequest.ts
 models/CancelPropertyInspectionRequest.ts
+models/CloseHeirTransferRequest.ts
 models/CloseStewardshipCaseRequest.ts
+models/CompleteHeirTransferRequest.ts
 models/CompletePropertyInspectionRequest.ts
 models/CorrectLeaseFeeTrackingRequest.ts
 models/CounselingReferralResponse.ts
@@ -86,6 +88,8 @@ models/GroundLeaseListItemResponse.ts
 models/GroundLeaseResponse.ts
 models/GroundLeaseTemplateListItemResponse.ts
 models/GroundLeaseTemplateResponse.ts
+models/HeirIncomeLimitResponse.ts
+models/HeirTransferResponse.ts
 models/HomeAssessmentItemResponse.ts
 models/HomeListItemResponse.ts
 models/HomeResponse.ts
@@ -143,6 +147,8 @@ models/OccupancyVerificationResponse.ts
 models/OpenForeclosurePreventionCaseForLeaseDefaultRequest.ts
 models/OpenForeclosurePreventionCaseRequest.ts
 models/OpenForeclosurePreventionCaseResponse.ts
+models/OpenHeirTransferRequest.ts
+models/OpenHeirTransferResponse.ts
 models/PaginatedResponseOfDevelopmentProjectListItemResponse.ts
 models/PaginatedResponseOfDocumentLibraryItemResponse.ts
 models/PaginatedResponseOfEntityDocumentItemResponse.ts
@@ -168,6 +174,7 @@ models/PortfolioImportResponse.ts
 models/PreviewResalePriceRequest.ts
 models/PreviewResalePriceStatementRequest.ts
 models/PreviewResalePriceStatementsRequest.ts
+models/PreviousHomeownerDto.ts
 models/ProblemDetails.ts
 models/PropertyInspectionResponse.ts
 models/PurchaseBoardCardResponse.ts
@@ -190,6 +197,7 @@ models/RecordDisclosureAcknowledgedRequest.ts
 models/RecordEligibilityVerifiedRequest.ts
 models/RecordFinancingCommittedRequest.ts
 models/RecordForbearanceOutcomeRequest.ts
+models/RecordHeirRequest.ts
 models/RecordHomeAssessmentRequest.ts
 models/RecordHousingCounselingRequest.ts
 models/RecordImprovementCompletedRequest.ts

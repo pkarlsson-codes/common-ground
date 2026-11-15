@@ -263,4 +263,50 @@ public interface IGroundLeasesApiClient
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>Each lease's price, or why it can't be worked out.</returns>
     Task<ResalePriceStatementPreviewsResponse> PreviewResalePriceStatementsAsync(PreviewResalePriceStatementsRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Opens a transfer of a deceased homeowner's home to an heir.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response.</returns>
+    Task<OpenHeirTransferResponse> OpenHeirTransferAsync(string groundLeaseId, OpenHeirTransferRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Gets a lease's heir transfers.</summary>
+    /// <param name="groundLeaseId">The ID of the ground lease.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response.</returns>
+    Task<IReadOnlyList<HeirTransferResponse>> GetHeirTransfersAsync(string groundLeaseId, CancellationToken cancellationToken);
+
+    /// <summary>Gets an heir transfer.</summary>
+    /// <param name="heirTransferId">The ID of the heir transfer.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response.</returns>
+    Task<HeirTransferResponse> GetHeirTransferAsync(string heirTransferId, CancellationToken cancellationToken);
+
+    /// <summary>Gets the home's income limit for an heir transfer.</summary>
+    /// <param name="heirTransferId">The ID of the heir transfer.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The response.</returns>
+    Task<HeirIncomeLimitResponse> GetHeirIncomeLimitAsync(string heirTransferId, CancellationToken cancellationToken);
+
+    /// <summary>Records or replaces the heir.</summary>
+    /// <param name="heirTransferId">The ID of the heir transfer.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when it is recorded.</returns>
+    Task RecordHeirAsync(string heirTransferId, RecordHeirRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Completes the transfer.</summary>
+    /// <param name="heirTransferId">The ID of the heir transfer.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when it is recorded.</returns>
+    Task CompleteHeirTransferAsync(string heirTransferId, CompleteHeirTransferRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Closes the transfer without passing the home.</summary>
+    /// <param name="heirTransferId">The ID of the heir transfer.</param>
+    /// <param name="request">The request body.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task that completes when it is recorded.</returns>
+    Task CloseHeirTransferAsync(string heirTransferId, CloseHeirTransferRequest request, CancellationToken cancellationToken);
 }

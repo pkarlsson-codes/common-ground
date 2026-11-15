@@ -308,4 +308,57 @@ public sealed class GroundLeasesApiClient(
         ArgumentNullException.ThrowIfNull(request);
         return await PostAsync<PreviewResalePriceStatementsRequest, ResalePriceStatementPreviewsResponse>("api/resale-price-statements/preview", request, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task<OpenHeirTransferResponse> OpenHeirTransferAsync(string groundLeaseId, OpenHeirTransferRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        return await PostAsync<OpenHeirTransferRequest, OpenHeirTransferResponse>($"api/ground-leases/{groundLeaseId}/heir-transfers", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<HeirTransferResponse>> GetHeirTransfersAsync(string groundLeaseId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        return await GetAsync<IReadOnlyList<HeirTransferResponse>>($"api/ground-leases/{groundLeaseId}/heir-transfers", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<HeirTransferResponse> GetHeirTransferAsync(string heirTransferId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(heirTransferId);
+        return await GetAsync<HeirTransferResponse>($"api/heir-transfers/{heirTransferId}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<HeirIncomeLimitResponse> GetHeirIncomeLimitAsync(string heirTransferId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(heirTransferId);
+        return await GetAsync<HeirIncomeLimitResponse>($"api/heir-transfers/{heirTransferId}/income-limit", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task RecordHeirAsync(string heirTransferId, RecordHeirRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(heirTransferId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/heir-transfers/{heirTransferId}/heir", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task CompleteHeirTransferAsync(string heirTransferId, CompleteHeirTransferRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(heirTransferId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/heir-transfers/{heirTransferId}/complete", request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task CloseHeirTransferAsync(string heirTransferId, CloseHeirTransferRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(heirTransferId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/heir-transfers/{heirTransferId}/close", request, cancellationToken).ConfigureAwait(false);
+    }
 }

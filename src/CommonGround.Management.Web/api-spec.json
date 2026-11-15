@@ -3519,6 +3519,421 @@
         }
       }
     },
+    "/api/v1/ground-leases/{groundLeaseId}/heir-transfers": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "OpenHeirTransfer",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "OpenHeirTransferRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenHeirTransferRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenHeirTransferResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "GetHeirTransfers",
+        "parameters": [
+          {
+            "name": "groundLeaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HeirTransferResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/heir-transfers/{heirTransferId}": {
+      "get": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "GetHeirTransfer",
+        "parameters": [
+          {
+            "name": "heirTransferId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeirTransferResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/heir-transfers/{heirTransferId}/income-limit": {
+      "get": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "GetHeirIncomeLimit",
+        "parameters": [
+          {
+            "name": "heirTransferId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeirIncomeLimitResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/heir-transfers/{heirTransferId}/heir": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "RecordHeir",
+        "parameters": [
+          {
+            "name": "heirTransferId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordHeirRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordHeirRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/heir-transfers/{heirTransferId}/complete": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "CompleteHeirTransfer",
+        "parameters": [
+          {
+            "name": "heirTransferId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "CompleteHeirTransferRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteHeirTransferRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/heir-transfers/{heirTransferId}/close": {
+      "post": {
+        "tags": [
+          "GroundLeases"
+        ],
+        "operationId": "CloseHeirTransfer",
+        "parameters": [
+          {
+            "name": "heirTransferId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "CloseHeirTransferRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseHeirTransferRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ground-lease-templates": {
       "post": {
         "tags": [
@@ -11389,6 +11804,12 @@
             "type": "string",
             "nullable": true
           },
+          "previousHomeowners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreviousHomeownerDto"
+            }
+          },
           "stewardshipCheckIns": {
             "type": "array",
             "items": {
@@ -11417,6 +11838,35 @@
           },
           "createdBy": {
             "type": "string"
+          }
+        }
+      },
+      "PreviousHomeownerDto": {
+        "type": "object",
+        "description": "Someone who held the home before the current homeowner.",
+        "additionalProperties": false,
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "description": "Their full name."
+          },
+          "email": {
+            "type": "string",
+            "description": "Their email address."
+          },
+          "phone": {
+            "type": "string",
+            "description": "Their phone number, or null when not given.",
+            "nullable": true
+          },
+          "transferredOn": {
+            "type": "string",
+            "description": "The day the home passed to the next homeowner.",
+            "format": "date"
+          },
+          "heirTransferId": {
+            "type": "string",
+            "description": "The heir transfer that moved the home on."
           }
         }
       },
@@ -13812,6 +14262,354 @@
           "reason": {
             "type": "string",
             "description": "Why the homeowner withdrew it."
+          }
+        }
+      },
+      "OpenHeirTransferResponse": {
+        "type": "object",
+        "description": "The ID of a transfer just opened.",
+        "additionalProperties": false,
+        "properties": {
+          "heirTransferId": {
+            "type": "string",
+            "description": "The new transfer's ID."
+          }
+        }
+      },
+      "OpenHeirTransferRequest": {
+        "type": "object",
+        "description": "Request to open a transfer of a deceased homeowner's home to an heir (Model Lease Art 10.3).",
+        "additionalProperties": false,
+        "required": [
+          "notifiedByContact",
+          "notes"
+        ],
+        "properties": {
+          "diedOn": {
+            "type": "string",
+            "description": "The day the homeowner died; not in the future.",
+            "format": "date"
+          },
+          "noticeReceivedOn": {
+            "type": "string",
+            "description": "The day the executor told the trust; not before the death, not in the future. More than 90 days after the death is recorded as late.",
+            "format": "date"
+          },
+          "notifiedBy": {
+            "type": "string",
+            "description": "Who told the trust."
+          },
+          "notifiedByContact": {
+            "type": "string",
+            "description": "How to reach them, or null.",
+            "minLength": 1,
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "description": "Anything staff want to note, or null.",
+            "minLength": 1,
+            "nullable": true
+          }
+        }
+      },
+      "HeirTransferResponse": {
+        "type": "object",
+        "description": "A transfer of a deceased homeowner's home to an heir (Model Lease Art 10.3).",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The transfer ID."
+          },
+          "groundLeaseId": {
+            "type": "string",
+            "description": "The lease the home is held on."
+          },
+          "homeId": {
+            "type": "string",
+            "description": "The home."
+          },
+          "deceasedHomeownerFullName": {
+            "type": "string",
+            "description": "The lease's homeowner when the transfer opened.",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "description": "Open, Heir recorded, Completed or Closed."
+          },
+          "diedOn": {
+            "type": "string",
+            "description": "The day the homeowner died.",
+            "format": "date"
+          },
+          "noticeReceivedOn": {
+            "type": "string",
+            "description": "The day the executor told the trust.",
+            "format": "date"
+          },
+          "noticeDueOn": {
+            "type": "string",
+            "description": "The last day the lease gave the executor to tell the trust: 90 days after the death.",
+            "format": "date"
+          },
+          "noticeWasLate": {
+            "type": "boolean",
+            "description": "Whether the notice came after NoticeDueOn."
+          },
+          "notifiedBy": {
+            "type": "string",
+            "description": "Who told the trust."
+          },
+          "notifiedByContact": {
+            "type": "string",
+            "description": "How to reach them, or null.",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "description": "What staff noted when opening, or null.",
+            "nullable": true
+          },
+          "heirFullName": {
+            "type": "string",
+            "description": "The heir's full name, or null before an heir is recorded.",
+            "nullable": true
+          },
+          "heirEmail": {
+            "type": "string",
+            "description": "The heir's email address, or null before an heir is recorded.",
+            "nullable": true
+          },
+          "heirPhone": {
+            "type": "string",
+            "description": "The heir's phone number, or null.",
+            "nullable": true
+          },
+          "relationship": {
+            "type": "string",
+            "description": "Spouse, Child, HouseholdMember or Other, or null before an heir is recorded.",
+            "nullable": true
+          },
+          "heirMovedInOn": {
+            "type": "string",
+            "description": "The day a household member moved in, or null.",
+            "format": "date",
+            "nullable": true
+          },
+          "heirVerifiedAnnualIncome": {
+            "type": "number",
+            "description": "The heir's verified annual income, for any other heir, or null.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "heirVerifiedHouseholdSize": {
+            "type": "integer",
+            "description": "The heir's household size, for any other heir, or null.",
+            "format": "int32",
+            "nullable": true
+          },
+          "incomeDocumentIds": {
+            "type": "array",
+            "description": "The income documents as Documents file IDs.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "incomeLimit": {
+            "type": "number",
+            "description": "The most the heir's household could earn, or null when the home has no limit or the heir was not checked.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "incomeLimitPercentOfAmi": {
+            "type": "integer",
+            "description": "The home's limit as a percent of area median income, or null.",
+            "format": "int32",
+            "nullable": true
+          },
+          "incomeLimitsEffectiveFrom": {
+            "type": "string",
+            "description": "The day the schedule that set the limit took effect, or null.",
+            "format": "date",
+            "nullable": true
+          },
+          "transferredOn": {
+            "type": "string",
+            "description": "The day the home passed to the heir, or null until completed.",
+            "format": "date",
+            "nullable": true
+          },
+          "letterOfAgreementDocumentId": {
+            "type": "string",
+            "description": "The signed Letter of Agreement, or null until completed.",
+            "nullable": true
+          },
+          "attorneyAcknowledgementDocumentId": {
+            "type": "string",
+            "description": "The signed Attorney's Acknowledgment, or null until completed.",
+            "nullable": true
+          },
+          "completionNotes": {
+            "type": "string",
+            "description": "What staff noted when completing, or null.",
+            "nullable": true
+          },
+          "closedReason": {
+            "type": "string",
+            "description": "HeirNotQualified, HeirDeclined or Other once closed, otherwise null.",
+            "nullable": true
+          },
+          "closedNotes": {
+            "type": "string",
+            "description": "What staff noted when closing, or null.",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "description": "When the transfer was closed, or null.",
+            "format": "date-time",
+            "nullable": true
+          },
+          "openedAt": {
+            "type": "string",
+            "description": "When the transfer was opened.",
+            "format": "date-time"
+          }
+        }
+      },
+      "HeirIncomeLimitResponse": {
+        "type": "object",
+        "description": "The income limits an heir who is not family is judged by.",
+        "additionalProperties": false,
+        "properties": {
+          "percentOfAmi": {
+            "type": "integer",
+            "description": "The home's limit as a percent of area median income, or null when the home has none.",
+            "format": "int32",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "The day the schedule in effect on the notice date took effect, or null when the home has no limit.",
+            "format": "date",
+            "nullable": true
+          },
+          "limits": {
+            "type": "array",
+            "description": "The limit for 1 to 8 people, in that order; empty when the home has no limit.",
+            "items": {
+              "type": "number",
+              "format": "decimal"
+            }
+          }
+        }
+      },
+      "RecordHeirRequest": {
+        "type": "object",
+        "description": "Request to record who is taking the home and how they qualify. Recording again replaces the heir.",
+        "additionalProperties": false,
+        "required": [
+          "phone",
+          "movedInOn",
+          "verifiedAnnualIncome",
+          "verifiedHouseholdSize",
+          "incomeDocumentIds"
+        ],
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "description": "The heir's full name."
+          },
+          "email": {
+            "type": "string",
+            "description": "The heir's email address."
+          },
+          "phone": {
+            "type": "string",
+            "description": "The heir's phone number, or null.",
+            "minLength": 1,
+            "nullable": true
+          },
+          "relationship": {
+            "type": "string",
+            "description": "How the heir qualifies: Spouse, Child, HouseholdMember or Other."
+          },
+          "movedInOn": {
+            "type": "string",
+            "description": "The day a household member moved in; required for HouseholdMember, at least a year before the death. Ignored for the others.",
+            "format": "date",
+            "nullable": true
+          },
+          "verifiedAnnualIncome": {
+            "type": "number",
+            "description": "The heir's verified annual income; required for Other. Ignored for the others.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "verifiedHouseholdSize": {
+            "type": "integer",
+            "description": "The heir's household size; required for Other. Ignored for the others.",
+            "format": "int32",
+            "nullable": true
+          },
+          "incomeDocumentIds": {
+            "type": "array",
+            "description": "The income documents as Documents file IDs; at least one for Other. Ignored for the others.",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CompleteHeirTransferRequest": {
+        "type": "object",
+        "description": "Request to complete the transfer: the lease then names the heir as homeowner.",
+        "additionalProperties": false,
+        "required": [
+          "notes"
+        ],
+        "properties": {
+          "transferredOn": {
+            "type": "string",
+            "description": "The day the home passes to the heir; not before the death, not in the future.",
+            "format": "date"
+          },
+          "letterOfAgreementDocumentId": {
+            "type": "string",
+            "description": "The signed Letter of Agreement, as a Documents file ID."
+          },
+          "attorneyAcknowledgementDocumentId": {
+            "type": "string",
+            "description": "The signed Attorney's Acknowledgment, as a Documents file ID."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Anything staff want to note, or null.",
+            "minLength": 1,
+            "nullable": true
+          }
+        }
+      },
+      "CloseHeirTransferRequest": {
+        "type": "object",
+        "description": "Request to close the transfer without the home passing to the heir.",
+        "additionalProperties": false,
+        "required": [
+          "notes"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Why: HeirNotQualified, HeirDeclined or Other."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Anything staff want to note, or null.",
+            "minLength": 1,
+            "nullable": true
           }
         }
       },

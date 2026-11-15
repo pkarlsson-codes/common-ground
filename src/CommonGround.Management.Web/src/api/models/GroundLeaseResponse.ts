@@ -14,6 +14,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { PreviousHomeownerDto } from './PreviousHomeownerDto';
+import {
+    PreviousHomeownerDtoFromJSON,
+    PreviousHomeownerDtoFromJSONTyped,
+    PreviousHomeownerDtoToJSON,
+    PreviousHomeownerDtoToJSONTyped,
+} from './PreviousHomeownerDto';
 import type { ResalePriceStatementsDto } from './ResalePriceStatementsDto';
 import {
     ResalePriceStatementsDtoFromJSON,
@@ -197,6 +204,12 @@ export interface GroundLeaseResponse {
     homeownerPhone?: string | null;
     /**
      * 
+     * @type {Array<PreviousHomeownerDto>}
+     * @memberof GroundLeaseResponse
+     */
+    previousHomeowners?: Array<PreviousHomeownerDto>;
+    /**
+     * 
      * @type {Array<StewardshipCheckInDto>}
      * @memberof GroundLeaseResponse
      */
@@ -284,6 +297,7 @@ export function GroundLeaseResponseFromJSONTyped(json: any, ignoreDiscriminator:
         'homeownerFullName': json['homeownerFullName'] == null ? undefined : json['homeownerFullName'],
         'homeownerEmail': json['homeownerEmail'] == null ? undefined : json['homeownerEmail'],
         'homeownerPhone': json['homeownerPhone'] == null ? undefined : json['homeownerPhone'],
+        'previousHomeowners': json['previousHomeowners'] == null ? undefined : ((json['previousHomeowners'] as Array<any>).map(PreviousHomeownerDtoFromJSON)),
         'stewardshipCheckIns': json['stewardshipCheckIns'] == null ? undefined : ((json['stewardshipCheckIns'] as Array<any>).map(StewardshipCheckInDtoFromJSON)),
         'leaseFees': json['leaseFees'] == null ? undefined : LeaseFeesDtoFromJSON(json['leaseFees']),
         'mortgages': json['mortgages'] == null ? undefined : MortgagesDtoFromJSON(json['mortgages']),
@@ -328,6 +342,7 @@ export function GroundLeaseResponseToJSONTyped(value?: GroundLeaseResponse | nul
         'homeownerFullName': value['homeownerFullName'],
         'homeownerEmail': value['homeownerEmail'],
         'homeownerPhone': value['homeownerPhone'],
+        'previousHomeowners': value['previousHomeowners'] == null ? undefined : ((value['previousHomeowners'] as Array<any>).map(PreviousHomeownerDtoToJSON)),
         'stewardshipCheckIns': value['stewardshipCheckIns'] == null ? undefined : ((value['stewardshipCheckIns'] as Array<any>).map(StewardshipCheckInDtoToJSON)),
         'leaseFees': LeaseFeesDtoToJSON(value['leaseFees']),
         'mortgages': MortgagesDtoToJSON(value['mortgages']),

@@ -510,4 +510,93 @@ public static class GroundLeasesEndpoints
         await client.WithdrawImprovementRequestAsync(improvementRequestId, request, cancellationToken).ConfigureAwait(false);
         return Results.NoContent();
     }
+
+    [WolverinePost("/api/v1/ground-leases/{groundLeaseId}/heir-transfers")]
+    [ProducesResponseType<OpenHeirTransferResponse>(StatusCodes.Status201Created)]
+    public static async Task<IResult> OpenHeirTransfer(
+        string groundLeaseId,
+        OpenHeirTransferRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        ArgumentNullException.ThrowIfNull(request);
+        var result = await client.OpenHeirTransferAsync(groundLeaseId, request, cancellationToken).ConfigureAwait(false);
+        return Results.Created($"/api/v1/heir-transfers/{result.HeirTransferId}", result);
+    }
+
+    [WolverineGet("/api/v1/ground-leases/{groundLeaseId}/heir-transfers")]
+    [ProducesResponseType<IReadOnlyList<HeirTransferResponse>>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetHeirTransfers(
+        string groundLeaseId,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groundLeaseId);
+        return Results.Ok(await client.GetHeirTransfersAsync(groundLeaseId, cancellationToken).ConfigureAwait(false));
+    }
+
+    [WolverineGet("/api/v1/heir-transfers/{heirTransferId}")]
+    [ProducesResponseType<HeirTransferResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetHeirTransfer(
+        string heirTransferId,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(heirTransferId);
+        return Results.Ok(await client.GetHeirTransferAsync(heirTransferId, cancellationToken).ConfigureAwait(false));
+    }
+
+    [WolverineGet("/api/v1/heir-transfers/{heirTransferId}/income-limit")]
+    [ProducesResponseType<HeirIncomeLimitResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetHeirIncomeLimit(
+        string heirTransferId,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(heirTransferId);
+        return Results.Ok(await client.GetHeirIncomeLimitAsync(heirTransferId, cancellationToken).ConfigureAwait(false));
+    }
+
+    [WolverinePost("/api/v1/heir-transfers/{heirTransferId}/heir")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> RecordHeir(
+        string heirTransferId,
+        RecordHeirRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(heirTransferId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.RecordHeirAsync(heirTransferId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/v1/heir-transfers/{heirTransferId}/complete")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> CompleteHeirTransfer(
+        string heirTransferId,
+        CompleteHeirTransferRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(heirTransferId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.CompleteHeirTransferAsync(heirTransferId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
+
+    [WolverinePost("/api/v1/heir-transfers/{heirTransferId}/close")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> CloseHeirTransfer(
+        string heirTransferId,
+        CloseHeirTransferRequest request,
+        IGroundLeasesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(heirTransferId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.CloseHeirTransferAsync(heirTransferId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
 }

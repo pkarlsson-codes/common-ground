@@ -18,6 +18,8 @@ import * as runtime from '../runtime';
 import type {
   ApproveImprovementRequestRequest,
   ApproveMortgageRequestRequest,
+  CloseHeirTransferRequest,
+  CompleteHeirTransferRequest,
   CorrectLeaseFeeTrackingRequest,
   CreateGroundLeaseRequest,
   CreateGroundLeaseResponse,
@@ -25,11 +27,15 @@ import type {
   DenyMortgageRequestRequest,
   EditPermittedMortgageRequest,
   GroundLeaseResponse,
+  HeirIncomeLimitResponse,
+  HeirTransferResponse,
   ImprovementRequestResponse,
   LeaseFeeNoticePolicyResponse,
   LeaseFeeNoticesDueResponse,
   MarkPermittedMortgagePaidOffRequest,
   MortgageRequestResponse,
+  OpenHeirTransferRequest,
+  OpenHeirTransferResponse,
   PaginatedResponseOfGroundLeaseListItemResponse,
   PaginatedResponseOfLeaseFeeBalanceResponse,
   PreviewResalePriceStatementRequest,
@@ -39,6 +45,7 @@ import type {
   ReceiveImprovementRequestResponse,
   ReceiveMortgageRequestRequest,
   ReceiveMortgageRequestResponse,
+  RecordHeirRequest,
   RecordImprovementCompletedRequest,
   RecordInsuranceCertificateRequest,
   RecordInsuranceCertificateResponse,
@@ -70,6 +77,10 @@ import {
     ApproveImprovementRequestRequestToJSON,
     ApproveMortgageRequestRequestFromJSON,
     ApproveMortgageRequestRequestToJSON,
+    CloseHeirTransferRequestFromJSON,
+    CloseHeirTransferRequestToJSON,
+    CompleteHeirTransferRequestFromJSON,
+    CompleteHeirTransferRequestToJSON,
     CorrectLeaseFeeTrackingRequestFromJSON,
     CorrectLeaseFeeTrackingRequestToJSON,
     CreateGroundLeaseRequestFromJSON,
@@ -84,6 +95,10 @@ import {
     EditPermittedMortgageRequestToJSON,
     GroundLeaseResponseFromJSON,
     GroundLeaseResponseToJSON,
+    HeirIncomeLimitResponseFromJSON,
+    HeirIncomeLimitResponseToJSON,
+    HeirTransferResponseFromJSON,
+    HeirTransferResponseToJSON,
     ImprovementRequestResponseFromJSON,
     ImprovementRequestResponseToJSON,
     LeaseFeeNoticePolicyResponseFromJSON,
@@ -94,6 +109,10 @@ import {
     MarkPermittedMortgagePaidOffRequestToJSON,
     MortgageRequestResponseFromJSON,
     MortgageRequestResponseToJSON,
+    OpenHeirTransferRequestFromJSON,
+    OpenHeirTransferRequestToJSON,
+    OpenHeirTransferResponseFromJSON,
+    OpenHeirTransferResponseToJSON,
     PaginatedResponseOfGroundLeaseListItemResponseFromJSON,
     PaginatedResponseOfGroundLeaseListItemResponseToJSON,
     PaginatedResponseOfLeaseFeeBalanceResponseFromJSON,
@@ -112,6 +131,8 @@ import {
     ReceiveMortgageRequestRequestToJSON,
     ReceiveMortgageRequestResponseFromJSON,
     ReceiveMortgageRequestResponseToJSON,
+    RecordHeirRequestFromJSON,
+    RecordHeirRequestToJSON,
     RecordImprovementCompletedRequestFromJSON,
     RecordImprovementCompletedRequestToJSON,
     RecordInsuranceCertificateRequestFromJSON,
@@ -174,6 +195,16 @@ export interface ApproveMortgageRequestOperationRequest {
     approveMortgageRequestRequest: ApproveMortgageRequestRequest;
 }
 
+export interface CloseHeirTransferOperationRequest {
+    heirTransferId: string;
+    closeHeirTransferRequest: CloseHeirTransferRequest;
+}
+
+export interface CompleteHeirTransferOperationRequest {
+    heirTransferId: string;
+    completeHeirTransferRequest: CompleteHeirTransferRequest;
+}
+
 export interface CorrectLeaseFeeTrackingOperationRequest {
     groundLeaseId: string;
     correctLeaseFeeTrackingRequest: CorrectLeaseFeeTrackingRequest;
@@ -210,6 +241,18 @@ export interface GetGroundLeasesRequest {
     landParcelId?: string | null;
     homeId?: string | null;
     search?: string | null;
+}
+
+export interface GetHeirIncomeLimitRequest {
+    heirTransferId: string;
+}
+
+export interface GetHeirTransferRequest {
+    heirTransferId: string;
+}
+
+export interface GetHeirTransfersRequest {
+    groundLeaseId: string;
 }
 
 export interface GetImprovementRequestRequest {
@@ -251,6 +294,11 @@ export interface MarkPermittedMortgagePaidOffOperationRequest {
     markPermittedMortgagePaidOffRequest: MarkPermittedMortgagePaidOffRequest;
 }
 
+export interface OpenHeirTransferOperationRequest {
+    groundLeaseId: string;
+    openHeirTransferRequest: OpenHeirTransferRequest;
+}
+
 export interface PreviewResalePriceStatementOperationRequest {
     groundLeaseId: string;
     previewResalePriceStatementRequest: PreviewResalePriceStatementRequest;
@@ -268,6 +316,11 @@ export interface ReceiveImprovementRequestOperationRequest {
 export interface ReceiveMortgageRequestOperationRequest {
     groundLeaseId: string;
     receiveMortgageRequestRequest: ReceiveMortgageRequestRequest;
+}
+
+export interface RecordHeirOperationRequest {
+    heirTransferId: string;
+    recordHeirRequest: RecordHeirRequest;
 }
 
 export interface RecordImprovementCompletedOperationRequest {
@@ -388,6 +441,34 @@ export interface GroundLeasesApiInterface {
 
     /**
      * 
+     * @param {string} heirTransferId 
+     * @param {CloseHeirTransferRequest} closeHeirTransferRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    closeHeirTransferRaw(requestParameters: CloseHeirTransferOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    closeHeirTransfer(requestParameters: CloseHeirTransferOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {string} heirTransferId 
+     * @param {CompleteHeirTransferRequest} completeHeirTransferRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    completeHeirTransferRaw(requestParameters: CompleteHeirTransferOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    completeHeirTransfer(requestParameters: CompleteHeirTransferOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
      * @param {string} groundLeaseId 
      * @param {CorrectLeaseFeeTrackingRequest} correctLeaseFeeTrackingRequest 
      * @param {*} [options] Override http request option.
@@ -486,6 +567,45 @@ export interface GroundLeasesApiInterface {
     /**
      */
     getGroundLeases(requestParameters: GetGroundLeasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedResponseOfGroundLeaseListItemResponse>;
+
+    /**
+     * 
+     * @param {string} heirTransferId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    getHeirIncomeLimitRaw(requestParameters: GetHeirIncomeLimitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HeirIncomeLimitResponse>>;
+
+    /**
+     */
+    getHeirIncomeLimit(requestParameters: GetHeirIncomeLimitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HeirIncomeLimitResponse>;
+
+    /**
+     * 
+     * @param {string} heirTransferId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    getHeirTransferRaw(requestParameters: GetHeirTransferRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HeirTransferResponse>>;
+
+    /**
+     */
+    getHeirTransfer(requestParameters: GetHeirTransferRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HeirTransferResponse>;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    getHeirTransfersRaw(requestParameters: GetHeirTransfersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<HeirTransferResponse>>>;
+
+    /**
+     */
+    getHeirTransfers(requestParameters: GetHeirTransfersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<HeirTransferResponse>>;
 
     /**
      * 
@@ -613,6 +733,20 @@ export interface GroundLeasesApiInterface {
     /**
      * 
      * @param {string} groundLeaseId 
+     * @param {OpenHeirTransferRequest} openHeirTransferRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    openHeirTransferRaw(requestParameters: OpenHeirTransferOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    openHeirTransfer(requestParameters: OpenHeirTransferOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {string} groundLeaseId 
      * @param {PreviewResalePriceStatementRequest} previewResalePriceStatementRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -664,6 +798,20 @@ export interface GroundLeasesApiInterface {
     /**
      */
     receiveMortgageRequest(requestParameters: ReceiveMortgageRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {string} heirTransferId 
+     * @param {RecordHeirRequest} recordHeirRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GroundLeasesApiInterface
+     */
+    recordHeirRaw(requestParameters: RecordHeirOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    recordHeir(requestParameters: RecordHeirOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -991,6 +1139,110 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
      */
     async approveMortgageRequest(requestParameters: ApproveMortgageRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
         const response = await this.approveMortgageRequestRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
+    async closeHeirTransferRaw(requestParameters: CloseHeirTransferOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['heirTransferId'] == null) {
+            throw new runtime.RequiredError(
+                'heirTransferId',
+                'Required parameter "heirTransferId" was null or undefined when calling closeHeirTransfer().'
+            );
+        }
+
+        if (requestParameters['closeHeirTransferRequest'] == null) {
+            throw new runtime.RequiredError(
+                'closeHeirTransferRequest',
+                'Required parameter "closeHeirTransferRequest" was null or undefined when calling closeHeirTransfer().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/heir-transfers/{heirTransferId}/close`;
+        urlPath = urlPath.replace(`{${"heirTransferId"}}`, encodeURIComponent(String(requestParameters['heirTransferId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CloseHeirTransferRequestToJSON(requestParameters['closeHeirTransferRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async closeHeirTransfer(requestParameters: CloseHeirTransferOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.closeHeirTransferRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
+    async completeHeirTransferRaw(requestParameters: CompleteHeirTransferOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['heirTransferId'] == null) {
+            throw new runtime.RequiredError(
+                'heirTransferId',
+                'Required parameter "heirTransferId" was null or undefined when calling completeHeirTransfer().'
+            );
+        }
+
+        if (requestParameters['completeHeirTransferRequest'] == null) {
+            throw new runtime.RequiredError(
+                'completeHeirTransferRequest',
+                'Required parameter "completeHeirTransferRequest" was null or undefined when calling completeHeirTransfer().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/heir-transfers/{heirTransferId}/complete`;
+        urlPath = urlPath.replace(`{${"heirTransferId"}}`, encodeURIComponent(String(requestParameters['heirTransferId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CompleteHeirTransferRequestToJSON(requestParameters['completeHeirTransferRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async completeHeirTransfer(requestParameters: CompleteHeirTransferOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.completeHeirTransferRaw(requestParameters, initOverrides);
         switch (response.raw.status) {
             case 204:
                 return null;
@@ -1342,6 +1594,111 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
 
     /**
      */
+    async getHeirIncomeLimitRaw(requestParameters: GetHeirIncomeLimitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HeirIncomeLimitResponse>> {
+        if (requestParameters['heirTransferId'] == null) {
+            throw new runtime.RequiredError(
+                'heirTransferId',
+                'Required parameter "heirTransferId" was null or undefined when calling getHeirIncomeLimit().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/heir-transfers/{heirTransferId}/income-limit`;
+        urlPath = urlPath.replace(`{${"heirTransferId"}}`, encodeURIComponent(String(requestParameters['heirTransferId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => HeirIncomeLimitResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getHeirIncomeLimit(requestParameters: GetHeirIncomeLimitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HeirIncomeLimitResponse> {
+        const response = await this.getHeirIncomeLimitRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getHeirTransferRaw(requestParameters: GetHeirTransferRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HeirTransferResponse>> {
+        if (requestParameters['heirTransferId'] == null) {
+            throw new runtime.RequiredError(
+                'heirTransferId',
+                'Required parameter "heirTransferId" was null or undefined when calling getHeirTransfer().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/heir-transfers/{heirTransferId}`;
+        urlPath = urlPath.replace(`{${"heirTransferId"}}`, encodeURIComponent(String(requestParameters['heirTransferId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => HeirTransferResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getHeirTransfer(requestParameters: GetHeirTransferRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HeirTransferResponse> {
+        const response = await this.getHeirTransferRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getHeirTransfersRaw(requestParameters: GetHeirTransfersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<HeirTransferResponse>>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling getHeirTransfers().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/heir-transfers`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(HeirTransferResponseFromJSON));
+    }
+
+    /**
+     */
+    async getHeirTransfers(requestParameters: GetHeirTransfersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<HeirTransferResponse>> {
+        const response = await this.getHeirTransfersRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
     async getImprovementRequestRaw(requestParameters: GetImprovementRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ImprovementRequestResponse>> {
         if (requestParameters['improvementRequestId'] == null) {
             throw new runtime.RequiredError(
@@ -1682,6 +2039,51 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
 
     /**
      */
+    async openHeirTransferRaw(requestParameters: OpenHeirTransferOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['groundLeaseId'] == null) {
+            throw new runtime.RequiredError(
+                'groundLeaseId',
+                'Required parameter "groundLeaseId" was null or undefined when calling openHeirTransfer().'
+            );
+        }
+
+        if (requestParameters['openHeirTransferRequest'] == null) {
+            throw new runtime.RequiredError(
+                'openHeirTransferRequest',
+                'Required parameter "openHeirTransferRequest" was null or undefined when calling openHeirTransfer().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/ground-leases/{groundLeaseId}/heir-transfers`;
+        urlPath = urlPath.replace(`{${"groundLeaseId"}}`, encodeURIComponent(String(requestParameters['groundLeaseId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: OpenHeirTransferRequestToJSON(requestParameters['openHeirTransferRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async openHeirTransfer(requestParameters: OpenHeirTransferOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.openHeirTransferRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
     async previewResalePriceStatementRaw(requestParameters: PreviewResalePriceStatementOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResalePriceStatementPriceResponse>> {
         if (requestParameters['groundLeaseId'] == null) {
             throw new runtime.RequiredError(
@@ -1850,6 +2252,58 @@ export class GroundLeasesApi extends runtime.BaseAPI implements GroundLeasesApiI
     async receiveMortgageRequest(requestParameters: ReceiveMortgageRequestOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.receiveMortgageRequestRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async recordHeirRaw(requestParameters: RecordHeirOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['heirTransferId'] == null) {
+            throw new runtime.RequiredError(
+                'heirTransferId',
+                'Required parameter "heirTransferId" was null or undefined when calling recordHeir().'
+            );
+        }
+
+        if (requestParameters['recordHeirRequest'] == null) {
+            throw new runtime.RequiredError(
+                'recordHeirRequest',
+                'Required parameter "recordHeirRequest" was null or undefined when calling recordHeir().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/heir-transfers/{heirTransferId}/heir`;
+        urlPath = urlPath.replace(`{${"heirTransferId"}}`, encodeURIComponent(String(requestParameters['heirTransferId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RecordHeirRequestToJSON(requestParameters['recordHeirRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async recordHeir(requestParameters: RecordHeirOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordHeirRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**
