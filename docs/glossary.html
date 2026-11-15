@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Glossary</title>
+<link rel="stylesheet" href="./docs.css" />
+<script src="./nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+<main>
+<header>
+  <h1>Glossary</h1>
+  <p class="lede">The language of each bounded context: its nouns, the verbs that act on each noun, what each one means inside that context, and the words it does not use. A term means what its own row says; the same word elsewhere can mean something else. Docs, journeys, UI labels and code use these terms. Source of the words: the Grounded Solutions CLT Technical Manual (2011), read as language, not as a model to copy. Why each term was chosen: <a href="glossary-decisions.html">Glossary Decisions</a>. How a party's name changes between contexts: <a href="architecture.html#messaging">Architecture, Messaging between contexts</a>.</p>
+  <p class="meta">Last checked against the code: 2026-11-14. Rules for using and changing this page: <code>docs/ai/ubiquitous-language.md</code>.</p>
+</header>
+
+<section id="reading">
+  <h2>How to read this page</h2>
+  <p>Each context has one table. A noun row is followed by the verbs that act on that noun, indented. A verb means what its own row says, for that noun only: "withdraw" under Application and "withdraw" under Purchase workflow are two verbs that are spelled the same. Each verb row names the event the code raises for it. Naming conventions for new verbs are in <code>docs/ai/ubiquitous-language.md</code>.</p>
+</section>
+
+<section id="shared-kernel">
+  <h2>1. Shared Kernel</h2>
+  <p>Terms every context uses with the same meaning. They have no verbs.</p>
+  <table>
+    <tr><th>Term</th><th>Meaning</th><th>Do not use</th></tr>
+    <tr><td><strong>Trust</strong></td><td>The community land trust that owns the land and uses the app. One tenant of the app. "CLT" is for the idea (a community land trust); "trust" is for one organization.</td><td>organization, tenant, account, CLT (for one organization)</td></tr>
+    <tr><td><strong>Money</strong></td><td>An amount of money. Code: <code>Money</code>.</td><td>decimal (in domain code)</td></tr>
+    <tr><td><strong>Business rule violation</strong></td><td>Developer term: a request the domain refuses. Code: <code>BusinessRuleViolationException</code>. Staff see its message, never this name.</td><td>validation error (that is a malformed request); "violation" alone (in docs and UI that is a lease violation)</td></tr>
+  </table>
+</section>
+
+<section id="identity">
+  <h2>2. Identity</h2>
+  <table>
+    <tr><th>Term</th><th>Meaning</th><th>Do not use</th></tr>
+    <tr><td><strong>User</strong></td><td>A person with a sign-in, linked to their Keycloak account. Code: <code>User</code>, <code>UserId</code>.</td><td>account, login</td></tr>
+    <tr class="verb"><td><strong>register</strong></td><td>The app adds the user the first time they sign in. Event: <code>UserRegistered</code>.</td><td>sign up, create</td></tr>
+    <tr><td><strong>Trust member</strong></td><td>A user who belongs to a trust and works in its Management app. Journeys and UI call trust members <strong>staff</strong>: "staff" for what that person decides, "the user" only for UI actions (what the user clicks). Code: no type of its own; the membership is on <code>User</code>, and the commands say it (<code>ListTrustMembers</code>, <code>RemoveTrustMember</code>).</td><td>admin, operator, agent, member (alone; Home Buyers has household members)</td></tr>
+    <tr class="verb"><td><strong>remove</strong></td><td>Staff end a user's membership of the trust. The user keeps their sign-in. Event: <code>UserRemovedFromTrust</code>.</td><td>delete, kick</td></tr>
+  </table>
+</section>
+
+<section id="trust-management">
+  <h2>3. Trust Management</h2>
+  <table>
+    <tr><th>Term</th><th>Meaning</th><th>Do not use</th></tr>
+    <tr><td><strong>Invitation</strong></td><td>A trust's offer to a person to become a trust member. Code: <code>TrustInvitation</code>.</td><td>invite (as a noun in docs; a button may say "Invite")</td></tr>
+    <tr class="verb"><td><strong>issue</strong></td><td>Staff offer membership to an email address. Event: <code>TrustInvitationIssued</code>.</td><td>send</td></tr>
+    <tr class="verb"><td><strong>accept</strong></td><td>The invited person takes up the offer and becomes a trust member. Event: <code>TrustInvitationAccepted</code>.</td><td>join, redeem</td></tr>
+    <tr class="verb"><td><strong>cancel</strong></td><td>Staff take back an invitation that hasn't been accepted. Event: <code>TrustInvitationCancelled</code>.</td><td>revoke, withdraw</td></tr>
+  </table>
+</section>
+
+<section id="property-registry">
+  <h2>4. Property Registry</h2>
+  <table>
+    <tr><th>Term</th><th>Meaning</th><th>Do not use</th></tr>
+    <tr><td><strong>Land parcel</strong></td><td>A piece of land the trust owns. It may carry one home or several.</td><td>lot, property, site, parcel (alone)</td></tr>
+    <tr class="verb"><td><strong>register</strong></td><td>Staff add land to the trust's portfolio. Event: <code>LandParcelRegistered</code>.</td><td>create, add</td></tr>
+    <tr class="verb"><td><strong>list for placement</strong></td><td>Staff offer the parcel for a home to be placed on it. Event: <code>ParcelListedForPlacement</code>.</td><td></td></tr>
+    <tr class="verb"><td><strong>withdraw for redevelopment</strong></td><td>Staff take the parcel out of use so it can be redeveloped. Event: <code>ParcelWithdrawnForRedevelopment</code>. See Not yet matching.</td><td></td></tr>
+    <tr class="verb"><td><strong>decommission</strong> / <strong>recommission</strong></td><td>Staff mark the parcel inactive, or active again. Events: <code>ParcelDecommissioned</code>, <code>ParcelRecommissioned</code>.</td><td>archive, delete</td></tr>
+    <tr><td><strong>Home</strong></td><td>A dwelling on a land parcel. The homeowner owns it; the trust owns the land under it. Labelled by parcel address plus the unit designation when the parcel has several. Property Registry owns it; other contexts keep a copy of the facts they need.</td><td>property, unit, house ("unit" only in "unit designation" and "Condo Unit")</td></tr>
+    <tr class="verb"><td><strong>register</strong></td><td>Staff add a home on a land parcel. Event: <code>HomeRegistered</code>.</td><td>create, add</td></tr>
+    <tr class="verb"><td><strong>set the income limit</strong></td><td>Staff set the income limit that applies to households buying this home. Event: <code>HomeIncomeLimitSet</code>.</td><td>configure</td></tr>
+    <tr class="verb"><td><strong>release for sale</strong></td><td>Staff offer a home the trust bought back and chose to hold to the waiting list. Refused when the home isn't held. No event: it ends the hold on the home's availability view.</td><td>list, publish</td></tr>
+    <tr><td><strong>Home assessment</strong></td><td>A home's assessed value on a date.</td><td>appraisal (that is Homeownership's market valuation)</td></tr>
+    <tr class="verb"><td><strong>record</strong></td><td>Staff enter an assessment that was made outside the app. Event: <code>HomeAssessed</code>.</td><td>appraise</td></tr>
+    <tr><td><strong>Development project</strong></td><td>Work that creates or rehabilitates homes on one or more land parcels.</td><td>project (alone)</td></tr>
+    <tr class="verb"><td><strong>initiate</strong></td><td>Staff start a new construction project or a rehabilitation project. Event: <code>DevelopmentProjectInitiated</code>.</td><td>start, create</td></tr>
+    <tr><td><strong>Sale stage</strong></td><td>Where a home stands in being sold: Selection, Purchase, Leased, Resale. Built from other contexts' events; the Selection stage is named after Home Buyers' home selection. No verbs: no one sets it.</td><td>status (alone)</td></tr>
+    <tr><td><strong>Occupancy</strong></td><td>Whether a homeowner leases the home now: Vacant or Occupied. No verbs: it follows the ground lease.</td><td>occupancy verification (that is Stewardship's check)</td></tr>
+  </table>
+</section>
+
+<section id="home-buyers">
+  <h2>5. Home Buyers</h2>
+  <table>
+    <tr><th>Term</th><th>Meaning</th><th>Do not use</th></tr>
+    <tr><td><strong>Household</strong></td><td>The people who would live in a home, with their income, size and circumstances. It exists before any application and after any purchase.</td><td>family, client, customer, buyer, homebuyer</td></tr>
+    <tr class="verb"><td><strong>register</strong></td><td>Staff add a household, before or without an application. Event: <code>HouseholdRegistered</code>.</td><td>create, sign up</td></tr>
+    <tr class="verb"><td><strong>update circumstances</strong></td><td>Staff change the household's income or other facts because they changed. Event: <code>HouseholdCircumstancesUpdated</code>. See Not yet matching.</td><td></td></tr>
+    <tr><td><strong>Household member</strong></td><td>One person in a household.</td><td>member (alone; Identity has trust members), occupant</td></tr>
+    <tr class="verb"><td><strong>add</strong> / <strong>update</strong> / <strong>remove</strong></td><td>Staff add a person to the household, change their details, or take them off it. Events: <code>HouseholdMemberAdded</code>, <code>HouseholdMemberUpdated</code>, <code>HouseholdMemberRemoved</code>.</td><td>delete</td></tr>
+    <tr><td><strong>Readiness</strong></td><td>Whether a household has completed its three <strong>readiness items</strong>: <strong>housing counseling</strong>, <strong>CLT orientation</strong> and <strong>mortgage prequalification</strong> (a lender's estimate of what the household can borrow, valid until an expiry date). Readiness is complete when all three are on record; an expired prequalification still counts. To be selected, a household needs complete readiness and a prequalification still valid on the selection date. The UI shows a household as Ready only when its prequalification also hasn't expired. Code: <code>ReadinessItem</code>, <code>IsReadinessComplete</code>, <code>IsPrequalificationValidOn</code>.</td><td>buyer preparation ("buyer" is Homeownership's word), onboarding; "prequalification" alone is fine, "mortgage" alone is not</td></tr>
+    <tr class="verb"><td><strong>record</strong></td><td>Staff enter that the household completed housing counseling or CLT orientation, or got a prequalification, outside the app. Events: <code>HousingCounselingRecorded</code>, <code>CltOrientationRecorded</code>, <code>MortgagePrequalificationRecorded</code>.</td><td>complete, check off</td></tr>
+    <tr class="verb"><td><strong>expire</strong></td><td>A prequalification reaches its expiry date and no longer counts toward selection. Event: <code>MortgagePrequalificationExpired</code>.</td><td>lapse</td></tr>
+    <tr><td><strong>Application</strong></td><td>A household's request to buy a home from the trust, with a snapshot of the household's facts at the time. Code name today: <code>HomeownerApplication</code>.</td><td>request, submission</td></tr>
+    <tr class="verb"><td><strong>submit</strong></td><td>The household applies. Refused while the household has another open application. Event: <code>ApplicationSubmitted</code>.</td><td>create, file</td></tr>
+    <tr class="verb"><td><strong>approve</strong> / <strong>deny</strong></td><td>The trust puts the application on the waiting list, or refuses it with a reason. The approval date sets its place on the waiting list. Events: <code>ApplicationApproved</code>, <code>ApplicationDenied</code>.</td><td>accept, reject</td></tr>
+    <tr class="verb"><td><strong>remove from the waiting list</strong></td><td>The trust takes an approved application off the waiting list, for a reason that arose after approval. Event: <code>ApplicationRemovedFromWaitingList</code>.</td><td>deny (that is before approval)</td></tr>
+    <tr class="verb"><td><strong>withdraw</strong></td><td>The household stops its application. Event: <code>ApplicationWithdrawn</code>.</td><td>cancel</td></tr>
+    <tr class="verb"><td><strong>return to the waiting list</strong></td><td>The purchase for the home it was selected for fell through, so the application waits again with its original approval date. Happens on its own. Event: <code>ApplicationReturnedToWaitingList</code>.</td><td>reinstate, reapprove</td></tr>
+    <tr><td><strong>Applicant</strong></td><td>A household in the role of having an application. Only when the sentence is about the application ("the applicant was selected"). Otherwise say household. No verbs of its own.</td><td>buyer</td></tr>
+    <tr><td><strong>Waiting list</strong></td><td>The approved applications waiting for a home, in approval-date order. No verbs of its own: applications join and leave it through their own verbs.</td><td>wait list, queue, pool</td></tr>
+    <tr><td><strong>Home selection</strong></td><td>The trust choosing one household for one home from a snapshot of the waiting list. Short form in running text: "selection". A <strong>lottery</strong> draws the household at random from the <strong>lottery pool</strong>, the candidates it may draw.</td><td>assignment, matching, allocation</td></tr>
+    <tr class="verb"><td><strong>start</strong></td><td>Staff open a selection for a home. Each candidate's income is judged against the home's income limit for its household size. Event: <code>HomeSelectionStarted</code>.</td><td>open, create</td></tr>
+    <tr class="verb"><td><strong>select by priority</strong></td><td>Staff choose a candidate, citing the priorities that put it ahead of the others. The application leaves the waiting list and a purchase begins in Homeownership. Events: <code>HouseholdSelectedByPriority</code>, <code>ApplicationSelectedForHome</code>.</td><td>assign, match, award</td></tr>
+    <tr class="verb"><td><strong>draw the lottery</strong></td><td>Staff have the app choose a candidate at random, from the tied candidates or from all of them. Events: <code>HouseholdSelectedByLottery</code>, <code>ApplicationSelectedForHome</code>.</td><td>run, roll</td></tr>
+    <tr class="verb"><td><strong>pass over</strong></td><td>An eligible application that a selection didn't choose. It stays on the waiting list, and the passing over is on its record. An application that couldn't have been selected isn't passed over. Event: <code>ApplicationPassedOver</code>.</td><td>skip, reject</td></tr>
+    <tr class="verb"><td><strong>cancel</strong></td><td>Staff end the selection without choosing anyone. Event: <code>HomeSelectionCancelled</code>.</td><td>withdraw, abandon</td></tr>
+    <tr><td><strong>Income limit schedule</strong></td><td>The trust's table of <strong>income limits</strong> (maximum household income by household size), effective from a date.</td><td>AMI cap, eligibility threshold; "schedule" alone (Homeownership has notice schedules)</td></tr>
+    <tr class="verb"><td><strong>enter</strong></td><td>Staff add the limits that take effect on a date. Event: <code>IncomeLimitScheduleEntered</code>.</td><td>create, upload</td></tr>
+    <tr class="verb"><td><strong>correct</strong></td><td>Staff fix a schedule that was entered wrong. Event: <code>IncomeLimitScheduleCorrected</code>.</td><td>edit, update</td></tr>
+  </table>
+</section>
+
+<section id="homeownership">
+  <h2>6. Homeownership</h2>
+  <table>
+    <tr><th>Term</th><th>Meaning</th><th>Do not use</th></tr>
+    <tr><td><strong>Purchase workflow</strong></td><td>The steps from a selected buyer to closing. UI and journeys say "purchase". Code: <code>PurchaseWorkflow</code>.</td><td>sale, transaction, deal</td></tr>
+    <tr class="verb"><td><strong>initiate</strong></td><td>Start a purchase. Happens on its own when a household is selected; staff initiate a direct purchase. Event: <code>PurchaseWorkflowInitiated</code>.</td><td>start, open</td></tr>
+    <tr class="verb"><td><strong>record</strong> (a step)</td><td>Staff enter that a step of the purchase happened outside the app: appraisal completed, inspection completed, title cleared, financing committed, disclosure acknowledged, lease executed, mortgage loan closed. Events: <code>AppraisalCompleted</code>, <code>InspectionCompleted</code>, <code>TitleCleared</code>, <code>FinancingCommitted</code>, <code>BuyerDisclosureAcknowledged</code>, <code>LeaseExecuted</code>. Buyer eligibility is also recorded today; see Not yet matching.</td><td>complete, check off</td></tr>
+    <tr class="verb"><td><strong>correct</strong> (a step)</td><td>Staff fix the figures of a recorded eligibility, appraisal or financing step that were wrong, with a reason. The old figures stay in the purchase's history. Only while the purchase is open. Events: <code>BuyerEligibilityCorrected</code>, <code>AppraisalCorrected</code>, <code>FinancingCorrected</code>.</td><td>edit, update, amend</td></tr>
+    <tr class="verb"><td><strong>schedule the closing</strong></td><td>Staff set the closing date. Event: <code>ClosingScheduled</code>.</td><td>book</td></tr>
+    <tr class="verb"><td><strong>stall</strong></td><td>Mark the purchase as stuck, with a reason and a date it should be resolved by. Event: <code>WorkflowStalled</code>.</td><td>pause, block</td></tr>
+    <tr class="verb"><td><strong>close</strong></td><td>The purchase completes: the money changed hands. The buyer becomes the homeowner and a ground lease is created. Event: <code>PurchaseClosed</code>.</td><td>complete, finish</td></tr>
+    <tr class="verb"><td><strong>fail</strong></td><td>The purchase ends because a condition wasn't met, such as financing falling through. Needs a failure reason. Event: <code>PurchaseFailed</code>.</td><td>reject, cancel</td></tr>
+    <tr class="verb"><td><strong>withdraw</strong></td><td>The buyer drops out of the purchase. Event: <code>PurchaseWithdrawn</code>.</td><td>cancel, abandon</td></tr>
+    <tr><td><strong>Buyer</strong></td><td>The party on a purchase workflow, from selection until closing. Usually a household selected in Home Buyers; on a direct purchase, the person staff entered. No verbs of its own.</td><td>purchaser, homebuyer, household (Homeownership has no households)</td></tr>
+    <tr><td><strong>Homeowner</strong></td><td>The person or people who own a home on trust land and hold its ground lease. A buyer becomes a homeowner when the purchase closes. No verbs of its own.</td><td>lessee, leaseholder, owner, resident</td></tr>
+    <tr><td><strong>Ground lease template</strong></td><td>The trust's standard lease terms that new ground leases are made from.</td><td>lease template, model lease (that is the manual's document)</td></tr>
+    <tr class="verb"><td><strong>create</strong></td><td>Staff define a template's name, covenant terms and option window. Event: <code>GroundLeaseTemplateCreated</code>.</td><td>define, add</td></tr>
+    <tr class="verb"><td><strong>archive</strong> / <strong>restore</strong></td><td>Staff hide a template from new leases, or bring it back. Events: <code>GroundLeaseTemplateArchived</code>, <code>GroundLeaseTemplateRestored</code>.</td><td>delete, retire</td></tr>
+    <tr><td><strong>Ground lease</strong></td><td>The long lease from the trust to the homeowner for the land under the home.</td><td>land lease, lease (alone)</td></tr>
+    <tr class="verb"><td><strong>create</strong></td><td>Happens on its own when a purchase closes. Staff create one for a lease signed before the trust used the app; refused while the home is leased, being sold, or in a home selection. Events: <code>GroundLeaseCreatedFromPurchase</code>, <code>GroundLeaseCreated</code>.</td><td>register, establish</td></tr>
+    <tr class="verb"><td><strong>terminate</strong></td><td>Staff end the lease, with a reason and a date. Event: <code>GroundLeaseTerminated</code>.</td><td>close, cancel</td></tr>
+    <tr class="verb"><td><strong>record a stewardship check-in</strong></td><td>Staff enter a visit with the homeowner and its notes. Event: <code>StewardshipCheckInRecorded</code>.</td><td>log</td></tr>
+    <tr class="verb"><td><strong>record a resale price statement</strong></td><td>Staff enter that the trust sent the homeowner what the home may sell for under the lease's formula, with the figures used. Event: <code>ResalePriceStatementRecorded</code>.</td><td></td></tr>
+    <tr><td><strong>Lease fee</strong></td><td>The monthly fee the homeowner pays the trust under the ground lease.</td><td>ground rent, rent, ground lease fee</td></tr>
+    <tr class="verb"><td><strong>correct tracking</strong></td><td>Staff fix the day fees are tracked from and the opening balance, such as after an import with the wrong date. Event: <code>LeaseFeeTrackingCorrected</code>.</td><td>edit, reset</td></tr>
+    <tr class="verb"><td><strong>waive interest</strong></td><td>Staff forgive late-fee interest owed today, with a reason, such as for a household in hardship. At most the interest owed today. Event: <code>LeaseFeeInterestWaived</code>.</td><td>forgive, cancel, write off</td></tr>
+    <tr><td><strong>Lease fee payment</strong></td><td>Money the trust received toward a lease's fees.</td><td>transaction, charge</td></tr>
+    <tr class="verb"><td><strong>record</strong></td><td>Staff enter a payment the trust received. An ended lease still takes payments. Event: <code>LeaseFeePaymentRecorded</code>.</td><td>post, add</td></tr>
+    <tr class="verb"><td><strong>void</strong></td><td>Staff mark a payment recorded by mistake so it no longer counts. It stays on the lease, marked void. Needs a reason. Event: <code>LeaseFeePaymentVoided</code>.</td><td>delete, reverse, refund</td></tr>
+    <tr><td><strong>Lease fee notice</strong></td><td>A late notice the trust sent, keeping the balance and oldest unpaid month on the day it was sent. Each has a level: first, second or default. The default one is the <strong>notice of default</strong>, which gives a cure period. Code: <code>LeaseFeeNotice</code>, <code>LeaseFeeNoticeLevel</code>.</td><td>"notice" alone (the trust sends other notices), bill, invoice</td></tr>
+    <tr class="verb"><td><strong>record</strong></td><td>Staff enter that a notice was sent. Refused when nothing was owed that day. Event: <code>LeaseFeeNoticeRecorded</code>.</td><td>send, issue (the app doesn't send it)</td></tr>
+    <tr><td><strong>Lease fee notice policy</strong></td><td>The trust's rule for when lease fee notices go out.</td><td>"policy" alone</td></tr>
+    <tr class="verb"><td><strong>set</strong></td><td>Staff replace the current policy with a new one. Event: <code>LeaseFeeNoticePolicySet</code>.</td><td>configure, edit</td></tr>
+    <tr><td><strong>Permitted mortgage</strong></td><td>A mortgage the trust has allowed on the home.</td><td>leasehold mortgage, loan, mortgage (alone; Home Buyers has mortgage prequalification)</td></tr>
+    <tr class="verb"><td><strong>record</strong></td><td>Staff enter a mortgage the trust permitted outside the app, such as on a lease from before the trust used it. Event: <code>PermittedMortgageRecorded</code>.</td><td>add</td></tr>
+    <tr class="verb"><td><strong>edit</strong></td><td>Staff change a mortgage's details because they changed, such as servicing moving to another company. Event: <code>PermittedMortgageEdited</code>.</td><td>update, correct</td></tr>
+    <tr class="verb"><td><strong>mark paid off</strong></td><td>Staff enter that the loan was repaid, so its lender no longer gets copies of notices. Event: <code>PermittedMortgagePaidOff</code>.</td><td>close, remove</td></tr>
+    <tr><td><strong>Mortgage request</strong></td><td>A homeowner asking the trust to permit a new loan on the home.</td><td>loan application, mortgage application</td></tr>
+    <tr class="verb"><td><strong>receive</strong></td><td>Staff enter the homeowner's request. Refused unless the lease is active, or while another request on the lease is pending. Event: <code>MortgageRequestReceived</code>.</td><td>submit (the homeowner's act, not entered by staff)</td></tr>
+    <tr class="verb"><td><strong>record the appraisal</strong></td><td>Staff enter the loan's appraisal and closing costs; the app works out the debt check against the purchase option price. Event: <code>MortgageRequestAppraisalRecorded</code>.</td><td></td></tr>
+    <tr class="verb"><td><strong>approve</strong> / <strong>deny</strong></td><td>The trust gives its written permission for the loan, or refuses it with the reason its denial letter gives. Approving needs the debt check; a loan above the cap needs a reason. Events: <code>MortgageRequestApproved</code>, <code>MortgageRequestDenied</code>.</td><td>accept, reject</td></tr>
+    <tr class="verb"><td><strong>record the loan closed</strong></td><td>Staff enter that the approved loan closed. It becomes a permitted mortgage, and the mortgages it paid off are marked paid off. Event: <code>MortgageRequestLoanClosed</code>.</td><td></td></tr>
+    <tr class="verb"><td><strong>withdraw</strong></td><td>The homeowner drops the loan, before a decision or after approval but before it closed. Needs a reason. Event: <code>MortgageRequestWithdrawn</code>.</td><td>cancel</td></tr>
+    <tr><td><strong>Insurance requirements</strong></td><td>The coverage a ground lease requires.</td><td>insurance policy</td></tr>
+    <tr class="verb"><td><strong>set</strong></td><td>Staff replace the requirements on a lease or template. Event: <code>InsuranceRequirementsSet</code>.</td><td>configure</td></tr>
+    <tr><td><strong>Insurance certificate</strong></td><td>The homeowner's proof of insurance cover.</td><td>policy, proof</td></tr>
+    <tr class="verb"><td><strong>record</strong></td><td>Staff enter a certificate the trust received. Event: <code>InsuranceCertificateRecorded</code>.</td><td>upload (the file is a document)</td></tr>
+    <tr class="verb"><td><strong>remove</strong></td><td>Staff take out a certificate recorded in error, so it no longer counts toward the cover. It stays on the lease. Needs a reason. Event: <code>InsuranceCertificateRemoved</code>. See Not yet matching.</td><td>delete</td></tr>
+    <tr><td><strong>Improvement request</strong></td><td>A homeowner asking the trust to approve altering or adding to the home, and to name the credit it will count at resale. The <strong>confirmed credit</strong> is what the trust counts once the work is done.</td><td>alteration request, capital improvement (alone), renovation</td></tr>
+    <tr class="verb"><td><strong>receive</strong></td><td>Staff enter the homeowner's request. Event: <code>ImprovementRequestReceived</code>.</td><td>submit (the homeowner's act, not entered by staff)</td></tr>
+    <tr class="verb"><td><strong>approve</strong> / <strong>deny</strong></td><td>The trust agrees to the work and names the credit it will count, or refuses with the reason its letter gives. Events: <code>ImprovementRequestApproved</code>, <code>ImprovementRequestDenied</code>.</td><td>accept, reject</td></tr>
+    <tr class="verb"><td><strong>record completed</strong></td><td>Staff enter that the approved work is finished, with its cost, the receipts and the confirmed credit. Event: <code>ImprovementCompleted</code>.</td><td>close, finish</td></tr>
+    <tr><td><strong>Heir transfer</strong></td><td>The home passing to an heir when the homeowner dies (Art 10.3). The lease continues with the heir as homeowner; the base price and everything on the lease stay. Different from a <strong>resale</strong>, which ends the lease.</td><td>inheritance, succession, probate transfer</td></tr>
+    <tr class="verb"><td><strong>open</strong> / <strong>record heir</strong></td><td>Staff open the transfer from the executor's notice, then enter the heir and the Art 10.3 route (spouse, child, household member, other). Events: <code>HeirTransferOpened</code>, <code>HeirRecorded</code>.</td><td>register, name</td></tr>
+    <tr class="verb"><td><strong>complete</strong> / <strong>close</strong></td><td>Complete: the signed letters are on file and the lease names the heir. Close: the home doesn't pass to the heir. Events: <code>HeirTransferCompleted</code>, <code>HeirTransferClosed</code>.</td><td>finalize, reject</td></tr>
+    <tr class="verb"><td><strong>withdraw</strong></td><td>The homeowner drops the work, before a decision or after approval but before it is completed. Needs a reason. Event: <code>ImprovementRequestWithdrawn</code>.</td><td>cancel</td></tr>
+    <tr><td><strong>Resale</strong></td><td>A homeowner's sale of the home back into the trust's program. It starts with the <strong>notice of intent to sell</strong>. The trust then has the <strong>purchase option</strong>, its right to buy the home at the <strong>purchase option price</strong>, for the lease's option window. A <strong>buyback</strong> is a resale the trust itself bought.</td><td>sale, listing, exit; "option" alone; "purchase" for the purchase option</td></tr>
+    <tr class="verb"><td><strong>record the intent to sell</strong></td><td>Staff enter the homeowner's notice; the resale opens and the option window starts on the notice date. Events: <code>IntentToSellRecorded</code>, <code>ResaleStarted</code>. See Not yet matching.</td><td></td></tr>
+    <tr class="verb"><td><strong>record the appraisal</strong></td><td>Staff enter the appraisal the lease requires; the app works out the formula price and the purchase option price. A later appraisal replaces it until the trust decides. Event: <code>ResaleAppraisalRecorded</code>.</td><td></td></tr>
+    <tr class="verb"><td><strong>exercise the purchase option</strong></td><td>The trust decides to buy the home at the purchase option price. Event: <code>PurchaseOptionExercised</code>.</td><td>buy, accept</td></tr>
+    <tr class="verb"><td><strong>decline the purchase option</strong></td><td>The trust decides not to buy. Not built yet.</td><td>pass, reject</td></tr>
+    <tr class="verb"><td><strong>close the buyback</strong></td><td>Staff enter that the trust paid for and took the home. The seller's lease ends; the home goes to the waiting list or the trust holds it with a reason. Event: <code>BuybackClosed</code>.</td><td>complete</td></tr>
+    <tr class="verb"><td><strong>withdraw</strong></td><td>The homeowner takes back the notice of intent to sell. Event: <code>ResaleWithdrawn</code>.</td><td>cancel</td></tr>
+    <tr><td><strong>Appraisal</strong></td><td>An appraiser's market valuation, recorded for a purchase, a resale or a mortgage request. Its verbs are under each of those.</td><td>assessment (that is Property Registry's assessed value)</td></tr>
+  </table>
+</section>
+
+<section id="stewardship">
+  <h2>7. Stewardship</h2>
+  <table>
+    <tr><th>Term</th><th>Meaning</th><th>Do not use</th></tr>
+    <tr><td><strong>Stewardship case</strong></td><td>The trust's permanent file for one ground lease. It holds the lease's lease violations, occupancy verifications and property inspections.</td><td>ticket, incident, file; "case" alone (Stewardship has two kinds)</td></tr>
+    <tr class="verb"><td><strong>open</strong> / <strong>close</strong></td><td>Happens on its own: opened when the ground lease starts, closed when it ends. Events: <code>StewardshipCaseOpened</code>, <code>StewardshipCaseClosed</code>.</td><td>create, archive</td></tr>
+    <tr><td><strong>Lease violation</strong></td><td>A breach of the ground lease's terms. A <strong>violation notice</strong> tells the homeowner.</td><td>infraction, breach (alone)</td></tr>
+    <tr class="verb"><td><strong>identify</strong></td><td>Staff note that the ground lease has been breached. Event: <code>LeaseViolationIdentified</code>.</td><td>report, log, open</td></tr>
+    <tr class="verb"><td><strong>issue a violation notice</strong></td><td>Staff tell the homeowner in writing. Event: <code>ViolationNoticeIssued</code>.</td><td>send</td></tr>
+    <tr class="verb"><td><strong>cure</strong></td><td>The homeowner fixed the breach and staff confirmed it. Event: <code>LeaseViolationCured</code>.</td><td>resolve, fix, close</td></tr>
+    <tr class="verb"><td><strong>escalate</strong></td><td>The homeowner didn't cure after the notice; the trust takes it further. Event: <code>LeaseViolationEscalated</code>.</td><td></td></tr>
+    <tr><td><strong>Occupancy verification</strong></td><td>The check that the homeowner lives in the home as the ground lease requires.</td><td>occupancy (alone; that is Property Registry's Vacant/Occupied)</td></tr>
+    <tr class="verb"><td><strong>initiate</strong></td><td>Staff start the check, with a due date. Event: <code>OccupancyVerificationInitiated</code>.</td><td>start, request</td></tr>
+    <tr class="verb"><td><strong>submit</strong></td><td>The homeowner's response is entered. Event: <code>OccupancyVerificationSubmitted</code>.</td><td></td></tr>
+    <tr class="verb"><td><strong>verify</strong></td><td>Staff confirm the homeowner lives there. Event: <code>OccupancyVerified</code>.</td><td>approve, accept</td></tr>
+    <tr class="verb"><td><strong>fail</strong></td><td>Staff find the homeowner doesn't meet the requirement, with a reason. Event: <code>OccupancyVerificationFailed</code>.</td><td>reject (see Not yet matching)</td></tr>
+    <tr class="verb"><td><strong>mark overdue</strong></td><td>No response came by the due date. Event: <code>OccupancyVerificationOverdue</code>.</td><td>expire</td></tr>
+    <tr><td><strong>Property inspection</strong></td><td>A visit to check the home's condition against the ground lease.</td><td>inspection (alone; Homeownership has the purchase's inspection), visit</td></tr>
+    <tr class="verb"><td><strong>schedule</strong></td><td>Staff set a date for it. Event: <code>PropertyInspectionScheduled</code>.</td><td>book</td></tr>
+    <tr class="verb"><td><strong>complete</strong></td><td>Staff enter that it happened and what was found. Event: <code>PropertyInspectionCompleted</code>.</td><td>record, close</td></tr>
+    <tr class="verb"><td><strong>cancel</strong></td><td>Staff call it off. Event: <code>PropertyInspectionCancelled</code>.</td><td>withdraw</td></tr>
+    <tr><td><strong>Foreclosure prevention case</strong></td><td>The trust's work with a homeowner who is behind on a permitted mortgage or on lease fees. A lease has at most one unresolved case.</td><td>default case</td></tr>
+    <tr class="verb"><td><strong>open</strong></td><td>Staff open a case. Opening for a <strong>lease default notice</strong> (an unpaid notice of default, with its cure-by date) keeps the notice's figures. Event: <code>ForeclosurePreventionCaseOpened</code>.</td><td>create</td></tr>
+    <tr class="verb"><td><strong>record servicer delinquency</strong></td><td>Staff enter what the loan servicer reported about missed payments. Event: <code>ServicerDelinquencyRecorded</code>.</td><td></td></tr>
+    <tr class="verb"><td><strong>make a counseling referral</strong> / <strong>record the counseling outcome</strong></td><td>Staff refer the homeowner to foreclosure counseling, then enter how it went. Events: <code>CounselingReferralMade</code>, <code>CounselingOutcomeRecorded</code>.</td><td></td></tr>
+    <tr class="verb"><td><strong>request forbearance</strong> / <strong>record the forbearance outcome</strong></td><td>The trust asks the lender to hold off, then enters the lender's answer. Event: <code>ForbearanceOutcomeRecorded</code>.</td><td></td></tr>
+    <tr class="verb"><td><strong>activate the cure period</strong></td><td>The trust uses its right under the lender recognition agreement to cure the default itself. Event: <code>CurePeriodActivated</code>.</td><td></td></tr>
+    <tr class="verb"><td><strong>resolve</strong></td><td>Staff end the case with an outcome, which may not be a cure. Event: <code>ForeclosurePreventionCaseResolved</code>.</td><td>close, cure</td></tr>
+  </table>
+</section>
+
+<section id="documents">
+  <h2>8. Documents</h2>
+  <table>
+    <tr><th>Term</th><th>Meaning</th><th>Do not use</th></tr>
+    <tr><td><strong>Document</strong></td><td>An uploaded file, with its versions, attached to records in any context.</td><td>attachment, upload, file (alone)</td></tr>
+    <tr class="verb"><td><strong>upload</strong></td><td>Staff add a file as a new document. Event: <code>DocumentUploaded</code>.</td><td>add, import</td></tr>
+    <tr class="verb"><td><strong>add a version</strong></td><td>Staff upload a newer file for the same document. Event: <code>DocumentVersionAdded</code>.</td><td>replace, overwrite</td></tr>
+    <tr class="verb"><td><strong>attach</strong> / <strong>detach</strong></td><td>Link a document to a record in another context, or unlink it. Events: <code>DocumentAttached</code>, <code>DocumentDetached</code>.</td><td>link</td></tr>
+    <tr class="verb"><td><strong>tag</strong> / <strong>untag</strong></td><td>Staff add or remove a label. Events: <code>DocumentTagged</code>, <code>DocumentUntagged</code>.</td><td>categorize</td></tr>
+    <tr class="verb"><td><strong>update details</strong></td><td>Staff change a document's title or sensitivity level. Event: <code>DocumentMetadataUpdated</code>.</td><td>edit metadata (in UI)</td></tr>
+    <tr class="verb"><td><strong>delete</strong></td><td>Staff remove a document from every record it is attached to. The app keeps it, marked deleted. Event: <code>DocumentSoftDeleted</code>.</td><td>soft delete (in UI), void</td></tr>
+  </table>
+</section>
+
+<section id="app">
+  <h2>9. Docs and UI words</h2>
+  <p>Not domain language; words for the app and its docs.</p>
+  <table>
+    <tr><th>Term</th><th>Meaning</th><th>Do not use</th></tr>
+    <tr><td><strong>Journey</strong></td><td>One thing staff do in the Management app, documented in <code>docs/journeys/</code>.</td><td>flow, use case</td></tr>
+    <tr><td><strong>Panel</strong></td><td>The side panel that opens over a list to show one record or a form.</td><td>drawer, modal, dialog</td></tr>
+  </table>
+</section>
+
+<section id="gaps">
+  <h2>10. Not yet matching</h2>
+  <ul>
+    <li><strong>Code <code>HomeownerApplication</code> vs "application".</strong> Not renamed yet: it appears in hundreds of identifiers (<code>HomeownerApplicationId</code> alone about 87) and in event names. The name misleads because the household is not yet a homeowner.</li>
+    <li><strong>Code <code>UnitAssessment</code></strong> (in <code>HomeAssessment.cs</code>) vs "home assessment". It also carries an <code>AppraiserName</code>, which blurs assessment and appraisal.</li>
+    <li><strong>Occupancy verification: UI "Reject", code "fail".</strong> <code>stewardship/reject-occupancy-verification.md</code> has a "Reject" button; the code is <code>FailOccupancy</code> and <code>OccupancyVerificationFailed</code>, and the toast says "Verification failed".</li>
+    <li><strong>Land parcel "withdraw for redevelopment"</strong> (<code>LandParcel.WithdrawForRedevelopment</code>) is the trust taking its own parcel out. The naming convention keeps "withdraw" for a party stopping something it started.</li>
+    <li><strong>Remove an insurance certificate</strong> (<code>RemoveInsuranceCertificate</code>) undoes an entry made in error, which the naming convention calls void, as <code>VoidLeaseFeePayment</code> does.</li>
+    <li><strong>Readiness: UI heading "Buyer Preparation Checklist"</strong> (<code>HouseholdDetailPanel.tsx</code>). The term is readiness; "buyer" is Homeownership's word.</li>
+    <li><strong>Submit an application: UI "Start Application"</strong>, toast "Application started", on the household detail. The verb is submit (<code>ApplicationSubmitted</code>).</li>
+    <li><strong>Household member: UI says "member" alone</strong> ("Add Member", "Save Member", toasts "Member added", "Member updated", "Member removed"). Inside the household panel the meaning is clear, but the term is household member.</li>
+    <li><strong>Edit vs update.</strong> <code>EditPermittedMortgage</code> and <code>UpdateHouseholdCircumstances</code> / <code>UpdateHouseholdMember</code> mean the same thing.</li>
+    <li><strong>Record as a catch-all.</strong> Homeownership has 18 <code>Record*</code> commands. Some hide a trust decision under "record", for example <code>RecordEligibilityVerified</code> (staff verify) and <code>RecordIntentToSell</code> (staff receive a notice).</li>
+    <li><strong>Stewardship code says "lease" alone</strong> (<code>LeaseViolation</code>, <code>LeaseDefaultNotice</code>, <code>LeaseFeeArrearsRecord</code>) for the ground lease. Accepted inside compound names; docs say "ground lease" when the lease itself is meant.</li>
+    <li><strong>Journeys say "user" for staff</strong> about 500 times. Most are UI actions and fine. Only sentences that say what staff decide need changing.</li>
+    <li><strong>Team journeys:</strong> <code>team/remove-a-member.md</code> says "member" alone; the term is trust member (staff).</li>
+    <li><strong>Resale journeys</strong> name a "Decline to Buy" button and a "Decline Purchase Option" journey. The verb is "decline the purchase option".</li>
+    <li><strong>The lease fee notice policy</strong> is Homeownership's, but its journey sits in <code>docs/journeys/trust-policy/</code>, and the nav says Trust Management holds "policy".</li>
+      </ul>
+</section>
+</main>
+</div>
+</body>
+</html>

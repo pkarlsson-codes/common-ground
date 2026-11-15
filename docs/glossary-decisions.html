@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Glossary Decisions</title>
+<link rel="stylesheet" href="./docs.css" />
+<script src="./nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+<main>
+<header>
+  <h1>Glossary Decisions</h1>
+  <p class="lede">Why each term in the <a href="glossary.html">glossary</a> was chosen over its rivals. The glossary says what to write; this page says why, so a later change can tell whether the reason still holds.</p>
+  <p class="meta">Counts: the Grounded Solutions CLT Technical Manual (2011), <code>docs/clt-manuals/markdown/</code>, case-insensitive, singular plus plural, counted 2026-11-14.</p>
+</header>
+
+<section id="rules">
+  <h2>1. How terms are chosen</h2>
+  <ul>
+    <li><strong>A language belongs to one bounded context.</strong> Inside a context, one concept has one word. Across contexts the same party may have different words (household, buyer, homeowner), and the same word may mean different things (member, schedule). Each context's "Do not use" column carries the clash; the architecture page's messaging section shows where a party's name changes.</li>
+    <li><strong>The manual's word wins</strong> when the manual uses it far more often than any rival and it fits the code's model. Where the manual splits between words, the model decides.</li>
+    <li><strong>The word staff say out loud wins over the legal word.</strong> The legal word stays in lease text.</li>
+    <li><strong>An existing code name wins</strong> when the manual has no clear word and the code name is accurate.</li>
+    <li><strong>A word that already means something else in the app is out</strong>, even if the manual uses it.</li>
+  </ul>
+</section>
+
+<section id="shared-kernel">
+  <h2>2. Shared Kernel</h2>
+  <table>
+    <tr><th>Term</th><th>Why</th></tr>
+    <tr><td><strong>Trust</strong></td><td>"Trust" names one organization (one tenant). "CLT" names the idea. Without the split, "the CLT" in a journey could mean either.</td></tr>
+    <tr><td><strong>Business rule violation</strong></td><td>Listed so "violation" in docs and UI can mean only a lease violation.</td></tr>
+  </table>
+</section>
+
+<section id="identity">
+  <h2>3. Identity</h2>
+  <table>
+    <tr><th>Term</th><th>Why</th></tr>
+    <tr><td><strong>Trust member / staff</strong></td><td>The code has no type for it: the membership is on <code>User</code>, and the commands say "trust member" (<code>ListTrustMembers</code>, <code>RemoveTrustMember</code>). Staff say "staff". Journeys say "user" about 500 times, mostly UI actions ("user clicks"), which stay. "Staff" is for the person deciding, so only sentences about decisions change. "Member" alone is out because Home Buyers has household members.</td></tr>
+  </table>
+</section>
+
+<section id="property-registry">
+  <h2>4. Property Registry</h2>
+  <table>
+    <tr><th>Term</th><th>Why</th></tr>
+    <tr><td><strong>Land parcel</strong></td><td>The manual never says "land parcel" and says "parcel" 36 times. The term comes from the code (<code>LandParcel</code>). Bare "parcel" is out because the manual also uses "development parcel".</td></tr>
+    <tr><td><strong>Home</strong></td><td>"Unit" already means a field (unit designation) and a home type (Condo Unit). "Property" collides with the Property Registry context name.</td></tr>
+    <tr><td><strong>Development project</strong></td><td>Matches the code. "Project" alone is too general to search for.</td></tr>
+    <tr><td><strong>Home assessment</strong></td><td>Kept apart from Homeownership's appraisal: an assessed value and a market valuation are different numbers.</td></tr>
+    <tr><td><strong>Occupancy</strong></td><td>Matches <code>HomeOccupancy</code>. Listed so Stewardship's occupancy verification keeps its full name.</td></tr>
+  </table>
+</section>
+
+<section id="home-buyers">
+  <h2>5. Home Buyers</h2>
+  <table>
+    <tr><th>Term</th><th>Why</th></tr>
+    <tr><td><strong>Household</strong></td><td>By count, buyer (335) plus homebuyer (221) beat household (241). The model decides instead: <code>Household</code> exists before any application and after any purchase, so "buyer" would be wrong for most of its life.</td></tr>
+    <tr><td><strong>Applicant</strong></td><td>The manual uses it only 20 times. Kept because the code uses <code>Applicant</code> and <code>SelectApplicant</code>, and it is accurate when the sentence is about the application.</td></tr>
+    <tr><td><strong>Readiness</strong></td><td>The manual has no clear word (readiness 2, buyer preparation 0), so the code name wins: <code>ReadinessItem</code>, <code>IsReadinessComplete</code>, <code>HouseholdReadinessIncomplete</code>, the household phase Ready, and the "Readiness" column. An earlier version chose "buyer preparation" after the UI heading; it was dropped because "buyer" is Homeownership's word, and Home Buyers says household.</td></tr>
+    <tr><td><strong>Application</strong></td><td>Docs and UI already say it. The code name <code>HomeownerApplication</code> misleads, because the household is not yet a homeowner.</td></tr>
+    <tr><td><strong>Waiting list</strong></td><td>Waiting list 11, wait list 0. Thin evidence, but unanimous.</td></tr>
+    <tr><td><strong>Home selection</strong></td><td>Matches the <code>HomeSelection</code> aggregate. "Assignment" or "allocation" would add a second name for it.</td></tr>
+    <tr><td><strong>Income limit</strong></td><td>Matches the code and the income limit schedule. "AMI cap" names one way of setting a limit, not the limit.</td></tr>
+    <tr><td><strong>Income limit schedule</strong></td><td>Matches <code>IncomeLimitSchedule</code>. "Schedule" alone is out because Homeownership has notice schedules.</td></tr>
+  </table>
+</section>
+
+<section id="homeownership">
+  <h2>6. Homeownership</h2>
+  <table>
+    <tr><th>Term</th><th>Why</th></tr>
+    <tr><td><strong>Buyer</strong></td><td>Homeownership has no households; the purchase workflow names its party <code>Buyer</code> (<code>BuyerFullName</code>, <code>BuyerEmail</code>), and a direct purchase has a buyer who was never a household. This is where the context line runs: Home Buyers says household, Homeownership says buyer.</td></tr>
+    <tr><td><strong>Homeowner</strong></td><td>Homeowner 1469, lessee 322, leaseholder 15. "Lessee" is the lease's legal word; staff say homeowner.</td></tr>
+    <tr><td><strong>Purchase workflow</strong></td><td>Matches <code>PurchaseWorkflow</code>. UI and journeys shorten it to "purchase" because staff don't say "workflow". "Sale" is out because a resale is also a sale.</td></tr>
+    <tr><td><strong>Ground lease</strong></td><td>Ground lease 294. "Lease" alone is ambiguous once insurance and mortgages are in the same sentence.</td></tr>
+    <tr><td><strong>Ground lease template</strong></td><td>Matches <code>GroundLeaseTemplate</code>. The manual says "model lease" 147 times, but it means its own published lease; using it for the trust's terms would point readers at that document.</td></tr>
+    <tr><td><strong>Lease fee</strong></td><td>Lease fee 304, ground lease fee 21. "Rent" implies a tenant who doesn't own the home.</td></tr>
+    <tr><td><strong>Lease fee payment</strong></td><td>Lease fee payment 15. Matches <code>LeaseFeePayment</code>. "Transaction" and "charge" are accounting words, and the app does no accounting.</td></tr>
+    <tr><td><strong>Lease fee notice</strong></td><td>Matches <code>LeaseFeeNotice</code>. "Notice" alone is out because the trust sends other notices. "Notice of default" (17) stays as the name of the default level, because the manual and the lease use it. "Bill" and "invoice" are out because a notice is about fees already unpaid.</td></tr>
+    <tr><td><strong>Lease fee notice policy</strong></td><td>Matches <code>LeaseFeeNoticePolicy</code>. "Policy" alone collides with the insurer's policy.</td></tr>
+    <tr><td><strong>Permitted mortgage</strong></td><td>Permitted mortgage 109, leasehold mortgage 43. "Permitted" says the trust approved it.</td></tr>
+    <tr><td><strong>Mortgage request</strong></td><td>Matches <code>MortgageRequest</code>; the manual has one use. "Loan application" and "mortgage application" are out because "application" is Home Buyers' word.</td></tr>
+    <tr><td><strong>Insurance requirements</strong></td><td>"Policy" alone is out: it is the insurer's document, and Homeownership already has the lease fee notice policy.</td></tr>
+    <tr><td><strong>Insurance certificate</strong></td><td>Matches <code>InsuranceCertificate</code>; the manual says "certificate" 28 times. "Policy" is the insurer's document, which the trust doesn't hold.</td></tr>
+    <tr><td><strong>Appraisal</strong></td><td>Matches the code (<code>ResaleAppraisal</code>, <code>AppraisalCompleted</code>). Kept apart from Property Registry's home assessment.</td></tr>
+    <tr><td><strong>Resale</strong></td><td>Matches the code. "Sale" alone can't tell a resale from a first purchase.</td></tr>
+    <tr><td><strong>Purchase option price</strong></td><td>Purchase option price 145, formula price 68. Not synonyms: the formula price is the calculation, the purchase option price is what the trust pays.</td></tr>
+  </table>
+</section>
+
+<section id="stewardship">
+  <h2>7. Stewardship</h2>
+  <table>
+    <tr><th>Term</th><th>Why</th></tr>
+    <tr><td><strong>Stewardship case</strong></td><td>Matches <code>StewardshipCase</code>, whose code comment calls it the "permanent stewardship file for an active ground lease". "Case" is kept over "file" because "file" collides with Documents. "Ticket" and "incident" are help-desk words.</td></tr>
+    <tr><td><strong>Foreclosure prevention case</strong></td><td>Matches <code>ForeclosurePreventionCase</code>. Because Stewardship has two kinds of case, "case" alone is out.</td></tr>
+    <tr><td><strong>Property inspection</strong></td><td>Matches <code>PropertyInspection</code>. "Inspection" alone is out because the purchase workflow has its own inspection.</td></tr>
+  </table>
+</section>
+
+<section id="app">
+  <h2>8. Docs and UI words</h2>
+  <table>
+    <tr><th>Term</th><th>Why</th></tr>
+    <tr><td><strong>Journey</strong></td><td>Matches <code>docs/journeys/</code>.</td></tr>
+    <tr><td><strong>Panel</strong></td><td>Matches the component names (<code>*Panel.tsx</code>). "Modal" and "dialog" describe a different UI pattern.</td></tr>
+  </table>
+</section>
+
+<section id="verbs">
+  <h2>9. Verbs</h2>
+  <p>The verbs come from the code's command and event names. In the glossary each verb sits under its noun, because a verb is a command on one aggregate: "withdraw" on an application and "withdraw" on a purchase have different preconditions, effects and events (<code>ApplicationWithdrawn</code>, <code>PurchaseWithdrawn</code>), so they are two verbs. An earlier version grouped same-spelled verbs in the Shared Kernel; that treated spelling as meaning and crossed context lines. What the same-spelled verbs share is a naming convention, kept in <code>docs/ai/ubiquitous-language.md</code>. The reasons for those conventions follow.</p>
+  <table>
+    <tr><th>Verb</th><th>Why</th></tr>
+    <tr><td><strong>withdraw / cancel / fail</strong></td><td>A purchase can be both withdrawn and failed (<code>WithdrawPurchase</code>, <code>FailPurchase</code>), so the two must mean different things. The code comments give the split: withdraw is "the buyer has withdrawn"; fail needs a failure reason. Across the code, withdraw is always the party that started something (application, purchase, intent to sell, mortgage request), and cancel is always the trust's own process (home selection, invitation, property inspection). The one exception, <code>WithdrawForRedevelopment</code> on a land parcel, is listed under Not yet matching.</td></tr>
+    <tr><td><strong>approve / deny</strong></td><td>Used for both requests the trust decides (application, mortgage request), in code and UI. "Reject" is out because the occupancy verification UI already uses it for what the code calls fail.</td></tr>
+    <tr><td><strong>record</strong></td><td>Kept for facts that happen outside the app, because most <code>Record*</code> commands are that (<code>RecordAppraisalCompleted</code>, <code>RecordTitleCleared</code>, <code>RecordPurchaseClosed</code>). Limiting it to those makes the ones that hide a decision stand out.</td></tr>
+    <tr><td><strong>correct / edit / void</strong></td><td>The code already uses three different verbs for three different changes: <code>CorrectLeaseFeeTracking</code> ("such as after an import with the wrong date"), <code>EditPermittedMortgage</code> ("such as when servicing moves to another company"), <code>VoidLeaseFeePayment</code> ("a payment recorded by mistake"). Edit wins over update because the one domain object that changes for real-world reasons in Homeownership uses it; Home Buyers' update is listed under Not yet matching.</td></tr>
+    <tr><td><strong>cure / resolve</strong></td><td>Cure is the manual's word (99 uses, against 16 for resolve) for fixing a default or violation, and the code uses it (<code>CureViolation</code>, <code>ActivateCurePeriod</code>). Resolve is kept for the foreclosure prevention case because it ends with an outcome (<code>ForeclosurePreventionOutcome</code>), which may not be a cure.</td></tr>
+    <tr><td><strong>pass over</strong></td><td>Matches <code>PassOver</code>. The code comment draws the line: an application that couldn't have been selected isn't passed over, so "skipped" would be wrong.</td></tr>
+    <tr><td><strong>exercise / decline</strong></td><td>"Exercise" is the legal verb for an option and matches <code>ExerciseOption</code>. "Decline" matches the journey; the code has no decline command yet.</td></tr>
+  </table>
+</section>
+
+<section id="weak">
+  <h2>10. Weakest choices</h2>
+  <ul>
+    <li><strong>Land parcel</strong> and <strong>applicant</strong> rest on the code, not the manual.</li>
+    <li><strong>Waiting list</strong> rests on 11 uses.</li>
+    <li><strong>Household over buyer</strong> goes against the raw counts, because the model says so.</li>
+  </ul>
+</section>
+</main>
+</div>
+</body>
+</html>

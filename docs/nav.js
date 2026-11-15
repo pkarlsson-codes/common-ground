@@ -27,6 +27,8 @@ const SITE = [
   { group: 'Topics', pages: [
     { file: 'auth-flow.html', title: 'Authentication flow' },
     { file: 'seeding.html', title: 'Seeding' },
+    { file: 'glossary.html', title: 'Glossary', about: 'Each bounded context\'s language: its terms, their meanings, and the words it avoids.' },
+    { file: 'glossary-decisions.html', title: 'Glossary Decisions', about: 'Why each glossary term was chosen over its rivals.' },
   ] },
 ];
 

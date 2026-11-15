@@ -11,6 +11,6 @@
 
 The outcome for the drawn household, the home, the purchase workflow and the other candidates is the same as for [Select Household by Priority](select-household-by-priority.md): candidates who could be selected but weren't drawn are recorded as passed over, just after the draw completes.
 
-If none of the candidates in the pool can be selected, the draw is rejected with "None of the candidates in the lottery can be selected right now."
+If none of the candidates in the lottery pool can be selected, the draw is rejected with "None of the candidates in the lottery can be selected right now."
 
 Continues in: [View Purchase Workflow Detail](../purchase-workflows/view-purchase-workflow-detail.md)

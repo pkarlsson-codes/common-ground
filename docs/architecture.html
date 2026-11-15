@@ -85,7 +85,7 @@ flowchart LR
   <table>
     <thead><tr><th>Context</th><th>What it covers</th><th>Aggregates (in <code>Domain/</code>)</th><th>Publishes integration events</th></tr></thead>
     <tbody>
-      <tr><td><code>HomeBuyers</code></td><td>People who want to buy: households, applications, matching a household to a home, income limits</td><td>Household, HomeownerApplication, HomeSelection, IncomeLimitSchedule</td><td>Yes</td></tr>
+      <tr><td><code>HomeBuyers</code></td><td>People who want to buy: households, applications, choosing a household for a home (home selection), income limits</td><td>Household, HomeownerApplication, HomeSelection, IncomeLimitSchedule</td><td>Yes</td></tr>
       <tr><td><code>PropertyRegistry</code></td><td>The physical portfolio</td><td>LandParcel, Home, DevelopmentProject</td><td>Yes</td></tr>
       <tr><td><code>Homeownership</code></td><td>A home once sold: ground leases, purchase workflow, mortgages, resales, lease fee notices</td><td>GroundLease, GroundLeaseTemplate, PurchaseWorkflow, MortgageRequest, Resale, LeaseFeeNoticePolicy</td><td>Yes</td></tr>
       <tr><td><code>Stewardship</code></td><td>Keeping homeowners in their homes: stewardship cases, foreclosure prevention</td><td>StewardshipCase, ForeclosurePreventionCase</td><td>No</td></tr>
@@ -204,6 +204,7 @@ sequenceDiagram
   <p><a href="https://wolverinefx.net/">Wolverine</a> is both the in-process mediator (endpoints call handlers through <code>IMessageBus</code>) and the message bus between contexts. Setup is in <code>src/CommonGround.API/Program.cs</code>.</p>
   <ul>
     <li><strong>Contexts don't call each other.</strong> When one context needs to react to another, the publisher puts an event type in its <code>*.Contracts/Events</code> folder, and the subscriber writes a handler for it. Example: <code>PurchaseClosed</code> from Homeownership.</li>
+    <li><strong>A party's name changes at the boundary.</strong> Each context has its own language (see the <a href="glossary.html">glossary</a>), so the subscriber translates. A <em>household</em> in Home Buyers becomes the <em>buyer</em> on a Homeownership purchase workflow when <code>ApplicationSelected</code> arrives (<code>ApplicationSelectedHandler</code>), and the buyer becomes the <em>homeowner</em> on the ground lease when the purchase closes. Stewardship knows only the homeowner.</li>
     <li><strong>Durable local queues.</strong> Messages are stored in the Postgres inbox/outbox in the same transaction as the events. They survive a restart, and scheduled messages (a prequalification expiring months later) are stored and polled for.</li>
     <li><strong>One handler per context per event</strong> (<code>MultipleHandlerBehavior.Separated</code>). Each runs on its own queue with its own transaction and retries, so one context's failure doesn't roll back another's.</li>
     <li><strong>Concurrency.</strong> Two handlers writing the same stream at once: the loser gets a version conflict and is retried after 50, 100 and 250 ms, reloading what it writes.</li>

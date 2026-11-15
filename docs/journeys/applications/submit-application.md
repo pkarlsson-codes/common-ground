@@ -7,10 +7,10 @@
 New household:
 
 4. The form starts with one empty household member, marked as primary contact
-5. For each household member, user enters Full Name, Email, and Phone (all required); "Add Member" adds another member and "Remove" removes one (at least one member always remains)
-6. User picks exactly one member as "Primary contact"; Household Size is shown as the number of members
+5. For each household member, user enters Full Name, Email, and Phone (all required); "Add Member" adds another household member and "Remove" removes one (at least one member always remains)
+6. User picks exactly one household member as "Primary contact"; Household Size is shown as the number of household members
 7. User enters Annual Income and optionally checks "Accessibility accommodations required"
-8. User clicks "Submit Application" (disabled until every member has Full Name, Email, and Phone); invalid phone numbers show an inline error
+8. User clicks "Submit Application" (disabled until every household member has Full Name, Email, and Phone); invalid phone numbers show an inline error
 9. The household is registered, then an application is submitted for it, capturing household size, income, and accessibility as declared at submission
 
 Existing household (e.g. one returning after a withdrawn or denied application):

@@ -92,6 +92,8 @@ table {
 th, td { text-align: left; vertical-align: top; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
 th { color: var(--muted); font-weight: 600; white-space: nowrap; }
 td code { overflow-wrap: normal; white-space: nowrap; }
+tr.verb td:first-child { padding-left: 2rem; }
+tr.verb td { font-size: 0.95em; }
 
 pre:not(.mermaid) {
   background: var(--code-bg);
