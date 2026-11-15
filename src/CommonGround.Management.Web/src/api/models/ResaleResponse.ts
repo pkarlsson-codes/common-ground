@@ -14,6 +14,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { PayoffStatementPrintDto } from './PayoffStatementPrintDto';
+import {
+    PayoffStatementPrintDtoFromJSON,
+    PayoffStatementPrintDtoFromJSONTyped,
+    PayoffStatementPrintDtoToJSON,
+    PayoffStatementPrintDtoToJSONTyped,
+} from './PayoffStatementPrintDto';
 import type { CalendarDate } from './CalendarDate';
 import {
     CalendarDateFromJSON,
@@ -196,6 +203,18 @@ export interface ResaleResponse {
      * @memberof ResaleResponse
      */
     holdReason?: string | null;
+    /**
+     * Lease fees paid to the trust from the seller's proceeds at the closing, if any.
+     * @type {number}
+     * @memberof ResaleResponse
+     */
+    feesPaidFromProceeds?: number | null;
+    /**
+     * The payoff statements printed for the closing agent, oldest first.
+     * @type {Array<PayoffStatementPrintDto>}
+     * @memberof ResaleResponse
+     */
+    payoffStatements?: Array<PayoffStatementPrintDto>;
 }
 
 /**
@@ -243,6 +262,8 @@ export function ResaleResponseFromJSONTyped(json: any, ignoreDiscriminator: bool
         'closingNotes': json['closingNotes'] == null ? undefined : json['closingNotes'],
         'offeredForSale': json['offeredForSale'] == null ? undefined : json['offeredForSale'],
         'holdReason': json['holdReason'] == null ? undefined : json['holdReason'],
+        'feesPaidFromProceeds': json['feesPaidFromProceeds'] == null ? undefined : json['feesPaidFromProceeds'],
+        'payoffStatements': json['payoffStatements'] == null ? undefined : ((json['payoffStatements'] as Array<any>).map(PayoffStatementPrintDtoFromJSON)),
     };
 }
 
@@ -285,6 +306,8 @@ export function ResaleResponseToJSONTyped(value?: ResaleResponse | null, ignoreD
         'closingNotes': value['closingNotes'],
         'offeredForSale': value['offeredForSale'],
         'holdReason': value['holdReason'],
+        'feesPaidFromProceeds': value['feesPaidFromProceeds'],
+        'payoffStatements': value['payoffStatements'] == null ? undefined : ((value['payoffStatements'] as Array<any>).map(PayoffStatementPrintDtoToJSON)),
     };
 }
 

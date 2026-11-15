@@ -1,15 +1,15 @@
 import { expect, test, type Page } from '@playwright/test'
-import { createHome, createLandParcel, post } from '../support/api'
+import { createHome, createLandParcel, get, post } from '../support/api'
 import { detailValue, expectToast, field, isoDate, panel, uniqueId } from '../support/ui'
 
 // Journeys: docs/journeys/ground-leases/record-intent-to-sell, docs/journeys/ground-leases/withdraw-intent-to-sell,
 //   docs/journeys/resales/view-open-resales, view-resale-detail, record-resale-appraisal, exercise-purchase-option,
-//   record-buyback-closed, docs/journeys/homes/release-home-for-sale
+//   record-buyback-closed, record-payoff-statement, docs/journeys/homes/release-home-for-sale
 
-const resaleSection = (page: Page) => page.locator('.detail-section', { hasText: /^Resale/ })
+const resaleSection = (page: Page) => page.locator('.detail-section', { hasText: /^Resale(?! Price)/ })
 
 /** A lease created directly, with a 60-day option window, for a homeowner no other test uses. */
-async function createLease(page: Page) {
+async function createLease(page: Page, fees?: { landUseFee: number; repairReserveFee: number; leaseStartDate: string }) {
   const { parcelId, apn } = await createLandParcel(page)
   const homeId = await createHome(page, parcelId)
   const homeowner = `Seller ${uniqueId()}`
@@ -19,10 +19,11 @@ async function createLease(page: Page) {
     homeownerFullName: homeowner,
     homeownerEmail: `${homeowner.toLowerCase().replace(/\s+/g, '-')}@example.com`,
     homeownerPhone: null,
-    leaseStartDate: '2020-01-01',
+    leaseStartDate: fees?.leaseStartDate ?? '2020-01-01',
     termYears: 99,
     optionWindowDays: 60,
     maxMortgageDebtPercent: 90,
+    ...(fees ? { landUseFee: fees.landUseFee, repairReserveFee: fees.repairReserveFee } : {}),
     basePrice: 200000,
     originalAppraisedValue: 250000,
     covenantTerms: 'Standard covenant terms',
@@ -160,7 +161,10 @@ test('the trust appraises, buys the home back, holds it and releases it for sale
   await expectToast(page, 'Purchase option exercised')
 
   await expect(resale.locator('.next-step-card')).toContainText('Record the closing')
-  await expect(resale.getByRole('button', { name: 'More actions' })).toHaveCount(0)
+  // Withdraw is gone once the option is exercised; only the Payoff Statement is left under More actions.
+  await resale.getByRole('button', { name: 'More actions' }).click()
+  await expect(page.getByRole('menuitem')).toHaveText(['Payoff Statement'])
+  await resale.getByRole('button', { name: 'More actions' }).click()
   await resale.getByRole('button', { name: 'Record Closing' }).click()
 
   const closing = panel(page, 'Record Closing')
@@ -185,4 +189,66 @@ test('the trust appraises, buys the home back, holds it and releases it for sale
   const lease = await openLease(page, homeowner)
   await expect(lease.locator('.slideover-header')).toContainText('Inactive')
   await expect(resaleSection(page)).toContainText('The trust bought this home on')
+})
+
+test('a payoff statement shows what the seller owes, is recorded when printed, and the closing records it as paid from proceeds', async ({ page }) => {
+  // Three monthly charges of $60 are due: this month and the two before it.
+  const start = new Date(`${isoDate().slice(0, 8)}01T00:00:00Z`)
+  start.setUTCMonth(start.getUTCMonth() - 2)
+  const { apn, homeowner, groundLeaseId } = await createLease(page, {
+    landUseFee: 45,
+    repairReserveFee: 15,
+    leaseStartDate: start.toISOString().slice(0, 10),
+  })
+  await post(page, `/api/v1/ground-leases/${groundLeaseId}/intent-to-sell`, { noticeDate: isoDate(-5), channel: 'Phone', notes: null })
+  const { items } = await get<{ items: { id: string }[] }>(page, `/api/v1/resales?pageNumber=1&pageSize=1&groundLeaseId=${groundLeaseId}`)
+  const resaleId = items[0].id
+  await post(page, `/api/v1/resales/${resaleId}/appraisal`, {
+    appraisedValue: 270000,
+    appraisalDate: isoDate(-2),
+    appraiserName: 'Hollis Appraisal Group',
+  })
+  await post(page, `/api/v1/resales/${resaleId}/exercise-option`, { exercisedDate: isoDate(-1), notes: null })
+
+  const resale = panel(page, `${apn} Elm St`)
+  await expect(async () => {
+    await page.goto('/resales')
+    await page.locator('tbody tr', { hasText: homeowner }).click()
+    await expect(resale).toBeVisible({ timeout: 1000 })
+  }).toPass()
+
+  await resale.getByRole('button', { name: 'More actions' }).click()
+  await page.getByRole('menuitem', { name: 'Payoff Statement' }).click()
+  const statement = panel(page, 'Payoff Statement')
+  await expect(field(statement, 'Good Through')).toHaveValue(isoDate())
+  await expect(statement).toContainText('$180.00')
+  await expect(statement).toContainText('Lease fees owed: $180.00')
+
+  const [letter] = await Promise.all([
+    page.context().waitForEvent('page'),
+    statement.getByRole('button', { name: 'Print Letter' }).click(),
+  ])
+  await expectToast(page, 'Payoff statement recorded')
+  await expect(letter.getByRole('article')).toContainText('the amount owed is $180.00', { timeout: 15000 })
+  await letter.close()
+
+  const printed = resale.getByRole('table', { name: 'Payoff statements' }).locator('tbody tr')
+  await expect(printed).toHaveCount(1)
+  await expect(printed).toContainText(isoDate())
+  await expect(printed).toContainText('$180.00')
+
+  await resale.getByRole('button', { name: 'Record Closing' }).click()
+  const closing = panel(page, 'Record Closing')
+  await expect(field(closing, 'Fees Paid from Proceeds ($)')).toHaveValue('180')
+  await closing.getByRole('button', { name: 'Record Closing' }).click()
+  await expectToast(page, 'Buyback closed')
+  await expect(detailValue(resale, 'Fees Paid from Proceeds')).toHaveText('$180.00')
+
+  const lease = await openLease(page, homeowner)
+  const fees = lease.locator('.detail-section', { hasText: 'Lease Fees' })
+  const payment = fees.getByRole('table', { name: 'Lease fee payments' }).locator('tbody tr')
+  await expect(payment).toHaveCount(1)
+  await expect(payment).toContainText('$180.00')
+  await expect(payment).toContainText('Sale proceeds')
+  await expect(detailValue(fees, 'Balance')).toHaveText('Paid up')
 })

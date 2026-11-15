@@ -58,6 +58,12 @@ export interface RecordBuybackClosedRequest {
      * @memberof RecordBuybackClosedRequest
      */
     holdReason?: string | null;
+    /**
+     * Lease fees the closing agent paid the trust from the seller's proceeds; absent or zero for none.
+     * @type {number}
+     * @memberof RecordBuybackClosedRequest
+     */
+    feesPaidFromProceeds?: number | null;
 }
 
 /**
@@ -82,6 +88,7 @@ export function RecordBuybackClosedRequestFromJSONTyped(json: any, ignoreDiscrim
         'notes': json['notes'] == null ? undefined : json['notes'],
         'offerForSale': json['offerForSale'] == null ? undefined : json['offerForSale'],
         'holdReason': json['holdReason'] == null ? undefined : json['holdReason'],
+        'feesPaidFromProceeds': json['feesPaidFromProceeds'] == null ? undefined : json['feesPaidFromProceeds'],
     };
 }
 
@@ -101,6 +108,7 @@ export function RecordBuybackClosedRequestToJSONTyped(value?: RecordBuybackClose
         'notes': value['notes'],
         'offerForSale': value['offerForSale'],
         'holdReason': value['holdReason'],
+        'feesPaidFromProceeds': value['feesPaidFromProceeds'],
     };
 }
 

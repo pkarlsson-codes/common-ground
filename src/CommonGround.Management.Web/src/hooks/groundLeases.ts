@@ -117,6 +117,7 @@ export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   MoneyOrder: 'Money Order',
   Card: 'Card',
   Other: 'Other',
+  SaleProceeds: 'Sale proceeds',
 }
 
 export interface RecordLeaseFeePaymentForm {

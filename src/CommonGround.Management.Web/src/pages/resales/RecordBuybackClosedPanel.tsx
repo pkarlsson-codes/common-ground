@@ -3,7 +3,7 @@ import type { ResaleResponse } from '../../api'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
 import { DateInput } from '../../components/DateInput'
 import SlideOver from '../../components/SlideOver'
-import { useRecordBuybackClosed, type RecordBuybackClosedForm } from '../../hooks/resales'
+import { usePayoffStatement, useRecordBuybackClosed, type RecordBuybackClosedForm } from '../../hooks/resales'
 import { useToast } from '../../hooks/useToast'
 import { trustToday } from '../../lib/calendarDate'
 import { formatPrice } from '../../lib/currency'
@@ -23,7 +23,13 @@ export default function RecordBuybackClosedPanel({ resale, onClose }: Props) {
     notes: '',
     offerForSale: true,
     holdReason: '',
+    feesPaidFromProceeds: 0,
   }))
+  // The payment is dated today, so the amount offered is what the lease owes today. Staff can change it.
+  const owed = usePayoffStatement(resale.id!, trustToday(), true)
+  const [feesEdited, setFeesEdited] = useState(false)
+  const feesPaid = feesEdited ? form.feesPaidFromProceeds : owed.data?.totalOwed ?? 0
+
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   const mutation = useRecordBuybackClosed()
   const { success } = useToast()
@@ -34,7 +40,7 @@ export default function RecordBuybackClosedPanel({ resale, onClose }: Props) {
     e.preventDefault()
     setProblem(null)
     try {
-      await mutation.mutateAsync({ resaleId: resale.id!, form })
+      await mutation.mutateAsync({ resaleId: resale.id!, form: { ...form, feesPaidFromProceeds: feesPaid } })
       success('Buyback closed')
       onClose()
     } catch (err) {
@@ -89,6 +95,22 @@ export default function RecordBuybackClosedPanel({ resale, onClose }: Props) {
               onChange={e => setForm(f => ({ ...f, pricePaid: parseFloat(e.target.value) || 0 }))}
               required
             />
+          </div>
+          <div className="form-field">
+            <label className="form-label" htmlFor="buyback-fees-from-proceeds">Fees Paid from Proceeds ($)</label>
+            <input
+              id="buyback-fees-from-proceeds"
+              className="form-input"
+              type="number"
+              min="0"
+              step="0.01"
+              value={feesPaid}
+              onChange={e => {
+                setFeesEdited(true)
+                setForm(f => ({ ...f, feesPaidFromProceeds: Math.max(0, parseFloat(e.target.value) || 0) }))
+              }}
+            />
+            <div className="form-help">Recorded on the lease as paid from sale proceeds. Zero for none.</div>
           </div>
           <div className="form-field full">
             <label className="form-label" htmlFor="buyback-notes">Closing Notes (optional)</label>

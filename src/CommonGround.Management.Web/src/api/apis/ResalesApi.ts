@@ -16,23 +16,30 @@
 
 import * as runtime from '../runtime';
 import type {
+  CalendarDate,
   ExercisePurchaseOptionRequest,
   PaginatedResponseOfResaleResponse,
+  PayoffStatementResponse,
   PreviewResalePriceRequest,
   ProblemDetails,
   RecordBuybackClosedRequest,
   RecordIntentToSellRequest,
   RecordIntentToSellResponse,
+  RecordPayoffStatementRequest,
   RecordResaleAppraisalRequest,
   ResalePriceResponse,
   ResaleResponse,
   WithdrawIntentToSellRequest,
 } from '../models/index';
 import {
+    CalendarDateFromJSON,
+    CalendarDateToJSON,
     ExercisePurchaseOptionRequestFromJSON,
     ExercisePurchaseOptionRequestToJSON,
     PaginatedResponseOfResaleResponseFromJSON,
     PaginatedResponseOfResaleResponseToJSON,
+    PayoffStatementResponseFromJSON,
+    PayoffStatementResponseToJSON,
     PreviewResalePriceRequestFromJSON,
     PreviewResalePriceRequestToJSON,
     ProblemDetailsFromJSON,
@@ -43,6 +50,8 @@ import {
     RecordIntentToSellRequestToJSON,
     RecordIntentToSellResponseFromJSON,
     RecordIntentToSellResponseToJSON,
+    RecordPayoffStatementRequestFromJSON,
+    RecordPayoffStatementRequestToJSON,
     RecordResaleAppraisalRequestFromJSON,
     RecordResaleAppraisalRequestToJSON,
     ResalePriceResponseFromJSON,
@@ -56,6 +65,11 @@ import {
 export interface ExercisePurchaseOptionOperationRequest {
     resaleId: string;
     exercisePurchaseOptionRequest: ExercisePurchaseOptionRequest;
+}
+
+export interface GetPayoffStatementRequest {
+    resaleId: string;
+    goodThrough?: CalendarDate;
 }
 
 export interface GetResaleRequest {
@@ -82,6 +96,11 @@ export interface RecordBuybackClosedOperationRequest {
 export interface RecordIntentToSellOperationRequest {
     groundLeaseId: string;
     recordIntentToSellRequest: RecordIntentToSellRequest;
+}
+
+export interface RecordPayoffStatementOperationRequest {
+    resaleId: string;
+    recordPayoffStatementRequest: RecordPayoffStatementRequest;
 }
 
 export interface RecordResaleAppraisalOperationRequest {
@@ -114,6 +133,20 @@ export interface ResalesApiInterface {
     /**
      */
     exercisePurchaseOption(requestParameters: ExercisePurchaseOptionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {string} resaleId 
+     * @param {CalendarDate} [goodThrough] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResalesApiInterface
+     */
+    getPayoffStatementRaw(requestParameters: GetPayoffStatementRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PayoffStatementResponse>>;
+
+    /**
+     */
+    getPayoffStatement(requestParameters: GetPayoffStatementRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PayoffStatementResponse>;
 
     /**
      * 
@@ -185,6 +218,20 @@ export interface ResalesApiInterface {
     /**
      */
     recordIntentToSell(requestParameters: RecordIntentToSellOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+
+    /**
+     * 
+     * @param {string} resaleId 
+     * @param {RecordPayoffStatementRequest} recordPayoffStatementRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResalesApiInterface
+     */
+    recordPayoffStatementRaw(requestParameters: RecordPayoffStatementOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    recordPayoffStatement(requestParameters: RecordPayoffStatementOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -271,6 +318,45 @@ export class ResalesApi extends runtime.BaseAPI implements ResalesApiInterface {
             default:
                 return await response.value();
         }
+    }
+
+    /**
+     */
+    async getPayoffStatementRaw(requestParameters: GetPayoffStatementRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PayoffStatementResponse>> {
+        if (requestParameters['resaleId'] == null) {
+            throw new runtime.RequiredError(
+                'resaleId',
+                'Required parameter "resaleId" was null or undefined when calling getPayoffStatement().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['goodThrough'] != null) {
+            queryParameters['goodThrough'] = requestParameters['goodThrough'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/resales/{resaleId}/payoff-statement`;
+        urlPath = urlPath.replace(`{${"resaleId"}}`, encodeURIComponent(String(requestParameters['resaleId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PayoffStatementResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getPayoffStatement(requestParameters: GetPayoffStatementRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PayoffStatementResponse> {
+        const response = await this.getPayoffStatementRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**
@@ -491,6 +577,58 @@ export class ResalesApi extends runtime.BaseAPI implements ResalesApiInterface {
     async recordIntentToSell(requestParameters: RecordIntentToSellOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.recordIntentToSellRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async recordPayoffStatementRaw(requestParameters: RecordPayoffStatementOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['resaleId'] == null) {
+            throw new runtime.RequiredError(
+                'resaleId',
+                'Required parameter "resaleId" was null or undefined when calling recordPayoffStatement().'
+            );
+        }
+
+        if (requestParameters['recordPayoffStatementRequest'] == null) {
+            throw new runtime.RequiredError(
+                'recordPayoffStatementRequest',
+                'Required parameter "recordPayoffStatementRequest" was null or undefined when calling recordPayoffStatement().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/resales/{resaleId}/payoff-statements`;
+        urlPath = urlPath.replace(`{${"resaleId"}}`, encodeURIComponent(String(requestParameters['resaleId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RecordPayoffStatementRequestToJSON(requestParameters['recordPayoffStatementRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async recordPayoffStatement(requestParameters: RecordPayoffStatementOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.recordPayoffStatementRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**

@@ -52,6 +52,7 @@ export interface RecordBuybackClosedForm {
   notes: string
   offerForSale: boolean
   holdReason: string
+  feesPaidFromProceeds: number
 }
 
 /** The step a resale in progress is on, as the Resales page and the detail panel's tracker name it. */
@@ -81,6 +82,16 @@ export function usePreviewResalePrice(
     queryKey: ['resales', 'price-preview', resaleId, figures],
     queryFn: () => api.previewResalePrice({ resaleId, previewResalePriceRequest: figures }),
     enabled,
+    retry: false,
+  })
+}
+
+/** What the seller owes the trust on a day, worked out by the server from the lease's fee ledger. */
+export function usePayoffStatement(resaleId: string | null, goodThrough: CalendarDate | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['resales', 'payoff-statement', resaleId, goodThrough],
+    queryFn: () => api.getPayoffStatement({ resaleId: resaleId!, goodThrough: goodThrough! }),
+    enabled: enabled && !!resaleId && !!goodThrough,
     retry: false,
   })
 }
@@ -137,6 +148,15 @@ export function useExercisePurchaseOption() {
   })
 }
 
+export function useRecordPayoffStatement() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ resaleId, goodThrough }: { resaleId: string; goodThrough: CalendarDate }) =>
+      api.recordPayoffStatement({ resaleId, recordPayoffStatementRequest: { goodThrough } }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['resales'] }),
+  })
+}
+
 export function useRecordBuybackClosed() {
   const qc = useQueryClient()
   return useMutation({
@@ -149,6 +169,7 @@ export function useRecordBuybackClosed() {
           notes: form.notes || undefined,
           offerForSale: form.offerForSale,
           holdReason: form.offerForSale ? undefined : form.holdReason,
+          feesPaidFromProceeds: form.feesPaidFromProceeds > 0 ? form.feesPaidFromProceeds : undefined,
         },
       }),
     onSuccess: () => refreshResales(qc),

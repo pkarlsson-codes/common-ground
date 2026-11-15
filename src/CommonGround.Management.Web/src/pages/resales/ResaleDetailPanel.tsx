@@ -7,14 +7,15 @@ import SlideOver from '../../components/SlideOver'
 import { useGroundLease } from '../../hooks/groundLeases'
 import { NOTICE_CHANNEL_LABELS, optionWindowLeft, useResale } from '../../hooks/resales'
 import { formatPrice } from '../../lib/currency'
-import { daysBetween, trustToday } from '../../lib/calendarDate'
+import { daysBetween, formatInstantDate, trustToday } from '../../lib/calendarDate'
 import { formatStepDate, lifecycleSteps } from '../../lib/lifecycle'
 import ExercisePurchaseOptionPanel from './ExercisePurchaseOptionPanel'
+import PayoffStatementPanel from './PayoffStatementPanel'
 import RecordBuybackClosedPanel from './RecordBuybackClosedPanel'
 import RecordResaleAppraisalPanel from './RecordResaleAppraisalPanel'
 import WithdrawResalePanel from './WithdrawResalePanel'
 
-type ActionPanel = 'appraisal' | 'exercise' | 'closing' | 'withdraw' | null
+type ActionPanel = 'appraisal' | 'exercise' | 'closing' | 'withdraw' | 'payoff' | null
 
 const STEPS = ['Notice', 'Appraisal', 'Decision', 'Closing'] as const
 
@@ -132,7 +133,10 @@ export default function ResaleDetailPanel({ resaleId, onClose }: Props) {
         <NextStepCard
           title={next.title}
           primary={next.primary}
-          moreActions={canWithdraw ? [{ label: 'Withdraw', onClick: () => setActionPanel('withdraw') }] : []}
+          moreActions={[
+            ...(open ? [{ label: 'Payoff Statement', onClick: () => setActionPanel('payoff') }] : []),
+            ...(canWithdraw ? [{ label: 'Withdraw', onClick: () => setActionPanel('withdraw') }] : []),
+          ]}
         />
 
         <div className="detail-section">
@@ -199,6 +203,9 @@ export default function ResaleDetailPanel({ resaleId, onClose }: Props) {
             <div className="detail-grid">
               <Field label="Closing Date"><span className="mono">{resale.closingDate}</span></Field>
               <Field label="Purchase Price Paid"><span className="mono">{formatPrice(resale.pricePaid!)}</span></Field>
+              {resale.feesPaidFromProceeds != null && resale.feesPaidFromProceeds > 0 && (
+                <Field label="Fees Paid from Proceeds"><span className="mono">{formatPrice(resale.feesPaidFromProceeds)}</span></Field>
+              )}
               <Field label="Home">{resale.offeredForSale ? 'Offered to the waiting list' : `Held by the trust: ${resale.holdReason}`}</Field>
               {resale.closingNotes && <Field label="Closing Notes" full>{resale.closingNotes}</Field>}
             </div>
@@ -215,6 +222,27 @@ export default function ResaleDetailPanel({ resaleId, onClose }: Props) {
           </div>
         )}
 
+        {(resale.payoffStatements?.length ?? 0) > 0 && (
+          <div className="detail-section">
+            <div className="detail-section__title">Payoff Statements</div>
+            <table className="registry-table" aria-label="Payoff statements">
+              <thead>
+                <tr><th>Printed</th><th>By</th><th>Good Through</th><th>Total Owed</th></tr>
+              </thead>
+              <tbody>
+                {[...resale.payoffStatements!].reverse().map(p => (
+                  <tr key={`${p.printedAt}`}>
+                    <td className="mono">{formatInstantDate(p.printedAt!)}</td>
+                    <td>{p.printedBy}</td>
+                    <td className="mono">{p.goodThrough}</td>
+                    <td className="mono">{formatPrice(p.totalOwed ?? 0)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
         <ConnectedRecords records={records} />
       </SlideOver>
 
@@ -223,6 +251,7 @@ export default function ResaleDetailPanel({ resaleId, onClose }: Props) {
       )}
       {actionPanel === 'exercise' && <ExercisePurchaseOptionPanel resale={resale} onClose={() => setActionPanel(null)} />}
       {actionPanel === 'closing' && <RecordBuybackClosedPanel resale={resale} onClose={() => setActionPanel(null)} />}
+      {actionPanel === 'payoff' && <PayoffStatementPanel resale={resale} onClose={() => setActionPanel(null)} />}
       {actionPanel === 'withdraw' && <WithdrawResalePanel resale={resale} onClose={() => { setActionPanel(null); onClose() }} />}
     </>
   )

@@ -60,4 +60,18 @@ public interface IResalesApiClient
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task RecordBuybackClosedAsync(string resaleId, RecordBuybackClosedRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Works out what the seller owes the trust as of a day, for the closing agent.</summary>
+    /// <param name="resaleId">The ID of the resale.</param>
+    /// <param name="goodThrough">The day the figures are worked out for.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The fees, interest and credit, and the total owed.</returns>
+    Task<PayoffStatementResponse> GetPayoffStatementAsync(string resaleId, DateOnly goodThrough, CancellationToken cancellationToken);
+
+    /// <summary>Records that a payoff statement was printed for the closing agent.</summary>
+    /// <param name="resaleId">The ID of the resale.</param>
+    /// <param name="request">The day the statement is good through.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task RecordPayoffStatementAsync(string resaleId, RecordPayoffStatementRequest request, CancellationToken cancellationToken);
 }

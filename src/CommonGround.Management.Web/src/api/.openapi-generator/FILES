@@ -170,6 +170,8 @@ models/PaginatedResponseOfResaleResponse.ts
 models/PaginatedResponseOfStewardshipCaseResponse.ts
 models/PaginatedResponseOfWaitingListEntryResponse.ts
 models/PassOverDto.ts
+models/PayoffStatementPrintDto.ts
+models/PayoffStatementResponse.ts
 models/PermittedMortgageDto.ts
 models/PortfolioImportErrorDto.ts
 models/PortfolioImportRequest.ts
@@ -220,6 +222,7 @@ models/RecordMortgageLoanClosedRequest.ts
 models/RecordMortgageLoanClosedResponse.ts
 models/RecordMortgagePrequalificationRequest.ts
 models/RecordMortgageRequestAppraisalRequest.ts
+models/RecordPayoffStatementRequest.ts
 models/RecordPermittedMortgageRequest.ts
 models/RecordPermittedMortgageResponse.ts
 models/RecordPurchaseClosedRequest.ts

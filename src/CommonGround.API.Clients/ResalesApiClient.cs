@@ -71,4 +71,19 @@ public sealed class ResalesApiClient(
         ArgumentNullException.ThrowIfNull(request);
         await PostAsync($"api/resales/{resaleId}/buyback-closing", request, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task<PayoffStatementResponse> GetPayoffStatementAsync(string resaleId, DateOnly goodThrough, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        return await GetAsync<PayoffStatementResponse>($"api/resales/{resaleId}/payoff-statement?goodThrough={goodThrough:yyyy-MM-dd}", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task RecordPayoffStatementAsync(string resaleId, RecordPayoffStatementRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/resales/{resaleId}/payoff-statements", request, cancellationToken).ConfigureAwait(false);
+    }
 }

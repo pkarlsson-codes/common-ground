@@ -8626,6 +8626,129 @@
         }
       }
     },
+    "/api/v1/resales/{resaleId}/payoff-statement": {
+      "get": {
+        "tags": [
+          "Resales"
+        ],
+        "operationId": "GetPayoffStatement",
+        "parameters": [
+          {
+            "name": "resaleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "goodThrough",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayoffStatementResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resales/{resaleId}/payoff-statements": {
+      "post": {
+        "tags": [
+          "Resales"
+        ],
+        "operationId": "RecordPayoffStatement",
+        "parameters": [
+          {
+            "name": "resaleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "RecordPayoffStatementRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordPayoffStatementRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/stewardship/cases": {
       "get": {
         "tags": [
@@ -18422,6 +18545,45 @@
             "type": "string",
             "description": "Why the trust is holding the home, if it is.",
             "nullable": true
+          },
+          "feesPaidFromProceeds": {
+            "type": "number",
+            "description": "Lease fees paid to the trust from the seller's proceeds at the closing, if any.",
+            "format": "decimal",
+            "nullable": true
+          },
+          "payoffStatements": {
+            "type": "array",
+            "description": "The payoff statements printed for the closing agent, oldest first.",
+            "items": {
+              "$ref": "#/components/schemas/PayoffStatementPrintDto"
+            }
+          }
+        }
+      },
+      "PayoffStatementPrintDto": {
+        "type": "object",
+        "description": "A payoff statement printed for a resale's closing agent.",
+        "additionalProperties": false,
+        "properties": {
+          "printedAt": {
+            "type": "string",
+            "description": "When it was printed.",
+            "format": "date-time"
+          },
+          "printedBy": {
+            "type": "string",
+            "description": "The staff user who printed it."
+          },
+          "goodThrough": {
+            "type": "string",
+            "description": "The day the figures were worked out for.",
+            "format": "date"
+          },
+          "totalOwed": {
+            "type": "number",
+            "description": "The amount the letter asked for.",
+            "format": "decimal"
           }
         }
       },
@@ -18549,6 +18711,62 @@
             "type": "string",
             "description": "Why the trust is holding the home; required when it is held.",
             "nullable": true
+          },
+          "feesPaidFromProceeds": {
+            "type": "number",
+            "description": "Lease fees the closing agent paid the trust from the seller's proceeds; absent or zero for none.",
+            "format": "decimal",
+            "nullable": true
+          }
+        }
+      },
+      "PayoffStatementResponse": {
+        "type": "object",
+        "description": "What a resale's seller owes the trust as of a day, for the closing agent to pay from proceeds.",
+        "additionalProperties": false,
+        "properties": {
+          "goodThrough": {
+            "type": "string",
+            "description": "The day the figures are worked out for.",
+            "format": "date"
+          },
+          "feesOwed": {
+            "type": "number",
+            "description": "Lease fees owed, less payments; zero if paid up or over.",
+            "format": "decimal"
+          },
+          "interestOwed": {
+            "type": "number",
+            "description": "Interest owed after waivers.",
+            "format": "decimal"
+          },
+          "credit": {
+            "type": "number",
+            "description": "What was paid beyond the fees charged; zero if none.",
+            "format": "decimal"
+          },
+          "totalOwed": {
+            "type": "number",
+            "description": "Fees and interest less credit, never below zero.",
+            "format": "decimal"
+          },
+          "oldestUnpaidMonth": {
+            "type": "string",
+            "description": "The due date of the oldest unpaid fee, or null when none is unpaid.",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
+      "RecordPayoffStatementRequest": {
+        "type": "object",
+        "description": "Request to record that a payoff statement was printed for a resale's closing agent.",
+        "additionalProperties": false,
+        "properties": {
+          "goodThrough": {
+            "type": "string",
+            "description": "The day the figures were worked out for, from today to 60 days ahead.",
+            "format": "date"
           }
         }
       },

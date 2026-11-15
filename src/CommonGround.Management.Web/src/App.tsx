@@ -26,6 +26,7 @@ import MortgageRequestLetterPage from './pages/ground-leases/MortgageRequestLett
 import ImprovementRequestLetterPage from './pages/ground-leases/ImprovementRequestLetterPage'
 import HeirTransferLetterPage from './pages/ground-leases/HeirTransferLetterPage'
 import ResalePriceStatementLetterPage from './pages/ground-leases/ResalePriceStatementLetterPage'
+import PayoffStatementLetterPage from './pages/resales/PayoffStatementLetterPage'
 import ResalePriceStatementsPrintPage from './pages/stewardship/ResalePriceStatementsPrintPage'
 import TrustPolicyPage from './pages/trust-policy/TrustPolicyPage'
 import IncomeLimitsPage from './pages/income-limits/IncomeLimitsPage'
@@ -137,6 +138,7 @@ export default function App() {
               <Route path="/improvement-requests/:improvementRequestId/letter" element={<ImprovementRequestLetterPage />} />
               <Route path="/heir-transfers/:heirTransferId/letter" element={<HeirTransferLetterPage />} />
               <Route path="/ground-leases/:groundLeaseId/resale-price-statement" element={<ResalePriceStatementLetterPage />} />
+              <Route path="/resales/:resaleId/payoff-statement" element={<PayoffStatementLetterPage />} />
               <Route path="/resale-price-statements/print" element={<ResalePriceStatementsPrintPage />} />
             </Route>
           </Route>

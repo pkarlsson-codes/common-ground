@@ -115,4 +115,31 @@ public static class ResalesEndpoints
         await client.RecordBuybackClosedAsync(resaleId, request, cancellationToken).ConfigureAwait(false);
         return Results.NoContent();
     }
+
+    [WolverineGet("/api/v1/resales/{resaleId}/payoff-statement")]
+    [ProducesResponseType<PayoffStatementResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetPayoffStatement(
+        string resaleId,
+        [FromQuery] DateOnly goodThrough,
+        IResalesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        var result = await client.GetPayoffStatementAsync(resaleId, goodThrough, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(result);
+    }
+
+    [WolverinePost("/api/v1/resales/{resaleId}/payoff-statements")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> RecordPayoffStatement(
+        string resaleId,
+        RecordPayoffStatementRequest request,
+        IResalesApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resaleId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.RecordPayoffStatementAsync(resaleId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
 }
