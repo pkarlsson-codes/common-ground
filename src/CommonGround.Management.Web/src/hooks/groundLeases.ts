@@ -6,6 +6,7 @@ import {
   type MortgageRequestResponse,
   type ReceiveImprovementRequestResponse,
   type ReceiveMortgageRequestResponse,
+  type RecordHeirRequest,
 } from '../api'
 import { apiConfig } from '../lib/apiConfig'
 import { startOfMonth, trustToday, type CalendarDate } from '../lib/calendarDate'
@@ -853,6 +854,24 @@ export function useOpenHeirTransfer() {
       })
       return result as { heirTransferId?: string }
     },
+    onSuccess: (_d, v) => invalidateHeirTransfers(qc, v.groundLeaseId),
+  })
+}
+
+/** The limits an heir who is not family is judged by: the home's % AMI level for 1 to 8 people. */
+export function useHeirIncomeLimit(heirTransferId: string | null, enabled = true) {
+  return useQuery({
+    queryKey: ['heir-income-limit', heirTransferId],
+    queryFn: () => api.getHeirIncomeLimit({ heirTransferId: heirTransferId! }),
+    enabled: !!heirTransferId && enabled,
+  })
+}
+
+export function useRecordHeir() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ heirTransferId, request }: { heirTransferId: string; groundLeaseId: string; request: RecordHeirRequest }) =>
+      api.recordHeir({ heirTransferId, recordHeirRequest: request }),
     onSuccess: (_d, v) => invalidateHeirTransfers(qc, v.groundLeaseId),
   })
 }

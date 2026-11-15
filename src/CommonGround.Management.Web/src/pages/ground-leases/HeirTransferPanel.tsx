@@ -1,9 +1,11 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import SlideOver from '../../components/SlideOver'
+import { downloadDocument, useEntityDocuments } from '../../hooks/documents'
 import { HEIR_TRANSFER_STATUS_LABELS, useHeirTransfer } from '../../hooks/groundLeases'
 import { useHome } from '../../hooks/homes'
 import { formatCalendarDate, type CalendarDate } from '../../lib/calendarDate'
 import { formatPrice } from '../../lib/currency'
+import RecordHeirPanel from './RecordHeirPanel'
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -21,12 +23,23 @@ export default function HeirTransferPanel({ heirTransferId, onClose }: { heirTra
   const { data: transfer, isLoading, isError } = useHeirTransfer(heirTransferId)
   const { data: home } = useHome(transfer?.homeId ?? null)
   const status = transfer?.status ?? ''
+  const [recording, setRecording] = useState(false)
+  const { data: leaseDocuments } = useEntityDocuments('GroundLease', transfer?.groundLeaseId ?? null)
+  const incomeDocuments = (leaseDocuments?.items ?? []).filter(d => (transfer?.incomeDocumentIds ?? []).includes(d.documentId!))
+  const canRecordHeir = status === 'Open' || status === 'Heir recorded'
 
   return (
     <SlideOver
       title={home?.label ?? 'Heir Transfer'}
       subtitle={transfer ? `${transfer.deceasedHomeownerFullName ?? 'Homeowner'} · ${HEIR_TRANSFER_STATUS_LABELS[status] ?? status}` : undefined}
       onClose={onClose}
+      footer={
+        canRecordHeir ? (
+          <button type="button" className="btn btn-secondary" onClick={() => setRecording(true)}>
+            {transfer?.heirFullName ? 'Change Heir' : 'Record Heir'}
+          </button>
+        ) : undefined
+      }
     >
       {isLoading && <div className="skeleton-rows"><div className="skeleton-row" /></div>}
       {isError && <div className="form-error" role="alert">Could not load the heir transfer.</div>}
@@ -67,6 +80,17 @@ export default function HeirTransferPanel({ heirTransferId, onClose }: { heirTra
                     </Field>
                   </>
                 )}
+                {incomeDocuments.length > 0 && (
+                  <Field label="Income Documents">
+                    {incomeDocuments.map(d => (
+                      <div key={d.documentId}>
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => downloadDocument(d.documentId!)}>
+                          {d.currentFileName ?? d.title}
+                        </button>
+                      </div>
+                    ))}
+                  </Field>
+                )}
               </div>
             </div>
           )}
@@ -93,6 +117,7 @@ export default function HeirTransferPanel({ heirTransferId, onClose }: { heirTra
           )}
         </>
       )}
+      {recording && transfer && <RecordHeirPanel transfer={transfer} onClose={() => setRecording(false)} />}
     </SlideOver>
   )
 }
