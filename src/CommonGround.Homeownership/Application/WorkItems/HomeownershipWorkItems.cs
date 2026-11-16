@@ -6,6 +6,7 @@ using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.ImprovementRequests;
 using CommonGround.Homeownership.Domain.MortgageRequests;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
+using CommonGround.Homeownership.Domain.Resales;
 using CommonGround.SharedKernel.Application.WorkItems;
 using CommonGround.SharedKernel.Domain;
 
@@ -90,6 +91,21 @@ public static class HomeownershipWorkItems
 
     /// <summary>Prepare the statement, print the letter, and record it sent.</summary>
     public const string RecordResalePriceStatement = "record-resale-price-statement";
+
+    /// <summary>An open resale where the trust's purchase option is undecided (Art 10.5, 10.6).</summary>
+    public const string ResaleDecisionDue = "resale-decision-due";
+
+    /// <summary>Record the appraisal the option price needs.</summary>
+    public const string RecordResaleAppraisal = "record-resale-appraisal";
+
+    /// <summary>Decide to buy the home.</summary>
+    public const string ExercisePurchaseOption = "exercise-purchase-option";
+
+    /// <summary>An open resale whose option was exercised and whose buyback closing isn't recorded.</summary>
+    public const string ResaleClosingWaiting = "resale-closing-waiting";
+
+    /// <summary>Record the buyback closing.</summary>
+    public const string RecordBuybackClosing = "record-buyback-closing";
 
     /// <summary>An active lease whose insurance cover ends within 30 days, has ended, or has no certificate on file (Art 9.4).</summary>
     public const string InsuranceCertificateDue = "insurance-certificate-due";
@@ -183,6 +199,43 @@ public static class HomeownershipWorkItems
             schedule.NextDueOn,
             schedule.NextDueOn,
             [RecordResalePriceStatement]);
+    }
+
+    /// <summary>
+    /// The item for an open resale: with no decision yet, waiting since the notice date and due on the option window
+    /// end, staying (overdue) after it; once the option is exercised, waiting since that day with no due date until
+    /// the buyback closing is recorded. Withdrawn and closed resales have none.
+    /// </summary>
+    /// <param name="resale">The resale.</param>
+    /// <param name="homeLabel">The label of the home, if known.</param>
+    /// <returns>The resale's work item, or null when it needs nothing.</returns>
+    public static WorkItem? ForResale(ResaleView resale, string? homeLabel)
+    {
+        ArgumentNullException.ThrowIfNull(resale);
+
+        if (resale.Status != ResaleStatus.Open.DisplayName)
+            return null;
+
+        var usd = CultureInfo.GetCultureInfo("en-US");
+        var label = homeLabel ?? "Home";
+
+        if (resale.OptionExercisedDate is { } exercised)
+            return new WorkItem(
+                WorkArea.Stewardship, ResaleClosingWaiting, "resale", resale.Id,
+                label,
+                $"{resale.HomeownerFullName}: buyback closing to record, option exercised {exercised.ToString("MMM d, yyyy", usd)}",
+                null,
+                exercised,
+                [RecordBuybackClosing]);
+
+        var appraisal = resale.AppraisedValue is null ? "no appraisal yet" : "appraised";
+        return new WorkItem(
+            WorkArea.Stewardship, ResaleDecisionDue, "resale", resale.Id,
+            label,
+            $"{resale.HomeownerFullName}: purchase option to decide by {resale.OptionWindowEndsOn.ToString("MMM d, yyyy", usd)}, {appraisal}",
+            resale.OptionWindowEndsOn,
+            resale.NoticeDate,
+            resale.AppraisedValue is null ? [RecordResaleAppraisal, ExercisePurchaseOption] : [ExercisePurchaseOption]);
     }
 
     /// <summary>

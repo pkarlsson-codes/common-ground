@@ -58,6 +58,39 @@ public class ResalePayoffStatementsTests(ApiFactory factory)
         lease.LeaseFees.Payments.Should().BeEmpty();
     }
 
+    [Fact]
+    public async Task OpenResale_ShowsOnTodayUntilTheBuybackClosingIsRecorded()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var today = (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Today;
+        var leaseId = await CreateLease(client, today.AddMonths(-2));
+        var resaleId = await OpenResale(client, leaseId, today);
+
+        var undecided = await client.GetFromJsonAsync<TodayResponse>("/api/today");
+        undecided!.Items.Should().ContainSingle(i => i.RecordId == resaleId && i.Kind == "resale-decision-due")
+            .Which.Should().BeEquivalentTo(new
+            {
+                RecordType = "resale",
+                DueDate = (DateOnly?)today.AddDays(60),
+                Actions = new[] { "record-resale-appraisal", "exercise-purchase-option" },
+            });
+
+        (await client.PostAsJsonAsync($"/api/resales/{resaleId}/appraisal",
+            new RecordResaleAppraisalRequest(270_000m, today, "Hollis", null, null))).StatusCode.Should().Be(HttpStatusCode.NoContent);
+        (await client.PostAsJsonAsync($"/api/resales/{resaleId}/exercise-option",
+            new ExercisePurchaseOptionRequest(today, null))).StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var exercised = await client.GetFromJsonAsync<TodayResponse>("/api/today");
+        exercised!.Items.Should().NotContain(i => i.RecordId == resaleId && i.Kind == "resale-decision-due");
+        exercised.Items.Should().ContainSingle(i => i.RecordId == resaleId && i.Kind == "resale-closing-waiting")
+            .Which.Actions.Should().Equal("record-buyback-closing");
+
+        (await client.PostAsJsonAsync($"/api/resales/{resaleId}/buyback-closing",
+            new RecordBuybackClosedRequest(today, 205_000m, null, true, null))).StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        (await client.GetFromJsonAsync<TodayResponse>("/api/today"))!.Items.Should().NotContain(i => i.RecordId == resaleId);
+    }
+
     [Theory]
     [InlineData(-1, "Good Through can't be")]
     [InlineData(61, "Good Through can't be later than")]

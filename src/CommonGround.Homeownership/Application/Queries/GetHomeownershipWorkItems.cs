@@ -5,6 +5,7 @@ using CommonGround.Homeownership.Domain.GroundLeases.LeaseFees;
 using CommonGround.Homeownership.Domain.ImprovementRequests;
 using CommonGround.Homeownership.Domain.MortgageRequests;
 using CommonGround.Homeownership.Domain.PurchaseWorkflows;
+using CommonGround.Homeownership.Domain.Resales;
 using CommonGround.SharedKernel.Application.WorkItems;
 using CommonGround.SharedKernel.Domain.Services;
 using CommonGround.SharedKernel.Specifications;
@@ -16,7 +17,7 @@ namespace CommonGround.Homeownership.Application.Queries;
 /// Returns Homeownership's work items: one for every open purchase, every lease with a late notice due, every
 /// active lease with an uncured notice of default (unless staff are already working with the homeowner in a
 /// foreclosure prevention case), every pending mortgage request, every approved loan past its expected closing, and
-/// every lease whose yearly resale price statement is due, every active lease whose insurance certificate is due, and
+/// every open resale awaiting a decision or a closing, every lease whose yearly resale price statement is due, every active lease whose insurance certificate is due, and
 /// every active lease whose current insurance certificate falls short.
 /// </summary>
 /// <param name="Today">The trust's today, against which upcoming closings are judged.</param>
@@ -69,6 +70,7 @@ public static class GetHomeownershipWorkItemsHandler
             .ConfigureAwait(false))
             .ToDictionary(v => v.Id, v => v.Label);
 
+        var openResaleStatus = ResaleStatus.Open.DisplayName;
         var waitingStatus = ImprovementRequestStatus.Waiting.DisplayName;
         var improvementRequests = await session.Query<ImprovementRequestView>()
             .Where(v => v.Status == waitingStatus)
@@ -76,6 +78,15 @@ public static class GetHomeownershipWorkItemsHandler
             .ConfigureAwait(false);
         var improvementLabels = (await session
             .LoadManyAsync<HomeLabelView>(cancellationToken, improvementRequests.Select(r => r.HomeId).Distinct())
+            .ConfigureAwait(false))
+            .ToDictionary(v => v.Id, v => v.Label);
+
+        var resales = await session.Query<ResaleView>()
+            .Where(v => v.Status == openResaleStatus)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        var resaleLabels = (await session
+            .LoadManyAsync<HomeLabelView>(cancellationToken, resales.Select(r => r.HomeId).Distinct())
             .ConfigureAwait(false))
             .ToDictionary(v => v.Id, v => v.Label);
 
@@ -98,6 +109,9 @@ public static class GetHomeownershipWorkItemsHandler
                 .OfType<WorkItem>(),
             .. improvementRequests
                 .Select(r => HomeownershipWorkItems.ForImprovementRequest(r, improvementLabels.GetValueOrDefault(r.HomeId)))
+                .OfType<WorkItem>(),
+            .. resales
+                .Select(r => HomeownershipWorkItems.ForResale(r, resaleLabels.GetValueOrDefault(r.HomeId)))
                 .OfType<WorkItem>(),
             .. statements.Select(HomeownershipWorkItems.ForResalePriceStatement),
             .. insurance

@@ -192,6 +192,71 @@ public class HomeownershipWorkItemsTests
         }
     }
 
+    public class TheForResaleMethod
+    {
+        private static ResaleView Resale(string status = "Open", decimal? appraised = null, DateOnly? exercised = null) => new()
+        {
+            Id = "resale-1",
+            HomeId = "home-1",
+            HomeownerFullName = "Grace Whitaker",
+            Status = status,
+            NoticeDate = new DateOnly(2026, 10, 26),
+            OptionWindowEndsOn = new DateOnly(2026, 11, 25),
+            AppraisedValue = appraised,
+            OptionExercisedDate = exercised,
+        };
+
+        [Fact]
+        public void GivenOpenResaleWithNoAppraisal_WhenDerived_ThenWaitsSinceNoticeDueOnWindowEndAndOffersAppraisalAndBuy()
+        {
+            var item = HomeownershipWorkItems.ForResale(Resale(), "14 Alder Lane");
+
+            item.Should().BeEquivalentTo(new
+            {
+                Kind = HomeownershipWorkItems.ResaleDecisionDue,
+                RecordType = "resale",
+                RecordId = "resale-1",
+                Detail = "Grace Whitaker: purchase option to decide by Nov 25, 2026, no appraisal yet",
+                DueDate = (DateOnly?)new DateOnly(2026, 11, 25),
+                WaitingSince = new DateOnly(2026, 10, 26),
+                Actions = new[] { HomeownershipWorkItems.RecordResaleAppraisal, HomeownershipWorkItems.ExercisePurchaseOption },
+            });
+        }
+
+        [Fact]
+        public void GivenOpenResaleWithAppraisal_WhenDerived_ThenOffersOnlyBuy()
+        {
+            var item = HomeownershipWorkItems.ForResale(Resale(appraised: 250_000m), null);
+
+            item!.Actions.Should().Equal(HomeownershipWorkItems.ExercisePurchaseOption);
+        }
+
+        [Fact]
+        public void GivenOptionExercised_WhenDerived_ThenWaitsSinceExercisedWithNoDueDateAndOffersTheClosing()
+        {
+            var item = HomeownershipWorkItems.ForResale(Resale(appraised: 250_000m, exercised: new DateOnly(2026, 11, 10)), null);
+
+            item.Should().BeEquivalentTo(new
+            {
+                Kind = HomeownershipWorkItems.ResaleClosingWaiting,
+                RecordType = "resale",
+                RecordId = "resale-1",
+                Detail = "Grace Whitaker: buyback closing to record, option exercised Nov 10, 2026",
+                DueDate = (DateOnly?)null,
+                WaitingSince = new DateOnly(2026, 11, 10),
+                Actions = new[] { HomeownershipWorkItems.RecordBuybackClosing },
+            });
+        }
+
+        [Theory]
+        [InlineData("Withdrawn")]
+        [InlineData("Closed")]
+        public void GivenResaleThatIsNotOpen_WhenDerived_ThenHasNoItem(string status)
+        {
+            HomeownershipWorkItems.ForResale(Resale(status), null).Should().BeNull();
+        }
+    }
+
     public class TheForMortgageRequestMethod
     {
         private readonly TestBed _testBed = new();
