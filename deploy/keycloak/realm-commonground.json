@@ -2,6 +2,7 @@
   "realm": "commonground",
   "displayName": "CommonGround",
   "loginTheme": "commonground",
+  "emailTheme": "commonground",
   "enabled": true,
   "sslRequired": "external",
   "registrationAllowed": true,
