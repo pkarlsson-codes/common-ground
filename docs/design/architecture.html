@@ -181,7 +181,7 @@ sequenceDiagram
   <h2>6. Domain model rules</h2>
   <ul>
     <li><strong>Aggregates are deciders.</strong> A decision method checks the request against current state and returns the event(s) it decides on, without changing state. Marten rebuilds state by calling the aggregate's public static <code>Create</code> for the first event and a public <code>Apply</code> for each later one. An event without a public <code>Apply</code> is silently ignored when state is rebuilt.</li>
-    <li><strong>Every domain type derives from a SharedKernel base class</strong> and starts from a <code>dotnet new</code> template in <code>templates/</code> (<code>ddd-aggregate</code>, <code>ddd-entity</code>, <code>ddd-vo</code>, <code>ddd-enum</code>). See <code>docs/ai/creating-domain-types.md</code>.</li>
+    <li><strong>Every domain type derives from a SharedKernel base class</strong> and starts from a <code>dotnet new</code> template in <code>templates/</code> (<code>ddd-aggregate</code>, <code>ddd-entity</code>, <code>ddd-vo</code>, <code>ddd-enum</code>).</li>
     <li><strong>Bad input a user can send is a business rule violation</strong>, not an <code>ArgumentException</code>. The exception handler turns it into a problem response with an error code, and every error code has a message.</li>
     <li><strong>A rule used in two places is a missing concept.</strong> Extract it into a value object or domain service, as was done for <code>Money</code> and <code>IncomeLimitTable</code>.</li>
   </ul>
@@ -209,7 +209,7 @@ sequenceDiagram
     <li><strong>One handler per context per event</strong> (<code>MultipleHandlerBehavior.Separated</code>). Each runs on its own queue with its own transaction and retries, so one context's failure doesn't roll back another's.</li>
     <li><strong>Concurrency.</strong> Two handlers writing the same stream at once: the loser gets a version conflict and is retried after 50, 100 and 250 ms, reloading what it writes.</li>
     <li><strong>Handlers run at the time of their cause.</strong> <code>EventClockMiddleware</code> sets the clock to the event's time, so a reaction is dated when its cause happened even if it's delivered late, and seeded data gets reactions on the seeded date.</li>
-    <li><strong>No event is dropped silently.</strong> A handler that can't act logs or fails; see <code>docs/ai/api-contracts.md</code>.</li>
+    <li><strong>No event is dropped silently.</strong> A handler that can't act logs or fails.</li>
     <li><strong>Handler class names end in <code>Handler</code> or <code>Consumer</code></strong>, or Wolverine doesn't find them.</li>
   </ul>
   <p><code>Messaging:Transport</code> can also send integration events to an external transport, for when a context is split into its own service: <code>None</code> (default), <code>Postgres</code> (one queue table, no extra container) or <code>RabbitMq</code>. Handlers inside the API receive the events with every setting.</p>
@@ -236,7 +236,6 @@ sequenceDiagram
     <li>"Today" is in the trust's time zone: <code>ITrustClock</code> in C#, <code>trustToday()</code> in the web app. A trust in Hawaii and one in Maine have different todays at the same instant.</li>
     <li>Code reads the time through <code>ITimeProvider</code>, never <code>DateTime.Now</code>, so tests and seeders can set the clock.</li>
   </ul>
-  <p>Full rules: <code>docs/ai/dates-and-times.md</code>.</p>
 </section>
 
 <section id="today">
@@ -256,7 +255,7 @@ sequenceDiagram
     <li>Code is organised by page under <code>src/pages/&lt;area&gt;/</code>, with shared components in <code>src/components/</code> and data hooks in <code>src/hooks/</code>.</li>
     <li>The API client in <code>src/api/</code> is generated, not hand-written: <code>npm run management:web:generate</code> builds the gateway, exports its OpenAPI spec with NSwag, and runs OpenAPI Generator (<code>typescript-fetch</code>). Re-run it after changing a gateway endpoint or contract.</li>
     <li>The gateway forwards API contracts to the browser, so a new required request field breaks the web forms and e2e tests until they send it.</li>
-    <li>Business defaults (what a field starts as) live in the client. On the wire, a null field and an absent field mean the same thing. See <code>docs/ai/api-contracts.md</code>.</li>
+    <li>Business defaults (what a field starts as) live in the client. On the wire, a null field and an absent field mean the same thing.</li>
   </ul>
   <p>Each user-facing journey has a doc in <code>docs/journeys/</code> describing the screens, entry points and outcomes.</p>
 </section>
@@ -264,7 +263,7 @@ sequenceDiagram
 <section id="deploy">
   <h2>14. Deployment</h2>
   <p><code>deploy/compose.yml</code> runs five containers on one server: Caddy, Postgres, Keycloak, API and management gateway, plus a <code>documents</code> volume. Caddy gets TLS certificates and sends traffic to the gateway, and <code>/auth-server</code> to Keycloak. A small cloud server with 2 vCPU and 4 GB RAM is the target; Keycloak is the largest consumer at about 1.25 GB planned.</p>
-  <p>Backup is a nightly <code>pg_dump</code> plus a copy of the documents volume (or the S3 bucket). The server never seeds data. The same setup serves an operator who hosts many CLTs and a CLT that hosts its own copy. Details and the options that were rejected: <code>docs/hosting-decision.md</code>.</p>
+  <p>Backup is a nightly <code>pg_dump</code> plus a copy of the documents volume (or the S3 bucket). The server never seeds data. The same setup serves an operator who hosts many CLTs and a CLT that hosts its own copy. How to set it up: <code>docs/hosting.md</code>.</p>
 </section>
 
 <section id="testing">
@@ -272,7 +271,7 @@ sequenceDiagram
   <table>
     <thead><tr><th>Layer</th><th>Where</th><th>What it checks</th></tr></thead>
     <tbody>
-      <tr><td>Unit</td><td><code>src/CommonGround.&lt;Context&gt;.Tests</code>, <code>SharedKernel.Tests</code>, <code>API.Tests</code></td><td>Aggregate decisions and value objects. Rules in <code>docs/ai/unit-testing.md</code>.</td></tr>
+      <tr><td>Unit</td><td><code>src/CommonGround.&lt;Context&gt;.Tests</code>, <code>SharedKernel.Tests</code>, <code>API.Tests</code></td><td>Aggregate decisions and value objects.</td></tr>
       <tr><td>Integration</td><td><code>src/CommonGround.API.IntegrationTests</code></td><td>The API over HTTP with <code>WebApplicationFactory</code>, against real Postgres. Tokens are signed with the test key and need a real trust membership.</td></tr>
       <tr><td>Web unit</td><td><code>src/CommonGround.Management.Web</code> (Vitest)</td><td>Components and helpers.</td></tr>
       <tr><td>End-to-end</td><td><code>e2e/</code> (Playwright)</td><td>Journeys through the real stack: browser, gateway, API, Keycloak. Run with <code>npm run e2e</code>.</td></tr>
@@ -303,7 +302,6 @@ sequenceDiagram
     <li>One context end to end: <code>src/CommonGround.HomeBuyers/Domain/Households</code>, then <code>Application/Commands</code>, then <code>src/CommonGround.API/HomeBuyers/HouseholdEndpoints.cs</code>.</li>
     <li>The gateway's matching file: <code>src/CommonGround.Management.Gateway/Endpoints/HouseholdEndpoints.cs</code>, and <code>Services/InternalJwtService.cs</code>.</li>
     <li>The matching page in <code>src/CommonGround.Management.Web/src/pages/households/</code> and its journey doc in <code>docs/journeys/households/</code>.</li>
-    <li>The rules for contributors in <code>docs/ai/</code> and <code>CLAUDE.md</code>.</li>
   </ol>
 </section>
 </main>

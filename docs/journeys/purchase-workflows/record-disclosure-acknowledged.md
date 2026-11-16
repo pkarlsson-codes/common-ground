@@ -16,5 +16,5 @@ Art 1 has the trust give the buyer a disclosure letter before the buyer commits:
 
 - **No file chosen:** the browser stops the form. Nothing is recorded.
 - **Acknowledged date in the future:** the API refuses and an error toast shows the message. The uploaded file stays in Documents. Nothing is recorded on the purchase.
-- **Already recorded:** the track is not expandable. A mistake is corrected by the later roadmap item for correcting tracks.
+- **Already recorded:** the track is not expandable. A mistake is corrected by a later change.
 - **Closing:** Schedule Closing needs this track complete, with the other six tracks.

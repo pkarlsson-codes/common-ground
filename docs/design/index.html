@@ -86,28 +86,20 @@
   <h2>Other docs in the repo</h2>
   <p>These are Markdown files. Open them in your editor or on your Git host. The links work when the docs are opened from a clone of the repo.</p>
   <dl>
-    <dt>Rules for changing the code</dt>
-    <dd><a href="./ai/creating-domain-types.md"><code>docs/ai/creating-domain-types.md</code></a>: aggregates, entities, IDs, value objects and enumerations.</dd>
-    <dd><a href="./ai/api-contracts.md"><code>docs/ai/api-contracts.md</code></a>: requests, responses, integration events and error codes.</dd>
-    <dd><a href="./ai/dates-and-times.md"><code>docs/ai/dates-and-times.md</code></a>: instants, calendar dates and the trust's "today".</dd>
-    <dd><a href="./ai/unit-testing.md"><code>docs/ai/unit-testing.md</code></a>: how unit tests are laid out and what is worth testing.</dd>
-    <dd><a href="../CLAUDE.md"><code>CLAUDE.md</code></a>: the short version of all of the above, read by Claude Code.</dd>
     <dt>What staff do in the app</dt>
-    <dd><a href="./journeys/README.md"><code>docs/journeys/</code></a>: one file per user journey in the Management app, grouped by page area.</dd>
+    <dd><a href="../journeys/README.md"><code>docs/journeys/</code></a>: one file per user journey in the Management app, grouped by page area.</dd>
     <dt>Tools</dt>
-    <dd><a href="../templates/README.md"><code>templates/README.md</code></a>: <code>dotnet new</code> templates for domain types.</dd>
-    <dd><a href="../e2e/README.md"><code>e2e/README.md</code></a>: Playwright tests that drive the Management app through the real stack.</dd>
-    <dt>Product</dt>
-    <dd><a href="./manual-coverage-matrix.md"><code>docs/manual-coverage-matrix.md</code></a>: which parts of CLT work the product covers, and the roadmap.</dd>
+    <dd><a href="../../templates/README.md"><code>templates/README.md</code></a>: <code>dotnet new</code> templates for domain types.</dd>
+    <dd><a href="../../e2e/README.md"><code>e2e/README.md</code></a>: Playwright tests that drive the Management app through the real stack.</dd>
   </dl>
 </section>
 
 <section id="about">
   <h2>About these pages</h2>
-  <p>The pages are static HTML with no build step. Open <code>docs/index.html</code> from disk or serve the folder with any static file server. Diagrams use Mermaid 11.4.1 from jsDelivr, so they need a network connection.</p>
+  <p>The pages are static HTML with no build step. Open <code>docs/design/index.html</code> from disk or serve the folder with any static file server. Diagrams use Mermaid 11.4.1 from jsDelivr, so they need a network connection.</p>
   <ul>
-    <li><code>docs/docs.css</code> holds the styles for light and dark mode.</li>
-    <li><code>docs/nav.js</code> builds the header, the sidebar, the Previous and Next links and the cards on this page. Its <code>SITE</code> list is the one place that lists the pages.</li>
+    <li><code>docs/design/docs.css</code> holds the styles for light and dark mode.</li>
+    <li><code>docs/design/nav.js</code> builds the header, the sidebar, the Previous and Next links and the cards on this page. Its <code>SITE</code> list is the one place that lists the pages.</li>
   </ul>
   <p><strong>To add a page:</strong> copy an existing context page and add it to <code>SITE</code> in <code>nav.js</code>, or remove <code>planned: true</code> from its entry. The sidebar, the Previous and Next links and its card on this page follow from that. The sidebar lists every <code>&lt;section id&gt;</code> in <code>&lt;main&gt;</code> by its <code>&lt;h2&gt;</code>, so a page needs no contents list of its own. Check it at 390px wide: the page must not scroll sideways.</p>
 </section>

@@ -1,4 +1,4 @@
-// Site navigation for the static pages in docs/.
+// Site navigation for the static pages in docs/design/.
 // Every page loads this file with <script src="./nav.js" defer>. It adds the
 // header bar, a site sidebar with the current page's sections nested under it
 // (built from each <section id> and its <h2>), previous/next links, and fills

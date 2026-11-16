@@ -13,7 +13,7 @@
 <header>
   <h1>Glossary Decisions</h1>
   <p class="lede">Why each term in the <a href="glossary.html">glossary</a> was chosen over its rivals. The glossary says what to write; this page says why, so a later change can tell whether the reason still holds.</p>
-  <p class="meta">Counts: the Grounded Solutions CLT Technical Manual (2011), <code>docs/clt-manuals/markdown/</code>, case-insensitive, singular plus plural, counted 2026-11-14.</p>
+  <p class="meta">Counts: the Grounded Solutions CLT Technical Manual (2011), case-insensitive, singular plus plural, counted 2026-11-14.</p>
 </header>
 
 <section id="rules">
@@ -115,7 +115,7 @@
 
 <section id="verbs">
   <h2>9. Verbs</h2>
-  <p>The verbs come from the code's command and event names. In the glossary each verb sits under its noun, because a verb is a command on one aggregate: "withdraw" on an application and "withdraw" on a purchase have different preconditions, effects and events (<code>ApplicationWithdrawn</code>, <code>PurchaseWithdrawn</code>), so they are two verbs. An earlier version grouped same-spelled verbs in the Shared Kernel; that treated spelling as meaning and crossed context lines. What the same-spelled verbs share is a naming convention, kept in <code>docs/ai/ubiquitous-language.md</code>. The reasons for those conventions follow.</p>
+  <p>The verbs come from the code's command and event names. In the glossary each verb sits under its noun, because a verb is a command on one aggregate: "withdraw" on an application and "withdraw" on a purchase have different preconditions, effects and events (<code>ApplicationWithdrawn</code>, <code>PurchaseWithdrawn</code>), so they are two verbs. An earlier version grouped same-spelled verbs in the Shared Kernel; that treated spelling as meaning and crossed context lines. What the same-spelled verbs share is a naming convention. The reasons for those conventions follow.</p>
   <table>
     <tr><th>Verb</th><th>Why</th></tr>
     <tr><td><strong>withdraw / cancel / fail</strong></td><td>A purchase can be both withdrawn and failed (<code>WithdrawPurchase</code>, <code>FailPurchase</code>), so the two must mean different things. The code comments give the split: withdraw is "the buyer has withdrawn"; fail needs a failure reason. Across the code, withdraw is always the party that started something (application, purchase, intent to sell, mortgage request), and cancel is always the trust's own process (home selection, invitation, property inspection). The one exception, <code>WithdrawForRedevelopment</code> on a land parcel, is listed under Not yet matching.</td></tr>

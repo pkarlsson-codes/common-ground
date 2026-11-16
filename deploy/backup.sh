@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Nightly backup of a CommonGround server: every Postgres database (the app, Keycloak, the gateway's
-# token store), the documents volume, and deploy/.env. Run from cron; see docs/deployment.html.
+# token store), the documents volume, and deploy/.env. Run from cron (/etc/cron.d, 03:30 UTC).
 #
 #   BACKUP_DIR        where to write (default /var/backups/commonground)
 #   BACKUP_KEEP_DAYS  how many days of backups to keep (default 7)

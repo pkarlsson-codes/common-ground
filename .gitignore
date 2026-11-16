@@ -27,13 +27,6 @@ Thumbs.db
 
 /docs/vendors/
 
-# Local working notes and reference material
-docs/*[Pp]lan.md
-docs/clt-manuals/
-docs/spec/
-docs/stories/
-docs/ai/
-
 # Document files from the file system blob store
 src/CommonGround.API/data/
 deploy/.env

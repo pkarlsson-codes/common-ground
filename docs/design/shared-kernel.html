@@ -64,7 +64,7 @@
 
 <section id="building-blocks">
   <h2>3. Domain building blocks</h2>
-  <p>Every domain type in a bounded context derives from one of these. Don't write a domain type as a plain record, class or C# <code>enum</code>. Generate the skeleton with the <code>dotnet new</code> templates in <code>templates/</code> (<code>ddd-aggregate</code>, <code>ddd-entity</code>, <code>ddd-vo</code>, <code>ddd-enum</code>); <code>docs/ai/creating-domain-types.md</code> has the full rules.</p>
+  <p>Every domain type in a bounded context derives from one of these. Don't write a domain type as a plain record, class or C# <code>enum</code>. Generate the skeleton with the <code>dotnet new</code> templates in <code>templates/</code> (<code>ddd-aggregate</code>, <code>ddd-entity</code>, <code>ddd-vo</code>, <code>ddd-enum</code>).</p>
 
   <div class="diagram">
 <pre class="mermaid">
@@ -186,7 +186,7 @@ shared.income_limit_level.limit_not_positive</code></pre>
       <tr><td><code>IncomeBand</code></td><td>Which levels a household's income falls between: over one level's limit and at or under the next. Used by HomeBuyers, Homeownership and reports.</td></tr>
     </tbody>
   </table>
-  <p>Not every amount is converted to <code>Money</code> yet. <code>docs/ai/creating-domain-types.md</code> lists the ones still in <code>decimal</code>.</p>
+  <p>Not every amount is converted to <code>Money</code> yet.</p>
 </section>
 
 <section id="marten">
@@ -235,7 +235,7 @@ shared.income_limit_level.limit_not_positive</code></pre>
       <tr><td><code>ITrustClock</code></td><td>Calendar dates in a trust's time zone: <code>TodayAsync(trustId)</code> and <code>ToTrustDateAsync(trustId, instant)</code>. Implemented by <code>TrustClock</code> in TrustManagement, which reads the trust's <code>IanaTimeZone</code>. A date taken from UTC would put an evening event on the next day.</td></tr>
     </tbody>
   </table>
-  <p>Instants are UTC <code>DateTimeOffset</code>; calendar dates are <code>DateOnly</code>. The full rules, including the web side (<code>CalendarDate</code>, <code>trustToday()</code>), are in <code>docs/ai/dates-and-times.md</code>.</p>
+  <p>Instants are UTC <code>DateTimeOffset</code>; calendar dates are <code>DateOnly</code>. The web side uses <code>CalendarDate</code> and <code>trustToday()</code>.</p>
 </section>
 
 <section id="work-items">
@@ -292,7 +292,7 @@ shared.income_limit_level.limit_not_positive</code></pre>
     <li><strong>Types stored in events can't change shape freely.</strong> Renaming an <code>Enumeration</code> display name, an ID prefix, or a <code>Money</code> JSON format changes how stored events read back. Keep accepting the old form, or write a Marten upcaster.</li>
     <li><strong>No context-specific language.</strong> A type here should mean the same thing in every context. <code>IncomeLimitTable</code> qualifies because HomeBuyers and Homeownership use the same HUD table in the same way.</li>
     <li><strong>New violations need messages.</strong> Add the factory to <code>SharedKernelBusinessRuleViolation.cs</code> with a <code>shared.</code> code, and its message to <code>BusinessRuleErrorMessageMap</code>.</li>
-    <li><strong>Test it in <code>CommonGround.SharedKernel.Tests</code></strong>, following <code>docs/ai/unit-testing.md</code>.</li>
+    <li><strong>Test it in <code>CommonGround.SharedKernel.Tests</code></strong>.</li>
   </ul>
 </section>
 </main>
