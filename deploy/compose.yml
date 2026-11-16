@@ -70,6 +70,7 @@ services:
       SMTP_SSL: ${SMTP_SSL:-false}
     volumes:
       - ./keycloak:/opt/keycloak/data/import:ro
+      - ./keycloak/themes/commonground:/opt/keycloak/themes/commonground:ro
     mem_limit: 1536m
     depends_on:
       postgres:

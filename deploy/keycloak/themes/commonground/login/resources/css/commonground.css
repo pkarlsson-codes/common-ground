@@ -1,0 +1,117 @@
+/* Colors copy the tokens in src/CommonGround.Management.Web/src/index.css. Keep them in step by hand. */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap");
+
+:root {
+    --cg-bg: #0b1018;
+    --cg-surface: #111827;
+    --cg-surface-raised: #192336;
+    --cg-border: #1e2d3d;
+    --cg-border-bright: #2a3d55;
+    --cg-text: #c8d8e8;
+    --cg-text-secondary: #748ba8;
+    --cg-text-bright: #e8f2fc;
+    --cg-amber: #bf832a;
+    --cg-amber-bright: #d4962e;
+    --cg-error: #e87070;
+
+    --keycloak-card-top-color: var(--cg-amber);
+
+    --pf-v5-global--FontFamily--text: 'IBM Plex Sans', system-ui, sans-serif;
+    --pf-v5-global--FontFamily--heading: 'IBM Plex Sans', system-ui, sans-serif;
+    --pf-v5-global--BackgroundColor--100: var(--cg-surface);
+    --pf-v5-global--BackgroundColor--200: var(--cg-surface-raised);
+    --pf-v5-global--Color--100: var(--cg-text);
+    --pf-v5-global--Color--200: var(--cg-text-secondary);
+    --pf-v5-global--BorderColor--100: var(--cg-border-bright);
+    --pf-v5-global--BorderColor--200: var(--cg-border-bright);
+    --pf-v5-global--BorderColor--300: var(--cg-border-bright);
+    --pf-v5-global--BorderColor--400: var(--cg-border-bright);
+    --pf-v5-global--link--Color: var(--cg-amber-bright);
+    --pf-v5-global--link--Color--hover: var(--cg-text-bright);
+    --pf-v5-global--primary-color--100: var(--cg-amber);
+    --pf-v5-global--primary-color--200: var(--cg-amber-bright);
+    --pf-v5-global--active-color--100: var(--cg-amber-bright);
+    --pf-v5-global--danger-color--100: var(--cg-error);
+}
+
+html.login-pf, .login-pf body {
+    background: var(--cg-bg);
+    color: var(--cg-text);
+}
+
+.pf-v5-c-login__main {
+    background: var(--cg-surface);
+    border: 1px solid var(--cg-border);
+}
+
+.pf-v5-c-title, .pf-v5-c-form__label-text, label {
+    color: var(--cg-text-bright);
+}
+
+.pf-v5-c-form-control {
+    --pf-v5-c-form-control--BackgroundColor: var(--cg-bg);
+    --pf-v5-c-form-control--Color: var(--cg-text-bright);
+    --pf-v5-c-form-control--BorderColor: var(--cg-border-bright);
+    background-color: var(--cg-bg);
+    color: var(--cg-text-bright);
+}
+
+.pf-v5-c-form-control:focus-within {
+    --pf-v5-c-form-control--BorderBottomColor: var(--cg-amber-bright);
+}
+
+.pf-v5-c-button.pf-m-primary {
+    --pf-v5-c-button--m-primary--BackgroundColor: var(--cg-amber);
+    --pf-v5-c-button--m-primary--hover--BackgroundColor: var(--cg-amber-bright);
+    --pf-v5-c-button--m-primary--active--BackgroundColor: var(--cg-amber-bright);
+    --pf-v5-c-button--m-primary--focus--BackgroundColor: var(--cg-amber-bright);
+    --pf-v5-c-button--m-primary--Color: var(--cg-bg);
+    background-color: var(--cg-amber);
+    color: var(--cg-bg);
+}
+
+.pf-v5-c-button.pf-m-primary:hover {
+    background-color: var(--cg-amber-bright);
+}
+
+.pf-v5-c-alert {
+    --pf-v5-c-alert--BackgroundColor: var(--cg-surface-raised);
+    color: var(--cg-text);
+}
+
+/* The header shows the realm display name, "CommonGround". */
+#kc-header-wrapper {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 2.5rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--cg-text-bright);
+}
+
+.pf-v5-c-login__main-footer-band {
+    border-top: 1px solid var(--cg-border);
+}
+
+.pf-v5-c-form-control, .pf-v5-c-input-group__item .pf-v5-c-form-control, .pf-v5-c-form-control::after {
+    --pf-v5-c-form-control--BorderColor: var(--cg-border-bright);
+    border-color: var(--cg-border-bright);
+}
+
+.pf-v5-c-input-group .pf-v5-c-button.pf-m-control {
+    background-color: var(--cg-bg);
+    border-color: var(--cg-border-bright);
+    color: var(--cg-text);
+}
+
+.pf-v5-c-login__main-header {
+    grid-template-columns: 1fr;
+}
+
+.pf-v5-c-form-control::before, .pf-v5-c-form-control::after {
+    border-color: var(--cg-border-bright);
+}
+
+#kc-page-title {
+    max-width: none;
+}

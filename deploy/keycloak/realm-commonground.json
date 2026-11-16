@@ -1,5 +1,7 @@
 {
   "realm": "commonground",
+  "displayName": "CommonGround",
+  "loginTheme": "commonground",
   "enabled": true,
   "sslRequired": "external",
   "registrationAllowed": true,
