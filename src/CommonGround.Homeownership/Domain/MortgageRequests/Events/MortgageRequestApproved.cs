@@ -7,17 +7,13 @@ namespace CommonGround.Homeownership.Domain.MortgageRequests.Events;
 /// Raised when the trust gives written permission for a requested loan (Model Lease Art 8.1). Keeps the debt check it
 /// decided on, so an auditor can see why a loan above the cap was permitted.
 /// </summary>
-/// <param name="AggregateId">The mortgage request ID.</param>
-/// <param name="GroundLeaseId">The homeowner's lease.</param>
 /// <param name="ApprovedOn">The day the trust approved it.</param>
-/// <param name="PurchaseOptionPrice">The purchase option price the loan's appraisal gave.</param>
 /// <param name="MaxMortgageDebtPercent">The lease's debt cap percent.</param>
 /// <param name="DebtCapAmount">The most total debt may be.</param>
 /// <param name="TotalDebtAfterClosing">All mortgage debt on the home once the loan closes.</param>
 /// <param name="DebtPercent">The total debt as a percent of the purchase option price.</param>
 /// <param name="OverCap">Whether the total debt is above the cap amount.</param>
 /// <param name="Reason">Why the trust approved it; required when over the cap.</param>
-/// <param name="ApprovedBy">The staff user who recorded it.</param>
 public sealed record MortgageRequestApproved(
     string AggregateId,
     string GroundLeaseId,

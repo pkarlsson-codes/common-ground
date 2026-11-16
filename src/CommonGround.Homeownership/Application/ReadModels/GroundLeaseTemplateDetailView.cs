@@ -1,15 +1,11 @@
 namespace CommonGround.Homeownership.Application.ReadModels;
 
-/// <summary>Detailed read model for a single ground lease template.</summary>
 public class GroundLeaseTemplateDetailView
 {
-    /// <summary>Gets or sets the unique identifier.</summary>
     public string Id { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the template name.</summary>
     public string TemplateName { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the lease term in years.</summary>
     public int TermYears { get; set; }
 
     /// <summary>Gets or sets the days the trust has to buy the home after its homeowner gives notice to sell.</summary>
@@ -33,13 +29,10 @@ public class GroundLeaseTemplateDetailView
     /// <summary>Gets or sets the liability coverage per occurrence a lease from this template requires, or null for none.</summary>
     public decimal? LiabilityPerOccurrence { get; set; }
 
-    /// <summary>Gets or sets the covenant terms text.</summary>
     public string CovenantTerms { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the current status.</summary>
     public string Status { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the resale formula kind.</summary>
     public string FormulaKind { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the appreciation share fraction (AppraisalBased only).</summary>
@@ -57,9 +50,7 @@ public class GroundLeaseTemplateDetailView
     /// <summary>Gets or sets the improvements cap, if any.</summary>
     public decimal? ImprovementsCap { get; set; }
 
-    /// <summary>Gets or sets the creation timestamp.</summary>
     public DateTimeOffset CreatedAt { get; set; }
 
-    /// <summary>Gets or sets the user ID of the creator.</summary>
     public string CreatedBy { get; set; } = string.Empty;
 }

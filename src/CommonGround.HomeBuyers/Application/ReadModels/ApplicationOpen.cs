@@ -8,7 +8,6 @@ namespace CommonGround.HomeBuyers.Application.ReadModels;
 /// An application that has not reached a terminal phase (<see cref="ApplicationPhase.IsTerminal"/>).
 /// Selected counts as open: the purchase can still fall through and return it to the waiting list.
 /// </summary>
-/// <typeparam name="TView">The homeowner application read model.</typeparam>
 public sealed class ApplicationOpen<TView> : Specification<TView>
     where TView : IHomeownerApplicationPhaseView
 {

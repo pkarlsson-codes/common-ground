@@ -9,7 +9,6 @@ namespace CommonGround.PropertyRegistry.Application.ReadModels;
 /// </summary>
 public class HomeAvailabilityView
 {
-    /// <summary>Gets or sets the home ID (the identity of this view).</summary>
     public string Id { get; set; } = string.Empty;
 
     /// <summary>Gets or sets who has the home now: the trust (vacant) or a homeowner (occupied), as a <see cref="HomeOccupancy"/> display name.</summary>

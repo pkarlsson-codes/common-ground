@@ -15,32 +15,24 @@ public class EntityDocumentsView
     /// <summary>Gets or sets the entity id segment of the key.</summary>
     public string EntityId { get; set; } = string.Empty;
 
-    /// <summary>Gets the current attachments to this entity.</summary>
     public List<EntityDocumentAttachmentItem> Items { get; set; } = [];
 }
 
 /// <summary>One attached document on an entity, denormalised for listing.</summary>
 public class EntityDocumentAttachmentItem
 {
-    /// <summary>Gets or sets the document ID.</summary>
     public string DocumentId { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the document title.</summary>
     public string Title { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the current version filename.</summary>
     public string CurrentFileName { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the current version content type.</summary>
     public string CurrentContentType { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the current version size in bytes.</summary>
     public long CurrentSizeBytes { get; set; }
 
-    /// <summary>Gets or sets the optional attachment role.</summary>
     public string? Role { get; set; }
 
-    /// <summary>Gets or sets when this attachment was created.</summary>
     public DateTimeOffset AttachedAt { get; set; }
 
     /// <summary>Gets or sets a value indicating whether the document is soft-deleted.</summary>

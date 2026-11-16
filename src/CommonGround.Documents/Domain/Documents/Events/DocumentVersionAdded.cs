@@ -2,7 +2,6 @@ using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.Documents.Domain.Documents.Events;
 
-/// <summary>Raised when a new version is added to an existing Document.</summary>
 public sealed record DocumentVersionAdded(
     string AggregateId,
     string VersionId,

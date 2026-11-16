@@ -2,7 +2,6 @@ using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.HomeBuyers.Domain.Households.Events;
 
-/// <summary>Mortgage prequalification recorded event.</summary>
 public sealed record MortgagePrequalificationRecorded(
     string AggregateId,
     string LenderName,

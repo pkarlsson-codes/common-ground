@@ -8,7 +8,6 @@ namespace CommonGround.HomeBuyers.Application.ReadModels;
 /// An application on the waiting list: approved and not yet selected for a home. Approval puts a household
 /// on the list; selection, denial or withdrawal takes it off, and a purchase that falls through puts it back.
 /// </summary>
-/// <typeparam name="TView">The homeowner application read model.</typeparam>
 public sealed class OnWaitingList<TView> : Specification<TView>
     where TView : IHomeownerApplicationPhaseView
 {

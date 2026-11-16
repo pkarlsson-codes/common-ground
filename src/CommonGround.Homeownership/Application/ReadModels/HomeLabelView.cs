@@ -9,6 +9,5 @@ public class HomeLabelView
     /// <summary>Gets or sets the home ID (the identity of this view).</summary>
     public string Id { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the home's label.</summary>
     public string Label { get; set; } = string.Empty;
 }

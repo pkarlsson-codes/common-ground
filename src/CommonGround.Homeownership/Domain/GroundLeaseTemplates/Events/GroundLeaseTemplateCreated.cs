@@ -4,7 +4,6 @@ using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.Homeownership.Domain.GroundLeaseTemplates.Events;
 
-/// <summary>Raised when a new ground lease template is created.</summary>
 public sealed record GroundLeaseTemplateCreated(
     string AggregateId,
     string TemplateName,

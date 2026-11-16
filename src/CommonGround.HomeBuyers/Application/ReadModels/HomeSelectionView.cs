@@ -3,19 +3,14 @@ namespace CommonGround.HomeBuyers.Application.ReadModels;
 /// <summary>Read model for a home selection: its candidates as snapshotted at start, and how it ended.</summary>
 public class HomeSelectionView
 {
-    /// <summary>Gets or sets the selection ID (the identity of this view).</summary>
     public string Id { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the home being selected for.</summary>
     public string HomeId { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the selection status.</summary>
     public string Status { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets who started the selection.</summary>
     public string StartedBy { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets when the selection started.</summary>
     public DateTimeOffset StartedAt { get; set; }
 
     /// <summary>Gets or sets the home's income limit as a percent of AMI when the selection started, or null when it had none.</summary>
@@ -48,7 +43,6 @@ public class HomeSelectionView
     /// <summary>Gets or sets the applications left out of the lottery because they could not be selected.</summary>
     public List<string> LotteryIneligibleApplicationIds { get; set; } = [];
 
-    /// <summary>Gets or sets the reason staff gave for cancelling the selection.</summary>
     public string? CancellationReason { get; set; }
 
     /// <summary>Gets or sets why the purchase the selection led to fell through, once it has.</summary>
@@ -67,10 +61,8 @@ public class HomeSelectionView
 /// <summary>A candidate's priority facts, frozen when the selection started.</summary>
 public class HomeSelectionCandidateEntry
 {
-    /// <summary>Gets or sets the candidate's application.</summary>
     public string ApplicationId { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the household that applied.</summary>
     public string HouseholdId { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the household's annual income as declared on the application.</summary>
@@ -79,7 +71,6 @@ public class HomeSelectionCandidateEntry
     /// <summary>Gets or sets the number of people in the household as declared on the application.</summary>
     public int HouseholdSize { get; set; }
 
-    /// <summary>Gets or sets a value indicating whether the household needs an accessible home.</summary>
     public bool RequiresAccessibility { get; set; }
 
     /// <summary>Gets or sets the date the household joined the waiting list.</summary>

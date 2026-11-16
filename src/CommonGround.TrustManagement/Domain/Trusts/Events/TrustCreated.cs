@@ -2,10 +2,7 @@ using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.TrustManagement.Domain.Trusts.Events;
 
-/// <summary>Raised when a new trust is created.</summary>
-/// <param name="AggregateId">The unique identifier of the trust.</param>
-/// <param name="Name">The name of the trust.</param>
-/// <param name="TimeZone">The IANA time zone id the trust operates in.</param>
+/// <summary>Raised when a new trust is created. <c>TimeZone</c> is an IANA time zone id.</summary>
 public sealed record TrustCreated(
     string AggregateId,
     string Name,

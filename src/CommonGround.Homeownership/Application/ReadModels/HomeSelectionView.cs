@@ -11,7 +11,6 @@ public class HomeSelectionView
     /// <summary>Gets or sets the selection ID (the identity of this view).</summary>
     public string Id { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the ID of the home being selected for.</summary>
     public string HomeId { get; set; } = string.Empty;
 
     /// <summary>Gets or sets a value indicating whether news of the selection's start has arrived.</summary>
@@ -26,14 +25,12 @@ public class HomeSelectionView
     /// <summary>Gets or sets a value indicating whether the selection is still choosing a household.</summary>
     public bool Open { get; set; }
 
-    /// <summary>Records that the selection started.</summary>
     public void RecordStarted()
     {
         Started = true;
         Open = !Ended;
     }
 
-    /// <summary>Records that the selection was cancelled or chose a household.</summary>
     public void RecordEnded()
     {
         Ended = true;
