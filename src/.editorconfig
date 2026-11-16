@@ -134,3 +134,7 @@ dotnet_diagnostic.SA1413.severity = none
 
 [**/Errors/*BusinessRuleViolation.cs]
 dotnet_diagnostic.CS1591.severity = none
+
+[**/{ReadModels,Events}/*.cs]
+dotnet_diagnostic.CS1591.severity = none
+dotnet_diagnostic.SA1600.severity = none
