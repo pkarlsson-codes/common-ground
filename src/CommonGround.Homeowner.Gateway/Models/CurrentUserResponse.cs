@@ -30,6 +30,3 @@ public sealed class CurrentUserDto
     /// </summary>
     public bool HasTrust { get; set; }
 }
-
-// NOTE: We intentionally return the user DTO directly on 200 and rely on HTTP 401 for unauthorized.
-// The envelope type was removed to follow REST semantics: 200 => user DTO, 401 => unauthorized.

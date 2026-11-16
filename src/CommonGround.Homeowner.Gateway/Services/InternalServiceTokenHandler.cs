@@ -13,8 +13,8 @@ public sealed class InternalServiceTokenHandler : DelegatingHandler
     /// <summary>
     /// Initializes a new instance of the <see cref="InternalServiceTokenHandler"/> class.
     /// </summary>
-    /// <param name="httpContextAccessor">Accessor used to read the current session cookie.</param>
-    /// <param name="jwtService">Service used to mint internal service tokens.</param>
+    /// <param name="httpContextAccessor">The HTTP context accessor.</param>
+    /// <param name="jwtService">The internal JWT service.</param>
     public InternalServiceTokenHandler(IHttpContextAccessor httpContextAccessor, IInternalJwtService jwtService)
     {
         _httpContextAccessor = httpContextAccessor;

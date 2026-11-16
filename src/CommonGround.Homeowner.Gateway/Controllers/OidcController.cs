@@ -23,10 +23,10 @@ public sealed class OidcController : ControllerBase
     /// <summary>
     /// Initializes a new instance of the <see cref="OidcController"/> class.
     /// </summary>
-    /// <param name="configuration">Application configuration.</param>
-    /// <param name="tokenStore">Token store for managing server-side tokens.</param>
-    /// <param name="httpClientFactory">Factory for creating HTTP clients.</param>
-    /// <param name="env">Host environment used to determine cookie security flags.</param>
+    /// <param name="configuration">The configuration.</param>
+    /// <param name="tokenStore">The token store.</param>
+    /// <param name="httpClientFactory">The HTTP client factory.</param>
+    /// <param name="env">The host environment. Cookies are marked secure only in Production.</param>
     public OidcController(
         IConfiguration configuration,
         ITokenStore tokenStore,

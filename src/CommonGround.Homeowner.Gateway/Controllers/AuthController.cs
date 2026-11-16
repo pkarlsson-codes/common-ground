@@ -40,7 +40,7 @@ public sealed class AuthController(IHostEnvironment env) : ControllerBase
     /// <summary>
     /// Get current authenticated user.
     /// </summary>
-    /// <param name="tokenStore">Token store used to resolve the current session.</param>
+    /// <param name="tokenStore">The token store.</param>
     /// <returns>The current user if authenticated; otherwise unauthorized.</returns>
     [HttpGet("me")]
     [EndpointName("getCurrentUser")]
