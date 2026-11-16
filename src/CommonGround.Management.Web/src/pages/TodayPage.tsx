@@ -14,6 +14,7 @@ import TodayMortgageRequestPanel from './ground-leases/TodayMortgageRequestPanel
 import TodayImprovementRequestPanel from './ground-leases/TodayImprovementRequestPanel'
 import TodayInsuranceCertificatePanel from './ground-leases/TodayInsuranceCertificatePanel'
 import TodayResalePriceStatementPanel from './ground-leases/TodayResalePriceStatementPanel'
+import TodayResalePanel from './resales/TodayResalePanel'
 
 const KIND_LABELS: Record<string, string> = {
   'application-awaiting-decision': 'Application to decide',
@@ -30,6 +31,8 @@ const KIND_LABELS: Record<string, string> = {
   'improvement-request-waiting': 'Improvement request to decide',
   'mortgage-loan-closing-unrecorded': 'Mortgage loan closing to confirm',
   'resale-price-statement-due': 'Resale price statement due',
+  'resale-decision-due': 'Resale decision due',
+  'resale-closing-waiting': 'Resale closing to record',
   'insurance-certificate-due': 'Insurance certificate due',
   'insurance-short-of-lease': 'Insurance short of the lease',
   'document-expiring': 'Document expiring',
@@ -52,6 +55,9 @@ const ACTION_PANELS: Record<string, (recordId: string, onClose: () => void) => R
   'record-mortgage-loan-closed': (id, onClose) => <TodayMortgageRequestPanel groundLeaseId={id} open="closing" onClose={onClose} />,
   'decide-improvement-request': (id, onClose) => <TodayImprovementRequestPanel groundLeaseId={id} onClose={onClose} />,
   'record-resale-price-statement': (id, onClose) => <TodayResalePriceStatementPanel groundLeaseId={id} onClose={onClose} />,
+  'record-resale-appraisal': (id, onClose) => <TodayResalePanel resaleId={id} action="appraisal" onClose={onClose} />,
+  'exercise-purchase-option': (id, onClose) => <TodayResalePanel resaleId={id} action="exercise" onClose={onClose} />,
+  'record-buyback-closing': (id, onClose) => <TodayResalePanel resaleId={id} action="buyback-closing" onClose={onClose} />,
   'record-insurance-certificate': (id, onClose) => <TodayInsuranceCertificatePanel groundLeaseId={id} onClose={onClose} />,
 }
 

@@ -38,6 +38,7 @@ const RECORD_PAGES: Record<string, string> = {
   purchase: '/purchase-workflows',
   document: '/documents',
   'ground-lease': '/ground-leases',
+  resale: '/resales',
 }
 
 /** Where a row leads: the record's detail, opened on its list page (selections have a page of their own). */
@@ -65,6 +66,8 @@ const KINDS: Record<string, { page: string; area: TodayArea }> = {
   'mortgage-request-pending': { page: '/ground-leases', area: 'stewardship' },
   'mortgage-loan-closing-unrecorded': { page: '/ground-leases', area: 'stewardship' },
   'resale-price-statement-due': { page: '/stewardship', area: 'stewardship' },
+  'resale-decision-due': { page: '/resales', area: 'stewardship' },
+  'resale-closing-waiting': { page: '/resales', area: 'stewardship' },
   'insurance-certificate-due': { page: '/ground-leases', area: 'stewardship' },
   'insurance-short-of-lease': { page: '/ground-leases', area: 'stewardship' },
   'document-expiring': { page: '/documents', area: 'records' },
@@ -118,6 +121,9 @@ const ACTION_LABELS: Record<string, string> = {
   'record-mortgage-loan-closed': 'Confirm closing',
   'record-resale-price-statement': 'Prepare statement',
   'record-insurance-certificate': 'Record certificate',
+  'record-resale-appraisal': 'Record appraisal',
+  'exercise-purchase-option': 'Buy the home',
+  'record-buyback-closing': 'Record buyback closing',
   'enter-income-limits': 'Enter limits',
 }
 
@@ -144,6 +150,9 @@ const PANEL_ACTIONS = new Set([
   'record-mortgage-loan-closed',
   'record-resale-price-statement',
   'record-insurance-certificate',
+  'record-resale-appraisal',
+  'exercise-purchase-option',
+  'record-buyback-closing',
 ])
 
 export interface RowAction {

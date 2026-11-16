@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { createApplication, createHome, createLandParcel, createPurchaseWorkflow, eligibilityVerified, post, setDocumentExpiry, uploadDocument } from '../support/api'
+import { createApplication, createGroundLease, createHome, createLandParcel, createPurchaseWorkflow, eligibilityVerified, post, setDocumentExpiry, uploadDocument } from '../support/api'
 import { expectToast, field, isoDate, panel, uniqueId } from '../support/ui'
 
 // Journeys (docs/journeys/today/):
@@ -134,4 +134,47 @@ test('a home whose income limit has no level in effect makes Income limits missi
 
   await expect(page).toHaveURL(/\/income-limits$/)
   await expect(panel(page, 'Enter Income Limits')).toBeVisible()
+})
+
+test('an open resale waits on Today for the option decision, then for the buyback closing, both done there', async ({ page }) => {
+  const homeowner = `Today seller ${uniqueId()}`
+  const groundLeaseId = await createGroundLease(page, homeowner)
+  await post(page, `/api/v1/ground-leases/${groundLeaseId}/intent-to-sell`, { noticeDate: isoDate(-5), channel: 'Phone', notes: null })
+
+  // The lease also has an insurance item, so match the resale rows by kind. Reload until the item shows.
+  const rows = section(page, 'Stewardship').getByRole('row', { name: new RegExp(`Resale (decision due|closing to record).*${homeowner}`) })
+  await expect(async () => {
+    await page.goto('/')
+    await expect(rows).toHaveCount(1, { timeout: 2_000 })
+  }).toPass()
+
+  const decision = rows.first()
+  await expect(decision).toContainText('Resale decision due')
+  await expect(decision).toContainText('no appraisal yet')
+  await expect(decision.getByRole('button', { name: /^Buy the home: / })).toBeVisible()
+
+  await decision.getByRole('button', { name: /^Record appraisal: / }).click()
+  const appraisal = panel(page, 'Record Appraisal')
+  await field(appraisal, 'Appraised Value ($)').fill('270000')
+  await field(appraisal, 'Appraiser').fill('Today Appraisal Group')
+  await appraisal.getByRole('button', { name: 'Record Appraisal' }).click()
+  await expectToast(page, 'Appraisal recorded')
+
+  await expect(page).toHaveURL(/\/$/)
+  await expect(decision.getByRole('button', { name: /^Record appraisal: / })).toHaveCount(0)
+  await decision.getByRole('button', { name: /^Buy the home: / }).click()
+  await panel(page, 'Buy the Home').getByRole('button', { name: 'Exercise Option' }).click()
+  await expectToast(page, 'Purchase option exercised')
+
+  const closing = rows.first()
+  await expect(closing).toContainText('Resale closing to record')
+  await closing.getByRole('button', { name: /^Record buyback closing: / }).click()
+  const record = panel(page, 'Record Closing')
+  await field(record, 'What Happens Next').selectOption('hold')
+  await field(record, 'Hold Reason').fill('Roof replacement first')
+  await record.getByRole('button', { name: 'Record Closing' }).click()
+  await expectToast(page, 'Buyback closed')
+
+  await expect(page).toHaveURL(/\/$/)
+  await expect(rows).toHaveCount(0)
 })
