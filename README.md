@@ -4,7 +4,7 @@ Free, open-source software for community land trusts (CLTs). It tracks the land,
 
 A CLT owns land and leases it to homeowners under a long-term ground lease, which keeps the homes affordable. Most CLTs run on spreadsheets or on expensive software. CommonGround aims to be a free alternative that a small CLT can run itself.
 
-**Status:** pre-1.0. It has not been used by a real CLT yet. Expect changes.
+**Status:** pre-1.0. It has not been used by a real CLT yet. Expect changes. You can try it at the [live demo](https://commonground.dotnetexperiments.com).
 
 ## What it does
 
@@ -15,7 +15,7 @@ A CLT owns land and leases it to homeowners under a long-term ground lease, whic
 - **Documents:** versioned files attached to leases and homes.
 - **Trusts and team:** one install can host several trusts. Staff are invited to a trust by email.
 - **Reports:** funder report with CSV downloads, and a CSV import for an existing portfolio.
-- **Demo mode:** each visitor who signs up gets a sample trust that is deleted after a set number of days.
+- **Demo mode:** each visitor who signs up gets a sample trust that is deleted after a set number of days. A demo runs at <https://commonground.dotnetexperiments.com>. Signing up needs a working email address for the confirmation link.
 
 Terminology follows the Grounded Solutions Network's [CLT Technical Manual](https://groundedsolutions.org). CommonGround is not affiliated with or endorsed by Grounded Solutions Network, and it contains no text from the manual. The glossary in [docs/design/glossary.html](docs/design/glossary.html) lists each term as this software uses it.
 
