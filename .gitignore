@@ -28,3 +28,6 @@ Thumbs.db
 # Document files from the file system blob store
 src/CommonGround.API/data/
 deploy/.env
+
+# Local-only notes, never committed
+.scratch/
