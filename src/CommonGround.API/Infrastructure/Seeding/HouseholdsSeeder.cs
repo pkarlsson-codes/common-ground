@@ -79,13 +79,13 @@ public sealed class HouseholdsSeeder(ITrustClock trustClock, PropagationWaiter p
                 {
                     var completed = counseling.CompletedDate.Resolve(today);
                     readiness.Add((completed, () => household.RecordHousingCounseling(
-                        counseling.CertificationNumber, completed, counseling.CounselorOrganization, SeederUserId)));
+                        counseling.CertificationNumber, completed, counseling.CounselorOrganization, today, SeederUserId)));
                 }
 
                 if (entry.CltOrientationCompleted is { } orientation)
                 {
                     var completed = orientation.Resolve(today);
-                    readiness.Add((completed, () => household.RecordCltOrientation(completed, SeederUserId)));
+                    readiness.Add((completed, () => household.RecordCltOrientation(completed, today, SeederUserId)));
                 }
 
                 if (entry.Prequalification is { } prequalification)

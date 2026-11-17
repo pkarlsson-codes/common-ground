@@ -341,6 +341,30 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class CltOrientation
+        {
+            public static BusinessRuleViolationException CompletedDateInFuture(DateOnly completedDate, DateOnly today)
+                => new(
+                    "home_buyers.household.clt_orientation.completed_date_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["completedDate"] = completedDate,
+                        ["today"] = today,
+                    });
+        }
+
+        public static class HousingCounseling
+        {
+            public static BusinessRuleViolationException CompletedDateInFuture(DateOnly completedDate, DateOnly today)
+                => new(
+                    "home_buyers.household.housing_counseling.completed_date_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["completedDate"] = completedDate,
+                        ["today"] = today,
+                    });
+        }
+
         public static class SelectApplicant
         {
             public static BusinessRuleViolationException NoPrimaryMember(HouseholdId householdId)

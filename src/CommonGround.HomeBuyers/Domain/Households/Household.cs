@@ -114,19 +114,33 @@ public sealed class Household : AggregateRoot<HouseholdId>
     }
 
     /// <summary>Records CLT orientation completion. Idempotent.</summary>
-    public CltOrientationRecorded? RecordCltOrientation(DateOnly completedDate, UserId recordedBy)
+    /// <param name="completedDate">The day it was completed; not after <paramref name="today"/>.</param>
+    /// <param name="today">Today in the trust's time zone.</param>
+    /// <param name="recordedBy">The staff user recording it.</param>
+    public CltOrientationRecorded? RecordCltOrientation(DateOnly completedDate, DateOnly today, UserId recordedBy)
     {
         if (IsCltOrientationCompleted) return null;
+
+        if (completedDate > today)
+            throw BusinessRuleViolation.Household.CltOrientation.CompletedDateInFuture(completedDate, today);
 
         return new CltOrientationRecorded(Id.Value, completedDate, recordedBy.Value);
     }
 
     /// <summary>Records HUD-approved housing counseling completion. Idempotent.</summary>
+    /// <param name="certificationNumber">The counselor's HUD certification number.</param>
+    /// <param name="completedDate">The day it was completed; not after <paramref name="today"/>.</param>
+    /// <param name="counselorOrganization">The counseling organization.</param>
+    /// <param name="today">Today in the trust's time zone.</param>
+    /// <param name="recordedBy">The staff user recording it.</param>
     public HousingCounselingRecorded? RecordHousingCounseling(
         string certificationNumber, DateOnly completedDate,
-        string counselorOrganization, UserId recordedBy)
+        string counselorOrganization, DateOnly today, UserId recordedBy)
     {
         if (IsHousingCounselingCompleted) return null;
+
+        if (completedDate > today)
+            throw BusinessRuleViolation.Household.HousingCounseling.CompletedDateInFuture(completedDate, today);
 
         return new HousingCounselingRecorded(
             Id.Value, certificationNumber, completedDate, counselorOrganization, recordedBy.Value);

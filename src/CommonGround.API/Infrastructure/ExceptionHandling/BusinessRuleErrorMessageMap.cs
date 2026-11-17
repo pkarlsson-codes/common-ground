@@ -49,6 +49,8 @@ internal static class BusinessRuleErrorMessageMap
             ["home_buyers.homeowner_application.select_applicant.purchase_price_non_positive"] = "Purchase price must be greater than zero.",
             ["home_buyers.homeowner_application.submit.household_has_open_application"] = "This household already has an open application.",
             ["home_buyers.household.circumstances.annual_income_negative"] = "Annual income cannot be negative.",
+            ["home_buyers.household.clt_orientation.completed_date_in_future"] = "Orientation completion date can't be in the future.",
+            ["home_buyers.household.housing_counseling.completed_date_in_future"] = "Counseling completion date can't be in the future.",
             ["home_buyers.household.members.cannot_remove_primary_member"] = "The primary member cannot be removed from the household.",
             ["home_buyers.household.members.member_not_found"] = "That household member was not found.",
             ["home_buyers.household.register.must_have_exactly_one_primary_member"] = "A household must have exactly one primary member.",

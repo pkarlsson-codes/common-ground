@@ -29,8 +29,8 @@ public class HandlerTestBed
             StaffUser));
         return ready
             ? household.Evolve(
-                household.RecordHousingCounseling("CERT-001", new DateOnly(2026, 6, 2), "Counseling Org", StaffUser)!,
-                household.RecordCltOrientation(new DateOnly(2026, 6, 3), StaffUser)!,
+                household.RecordHousingCounseling("CERT-001", new DateOnly(2026, 6, 2), "Counseling Org", new DateOnly(2026, 6, 10), StaffUser)!,
+                household.RecordCltOrientation(new DateOnly(2026, 6, 3), new DateOnly(2026, 6, 10), StaffUser)!,
                 household.RecordMortgagePrequalification("Lender", 210000m, new DateOnly(2027, 1, 1), StaffUser))!
             : household;
     }

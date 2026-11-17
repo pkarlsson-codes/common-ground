@@ -22,8 +22,8 @@ public class HouseholdTests
         public Household ReadyHousehold(DateOnly prequalificationExpiry)
         {
             var household = RegisteredHousehold();
-            household = household.Decide(a => a.RecordHousingCounseling("CERT-001", new DateOnly(2026, 6, 2), "Counseling Org", StaffUser)).Aggregate;
-            household = household.Decide(a => a.RecordCltOrientation(new DateOnly(2026, 6, 3), StaffUser)).Aggregate;
+            household = household.Decide(a => a.RecordHousingCounseling("CERT-001", new DateOnly(2026, 6, 2), "Counseling Org", new DateOnly(2026, 6, 10), StaffUser)).Aggregate;
+            household = household.Decide(a => a.RecordCltOrientation(new DateOnly(2026, 6, 3), new DateOnly(2026, 6, 10), StaffUser)).Aggregate;
             household = household.Decide(a => a.RecordMortgagePrequalification("Lender", 210000m, prequalificationExpiry, StaffUser)).Aggregate;
             return household;
         }
@@ -190,6 +190,50 @@ public class HouseholdTests
             (sut, var events) = sut.Decide(a => a.UpdateCircumstances(HouseholdCircumstances.Create(false, Money.Create(65000m)), _testBed.StaffUser));
 
             events.OfType<HouseholdCircumstancesUpdated>().Should().BeEmpty();
+        }
+    }
+
+    public class TheRecordReadinessMethods
+    {
+        private readonly TestBed _testBed = new();
+        private static readonly DateOnly Today = new(2026, 6, 10);
+
+        [Fact]
+        public void GivenOrientationDateAfterToday_WhenRecorded_ThenThrowsCompletedDateInFuture()
+        {
+            var household = _testBed.RegisteredHousehold();
+
+            var act = () => household.RecordCltOrientation(Today.AddDays(1), Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.household.clt_orientation.completed_date_in_future");
+        }
+
+        [Fact]
+        public void GivenOrientationDateToday_WhenRecorded_ThenRecorded()
+        {
+            var household = _testBed.RegisteredHousehold();
+
+            household.RecordCltOrientation(Today, Today, _testBed.StaffUser).Should().NotBeNull();
+        }
+
+        [Fact]
+        public void GivenCounselingDateAfterToday_WhenRecorded_ThenThrowsCompletedDateInFuture()
+        {
+            var household = _testBed.RegisteredHousehold();
+
+            var act = () => household.RecordHousingCounseling("CERT-001", Today.AddDays(1), "Org", Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.household.housing_counseling.completed_date_in_future");
+        }
+
+        [Fact]
+        public void GivenCounselingDateToday_WhenRecorded_ThenRecorded()
+        {
+            var household = _testBed.RegisteredHousehold();
+
+            household.RecordHousingCounseling("CERT-001", Today, "Org", Today, _testBed.StaffUser).Should().NotBeNull();
         }
     }
 

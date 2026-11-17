@@ -36,9 +36,9 @@ public class HomeownerApplicationTests
         public TestBed WithReadiness(bool counseling = true, bool orientation = true, DateOnly? prequalificationExpiry = null)
         {
             if (counseling)
-                Household = Household.Decide(a => a.RecordHousingCounseling("CERT-001", new DateOnly(2026, 6, 2), "Counseling Org", StaffUser)).Aggregate;
+                Household = Household.Decide(a => a.RecordHousingCounseling("CERT-001", new DateOnly(2026, 6, 2), "Counseling Org", new DateOnly(2026, 6, 10), StaffUser)).Aggregate;
             if (orientation)
-                Household = Household.Decide(a => a.RecordCltOrientation(new DateOnly(2026, 6, 3), StaffUser)).Aggregate;
+                Household = Household.Decide(a => a.RecordCltOrientation(new DateOnly(2026, 6, 3), new DateOnly(2026, 6, 10), StaffUser)).Aggregate;
             Household = Household.Decide(a => a.RecordMortgagePrequalification("Lender", 210000m, prequalificationExpiry ?? new DateOnly(2027, 1, 1), StaffUser)).Aggregate;
             return this;
         }
