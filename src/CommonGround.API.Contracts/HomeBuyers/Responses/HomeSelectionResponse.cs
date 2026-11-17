@@ -39,6 +39,7 @@ public sealed record HomeSelectionResponse(
 /// current primary contact and whether its application can still be selected today.
 /// <see cref="IncomeLimit"/> is the home's limit for the household's size, null when the home has none;
 /// a candidate with <see cref="IsOverIncomeLimit"/> can't be selected.
+/// <see cref="PrequalifiedAmount"/> is the approved amount of the household's current mortgage prequalification, null when it has none.
 /// </summary>
 public sealed record HomeSelectionCandidateDto(
     string ApplicationId,
@@ -51,4 +52,5 @@ public sealed record HomeSelectionCandidateDto(
     decimal? IncomeLimit,
     bool IsOverIncomeLimit,
     string ApplicationPhase,
-    bool CanBeSelected);
+    bool CanBeSelected,
+    decimal? PrequalifiedAmount);

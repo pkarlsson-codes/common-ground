@@ -4,6 +4,7 @@ import { formatStepDate } from '../../lib/lifecycle'
 import type { HomeSelectionCandidateDto, HomeSelectionResponse } from '../../api'
 import NavIdLink from '../../components/NavIdLink'
 import StatusBadge from '../../components/StatusBadge'
+import { useHome } from '../../hooks/homes'
 import { selectionPriorityLabel, useHomeSelection } from '../../hooks/homeSelections'
 import { formatCalendarDate, formatInstant, numericDate, type CalendarDate } from '../../lib/calendarDate'
 import { getResponseStatus } from '../../lib/getErrorMessage'
@@ -156,6 +157,9 @@ function CandidateOutcome({ selection, candidate }: { selection: HomeSelectionRe
 export default function HomeSelectionPage() {
   const { selectionId = '' } = useParams()
   const { data: selection, isLoading, isError, error, refetch } = useHomeSelection(selectionId)
+  const { data: home } = useHome(selection?.homeId ?? null)
+  // Undefined while loading, null when the home has no assessment on record.
+  const assessedValue = home ? (home.assessedValue ? Number(home.assessedValue) : null) : undefined
   const [tied, setTied] = useState<string[]>([])
   const [actionPanel, setActionPanel] = useState<ActionPanel>(null)
 
@@ -301,6 +305,7 @@ export default function HomeSelectionPage() {
         <SelectByPriorityPanel
           selectionId={selectionId}
           candidate={actionPanel.candidate}
+          assessedValue={assessedValue}
           onClose={() => setActionPanel(null)}
         />
       )}
@@ -310,6 +315,7 @@ export default function HomeSelectionPage() {
           selectionId={selectionId}
           tiedApplicationIds={tied.length >= 2 ? tied : null}
           candidateCount={candidates.length}
+          assessedValue={assessedValue}
           onClose={() => setActionPanel(null)}
         />
       )}

@@ -11,10 +11,11 @@ import { emptyPurchaseTerms, purchaseTermsComplete, type PurchaseTerms } from '.
 type Props = {
   selectionId: string
   candidate: HomeSelectionCandidateDto
+  assessedValue: number | null | undefined
   onClose: () => void
 }
 
-export default function SelectByPriorityPanel({ selectionId, candidate, onClose }: Props) {
+export default function SelectByPriorityPanel({ selectionId, candidate, assessedValue, onClose }: Props) {
   const [priorities, setPriorities] = useState<string[]>([])
   const [reason, setReason] = useState('')
   const [terms, setTerms] = useState<PurchaseTerms>(emptyPurchaseTerms)
@@ -92,7 +93,12 @@ export default function SelectByPriorityPanel({ selectionId, candidate, onClose 
               required
             />
           </div>
-          <PurchaseTermsFields value={terms} onChange={setTerms} />
+          <PurchaseTermsFields
+            value={terms}
+            onChange={setTerms}
+            assessedValue={assessedValue}
+            prequalifiedAmount={candidate.prequalifiedAmount ?? null}
+          />
         </div>
 
         <ApiProblemAlert problem={problem} />

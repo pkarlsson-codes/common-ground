@@ -15839,7 +15839,7 @@
       },
       "HomeSelectionCandidateDto": {
         "type": "object",
-        "description": "A candidate's priority facts as they stood when the selection started, with its household's\ncurrent primary contact and whether its application can still be selected today.\nIncomeLimit is the home's limit for the household's size, null when the home has none;\na candidate with IsOverIncomeLimit can't be selected.",
+        "description": "A candidate's priority facts as they stood when the selection started, with its household's\ncurrent primary contact and whether its application can still be selected today.\nIncomeLimit is the home's limit for the household's size, null when the home has none;\na candidate with IsOverIncomeLimit can't be selected.\nPrequalifiedAmount is the approved amount of the household's current mortgage prequalification, null when it has none.",
         "additionalProperties": false,
         "properties": {
           "applicationId": {
@@ -15884,6 +15884,11 @@
           },
           "canBeSelected": {
             "type": "boolean"
+          },
+          "prequalifiedAmount": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
           }
         }
       },

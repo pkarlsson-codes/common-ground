@@ -12,10 +12,11 @@ type Props = {
   /** The candidates staff marked as tied, or null to draw from every candidate. */
   tiedApplicationIds: string[] | null
   candidateCount: number
+  assessedValue: number | null | undefined
   onClose: () => void
 }
 
-export default function DrawLotteryPanel({ selectionId, tiedApplicationIds, candidateCount, onClose }: Props) {
+export default function DrawLotteryPanel({ selectionId, tiedApplicationIds, candidateCount, assessedValue, onClose }: Props) {
   const [terms, setTerms] = useState<PurchaseTerms>(emptyPurchaseTerms)
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   const mutation = useDrawSelectionLottery()
@@ -71,7 +72,7 @@ export default function DrawLotteryPanel({ selectionId, tiedApplicationIds, cand
           draw can be checked.
         </div>
         <div className="form-grid">
-          <PurchaseTermsFields value={terms} onChange={setTerms} />
+          <PurchaseTermsFields value={terms} onChange={setTerms} assessedValue={assessedValue} />
         </div>
 
         <ApiProblemAlert problem={problem} />

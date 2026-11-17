@@ -87,10 +87,12 @@ public class HomeSelectionTests(ApiFactory factory)
             WaitingSince = new DateOnly(2026, 3, 1),
             ApplicationPhase = "Approved",
             CanBeSelected = true,
+            PrequalifiedAmount = (decimal?)210000m,
         });
         candidates[earlier.ApplicationId].PrimaryContact!.Email.Should().Be(earlier.Email);
         candidates[later.ApplicationId].AnnualIncome.Should().Be(52000m);
         candidates[notReady.ApplicationId].CanBeSelected.Should().BeFalse();
+        candidates[notReady.ApplicationId].PrequalifiedAmount.Should().BeNull();
 
         var summaries = await GetSelectionsForHomeAsync(client, homeId);
         summaries.Should().ContainSingle().Which.Should().BeEquivalentTo(new

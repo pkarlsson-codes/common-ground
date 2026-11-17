@@ -34,6 +34,7 @@ import {
  * current primary contact and whether its application can still be selected today.
  * IncomeLimit is the home's limit for the household's size, null when the home has none;
  * a candidate with IsOverIncomeLimit can't be selected.
+ * PrequalifiedAmount is the approved amount of the household's current mortgage prequalification, null when it has none.
  * @export
  * @interface HomeSelectionCandidateDto
  */
@@ -104,6 +105,12 @@ export interface HomeSelectionCandidateDto {
      * @memberof HomeSelectionCandidateDto
      */
     canBeSelected?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof HomeSelectionCandidateDto
+     */
+    prequalifiedAmount?: number | null;
 }
 
 /**
@@ -134,6 +141,7 @@ export function HomeSelectionCandidateDtoFromJSONTyped(json: any, ignoreDiscrimi
         'isOverIncomeLimit': json['isOverIncomeLimit'] == null ? undefined : json['isOverIncomeLimit'],
         'applicationPhase': json['applicationPhase'] == null ? undefined : json['applicationPhase'],
         'canBeSelected': json['canBeSelected'] == null ? undefined : json['canBeSelected'],
+        'prequalifiedAmount': json['prequalifiedAmount'] == null ? undefined : json['prequalifiedAmount'],
     };
 }
 
@@ -159,6 +167,7 @@ export function HomeSelectionCandidateDtoToJSONTyped(value?: HomeSelectionCandid
         'isOverIncomeLimit': value['isOverIncomeLimit'],
         'applicationPhase': value['applicationPhase'],
         'canBeSelected': value['canBeSelected'],
+        'prequalifiedAmount': value['prequalifiedAmount'],
     };
 }
 

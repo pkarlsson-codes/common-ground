@@ -40,6 +40,13 @@ public static class GetHomeSelectionHandler
             .ConfigureAwait(false);
         var householdsById = households.ToDictionary(h => h.Id);
 
+        var prequalifications = await session
+            .LoadManyAsync<HouseholdView>(cancellationToken, selection.Candidates.Select(c => c.HouseholdId).Distinct())
+            .ConfigureAwait(false);
+        var prequalifiedAmountsByHousehold = prequalifications
+            .Where(h => h.MortgagePrequalification is not null)
+            .ToDictionary(h => h.Id, h => h.MortgagePrequalification!.ApprovedAmount);
+
         var today = await trustClock.TodayAsync(session.TenantId, cancellationToken).ConfigureAwait(false);
 
         return new HomeSelectionDetails(
@@ -55,7 +62,8 @@ public static class GetHomeSelectionHandler
                     phase,
                     !c.IsOverIncomeLimit
                         && phase == ApplicationPhase.Approved.DisplayName
-                        && (household?.IsReadyForSelectionOn(today) ?? false));
+                        && (household?.IsReadyForSelectionOn(today) ?? false),
+                    prequalifiedAmountsByHousehold.TryGetValue(c.HouseholdId, out var amount) ? amount : null);
             })]);
     }
 }
