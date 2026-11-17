@@ -292,6 +292,27 @@ public static class BusinessRuleViolation
                     });
         }
 
+        public static class GuardDate
+        {
+            public static BusinessRuleViolationException InFuture(DateOnly date, DateOnly today)
+                => new(
+                    "stewardship.foreclosure_prevention_case.guard_date.in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["date"] = date,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException BeforeCaseOpened(DateOnly date, DateOnly openedDate)
+                => new(
+                    "stewardship.foreclosure_prevention_case.guard_date.before_case_opened",
+                    new Dictionary<string, object?>
+                    {
+                        ["date"] = date,
+                        ["openedDate"] = openedDate,
+                    });
+        }
+
         public static class FindReferral
         {
             public static BusinessRuleViolationException NotFound(Guid id)

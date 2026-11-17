@@ -12,6 +12,7 @@ public class ForeclosurePreventionCaseTests
     private static readonly UserId Staff = UserId.Generate();
     private static readonly string GroundLeaseIdValue = "groundlease-01JRGV0000000000000000000A";
     private static readonly DateOnly Today = new(2026, 4, 24);
+    private static readonly DateOnly Now = Today.AddDays(90);
 
     private static ForeclosurePreventionCase OpenCase(
         ForeclosurePreventionTrigger trigger = ForeclosurePreventionTrigger.LeaseFeeArrears) =>
@@ -41,7 +42,7 @@ public class ForeclosurePreventionCaseTests
     public void RecordServicerDelinquency_OpenedCase_RecordsFactWithoutAdvancing()
     {
         var fpc = OpenCase();
-        var (decided, events) = fpc.Decide(a => a.RecordServicerDelinquency("First National Bank", 3, Today, Staff));
+        var (decided, events) = fpc.Decide(a => a.RecordServicerDelinquency("First National Bank", 3, Today, Now, Staff));
         fpc = decided;
 
         fpc.Status.Should().Be(ForeclosurePreventionCaseStatus.Opened);
@@ -55,7 +56,7 @@ public class ForeclosurePreventionCaseTests
     {
         var fpc = OpenCase();
 
-        var act = () => fpc.RecordServicerDelinquency("First National Bank", months, Today, Staff);
+        var act = () => fpc.RecordServicerDelinquency("First National Bank", months, Today, Now, Staff);
 
         act.Should().Throw<BusinessRuleViolationException>();
     }
@@ -64,7 +65,7 @@ public class ForeclosurePreventionCaseTests
     public void MakeCounselingReferral_FromOpened_AdvancesToActive()
     {
         var fpc = OpenCase();
-        fpc = fpc.Decide(a => a.MakeCounselingReferral("Housing Counselors Inc", Today, Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.MakeCounselingReferral("Housing Counselors Inc", Today, Now, Staff)).Aggregate;
 
         fpc.Status.Should().Be(ForeclosurePreventionCaseStatus.Active);
         fpc.CounselingReferrals.Should().ContainSingle();
@@ -75,8 +76,8 @@ public class ForeclosurePreventionCaseTests
     public void MakeCounselingReferral_FromActive_StaysActive()
     {
         var fpc = OpenCase();
-        fpc = fpc.Decide(a => a.MakeCounselingReferral("Agency One", Today, Staff)).Aggregate;
-        fpc = fpc.Decide(a => a.MakeCounselingReferral("Agency Two", Today, Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.MakeCounselingReferral("Agency One", Today, Now, Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.MakeCounselingReferral("Agency Two", Today, Now, Staff)).Aggregate;
 
         fpc.Status.Should().Be(ForeclosurePreventionCaseStatus.Active);
         fpc.CounselingReferrals.Should().HaveCount(2);
@@ -86,10 +87,10 @@ public class ForeclosurePreventionCaseTests
     public void RecordCounselingOutcome_WhenReferralExists_RecordsOutcome()
     {
         var fpc = OpenCase();
-        fpc = fpc.Decide(a => a.MakeCounselingReferral("Housing Counselors Inc", Today, Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.MakeCounselingReferral("Housing Counselors Inc", Today, Now, Staff)).Aggregate;
         var referralId = fpc.CounselingReferrals[0].Id;
 
-        fpc = fpc.Decide(a => a.RecordCounselingOutcome(referralId, "Counseling completed successfully", Today.AddDays(30), Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.RecordCounselingOutcome(referralId, "Counseling completed successfully", Today.AddDays(30), Now, Staff)).Aggregate;
 
         fpc.CounselingReferrals[0].Outcome.Should().Be("Counseling completed successfully");
         fpc.CounselingReferrals[0].OutcomeDate.Should().Be(Today.AddDays(30));
@@ -99,9 +100,9 @@ public class ForeclosurePreventionCaseTests
     public void RecordCounselingOutcome_WhenReferralNotFound_Throws()
     {
         var fpc = OpenCase();
-        fpc = fpc.Decide(a => a.MakeCounselingReferral("Agency", Today, Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.MakeCounselingReferral("Agency", Today, Now, Staff)).Aggregate;
 
-        var act = () => fpc.RecordCounselingOutcome(Guid.NewGuid(), "Outcome", Today, Staff);
+        var act = () => fpc.RecordCounselingOutcome(Guid.NewGuid(), "Outcome", Today, Now, Staff);
         act.Should().Throw<BusinessRuleViolationException>();
     }
 
@@ -109,7 +110,7 @@ public class ForeclosurePreventionCaseTests
     public void RequestForbearance_FromOpened_AdvancesToActive()
     {
         var fpc = OpenCase();
-        fpc = fpc.Decide(a => a.RequestForbearance("First National Bank", Today, Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.RequestForbearance("First National Bank", Today, Now, Staff)).Aggregate;
 
         fpc.Status.Should().Be(ForeclosurePreventionCaseStatus.Active);
         fpc.ForbearanceRequests.Should().ContainSingle();
@@ -120,10 +121,10 @@ public class ForeclosurePreventionCaseTests
     public void RecordForbearanceOutcome_Granted_RecordsOutcome()
     {
         var fpc = OpenCase();
-        fpc = fpc.Decide(a => a.RequestForbearance("Bank", Today, Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.RequestForbearance("Bank", Today, Now, Staff)).Aggregate;
         var requestId = fpc.ForbearanceRequests[0].Id;
 
-        fpc = fpc.Decide(a => a.RecordForbearanceOutcome(requestId, ForbearanceOutcome.Granted, Today.AddDays(14), "6-month agreement", Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.RecordForbearanceOutcome(requestId, ForbearanceOutcome.Granted, Today.AddDays(14), "6-month agreement", Now, Staff)).Aggregate;
 
         fpc.ForbearanceRequests[0].Outcome.Should().Be(ForbearanceOutcome.Granted);
         fpc.ForbearanceRequests[0].Notes.Should().Be("6-month agreement");
@@ -133,10 +134,10 @@ public class ForeclosurePreventionCaseTests
     public void RecordForbearanceOutcome_Denied_RecordsOutcome()
     {
         var fpc = OpenCase();
-        fpc = fpc.Decide(a => a.RequestForbearance("Bank", Today, Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.RequestForbearance("Bank", Today, Now, Staff)).Aggregate;
         var requestId = fpc.ForbearanceRequests[0].Id;
 
-        fpc = fpc.Decide(a => a.RecordForbearanceOutcome(requestId, ForbearanceOutcome.Denied, Today.AddDays(7), null, Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.RecordForbearanceOutcome(requestId, ForbearanceOutcome.Denied, Today.AddDays(7), null, Now, Staff)).Aggregate;
 
         fpc.ForbearanceRequests[0].Outcome.Should().Be(ForbearanceOutcome.Denied);
     }
@@ -145,7 +146,7 @@ public class ForeclosurePreventionCaseTests
     public void ActivateCurePeriod_FromOpened_AdvancesToActive()
     {
         var fpc = OpenCase();
-        fpc = fpc.Decide(a => a.ActivateCurePeriod("lra-001", Today, 90, Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.ActivateCurePeriod("lra-001", Today, 90, Now, Staff)).Aggregate;
 
         fpc.Status.Should().Be(ForeclosurePreventionCaseStatus.Active);
         fpc.CurePeriodActivations.Should().ContainSingle();
@@ -158,9 +159,9 @@ public class ForeclosurePreventionCaseTests
     public void Resolve_WhenActive_TransitionsToResolved()
     {
         var fpc = OpenCase();
-        fpc = fpc.Decide(a => a.MakeCounselingReferral("Agency", Today, Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.MakeCounselingReferral("Agency", Today, Now, Staff)).Aggregate;
 
-        var (decided, events) = fpc.Decide(a => a.Resolve(ForeclosurePreventionOutcome.InterventionSuccessful, Today.AddDays(60), Staff));
+        var (decided, events) = fpc.Decide(a => a.Resolve(ForeclosurePreventionOutcome.InterventionSuccessful, Today.AddDays(60), Now, Staff));
         fpc = decided;
 
         fpc.Status.Should().Be(ForeclosurePreventionCaseStatus.Resolved);
@@ -174,7 +175,7 @@ public class ForeclosurePreventionCaseTests
     {
         var fpc = OpenCase();
 
-        var act = () => fpc.Resolve(ForeclosurePreventionOutcome.InterventionSuccessful, Today, Staff);
+        var act = () => fpc.Resolve(ForeclosurePreventionOutcome.InterventionSuccessful, Today, Now, Staff);
         act.Should().Throw<BusinessRuleViolationException>();
     }
 
@@ -182,10 +183,10 @@ public class ForeclosurePreventionCaseTests
     public void Resolve_WhenAlreadyResolved_Throws()
     {
         var fpc = OpenCase();
-        fpc = fpc.Decide(a => a.MakeCounselingReferral("Agency", Today, Staff)).Aggregate;
-        fpc = fpc.Decide(a => a.Resolve(ForeclosurePreventionOutcome.InterventionSuccessful, Today, Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.MakeCounselingReferral("Agency", Today, Now, Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.Resolve(ForeclosurePreventionOutcome.InterventionSuccessful, Today, Now, Staff)).Aggregate;
 
-        var act = () => fpc.Resolve(ForeclosurePreventionOutcome.HomeownerSold, Today, Staff);
+        var act = () => fpc.Resolve(ForeclosurePreventionOutcome.HomeownerSold, Today, Now, Staff);
         act.Should().Throw<BusinessRuleViolationException>();
     }
 
@@ -193,16 +194,16 @@ public class ForeclosurePreventionCaseTests
     public void AnyIntervention_AfterResolved_Throws()
     {
         var fpc = OpenCase();
-        fpc = fpc.Decide(a => a.MakeCounselingReferral("Agency", Today, Staff)).Aggregate;
-        fpc = fpc.Decide(a => a.Resolve(ForeclosurePreventionOutcome.InterventionSuccessful, Today, Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.MakeCounselingReferral("Agency", Today, Now, Staff)).Aggregate;
+        fpc = fpc.Decide(a => a.Resolve(ForeclosurePreventionOutcome.InterventionSuccessful, Today, Now, Staff)).Aggregate;
 
-        ((Action)(() => fpc.MakeCounselingReferral("Agency2", Today, Staff)))
+        ((Action)(() => fpc.MakeCounselingReferral("Agency2", Today, Now, Staff)))
             .Should().Throw<BusinessRuleViolationException>();
-        ((Action)(() => fpc.RequestForbearance("Bank", Today, Staff)))
+        ((Action)(() => fpc.RequestForbearance("Bank", Today, Now, Staff)))
             .Should().Throw<BusinessRuleViolationException>();
-        ((Action)(() => fpc.ActivateCurePeriod("lra-002", Today, 90, Staff)))
+        ((Action)(() => fpc.ActivateCurePeriod("lra-002", Today, 90, Now, Staff)))
             .Should().Throw<BusinessRuleViolationException>();
-        ((Action)(() => fpc.RecordServicerDelinquency("Bank", 3, Today, Staff)))
+        ((Action)(() => fpc.RecordServicerDelinquency("Bank", 3, Today, Now, Staff)))
             .Should().Throw<BusinessRuleViolationException>();
     }
 
@@ -277,6 +278,57 @@ public class ForeclosurePreventionCaseTests
 
             act.Should().Throw<BusinessRuleViolationException>()
                 .Which.Code.Should().Be("stewardship.foreclosure_prevention_case.open.case_already_open");
+        }
+    }
+    public class TheDateChecks
+    {
+        private static ForeclosurePreventionCase ActiveCase()
+        {
+            var fpc = OpenCase();
+            return fpc.Decide(a => a.MakeCounselingReferral("Agency", Today, Now, Staff)).Aggregate;
+        }
+
+        public static TheoryData<string, Func<ForeclosurePreventionCase, DateOnly, object>> Commands => new()
+        {
+            { "servicer delinquency", (f, d) => f.RecordServicerDelinquency("Bank", 3, d, Now, Staff) },
+            { "counseling referral", (f, d) => f.MakeCounselingReferral("Agency", d, Now, Staff) },
+            { "forbearance request", (f, d) => f.RequestForbearance("Bank", d, Now, Staff) },
+            { "cure period", (f, d) => f.ActivateCurePeriod("lra-1", d, 90, Now, Staff) },
+            { "resolve", (f, d) => f.Resolve(ForeclosurePreventionOutcome.InterventionSuccessful, d, Now, Staff) },
+        };
+
+        [Theory]
+        [MemberData(nameof(Commands))]
+        public void ADateAfterTodayIsRejected(string name, Func<ForeclosurePreventionCase, DateOnly, object> command)
+        {
+            var fpc = ActiveCase();
+
+            var act = () => command(fpc, Now.AddDays(1));
+
+            act.Should().Throw<BusinessRuleViolationException>(name)
+                .Which.Code.Should().Be("stewardship.foreclosure_prevention_case.guard_date.in_future");
+        }
+
+        [Theory]
+        [MemberData(nameof(Commands))]
+        public void ADateBeforeTheCaseOpenedIsRejected(string name, Func<ForeclosurePreventionCase, DateOnly, object> command)
+        {
+            var fpc = ActiveCase();
+
+            var act = () => command(fpc, Today.AddDays(-1));
+
+            act.Should().Throw<BusinessRuleViolationException>(name)
+                .Which.Code.Should().Be("stewardship.foreclosure_prevention_case.guard_date.before_case_opened");
+        }
+
+        [Theory]
+        [MemberData(nameof(Commands))]
+        public void TodayAndTheOpenedDateAreAccepted(string name, Func<ForeclosurePreventionCase, DateOnly, object> command)
+        {
+            var fpc = ActiveCase();
+
+            command(fpc, Now).Should().NotBeNull(name);
+            command(fpc, Today).Should().NotBeNull(name);
         }
     }
 }

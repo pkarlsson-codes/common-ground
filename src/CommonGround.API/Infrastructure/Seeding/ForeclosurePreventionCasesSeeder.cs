@@ -158,7 +158,7 @@ public sealed class ForeclosurePreventionCasesSeeder(ITrustClock trustClock, Pro
         {
             var on = delinquency.Date.Resolve(today);
             delinquencies.Add((on, stream => stream.Decide(fpc =>
-                fpc.RecordServicerDelinquency(delinquency.ServicerName, delinquency.DelinquentMonths, on, SeederUserId))));
+                fpc.RecordServicerDelinquency(delinquency.ServicerName, delinquency.DelinquentMonths, on, today, SeederUserId))));
         }
 
         AddInOrder(actions, delinquencies, entry, "servicer delinquencies");
@@ -172,7 +172,7 @@ public sealed class ForeclosurePreventionCasesSeeder(ITrustClock trustClock, Pro
             [
                 (referredOn, stream => stream.Decide(fpc =>
                 {
-                    var made = fpc.MakeCounselingReferral(referral.AgencyName, referredOn, SeederUserId);
+                    var made = fpc.MakeCounselingReferral(referral.AgencyName, referredOn, today, SeederUserId);
                     id = made.ReferralId;
                     return made;
                 })),
@@ -181,7 +181,7 @@ public sealed class ForeclosurePreventionCasesSeeder(ITrustClock trustClock, Pro
             if (referral.Outcome is { } outcome)
             {
                 var on = outcome.Date.Resolve(today);
-                steps.Add((on, stream => stream.Decide(fpc => fpc.RecordCounselingOutcome(id, outcome.Outcome, on, SeederUserId))));
+                steps.Add((on, stream => stream.Decide(fpc => fpc.RecordCounselingOutcome(id, outcome.Outcome, on, today, SeederUserId))));
             }
 
             AddInOrder(actions, steps, entry, $"referral to {referral.AgencyName} on {referredOn}");
@@ -195,7 +195,7 @@ public sealed class ForeclosurePreventionCasesSeeder(ITrustClock trustClock, Pro
             [
                 (requestedOn, stream => stream.Decide(fpc =>
                 {
-                    var requested = fpc.RequestForbearance(request.LenderName, requestedOn, SeederUserId);
+                    var requested = fpc.RequestForbearance(request.LenderName, requestedOn, today, SeederUserId);
                     id = requested.RequestId;
                     return requested;
                 })),
@@ -205,7 +205,7 @@ public sealed class ForeclosurePreventionCasesSeeder(ITrustClock trustClock, Pro
             {
                 var on = outcome.Date.Resolve(today);
                 var decision = ForbearanceOutcome.FromDisplayName(outcome.Outcome);
-                steps.Add((on, stream => stream.Decide(fpc => fpc.RecordForbearanceOutcome(id, decision, on, outcome.Notes, SeederUserId))));
+                steps.Add((on, stream => stream.Decide(fpc => fpc.RecordForbearanceOutcome(id, decision, on, outcome.Notes, today, SeederUserId))));
             }
 
             AddInOrder(actions, steps, entry, $"forbearance request to {request.LenderName} on {requestedOn}");
@@ -214,7 +214,7 @@ public sealed class ForeclosurePreventionCasesSeeder(ITrustClock trustClock, Pro
         foreach (var curePeriod in entry.CurePeriods)
         {
             var on = curePeriod.Date.Resolve(today);
-            actions.Add((on, stream => stream.Decide(fpc => fpc.ActivateCurePeriod(curePeriod.LraId, on, curePeriod.CurePeriodDays, SeederUserId))));
+            actions.Add((on, stream => stream.Decide(fpc => fpc.ActivateCurePeriod(curePeriod.LraId, on, curePeriod.CurePeriodDays, today, SeederUserId))));
         }
 
         if (entry.Resolved is { } resolved)
@@ -227,7 +227,7 @@ public sealed class ForeclosurePreventionCasesSeeder(ITrustClock trustClock, Pro
             }
 
             var outcome = Enum.Parse<ForeclosurePreventionOutcome>(resolved.Outcome);
-            actions.Add((on, stream => stream.Decide(fpc => fpc.Resolve(outcome, on, SeederUserId))));
+            actions.Add((on, stream => stream.Decide(fpc => fpc.Resolve(outcome, on, today, SeederUserId))));
         }
 
         return actions;

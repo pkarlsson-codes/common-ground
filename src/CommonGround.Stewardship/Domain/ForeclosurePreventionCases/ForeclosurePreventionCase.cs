@@ -116,9 +116,10 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
 
     /// <summary>Records a servicer delinquency without advancing the case to Active.</summary>
     public ServicerDelinquencyRecorded RecordServicerDelinquency(
-        string servicerName, int delinquentMonths, DateOnly recordedDate, UserId recordedBy)
+        string servicerName, int delinquentMonths, DateOnly recordedDate, DateOnly today, UserId recordedBy)
     {
         GuardNotResolved();
+        GuardDate(recordedDate, today);
         if (string.IsNullOrWhiteSpace(servicerName))
             throw BusinessRuleViolation.ForeclosurePreventionCase.RecordServicerDelinquency.ServicerNameRequired();
         if (delinquentMonths <= 0)
@@ -131,9 +132,10 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
 
     /// <summary>Makes a housing counseling referral, advancing the case to Active if still Opened.</summary>
     public CounselingReferralMade MakeCounselingReferral(
-        string agencyName, DateOnly referralDate, UserId referredBy)
+        string agencyName, DateOnly referralDate, DateOnly today, UserId referredBy)
     {
         GuardNotResolved();
+        GuardDate(referralDate, today);
         if (string.IsNullOrWhiteSpace(agencyName))
             throw BusinessRuleViolation.ForeclosurePreventionCase.MakeCounselingReferral.AgencyNameRequired();
 
@@ -144,9 +146,10 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
 
     /// <summary>Records the outcome of a counseling referral.</summary>
     public CounselingOutcomeRecorded RecordCounselingOutcome(
-        Guid referralId, string outcome, DateOnly outcomeDate, UserId recordedBy)
+        Guid referralId, string outcome, DateOnly outcomeDate, DateOnly today, UserId recordedBy)
     {
         GuardActive();
+        GuardDate(outcomeDate, today);
         if (string.IsNullOrWhiteSpace(outcome))
             throw BusinessRuleViolation.ForeclosurePreventionCase.RecordCounselingOutcome.OutcomeRequired();
         var referral = FindReferral(referralId);
@@ -159,9 +162,10 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
 
     /// <summary>Submits a forbearance request to a lender, advancing the case to Active if still Opened.</summary>
     public ForbearanceRequested RequestForbearance(
-        string lenderName, DateOnly requestedDate, UserId requestedBy)
+        string lenderName, DateOnly requestedDate, DateOnly today, UserId requestedBy)
     {
         GuardNotResolved();
+        GuardDate(requestedDate, today);
         if (string.IsNullOrWhiteSpace(lenderName))
             throw BusinessRuleViolation.ForeclosurePreventionCase.RequestForbearance.LenderNameRequired();
 
@@ -173,9 +177,10 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     /// <summary>Records the lender's decision on a forbearance request.</summary>
     public ForbearanceOutcomeRecorded RecordForbearanceOutcome(
         Guid requestId, ForbearanceOutcome outcome, DateOnly outcomeDate,
-        string? notes, UserId recordedBy)
+        string? notes, DateOnly today, UserId recordedBy)
     {
         GuardActive();
+        GuardDate(outcomeDate, today);
         var request = FindForbearanceRequest(requestId);
         _ = request;
 
@@ -186,9 +191,10 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
 
     /// <summary>Activates a CLT cure period under a lender recognition agreement, advancing the case to Active if still Opened.</summary>
     public CurePeriodActivated ActivateCurePeriod(
-        string lraId, DateOnly activationDate, int curePeriodDays, UserId activatedBy)
+        string lraId, DateOnly activationDate, int curePeriodDays, DateOnly today, UserId activatedBy)
     {
         GuardNotResolved();
+        GuardDate(activationDate, today);
         if (string.IsNullOrWhiteSpace(lraId))
             throw BusinessRuleViolation.ForeclosurePreventionCase.ActivateCurePeriod.LraIdRequired();
         if (curePeriodDays <= 0)
@@ -201,10 +207,11 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     }
 
     /// <summary>Resolves the case with the given outcome.</summary>
-    public ForeclosurePreventionCaseResolved Resolve(ForeclosurePreventionOutcome outcome, DateOnly resolvedDate, UserId resolvedBy)
+    public ForeclosurePreventionCaseResolved Resolve(ForeclosurePreventionOutcome outcome, DateOnly resolvedDate, DateOnly today, UserId resolvedBy)
     {
         if (Status != ForeclosurePreventionCaseStatus.Active)
             throw BusinessRuleViolation.ForeclosurePreventionCase.Resolve.InvalidStatus(Status);
+        GuardDate(resolvedDate, today);
 
         return new ForeclosurePreventionCaseResolved(
             Id.Value, outcome, resolvedDate,
@@ -314,6 +321,14 @@ public sealed class ForeclosurePreventionCase : AggregateRoot<ForeclosurePrevent
     {
         if (Status != ForeclosurePreventionCaseStatus.Active)
             throw BusinessRuleViolation.ForeclosurePreventionCase.GuardActive.InvalidStatus(Status);
+    }
+
+    private void GuardDate(DateOnly date, DateOnly today)
+    {
+        if (date > today)
+            throw BusinessRuleViolation.ForeclosurePreventionCase.GuardDate.InFuture(date, today);
+        if (date < OpenedDate)
+            throw BusinessRuleViolation.ForeclosurePreventionCase.GuardDate.BeforeCaseOpened(date, OpenedDate);
     }
 
     private CounselingReferral FindReferral(Guid id) =>

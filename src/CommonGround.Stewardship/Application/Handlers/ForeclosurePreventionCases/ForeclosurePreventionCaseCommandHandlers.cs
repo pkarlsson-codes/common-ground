@@ -4,6 +4,7 @@ using CommonGround.Stewardship.Application.Queries;
 using CommonGround.Stewardship.Domain.ForeclosurePreventionCases;
 using CommonGround.Stewardship.Domain.ForeclosurePreventionCases.Events;
 using CommonGround.Stewardship.Infrastructure.Persistence;
+using CommonGround.SharedKernel.Domain.Services;
 using Marten;
 using Wolverine.Marten;
 
@@ -41,15 +42,19 @@ public static class OpenForeclosurePreventionCaseHandler
         return UnresolvedForeclosurePreventionCase.FindAsync(session, cmd.GroundLeaseId, ct);
     }
 
-    public static IStartStream Handle(OpenForeclosurePreventionCaseCommand cmd, UnresolvedForeclosurePreventionCase unresolved)
+    public static async Task<IStartStream> Handle(OpenForeclosurePreventionCaseCommand cmd, UnresolvedForeclosurePreventionCase unresolved, IDocumentSession session, ITrustClock trustClock, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(cmd);
         ArgumentNullException.ThrowIfNull(unresolved);
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(trustClock);
+
+        var today = await trustClock.TodayAsync(session.TenantId, ct).ConfigureAwait(false);
 
         var opened = ForeclosurePreventionCase.Open(
             cmd.ForeclosurePreventionCaseId, cmd.GroundLeaseId, ForeclosurePreventionTrigger.ServicerDelinquency, cmd.RecordedDate, unresolved.Id, cmd.RecordedBy);
         var delinquency = ForeclosurePreventionCase.Create(opened)
-            .RecordServicerDelinquency(cmd.ServicerName, cmd.DelinquentMonths, cmd.RecordedDate, cmd.RecordedBy);
+            .RecordServicerDelinquency(cmd.ServicerName, cmd.DelinquentMonths, cmd.RecordedDate, today, cmd.RecordedBy);
 
         return MartenOps.StartStream<ForeclosurePreventionCase>(cmd.ForeclosurePreventionCaseId.Value, opened, delinquency);
     }
@@ -80,83 +85,104 @@ public static class OpenForeclosurePreventionCaseForLeaseDefaultHandler
 /// <summary>Handles <see cref="RecordServicerDelinquencyCommand"/>.</summary>
 public static class RecordServicerDelinquencyHandler
 {
-    public static ServicerDelinquencyRecorded Handle(RecordServicerDelinquencyCommand cmd, [WriteAggregate] ForeclosurePreventionCase fpc)
+    public static async Task<ServicerDelinquencyRecorded> Handle(RecordServicerDelinquencyCommand cmd, [WriteAggregate] ForeclosurePreventionCase fpc, IDocumentSession session, ITrustClock trustClock, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(cmd);
         ArgumentNullException.ThrowIfNull(fpc);
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(trustClock);
 
-        return fpc.RecordServicerDelinquency(cmd.ServicerName, cmd.DelinquentMonths, cmd.RecordedDate, cmd.RecordedBy);
+        var today = await trustClock.TodayAsync(session.TenantId, ct).ConfigureAwait(false);
+        return fpc.RecordServicerDelinquency(cmd.ServicerName, cmd.DelinquentMonths, cmd.RecordedDate, today, cmd.RecordedBy);
     }
 }
 
 /// <summary>Handles <see cref="MakeCounselingReferralCommand"/>.</summary>
 public static class MakeCounselingReferralHandler
 {
-    public static CounselingReferralMade Handle(MakeCounselingReferralCommand cmd, [WriteAggregate] ForeclosurePreventionCase fpc)
+    public static async Task<CounselingReferralMade> Handle(MakeCounselingReferralCommand cmd, [WriteAggregate] ForeclosurePreventionCase fpc, IDocumentSession session, ITrustClock trustClock, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(cmd);
         ArgumentNullException.ThrowIfNull(fpc);
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(trustClock);
 
-        return fpc.MakeCounselingReferral(cmd.AgencyName, cmd.ReferralDate, cmd.ReferredBy);
+        var today = await trustClock.TodayAsync(session.TenantId, ct).ConfigureAwait(false);
+        return fpc.MakeCounselingReferral(cmd.AgencyName, cmd.ReferralDate, today, cmd.ReferredBy);
     }
 }
 
 /// <summary>Handles <see cref="RecordCounselingOutcomeCommand"/>.</summary>
 public static class RecordCounselingOutcomeHandler
 {
-    public static CounselingOutcomeRecorded Handle(RecordCounselingOutcomeCommand cmd, [WriteAggregate] ForeclosurePreventionCase fpc)
+    public static async Task<CounselingOutcomeRecorded> Handle(RecordCounselingOutcomeCommand cmd, [WriteAggregate] ForeclosurePreventionCase fpc, IDocumentSession session, ITrustClock trustClock, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(cmd);
         ArgumentNullException.ThrowIfNull(fpc);
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(trustClock);
 
-        return fpc.RecordCounselingOutcome(cmd.ReferralId, cmd.Outcome, cmd.OutcomeDate, cmd.RecordedBy);
+        var today = await trustClock.TodayAsync(session.TenantId, ct).ConfigureAwait(false);
+        return fpc.RecordCounselingOutcome(cmd.ReferralId, cmd.Outcome, cmd.OutcomeDate, today, cmd.RecordedBy);
     }
 }
 
 /// <summary>Handles <see cref="RequestForbearanceCommand"/>.</summary>
 public static class RequestForbearanceHandler
 {
-    public static ForbearanceRequested Handle(RequestForbearanceCommand cmd, [WriteAggregate] ForeclosurePreventionCase fpc)
+    public static async Task<ForbearanceRequested> Handle(RequestForbearanceCommand cmd, [WriteAggregate] ForeclosurePreventionCase fpc, IDocumentSession session, ITrustClock trustClock, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(cmd);
         ArgumentNullException.ThrowIfNull(fpc);
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(trustClock);
 
-        return fpc.RequestForbearance(cmd.LenderName, cmd.RequestedDate, cmd.RequestedBy);
+        var today = await trustClock.TodayAsync(session.TenantId, ct).ConfigureAwait(false);
+        return fpc.RequestForbearance(cmd.LenderName, cmd.RequestedDate, today, cmd.RequestedBy);
     }
 }
 
 /// <summary>Handles <see cref="RecordForbearanceOutcomeCommand"/>.</summary>
 public static class RecordForbearanceOutcomeHandler
 {
-    public static ForbearanceOutcomeRecorded Handle(RecordForbearanceOutcomeCommand cmd, [WriteAggregate] ForeclosurePreventionCase fpc)
+    public static async Task<ForbearanceOutcomeRecorded> Handle(RecordForbearanceOutcomeCommand cmd, [WriteAggregate] ForeclosurePreventionCase fpc, IDocumentSession session, ITrustClock trustClock, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(cmd);
         ArgumentNullException.ThrowIfNull(fpc);
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(trustClock);
 
-        return fpc.RecordForbearanceOutcome(cmd.RequestId, cmd.Outcome, cmd.OutcomeDate, cmd.Notes, cmd.RecordedBy);
+        var today = await trustClock.TodayAsync(session.TenantId, ct).ConfigureAwait(false);
+        return fpc.RecordForbearanceOutcome(cmd.RequestId, cmd.Outcome, cmd.OutcomeDate, cmd.Notes, today, cmd.RecordedBy);
     }
 }
 
 /// <summary>Handles <see cref="ActivateCurePeriodCommand"/>.</summary>
 public static class ActivateCurePeriodHandler
 {
-    public static CurePeriodActivated Handle(ActivateCurePeriodCommand cmd, [WriteAggregate] ForeclosurePreventionCase fpc)
+    public static async Task<CurePeriodActivated> Handle(ActivateCurePeriodCommand cmd, [WriteAggregate] ForeclosurePreventionCase fpc, IDocumentSession session, ITrustClock trustClock, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(cmd);
         ArgumentNullException.ThrowIfNull(fpc);
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(trustClock);
 
-        return fpc.ActivateCurePeriod(cmd.LraId, cmd.ActivationDate, cmd.CurePeriodDays, cmd.ActivatedBy);
+        var today = await trustClock.TodayAsync(session.TenantId, ct).ConfigureAwait(false);
+        return fpc.ActivateCurePeriod(cmd.LraId, cmd.ActivationDate, cmd.CurePeriodDays, today, cmd.ActivatedBy);
     }
 }
 
 /// <summary>Handles <see cref="ResolveForeclosurePreventionCaseCommand"/>.</summary>
 public static class ResolveForeclosurePreventionCaseHandler
 {
-    public static ForeclosurePreventionCaseResolved Handle(ResolveForeclosurePreventionCaseCommand cmd, [WriteAggregate] ForeclosurePreventionCase fpc)
+    public static async Task<ForeclosurePreventionCaseResolved> Handle(ResolveForeclosurePreventionCaseCommand cmd, [WriteAggregate] ForeclosurePreventionCase fpc, IDocumentSession session, ITrustClock trustClock, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(cmd);
         ArgumentNullException.ThrowIfNull(fpc);
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(trustClock);
 
-        return fpc.Resolve(cmd.Outcome, cmd.ResolvedDate, cmd.ResolvedBy);
+        var today = await trustClock.TodayAsync(session.TenantId, ct).ConfigureAwait(false);
+        return fpc.Resolve(cmd.Outcome, cmd.ResolvedDate, today, cmd.ResolvedBy);
     }
 }

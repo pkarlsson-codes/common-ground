@@ -326,6 +326,8 @@ internal static class BusinessRuleErrorMessageMap
             ["stewardship.foreclosure_prevention_case.activate_cure_period.lra_id_required"] = "LRA case identifier is required to activate cure period.",
             ["stewardship.foreclosure_prevention_case.find_forbearance_request.not_found"] = "Forbearance request was not found.",
             ["stewardship.foreclosure_prevention_case.find_referral.not_found"] = "Counseling referral was not found.",
+            ["stewardship.foreclosure_prevention_case.guard_date.in_future"] = "The date can't be in the future.",
+            ["stewardship.foreclosure_prevention_case.guard_date.before_case_opened"] = "The date can't be before the case opened.",
             ["stewardship.foreclosure_prevention_case.guard_active.invalid_status"] = "This action is not allowed for the current foreclosure prevention case status.",
             ["stewardship.foreclosure_prevention_case.guard_not_resolved.invalid_status"] = "This action requires a foreclosure prevention case that is not resolved.",
             ["stewardship.foreclosure_prevention_case.make_counseling_referral.agency_name_required"] = "Counseling agency name is required.",
