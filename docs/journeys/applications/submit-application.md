@@ -11,7 +11,8 @@ New household:
 6. User picks exactly one household member as "Primary contact"; Household Size is shown as the number of household members
 7. User enters Annual Income and optionally checks "Accessibility accommodations required"
 8. User clicks "Submit Application" (disabled until every household member has Full Name, Email, and Phone); invalid phone numbers show an inline error
-9. The household is registered, then an application is submitted for it, capturing household size, income, and accessibility as declared at submission
+9. When an email typed for a member (compared ignoring case and surrounding spaces) matches any member of an existing household, a warning under the field reads "A household with this email exists: <primary contact name>." with "Use the existing household"; clicking it switches to "Existing household" with that household selected. The warning doesn't block submitting, because two people can share an email
+10. The household is registered, then an application is submitted for it, capturing household size, income, and accessibility as declared at submission
 
 Existing household (e.g. one returning after a withdrawn or denied application):
 

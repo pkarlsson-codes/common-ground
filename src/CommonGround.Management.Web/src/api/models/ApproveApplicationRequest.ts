@@ -29,13 +29,13 @@ import {
  */
 export interface ApproveApplicationRequest {
     /**
-     * 
+     * The day of approval.
      * @type {CalendarDate}
      * @memberof ApproveApplicationRequest
      */
     approvedDate?: CalendarDate;
     /**
-     * 
+     * Internal notes, if any.
      * @type {string}
      * @memberof ApproveApplicationRequest
      */

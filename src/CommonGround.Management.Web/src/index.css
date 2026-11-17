@@ -908,6 +908,15 @@ body {
   font-size: 12.5px;
 }
 
+.form-warning {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--warning-surface);
+  border-radius: 8px;
+  color: var(--warning);
+  font-size: 12.5px;
+}
+
 .form-error__list {
   margin: 8px 0 0;
   padding-left: 16px;

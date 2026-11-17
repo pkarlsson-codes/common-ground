@@ -46,7 +46,7 @@ public static class HouseholdEndpoints
         IMessageBus bus,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetHouseholds(request.Page, request.Search);
+        var query = new GetHouseholds(request.Page, request.Search, request.Email);
 
         var result = await bus.InvokeForTenantAsync<PaginatedResponse<HouseholdListItemView>>(bus.TenantId!, query, cancellationToken);
 

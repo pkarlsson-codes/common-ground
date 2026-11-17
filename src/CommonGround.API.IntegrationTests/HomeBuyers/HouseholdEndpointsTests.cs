@@ -28,6 +28,24 @@ public class HouseholdEndpointsTests(ApiFactory factory)
             .Which.Should().BeEquivalentTo(new { Id = householdId, PrimaryContact = new { Email = email }, HouseholdSize = 1 });
     }
 
+    [Fact]
+    public async Task GetHouseholds_FilterByEmail_MatchesAnyMemberExactlyIgnoringCaseAndWhitespace()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var partnerEmail = $"partner-{Guid.NewGuid():N}@example.com";
+        var householdId = await RegisterHouseholdAsync(client, $"email-filter-{Guid.NewGuid():N}@example.com");
+        await client.PostAsJsonAsync($"/api/households/{householdId}/members",
+            new AddHouseholdMemberRequest("Partner", partnerEmail, "(202) 555-0101"));
+
+        var exact = await client.GetFromJsonAsync<PaginatedResponse<HouseholdListItemResponse>>(
+            $"/api/households?email={Uri.EscapeDataString("  " + partnerEmail.ToUpperInvariant() + " ")}");
+        var partial = await client.GetFromJsonAsync<PaginatedResponse<HouseholdListItemResponse>>(
+            $"/api/households?email={Uri.EscapeDataString(partnerEmail[1..])}");
+
+        exact!.Items.Should().ContainSingle().Which.Id.Should().Be(householdId);
+        partial!.Items.Should().BeEmpty();
+    }
+
     [Theory]
     [InlineData("Invalid Phone", "invalid-phone@example.com", "555-0100", "shared.phone.invalid_format")]
     [InlineData("Invalid Email", "invalid-email.example.com", "(202) 555-0100", "shared.email.invalid_format")]

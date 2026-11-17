@@ -69,6 +69,7 @@ export interface GetHouseholdsRequest {
     pageNumber?: number;
     pageSize?: number;
     search?: string | null;
+    email?: string | null;
 }
 
 export interface RecordCltOrientationOperationRequest {
@@ -145,6 +146,7 @@ export interface HouseholdApiInterface {
      * @param {number} [pageNumber] 
      * @param {number} [pageSize] 
      * @param {string} [search] 
+     * @param {string} [email] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HouseholdApiInterface
@@ -355,6 +357,10 @@ export class HouseholdApi extends runtime.BaseAPI implements HouseholdApiInterfa
 
         if (requestParameters['search'] != null) {
             queryParameters['search'] = requestParameters['search'];
+        }
+
+        if (requestParameters['email'] != null) {
+            queryParameters['email'] = requestParameters['email'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

@@ -19,6 +19,8 @@ export type HouseholdsQueryParams = {
   pageNumber: number
   pageSize?: number
   search?: string
+  /** Exact member email, ignoring case and surrounding whitespace. */
+  email?: string
 }
 
 const shouldRetryQuery = (failureCount: number, error: unknown): boolean => {
@@ -42,12 +44,13 @@ export const findOpenApplication = (household?: HouseholdResponse) =>
 
 export function useHouseholds(params: HouseholdsQueryParams) {
   return useQuery<PaginatedResponseOfHouseholdListItemResponse>({
-    queryKey: ['households', params.pageNumber, params.pageSize, params.search],
+    queryKey: ['households', params.pageNumber, params.pageSize, params.search, params.email],
     queryFn: () =>
       api.getHouseholds({
         pageNumber: params.pageNumber,
         pageSize: params.pageSize ?? 20,
         search: params.search,
+        email: params.email,
       }),
     retry: shouldRetryQuery,
   })

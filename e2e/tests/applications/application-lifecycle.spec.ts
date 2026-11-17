@@ -100,6 +100,27 @@ test('submitted application shows its declared snapshot, phase-appropriate actio
   await expect(detailValue(members, 'Member')).toContainText(other.name)
 })
 
+test('typing the email of an existing household offers to use it, and can be ignored', async ({ page }) => {
+  const { primary, other } = newHousehold()
+  await submitApplication(page, [primary])
+
+  await page.getByRole('button', { name: 'New Application' }).click()
+  const form = panel(page, 'Submit Application')
+  await field(form, 'Email').fill(`  ${primary.email.toUpperCase()} `)
+  const nudge = form.getByRole('status')
+  await expect(nudge).toContainText(`A household with this email exists: ${primary.name}.`)
+
+  // Ignoring the warning still allows a new household.
+  await field(form, 'Full Name').fill(other.name)
+  await field(form, 'Phone').fill(other.phone)
+  await field(form, 'Annual Income ($)').fill('65000')
+  await expect(form.getByRole('button', { name: 'Submit Application' })).toBeEnabled()
+
+  await nudge.getByRole('button', { name: 'Use the existing household' }).click()
+  await expect(form.getByRole('radio', { name: 'Existing household' })).toBeChecked()
+  await expect(form.locator('.detail-section', { hasText: 'Selected Household' })).toContainText(primary.name)
+})
+
 test('approving a submitted application moves it to Approved', async ({ page }) => {
   const { primary } = newHousehold()
   await submitApplication(page, [primary])

@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
 import SlideOver from '../../components/SlideOver'
 import { useSubmitApplication } from '../../hooks/applications'
-import { findOpenApplication, useHousehold, useStartApplication } from '../../hooks/households'
+import { findOpenApplication, useHousehold, useHouseholds, useStartApplication } from '../../hooks/households'
 import { useToast } from '../../hooks/useToast'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
 import { formatPhoneInput, isValidPhone, toE164 } from '../../lib/phone'
@@ -31,6 +31,31 @@ const emptyForm = (): FormState => ({
   annualIncome: 0,
   accessibilityRequired: false,
 })
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+/** Warns, without blocking, when a typed email already belongs to a household member. */
+function ExistingEmailNudge({ email, onUseExisting }: { email: string; onUseExisting: (householdId: string) => void }) {
+  const [settled, setSettled] = useState('')
+  useEffect(() => {
+    const id = setTimeout(() => setSettled(email.trim()), 400)
+    return () => clearTimeout(id)
+  }, [email])
+
+  const valid = EMAIL_PATTERN.test(settled)
+  const { data } = useHouseholds({ pageNumber: 1, pageSize: 1, email: valid ? settled : undefined })
+  const match = valid ? data?.items?.[0] : undefined
+  if (!match?.id || settled.toLowerCase() !== email.trim().toLowerCase()) return null
+
+  return (
+    <div className="form-warning" role="status">
+      A household with this email exists: {match.primaryContact?.name}.{' '}
+      <button type="button" className="btn btn-ghost btn-sm" onClick={() => onUseExisting(match.id!)}>
+        Use the existing household
+      </button>
+    </div>
+  )
+}
 
 type Props = {
   onClose: () => void
@@ -65,6 +90,11 @@ export default function SubmitApplicationPanel({ onClose }: Props) {
   const canApplyForExisting = Boolean(existing.data) && !findOpenApplication(existing.data)
   const isPending = submitMutation.isPending || startApplication.isPending
   const canSubmit = mode === 'new' ? isComplete : canApplyForExisting
+
+  const useExistingHousehold = (householdId: string) => {
+    setExistingId(householdId)
+    switchMode('existing')
+  }
 
   const switchMode = (next: Mode) => {
     setProblem(null)
@@ -181,6 +211,7 @@ export default function SubmitApplicationPanel({ onClose }: Props) {
                     onChange={e => updateMember(index, { email: e.target.value })}
                     required
                   />
+                  <ExistingEmailNudge email={member.email} onUseExisting={useExistingHousehold} />
                 </div>
                 <div className="form-field">
                   <label className="form-label">Phone</label>

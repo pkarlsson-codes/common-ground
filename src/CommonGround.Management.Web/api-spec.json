@@ -5691,6 +5691,15 @@
               "nullable": true
             },
             "x-position": 3
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 4
           }
         ],
         "responses": {
@@ -15417,10 +15426,12 @@
         "properties": {
           "approvedDate": {
             "type": "string",
+            "description": "The day of approval.",
             "format": "date"
           },
           "notes": {
             "type": "string",
+            "description": "Internal notes, if any.",
             "nullable": true
           }
         }
