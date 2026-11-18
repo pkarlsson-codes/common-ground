@@ -8,7 +8,6 @@ import { useHome } from '../../hooks/homes'
 import { selectionPriorityLabel, useHomeSelection } from '../../hooks/homeSelections'
 import { formatCalendarDate, formatInstant, numericDate, type CalendarDate } from '../../lib/calendarDate'
 import { getResponseStatus } from '../../lib/getErrorMessage'
-import ApplicationPhaseBadge from '../applications/ApplicationPhaseBadge'
 import CancelSelectionPanel from './CancelSelectionPanel'
 import DrawLotteryPanel from './DrawLotteryPanel'
 import SelectByPriorityPanel from './SelectByPriorityPanel'
@@ -49,14 +48,17 @@ const incomeLimitDescription = (selection: HomeSelectionResponse) => {
   return `${selection.incomeLimitPercentOfAmi}% of AMI${effective}`
 }
 
-function IncomeLimitCell({ candidate }: { candidate: HomeSelectionCandidateDto }) {
-  if (candidate.incomeLimit == null) return <>—</>
+function IncomeCell({ candidate }: { candidate: HomeSelectionCandidateDto }) {
+  const income = fmtCurrency(Number(candidate.annualIncome ?? 0))
   return (
     <>
-      <span className="cell-mono">{fmtCurrency(Number(candidate.incomeLimit))}</span>
-      {candidate.isOverIncomeLimit && (
-        <div><span className="badge badge-overincomelimit">Over income limit</span></div>
-      )}
+      <span className="cell-mono">
+        {candidate.incomeLimit == null ? income : `${income} of ${fmtCurrency(Number(candidate.incomeLimit))}`}
+      </span>
+      <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+        {candidate.householdSize} {candidate.householdSize === 1 ? 'person' : 'people'}
+        {candidate.incomeLimit == null && ' · no limit'}
+      </div>
     </>
   )
 }
@@ -233,16 +235,11 @@ export default function HomeSelectionPage() {
               <thead>
                 <tr>
                   {isOpen && <th>Tied</th>}
-                  <th>Primary Contact</th>
-                  <th>Annual Income</th>
-                  <th>Household Size</th>
-                  <th>Income Limit</th>
-                  <th>Needs Accessibility</th>
+                  <th>Applicant</th>
+                  <th>Income</th>
                   <th>Prequalified</th>
                   <th>Waiting Since</th>
-                  <th>Application</th>
-                  <th>Can Be Selected</th>
-                  <th>Why Not</th>
+                  <th>Status</th>
                   <th />
                 </tr>
               </thead>
@@ -269,26 +266,26 @@ export default function HomeSelectionPage() {
                         {candidate.primaryContact?.email && (
                           <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{candidate.primaryContact.email}</div>
                         )}
-                      </td>
-                      <td><span className="cell-mono">{fmtCurrency(Number(candidate.annualIncome ?? 0))}</span></td>
-                      <td><span className="cell-mono">{candidate.householdSize ?? '—'}</span></td>
-                      <td><IncomeLimitCell candidate={candidate} /></td>
-                      <td>
-                        {candidate.requiresAccessibility ? 'Yes' : 'No'}
-                        {candidate.requiresAccessibility && selection.homeIsAccessible === false && (
-                          <div><span className="badge badge-overincomelimit">Home is not accessible</span></div>
+                        {candidate.requiresAccessibility && (
+                          <div>
+                            <span className="badge badge-default">Needs accessible home</span>
+                            {selection.homeIsAccessible === false && (
+                              <span className="badge badge-overincomelimit">Home is not accessible</span>
+                            )}
+                          </div>
                         )}
                       </td>
+                      <td><IncomeCell candidate={candidate} /></td>
                       <td>
                         {candidate.prequalifiedAmount != null
                           ? <span className="cell-mono">{fmtCurrency(Number(candidate.prequalifiedAmount))}</span>
                           : 'None'}
                       </td>
                       <td><span className="cell-mono">{fmtDate(candidate.waitingSince)}</span></td>
-                      <td><ApplicationPhaseBadge phase={candidate.applicationPhase} /></td>
-                      <td>{candidate.canBeSelected ? 'Yes' : 'No'}</td>
                       <td>
-                        {(candidate.notSelectableReasons ?? []).map(reason => <div key={reason}>{reason}</div>)}
+                        {candidate.canBeSelected
+                          ? 'Can be selected'
+                          : (candidate.notSelectableReasons ?? []).map(reason => <div key={reason}>{reason}</div>)}
                       </td>
                       <td style={{ textAlign: 'right' }}>
                         {isOpen ? (
