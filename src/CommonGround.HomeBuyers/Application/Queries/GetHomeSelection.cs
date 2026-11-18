@@ -56,39 +56,43 @@ public static class GetHomeSelectionHandler
             {
                 var phase = applicationsById.GetValueOrDefault(c.ApplicationId)?.Phase ?? string.Empty;
                 var household = householdsById.GetValueOrDefault(c.HouseholdId);
-                var notSelectableReason = NotSelectableReason(c, phase, household, today);
+                var notSelectableReasons = NotSelectableReasons(c, phase, household, today);
                 return new HomeSelectionCandidateDetails(
                     c,
                     household is null ? null : HouseholdContact.From(household),
                     phase,
-                    notSelectableReason is null,
+                    notSelectableReasons.Count == 0,
                     prequalifiedAmountsByHousehold.TryGetValue(c.HouseholdId, out var amount) ? amount : null,
-                    notSelectableReason);
+                    notSelectableReasons);
             })]);
     }
 
-    /// <summary>Why the candidate can't be selected today, in words for staff, or null when it can. The first failing check wins.</summary>
-    private static string? NotSelectableReason(
+    /// <summary>Every reason the candidate can't be selected today, in words for staff. Empty when it can be selected.</summary>
+    private static List<string> NotSelectableReasons(
         HomeSelectionCandidateEntry candidate,
         string phase,
         HouseholdListItemView? household,
         DateOnly today)
     {
-        if (candidate.IsOverIncomeLimit)
-            return "Over income limit";
-        if (phase != ApplicationPhase.Approved.DisplayName)
-            return string.IsNullOrEmpty(phase) ? "Application not found" : $"Application is {phase.ToLowerInvariant()}";
+        if (string.IsNullOrEmpty(phase))
+            return ["Application not found"];
         if (household is null)
-            return "Household not found";
-        if (!household.IsHousingCounselingCompleted)
-            return "Housing counseling not completed";
-        if (!household.IsCltOrientationCompleted)
-            return "CLT orientation not completed";
-        if (household.MortgagePrequalificationExpiryDate is null)
-            return "No mortgage prequalification";
-        if (!household.IsReadyForSelectionOn(today))
-            return "Prequalification expired";
+            return ["Household not found"];
 
-        return null;
+        var reasons = new List<string>();
+        if (candidate.IsOverIncomeLimit)
+            reasons.Add("Over income limit");
+        if (phase != ApplicationPhase.Approved.DisplayName)
+            reasons.Add($"Application is {phase.ToLowerInvariant()}");
+        if (!household.IsHousingCounselingCompleted)
+            reasons.Add("Housing counseling not completed");
+        if (!household.IsCltOrientationCompleted)
+            reasons.Add("CLT orientation not completed");
+        if (household.MortgagePrequalificationExpiryDate is null)
+            reasons.Add("No mortgage prequalification");
+        else if (household.MortgagePrequalificationExpiryDate < today)
+            reasons.Add("Prequalification expired");
+
+        return reasons;
     }
 }

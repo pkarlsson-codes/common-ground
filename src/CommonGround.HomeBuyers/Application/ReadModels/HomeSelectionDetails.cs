@@ -22,4 +22,4 @@ public sealed record HomeSelectionCandidateDetails(
     string ApplicationPhase,
     bool CanBeSelected,
     decimal? PrequalifiedAmount,
-    string? NotSelectableReason);
+    IReadOnlyList<string> NotSelectableReasons);

@@ -35,7 +35,7 @@ import {
  * IncomeLimit is the home's limit for the household's size, null when the home has none;
  * a candidate with IsOverIncomeLimit can't be selected.
  * PrequalifiedAmount is the approved amount of the household's current mortgage prequalification, null when it has none.
- * NotSelectableReason says in words why CanBeSelected is false, null when it is true.
+ * NotSelectableReasons lists every reason in words why CanBeSelected is false, empty when it is true.
  * @export
  * @interface HomeSelectionCandidateDto
  */
@@ -114,10 +114,10 @@ export interface HomeSelectionCandidateDto {
     prequalifiedAmount?: number | null;
     /**
      * 
-     * @type {string}
+     * @type {Array<string>}
      * @memberof HomeSelectionCandidateDto
      */
-    notSelectableReason?: string | null;
+    notSelectableReasons?: Array<string>;
 }
 
 /**
@@ -149,7 +149,7 @@ export function HomeSelectionCandidateDtoFromJSONTyped(json: any, ignoreDiscrimi
         'applicationPhase': json['applicationPhase'] == null ? undefined : json['applicationPhase'],
         'canBeSelected': json['canBeSelected'] == null ? undefined : json['canBeSelected'],
         'prequalifiedAmount': json['prequalifiedAmount'] == null ? undefined : json['prequalifiedAmount'],
-        'notSelectableReason': json['notSelectableReason'] == null ? undefined : json['notSelectableReason'],
+        'notSelectableReasons': json['notSelectableReasons'] == null ? undefined : json['notSelectableReasons'],
     };
 }
 
@@ -176,7 +176,7 @@ export function HomeSelectionCandidateDtoToJSONTyped(value?: HomeSelectionCandid
         'applicationPhase': value['applicationPhase'],
         'canBeSelected': value['canBeSelected'],
         'prequalifiedAmount': value['prequalifiedAmount'],
-        'notSelectableReason': value['notSelectableReason'],
+        'notSelectableReasons': value['notSelectableReasons'],
     };
 }
 

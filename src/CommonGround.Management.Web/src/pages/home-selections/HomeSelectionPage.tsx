@@ -49,11 +49,6 @@ const incomeLimitDescription = (selection: HomeSelectionResponse) => {
   return `${selection.incomeLimitPercentOfAmi}% of AMI${effective}`
 }
 
-const canBeSelectedLabel = (candidate: HomeSelectionCandidateDto) => {
-  if (candidate.canBeSelected) return 'Yes'
-  return candidate.notSelectableReason ? `No (${candidate.notSelectableReason})` : 'No'
-}
-
 function IncomeLimitCell({ candidate }: { candidate: HomeSelectionCandidateDto }) {
   if (candidate.incomeLimit == null) return <>—</>
   return (
@@ -247,6 +242,7 @@ export default function HomeSelectionPage() {
                   <th>Waiting Since</th>
                   <th>Application</th>
                   <th>Can Be Selected</th>
+                  <th>Why Not</th>
                   <th />
                 </tr>
               </thead>
@@ -290,7 +286,10 @@ export default function HomeSelectionPage() {
                       </td>
                       <td><span className="cell-mono">{fmtDate(candidate.waitingSince)}</span></td>
                       <td><ApplicationPhaseBadge phase={candidate.applicationPhase} /></td>
-                      <td>{canBeSelectedLabel(candidate)}</td>
+                      <td>{candidate.canBeSelected ? 'Yes' : 'No'}</td>
+                      <td>
+                        {(candidate.notSelectableReasons ?? []).map(reason => <div key={reason}>{reason}</div>)}
+                      </td>
                       <td style={{ textAlign: 'right' }}>
                         {isOpen ? (
                           <button

@@ -231,7 +231,7 @@ public static class HomeSelectionsEndpoints
             candidate.ApplicationPhase,
             candidate.CanBeSelected,
             candidate.PrequalifiedAmount,
-            candidate.NotSelectableReason);
+            candidate.NotSelectableReasons);
 
     private static HouseholdContactDto? MapContact(HouseholdContact? contact) =>
         contact is null ? null : new HouseholdContactDto(contact.Name, contact.Email, contact.Phone);
