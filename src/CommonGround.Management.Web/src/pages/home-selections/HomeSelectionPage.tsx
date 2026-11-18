@@ -36,7 +36,9 @@ function SkeletonRows() {
 
 const homeDescription = (selection: HomeSelectionResponse) => {
   if (selection.homeBedrooms == null) return 'Home'
-  return `${selection.homeBedrooms} bd home${selection.homeIsAccessible ? ' · Accessible' : ''}`
+  const size = selection.homeSquareFootage != null ? ` · ${Number(selection.homeSquareFootage).toLocaleString()} sq ft` : ''
+  const baths = selection.homeBathrooms != null ? ` · ${Number(selection.homeBathrooms)} ba` : ''
+  return `${selection.homeBedrooms} bd${baths}${size}${selection.homeIsAccessible ? ' · Accessible' : ' · Not accessible'}`
 }
 
 const incomeLimitDescription = (selection: HomeSelectionResponse) => {
@@ -48,8 +50,8 @@ const incomeLimitDescription = (selection: HomeSelectionResponse) => {
 }
 
 const canBeSelectedLabel = (candidate: HomeSelectionCandidateDto) => {
-  if (candidate.isOverIncomeLimit) return 'No (over income limit)'
-  return candidate.canBeSelected ? 'Yes' : 'No'
+  if (candidate.canBeSelected) return 'Yes'
+  return candidate.notSelectableReason ? `No (${candidate.notSelectableReason})` : 'No'
 }
 
 function IncomeLimitCell({ candidate }: { candidate: HomeSelectionCandidateDto }) {
@@ -241,6 +243,7 @@ export default function HomeSelectionPage() {
                   <th>Household Size</th>
                   <th>Income Limit</th>
                   <th>Needs Accessibility</th>
+                  <th>Prequalified</th>
                   <th>Waiting Since</th>
                   <th>Application</th>
                   <th>Can Be Selected</th>
@@ -274,7 +277,17 @@ export default function HomeSelectionPage() {
                       <td><span className="cell-mono">{fmtCurrency(Number(candidate.annualIncome ?? 0))}</span></td>
                       <td><span className="cell-mono">{candidate.householdSize ?? '—'}</span></td>
                       <td><IncomeLimitCell candidate={candidate} /></td>
-                      <td>{candidate.requiresAccessibility ? 'Yes' : 'No'}</td>
+                      <td>
+                        {candidate.requiresAccessibility ? 'Yes' : 'No'}
+                        {candidate.requiresAccessibility && selection.homeIsAccessible === false && (
+                          <div><span className="badge badge-overincomelimit">Home is not accessible</span></div>
+                        )}
+                      </td>
+                      <td>
+                        {candidate.prequalifiedAmount != null
+                          ? <span className="cell-mono">{fmtCurrency(Number(candidate.prequalifiedAmount))}</span>
+                          : 'None'}
+                      </td>
                       <td><span className="cell-mono">{fmtDate(candidate.waitingSince)}</span></td>
                       <td><ApplicationPhaseBadge phase={candidate.applicationPhase} /></td>
                       <td>{canBeSelectedLabel(candidate)}</td>

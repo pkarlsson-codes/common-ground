@@ -17,6 +17,10 @@ public class HomeFactsView
 
     public int Bedrooms { get; set; }
 
+    public decimal Bathrooms { get; set; }
+
+    public decimal SquareFootage { get; set; }
+
     public bool IsAccessible { get; set; }
 
     /// <summary>Gets or sets the income limit as a percent of AMI, or null when the home has no income limit.</summary>

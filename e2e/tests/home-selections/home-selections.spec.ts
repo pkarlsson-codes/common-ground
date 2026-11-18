@@ -47,7 +47,7 @@ test('a household over the home income limit is marked and cannot be selected', 
   const overRow = page.getByRole('row', { name: new RegExp(over.name) })
   await expect(overRow).toContainText('$70,000')
   await expect(overRow).toContainText('Over income limit')
-  await expect(overRow).toContainText('No (over income limit)')
+  await expect(overRow).toContainText('No (Over income limit)')
   await expect(overRow.getByRole('button', { name: 'Select' })).toBeDisabled()
 
   const underRow = page.getByRole('row', { name: new RegExp(under.name) })

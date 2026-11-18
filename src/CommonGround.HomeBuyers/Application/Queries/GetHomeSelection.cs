@@ -56,14 +56,39 @@ public static class GetHomeSelectionHandler
             {
                 var phase = applicationsById.GetValueOrDefault(c.ApplicationId)?.Phase ?? string.Empty;
                 var household = householdsById.GetValueOrDefault(c.HouseholdId);
+                var notSelectableReason = NotSelectableReason(c, phase, household, today);
                 return new HomeSelectionCandidateDetails(
                     c,
                     household is null ? null : HouseholdContact.From(household),
                     phase,
-                    !c.IsOverIncomeLimit
-                        && phase == ApplicationPhase.Approved.DisplayName
-                        && (household?.IsReadyForSelectionOn(today) ?? false),
-                    prequalifiedAmountsByHousehold.TryGetValue(c.HouseholdId, out var amount) ? amount : null);
+                    notSelectableReason is null,
+                    prequalifiedAmountsByHousehold.TryGetValue(c.HouseholdId, out var amount) ? amount : null,
+                    notSelectableReason);
             })]);
+    }
+
+    /// <summary>Why the candidate can't be selected today, in words for staff, or null when it can. The first failing check wins.</summary>
+    private static string? NotSelectableReason(
+        HomeSelectionCandidateEntry candidate,
+        string phase,
+        HouseholdListItemView? household,
+        DateOnly today)
+    {
+        if (candidate.IsOverIncomeLimit)
+            return "Over income limit";
+        if (phase != ApplicationPhase.Approved.DisplayName)
+            return string.IsNullOrEmpty(phase) ? "Application not found" : $"Application is {phase.ToLowerInvariant()}";
+        if (household is null)
+            return "Household not found";
+        if (!household.IsHousingCounselingCompleted)
+            return "Housing counseling not completed";
+        if (!household.IsCltOrientationCompleted)
+            return "CLT orientation not completed";
+        if (household.MortgagePrequalificationExpiryDate is null)
+            return "No mortgage prequalification";
+        if (!household.IsReadyForSelectionOn(today))
+            return "Prequalification expired";
+
+        return null;
     }
 }

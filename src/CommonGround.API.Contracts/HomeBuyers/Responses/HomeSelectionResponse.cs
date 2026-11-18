@@ -14,6 +14,8 @@ public sealed record HomeSelectionResponse(
     string HomeId,
     string? HomeLabel,
     int? HomeBedrooms,
+    decimal? HomeBathrooms,
+    decimal? HomeSquareFootage,
     bool? HomeIsAccessible,
     int? IncomeLimitPercentOfAmi,
     DateOnly? IncomeLimitsEffectiveFrom,
@@ -40,6 +42,7 @@ public sealed record HomeSelectionResponse(
 /// <see cref="IncomeLimit"/> is the home's limit for the household's size, null when the home has none;
 /// a candidate with <see cref="IsOverIncomeLimit"/> can't be selected.
 /// <see cref="PrequalifiedAmount"/> is the approved amount of the household's current mortgage prequalification, null when it has none.
+/// <see cref="NotSelectableReason"/> says in words why <see cref="CanBeSelected"/> is false, null when it is true.
 /// </summary>
 public sealed record HomeSelectionCandidateDto(
     string ApplicationId,
@@ -53,4 +56,5 @@ public sealed record HomeSelectionCandidateDto(
     bool IsOverIncomeLimit,
     string ApplicationPhase,
     bool CanBeSelected,
-    decimal? PrequalifiedAmount);
+    decimal? PrequalifiedAmount,
+    string? NotSelectableReason);

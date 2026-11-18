@@ -13,5 +13,7 @@ public sealed record HomeRegistered(
     string LandParcelId,
     string Label,
     int Bedrooms,
+    decimal Bathrooms,
+    decimal SquareFootage,
     bool IsAccessible,
     int? IncomeLimitPercentOfAmi) : IntegrationEvent;

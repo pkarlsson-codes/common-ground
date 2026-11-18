@@ -15748,6 +15748,16 @@
             "format": "int32",
             "nullable": true
           },
+          "homeBathrooms": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "homeSquareFootage": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
           "homeIsAccessible": {
             "type": "boolean",
             "nullable": true
@@ -15839,7 +15849,7 @@
       },
       "HomeSelectionCandidateDto": {
         "type": "object",
-        "description": "A candidate's priority facts as they stood when the selection started, with its household's\ncurrent primary contact and whether its application can still be selected today.\nIncomeLimit is the home's limit for the household's size, null when the home has none;\na candidate with IsOverIncomeLimit can't be selected.\nPrequalifiedAmount is the approved amount of the household's current mortgage prequalification, null when it has none.",
+        "description": "A candidate's priority facts as they stood when the selection started, with its household's\ncurrent primary contact and whether its application can still be selected today.\nIncomeLimit is the home's limit for the household's size, null when the home has none;\na candidate with IsOverIncomeLimit can't be selected.\nPrequalifiedAmount is the approved amount of the household's current mortgage prequalification, null when it has none.\nNotSelectableReason says in words why CanBeSelected is false, null when it is true.",
         "additionalProperties": false,
         "properties": {
           "applicationId": {
@@ -15888,6 +15898,10 @@
           "prequalifiedAmount": {
             "type": "number",
             "format": "decimal",
+            "nullable": true
+          },
+          "notSelectableReason": {
+            "type": "string",
             "nullable": true
           }
         }

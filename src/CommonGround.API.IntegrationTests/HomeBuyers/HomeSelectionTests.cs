@@ -68,6 +68,8 @@ public class HomeSelectionTests(ApiFactory factory)
         {
             HomeId = homeId,
             HomeBedrooms = 3,
+            HomeBathrooms = 2m,
+            HomeSquareFootage = 1200m,
             HomeIsAccessible = false,
             Status = "Open",
             SelectedApplicationId = (string?)null,
@@ -87,11 +89,13 @@ public class HomeSelectionTests(ApiFactory factory)
             WaitingSince = new DateOnly(2026, 3, 1),
             ApplicationPhase = "Approved",
             CanBeSelected = true,
+            NotSelectableReason = (string?)null,
             PrequalifiedAmount = (decimal?)210000m,
         });
         candidates[earlier.ApplicationId].PrimaryContact!.Email.Should().Be(earlier.Email);
         candidates[later.ApplicationId].AnnualIncome.Should().Be(52000m);
         candidates[notReady.ApplicationId].CanBeSelected.Should().BeFalse();
+        candidates[notReady.ApplicationId].NotSelectableReason.Should().NotBeNullOrEmpty();
         candidates[notReady.ApplicationId].PrequalifiedAmount.Should().BeNull();
 
         var summaries = await GetSelectionsForHomeAsync(client, homeId);
@@ -516,7 +520,7 @@ public class HomeSelectionTests(ApiFactory factory)
         using var scope = factory.Services.CreateScope();
         await using var session = scope.ServiceProvider.GetRequiredService<IDocumentStore>().LightweightSession(ApiFactory.TestTrustId);
         HomeRegisteredHandler.Handle(
-            new HomeRegistered(homeId, landParcelId, Label: "1 Test Lane", Bedrooms: 3, IsAccessible: false, incomeLimitPercentOfAmi))
+            new HomeRegistered(homeId, landParcelId, Label: "1 Test Lane", Bedrooms: 3, Bathrooms: 2m, SquareFootage: 1200m, IsAccessible: false, incomeLimitPercentOfAmi))
             .Execute(session);
         await session.SaveChangesAsync();
 

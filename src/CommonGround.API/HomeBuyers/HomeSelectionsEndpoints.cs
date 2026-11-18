@@ -194,6 +194,8 @@ public static class HomeSelectionsEndpoints
             view.HomeId,
             details.Home?.Label,
             details.Home?.Bedrooms,
+            details.Home?.Bathrooms,
+            details.Home?.SquareFootage,
             details.Home?.IsAccessible,
             view.IncomeLimitPercentOfAmi,
             view.IncomeLimitsEffectiveFrom,
@@ -228,7 +230,8 @@ public static class HomeSelectionsEndpoints
             candidate.Facts.IsOverIncomeLimit,
             candidate.ApplicationPhase,
             candidate.CanBeSelected,
-            candidate.PrequalifiedAmount);
+            candidate.PrequalifiedAmount,
+            candidate.NotSelectableReason);
 
     private static HouseholdContactDto? MapContact(HouseholdContact? contact) =>
         contact is null ? null : new HouseholdContactDto(contact.Name, contact.Email, contact.Phone);

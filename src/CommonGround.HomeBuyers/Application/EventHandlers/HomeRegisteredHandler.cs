@@ -18,6 +18,8 @@ public static class HomeRegisteredHandler
             LandParcelId = @event.LandParcelId,
             Label = @event.Label,
             Bedrooms = @event.Bedrooms,
+            Bathrooms = @event.Bathrooms,
+            SquareFootage = @event.SquareFootage,
             IsAccessible = @event.IsAccessible,
             IncomeLimitPercentOfAmi = @event.IncomeLimitPercentOfAmi,
         });

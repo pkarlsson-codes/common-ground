@@ -67,6 +67,18 @@ export interface HomeSelectionResponse {
     homeBedrooms?: number | null;
     /**
      * 
+     * @type {number}
+     * @memberof HomeSelectionResponse
+     */
+    homeBathrooms?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof HomeSelectionResponse
+     */
+    homeSquareFootage?: number | null;
+    /**
+     * 
      * @type {boolean}
      * @memberof HomeSelectionResponse
      */
@@ -202,6 +214,8 @@ export function HomeSelectionResponseFromJSONTyped(json: any, ignoreDiscriminato
         'homeId': json['homeId'] == null ? undefined : json['homeId'],
         'homeLabel': json['homeLabel'] == null ? undefined : json['homeLabel'],
         'homeBedrooms': json['homeBedrooms'] == null ? undefined : json['homeBedrooms'],
+        'homeBathrooms': json['homeBathrooms'] == null ? undefined : json['homeBathrooms'],
+        'homeSquareFootage': json['homeSquareFootage'] == null ? undefined : json['homeSquareFootage'],
         'homeIsAccessible': json['homeIsAccessible'] == null ? undefined : json['homeIsAccessible'],
         'incomeLimitPercentOfAmi': json['incomeLimitPercentOfAmi'] == null ? undefined : json['incomeLimitPercentOfAmi'],
         'incomeLimitsEffectiveFrom': json['incomeLimitsEffectiveFrom'] == null ? undefined : CalendarDateFromJSON(json['incomeLimitsEffectiveFrom']),
@@ -239,6 +253,8 @@ export function HomeSelectionResponseToJSONTyped(value?: HomeSelectionResponse |
         'homeId': value['homeId'],
         'homeLabel': value['homeLabel'],
         'homeBedrooms': value['homeBedrooms'],
+        'homeBathrooms': value['homeBathrooms'],
+        'homeSquareFootage': value['homeSquareFootage'],
         'homeIsAccessible': value['homeIsAccessible'],
         'incomeLimitPercentOfAmi': value['incomeLimitPercentOfAmi'],
         'incomeLimitsEffectiveFrom': CalendarDateToJSON(value['incomeLimitsEffectiveFrom']),

@@ -21,4 +21,5 @@ public sealed record HomeSelectionCandidateDetails(
     HouseholdContact? PrimaryContact,
     string ApplicationPhase,
     bool CanBeSelected,
-    decimal? PrequalifiedAmount);
+    decimal? PrequalifiedAmount,
+    string? NotSelectableReason);
