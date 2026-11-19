@@ -268,10 +268,9 @@ export default function HomeSelectionPage() {
                         )}
                         {candidate.requiresAccessibility && (
                           <div>
-                            <span className="badge badge-default">Needs accessible home</span>
-                            {selection.homeIsAccessible === false && (
-                              <span className="badge badge-overincomelimit">Home is not accessible</span>
-                            )}
+                            {selection.homeIsAccessible === false
+                              ? <span className="badge badge-overincomelimit">Needs accessible home · home is not accessible</span>
+                              : <span className="badge badge-default">Needs accessible home</span>}
                           </div>
                         )}
                       </td>
