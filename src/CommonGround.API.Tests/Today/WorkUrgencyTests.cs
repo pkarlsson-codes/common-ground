@@ -1,4 +1,6 @@
 using CommonGround.API.Today;
+using CommonGround.HomeBuyers.Application.WorkItems;
+using CommonGround.Homeownership.Application.WorkItems;
 using CommonGround.SharedKernel.Application.WorkItems;
 using FluentAssertions;
 
@@ -11,7 +13,10 @@ public class WorkUrgencyTests
         public DateOnly Today { get; } = new(2026, 11, 2);
 
         public WorkItem Item(string label, DateOnly? due, DateOnly waitingSince) =>
-            new(WorkArea.Applicants, "kind", "record", label, label, "detail", due, waitingSince, []);
+            Item(label, "kind", due, waitingSince);
+
+        public WorkItem Item(string label, string kind, DateOnly? due, DateOnly waitingSince) =>
+            new(WorkArea.Applicants, kind, "record", label, label, "detail", due, waitingSince, []);
     }
 
     public class TheOrderMethod
@@ -34,6 +39,62 @@ public class WorkUrgencyTests
             var ordered = WorkUrgency.Order(items);
 
             ordered.Select(i => i.Label).Should().Equal("overdue", "due soon", "due later", "waiting longest", "waiting recently");
+        }
+    }
+
+    public class TheOrderMethodWithKinds
+    {
+        private readonly TestBed _testBed = new();
+
+        [Fact]
+        public void GivenStewardshipKinds_WhenOrdered_ThenTheyFollowTheKindOrderWhateverTheirDates()
+        {
+            var today = _testBed.Today;
+            var old = new DateOnly(2020, 1, 1);
+            var items = new[]
+            {
+                _testBed.Item("ending soon", HomeownershipWorkItems.InsuranceEndingSoon, old, old),
+                _testBed.Item("statement", HomeownershipWorkItems.ResalePriceStatementDue, old, old),
+                _testBed.Item("loan closing", HomeownershipWorkItems.MortgageLoanClosingUnrecorded, old, old),
+                _testBed.Item("resale closing", HomeownershipWorkItems.ResaleClosingWaiting, old, old),
+                _testBed.Item("fee notice", HomeownershipWorkItems.LeaseFeeNoticeDue, old, old),
+                _testBed.Item("lapsed", HomeownershipWorkItems.InsuranceLapsed, old, old),
+                _testBed.Item("short", HomeownershipWorkItems.InsuranceShortOfLease, null, old),
+                _testBed.Item("improvement", HomeownershipWorkItems.ImprovementRequestWaiting, old, old),
+                _testBed.Item("mortgage request", HomeownershipWorkItems.MortgageRequestPending, old, old),
+                _testBed.Item("default", HomeownershipWorkItems.LeaseDefaultUncured, today.AddDays(5), today),
+                _testBed.Item("resale decision", HomeownershipWorkItems.ResaleDecisionDue, today.AddDays(20), today),
+            };
+
+            WorkUrgency.Order(items).Select(i => i.Label).Should().Equal(
+                "resale decision", "default", "mortgage request", "improvement", "short", "lapsed",
+                "fee notice", "resale closing", "loan closing", "statement", "ending soon");
+        }
+
+        [Fact]
+        public void GivenTwoItemsOfOneKind_WhenOrdered_ThenTheEarlierDueDateComesFirst()
+        {
+            var today = _testBed.Today;
+            var items = new[]
+            {
+                _testBed.Item("later", HomeownershipWorkItems.InsuranceLapsed, today, today),
+                _testBed.Item("earlier", HomeownershipWorkItems.InsuranceLapsed, today.AddDays(-9), today),
+            };
+
+            WorkUrgency.Order(items).Select(i => i.Label).Should().Equal("earlier", "later");
+        }
+
+        [Fact]
+        public void GivenAnApplicantsKindAndAnUnlistedKind_WhenOrdered_ThenTheUnlistedKindIsLast()
+        {
+            var today = _testBed.Today;
+            var items = new[]
+            {
+                _testBed.Item("unlisted", "future-kind", today.AddDays(-100), today),
+                _testBed.Item("application", HomeBuyersWorkItems.ApplicationAwaitingDecision, null, today),
+            };
+
+            WorkUrgency.Order(items).Select(i => i.Label).Should().Equal("application", "unlisted");
         }
     }
 

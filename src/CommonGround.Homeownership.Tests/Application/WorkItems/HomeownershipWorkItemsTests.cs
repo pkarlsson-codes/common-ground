@@ -342,7 +342,7 @@ public class HomeownershipWorkItemsTests
 
             item.Should().BeEquivalentTo(new
             {
-                Kind = HomeownershipWorkItems.InsuranceCertificateDue,
+                Kind = HomeownershipWorkItems.InsuranceEndingSoon,
                 Label = "14 Alder Lane",
                 Detail = "Dana Whitfield: policy ends Nov 20, 2026",
                 DueDate = (DateOnly?)new DateOnly(2026, 11, 20),
@@ -352,19 +352,31 @@ public class HomeownershipWorkItemsTests
         }
 
         [Fact]
-        public void GivenCoverThatEnded_WhenDerived_ThenSaysThePolicyEnded()
+        public void GivenCoverThatEnded_WhenDerived_ThenIsLapsedAndSaysThePolicyEnded()
         {
             var insurance = _testBed.Insured(TestBed.Certificate(new DateOnly(2026, 10, 1)));
 
-            HomeownershipWorkItems.ForInsuranceCertificateDue(insurance, _testBed.Today).Detail
-                .Should().Be("Dana Whitfield: policy ended Oct 1, 2026");
+            var item = HomeownershipWorkItems.ForInsuranceCertificateDue(insurance, _testBed.Today);
+
+            item.Kind.Should().Be(HomeownershipWorkItems.InsuranceLapsed);
+            item.Detail.Should().Be("Dana Whitfield: policy ended Oct 1, 2026");
         }
 
         [Fact]
-        public void GivenNoCertificate_WhenDerived_ThenDueOnTheLeaseStart()
+        public void GivenCoverEndingToday_WhenDerived_ThenIsEndingSoon()
+        {
+            var insurance = _testBed.Insured(TestBed.Certificate(_testBed.Today));
+
+            HomeownershipWorkItems.ForInsuranceCertificateDue(insurance, _testBed.Today).Kind
+                .Should().Be(HomeownershipWorkItems.InsuranceEndingSoon);
+        }
+
+        [Fact]
+        public void GivenNoCertificate_WhenDerived_ThenIsLapsedAndDueOnTheLeaseStart()
         {
             var item = HomeownershipWorkItems.ForInsuranceCertificateDue(_testBed.Insured(), _testBed.Today);
 
+            item.Kind.Should().Be(HomeownershipWorkItems.InsuranceLapsed);
             item.Detail.Should().Be("Dana Whitfield: no certificate on file");
             item.DueDate.Should().Be(new DateOnly(2025, 1, 1));
         }
@@ -375,7 +387,7 @@ public class HomeownershipWorkItemsTests
         private readonly TestBed _testBed = new();
 
         [Fact]
-        public void GivenACertificateShortOnEverything_WhenDerived_ThenNamesEachShortfallDueOnTheDayItWasReceived()
+        public void GivenACertificateShortOnEverything_WhenDerived_ThenNamesEachShortfallWaitingSinceTheDayItWasReceived()
         {
             var insurance = _testBed.Insured(TestBed.Certificate(new DateOnly(2027, 10, 1), 250_000m, 100_000m, false));
 
@@ -386,9 +398,9 @@ public class HomeownershipWorkItemsTests
                 Kind = HomeownershipWorkItems.InsuranceShortOfLease,
                 Detail = "Dana Whitfield: insurance short of the lease, dwelling $250,000.00 below the $280,000.00 replacement value; " +
                     "liability $100,000.00 below the $300,000.00 required; trust not named as additional insured",
-                DueDate = (DateOnly?)new DateOnly(2026, 10, 20),
+                DueDate = (DateOnly?)null,
                 WaitingSince = new DateOnly(2026, 10, 20),
-                Actions = Array.Empty<string>(),
+                Actions = new[] { HomeownershipWorkItems.RecordInsuranceCertificate },
             });
         }
 

@@ -59,6 +59,9 @@ public static class HomeownershipWorkItems
     /// <summary>Print the late notice and record it as sent.</summary>
     public const string RecordLeaseFeeNotice = "record-lease-fee-notice";
 
+    /// <summary>Days after the cure period ends within which the trust says whether it exercises its purchase option (Art 12.4(b)).</summary>
+    public const int PurchaseOptionNoticeDays = 30;
+
     /// <summary>An active lease whose notice of default's cure deadline passed unpaid (Art 12.1).</summary>
     public const string LeaseDefaultUncured = "lease-default-uncured";
 
@@ -107,8 +110,11 @@ public static class HomeownershipWorkItems
     /// <summary>Record the buyback closing.</summary>
     public const string RecordBuybackClosing = "record-buyback-closing";
 
-    /// <summary>An active lease whose insurance cover ends within 30 days, has ended, or has no certificate on file (Art 9.4).</summary>
-    public const string InsuranceCertificateDue = "insurance-certificate-due";
+    /// <summary>An active lease whose insurance cover has ended, or that has no certificate on file (Art 9.4).</summary>
+    public const string InsuranceLapsed = "insurance-lapsed";
+
+    /// <summary>An active lease whose insurance cover ends today or within the next 30 days (Art 9.4).</summary>
+    public const string InsuranceEndingSoon = "insurance-ending-soon";
 
     /// <summary>Record the homeowner's insurance certificate.</summary>
     public const string RecordInsuranceCertificate = "record-insurance-certificate";
@@ -117,9 +123,11 @@ public static class HomeownershipWorkItems
     public const string InsuranceShortOfLease = "insurance-short-of-lease";
 
     /// <summary>
-    /// The item for an active lease whose next insurance certificate is due: due on the day its cover ends (or the
-    /// lease start with no certificate), waiting from <see cref="InsuranceCover.DueWindowDays"/> before, and gone
-    /// once a certificate with a later policy end is recorded.
+    /// The item for an active lease whose next insurance certificate is due: <see cref="InsuranceLapsed"/> when the
+    /// cover ended before <paramref name="today"/> or no certificate is on file, otherwise
+    /// <see cref="InsuranceEndingSoon"/>. Due on the day its cover ends (or the lease start with no certificate),
+    /// waiting from <see cref="InsuranceCover.DueWindowDays"/> before, and gone once a certificate with a later
+    /// policy end is recorded.
     /// </summary>
     /// <param name="insurance">The lease and its cover.</param>
     /// <param name="today">The trust's today, against which the policy end is judged passed.</param>
@@ -137,8 +145,10 @@ public static class HomeownershipWorkItems
             { } end => $"policy ends {end.ToString("MMM d, yyyy", usd)}",
         };
 
+        var kind = cover.CoveredThrough is { } through && through >= today ? InsuranceEndingSoon : InsuranceLapsed;
+
         return new WorkItem(
-            WorkArea.Stewardship, InsuranceCertificateDue, "ground-lease", insurance.Lease.Id,
+            WorkArea.Stewardship, kind, "ground-lease", insurance.Lease.Id,
             insurance.HomeLabel ?? "Home",
             $"{insurance.Lease.HomeownerFullName}: {detail}",
             cover.DueOn,
@@ -147,8 +157,9 @@ public static class HomeownershipWorkItems
     }
 
     /// <summary>
-    /// The item for an active lease whose current insurance certificate falls short: due on the day it was received,
-    /// and gone once a certificate that meets the lease is recorded or the requirements change so this one does.
+    /// The item for an active lease whose current insurance certificate falls short: waiting since the day it was
+    /// received, with no due date, and gone once a certificate that meets the lease is recorded or the requirements
+    /// change so this one does.
     /// </summary>
     /// <param name="insurance">The lease and its cover; the cover must be short.</param>
     /// <returns>The lease's work item.</returns>
@@ -172,9 +183,9 @@ public static class HomeownershipWorkItems
             WorkArea.Stewardship, InsuranceShortOfLease, "ground-lease", insurance.Lease.Id,
             insurance.HomeLabel ?? "Home",
             $"{insurance.Lease.HomeownerFullName}: insurance short of the lease, {string.Join("; ", shortfalls)}",
+            null,
             coverage.ReceivedOn,
-            coverage.ReceivedOn,
-            []);
+            [RecordInsuranceCertificate]);
     }
 
     /// <summary>
@@ -306,8 +317,9 @@ public static class HomeownershipWorkItems
     private static bool DebtCheckMissing(this MortgageRequestView request) => request.PurchaseOptionPrice is null;
 
     /// <summary>
-    /// The item for an active lease whose notice of default wasn't cured: due the day after the cure deadline, and
-    /// gone once the amount owed is paid or the lease ends.
+    /// The item for an active lease whose notice of default wasn't cured: waiting since the day after the cure
+    /// deadline, due <see cref="PurchaseOptionNoticeDays"/> after it (Art 12.4(b): the trust says whether it exercises
+    /// its purchase option), and gone once the amount owed is paid or the lease ends.
     /// </summary>
     /// <param name="balance">The lease's balance; its <see cref="LeaseFeeBalance.DefaultCure"/> must be uncured.</param>
     /// <returns>The lease's work item.</returns>
@@ -317,13 +329,15 @@ public static class HomeownershipWorkItems
 
         var cure = balance.DefaultCure ?? throw new ArgumentException("The lease has no notice of default.", nameof(balance));
         var usd = CultureInfo.GetCultureInfo("en-US");
+        var purchaseOptionDecisionBy = cure.CureBy.AddDays(PurchaseOptionNoticeDays);
 
         return new WorkItem(
             WorkArea.Stewardship, LeaseDefaultUncured, "ground-lease", balance.Lease.Id,
             balance.HomeLabel ?? "Home",
             $"{balance.Lease.HomeownerFullName}: default not cured by {cure.CureBy.ToString("MMM d", usd)}, " +
-            $"{cure.StillToPay} of {cure.AmountOwed} still to pay",
-            null,
+            $"{cure.StillToPay} of {cure.AmountOwed} still to pay, " +
+            $"purchase option decision due {purchaseOptionDecisionBy.ToString("MMM d", usd)}",
+            purchaseOptionDecisionBy,
             cure.CureBy.AddDays(1),
             [ReviewLeaseDefault]);
     }

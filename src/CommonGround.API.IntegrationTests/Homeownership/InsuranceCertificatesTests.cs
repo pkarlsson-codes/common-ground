@@ -21,7 +21,7 @@ public class InsuranceCertificatesTests(ApiFactory factory)
         (await TodayItems(client, leaseId)).Should().ContainSingle().Which.Should().BeEquivalentTo(new
         {
             Area = "stewardship",
-            Kind = "insurance-certificate-due",
+            Kind = "insurance-lapsed",
             RecordType = "ground-lease",
             Detail = "Dana Whitfield: no certificate on file",
             DueDate = (DateOnly?)new DateOnly(2018, 1, 1),
@@ -52,8 +52,8 @@ public class InsuranceCertificatesTests(ApiFactory factory)
         (await TodayItems(client, leaseId)).Should().ContainSingle().Which.Should().BeEquivalentTo(new
         {
             Kind = "insurance-short-of-lease",
-            DueDate = (DateOnly?)today,
-            Actions = Array.Empty<string>(),
+            DueDate = (DateOnly?)null,
+            Actions = new[] { "record-insurance-certificate" },
         });
 
         var amended = await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/insurance-certificates",

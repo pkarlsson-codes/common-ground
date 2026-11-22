@@ -4,7 +4,7 @@ import { detailValue, expectToast, field, isoDate, panel, uniqueId } from '../su
 
 // Journeys: docs/journeys/ground-leases/set-insurance-requirements, record-insurance-certificate,
 //   remove-insurance-certificate, view-ground-lease-detail (Insurance section),
-//   docs/journeys/today/work-through-today (Insurance certificate due, Insurance short of the lease)
+//   docs/journeys/today/work-through-today (Insurance lapsed, Insurance short of the lease)
 
 const todaySection = (page: Page, name: string) => page.getByRole('region', { name: new RegExp(`^${name}`) })
 
@@ -125,7 +125,7 @@ test('a lease with no certificate waits on Today, and one short of the lease sho
 
   // Today reads the lease view, which catches up with the new lease after the POST returns.
   const stewardship = todaySection(page, 'Stewardship')
-  const due = stewardship.getByRole('row', { name: new RegExp(`Insurance certificate due.*${homeowner}`) })
+  const due = stewardship.getByRole('row', { name: new RegExp(`Insurance lapsed.*${homeowner}`) })
   await expect(async () => {
     await page.goto('/')
     await expect(due).toContainText(`${homeowner}: no certificate on file`, { timeout: 2_000 })

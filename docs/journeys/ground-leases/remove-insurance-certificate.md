@@ -6,6 +6,6 @@ For a certificate recorded in error: on the wrong lease, or with a mistyped poli
 2. A confirm panel asks for Reason (required, e.g. "Policy end typed as 2028, should be 2027")
 3. User clicks "Remove Certificate", or "Cancel"
 4. Toast: "Insurance certificate removed". The certificate shows greyed with "Removed: {reason}". Covered Through and the check use the remaining certificates. The certificate file stays in Documents
-5. If Covered Through is now within 30 days, passed, or there is no certificate left, an Insurance certificate due item for the lease shows on Today
+5. If Covered Through is now within 30 days, passed, or there is no certificate left, an Insurance lapsed or Insurance ending soon item for the lease shows on Today
 
 Continues in: [Record Insurance Certificate](record-insurance-certificate.md)
