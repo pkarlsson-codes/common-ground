@@ -20,6 +20,8 @@ async function createLease(page: Page, fees?: { landUseFee: number; repairReserv
     homeownerEmail: `${homeowner.toLowerCase().replace(/\s+/g, '-')}@example.com`,
     homeownerPhone: null,
     leaseStartDate: fees?.leaseStartDate ?? '2020-01-01',
+    feesTrackedFrom: fees?.leaseStartDate ?? '2020-01-01',
+    openingBalance: 0,
     termYears: 99,
     optionWindowDays: 60,
     maxMortgageDebtPercent: 90,
@@ -199,6 +201,8 @@ test('a payoff statement shows what the seller owes, is recorded when printed, a
     landUseFee: 45,
     repairReserveFee: 15,
     leaseStartDate: start.toISOString().slice(0, 10),
+    feesTrackedFrom: start.toISOString().slice(0, 10),
+    openingBalance: 0,
   })
   await post(page, `/api/v1/ground-leases/${groundLeaseId}/intent-to-sell`, { noticeDate: isoDate(-5), channel: 'Phone', notes: null })
   const { items } = await get<{ items: { id: string }[] }>(page, `/api/v1/resales?pageNumber=1&pageSize=1&groundLeaseId=${groundLeaseId}`)

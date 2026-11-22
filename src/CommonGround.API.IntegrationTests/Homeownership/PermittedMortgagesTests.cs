@@ -109,5 +109,5 @@ public class PermittedMortgagesTests(ApiFactory factory)
             new CreateGroundLeaseRequest(
                 Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "Dana Whitfield", "dana@example.com", null,
                 leaseStart, 99, 60, 45m, 15m, 200_000m, 250_000m, "Standard covenant", "AppraisalBased",
-                0.25m, null, null, null, null, maxMortgageDebtPercent, 0m));
+                0.25m, null, null, null, null, maxMortgageDebtPercent, leaseStart, 0m, 0m));
 }

@@ -106,6 +106,8 @@ export async function createGroundLease(page: Page, homeownerFullName: string) {
     homeownerEmail: `${homeownerFullName.toLowerCase().replace(/\s+/g, '.')}@example.com`,
     homeownerPhone: null,
     leaseStartDate: isoDate(-365),
+    feesTrackedFrom: isoDate(-365),
+    openingBalance: 0,
     termYears: 99,
     optionWindowDays: 60,
     maxMortgageDebtPercent: 90,

@@ -125,7 +125,7 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
 
         var resale = direct.ResalePolicy;
         var leaseId = GroundLeaseId.Generate();
-        var created = GroundLease.Establish(
+        var created = GroundLease.RegisterExisting(
             leaseId,
             parcelLookup.LandParcelId,
             homeLookup.UnitId,
@@ -146,7 +146,8 @@ public sealed class GroundLeasesSeeder(ITrustClock trustClock, PropagationWaiter
                 resale.AnnualPercentage,
                 resale.ImprovementsCap),
             HomeCommitments.None,
-            SeederUserId);
+            SeederUserId,
+            LeaseFeeTracking.FromLeaseStart(leaseStartDate));
         session.Events.StartStream<GroundLease>(leaseId.Value, created);
 
         // Saved now so the lease can be fetched for writing like one a purchase created, and propagated

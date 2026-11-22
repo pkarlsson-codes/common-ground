@@ -139,12 +139,13 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         InsuranceRequirements);
 
     /// <summary>
-    /// Creates a ground lease that didn't come from a purchase, such as one signed before the trust used
-    /// CommonGround. Refused while the home is already leased, being sold, or in a home selection. Fees are tracked
-    /// from the lease start unless <paramref name="leaseFeeTracking"/> says otherwise. Without
+    /// Registers a ground lease that already exists, such as one signed before the trust used CommonGround. A lease
+    /// that a purchase closing creates comes from <see cref="CreateFromPurchase"/> instead. Refused while the home is
+    /// already leased, being sold, or in a home selection. <paramref name="leaseFeeTracking"/> is required: the
+    /// trust says where fee tracking begins and what was owed then, so no arrears are guessed. Without
     /// <paramref name="insuranceRequirements"/> the lease checks no insurance amounts.
     /// </summary>
-    public static GroundLeaseCreated Establish(
+    public static ExistingGroundLeaseRegistered RegisterExisting(
         GroundLeaseId id,
         string landParcelId,
         string unitId,
@@ -160,7 +161,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         ResalePolicyTerms resalePolicyTerms,
         HomeCommitments homeCommitments,
         UserId createdBy,
-        LeaseFeeTracking? leaseFeeTracking = null,
+        LeaseFeeTracking leaseFeeTracking,
         InsuranceRequirements? insuranceRequirements = null)
     {
         ArgumentNullException.ThrowIfNull(leaseFeeTerms);
@@ -195,11 +196,12 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         if (string.IsNullOrWhiteSpace(covenantTerms))
             throw BusinessRuleViolation.GroundLease.Create.CovenantTermsRequired();
 
-        var tracking = leaseFeeTracking ?? LeaseFeeTracking.FromLeaseStart(leaseStartDate);
+        ArgumentNullException.ThrowIfNull(leaseFeeTracking);
+        var tracking = leaseFeeTracking;
         if (tracking.TrackedFrom < leaseStartDate)
             throw BusinessRuleViolation.LeaseFeeTracking.Create.TrackedFromBeforeLeaseStart(tracking.TrackedFrom, leaseStartDate);
 
-        return new GroundLeaseCreated(
+        return new ExistingGroundLeaseRegistered(
             id.Value,
             landParcelId,
             unitId,
@@ -857,7 +859,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
     }
 
     /// <summary>Starts a ground lease from its first event.</summary>
-    public static GroundLease Create(GroundLeaseCreated e)
+    public static GroundLease Create(ExistingGroundLeaseRegistered e)
     {
         ArgumentNullException.ThrowIfNull(e);
 
@@ -866,7 +868,7 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         return groundLease;
     }
 
-    private void Apply(GroundLeaseCreated e)
+    private void Apply(ExistingGroundLeaseRegistered e)
     {
         Id = GroundLeaseId.Create(e.AggregateId);
         LandParcelId = e.LandParcelId;

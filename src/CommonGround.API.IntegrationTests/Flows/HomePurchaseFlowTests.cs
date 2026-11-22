@@ -504,7 +504,7 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
         client.PostAsJsonAsync("/api/ground-leases",
             new CreateGroundLeaseRequest(
                 landParcelId, homeId, "Dana Whitfield", "dana@example.com", null, leaseStart, 99, 60, 0m, 0m, 200_000m, 250_000m, "Signed on paper",
-                "AppraisalBased", 0.25m, null, null, null, null, 90));
+                "AppraisalBased", 0.25m, null, null, null, null, 90, leaseStart, 0m));
 
     private static async Task<FunderReportResponse> GetFunderReportAsync(HttpClient client, DateOnly from, DateOnly to) =>
         (await client.GetFromJsonAsync<FunderReportResponse>($"/api/reports/funder?from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}"))!;

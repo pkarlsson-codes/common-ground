@@ -11,7 +11,7 @@ import {
   type CloseHeirTransferRequest,
 } from '../api'
 import { apiConfig } from '../lib/apiConfig'
-import { startOfMonth, trustToday, type CalendarDate } from '../lib/calendarDate'
+import { trustToday, type CalendarDate } from '../lib/calendarDate'
 import type {
   CreateGroundLeaseForm,
   RecordCheckInForm,
@@ -50,10 +50,6 @@ export function useGroundLease(id: string | null) {
   })
 }
 
-/** A lease that started before this month asks where fee tracking begins, so its past months aren't charged. */
-export const tracksFeesFromLater = (form: Pick<CreateGroundLeaseForm, 'leaseStartDate'>) =>
-  form.leaseStartDate < startOfMonth(trustToday())
-
 export function useCreateGroundLease() {
   const qc = useQueryClient()
   return useMutation({
@@ -72,7 +68,6 @@ export function useCreateGroundLease() {
           repairReserveFee: form.repairReserveFee,
           lateInterestRate: form.lateInterestRate,
           interestWaiverDays: form.interestWaiverDays,
-          ...(tracksFeesFromLater(form) && { feesTrackedFrom: form.feesTrackedFrom, openingBalance: form.openingBalance }),
           basePrice: form.basePrice,
           originalAppraisedValue: form.originalAppraisedValue,
           covenantTerms: form.covenantTerms || undefined,
@@ -84,6 +79,9 @@ export function useCreateGroundLease() {
           improvementsCap: form.hasImprovementsCap ? form.improvementsCap : undefined,
           // The input is required, so the form can't submit without it.
           maxMortgageDebtPercent: form.maxMortgageDebtPercent!,
+          // Both inputs are required, so the form can't submit without them.
+          feesTrackedFrom: form.feesTrackedFrom!,
+          openingBalance: form.openingBalance!,
           insuranceReplacementValue: form.insuranceReplacementValue,
           insuranceLiabilityPerOccurrence: form.insuranceLiabilityPerOccurrence,
         },

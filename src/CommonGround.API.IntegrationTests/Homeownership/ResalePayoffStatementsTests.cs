@@ -131,7 +131,7 @@ public class ResalePayoffStatementsTests(ApiFactory factory)
             new CreateGroundLeaseRequest(
                 Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), $"Homeowner {Guid.NewGuid():N}", "dana@example.com", null,
                 leaseStart, 99, 60, 45m, 15m, 200_000m, 250_000m, "Standard covenant", "AppraisalBased",
-                0.25m, null, null, null, null, 90));
+                0.25m, null, null, null, null, 90, leaseStart, 0m));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<CreateGroundLeaseResponse>())!.GroundLeaseId;
     }

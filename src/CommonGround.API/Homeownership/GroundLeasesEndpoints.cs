@@ -38,13 +38,11 @@ public static class GroundLeasesEndpoints
             request.AnnualPercentage,
             request.ImprovementsCap);
 
-        var leaseFeeTracking = request.FeesTrackedFrom is { } trackedFrom
-            ? LeaseFeeTracking.Create(trackedFrom, Money.Create(request.OpeningBalance ?? 0m), request.LeaseStartDate)
-            : null;
+        var leaseFeeTracking = LeaseFeeTracking.Create(request.FeesTrackedFrom, Money.Create(request.OpeningBalance), request.LeaseStartDate);
 
         var id = GroundLeaseId.Generate();
 
-        var command = new CreateGroundLease(
+        var command = new RegisterExistingGroundLease(
             id,
             request.LandParcelId,
             request.HomeId,

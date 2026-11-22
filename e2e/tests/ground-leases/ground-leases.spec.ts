@@ -37,6 +37,8 @@ const createLeaseDirectly = (page: Page, landParcelId: string, homeId: string, h
     homeownerEmail: `${homeownerFullName.toLowerCase().replace(/\s+/g, '-')}@example.com`,
     homeownerPhone: null,
     leaseStartDate: '2020-01-01',
+    feesTrackedFrom: '2020-01-01',
+    openingBalance: 0,
     termYears: 99,
     optionWindowDays: 60,
     maxMortgageDebtPercent: 90,
@@ -83,8 +85,10 @@ test('creating a lease on a parcel\'s home lists it first, shows its homeowner a
   await field(form, 'Repair Reserve Fee ($/month)').fill('10')
   await expect(form).toContainText('Monthly Lease Fee: $50.00, due on the 1st')
   await expect(form).toContainText('Late Interest: None')
-  // A lease that started before this month asks where fee tracking begins, defaulting to this month's 1st.
-  await expect(field(form, 'Fees Tracked From')).toHaveValue(`${isoDate().slice(0, 8)}01`)
+  // The form asks where fee tracking begins and what was owed; neither has a default.
+  await expect(field(form, 'Fees Tracked From')).toHaveValue('')
+  await expect(field(form, 'Owed on That Day ($)')).toHaveValue('')
+  await field(form, 'Fees Tracked From').fill(`${isoDate().slice(0, 8)}01`)
   await field(form, 'Owed on That Day ($)').fill('150')
   await field(form, 'Base Price ($)').fill('180000')
   await field(form, 'Original Appraised Value ($)').fill('240000')

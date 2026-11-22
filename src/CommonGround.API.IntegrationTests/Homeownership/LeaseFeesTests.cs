@@ -322,7 +322,7 @@ public class LeaseFeesTests(ApiFactory factory)
             new CreateGroundLeaseRequest(
                 Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), homeowner, "dana@example.com", null,
                 leaseStart, 99, 60, 45m, 15m, 200_000m, 250_000m, "Standard covenant", "AppraisalBased",
-                0.25m, null, null, null, null, 90, lateInterestRate, FeesTrackedFrom: feesTrackedFrom, OpeningBalance: openingBalance));
+                0.25m, null, null, null, null, 90, feesTrackedFrom ?? leaseStart, openingBalance ?? 0m, lateInterestRate));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<CreateGroundLeaseResponse>())!.GroundLeaseId;
     }

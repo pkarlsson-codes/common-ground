@@ -41,6 +41,8 @@ async function createLease(page: Page, homeowner: string, leaseStartDate: string
     homeownerEmail: `${homeowner.toLowerCase().replace(/\s+/g, '.')}@example.com`,
     homeownerPhone: null,
     leaseStartDate,
+    feesTrackedFrom: leaseStartDate,
+    openingBalance: 0,
     termYears: 99,
     optionWindowDays: 60,
     maxMortgageDebtPercent: 90,

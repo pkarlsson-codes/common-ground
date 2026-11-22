@@ -24,10 +24,10 @@ public class RecordBuybackClosedHandlerTests
         {
             var staff = UserId.Generate();
             var resaleId = ResaleId.Generate();
-            var lease = EventReplay.Replay<GroundLease>(GroundLease.Establish(
+            var lease = EventReplay.Replay<GroundLease>(GroundLease.RegisterExisting(
                 GroundLeaseId.Generate(), "land-parcel-1234", "home-5678", Homeowner.From("Dana Whitfield", "dana@example.com"),
                 new DateOnly(2020, 1, 1), 99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), Money.Create(200_000m), Money.Create(250_000m), "Covenants", ResalePolicyTerms.AppraisalBased(0.25m),
-                HomeCommitments.None, staff));
+                HomeCommitments.None, staff, LeaseFeeTracking.FromLeaseStart(new DateOnly(2020, 1, 1))));
             var resale = EventReplay.Replay<Resale>(
                 Resale.RecordIntentToSell(resaleId, lease, Today, NoticeChannel.Phone, null, Today, staff));
             resale = resale.Decide(r => r.RecordAppraisal(lease, Money.Create(270_000), Today, "Hollis", null, null, Today, staff)).Aggregate;
@@ -51,10 +51,10 @@ public class RecordBuybackClosedHandlerTests
         {
             var staff = UserId.Generate();
             var resaleId = ResaleId.Generate();
-            var lease = EventReplay.Replay<GroundLease>(GroundLease.Establish(
+            var lease = EventReplay.Replay<GroundLease>(GroundLease.RegisterExisting(
                 GroundLeaseId.Generate(), "land-parcel-1234", "home-5678", Homeowner.From("Dana Whitfield", "dana@example.com"),
                 new DateOnly(2026, 1, 1), 99, 60, LeaseFeeTerms.Create(Money.Create(50m), Money.Create(10m)), MortgageDebtCap.Create(90), Money.Create(200_000m), Money.Create(250_000m), "Covenants", ResalePolicyTerms.AppraisalBased(0.25m),
-                HomeCommitments.None, staff));
+                HomeCommitments.None, staff, LeaseFeeTracking.FromLeaseStart(new DateOnly(2026, 1, 1))));
             var resale = EventReplay.Replay<Resale>(
                 Resale.RecordIntentToSell(resaleId, lease, Today, NoticeChannel.Phone, null, Today, staff));
             resale = resale.Decide(r => r.RecordAppraisal(lease, Money.Create(270_000), Today, "Hollis", null, null, Today, staff)).Aggregate;
@@ -85,9 +85,9 @@ public class RecordBuybackClosedHandlerTests
         {
             var staff = UserId.Generate();
             var resaleId = ResaleId.Generate();
-            var lease = EventReplay.Replay<GroundLease>(GroundLease.Establish(
+            var lease = EventReplay.Replay<GroundLease>(GroundLease.RegisterExisting(
                 GroundLeaseId.Generate(), "land-parcel-1234", "home-5678", Homeowner.From("Dana Whitfield", "dana@example.com"),
-                new DateOnly(2020, 1, 1), 99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), Money.Create(200_000m), Money.Create(250_000m), "Covenants", ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, staff));
+                new DateOnly(2020, 1, 1), 99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), Money.Create(200_000m), Money.Create(250_000m), "Covenants", ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, staff, LeaseFeeTracking.FromLeaseStart(new DateOnly(2020, 1, 1))));
             var resale = EventReplay.Replay<Resale>(
                 Resale.RecordIntentToSell(resaleId, lease, Today, NoticeChannel.Phone, null, Today, staff));
             resale = resale.Decide(r => r.RecordAppraisal(lease, Money.Create(270_000), Today, "Hollis", null, null, Today, staff)).Aggregate;

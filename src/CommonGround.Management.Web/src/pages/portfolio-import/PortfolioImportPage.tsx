@@ -39,8 +39,8 @@ const COLUMNS: readonly Column[] = [
   { name: 'Appraised Value at Purchase', required: 'With a homeowner',    values: AMOUNT },
   { name: 'Land Use Fee',                required: 'No',                  values: 'Monthly amount; blank uses the template\'s' },
   { name: 'Repair Reserve Fee',          required: 'No',                  values: 'Monthly amount; blank uses the template\'s' },
-  { name: 'Fees Tracked From',           required: 'No',                  values: 'The date CommonGround starts counting fees owed; blank means the 1st of this month' },
-  { name: 'Amount Owed Then',            required: 'No',                  values: 'Fees already owed on that date; blank means $0' },
+  { name: 'Fees Tracked From',           required: 'With a homeowner',    values: 'The date CommonGround starts counting fees owed, not before Lease Start. Months before it aren\'t charged' },
+  { name: 'Amount Owed Then',            required: 'With a homeowner',    values: 'Fees and interest owed on that date; enter 0 if paid up' },
 ]
 
 /** Imports the trust's existing land parcels, homes and ground leases from one CSV file. */

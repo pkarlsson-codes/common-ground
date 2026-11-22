@@ -67,6 +67,8 @@ public class PortfolioImportPlannerTests
             ["Lease Start"] = "2005-06-01",
             ["Base Price"] = "120000",
             ["Appraised Value at Purchase"] = "150000",
+            ["Fees Tracked From"] = "2026-11-01",
+            ["Amount Owed Then"] = "0",
         };
 
         public static CsvTable Csv(params Dictionary<string, string>[] rows)
@@ -96,19 +98,37 @@ public class PortfolioImportPlannerTests
 
             plan.Errors.Should().BeEmpty();
             plan.Steps.Select(s => s.Command.GetType()).Should().Equal(
-                typeof(RegisterLandParcel), typeof(RegisterHome), typeof(CreateGroundLease), typeof(RegisterHome));
+                typeof(RegisterLandParcel), typeof(RegisterHome), typeof(RegisterExistingGroundLease), typeof(RegisterHome));
             plan.Steps.Select(s => s.Row).Should().Equal(2, 2, 2, 3);
             (plan.ParcelsToCreate, plan.HomesToCreate, plan.LeasesToCreate).Should().Be((1, 2, 1));
         }
 
         [Fact]
-        public void GivenAnOldLeaseWithNoTrackingColumns_WhenPlanned_ThenTracksFeesFromTheFirstOfThisMonthWithNothingOwed()
+        public void GivenALeaseWithBlankTrackingCells_WhenPlanned_ThenReportsBothAsRequiredAndPlansNothing()
         {
-            var plan = _testBed.Plan(TestBed.Csv(_testBed.Row()));
+            var row = _testBed.Row();
+            row["Fees Tracked From"] = string.Empty;
+            row["Amount Owed Then"] = string.Empty;
 
-            var lease = plan.Steps.Select(s => s.Command).OfType<CreateGroundLease>().Single();
-            lease.LeaseFeeTracking!.TrackedFrom.Should().Be(new DateOnly(2026, 11, 1));
-            lease.LeaseFeeTracking.OpeningBalance.Should().Be(Money.Zero);
+            var plan = _testBed.Plan(TestBed.Csv(row));
+
+            plan.Errors.Select(e => (e.Row, e.Column, e.Message)).Should().Equal(
+                (2, "Fees Tracked From", "This is required."), (2, "Amount Owed Then", "This is required."));
+            plan.Steps.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void GivenALeaseWithTrackingCells_WhenPlanned_ThenTracksFromThatDayWithThatBalance()
+        {
+            var row = _testBed.Row();
+            row["Fees Tracked From"] = "2026-09-01";
+            row["Amount Owed Then"] = "$250";
+
+            var plan = _testBed.Plan(TestBed.Csv(row));
+
+            var lease = plan.Steps.Select(s => s.Command).OfType<RegisterExistingGroundLease>().Single();
+            lease.LeaseFeeTracking!.TrackedFrom.Should().Be(new DateOnly(2026, 9, 1));
+            lease.LeaseFeeTracking.OpeningBalance.Should().Be(Money.Create(250m));
         }
 
         [Fact]
@@ -119,7 +139,7 @@ public class PortfolioImportPlannerTests
 
             var plan = _testBed.Plan(TestBed.Csv(row));
 
-            var lease = plan.Steps.Select(s => s.Command).OfType<CreateGroundLease>().Single();
+            var lease = plan.Steps.Select(s => s.Command).OfType<RegisterExistingGroundLease>().Single();
             (lease.TermYears, lease.OptionWindowDays, lease.MortgageDebtCap.Percent, lease.CovenantTerms).Should().Be((99, 90, 85, "Covenant"));
             lease.LeaseFeeTerms.LandUseFee.Should().Be(Money.Create(20m));
             lease.LeaseFeeTerms.RepairReserveFee.Should().Be(Money.Create(10m));
@@ -239,7 +259,7 @@ public class PortfolioImportPlannerTests
 
             var plan = _testBed.Plan(TestBed.Csv(_testBed.Row("APN-1")));
 
-            var lease = plan.Steps.Should().ContainSingle().Which.Command.Should().BeOfType<CreateGroundLease>().Subject;
+            var lease = plan.Steps.Should().ContainSingle().Which.Command.Should().BeOfType<RegisterExistingGroundLease>().Subject;
             (lease.LandParcelId, lease.UnitId).Should().Be(("parcel-1", "home-1"));
         }
 

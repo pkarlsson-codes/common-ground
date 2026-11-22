@@ -270,19 +270,20 @@ internal static class PortfolioImportPlanner
         var appraisedValue = row.Decimal(PortfolioColumns.AppraisedValue, required: true);
         var landUseFee = row.Decimal(PortfolioColumns.LandUseFee, required: false);
         var repairReserveFee = row.Decimal(PortfolioColumns.RepairReserveFee, required: false);
-        var trackedFrom = row.Date(PortfolioColumns.FeesTrackedFrom, required: false);
-        var amountOwed = row.Decimal(PortfolioColumns.AmountOwed, required: false);
+
+        // Both are required: a guess would hide what the homeowner already owes, or charge years of fees.
+        var trackedFrom = row.Date(PortfolioColumns.FeesTrackedFrom, required: true);
+        var amountOwed = row.Decimal(PortfolioColumns.AmountOwed, required: true);
         if (parcelId is null || plannedHome is not { } home || email is null || template is null || leaseStart is null || basePrice is null || appraisedValue is null
+            || trackedFrom is null || amountOwed is null
             || row.HasErrorIn(PortfolioColumns.LandUseFee, PortfolioColumns.RepairReserveFee, PortfolioColumns.FeesTrackedFrom, PortfolioColumns.AmountOwed))
         {
             return;
         }
 
-        var firstOfThisMonth = new DateOnly(context.Today.Year, context.Today.Month, 1);
-        var trackFrom = trackedFrom ?? (leaseStart.Value < firstOfThisMonth ? firstOfThisMonth : leaseStart.Value);
         var id = GroundLeaseId.Generate();
 
-        CreateGroundLease? command = null;
+        RegisterExistingGroundLease? command = null;
         var valid = row.Check(() =>
         {
             var homeowner = Homeowner.From(name, email, phone);
@@ -295,14 +296,14 @@ internal static class PortfolioImportPlanner
                 template.FormulaKind, template.AppreciationShare, template.IndexType, template.BaselineIndexValue,
                 template.AnnualPercentage, template.ImprovementsCap);
             var debtCap = MortgageDebtCap.Create(template.MaxMortgageDebtPercent);
-            var tracking = LeaseFeeTracking.Create(trackFrom, Money.Create(amountOwed ?? 0m), leaseStart.Value);
+            var tracking = LeaseFeeTracking.Create(trackedFrom.Value, Money.Create(amountOwed.Value), leaseStart.Value);
 
-            GroundLease.Establish(
+            GroundLease.RegisterExisting(
                 id, parcelId, home.Id, homeowner, leaseStart.Value, template.TermYears, template.OptionWindowDays, feeTerms, debtCap,
                 Money.Create(basePrice.Value), Money.Create(appraisedValue.Value), template.CovenantTerms, resaleTerms, HomeCommitments.Create(null, null, null),
                 context.ImportedBy, tracking);
 
-            command = new CreateGroundLease(
+            command = new RegisterExistingGroundLease(
                 id, parcelId, home.Id, homeowner, leaseStart.Value, template.TermYears, template.OptionWindowDays, feeTerms, debtCap,
                 Money.Create(basePrice.Value), Money.Create(appraisedValue.Value), template.CovenantTerms, resaleTerms, context.ImportedBy, tracking);
         });

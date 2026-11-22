@@ -200,7 +200,7 @@ public class HeirTransfersTests(ApiFactory factory)
             new CreateGroundLeaseRequest(
                 landParcelId, homeId, "Dana Whitfield", "dana@example.com", null,
                 leaseStart, 99, 60, 45m, 15m, 200_000m, 250_000m, "Standard covenant", "AppraisalBased",
-                0.25m, null, null, null, null, 90, 0m));
+                0.25m, null, null, null, null, 90, leaseStart, 0m, 0m));
         response.EnsureSuccessStatusCode();
         return ((await response.Content.ReadFromJsonAsync<CreateGroundLeaseResponse>())!.GroundLeaseId, homeId, landParcelId);
     }

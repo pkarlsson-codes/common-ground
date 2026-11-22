@@ -14,7 +14,7 @@ public class PortfolioImportTests(ApiFactory factory)
     private const string Header =
         "Parcel Number,Parcel Address,Parcel Acres,Acquired On,Acquired By,Unit,Home Type,Bedrooms,Bathrooms,Accessible," +
         "Square Feet,Year Built,Assessed Value,Assessed On,Homeowner Name,Homeowner Email,Lease Template,Lease Start," +
-        "Base Price,Appraised Value at Purchase,Amount Owed Then";
+        "Base Price,Appraised Value at Purchase,Fees Tracked From,Amount Owed Then";
 
     [Fact]
     public async Task Import_FileWithAnError_ImportsNothingAndListsTheError()
@@ -23,7 +23,7 @@ public class PortfolioImportTests(ApiFactory factory)
         var tag = Guid.NewGuid().ToString("N")[..8];
         var template = await CreateTemplate(client, $"Lease {tag}");
         var csv = $"{Header}\n" +
-                  $"APN-{tag},1 Elm St,0.2,2004-03-15,Donation,,SingleFamily,two,1,no,1100,1998,180000,2026-01-01,Ana {tag},ana@example.com,{template},2005-06-01,120000,150000,\n";
+                  $"APN-{tag},1 Elm St,0.2,2004-03-15,Donation,,SingleFamily,two,1,no,1100,1998,180000,2026-01-01,Ana {tag},ana@example.com,{template},2005-06-01,120000,150000,2026-01-01,0\n";
 
         var check = await Post(client, "/api/portfolio-import/check", csv);
         var import = await client.PostAsJsonAsync("/api/portfolio-import", new PortfolioImportRequest(csv));
@@ -40,8 +40,8 @@ public class PortfolioImportTests(ApiFactory factory)
         var tag = Guid.NewGuid().ToString("N")[..8];
         var template = await CreateTemplate(client, $"Lease {tag}");
         var csv = $"{Header}\n" +
-                  $"APN-{tag},1 Elm St,0.2,3/15/2004,Donation,A,Duplex,3,1.5,no,\"1,100\",1998,\"$180,000\",2026-01-01,Ana {tag},ana@example.com,{template},6/1/2005,120000,150000,$150\n" +
-                  $"APN-{tag},1 Elm St,0.2,3/15/2004,Donation,B,Duplex,2,1,yes,900,1998,160000,2026-01-01,,,,,,,\n";
+                  $"APN-{tag},1 Elm St,0.2,3/15/2004,Donation,A,Duplex,3,1.5,no,\"1,100\",1998,\"$180,000\",2026-01-01,Ana {tag},ana@example.com,{template},6/1/2005,120000,150000,1/1/2026,$150\n" +
+                  $"APN-{tag},1 Elm St,0.2,3/15/2004,Donation,B,Duplex,2,1,yes,900,1998,160000,2026-01-01,,,,,,,,\n";
 
         var check = await Post(client, "/api/portfolio-import/check", csv);
         var first = await Post(client, "/api/portfolio-import", csv);

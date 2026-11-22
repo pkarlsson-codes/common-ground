@@ -20,10 +20,10 @@ public class RecordIntentToSellHandlerTests
     {
         public static readonly DateOnly Today = new(2026, 3, 10);
 
-        public GroundLease Lease { get; } = EventReplay.Replay<GroundLease>(GroundLease.Establish(
+        public GroundLease Lease { get; } = EventReplay.Replay<GroundLease>(GroundLease.RegisterExisting(
             GroundLeaseId.Generate(), "land-parcel-1234", "home-5678", Homeowner.From("Dana Whitfield", "dana@example.com"),
             new DateOnly(2020, 1, 1), 99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), Money.Create(200_000m), Money.Create(250_000m), "Covenants", ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None,
-            UserId.Generate()));
+            UserId.Generate(), LeaseFeeTracking.FromLeaseStart(new DateOnly(2020, 1, 1))));
 
         public RecordIntentToSell Command() =>
             new(ResaleId.Generate(), Lease.Id, Today, NoticeChannel.Phone, null, UserId.Generate());

@@ -142,7 +142,7 @@ public class ResalePriceStatementsTests(ApiFactory factory)
             new CreateGroundLeaseRequest(
                 Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), homeowner, "dana@example.com", null,
                 leaseStart, 99, 60, 0m, 0m, 180_000m, 250_000m, "Standard covenant", "IndexBased",
-                null, "CPI-U", 290.0m, null, null, 90));
+                null, "CPI-U", 290.0m, null, null, 90, leaseStart, 0m));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<CreateGroundLeaseResponse>())!.GroundLeaseId;
     }

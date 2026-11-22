@@ -11922,7 +11922,9 @@
         "description": "Request to create a ground lease directly, rather than from a purchase closing.",
         "additionalProperties": false,
         "required": [
-          "maxMortgageDebtPercent"
+          "maxMortgageDebtPercent",
+          "feesTrackedFrom",
+          "openingBalance"
         ],
         "properties": {
           "landParcelId": {
@@ -12003,6 +12005,14 @@
             "type": "integer",
             "format": "int32"
           },
+          "feesTrackedFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "openingBalance": {
+            "type": "number",
+            "format": "decimal"
+          },
           "lateInterestRate": {
             "type": "number",
             "format": "decimal"
@@ -12010,16 +12020,6 @@
           "interestWaiverDays": {
             "type": "integer",
             "format": "int32"
-          },
-          "feesTrackedFrom": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "openingBalance": {
-            "type": "number",
-            "format": "decimal",
-            "nullable": true
           },
           "insuranceReplacementValue": {
             "type": "number",
@@ -19727,8 +19727,9 @@
           },
           "waitingSince": {
             "type": "string",
-            "description": "The date it started waiting, or became due soon.",
-            "format": "date"
+            "description": "The date it started waiting, or became due soon; none when the item has no meaningful start.",
+            "format": "date",
+            "nullable": true
           },
           "actions": {
             "type": "array",

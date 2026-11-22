@@ -37,11 +37,11 @@ public class GroundLeaseTests
         /// <summary>$60 a month at 36.5% a year: 6 cents a day of interest on an unpaid month.</summary>
         public LeaseFeeTerms FeesWithInterest { get; } = LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m), 36.5m);
 
-        public GroundLeaseCreated Established(
+        public ExistingGroundLeaseRegistered Established(
             ResalePolicyTerms? terms = null, LeaseFeeTerms? fees = null, LeaseFeeTracking? tracking = null, InsuranceRequirements? insurance = null) =>
-            GroundLease.Establish(
+            GroundLease.RegisterExisting(
                 LeaseId, ParcelId, HomeId, Homeowner, LeaseStart, 99, 60, fees ?? Fees, MortgageDebtCap.Create(90), Money.Create(200_000m), Money.Create(250_000m), "Standard affordability covenant",
-                terms ?? ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, StaffUser, tracking, insurance);
+                terms ?? ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, StaffUser, tracking ?? LeaseFeeTracking.FromLeaseStart(LeaseStart), insurance);
 
         /// <summary>Replacement value $280,000, liability $300,000 per occurrence.</summary>
         public static InsuranceRequirements Insurance { get; } =
@@ -76,7 +76,7 @@ public class GroundLeaseTests
             GroundLease.CreateFromPurchase(LeaseId, template, Workflow(), new DateOnly(2026, 1, 1), PermittedMortgageId.Generate(), StaffUser);
     }
 
-    public class TheEstablishMethod
+    public class TheRegisterExistingMethod
     {
         private readonly TestBed _testBed = new();
 
@@ -146,10 +146,10 @@ public class GroundLeaseTests
         public void GivenHomeAlreadyCommitted_WhenEstablished_ThenThrowsBusinessRuleViolation(
             string? activeLeaseId, string? openPurchaseWorkflowId, string? openHomeSelectionId, string expectedCode)
         {
-            var act = () => GroundLease.Establish(
+            var act = () => GroundLease.RegisterExisting(
                 _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, _testBed.Homeowner, new DateOnly(2025, 1, 1),
                 99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), Money.Create(200_000m), Money.Create(250_000m), "Terms", ResalePolicyTerms.AppraisalBased(0.25m),
-                HomeCommitments.Create(activeLeaseId, openPurchaseWorkflowId, openHomeSelectionId), _testBed.StaffUser);
+                HomeCommitments.Create(activeLeaseId, openPurchaseWorkflowId, openHomeSelectionId), _testBed.StaffUser, LeaseFeeTracking.FromLeaseStart(new DateOnly(2025, 1, 1)));
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }
@@ -163,9 +163,9 @@ public class GroundLeaseTests
         public void GivenInvalidInputs_WhenEstablished_ThenThrowsBusinessRuleViolation(
             int termYears, int optionWindowDays, string covenantTerms, string expectedCode, int basePrice = 200_000, int originalAppraisedValue = 250_000)
         {
-            var act = () => GroundLease.Establish(
+            var act = () => GroundLease.RegisterExisting(
                 _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, _testBed.Homeowner, new DateOnly(2025, 1, 1),
-                termYears, optionWindowDays, LeaseFeeTerms.None, MortgageDebtCap.Create(90), Money.Create(basePrice), Money.Create(originalAppraisedValue), covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser);
+                termYears, optionWindowDays, LeaseFeeTerms.None, MortgageDebtCap.Create(90), Money.Create(basePrice), Money.Create(originalAppraisedValue), covenantTerms, ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser, LeaseFeeTracking.FromLeaseStart(new DateOnly(2025, 1, 1)));
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }

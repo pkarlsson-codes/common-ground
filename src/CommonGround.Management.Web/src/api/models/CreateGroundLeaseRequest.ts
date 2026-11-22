@@ -150,6 +150,18 @@ export interface CreateGroundLeaseRequest {
     maxMortgageDebtPercent: number;
     /**
      * 
+     * @type {CalendarDate}
+     * @memberof CreateGroundLeaseRequest
+     */
+    feesTrackedFrom: CalendarDate;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateGroundLeaseRequest
+     */
+    openingBalance: number;
+    /**
+     * 
      * @type {number}
      * @memberof CreateGroundLeaseRequest
      */
@@ -160,18 +172,6 @@ export interface CreateGroundLeaseRequest {
      * @memberof CreateGroundLeaseRequest
      */
     interestWaiverDays?: number;
-    /**
-     * 
-     * @type {CalendarDate}
-     * @memberof CreateGroundLeaseRequest
-     */
-    feesTrackedFrom?: CalendarDate | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof CreateGroundLeaseRequest
-     */
-    openingBalance?: number | null;
     /**
      * 
      * @type {number}
@@ -191,6 +191,8 @@ export interface CreateGroundLeaseRequest {
  */
 export function instanceOfCreateGroundLeaseRequest(value: object): value is CreateGroundLeaseRequest {
     if (!('maxMortgageDebtPercent' in value) || value['maxMortgageDebtPercent'] === undefined) return false;
+    if (!('feesTrackedFrom' in value) || value['feesTrackedFrom'] === undefined) return false;
+    if (!('openingBalance' in value) || value['openingBalance'] === undefined) return false;
     return true;
 }
 
@@ -224,10 +226,10 @@ export function CreateGroundLeaseRequestFromJSONTyped(json: any, ignoreDiscrimin
         'annualPercentage': json['annualPercentage'] == null ? undefined : json['annualPercentage'],
         'improvementsCap': json['improvementsCap'] == null ? undefined : json['improvementsCap'],
         'maxMortgageDebtPercent': json['maxMortgageDebtPercent'],
+        'feesTrackedFrom': CalendarDateFromJSON(json['feesTrackedFrom']),
+        'openingBalance': json['openingBalance'],
         'lateInterestRate': json['lateInterestRate'] == null ? undefined : json['lateInterestRate'],
         'interestWaiverDays': json['interestWaiverDays'] == null ? undefined : json['interestWaiverDays'],
-        'feesTrackedFrom': json['feesTrackedFrom'] == null ? undefined : CalendarDateFromJSON(json['feesTrackedFrom']),
-        'openingBalance': json['openingBalance'] == null ? undefined : json['openingBalance'],
         'insuranceReplacementValue': json['insuranceReplacementValue'] == null ? undefined : json['insuranceReplacementValue'],
         'insuranceLiabilityPerOccurrence': json['insuranceLiabilityPerOccurrence'] == null ? undefined : json['insuranceLiabilityPerOccurrence'],
     };
@@ -264,10 +266,10 @@ export function CreateGroundLeaseRequestToJSONTyped(value?: CreateGroundLeaseReq
         'annualPercentage': value['annualPercentage'],
         'improvementsCap': value['improvementsCap'],
         'maxMortgageDebtPercent': value['maxMortgageDebtPercent'],
-        'lateInterestRate': value['lateInterestRate'],
-        'interestWaiverDays': value['interestWaiverDays'],
         'feesTrackedFrom': CalendarDateToJSON(value['feesTrackedFrom']),
         'openingBalance': value['openingBalance'],
+        'lateInterestRate': value['lateInterestRate'],
+        'interestWaiverDays': value['interestWaiverDays'],
         'insuranceReplacementValue': value['insuranceReplacementValue'],
         'insuranceLiabilityPerOccurrence': value['insuranceLiabilityPerOccurrence'],
     };

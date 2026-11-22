@@ -68,10 +68,10 @@ export interface CreateGroundLeaseForm {
   repairReserveFee: number
   lateInterestRate: number
   interestWaiverDays: number
-  /** First day fees are tracked; sent only while the lease started before this month. */
-  feesTrackedFrom: CalendarDate
-  /** What was owed on feesTrackedFrom. */
-  openingBalance: number
+  /** First day fees are tracked; no default: the lease already exists, so the trust states it. */
+  feesTrackedFrom: CalendarDate | null
+  /** What was owed on feesTrackedFrom, zero when paid up; no default. */
+  openingBalance: number | null
   basePrice: number
   originalAppraisedValue: number
   covenantTerms: string

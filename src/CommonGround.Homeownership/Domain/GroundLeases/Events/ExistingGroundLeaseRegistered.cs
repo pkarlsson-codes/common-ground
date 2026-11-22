@@ -20,7 +20,7 @@ namespace CommonGround.Homeownership.Domain.GroundLeases.Events;
 /// <param name="HomeownerPhone">The homeowner's phone number, if given.</param>
 /// <param name="RequiredReplacementValue">The replacement value the home must be insured for (Art 9.4), or null when not checked.</param>
 /// <param name="RequiredLiabilityPerOccurrence">The liability coverage per occurrence required, or null when not checked.</param>
-public sealed record GroundLeaseCreated(
+public sealed record ExistingGroundLeaseRegistered(
     string AggregateId,
     string LandParcelId,
     string HomeId,

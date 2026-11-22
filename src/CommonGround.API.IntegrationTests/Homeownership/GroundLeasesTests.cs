@@ -165,6 +165,6 @@ public class GroundLeasesTests(ApiFactory factory)
             new CreateGroundLeaseRequest(
                 landParcelId, homeId, "Dana Whitfield", "dana@example.com", "(503) 555-0123",
                 new DateOnly(2018, 1, 1), 99, 60, 0m, 0m, 200_000m, 250_000m, "Standard covenant", formulaKind,
-                appreciationShare, indexType, baselineIndexValue, null, null, 90,
+                appreciationShare, indexType, baselineIndexValue, null, null, 90, new DateOnly(2018, 1, 1), 0m,
                 InsuranceReplacementValue: replacementValue, InsuranceLiabilityPerOccurrence: liabilityPerOccurrence));
 }

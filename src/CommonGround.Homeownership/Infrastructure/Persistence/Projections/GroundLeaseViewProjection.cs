@@ -9,7 +9,7 @@ namespace CommonGround.Homeownership.Infrastructure.Persistence.Projections;
 /// <summary>Builds <see cref="GroundLeaseView"/> from GroundLease events.</summary>
 internal sealed class GroundLeaseViewProjection : SingleStreamProjection<GroundLeaseView, string>
 {
-    public static GroundLeaseView Create(IEvent<GroundLeaseCreated> e) =>
+    public static GroundLeaseView Create(IEvent<ExistingGroundLeaseRegistered> e) =>
         new()
         {
             Id = e.Data.AggregateId,

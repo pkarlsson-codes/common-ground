@@ -121,7 +121,7 @@ public class InsuranceCertificatesTests(ApiFactory factory)
             new CreateGroundLeaseRequest(
                 Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "Dana Whitfield", "dana@example.com", "(503) 555-0123",
                 new DateOnly(2018, 1, 1), 99, 60, 0m, 0m, 200_000m, 250_000m, "Standard covenant", "AppraisalBased",
-                0.25m, null, null, null, null, 90,
+                0.25m, null, null, null, null, 90, new DateOnly(2018, 1, 1), 0m,
                 InsuranceReplacementValue: 280_000m, InsuranceLiabilityPerOccurrence: 300_000m));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<CreateGroundLeaseResponse>())!.GroundLeaseId;

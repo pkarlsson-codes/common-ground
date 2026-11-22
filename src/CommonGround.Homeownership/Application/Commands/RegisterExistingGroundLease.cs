@@ -12,8 +12,8 @@ using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.Commands;
 
-/// <summary>Creates a ground lease directly, rather than from a purchase closing.</summary>
-public sealed record CreateGroundLease(
+/// <summary>Registers a ground lease that already exists, rather than one a purchase closing creates.</summary>
+public sealed record RegisterExistingGroundLease(
     GroundLeaseId GroundLeaseId,
     string LandParcelId,
     string UnitId,
@@ -28,15 +28,15 @@ public sealed record CreateGroundLease(
     string CovenantTerms,
     ResalePolicyTerms ResalePolicyTerms,
     UserId CreatedBy,
-    LeaseFeeTracking? LeaseFeeTracking = null,
+    LeaseFeeTracking LeaseFeeTracking,
     InsuranceRequirements? InsuranceRequirements = null);
 
-/// <summary>Handles <see cref="CreateGroundLease"/>.</summary>
-public static class CreateGroundLeaseHandler
+/// <summary>Handles <see cref="RegisterExistingGroundLease"/>.</summary>
+public static class RegisterExistingGroundLeaseHandler
 {
 
     /// <summary>Finds what the home is already committed to: an active lease, an open purchase or an open selection.</summary>
-    public static async Task<HomeCommitments> LoadAsync(CreateGroundLease command, IQuerySession session, CancellationToken cancellationToken)
+    public static async Task<HomeCommitments> LoadAsync(RegisterExistingGroundLease command, IQuerySession session, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
         ArgumentNullException.ThrowIfNull(session);
@@ -60,11 +60,11 @@ public static class CreateGroundLeaseHandler
     }
 
     /// <summary>Starts the new stream.</summary>
-    public static IStartStream Handle(CreateGroundLease command, HomeCommitments homeCommitments)
+    public static IStartStream Handle(RegisterExistingGroundLease command, HomeCommitments homeCommitments)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var started = GroundLease.Establish(
+        var started = GroundLease.RegisterExisting(
             command.GroundLeaseId,
             command.LandParcelId,
             command.UnitId,

@@ -25,6 +25,8 @@ async function createBuyback(page: Page) {
     homeownerEmail: `${homeowner.toLowerCase().replace(/\s+/g, '-')}@example.com`,
     homeownerPhone: null,
     leaseStartDate: '2020-01-01',
+    feesTrackedFrom: '2020-01-01',
+    openingBalance: 0,
     termYears: 99,
     optionWindowDays: 60,
     maxMortgageDebtPercent: 90,

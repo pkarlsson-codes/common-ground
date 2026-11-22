@@ -7,14 +7,14 @@ import { expectToast, uniqueId } from '../support/ui'
 const HEADER =
   'Parcel Number,Parcel Address,Parcel Acres,Acquired On,Acquired By,Unit,Home Type,Bedrooms,Bathrooms,Accessible,' +
   'Square Feet,Year Built,Assessed Value,Assessed On,Homeowner Name,Homeowner Email,Lease Template,Lease Start,' +
-  'Base Price,Appraised Value at Purchase'
+  'Base Price,Appraised Value at Purchase,Fees Tracked From,Amount Owed Then'
 
 /** Two homes on one parcel: unit A leased to `homeowner`, unit B without a lease. */
 const portfolio = (tag: string, template: string, homeowner: string, bedroomsA = '3') =>
   `${HEADER}\n` +
   `APN-${tag},1 Elm St,0.2,3/15/2004,Donation,A,Duplex,${bedroomsA},1.5,no,"1,100",1998,"$180,000",2026-01-01,` +
-  `${homeowner},owner-${tag}@example.com,${template},6/1/2005,120000,150000\n` +
-  `APN-${tag},1 Elm St,0.2,3/15/2004,Donation,B,Duplex,2,1,yes,900,1998,160000,2026-01-01,,,,,,\n`
+  `${homeowner},owner-${tag}@example.com,${template},6/1/2005,120000,150000,1/1/2026,0\n` +
+  `APN-${tag},1 Elm St,0.2,3/15/2004,Donation,B,Duplex,2,1,yes,900,1998,160000,2026-01-01,,,,,,,,\n`
 
 async function chooseFile(page: Page, csv: string) {
   await page.getByLabel('Import file').setInputFiles({ name: 'portfolio.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) })

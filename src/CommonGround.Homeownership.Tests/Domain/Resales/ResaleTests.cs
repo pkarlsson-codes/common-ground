@@ -24,10 +24,10 @@ public class ResaleTests
 
         public ResaleId ResaleId { get; } = ResaleId.Generate();
 
-        public GroundLease Lease { get; } = EventReplay.Replay<GroundLease>(GroundLease.Establish(
+        public GroundLease Lease { get; } = EventReplay.Replay<GroundLease>(GroundLease.RegisterExisting(
             GroundLeaseId.Generate(), "land-parcel-1234", "home-5678", Homeowner.From("Dana Whitfield", "dana@example.com"),
             new DateOnly(2020, 1, 1), 99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), Money.Create(200_000m), Money.Create(250_000m), "Covenants", ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None,
-            UserId.Generate()));
+            UserId.Generate(), LeaseFeeTracking.FromLeaseStart(new DateOnly(2020, 1, 1))));
 
         public IntentToSellRecorded Recorded() =>
             Resale.RecordIntentToSell(ResaleId, Lease, NoticeDate, NoticeChannel.Phone, null, NoticeDate, StaffUser);
@@ -358,10 +358,10 @@ public class ResaleTests
         private static readonly DateOnly Today = new(2026, 3, 10);
         private readonly TestBed _testBed = new();
 
-        private GroundLease FeeLease() => EventReplay.Replay<GroundLease>(GroundLease.Establish(
+        private GroundLease FeeLease() => EventReplay.Replay<GroundLease>(GroundLease.RegisterExisting(
             GroundLeaseId.Generate(), "land-parcel-1234", "home-5678", Homeowner.From("Dana Whitfield", "dana@example.com"),
             new DateOnly(2026, 1, 1), 99, 60, LeaseFeeTerms.Create(Money.Create(50m), Money.Create(10m)), MortgageDebtCap.Create(90),
-            Money.Create(200_000m), Money.Create(250_000m), "Covenants", ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser));
+            Money.Create(200_000m), Money.Create(250_000m), "Covenants", ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, _testBed.StaffUser, LeaseFeeTracking.FromLeaseStart(new DateOnly(2026, 1, 1))));
 
         private Resale ResaleOn(GroundLease lease) => EventReplay.Replay<Resale>(
             Resale.RecordIntentToSell(_testBed.ResaleId, lease, Today, NoticeChannel.Phone, null, Today, _testBed.StaffUser));

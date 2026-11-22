@@ -12,7 +12,7 @@ For a trust that already has homes and leases when it starts using CommonGround.
 8. If the import stops part way (a server error), the page says which row it stopped at. Choosing the same file and importing again skips everything already created
 
 Notes:
-- Fees Tracked From defaults to the 1st of this month and Amount Owed Then to zero, so leases signed years ago don't fill Today with late notices for months before the trust used CommonGround. See [Create Ground Lease](../ground-leases/create-ground-lease.md).
+- Fees Tracked From and Amount Owed Then are required for every lease, so the import never guesses what a homeowner owes: a blank is a row error. Months before Fees Tracked From aren't charged, so leases signed years ago don't fill Today with late notices. See [Create Ground Lease](../ground-leases/create-ground-lease.md).
 - Income Limit is the home's limit as a percent of AMI, e.g. `80`, or `None` for a home sold at market rate. Empty means 80, as on [Register Home](../homes/register-home.md).
 - Dates may be written `2005-06-01` or `6/1/2005`. Amounts may include `$` and `,`.
 

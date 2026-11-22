@@ -40,10 +40,10 @@ public class MortgageRequestTests
 
         public TestBed()
         {
-            Lease = EventReplay.Replay<GroundLease>(GroundLease.Establish(
+            Lease = EventReplay.Replay<GroundLease>(GroundLease.RegisterExisting(
                 GroundLeaseId.Generate(), "land-parcel-1", "home-1", Homeowner.From("Dana Whitfield", "dana@example.com", null),
                 LeaseStart, 99, 60, LeaseFeeTerms.Create(Money.Create(45m), Money.Create(15m)), MortgageDebtCap.Create(90),
-                Money.Create(200_000m), Money.Create(250_000m), "Covenant", ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, StaffUser));
+                Money.Create(200_000m), Money.Create(250_000m), "Covenant", ResalePolicyTerms.AppraisalBased(0.25m), HomeCommitments.None, StaffUser, LeaseFeeTracking.FromLeaseStart(LeaseStart)));
         }
 
         public static LoanAppraisal Appraisal { get; } = LoanAppraisal.Create(Money.Create(330_000m), new DateOnly(2026, 5, 10), null);

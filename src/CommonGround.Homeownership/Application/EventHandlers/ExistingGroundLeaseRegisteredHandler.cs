@@ -7,10 +7,10 @@ namespace CommonGround.Homeownership.Application.EventHandlers;
 /// Publishes that a lease created directly exists, as <see cref="HomeownerOnboardedHandler"/> does for one from
 /// a purchase, so other BCs treat it the same way. It publishes no purchase closing: there was none.
 /// </summary>
-public static class GroundLeaseCreatedHandler
+public static class ExistingGroundLeaseRegisteredHandler
 {
     /// <summary>Maps the domain event to the integration event Wolverine publishes.</summary>
-    public static GroundLeaseCreatedIntegration Handle(GroundLeaseCreated @event)
+    public static GroundLeaseCreatedIntegration Handle(ExistingGroundLeaseRegistered @event)
     {
         ArgumentNullException.ThrowIfNull(@event);
 

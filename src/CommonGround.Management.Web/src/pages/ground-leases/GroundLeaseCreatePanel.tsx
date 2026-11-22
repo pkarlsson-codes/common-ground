@@ -4,7 +4,7 @@ import EntityCombobox from '../../components/EntityCombobox'
 import DebtCapField from './DebtCapField'
 import OptionalAmountField from './OptionalAmountField'
 import SlideOver from '../../components/SlideOver'
-import { tracksFeesFromLater, useCreateGroundLease } from '../../hooks/groundLeases'
+import { useCreateGroundLease } from '../../hooks/groundLeases'
 import {
   FORMULA_KIND_LABELS,
   FORMULA_KINDS,
@@ -14,7 +14,7 @@ import {
 import { useToast } from '../../hooks/useToast'
 import { apiConfig } from '../../lib/apiConfig'
 import { getErrorMessage } from '../../lib/getErrorMessage'
-import { startOfMonth, trustToday } from '../../lib/calendarDate'
+import { trustToday } from '../../lib/calendarDate'
 import { DateInput } from '../../components/DateInput'
 import LeaseFeeFields from './LeaseFeeFields'
 import { formatPhoneInput, isValidPhone } from '../../lib/phone'
@@ -35,8 +35,8 @@ const emptyCreate = (): CreateGroundLeaseForm => ({
   repairReserveFee: 0,
   lateInterestRate: 0,
   interestWaiverDays: 30,
-  feesTrackedFrom: startOfMonth(trustToday()),
-  openingBalance: 0,
+  feesTrackedFrom: null,
+  openingBalance: null,
   basePrice: 0,
   originalAppraisedValue: 0,
   covenantTerms: '',
@@ -204,34 +204,31 @@ export default function GroundLeaseCreatePanel({ onClose }: Props) {
             fees={createForm}
             onChange={fees => setCreateForm(f => ({ ...f, ...fees }))}
           />
-          {tracksFeesFromLater(createForm) && (
-            <>
-              <div className="form-field">
-                <label className="form-label" htmlFor="lease-fees-tracked-from">Fees Tracked From</label>
-                <DateInput
-                  id="lease-fees-tracked-from"
-                  className="form-input"
-                  value={createForm.feesTrackedFrom}
-                  onChange={v => setCreateForm(f => ({ ...f, feesTrackedFrom: v }))}
-                  required
-                />
-                <div className="form-help">Months before this day aren't charged here</div>
-              </div>
-              <div className="form-field">
-                <label className="form-label" htmlFor="lease-opening-balance">Owed on That Day ($)</label>
-                <input
-                  id="lease-opening-balance"
-                  className="form-input"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={createForm.openingBalance}
-                  onChange={e => setCreateForm(f => ({ ...f, openingBalance: Math.max(0, parseFloat(e.target.value) || 0) }))}
-                />
-                <div className="form-help">Unpaid fees and interest from before, if any</div>
-              </div>
-            </>
-          )}
+          <div className="form-field">
+            <label className="form-label" htmlFor="lease-fees-tracked-from">Fees Tracked From</label>
+            <DateInput
+              id="lease-fees-tracked-from"
+              className="form-input"
+              value={createForm.feesTrackedFrom}
+              onChange={v => setCreateForm(f => ({ ...f, feesTrackedFrom: v }))}
+              required
+            />
+            <div className="form-help">Months before this day aren't charged here</div>
+          </div>
+          <div className="form-field">
+            <label className="form-label" htmlFor="lease-opening-balance">Owed on That Day ($)</label>
+            <input
+              id="lease-opening-balance"
+              className="form-input"
+              type="number"
+              min="0"
+              step="0.01"
+              value={createForm.openingBalance ?? ''}
+              onChange={e => setCreateForm(f => ({ ...f, openingBalance: e.target.value === '' ? null : Math.max(0, parseFloat(e.target.value) || 0) }))}
+              required
+            />
+            <div className="form-help">Unpaid fees and interest from before. Enter 0 if paid up</div>
+          </div>
           <div className="form-field">
             <label className="form-label" htmlFor="lease-base-price">Base Price ($)</label>
             <input
