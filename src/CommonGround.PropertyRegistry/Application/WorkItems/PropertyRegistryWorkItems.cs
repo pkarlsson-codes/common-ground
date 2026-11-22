@@ -14,18 +14,16 @@ public static class PropertyRegistryWorkItems
     public const string StartSelection = "start-selection";
 
     /// <summary>
-    /// The item for a home that is available with no selection open, waiting since it was registered or last
-    /// became available again; none for a home in any other status.
+    /// The item for a home that is available with no selection open, waiting since it last
+    /// became available again (no date for a home never sold); none for a home in any other status.
     /// </summary>
     /// <param name="home">The home.</param>
     /// <param name="availability">Where the home stands in being sold; none means it is available.</param>
     /// <param name="label">The label staff know the home by.</param>
-    /// <param name="zone">The trust's time zone, for the date the home was registered.</param>
     /// <returns>The home's work item, or null when it isn't waiting on a selection.</returns>
-    public static WorkItem? ForHome(HomeView home, HomeAvailabilityView? availability, string label, IanaTimeZone zone)
+    public static WorkItem? ForHome(HomeView home, HomeAvailabilityView? availability, string label)
     {
         ArgumentNullException.ThrowIfNull(home);
-        ArgumentNullException.ThrowIfNull(zone);
 
         if (availability is not null && availability.SaleStage != HomeSaleStage.Offered.DisplayName)
             return null;
@@ -41,6 +39,6 @@ public static class PropertyRegistryWorkItems
             ? new WorkItem(WorkArea.Selections, HomeAvailable, "home", home.Id, label,
                 availableAgainReason, null, availableAgain, [StartSelection])
             : new WorkItem(WorkArea.Selections, HomeAvailable, "home", home.Id, label,
-                "Available, no selection started", null, zone.ToDate(home.RegisteredAt), [StartSelection]);
+                "Available, no selection started", null, null, [StartSelection]);
     }
 }

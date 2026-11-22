@@ -2,7 +2,6 @@ using CommonGround.PropertyRegistry.Application.ReadModels;
 using CommonGround.PropertyRegistry.Application.WorkItems;
 using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.SharedKernel.Application.WorkItems;
-using CommonGround.SharedKernel.Domain.Services;
 using Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Queries;
@@ -17,12 +16,9 @@ public static class GetPropertyRegistryWorkItemsHandler
     public static async Task<WorkItemList> Handle(
         GetPropertyRegistryWorkItems request,
         IQuerySession session,
-        ITrustClock trustClock,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-
-        var zone = await trustClock.GetTimeZoneAsync(session.TenantId, cancellationToken).ConfigureAwait(false);
 
         // A home with no availability yet is available, so look past the ones known to be otherwise.
         var offered = HomeSaleStage.Offered.DisplayName;
@@ -50,8 +46,7 @@ public static class GetPropertyRegistryWorkItemsHandler
                 .Select(h => PropertyRegistryWorkItems.ForHome(
                     h,
                     availabilities.GetValueOrDefault(h.Id),
-                    HomeLabel.Format(addresses.GetValueOrDefault(h.LandParcelId, string.Empty), h.UnitDesignation),
-                    zone))
+                    HomeLabel.Format(addresses.GetValueOrDefault(h.LandParcelId, string.Empty), h.UnitDesignation)))
                 .OfType<WorkItem>(),
         ]);
     }

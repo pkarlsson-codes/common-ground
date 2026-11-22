@@ -10,7 +10,6 @@ public class PropertyRegistryWorkItemsTests
 {
     public class TestBed
     {
-        public IanaTimeZone Zone { get; } = IanaTimeZone.Create("America/New_York");
 
         public HomeView Home { get; } = new()
         {
@@ -24,15 +23,15 @@ public class PropertyRegistryWorkItemsTests
         private readonly TestBed _testBed = new();
 
         [Fact]
-        public void GivenNoAvailabilityYet_WhenDerived_ThenAvailableToStartASelectionSinceTheTrustDateItWasRegistered()
+        public void GivenNoAvailabilityYet_WhenDerived_ThenAvailableToStartASelectionWithNoWaitingDate()
         {
-            var item = PropertyRegistryWorkItems.ForHome(_testBed.Home, null, "14 Alder Lane", _testBed.Zone);
+            var item = PropertyRegistryWorkItems.ForHome(_testBed.Home, null, "14 Alder Lane");
 
             item.Should().BeEquivalentTo(new
             {
                 Kind = PropertyRegistryWorkItems.HomeAvailable,
                 Label = "14 Alder Lane",
-                WaitingSince = new DateOnly(2026, 8, 31),
+                WaitingSince = (DateOnly?)null,
                 Actions = new[] { PropertyRegistryWorkItems.StartSelection },
             });
         }
@@ -42,7 +41,7 @@ public class PropertyRegistryWorkItemsTests
         {
             var availability = new HomeAvailabilityView { Id = "home-1", AvailableAgainDate = new DateOnly(2026, 10, 15) };
 
-            var item = PropertyRegistryWorkItems.ForHome(_testBed.Home, availability, "14 Alder Lane", _testBed.Zone);
+            var item = PropertyRegistryWorkItems.ForHome(_testBed.Home, availability, "14 Alder Lane");
 
             item!.WaitingSince.Should().Be(new DateOnly(2026, 10, 15));
         }
@@ -56,7 +55,7 @@ public class PropertyRegistryWorkItemsTests
         {
             var availability = new HomeAvailabilityView { Id = "home-1", SaleStage = saleStage };
 
-            var item = PropertyRegistryWorkItems.ForHome(_testBed.Home, availability, "14 Alder Lane", _testBed.Zone);
+            var item = PropertyRegistryWorkItems.ForHome(_testBed.Home, availability, "14 Alder Lane");
 
             item.Should().BeNull();
         }
@@ -66,7 +65,7 @@ public class PropertyRegistryWorkItemsTests
         {
             var availability = new HomeAvailabilityView { Id = "home-1", SaleStage = HomeSaleStage.Offered.DisplayName };
 
-            var item = PropertyRegistryWorkItems.ForHome(_testBed.Home, availability, "14 Alder Lane", _testBed.Zone);
+            var item = PropertyRegistryWorkItems.ForHome(_testBed.Home, availability, "14 Alder Lane");
 
             item!.Kind.Should().Be(PropertyRegistryWorkItems.HomeAvailable);
         }

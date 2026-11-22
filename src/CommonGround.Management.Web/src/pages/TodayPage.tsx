@@ -73,7 +73,9 @@ function DueChip({ item, today }: { item: WorkItemResponse; today: CalendarDate 
     )
   }
 
-  const days = item.waitingSince ? daysBetween(item.waitingSince, today) : 0
+  if (!item.waitingSince) return null
+
+  const days = daysBetween(item.waitingSince, today)
   return <span className="due-chip due-chip--waiting">{days > 0 ? `Waiting ${plural(days, 'day')}` : 'Since today'}</span>
 }
 

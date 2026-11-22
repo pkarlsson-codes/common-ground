@@ -27,7 +27,7 @@ public static class WorkUrgency
         [.. items
             .OrderBy(i => i.DueDate is null)
             .ThenBy(i => i.DueDate)
-            .ThenBy(i => i.WaitingSince)
+            .ThenBy(i => i.WaitingSince ?? DateOnly.MaxValue)
             .ThenBy(i => i.Label, StringComparer.Ordinal)];
 
     /// <summary>How urgent an item is on <paramref name="today"/>.</summary>
