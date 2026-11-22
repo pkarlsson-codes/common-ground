@@ -188,7 +188,9 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
                 <thead>
                   <tr>
                     <th>Date</th>
-                    <th>Selection Method</th>
+                    <th>Home</th>
+                    <th>Chosen By</th>
+                    <th>Reason</th>
                     <th />
                   </tr>
                 </thead>
@@ -196,7 +198,9 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
                   {passOvers.map(passOver => (
                     <tr key={passOver.selectionId}>
                       <td><span className="cell-mono">{fmtDateTime(passOver.passedOverAt)}</span></td>
+                      <td>{passOver.homeLabel ?? '—'}</td>
                       <td>{passOver.selectionMethod ?? '—'}</td>
+                      <td>{passOver.selectionReason ?? (passOver.selectionMethod === 'Lottery' ? 'Drawn by lottery' : 'No reason recorded')}</td>
                       <td style={{ textAlign: 'right' }}>
                         <Link className="btn btn-link btn-sm" to={homeSelectionPath(passOver.selectionId!)}>
                           Open Selection

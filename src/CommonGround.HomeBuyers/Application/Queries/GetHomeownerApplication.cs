@@ -35,9 +35,24 @@ public static class GetHomeownerApplicationHandler
             .ConfigureAwait(false);
         var selectionsById = selections.ToDictionary(s => s.Id);
 
+        var homes = await session
+            .LoadManyAsync<HomeFactsView>(cancellationToken, entries.Select(p => p.HomeId).Distinct())
+            .ConfigureAwait(false);
+        var homesById = homes.ToDictionary(h => h.Id);
+
+        HouseholdPassOver ToPassOver(HouseholdPassOverEntry p)
+        {
+            var selection = selectionsById.GetValueOrDefault(p.SelectionId);
+            return new HouseholdPassOver(
+                p,
+                homesById.GetValueOrDefault(p.HomeId)?.Label,
+                selection?.SelectionMethod,
+                selection?.SelectionReason);
+        }
+
         return new HomeownerApplicationDetails(
             view,
             household is null ? null : HouseholdContact.From(household),
-            [.. entries.Select(p => new HouseholdPassOver(p, selectionsById.GetValueOrDefault(p.SelectionId)?.SelectionMethod))]);
+            [.. entries.Select(ToPassOver)]);
     }
 }

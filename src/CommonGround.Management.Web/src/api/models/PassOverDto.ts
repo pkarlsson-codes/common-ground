@@ -16,7 +16,8 @@
 import { mapValues } from '../runtime';
 /**
  * A home selection the household was passed over in. SelectionMethod is how the
- * chosen household was picked: "Priority" or "Lottery".
+ * chosen household was picked: "Priority" or "Lottery". SelectionReason is staff's
+ * explanation of a priority choice; null for a lottery or a selection that recorded none.
  * @export
  * @interface PassOverDto
  */
@@ -41,6 +42,12 @@ export interface PassOverDto {
     homeId?: string;
     /**
      * 
+     * @type {string}
+     * @memberof PassOverDto
+     */
+    homeLabel?: string | null;
+    /**
+     * 
      * @type {Date}
      * @memberof PassOverDto
      */
@@ -51,6 +58,12 @@ export interface PassOverDto {
      * @memberof PassOverDto
      */
     selectionMethod?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof PassOverDto
+     */
+    selectionReason?: string | null;
 }
 
 /**
@@ -73,8 +86,10 @@ export function PassOverDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'applicationId': json['applicationId'] == null ? undefined : json['applicationId'],
         'selectionId': json['selectionId'] == null ? undefined : json['selectionId'],
         'homeId': json['homeId'] == null ? undefined : json['homeId'],
+        'homeLabel': json['homeLabel'] == null ? undefined : json['homeLabel'],
         'passedOverAt': json['passedOverAt'] == null ? undefined : (new Date(json['passedOverAt'])),
         'selectionMethod': json['selectionMethod'] == null ? undefined : json['selectionMethod'],
+        'selectionReason': json['selectionReason'] == null ? undefined : json['selectionReason'],
     };
 }
 
@@ -92,8 +107,10 @@ export function PassOverDtoToJSONTyped(value?: PassOverDto | null, ignoreDiscrim
         'applicationId': value['applicationId'],
         'selectionId': value['selectionId'],
         'homeId': value['homeId'],
+        'homeLabel': value['homeLabel'],
         'passedOverAt': value['passedOverAt'] == null ? undefined : ((value['passedOverAt']).toISOString()),
         'selectionMethod': value['selectionMethod'],
+        'selectionReason': value['selectionReason'],
     };
 }
 

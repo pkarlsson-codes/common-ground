@@ -15397,7 +15397,7 @@
       },
       "PassOverDto": {
         "type": "object",
-        "description": "A home selection the household was passed over in. SelectionMethod is how the\nchosen household was picked: \"Priority\" or \"Lottery\".",
+        "description": "A home selection the household was passed over in. SelectionMethod is how the\nchosen household was picked: \"Priority\" or \"Lottery\". SelectionReason is staff's\nexplanation of a priority choice; null for a lottery or a selection that recorded none.",
         "additionalProperties": false,
         "properties": {
           "applicationId": {
@@ -15409,11 +15409,19 @@
           "homeId": {
             "type": "string"
           },
+          "homeLabel": {
+            "type": "string",
+            "nullable": true
+          },
           "passedOverAt": {
             "type": "string",
             "format": "date-time"
           },
           "selectionMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "selectionReason": {
             "type": "string",
             "nullable": true
           }

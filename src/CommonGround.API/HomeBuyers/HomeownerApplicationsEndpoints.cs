@@ -233,8 +233,10 @@ public static class HomeownerApplicationsEndpoints
             passOver.Entry.ApplicationId,
             passOver.Entry.SelectionId,
             passOver.Entry.HomeId,
+            passOver.HomeLabel,
             passOver.Entry.PassedOverAt,
-            passOver.SelectionMethod);
+            passOver.SelectionMethod,
+            passOver.SelectionReason);
 
     private static HouseholdContactDto? MapContact(HouseholdContact? contact) =>
         contact is null ? null : new HouseholdContactDto(contact.Name, contact.Email, contact.Phone);

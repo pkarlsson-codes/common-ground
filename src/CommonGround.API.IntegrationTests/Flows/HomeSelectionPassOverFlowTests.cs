@@ -58,7 +58,9 @@ public class HomeSelectionPassOverFlowTests(DurableApiFactory factory)
             SelectionId = selectionId,
             HomeId = homeId,
             SelectionMethod = "Priority",
+            SelectionReason = "Longest on the waiting list",
         });
+        eligibleApplication.PassOvers.Single().HomeLabel.Should().NotBeNullOrWhiteSpace();
 
         (await GetApplicationAsync(client, notReady)).PassOvers.Should().BeEmpty();
         (await GetApplicationAsync(client, withdrawn)).PassOvers.Should().BeEmpty();
@@ -92,7 +94,8 @@ public class HomeSelectionPassOverFlowTests(DurableApiFactory factory)
 
         (await GetApplicationAsync(client, winner!)).PassOvers.Should().BeEmpty();
         (await GetApplicationAsync(client, loser)).PassOvers
-            .Should().ContainSingle().Which.SelectionMethod.Should().Be("Lottery");
+            .Should().ContainSingle().Which.Should().Match<PassOverDto>(p =>
+                p.SelectionMethod == "Lottery" && p.SelectionReason == null);
         (await GetApplicationAsync(client, untied)).PassOvers
             .Should().ContainSingle("every eligible candidate is passed over, tied or not");
         (await GetApplicationAsync(client, tiedNotReady)).PassOvers.Should().BeEmpty();
