@@ -19,6 +19,7 @@ import LeaseHeirTransferSection from './LeaseHeirTransferSection'
 import LeaseImprovementsSection from './LeaseImprovementsSection'
 import LeaseInsuranceSection from './LeaseInsuranceSection'
 import LeaseResalePriceStatementsSection from './LeaseResalePriceStatementsSection'
+import UserName from '../../components/UserName'
 
 function SkeletonRows() {
   return (
@@ -193,7 +194,7 @@ export default function GroundLeaseDetailPanel({ groundLeaseId, onClose }: Props
                     </div>
                     {c.notes && <div style={{ fontSize: 13, marginTop: 2 }}>{c.notes}</div>}
                     <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 2 }}>
-                      by {c.recordedBy}
+                      by <UserName id={c.recordedBy} />
                     </div>
                   </div>
                 ))}

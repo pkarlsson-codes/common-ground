@@ -11,7 +11,11 @@ public sealed record ListTrustMembers(TrustId TrustId);
 /// <summary>Handles <see cref="ListTrustMembers"/>.</summary>
 public static class ListTrustMembersHandler
 {
-    /// <summary>Returns the trust's users, by name then email.</summary>
+    /// <summary>
+    /// Returns every user in the trust, by name then email. An exception to the server-side paging convention, on purpose: a trust has dozens of
+    /// users at most, and the web app resolves user ids to names by searching this whole list (see
+    /// <c>useUserName</c>). Adding paging here makes real members show as "Former member".
+    /// </summary>
     public static async Task<IReadOnlyList<UserView>> Handle(
         ListTrustMembers query,
         IQuerySession session,

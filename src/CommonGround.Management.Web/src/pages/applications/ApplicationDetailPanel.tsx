@@ -13,6 +13,7 @@ import RemoveFromWaitingListPanel from './RemoveFromWaitingListPanel'
 import { waitingListRemovalReasonLabel } from './waitingListRemovalReasons'
 import { getResponseStatus } from '../../lib/getErrorMessage'
 import { formatPhoneDisplay } from '../../lib/phone'
+import UserName from '../../components/UserName'
 
 type Props = {
   applicationId: string
@@ -98,7 +99,7 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
             </div>
             <div className="detail-field">
               <div className="detail-field__label">Submitted By</div>
-              <div className="detail-field__value">{detail.submittedBy ?? '—'}</div>
+              <div className="detail-field__value"><UserName id={detail.submittedBy} /></div>
             </div>
             <div className="detail-field">
               <div className="detail-field__label">Phone</div>

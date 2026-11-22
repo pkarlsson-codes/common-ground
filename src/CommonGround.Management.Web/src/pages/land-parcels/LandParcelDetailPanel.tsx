@@ -8,6 +8,7 @@ import ConnectedRecords from '../../components/lifecycle/ConnectedRecords'
 import { formatStepDate } from '../../lib/lifecycle'
 import { useConnectedGroundLeases } from '../../hooks/groundLeases'
 import DevelopmentProjectsSection from './DevelopmentProjectsSection'
+import UserName from '../../components/UserName'
 
 function SkeletonRows() {
   return (
@@ -169,7 +170,7 @@ export default function LandParcelDetailPanel({ parcelId, onClose }: Props) {
             </div>
             <div className="detail-field full-span">
               <div className="detail-field__label">Registered By</div>
-              <div className="detail-field__value mono">{detail.registeredBy}</div>
+              <div className="detail-field__value mono"><UserName id={detail.registeredBy} /></div>
             </div>
             {detail.covenantTerms && (
               <div className="detail-field full-span">

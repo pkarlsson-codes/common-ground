@@ -11,6 +11,7 @@ import { getResponseStatus } from '../../lib/getErrorMessage'
 import CancelSelectionPanel from './CancelSelectionPanel'
 import DrawLotteryPanel from './DrawLotteryPanel'
 import SelectByPriorityPanel from './SelectByPriorityPanel'
+import UserName from '../../components/UserName'
 
 const fmtCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
@@ -73,7 +74,7 @@ function Outcome({ selection }: { selection: HomeSelectionResponse }) {
         </div>
         <div className="detail-field">
           <div className="detail-field__label">Cancelled By</div>
-          <div className="detail-field__value">{selection.closedBy ?? '—'}</div>
+          <div className="detail-field__value"><UserName id={selection.closedBy} /></div>
         </div>
         <div className="detail-field">
           <div className="detail-field__label">Cancelled At</div>
@@ -121,7 +122,7 @@ function Outcome({ selection }: { selection: HomeSelectionResponse }) {
       )}
       <div className="detail-field">
         <div className="detail-field__label">Selected By</div>
-        <div className="detail-field__value">{selection.closedBy ?? '—'}</div>
+        <div className="detail-field__value"><UserName id={selection.closedBy} /></div>
       </div>
       <div className="detail-field">
         <div className="detail-field__label">Selected At</div>
@@ -177,7 +178,7 @@ export default function HomeSelectionPage() {
           <h1 className="page-header__title">{selection ? selection.homeLabel || homeDescription(selection) : '…'}</h1>
           {selection && (
             <div className="page-header__count">
-              {selection.homeLabel && `${homeDescription(selection)} · `}Started {fmtDateTime(selection.startedAt)} by {selection.startedBy} · {incomeLimitDescription(selection)} · {candidates.length} candidate{candidates.length !== 1 ? 's' : ''}
+              {selection.homeLabel && `${homeDescription(selection)} · `}Started {fmtDateTime(selection.startedAt)} by <UserName id={selection.startedBy} /> · {incomeLimitDescription(selection)} · {candidates.length} candidate{candidates.length !== 1 ? 's' : ''}
             </div>
           )}
         </div>

@@ -14,6 +14,7 @@ import PayoffStatementPanel from './PayoffStatementPanel'
 import RecordBuybackClosedPanel from './RecordBuybackClosedPanel'
 import RecordResaleAppraisalPanel from './RecordResaleAppraisalPanel'
 import WithdrawResalePanel from './WithdrawResalePanel'
+import UserName from '../../components/UserName'
 
 type ActionPanel = 'appraisal' | 'exercise' | 'closing' | 'withdraw' | 'payoff' | null
 
@@ -233,7 +234,7 @@ export default function ResaleDetailPanel({ resaleId, onClose }: Props) {
                 {[...resale.payoffStatements!].reverse().map(p => (
                   <tr key={`${p.printedAt}`}>
                     <td className="mono">{formatInstantDate(p.printedAt!)}</td>
-                    <td>{p.printedBy}</td>
+                    <td><UserName id={p.printedBy} /></td>
                     <td className="mono">{p.goodThrough}</td>
                     <td className="mono">{formatPrice(p.totalOwed ?? 0)}</td>
                   </tr>

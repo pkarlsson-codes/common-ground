@@ -9,11 +9,11 @@ import {
   type CorrectEligibilityForm,
   type CorrectFinancingForm,
 } from '../../hooks/purchaseWorkflows'
-import { useTrustMembers } from '../../hooks/team'
 import { formatCalendarDate, formatInstantDate, parseCalendarDate, trustToday } from '../../lib/calendarDate'
 import { formatCurrency } from '../../lib/currency'
 import { getErrorMessage } from '../../lib/getErrorMessage'
 import { EligibilityIncomeCheck } from './EligibilityIncomeCheck'
+import { useUserName } from '../../hooks/useUserName'
 
 interface CorrectionFormProps {
   detail: PurchaseWorkflowResponse
@@ -223,12 +223,8 @@ const describeChange = (c: PurchaseCorrectionChangeDto) =>
 
 /** Every correction to a recorded track, newest first as the API sends them. */
 export function CorrectionsList({ corrections }: { corrections: PurchaseCorrectionDto[] }) {
-  const { data: members } = useTrustMembers()
+  const nameOf = useUserName()
   if (corrections.length === 0) return null
-  const nameOf = (userId: string | undefined) => {
-    const m = members?.items?.find(x => x.userId === userId)
-    return m?.name || m?.email || userId || ''
-  }
 
   return (
     <div style={{ marginTop: 8 }} data-testid="purchase-corrections">

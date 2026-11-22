@@ -2,16 +2,15 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import PageEyebrow from '../../components/PageEyebrow'
 import { describeLevels, useIncomeLimitSchedules } from '../../hooks/incomeLimits'
-import { useTrustMembers } from '../../hooks/team'
 import { formatCalendarDate } from '../../lib/calendarDate'
 import IncomeLimitScheduleDetailPanel from './IncomeLimitScheduleDetailPanel'
 import IncomeLimitSchedulePanel from './IncomeLimitSchedulePanel'
+import { useUserName } from '../../hooks/useUserName'
 
 type Panel = { kind: 'enter' } | { kind: 'view'; id: string } | { kind: 'correct'; id: string } | null
 
 export default function IncomeLimitsPage() {
   const { data, isLoading, isError, refetch } = useIncomeLimitSchedules()
-  const { data: members } = useTrustMembers()
   const location = useLocation()
   const navigate = useNavigate()
   // A link from Today opens the Enter panel, or a schedule's detail, on arrival.
@@ -30,11 +29,7 @@ export default function IncomeLimitsPage() {
   const newest = schedules[0] ?? null
   const panelSchedule = panel && panel.kind !== 'enter' ? schedules.find(s => s.id === panel.id) ?? null : null
 
-  const nameOf = (userId?: string | null) => {
-    if (!userId) return '—'
-    const member = members?.items?.find(m => m.userId === userId)
-    return member?.name || member?.email || userId
-  }
+  const nameOf = useUserName()
 
   return (
     <div className="page">
