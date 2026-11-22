@@ -71,11 +71,11 @@ export interface WorkItemResponse {
      */
     dueDate?: CalendarDate | null;
     /**
-     * The date it started waiting, or became due soon.
+     * The date it started waiting, or became due soon; none when the item has no meaningful start.
      * @type {CalendarDate}
      * @memberof WorkItemResponse
      */
-    waitingSince?: CalendarDate;
+    waitingSince?: CalendarDate | null;
     /**
      * What staff can do to fix it, as keys such as approve-application, in the order to offer them.
      * @type {Array<string>}
