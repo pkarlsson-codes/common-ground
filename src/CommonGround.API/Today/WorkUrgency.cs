@@ -34,7 +34,6 @@ public static class WorkUrgency
         HomeBuyersWorkItems.PrequalificationExpiring,
 
         // Selections
-        HomeBuyersWorkItems.SelectionOpen,
         PropertyRegistryWorkItems.HomeAvailable,
         HomeBuyersWorkItems.IncomeLimitsMissing,
         HomeBuyersWorkItems.IncomeLimitsStale,

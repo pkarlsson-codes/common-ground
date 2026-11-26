@@ -1,6 +1,5 @@
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
-using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.SharedKernel.Domain.Exceptions;
 using CommonGround.SharedKernel.Extensions;
 using JasperFx.Events;
@@ -8,26 +7,17 @@ using Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
-/// <summary>
-/// Passes over a candidate's application in a home selection that chose another household,
-/// if the candidate could still have been selected on <paramref name="SelectedDate"/>.
-/// </summary>
+/// <summary>Records that a home selection passed over an application: another household was chosen while it could have been.</summary>
 public sealed record PassOverApplication(
     HomeownerApplicationId ApplicationId,
     HomeSelectionId SelectionId,
-    string HomeId,
-    DateOnly SelectedDate);
-
-/// <summary>A passed-over candidate's application, fetched for writing, and their household.</summary>
-/// <param name="Application">The candidate's application stream.</param>
-/// <param name="Household">The candidate's household, read-only.</param>
-public sealed record PassOverTarget(IEventStream<HomeownerApplication> Application, Household Household);
+    string HomeId);
 
 /// <summary>Handles <see cref="PassOverApplication"/>.</summary>
 public static class PassOverApplicationHandler
 {
-    /// <summary>Fetches the application for writing and loads its household.</summary>
-    public static async Task<PassOverTarget> LoadAsync(
+    /// <summary>Fetches the application for writing.</summary>
+    public static async Task<IEventStream<HomeownerApplication>> LoadAsync(
         PassOverApplication command,
         IDocumentSession session,
         CancellationToken cancellationToken)
@@ -38,25 +28,21 @@ public static class PassOverApplicationHandler
         var application = await session.Events
             .FetchForWriting<HomeownerApplication>(command.ApplicationId.Value, cancellationToken)
             .ConfigureAwait(false);
-        var current = application.Aggregate
+        _ = application.Aggregate
             ?? throw new AggregateNotFoundException(typeof(HomeownerApplication), command.ApplicationId.Value);
-        var household = await session
-            .LoadAggregateAsync<Household>(current.HouseholdId, cancellationToken)
-            .ConfigureAwait(false);
 
-        return new PassOverTarget(application, household);
+        return application;
     }
 
     /// <summary>
-    /// Records the pass-over. Does nothing if the candidate withdrew, their readiness lapsed, or
-    /// they were already passed over in this selection, so a retried message is harmless.
+    /// Records the pass-over. Does nothing if it was already recorded for this selection, so a retried message is
+    /// harmless. Whether the household could have been chosen was settled when the selection was recorded.
     /// </summary>
-    public static void Handle(PassOverApplication command, PassOverTarget target)
+    public static void Handle(PassOverApplication command, IEventStream<HomeownerApplication> application)
     {
         ArgumentNullException.ThrowIfNull(command);
-        ArgumentNullException.ThrowIfNull(target);
+        ArgumentNullException.ThrowIfNull(application);
 
-        target.Application.Decide(application =>
-            application.PassOver(command.SelectionId, command.HomeId, target.Household, command.SelectedDate));
+        application.Decide(a => a.PassOver(command.SelectionId, command.HomeId));
     }
 }

@@ -41,12 +41,11 @@ const RECORD_PAGES: Record<string, string> = {
   resale: '/resales',
 }
 
-/** Where a row leads: the record's detail, opened on its list page (selections have a page of their own). */
+/** Where a row leads: the record's detail, opened on its list page. */
 export function recordLink(item: Pick<WorkItemResponse, 'recordType' | 'recordId'>): RecordLink | null {
   const id = item.recordId
   if (item.recordType === 'income-limits') return { to: '/income-limits', state: id ? { openId: id } : undefined }
   if (!id) return null
-  if (item.recordType === 'selection') return { to: `/homes/selections/${id}` }
   const to = RECORD_PAGES[item.recordType ?? '']
   return to ? { to, state: { openId: id } } : null
 }
@@ -56,7 +55,6 @@ const KINDS: Record<string, { page: string; area: TodayArea }> = {
   'application-awaiting-decision': { page: '/applications', area: 'applicants' },
   'readiness-step-missing': { page: '/households', area: 'applicants' },
   'prequalification-expiring': { page: '/households', area: 'applicants' },
-  'selection-open': { page: '/home-selections', area: 'selections' },
   'home-available': { page: '/homes', area: 'selections' },
   'purchase-step-waiting': { page: '/purchase-workflows', area: 'purchases' },
   'purchase-stalled': { page: '/purchase-workflows', area: 'purchases' },
@@ -103,7 +101,6 @@ const ACTION_LABELS: Record<string, string> = {
   'record-housing-counseling': 'Record counseling',
   'record-clt-orientation': 'Record orientation',
   'record-mortgage-prequalification': 'Record prequalification',
-  'start-selection': 'Start selection',
   'choose-household': 'Choose household',
   'record-eligibility': 'Record eligibility',
   'record-appraisal': 'Record appraisal',
@@ -135,6 +132,8 @@ const ACTION_LINKS: Record<string, RecordLink> = {
 
 /** Where an action without a panel on Today leads: its own page, or else the row's record. */
 export function actionLink(item: Pick<WorkItemResponse, 'recordType' | 'recordId'>, key: string): RecordLink | null {
+  // A home's selection page, as homeSelectionPath gives it.
+  if (key === 'choose-household' && item.recordType === 'home' && item.recordId) return { to: `/homes/${item.recordId}/selection` }
   return ACTION_LINKS[key] ?? recordLink(item)
 }
 

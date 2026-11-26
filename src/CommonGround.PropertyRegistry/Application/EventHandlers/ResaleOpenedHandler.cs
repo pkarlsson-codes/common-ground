@@ -1,6 +1,7 @@
 using CommonGround.Homeownership.Contracts.Events;
 using CommonGround.PropertyRegistry.Application.ReadModels;
 using Marten;
+using Wolverine;
 using Wolverine.Marten;
 
 namespace CommonGround.PropertyRegistry.Application.EventHandlers;
@@ -17,7 +18,7 @@ public static class ResaleOpenedHandler
     }
 
     /// <summary>Records the resale on the home's availability.</summary>
-    public static IMartenOp Handle(ResaleOpened @event, HomeAvailabilityView? availability)
+    public static (IMartenOp, OutgoingMessages) Handle(ResaleOpened @event, HomeAvailabilityView? availability)
     {
         ArgumentNullException.ThrowIfNull(@event);
 

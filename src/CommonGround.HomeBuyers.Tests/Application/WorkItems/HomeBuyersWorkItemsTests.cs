@@ -134,34 +134,6 @@ public class HomeBuyersWorkItemsTests
         }
     }
 
-    public class TheForSelectionMethod
-    {
-        private readonly TestBed _testBed = new();
-
-        [Fact]
-        public void GivenOpenSelection_WhenDerived_ThenWaitsSinceItStartedWithItsCandidateCount()
-        {
-            var selection = new HomeSelectionView
-            {
-                Id = "selection-1",
-                HomeId = "home-1",
-                StartedAt = new DateTimeOffset(2026, 10, 28, 15, 0, 0, TimeSpan.Zero),
-                Candidates = [new HomeSelectionCandidateEntry(), new HomeSelectionCandidateEntry()],
-            };
-
-            var item = HomeBuyersWorkItems.ForSelection(selection, "14 Alder Lane", _testBed.Zone);
-
-            item.Should().BeEquivalentTo(new
-            {
-                Kind = HomeBuyersWorkItems.SelectionOpen,
-                Label = "14 Alder Lane",
-                Detail = "Open, 2 candidates to choose from",
-                WaitingSince = new DateOnly(2026, 10, 28),
-                Actions = new[] { HomeBuyersWorkItems.ChooseHousehold },
-            });
-        }
-    }
-
     public class TheForIncomeLimitsMethod
     {
         private readonly TestBed _testBed = new();
@@ -192,7 +164,7 @@ public class HomeBuyersWorkItemsTests
                 Kind = HomeBuyersWorkItems.IncomeLimitsMissing,
                 RecordType = "income-limits",
                 RecordId = string.Empty,
-                Detail = "No 80%, 120% limits in effect; selections can't start for A Street, B Street, C Street and 1 more",
+                Detail = "No 80%, 120% limits in effect; households can't be chosen for A Street, B Street, C Street and 1 more",
                 WaitingSince = _testBed.Today,
                 Actions = new[] { HomeBuyersWorkItems.EnterIncomeLimits },
             });
@@ -210,7 +182,7 @@ public class HomeBuyersWorkItemsTests
             {
                 Kind = HomeBuyersWorkItems.IncomeLimitsMissing,
                 RecordId = "schedule-1",
-                Detail = "No 60% limits in effect; selections can't start for B Street",
+                Detail = "No 60% limits in effect; households can't be chosen for B Street",
             });
         }
 

@@ -17,7 +17,7 @@ public class HomeIncomeLimitSetHandlerTests
 
             var op = HomeIncomeLimitSetHandler.Handle(new HomeIncomeLimitSet(HandlerTestBed.HomeId, 120), facts);
 
-            op.Should().BeOfType<StoreDoc<HomeFactsView>>();
+            op.Should().BeOfType<UpdateDoc<HomeFactsView>>();
             facts.IncomeLimitPercentOfAmi.Should().Be(120);
         }
 

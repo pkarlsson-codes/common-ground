@@ -8,15 +8,15 @@ import PurchaseTermsFields from './PurchaseTermsFields'
 import { emptyPurchaseTerms, purchaseTermsComplete, type PurchaseTerms } from './purchaseTerms'
 
 type Props = {
-  selectionId: string
-  /** The candidates staff marked as tied, or null to draw from every candidate. */
+  homeId: string
+  /** The households staff marked as tied, or null to draw from the whole waiting list. */
   tiedApplicationIds: string[] | null
-  candidateCount: number
+  waitingCount: number
   assessedValue: number | null | undefined
   onClose: () => void
 }
 
-export default function DrawLotteryPanel({ selectionId, tiedApplicationIds, candidateCount, assessedValue, onClose }: Props) {
+export default function DrawLotteryPanel({ homeId, tiedApplicationIds, waitingCount, assessedValue, onClose }: Props) {
   const [terms, setTerms] = useState<PurchaseTerms>(emptyPurchaseTerms)
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
   const mutation = useDrawSelectionLottery()
@@ -28,7 +28,7 @@ export default function DrawLotteryPanel({ selectionId, tiedApplicationIds, cand
 
     try {
       await mutation.mutateAsync({
-        selectionId,
+        homeId,
         request: {
           tiedApplicationIds,
           groundLeaseTemplateId: terms.groundLeaseTemplateId,
@@ -44,8 +44,8 @@ export default function DrawLotteryPanel({ selectionId, tiedApplicationIds, cand
   }
 
   const poolDescription = tiedApplicationIds
-    ? `Draws between the ${tiedApplicationIds.length} tied candidates you marked.`
-    : `Draws from all ${candidateCount} candidates.`
+    ? `Draws between the ${tiedApplicationIds.length} tied households you marked.`
+    : `Draws from all ${waitingCount} households on the waiting list.`
 
   return (
     <SlideOver
@@ -68,8 +68,8 @@ export default function DrawLotteryPanel({ selectionId, tiedApplicationIds, cand
     >
       <form id="draw-lottery-form" onSubmit={handleSubmit}>
         <div className="detail-field__value" style={{ marginBottom: 16 }}>
-          Candidates who can no longer be selected are left out of the draw. The seed is recorded so the
-          draw can be checked.
+          Households that can't be chosen on the date of the draw are left out of it. The whole waiting list and
+          the seed are recorded, so the draw can be checked.
         </div>
         <div className="form-grid">
           <PurchaseTermsFields value={terms} onChange={setTerms} assessedValue={assessedValue} />

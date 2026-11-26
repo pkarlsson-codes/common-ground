@@ -16,65 +16,45 @@
 
 import * as runtime from '../runtime';
 import type {
-  CancelHomeSelectionRequest,
   DrawSelectionLotteryRequest,
-  HomeSelectionResponse,
-  HomeSelectionSummaryResponse,
+  HomeSelectionCreatedResponse,
+  HomeSelectionOverviewResponse,
   PaginatedResponseOfHomeSelectionListItemResponse,
   ProblemDetails,
   SelectHouseholdByPriorityRequest,
-  StartHomeSelectionResponse,
 } from '../models/index';
 import {
-    CancelHomeSelectionRequestFromJSON,
-    CancelHomeSelectionRequestToJSON,
     DrawSelectionLotteryRequestFromJSON,
     DrawSelectionLotteryRequestToJSON,
-    HomeSelectionResponseFromJSON,
-    HomeSelectionResponseToJSON,
-    HomeSelectionSummaryResponseFromJSON,
-    HomeSelectionSummaryResponseToJSON,
+    HomeSelectionCreatedResponseFromJSON,
+    HomeSelectionCreatedResponseToJSON,
+    HomeSelectionOverviewResponseFromJSON,
+    HomeSelectionOverviewResponseToJSON,
     PaginatedResponseOfHomeSelectionListItemResponseFromJSON,
     PaginatedResponseOfHomeSelectionListItemResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
     SelectHouseholdByPriorityRequestFromJSON,
     SelectHouseholdByPriorityRequestToJSON,
-    StartHomeSelectionResponseFromJSON,
-    StartHomeSelectionResponseToJSON,
 } from '../models/index';
 
-export interface CancelHomeSelectionOperationRequest {
-    selectionId: string;
-    cancelHomeSelectionRequest: CancelHomeSelectionRequest;
-}
-
 export interface DrawSelectionLotteryOperationRequest {
-    selectionId: string;
+    homeId: string;
     drawSelectionLotteryRequest: DrawSelectionLotteryRequest;
 }
 
-export interface GetHomeSelectionRequest {
-    selectionId: string;
+export interface GetHomeSelectionOverviewRequest {
+    homeId: string;
 }
 
 export interface GetHomeSelectionsRequest {
     pageNumber?: number;
     pageSize?: number;
-    status?: string | null;
-}
-
-export interface GetHomeSelectionsForHomeRequest {
-    homeId: string;
 }
 
 export interface SelectHouseholdByPriorityOperationRequest {
-    selectionId: string;
-    selectHouseholdByPriorityRequest: SelectHouseholdByPriorityRequest;
-}
-
-export interface StartHomeSelectionRequest {
     homeId: string;
+    selectHouseholdByPriorityRequest: SelectHouseholdByPriorityRequest;
 }
 
 /**
@@ -86,21 +66,7 @@ export interface StartHomeSelectionRequest {
 export interface HomeSelectionsApiInterface {
     /**
      * 
-     * @param {string} selectionId 
-     * @param {CancelHomeSelectionRequest} cancelHomeSelectionRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof HomeSelectionsApiInterface
-     */
-    cancelHomeSelectionRaw(requestParameters: CancelHomeSelectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
-
-    /**
-     */
-    cancelHomeSelection(requestParameters: CancelHomeSelectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
-
-    /**
-     * 
-     * @param {string} selectionId 
+     * @param {string} homeId 
      * @param {DrawSelectionLotteryRequest} drawSelectionLotteryRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -110,26 +76,25 @@ export interface HomeSelectionsApiInterface {
 
     /**
      */
-    drawSelectionLottery(requestParameters: DrawSelectionLotteryOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+    drawSelectionLottery(requestParameters: DrawSelectionLotteryOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
     /**
      * 
-     * @param {string} selectionId 
+     * @param {string} homeId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HomeSelectionsApiInterface
      */
-    getHomeSelectionRaw(requestParameters: GetHomeSelectionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HomeSelectionResponse>>;
+    getHomeSelectionOverviewRaw(requestParameters: GetHomeSelectionOverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HomeSelectionOverviewResponse>>;
 
     /**
      */
-    getHomeSelection(requestParameters: GetHomeSelectionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HomeSelectionResponse>;
+    getHomeSelectionOverview(requestParameters: GetHomeSelectionOverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HomeSelectionOverviewResponse>;
 
     /**
      * 
      * @param {number} [pageNumber] 
      * @param {number} [pageSize] 
-     * @param {string} [status] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HomeSelectionsApiInterface
@@ -143,19 +108,6 @@ export interface HomeSelectionsApiInterface {
     /**
      * 
      * @param {string} homeId 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof HomeSelectionsApiInterface
-     */
-    getHomeSelectionsForHomeRaw(requestParameters: GetHomeSelectionsForHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<HomeSelectionSummaryResponse>>>;
-
-    /**
-     */
-    getHomeSelectionsForHome(requestParameters: GetHomeSelectionsForHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<HomeSelectionSummaryResponse>>;
-
-    /**
-     * 
-     * @param {string} selectionId 
      * @param {SelectHouseholdByPriorityRequest} selectHouseholdByPriorityRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -165,20 +117,7 @@ export interface HomeSelectionsApiInterface {
 
     /**
      */
-    selectHouseholdByPriority(requestParameters: SelectHouseholdByPriorityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
-
-    /**
-     * 
-     * @param {string} homeId 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof HomeSelectionsApiInterface
-     */
-    startHomeSelectionRaw(requestParameters: StartHomeSelectionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
-
-    /**
-     */
-    startHomeSelection(requestParameters: StartHomeSelectionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
+    selectHouseholdByPriority(requestParameters: SelectHouseholdByPriorityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object>;
 
 }
 
@@ -189,63 +128,11 @@ export class HomeSelectionsApi extends runtime.BaseAPI implements HomeSelections
 
     /**
      */
-    async cancelHomeSelectionRaw(requestParameters: CancelHomeSelectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters['selectionId'] == null) {
-            throw new runtime.RequiredError(
-                'selectionId',
-                'Required parameter "selectionId" was null or undefined when calling cancelHomeSelection().'
-            );
-        }
-
-        if (requestParameters['cancelHomeSelectionRequest'] == null) {
-            throw new runtime.RequiredError(
-                'cancelHomeSelectionRequest',
-                'Required parameter "cancelHomeSelectionRequest" was null or undefined when calling cancelHomeSelection().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-
-        let urlPath = `/api/v1/home-selections/{selectionId}/cancel`;
-        urlPath = urlPath.replace(`{${"selectionId"}}`, encodeURIComponent(String(requestParameters['selectionId'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: CancelHomeSelectionRequestToJSON(requestParameters['cancelHomeSelectionRequest']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse<any>(response);
-    }
-
-    /**
-     */
-    async cancelHomeSelection(requestParameters: CancelHomeSelectionOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
-        const response = await this.cancelHomeSelectionRaw(requestParameters, initOverrides);
-        switch (response.raw.status) {
-            case 204:
-                return null;
-            case 200:
-                return await response.value();
-            default:
-                return await response.value();
-        }
-    }
-
-    /**
-     */
     async drawSelectionLotteryRaw(requestParameters: DrawSelectionLotteryOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters['selectionId'] == null) {
+        if (requestParameters['homeId'] == null) {
             throw new runtime.RequiredError(
-                'selectionId',
-                'Required parameter "selectionId" was null or undefined when calling drawSelectionLottery().'
+                'homeId',
+                'Required parameter "homeId" was null or undefined when calling drawSelectionLottery().'
             );
         }
 
@@ -263,8 +150,8 @@ export class HomeSelectionsApi extends runtime.BaseAPI implements HomeSelections
         headerParameters['Content-Type'] = 'application/json';
 
 
-        let urlPath = `/api/v1/home-selections/{selectionId}/draw-lottery`;
-        urlPath = urlPath.replace(`{${"selectionId"}}`, encodeURIComponent(String(requestParameters['selectionId'])));
+        let urlPath = `/api/v1/homes/{homeId}/home-selections/draw-lottery`;
+        urlPath = urlPath.replace(`{${"homeId"}}`, encodeURIComponent(String(requestParameters['homeId'])));
 
         const response = await this.request({
             path: urlPath,
@@ -279,25 +166,18 @@ export class HomeSelectionsApi extends runtime.BaseAPI implements HomeSelections
 
     /**
      */
-    async drawSelectionLottery(requestParameters: DrawSelectionLotteryOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+    async drawSelectionLottery(requestParameters: DrawSelectionLotteryOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.drawSelectionLotteryRaw(requestParameters, initOverrides);
-        switch (response.raw.status) {
-            case 204:
-                return null;
-            case 200:
-                return await response.value();
-            default:
-                return await response.value();
-        }
+        return await response.value();
     }
 
     /**
      */
-    async getHomeSelectionRaw(requestParameters: GetHomeSelectionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HomeSelectionResponse>> {
-        if (requestParameters['selectionId'] == null) {
+    async getHomeSelectionOverviewRaw(requestParameters: GetHomeSelectionOverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HomeSelectionOverviewResponse>> {
+        if (requestParameters['homeId'] == null) {
             throw new runtime.RequiredError(
-                'selectionId',
-                'Required parameter "selectionId" was null or undefined when calling getHomeSelection().'
+                'homeId',
+                'Required parameter "homeId" was null or undefined when calling getHomeSelectionOverview().'
             );
         }
 
@@ -306,8 +186,8 @@ export class HomeSelectionsApi extends runtime.BaseAPI implements HomeSelections
         const headerParameters: runtime.HTTPHeaders = {};
 
 
-        let urlPath = `/api/v1/home-selections/{selectionId}`;
-        urlPath = urlPath.replace(`{${"selectionId"}}`, encodeURIComponent(String(requestParameters['selectionId'])));
+        let urlPath = `/api/v1/homes/{homeId}/selection`;
+        urlPath = urlPath.replace(`{${"homeId"}}`, encodeURIComponent(String(requestParameters['homeId'])));
 
         const response = await this.request({
             path: urlPath,
@@ -316,13 +196,13 @@ export class HomeSelectionsApi extends runtime.BaseAPI implements HomeSelections
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => HomeSelectionResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => HomeSelectionOverviewResponseFromJSON(jsonValue));
     }
 
     /**
      */
-    async getHomeSelection(requestParameters: GetHomeSelectionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HomeSelectionResponse> {
-        const response = await this.getHomeSelectionRaw(requestParameters, initOverrides);
+    async getHomeSelectionOverview(requestParameters: GetHomeSelectionOverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HomeSelectionOverviewResponse> {
+        const response = await this.getHomeSelectionOverviewRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -337,10 +217,6 @@ export class HomeSelectionsApi extends runtime.BaseAPI implements HomeSelections
 
         if (requestParameters['pageSize'] != null) {
             queryParameters['pageSize'] = requestParameters['pageSize'];
-        }
-
-        if (requestParameters['status'] != null) {
-            queryParameters['status'] = requestParameters['status'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -367,46 +243,11 @@ export class HomeSelectionsApi extends runtime.BaseAPI implements HomeSelections
 
     /**
      */
-    async getHomeSelectionsForHomeRaw(requestParameters: GetHomeSelectionsForHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<HomeSelectionSummaryResponse>>> {
+    async selectHouseholdByPriorityRaw(requestParameters: SelectHouseholdByPriorityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['homeId'] == null) {
             throw new runtime.RequiredError(
                 'homeId',
-                'Required parameter "homeId" was null or undefined when calling getHomeSelectionsForHome().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-
-        let urlPath = `/api/v1/homes/{homeId}/home-selections`;
-        urlPath = urlPath.replace(`{${"homeId"}}`, encodeURIComponent(String(requestParameters['homeId'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(HomeSelectionSummaryResponseFromJSON));
-    }
-
-    /**
-     */
-    async getHomeSelectionsForHome(requestParameters: GetHomeSelectionsForHomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<HomeSelectionSummaryResponse>> {
-        const response = await this.getHomeSelectionsForHomeRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     */
-    async selectHouseholdByPriorityRaw(requestParameters: SelectHouseholdByPriorityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters['selectionId'] == null) {
-            throw new runtime.RequiredError(
-                'selectionId',
-                'Required parameter "selectionId" was null or undefined when calling selectHouseholdByPriority().'
+                'Required parameter "homeId" was null or undefined when calling selectHouseholdByPriority().'
             );
         }
 
@@ -424,8 +265,8 @@ export class HomeSelectionsApi extends runtime.BaseAPI implements HomeSelections
         headerParameters['Content-Type'] = 'application/json';
 
 
-        let urlPath = `/api/v1/home-selections/{selectionId}/select-by-priority`;
-        urlPath = urlPath.replace(`{${"selectionId"}}`, encodeURIComponent(String(requestParameters['selectionId'])));
+        let urlPath = `/api/v1/homes/{homeId}/home-selections/select-by-priority`;
+        urlPath = urlPath.replace(`{${"homeId"}}`, encodeURIComponent(String(requestParameters['homeId'])));
 
         const response = await this.request({
             path: urlPath,
@@ -440,50 +281,8 @@ export class HomeSelectionsApi extends runtime.BaseAPI implements HomeSelections
 
     /**
      */
-    async selectHouseholdByPriority(requestParameters: SelectHouseholdByPriorityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+    async selectHouseholdByPriority(requestParameters: SelectHouseholdByPriorityOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.selectHouseholdByPriorityRaw(requestParameters, initOverrides);
-        switch (response.raw.status) {
-            case 204:
-                return null;
-            case 200:
-                return await response.value();
-            default:
-                return await response.value();
-        }
-    }
-
-    /**
-     */
-    async startHomeSelectionRaw(requestParameters: StartHomeSelectionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters['homeId'] == null) {
-            throw new runtime.RequiredError(
-                'homeId',
-                'Required parameter "homeId" was null or undefined when calling startHomeSelection().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-
-        let urlPath = `/api/v1/homes/{homeId}/home-selections`;
-        urlPath = urlPath.replace(`{${"homeId"}}`, encodeURIComponent(String(requestParameters['homeId'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse<any>(response);
-    }
-
-    /**
-     */
-    async startHomeSelection(requestParameters: StartHomeSelectionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
-        const response = await this.startHomeSelectionRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

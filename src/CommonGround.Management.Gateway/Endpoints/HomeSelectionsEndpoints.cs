@@ -9,27 +9,15 @@ namespace CommonGround.Management.Gateway.Endpoints;
 
 public static class HomeSelectionsEndpoints
 {
-    [WolverinePost("/api/v1/homes/{homeId}/home-selections")]
-    [ProducesResponseType<StartHomeSelectionResponse>(StatusCodes.Status201Created)]
-    public static async Task<IResult> StartHomeSelection(
+    [WolverineGet("/api/v1/homes/{homeId}/selection")]
+    [ProducesResponseType<HomeSelectionOverviewResponse>(StatusCodes.Status200OK)]
+    public static async Task<IResult> GetHomeSelectionOverview(
         string homeId,
         IHomeSelectionsApiClient client,
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
-        var result = await client.StartHomeSelectionAsync(homeId, cancellationToken).ConfigureAwait(false);
-        return Results.Created($"/api/v1/home-selections/{result.SelectionId}", result);
-    }
-
-    [WolverineGet("/api/v1/homes/{homeId}/home-selections")]
-    [ProducesResponseType<IReadOnlyList<HomeSelectionSummaryResponse>>(StatusCodes.Status200OK)]
-    public static async Task<IResult> GetHomeSelectionsForHome(
-        string homeId,
-        IHomeSelectionsApiClient client,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
-        var result = await client.GetHomeSelectionsForHomeAsync(homeId, cancellationToken).ConfigureAwait(false);
+        var result = await client.GetHomeSelectionOverviewAsync(homeId, cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
     }
 
@@ -44,57 +32,31 @@ public static class HomeSelectionsEndpoints
         return Results.Ok(result);
     }
 
-    [WolverineGet("/api/v1/home-selections/{selectionId}")]
-    [ProducesResponseType<HomeSelectionResponse>(StatusCodes.Status200OK)]
-    public static async Task<IResult> GetHomeSelection(
-        string selectionId,
-        IHomeSelectionsApiClient client,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(selectionId);
-        var result = await client.GetHomeSelectionAsync(selectionId, cancellationToken).ConfigureAwait(false);
-        return Results.Ok(result);
-    }
-
-    [WolverinePost("/api/v1/home-selections/{selectionId}/select-by-priority")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [WolverinePost("/api/v1/homes/{homeId}/home-selections/select-by-priority")]
+    [ProducesResponseType<HomeSelectionCreatedResponse>(StatusCodes.Status201Created)]
     public static async Task<IResult> SelectHouseholdByPriority(
-        string selectionId,
+        string homeId,
         SelectHouseholdByPriorityRequest request,
         IHomeSelectionsApiClient client,
         CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(selectionId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
         ArgumentNullException.ThrowIfNull(request);
-        await client.SelectHouseholdByPriorityAsync(selectionId, request, cancellationToken).ConfigureAwait(false);
-        return Results.NoContent();
+        var result = await client.SelectHouseholdByPriorityAsync(homeId, request, cancellationToken).ConfigureAwait(false);
+        return Results.Created($"/api/v1/homes/{homeId}/selection", result);
     }
 
-    [WolverinePost("/api/v1/home-selections/{selectionId}/draw-lottery")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [WolverinePost("/api/v1/homes/{homeId}/home-selections/draw-lottery")]
+    [ProducesResponseType<HomeSelectionCreatedResponse>(StatusCodes.Status201Created)]
     public static async Task<IResult> DrawSelectionLottery(
-        string selectionId,
+        string homeId,
         DrawSelectionLotteryRequest request,
         IHomeSelectionsApiClient client,
         CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(selectionId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
         ArgumentNullException.ThrowIfNull(request);
-        await client.DrawSelectionLotteryAsync(selectionId, request, cancellationToken).ConfigureAwait(false);
-        return Results.NoContent();
-    }
-
-    [WolverinePost("/api/v1/home-selections/{selectionId}/cancel")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public static async Task<IResult> CancelHomeSelection(
-        string selectionId,
-        CancelHomeSelectionRequest request,
-        IHomeSelectionsApiClient client,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(selectionId);
-        ArgumentNullException.ThrowIfNull(request);
-        await client.CancelHomeSelectionAsync(selectionId, request, cancellationToken).ConfigureAwait(false);
-        return Results.NoContent();
+        var result = await client.DrawSelectionLotteryAsync(homeId, request, cancellationToken).ConfigureAwait(false);
+        return Results.Created($"/api/v1/homes/{homeId}/selection", result);
     }
 }

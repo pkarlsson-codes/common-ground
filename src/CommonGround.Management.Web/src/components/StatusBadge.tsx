@@ -3,7 +3,6 @@ import { statusLabel } from '../utils/statusLabel'
 const CSS_CLASS: Record<string, string> = {
   // Property Registry
   Available:        'badge-available',
-  InSelection:      'badge-inprogress',
   UnderContract:    'badge-closingscheduled',
   Leased:           'badge-occupied',
   Resale:           'badge-stalled',
@@ -38,9 +37,11 @@ const CSS_CLASS: Record<string, string> = {
   Submitted:        'badge-inprogress',
   Verified:         'badge-closed',
   Overdue:          'badge-stalled',
-  // Home Selection
+  // Home Selection outcomes
   Open:             'badge-inprogress',
-  FellThrough:      'badge-failed',
+  Chosen:           'badge-closed',
+  PassedOver:       'badge-default',
+  CouldNotBeChosen: 'badge-overincomelimit',
   // Property Inspection
   Scheduled:        'badge-initiated',
   Completed:        'badge-closed',

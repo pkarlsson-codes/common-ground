@@ -15,49 +15,19 @@ namespace CommonGround.API.HomeBuyers;
 
 public static class HomeSelectionsEndpoints
 {
-    [WolverinePost("/api/homes/{homeId}/home-selections")]
-    public static async Task<IResult> StartHomeSelection(
-        string homeId,
-        HttpContext httpContext,
-        IMessageBus bus,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
-
-        var userId = httpContext.GetUserId();
-
-        var id = HomeSelectionId.Generate();
-        await bus.InvokeForTenantAsync(bus.TenantId!,
-            new StartHomeSelection(id, homeId, userId),
-            cancellationToken);
-
-        return Results.Created($"/api/home-selections/{id.Value}", new StartHomeSelectionResponse(id.Value));
-    }
-
-    [WolverineGet("/api/homes/{homeId}/home-selections")]
-    public static async Task<IResult> GetHomeSelectionsForHome(
+    [WolverineGet("/api/homes/{homeId}/selection")]
+    public static async Task<IResult> GetHomeSelectionOverview(
         string homeId,
         IMessageBus bus,
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
 
-        var selections = await bus.InvokeForTenantAsync<IReadOnlyList<HomeSelectionView>>(bus.TenantId!,
-            new GetHomeSelectionsForHome(homeId),
+        var overview = await bus.InvokeForTenantAsync<HomeSelectionOverview>(bus.TenantId!,
+            new GetHomeSelectionOverview(homeId),
             cancellationToken);
 
-        var response = selections.Select(s => new HomeSelectionSummaryResponse(
-            s.Id,
-            s.HomeId,
-            s.Status,
-            s.StartedBy,
-            s.StartedAt,
-            s.Candidates.Count,
-            s.SelectedApplicationId,
-            s.SelectionMethod,
-            s.ClosedAt));
-
-        return Results.Ok(response);
+        return Results.Ok(MapToResponse(overview));
     }
 
     [WolverineGet("/api/home-selections")]
@@ -66,49 +36,35 @@ public static class HomeSelectionsEndpoints
         IMessageBus bus,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
         var result = await bus.InvokeForTenantAsync<PaginatedResponse<HomeSelectionListItem>>(bus.TenantId!,
-            new GetHomeSelections(request.Page, request.Status),
+            new GetHomeSelections(request.Page),
             cancellationToken);
 
         var response = result.MapItems(i => new HomeSelectionListItemResponse(
             i.Selection.Id,
             i.Selection.HomeId,
             i.HomeLabel,
-            i.Selection.Status,
-            i.Selection.StartedAt,
-            i.Selection.Candidates.Count,
+            i.Selection.SelectedDate,
+            i.Selection.RecordedAt,
+            i.Selection.SelectionMethod,
+            i.Selection.Applications.Count,
             i.Selection.SelectedApplicationId,
-            MapContact(i.ChosenContact),
-            i.Selection.ClosedAt,
-            i.Selection.FellThroughDate));
+            MapContact(i.ChosenContact)));
 
         return Results.Ok(response);
     }
 
-    [WolverineGet("/api/home-selections/{selectionId}")]
-    public static async Task<IResult> GetHomeSelection(
-        string selectionId,
-        IMessageBus bus,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(selectionId);
-
-        var details = await bus.InvokeForTenantAsync<HomeSelectionDetails>(bus.TenantId!,
-            new GetHomeSelection(HomeSelectionId.Create(selectionId)),
-            cancellationToken);
-
-        return Results.Ok(MapToResponse(details));
-    }
-
-    [WolverinePost("/api/home-selections/{selectionId}/select-by-priority")]
+    [WolverinePost("/api/homes/{homeId}/home-selections/select-by-priority")]
     public static async Task<IResult> SelectHouseholdByPriority(
-        string selectionId,
+        string homeId,
         SelectHouseholdByPriorityRequest request,
         HttpContext httpContext,
         IMessageBus bus,
         CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(selectionId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
         ArgumentNullException.ThrowIfNull(request);
 
         var priorities = new List<SelectionPriority>();
@@ -124,9 +80,11 @@ public static class HomeSelectionsEndpoints
 
         var userId = httpContext.GetUserId();
 
+        var id = HomeSelectionId.Generate();
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new SelectHouseholdByPriority(
-                HomeSelectionId.Create(selectionId),
+                id,
+                homeId,
                 HomeownerApplicationId.Create(request.ApplicationId),
                 priorities,
                 request.Reason,
@@ -136,25 +94,27 @@ public static class HomeSelectionsEndpoints
                 userId),
             cancellationToken);
 
-        return Results.NoContent();
+        return Results.Created($"/api/homes/{homeId}/selection", new HomeSelectionCreatedResponse(id.Value));
     }
 
-    [WolverinePost("/api/home-selections/{selectionId}/draw-lottery")]
+    [WolverinePost("/api/homes/{homeId}/home-selections/draw-lottery")]
     public static async Task<IResult> DrawSelectionLottery(
-        string selectionId,
+        string homeId,
         DrawSelectionLotteryRequest request,
         HttpContext httpContext,
         IMessageBus bus,
         CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(selectionId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
         ArgumentNullException.ThrowIfNull(request);
 
         var userId = httpContext.GetUserId();
 
+        var id = HomeSelectionId.Generate();
         await bus.InvokeForTenantAsync(bus.TenantId!,
             new DrawSelectionLottery(
-                HomeSelectionId.Create(selectionId),
+                id,
+                homeId,
                 request.TiedApplicationIds?.Select(HomeownerApplicationId.Create).ToList(),
                 request.GroundLeaseTemplateId,
                 request.PurchasePrice,
@@ -162,76 +122,81 @@ public static class HomeSelectionsEndpoints
                 userId),
             cancellationToken);
 
-        return Results.NoContent();
+        return Results.Created($"/api/homes/{homeId}/selection", new HomeSelectionCreatedResponse(id.Value));
     }
 
-    [WolverinePost("/api/home-selections/{selectionId}/cancel")]
-    public static async Task<IResult> CancelHomeSelection(
-        string selectionId,
-        CancelHomeSelectionRequest request,
-        HttpContext httpContext,
-        IMessageBus bus,
-        CancellationToken cancellationToken)
+    private static HomeSelectionOverviewResponse MapToResponse(HomeSelectionOverview overview)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(selectionId);
-        ArgumentNullException.ThrowIfNull(request);
+        var home = overview.Home;
 
-        var userId = httpContext.GetUserId();
+        var waitingList = overview.WaitingList
+            .Select(a => new WaitingListComparisonEntryDto(
+                a.ApplicationId,
+                a.HouseholdId,
+                MapContact(a.PrimaryContact),
+                a.AnnualIncome,
+                a.HouseholdSize,
+                a.RequiresAccessibility,
+                a.WaitingSince,
+                a.IncomeLimit,
+                a.Reasons.Count == 0,
+                a.Reasons,
+                a.PrequalifiedAmount))
+            .ToList();
 
-        await bus.InvokeForTenantAsync(bus.TenantId!,
-            new CancelHomeSelection(HomeSelectionId.Create(selectionId), request.Reason, userId),
-            cancellationToken);
-
-        return Results.NoContent();
+        return new HomeSelectionOverviewResponse(
+            home.Id,
+            home.Label,
+            home.Bedrooms,
+            home.Bathrooms,
+            home.SquareFootage,
+            home.IsAccessible,
+            home.IncomeLimitPercentOfAmi,
+            overview.IncomeLimitsEffectiveFrom,
+            overview.HasIncomeLimitsInEffect,
+            overview.SaleStage,
+            overview.IsOffered,
+            overview.Today,
+            waitingList,
+            [.. overview.Decisions.Select(MapDecision)]);
     }
 
-    private static HomeSelectionResponse MapToResponse(HomeSelectionDetails details)
+    private static HomeSelectionDecisionDto MapDecision(HomeSelectionDecision decision)
     {
-        var view = details.Selection;
+        var s = decision.Selection;
+        var applications = decision.Applications
+            .Select(a => new HomeSelectionDecisionApplicationDto(
+                a.Entry.ApplicationId,
+                a.Entry.HouseholdId,
+                MapContact(a.PrimaryContact),
+                a.Entry.AnnualIncome,
+                a.Entry.HouseholdSize,
+                a.Entry.RequiresAccessibility,
+                a.Entry.WaitingSince,
+                a.Entry.IncomeLimit,
+                a.Entry.Outcome,
+                a.Entry.Reasons))
+            .ToList();
 
-        return new HomeSelectionResponse(
-            view.Id,
-            view.HomeId,
-            details.Home?.Label,
-            details.Home?.Bedrooms,
-            details.Home?.Bathrooms,
-            details.Home?.SquareFootage,
-            details.Home?.IsAccessible,
-            view.IncomeLimitPercentOfAmi,
-            view.IncomeLimitsEffectiveFrom,
-            view.Status,
-            view.StartedBy,
-            view.StartedAt,
-            [.. details.Candidates.Select(MapCandidate)],
-            view.SelectedApplicationId,
-            view.SelectionMethod,
-            view.Priorities,
-            view.SelectionReason,
-            view.LotterySeed,
-            view.LotteryPoolApplicationIds,
-            view.LotteryIneligibleApplicationIds,
-            view.CancellationReason,
-            view.ClosedBy,
-            view.ClosedAt,
-            view.FellThroughReason,
-            view.FellThroughDate);
+        return new HomeSelectionDecisionDto(
+            s.Id,
+            s.SelectedApplicationId,
+            s.SelectedHouseholdId,
+            s.SelectedDate,
+            s.SelectedBy,
+            s.RecordedAt,
+            s.SelectionMethod,
+            s.GroundLeaseTemplateId,
+            s.PurchasePrice,
+            s.IncomeLimitPercentOfAmi,
+            s.IncomeLimitsEffectiveFrom,
+            s.Priorities,
+            s.SelectionReason,
+            s.LotteryTiedApplicationIds,
+            s.LotteryPoolApplicationIds,
+            s.LotterySeed,
+            applications);
     }
-
-    private static HomeSelectionCandidateDto MapCandidate(HomeSelectionCandidateDetails candidate) =>
-        new(
-            candidate.Facts.ApplicationId,
-            candidate.Facts.HouseholdId,
-            MapContact(candidate.PrimaryContact),
-            candidate.Facts.AnnualIncome,
-            candidate.Facts.HouseholdSize,
-            candidate.Facts.RequiresAccessibility,
-            candidate.Facts.WaitingSince,
-            candidate.Facts.IncomeLimit,
-            candidate.Facts.IsOverIncomeLimit,
-            candidate.ApplicationPhase,
-            candidate.CanBeSelected,
-            candidate.PrequalifiedAmount,
-            candidate.NotSelectableReasons);
 
     private static HouseholdContactDto? MapContact(HouseholdContact? contact) =>
         contact is null ? null : new HouseholdContactDto(contact.Name, contact.Email, contact.Phone);

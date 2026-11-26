@@ -18,7 +18,6 @@ public sealed record HomeResponse(
     string? ConditionNotes,
     DateTimeOffset RegisteredAt,
     DateOnly? AvailableAgainDate,
-    DateOnly? SelectionOpenedDate,
     DateOnly? UnderContractDate,
     DateOnly? LeasedDate,
     DateOnly? ResaleNoticeDate,

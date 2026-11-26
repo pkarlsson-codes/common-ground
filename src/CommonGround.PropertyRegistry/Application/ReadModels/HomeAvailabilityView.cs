@@ -4,8 +4,9 @@ namespace CommonGround.PropertyRegistry.Application.ReadModels;
 
 /// <summary>
 /// Where a home stands in being sold, pieced together from HomeBuyers' selections and Homeownership's
-/// purchases, leases and resales. Those contexts decide; this only shows what they decided, so it takes their news in whatever
-/// order it arrives and never refuses any of it. A home without one is available.
+/// purchases, leases and resales. Those contexts decide; this only shows what they decided, so it takes their news in
+/// whatever order it arrives and never refuses any of it. A home without one is available. HomeBuyers hears of every
+/// change to <see cref="SaleStage"/> and refuses to choose a household for a home that isn't offered.
 /// </summary>
 public class HomeAvailabilityView
 {
@@ -20,8 +21,14 @@ public class HomeAvailabilityView
     /// <summary>Gets or sets the date the home last became available again after its purchase fell through, if it has.</summary>
     public DateOnly? AvailableAgainDate { get; set; }
 
-    /// <summary>Gets or sets the date the home's current selection opened, while it is in selection or later.</summary>
-    public DateOnly? SelectionOpenedDate { get; set; }
+    /// <summary>Gets or sets the date the home reached its <see cref="SaleStage"/>, or null when it has been there since it was registered.</summary>
+    public DateOnly? SaleStageSince { get; set; }
+
+    /// <summary>Gets or sets how many times the home's sale stage has been published as changed.</summary>
+    public int SaleStageSequence { get; set; }
+
+    /// <summary>Gets or sets the home's latest selection heard of, or null when none has been.</summary>
+    public string? LatestSelectionId { get; set; }
 
     /// <summary>Gets or sets the date the home went under contract, while it is under contract or later.</summary>
     public DateOnly? UnderContractDate { get; set; }
@@ -53,28 +60,16 @@ public class HomeAvailabilityView
     /// </summary>
     public Dictionary<string, DateOnly> FellThroughBeforeSelected { get; set; } = [];
 
-    /// <summary>Records that a selection started choosing a household for the home.</summary>
-    public void RecordSelectionStarted(string selectionId, DateTimeOffset startedAt, DateOnly openedDate)
-    {
-        var selection = SelectionFor(selectionId);
-        selection.StartedAt = startedAt;
-        selection.OpenedDate = openedDate;
-        Refresh();
-    }
-
-    /// <summary>Records that a selection was cancelled without choosing anyone.</summary>
-    public void RecordSelectionCancelled(string selectionId)
-    {
-        SelectionFor(selectionId).Cancelled = true;
-        Refresh();
-    }
-
-    /// <summary>Records that a selection chose a household, putting the home under contract.</summary>
-    public void RecordApplicationSelected(string selectionId, string applicationId, DateOnly selectedDate)
+    /// <summary>
+    /// Records that a selection chose a household, putting the home under contract. <paramref name="recordedAt"/> is when
+    /// the choice was recorded, which orders the home's selections; the date staff gave it may be earlier.
+    /// </summary>
+    public void RecordApplicationSelected(string selectionId, string applicationId, DateOnly selectedDate, DateTimeOffset recordedAt)
     {
         var selection = SelectionFor(selectionId);
         selection.ApplicationId = applicationId;
         selection.SelectedDate = selectedDate;
+        selection.RecordedAt = recordedAt;
         if (FellThroughBeforeSelected.Remove(applicationId, out var fellThroughDate))
             selection.FellThroughDate = fellThroughDate;
 
@@ -168,17 +163,18 @@ public class HomeAvailabilityView
         return selection;
     }
 
-    // HomeBuyers runs one selection per home at a time, so the latest to start is the one that counts;
-    // a selection heard of only through its outcome counts once news of its start arrives. A lease has one
-    // open resale at a time, so one heard of and not withdrawn or bought back is it, whether or not news of the
-    // lease came first. A buyback ends the lease and the selections before it: the home is vacant again, and
-    // only a lease or selection from the buyback on counts.
+    // HomeBuyers chooses a household for a home only while it is offered, so the latest selection recorded is the
+    // one that counts; a selection heard of only through its purchase falling through counts once news of the
+    // choice arrives. A lease has one open resale at a time, so one heard of and not withdrawn or bought back is
+    // it, whether or not news of the lease came first. A buyback ends the lease and the selections before it: the
+    // home is vacant again, and only a lease or selection from the buyback on counts.
     private void Refresh()
     {
         var endedDate = Resales.Max(r => r.BoughtBackDate);
-        var current = Selections.Where(s => endedDate is null || s.OpenedDate >= endedDate).ToList();
-        var latest = current.Where(s => s.StartedAt is not null).MaxBy(s => s.StartedAt);
-        var active = latest is { Cancelled: false, FellThroughDate: null } ? latest : null;
+        LatestSelectionId = Selections.Where(s => s.RecordedAt is not null).MaxBy(s => s.RecordedAt)?.Id;
+        var current = Selections.Where(s => endedDate is null || s.SelectedDate >= endedDate).ToList();
+        var latest = current.Where(s => s.RecordedAt is not null).MaxBy(s => s.RecordedAt);
+        var active = latest is { FellThroughDate: null } ? latest : null;
         var openResale = Resales.Find(r => r is { NoticeDate: not null, Withdrawn: false, BoughtBackDate: null });
         var leased = LeasedDate is not null && (endedDate is null || LeasedDate > endedDate);
         var held = leased ? null : HeldResale();
@@ -190,11 +186,9 @@ public class HomeAvailabilityView
             (true, _) => HomeSaleStage.NotForSale,
             _ when held is not null => HomeSaleStage.HeldByTrust,
             (false, null) => HomeSaleStage.Offered,
-            (false, { ApplicationId: null }) => HomeSaleStage.InSelection,
             _ => HomeSaleStage.UnderContract,
         };
         SaleStage = saleStage.DisplayName;
-        SelectionOpenedDate = active?.OpenedDate;
         UnderContractDate = active?.SelectedDate;
         ResaleNoticeDate = openResale?.NoticeDate;
         HeldSinceDate = held?.BoughtBackDate;
@@ -213,6 +207,15 @@ public class HomeAvailabilityView
         var again = candidates.Where(c => c.Date is not null).OrderByDescending(c => c.Date).Cast<(DateOnly? Date, string Cause)?>().FirstOrDefault();
         AvailableAgainDate = again?.Date;
         AvailableAgainCause = again?.Cause;
+
+        SaleStageSince = saleStage switch
+        {
+            _ when saleStage == HomeSaleStage.AwaitingTrustDecision => ResaleNoticeDate,
+            _ when saleStage == HomeSaleStage.NotForSale => LeasedDate,
+            _ when saleStage == HomeSaleStage.HeldByTrust => HeldSinceDate,
+            _ when saleStage == HomeSaleStage.UnderContract => UnderContractDate,
+            _ => AvailableAgainDate,
+        };
     }
 }
 
@@ -244,19 +247,13 @@ public class HomeAvailabilitySelection
     /// <summary>Gets or sets the selection ID.</summary>
     public string Id { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets when the selection started, once news of it has arrived.</summary>
-    public DateTimeOffset? StartedAt { get; set; }
+    /// <summary>Gets or sets when the choice was recorded, once news of it has arrived.</summary>
+    public DateTimeOffset? RecordedAt { get; set; }
 
-    /// <summary>Gets or sets the trust date the selection started on.</summary>
-    public DateOnly? OpenedDate { get; set; }
-
-    /// <summary>Gets or sets a value indicating whether the selection was cancelled without choosing anyone.</summary>
-    public bool Cancelled { get; set; }
-
-    /// <summary>Gets or sets the application the selection chose, once it has.</summary>
+    /// <summary>Gets or sets the application the selection chose, once news of it has arrived.</summary>
     public string? ApplicationId { get; set; }
 
-    /// <summary>Gets or sets the date the selection chose a household.</summary>
+    /// <summary>Gets or sets the date staff gave the choice.</summary>
     public DateOnly? SelectedDate { get; set; }
 
     /// <summary>Gets or sets the date the purchase the selection led to fell through, once it has.</summary>

@@ -6,12 +6,10 @@ using Marten.Pagination;
 
 namespace CommonGround.HomeBuyers.Application.Queries;
 
-/// <summary>Returns home selections across every home, newest first, optionally filtered by status.</summary>
-public sealed record GetHomeSelections(
-    PageSpec Page,
-    string? Status = null);
+/// <summary>Returns the households chosen for homes across every home, newest first.</summary>
+public sealed record GetHomeSelections(PageSpec Page);
 
-/// <summary>A home selection with the home's label and the chosen household's primary contact, once chosen.</summary>
+/// <summary>A home selection with the home's label and the chosen household's primary contact.</summary>
 public sealed record HomeSelectionListItem(
     HomeSelectionView Selection,
     string? HomeLabel,
@@ -28,15 +26,8 @@ public static class GetHomeSelectionsHandler
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        IQueryable<HomeSelectionView> query = session.Query<HomeSelectionView>();
-
-        if (!string.IsNullOrWhiteSpace(request.Status))
-        {
-            query = query.Where(v => v.Status == request.Status);
-        }
-
-        var page = await query
-            .OrderByDescending(v => v.StartedAt)
+        var page = await session.Query<HomeSelectionView>()
+            .OrderByDescending(v => v.RecordedAt)
             .ToPagedListAsync(request.Page.Number, request.Page.Size, cancellationToken)
             .ConfigureAwait(false);
 
@@ -45,10 +36,7 @@ public static class GetHomeSelectionsHandler
             .ConfigureAwait(false))
             .ToDictionary(h => h.Id);
 
-        var chosenHouseholdIds = page
-            .Select(s => s.Candidates.FirstOrDefault(c => c.ApplicationId == s.SelectedApplicationId)?.HouseholdId)
-            .OfType<string>()
-            .Distinct();
+        var chosenHouseholdIds = page.Select(s => s.SelectedHouseholdId).Distinct();
         var households = (await session
             .LoadManyAsync<HouseholdListItemView>(cancellationToken, chosenHouseholdIds)
             .ConfigureAwait(false))
@@ -58,8 +46,7 @@ public static class GetHomeSelectionsHandler
         {
             Items = [.. page.Select(s =>
             {
-                var chosenHouseholdId = s.Candidates.FirstOrDefault(c => c.ApplicationId == s.SelectedApplicationId)?.HouseholdId;
-                var household = chosenHouseholdId is null ? null : households.GetValueOrDefault(chosenHouseholdId);
+                var household = households.GetValueOrDefault(s.SelectedHouseholdId);
                 return new HomeSelectionListItem(
                     s,
                     homes.GetValueOrDefault(s.HomeId)?.Label,

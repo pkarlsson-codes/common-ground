@@ -9,7 +9,7 @@ import { useConnectedGroundLeases } from '../../hooks/groundLeases'
 import { useReleaseHomeForSale } from '../../hooks/homes'
 import { resaleStep, useOpenResaleForLease } from '../../hooks/resales'
 import { useToast } from '../../hooks/useToast'
-import { homeSelectionPath, useHomeSelectionsForHome, useStartHomeSelection } from '../../hooks/homeSelections'
+import { homeSelectionPath, useHomeSelectionOverview } from '../../hooks/homeSelections'
 import { isOpenPurchasePhase, purchaseWaitingOn, useConnectedPurchaseWorkflows, usePurchaseWorkflow } from '../../hooks/purchaseWorkflows'
 import { getApiProblem, type ApiProblemDetails } from '../../lib/getErrorMessage'
 import { formatStepDate, homeStage, homeStages, lifecycleSteps } from '../../lib/lifecycle'
@@ -26,40 +26,28 @@ export function HomeLifecycle({ home, moreActions }: Props) {
   const navigate = useNavigate()
   const homeId = home.id!
   const stage = homeStage(home.occupancy, home.saleStage)
-  const { data: selections } = useHomeSelectionsForHome(homeId)
+  const { data: selection } = useHomeSelectionOverview(homeId)
   const { data: purchases } = useConnectedPurchaseWorkflows({ homeId })
   const { data: leases } = useConnectedGroundLeases({ homeId })
   const openPurchaseId = purchases?.items?.find(p => isOpenPurchasePhase(p.phase))?.id ?? null
   const { data: openPurchase } = usePurchaseWorkflow(openPurchaseId)
-  const startMutation = useStartHomeSelection()
   const releaseMutation = useReleaseHomeForSale()
   const { success } = useToast()
   const [problem, setProblem] = useState<ApiProblemDetails | null>(null)
 
-  const openSelection = selections?.find(s => s.status === 'Open')
-  const endedCount = (selections ?? []).filter(s => s.status === 'Cancelled' || s.status === 'FellThrough').length
+  const earlierChoices = selection?.decisions?.length ?? 0
+  const waitingCount = selection?.waitingList?.length
   const activeLease = leases?.items?.find(l => l.status === 'Active')
   const { data: openResale } = useOpenResaleForLease(activeLease?.id ?? '')
 
   const steps = lifecycleSteps(homeStages(stage), stage, {
     Development: formatStepDate(new Date(home.registeredAt)),
     Available: formatStepDate(home.availableAgainDate) ?? formatStepDate(new Date(home.registeredAt)),
-    Selection: formatStepDate(home.selectionOpenedDate),
     Purchasing: home.underContractDate ? `Since ${formatStepDate(home.underContractDate)}` : undefined,
     Leased: formatStepDate(home.leasedDate),
     Resale: home.resaleNoticeDate ? `Notice ${formatStepDate(home.resaleNoticeDate)}` : undefined,
     'Held by Trust': formatStepDate(home.heldSinceDate),
   })
-
-  const handleStart = async () => {
-    setProblem(null)
-    try {
-      const { selectionId } = await startMutation.mutateAsync(homeId)
-      navigate(homeSelectionPath(selectionId!))
-    } catch (err) {
-      setProblem(await getApiProblem(err, 'Failed to start the selection.'))
-    }
-  }
 
   const handleRelease = async () => {
     setProblem(null)
@@ -74,12 +62,6 @@ export function HomeLifecycle({ home, moreActions }: Props) {
   let title: string
   let primary: NextStepAction | undefined
   switch (stage) {
-    case 'Selection':
-      title = openSelection
-        ? `A selection is choosing a household from ${openSelection.candidateCount} candidate${openSelection.candidateCount !== 1 ? 's' : ''}.`
-        : 'A selection is choosing a household for this home.'
-      primary = openSelection ? { label: 'Open Selection', onClick: () => navigate(homeSelectionPath(openSelection.id!)) } : undefined
-      break
     case 'Purchasing':
       title = openPurchase
         ? `The purchase by ${openPurchase.buyerFullName} is waiting on ${purchaseWaitingOn(openPurchase)}.`
@@ -109,8 +91,10 @@ export function HomeLifecycle({ home, moreActions }: Props) {
       primary = { label: releaseMutation.isPending ? 'Releasing…' : 'Release for Sale', onClick: () => { void handleRelease() }, disabled: releaseMutation.isPending }
       break
     default:
-      title = 'Choose a household from the waiting list for this home.'
-      primary = { label: startMutation.isPending ? 'Starting…' : 'Start Selection', onClick: () => { void handleStart() }, disabled: startMutation.isPending }
+      title = waitingCount === undefined
+        ? 'Choose a household from the waiting list for this home.'
+        : `Choose a household for this home from the ${waitingCount} on the waiting list.`
+      primary = { label: 'Choose a Household', onClick: () => navigate(homeSelectionPath(homeId)) }
   }
 
   return (
@@ -118,8 +102,8 @@ export function HomeLifecycle({ home, moreActions }: Props) {
       <LifecycleStepper steps={steps} label="Home lifecycle" />
       <NextStepCard
         title={title}
-        body={stage === 'Available' && endedCount > 0
-          ? `${endedCount} earlier selection${endedCount !== 1 ? 's' : ''} ended without a sale.`
+        body={stage === 'Available' && earlierChoices > 0
+          ? `${earlierChoices} household${earlierChoices !== 1 ? 's were' : ' was'} chosen for this home before.`
           : stage === 'Resale' && openResale
             ? `The resale is at the ${resaleStep(openResale)} step.`
             : undefined}
@@ -135,7 +119,7 @@ export function HomeLifecycle({ home, moreActions }: Props) {
 /** Links to the home's land parcel, selections, purchases, buying households and ground leases. */
 export function HomeConnectedRecords({ home }: { home: Home }) {
   const homeId = home.id!
-  const { data: selections, isLoading: selectionsLoading } = useHomeSelectionsForHome(homeId)
+  const { data: selection, isLoading: selectionsLoading } = useHomeSelectionOverview(homeId)
   const { data: purchases, isLoading: purchasesLoading } = useConnectedPurchaseWorkflows({ homeId })
   const { data: leases, isLoading: leasesLoading } = useConnectedGroundLeases({ homeId })
 
@@ -143,13 +127,12 @@ export function HomeConnectedRecords({ home }: { home: Home }) {
     ...(home.landParcelId
       ? [{ key: `parcel-${home.landParcelId}`, type: 'Land parcel', name: home.label ?? 'Land parcel', to: '/land-parcels', openId: home.landParcelId }]
       : []),
-    ...(selections ?? []).map(s => ({
+    ...(selection?.decisions ?? []).map(s => ({
       key: `selection-${s.id}`,
       type: 'Selection',
-      name: `Started ${formatStepDate(s.startedAt)}`,
-      meta: `${s.candidateCount} candidate${s.candidateCount !== 1 ? 's' : ''}`,
-      status: s.status ?? undefined,
-      to: homeSelectionPath(s.id!),
+      name: `Chosen ${formatStepDate(s.selectedDate)}`,
+      meta: `${s.selectionMethod === 'Lottery' ? 'By lottery' : 'By priority'} · ${s.applications?.length ?? 0} on the waiting list`,
+      to: homeSelectionPath(homeId),
     })),
     ...(purchases?.items ?? []).map(p => ({
       key: `purchase-${p.id}`,

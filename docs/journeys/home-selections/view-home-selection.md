@@ -1,17 +1,19 @@
 # View Home Selection
 
-1. User opens a selection from the Home selections page, from a home's Next Step card ("Start Selection" or "Open Selection") or Connected Records, from "Open Selection" on a row of an application's Passed Over section, or from a "Selection open" row on [Today](../today/work-through-today.md)
-2. Header shows the home's label, its bedrooms (and "Accessible" if it is), its income limit as judged at the start ("80% of AMI, limits effective Apr 1, 2026", or "No income limit"), when and by whom the selection was started, the number of candidates, the selection's status (Open, Completed, Fell Through, or Cancelled), and an "Open Home" link
-3. Candidates table lists each household side by side with its priority facts: Primary Contact (name and email), Annual Income, Household Size, Income Limit (the limit for that household size, with "Over income limit" when the income is higher), Needs Accessibility, Waiting Since (the application's approved date), Application phase, and Can Be Selected
-4. Can Be Selected is "No (over income limit)" for a candidate whose income was over the limit when the selection started; this does not change. Otherwise it is "Yes" only while the application is still Approved and the household's readiness is complete with a valid prequalification. It is checked live, so a candidate who withdraws or whose prequalification lapses after the selection starts shows "No"
-5. While the selection is Open:
-   - Each row has a "Tied" checkbox and a "Select" button (disabled when the candidate can't be selected)
-   - A toolbar offers "Draw Lottery From All" (or "Draw Lottery Between N Tied" once two or more are marked tied; disabled while exactly one is marked) and "Cancel Selection"
-6. Once Completed, Fell Through, or Cancelled, an Outcome section replaces the toolbar:
-   - Completed by priority: Method, Priorities, Reason, Selected By, Selected At
-   - Completed by lottery: Method, Seed, Drawn From (number of candidates), Left Out of Draw (number of candidates), Selected By, Selected At
-   - Fell Through: as for Completed, plus "Purchase fell through" with the date
-   - Cancelled: Cancellation Reason, Cancelled By, Cancelled At
-7. In a closed selection, the chosen candidate's row is marked "Selected", and candidates left out of a lottery draw are marked "Left out of draw", and over-limit candidates keep "Over income limit"
+1. User opens a home's selection page from the home's Next Step card ("Choose a Household"), from a selection in the home's Connected Records, from a row on the [Home selections](view-home-selections.md) page, from "Open Selection" on a row of an application's Passed Over section, or from "Choose household" on a "Home available" row on [Today](../today/work-through-today.md)
+2. Header shows the home's label, its bedrooms, bathrooms, square footage and whether it is accessible, its income limit ("80% of AMI, limits effective Apr 1, 2026", or "No income limit"), how many households are on the waiting list, a badge with where the home stands (Available, Under Contract, Leased, Resale or Held by Trust), and an "Open Home" link
+3. A Waiting List Today section compares the [waiting list](../waiting-list/view-waiting-list.md) as it is right now against the home. There is no snapshot and nothing to start: a household approved yesterday is on it, and one that withdrew this morning is not. Each household is listed side by side with its priority facts, longest waiting first: Applicant (name and email, and "Needs accessible home", flagged when the home is not accessible), Income (as declared on the application, against the home's limit for its household size), Prequalified (the approved amount, or "None"), Waiting Since (the application's approved date), and Can Be Chosen
+4. Can Be Chosen is "Yes", or every reason the household can't be chosen today: Over income limit, No primary member, Housing counseling not completed, CLT orientation not completed, No mortgage prequalification, Prequalification expired. Households are not scored or ranked
+5. While the home is offered to the waiting list:
+   - Each row has a "Tied" checkbox and a "Choose" button (disabled when the household can't be chosen)
+   - A toolbar offers "Draw Lottery From All" (or "Draw Lottery Between N Tied" once two or more are marked tied; disabled while exactly one is marked)
+6. When the home has an income limit and no income limits in effect today have its level, the section says so ("No 80% of AMI income limits are in effect. Enter them under Income Limits before choosing a household.") and offers no Choose or Draw buttons
+7. When the home is not offered, the section says why instead of offering the buttons: "A household has been chosen for this home. A new household can be chosen only if its purchase falls through." for a home under contract, or that the home is leased, in resale or held by the trust
+8. Below it, each household already chosen for the home has a section, newest first, headed "{name} chosen {date}":
+   - By priority: Method, Priorities, Reason, Chosen On, Chosen By, Purchase Price, Income Limit
+   - By lottery: Method, Drawn From (how many households, found tied or on the whole waiting list, and how many tied households were left out), Seed, Chosen On, Chosen By, Purchase Price, Income Limit
+   - A table of the whole waiting list as it was at that moment, each household marked Chosen, Passed Over, or Couldn't Be Chosen with its reasons. The record does not change afterwards, whatever happens to the purchase
 
-Continues in: [Select Household by Priority](select-household-by-priority.md), [Draw Selection Lottery](draw-selection-lottery.md), [Cancel Home Selection](cancel-home-selection.md)
+Unconfirmed with a practitioner: whether a trust needs to hold a home for a household before choosing, or to fix the list a committee or board decides from. Neither exists; the list is always the one as it is when staff choose.
+
+Continues in: [Select Household by Priority](select-household-by-priority.md), [Draw Selection Lottery](draw-selection-lottery.md)

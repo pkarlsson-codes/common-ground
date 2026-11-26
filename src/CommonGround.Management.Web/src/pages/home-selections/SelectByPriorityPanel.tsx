@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { HomeSelectionCandidateDto } from '../../api'
+import type { WaitingListComparisonEntryDto } from '../../api'
 import ApiProblemAlert from '../../components/ApiProblemAlert'
 import SlideOver from '../../components/SlideOver'
 import { SELECTION_PRIORITIES, useSelectHouseholdByPriority } from '../../hooks/homeSelections'
@@ -9,13 +9,13 @@ import PurchaseTermsFields from './PurchaseTermsFields'
 import { emptyPurchaseTerms, purchaseTermsComplete, type PurchaseTerms } from './purchaseTerms'
 
 type Props = {
-  selectionId: string
-  candidate: HomeSelectionCandidateDto
+  homeId: string
+  entry: WaitingListComparisonEntryDto
   assessedValue: number | null | undefined
   onClose: () => void
 }
 
-export default function SelectByPriorityPanel({ selectionId, candidate, assessedValue, onClose }: Props) {
+export default function SelectByPriorityPanel({ homeId, entry, assessedValue, onClose }: Props) {
   const [priorities, setPriorities] = useState<string[]>([])
   const [reason, setReason] = useState('')
   const [terms, setTerms] = useState<PurchaseTerms>(emptyPurchaseTerms)
@@ -32,9 +32,9 @@ export default function SelectByPriorityPanel({ selectionId, candidate, assessed
 
     try {
       await mutation.mutateAsync({
-        selectionId,
+        homeId,
         request: {
-          applicationId: candidate.applicationId!,
+          applicationId: entry.applicationId!,
           priorities: SELECTION_PRIORITIES.map(p => p.value).filter(v => priorities.includes(v)),
           reason,
           groundLeaseTemplateId: terms.groundLeaseTemplateId,
@@ -42,17 +42,17 @@ export default function SelectByPriorityPanel({ selectionId, candidate, assessed
           selectedDate: terms.selectedDate,
         },
       })
-      success('Household selected')
+      success('Household chosen')
       onClose()
     } catch (err) {
-      setProblem(await getApiProblem(err, 'Failed to select household.'))
+      setProblem(await getApiProblem(err, 'Failed to choose the household.'))
     }
   }
 
   return (
     <SlideOver
-      title="Select by Priority"
-      subtitle={candidate.primaryContact?.name ?? candidate.applicationId}
+      title="Choose by Priority"
+      subtitle={entry.primaryContact?.name ?? entry.applicationId}
       onClose={onClose}
       footer={
         <>
@@ -63,12 +63,15 @@ export default function SelectByPriorityPanel({ selectionId, candidate, assessed
             form="select-by-priority-form"
             disabled={mutation.isPending || priorities.length === 0 || !reason.trim() || !purchaseTermsComplete(terms)}
           >
-            {mutation.isPending ? 'Selecting…' : 'Select Household'}
+            {mutation.isPending ? 'Choosing…' : 'Choose Household'}
           </button>
         </>
       }
     >
       <form id="select-by-priority-form" onSubmit={handleSubmit}>
+        <div className="detail-field__value" style={{ marginBottom: 16 }}>
+          The waiting list is judged again on the date of the choice, and recorded with it.
+        </div>
         <div className="form-grid">
           <div className="form-field full">
             <label className="form-label">Priorities That Justify This Choice</label>
@@ -89,7 +92,7 @@ export default function SelectByPriorityPanel({ selectionId, candidate, assessed
               className="form-textarea"
               value={reason}
               onChange={e => setReason(e.target.value)}
-              placeholder="Why this household over the other candidates…"
+              placeholder="Why this household over the others on the waiting list…"
               required
             />
           </div>
@@ -97,7 +100,7 @@ export default function SelectByPriorityPanel({ selectionId, candidate, assessed
             value={terms}
             onChange={setTerms}
             assessedValue={assessedValue}
-            prequalifiedAmount={candidate.prequalifiedAmount ?? null}
+            prequalifiedAmount={entry.prequalifiedAmount ?? null}
           />
         </div>
 

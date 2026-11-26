@@ -1,15 +1,12 @@
-using CommonGround.HomeBuyers.Application.Commands;
-using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.Testing;
-using JasperFx.Events;
 
 namespace CommonGround.HomeBuyers.Tests.Application;
 
-/// <summary>Households, applications and selections as streams, for the handlers that write to several at once.</summary>
+/// <summary>Households and applications as streams, for the handlers that write to several at once.</summary>
 public class HandlerTestBed
 {
     public UserId StaffUser { get; } = UserId.Generate();
@@ -47,27 +44,6 @@ public class HandlerTestBed
         var application = ApprovedApplication(household);
         return application.Evolve(application.SelectForHome(
             household, HomeSelectionId.Generate(), HomeId, "land-parcel-1", "template-1", 200000m, SelectedDate, StaffUser,
-            CandidateFor(application, household), incomeLimitPercentOfAmi: null, incomeLimits: null))!;
+            incomeLimitPercentOfAmi: null, incomeLimits: null))!;
     }
-
-    public HomeSelection OpenSelection(params (HomeownerApplication Application, Household Household)[] candidates) =>
-        EventReplay.Replay<HomeSelection>(HomeSelection.Start(
-            HomeSelectionId.Generate(),
-            HomeId,
-            [.. candidates.Select(c => CandidateFor(c.Application, c.Household))],
-            incomeLimitPercentOfAmi: null,
-            scheduleInEffect: null,
-            SelectedDate,
-            activeSelectionId: null,
-            StaffUser));
-
-    public ChosenApplication Chosen(HomeownerApplication application, Household household) =>
-        new(
-            new StubEventStream<HomeownerApplication>(application),
-            household,
-            new HomeFactsView { Id = HomeId, LandParcelId = "land-parcel-1" },
-            CandidateFor(application, household));
-
-    public static SelectionCandidate CandidateFor(HomeownerApplication application, Household household) =>
-        SelectionCandidate.Create(application.Id, household.Id, Money.Create(65000m), 1, false, new DateOnly(2026, 6, 1), incomeLimit: null);
 }

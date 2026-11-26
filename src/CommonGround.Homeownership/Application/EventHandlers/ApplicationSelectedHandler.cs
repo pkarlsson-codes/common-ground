@@ -10,41 +10,32 @@ using Wolverine.Marten;
 
 namespace CommonGround.Homeownership.Application.EventHandlers;
 
-/// <summary>
-/// Reacts to applicant selection by initiating a purchase workflow, and records that the home's selection
-/// has ended: the purchase now stands for the home.
-/// </summary>
+/// <summary>Reacts to a household being chosen for a home by initiating a purchase workflow.</summary>
 public static class ApplicationSelectedHandler
 {
 
-    /// <summary>Finds the application's purchase workflow that is still open, if any, and the home's selection.</summary>
-    public static async Task<(PurchaseWorkflowView?, HomeSelectionView?)> LoadAsync(ApplicationSelected @event, IDocumentSession session, CancellationToken ct)
+    /// <summary>Finds the application's purchase workflow that is still open, if any.</summary>
+    public static Task<PurchaseWorkflowView?> LoadAsync(ApplicationSelected @event, IQuerySession session, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(@event);
         ArgumentNullException.ThrowIfNull(session);
 
-        var existingOpenWorkflow = await session.Query<PurchaseWorkflowView>()
+        return session.Query<PurchaseWorkflowView>()
             .Where(v => v.ApplicationId == @event.ApplicationId)
             .Matching(PurchaseWorkflowInProgress<PurchaseWorkflowView>.Instance)
-            .FirstOrDefaultAsync(ct)
-            .ConfigureAwait(false);
-        var selection = await HomeSelectionUpdate.LoadAsync(session, @event.HomeSelectionId, ct).ConfigureAwait(false);
-
-        return (existingOpenWorkflow, selection);
+            .FirstOrDefaultAsync(ct);
     }
 
     /// <summary>
     /// Creates a purchase workflow when an applicant is selected for a home, unless an open workflow already
-    /// exists for the application, and ends the home's selection.
+    /// exists for the application.
     /// </summary>
-    public static (IMartenOp, IMartenOp) Handle(ApplicationSelected @event, PurchaseWorkflowView? existingOpenWorkflow, HomeSelectionView? selection)
+    public static IMartenOp Handle(ApplicationSelected @event, PurchaseWorkflowView? existingOpenWorkflow)
     {
         ArgumentNullException.ThrowIfNull(@event);
 
-        var selectionEnded = HomeSelectionUpdate.Record(@event.HomeSelectionId, @event.HomeId, selection, view => view.RecordEnded());
-
         if (existingOpenWorkflow is not null)
-            return (MartenOps.Nothing(), selectionEnded);
+            return MartenOps.Nothing();
 
         var workflowId = PurchaseWorkflowId.Generate();
         var initiated = PurchaseWorkflow.Initiate(
@@ -66,6 +57,6 @@ public static class ApplicationSelectedHandler
                     [.. levels.Select(level => IncomeLimitLevel.Create(level.PercentOfAmi, [.. level.Limits.Select(Money.Create)]))])
                 : null);
 
-        return (MartenOps.StartStream<PurchaseWorkflow>(workflowId.Value, initiated), selectionEnded);
+        return MartenOps.StartStream<PurchaseWorkflow>(workflowId.Value, initiated);
     }
 }

@@ -5,10 +5,10 @@ namespace CommonGround.HomeBuyers.Contracts.Events;
 /// <summary>
 /// Integration event published when an applicant is selected for a specific home.
 /// Consumed by Homeownership to initiate a PurchaseWorkflow, and by PropertyRegistry to show the home under contract.
-/// <paramref name="AnnualIncome"/> and <paramref name="HouseholdSize"/> are what the household declared when the
-/// selection started. <paramref name="IncomeLimitPercentOfAmi"/> is the home's income limit the selection judged by,
+/// <paramref name="AnnualIncome"/> and <paramref name="HouseholdSize"/> are what the household declared on its
+/// application. <paramref name="IncomeLimitPercentOfAmi"/> is the home's income limit the selection judged by,
 /// null when the home had none. <paramref name="IncomeLimitsEffectiveFrom"/> and <paramref name="IncomeLimitLevels"/>
-/// are the income limit schedule in effect when the selection started, every level of it; both are null when no
+/// are the income limit schedule in effect on <paramref name="SelectedDate"/>, every level of it; both are null when no
 /// schedule was in effect.
 /// </summary>
 public sealed record ApplicationSelected(

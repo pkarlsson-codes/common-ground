@@ -1,51 +1,38 @@
 using CommonGround.HomeBuyers.Application.Commands;
-using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
-using CommonGround.HomeBuyers.Domain.HomeownerApplications.Events;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
-using CommonGround.SharedKernel.Domain.Exceptions;
-using Marten;
+using CommonGround.HomeBuyers.Domain.HomeSelections.Events;
 
 namespace CommonGround.HomeBuyers.Application.EventHandlers;
 
 /// <summary>
-/// When a home selection chooses a household, passes over every other candidate, one message each,
-/// so completing the selection writes only the selection and the chosen application. Selections that
-/// share candidates can then complete at the same time without conflicting.
+/// When a household is chosen for a home, passes over every application the choice marked passed over, one message
+/// each, so recording the choice writes only the selection, the home and the chosen application. Choices for
+/// different homes that share a waiting list can then be recorded at the same time without conflicting.
 /// </summary>
 public static class PassOverCandidatesHandler
 {
-    /// <summary>Loads the selection the household was chosen in.</summary>
-    public static async Task<HomeSelectionView> LoadAsync(
-        ApplicationSelectedForHome @event,
-        IQuerySession session,
-        CancellationToken cancellationToken)
+    /// <summary>Asks for each application marked passed over in a choice by priority to be passed over.</summary>
+    public static IEnumerable<PassOverApplication> Handle(HouseholdSelectedByPriority @event)
     {
         ArgumentNullException.ThrowIfNull(@event);
-        ArgumentNullException.ThrowIfNull(session);
 
-        return await session
-            .LoadAsync<HomeSelectionView>(@event.HomeSelectionId, cancellationToken)
-            .ConfigureAwait(false)
-            ?? throw new AggregateNotFoundException(typeof(HomeSelection), @event.HomeSelectionId);
+        return PassOver(@event.AggregateId, @event.HomeId, @event.Applications);
     }
 
-    /// <summary>
-    /// Asks for every candidate except the chosen one and those over the home's income limit to be passed
-    /// over. An over-limit household didn't lose to another household; it could never have been chosen.
-    /// </summary>
-    public static IEnumerable<PassOverApplication> Handle(ApplicationSelectedForHome @event, HomeSelectionView selection)
+    /// <summary>Asks for each application marked passed over in a lottery to be passed over.</summary>
+    public static IEnumerable<PassOverApplication> Handle(HouseholdSelectedByLottery @event)
     {
         ArgumentNullException.ThrowIfNull(@event);
-        ArgumentNullException.ThrowIfNull(selection);
 
-        var selectionId = HomeSelectionId.Create(@event.HomeSelectionId);
-        return
+        return PassOver(@event.AggregateId, @event.HomeId, @event.Applications);
+    }
+
+    private static List<PassOverApplication> PassOver(string selectionId, string homeId, IEnumerable<RecordedApplication> applications) =>
         [
-            .. selection.Candidates
-                .Where(c => c.ApplicationId != @event.AggregateId && !c.IsOverIncomeLimit)
-                .Select(c => new PassOverApplication(
-                    HomeownerApplicationId.Create(c.ApplicationId), selectionId, @event.HomeId, @event.SelectedDate)),
+            .. applications
+                .Where(a => a.Outcome == SelectionOutcome.PassedOver)
+                .Select(a => new PassOverApplication(
+                    HomeownerApplicationId.Create(a.ApplicationId), HomeSelectionId.Create(selectionId), homeId)),
         ];
-    }
 }

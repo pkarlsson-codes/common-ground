@@ -1,13 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   HomeSelectionsApi,
-  type CancelHomeSelectionRequest,
   type DrawSelectionLotteryRequest,
-  type HomeSelectionResponse,
+  type HomeSelectionOverviewResponse,
   type PaginatedResponseOfHomeSelectionListItemResponse,
-  type HomeSelectionSummaryResponse,
   type SelectHouseholdByPriorityRequest,
-  type StartHomeSelectionResponse,
 } from '../api'
 import { apiConfig } from '../lib/apiConfig'
 
@@ -21,83 +18,69 @@ export const SELECTION_PRIORITIES: { value: string; label: string }[] = [
   { value: 'WaitingListTenure', label: 'Waiting-list tenure' },
 ]
 
-/** The route of a home selection's page. */
-export const homeSelectionPath = (selectionId: string) => `/homes/selections/${selectionId}`
+/** Why a household can't be chosen, in the API's names, with the words staff read. */
+const CANNOT_BE_CHOSEN_REASONS: Record<string, string> = {
+  OverIncomeLimit: 'Over income limit',
+  NoPrimaryMember: 'No primary member',
+  HousingCounselingIncomplete: 'Housing counseling not completed',
+  CltOrientationIncomplete: 'CLT orientation not completed',
+  NoPrequalification: 'No mortgage prequalification',
+  PrequalificationExpired: 'Prequalification expired',
+}
+
+export const cannotBeChosenReasonLabel = (value: string) => CANNOT_BE_CHOSEN_REASONS[value] ?? value
+
+/** The route of a home's selection page: its waiting list compared against it, and the households chosen for it. */
+export const homeSelectionPath = (homeId: string) => `/homes/${homeId}/selection`
 
 export const selectionPriorityLabel = (value: string) =>
   SELECTION_PRIORITIES.find(p => p.value === value)?.label ?? value
 
-/** A home's selections, newest first. At most one is open or completed; the rest are cancelled. */
-export function useHomeSelectionsForHome(homeId: string | null) {
-  return useQuery<HomeSelectionSummaryResponse[]>({
+/** A home's waiting list compared against it today, and the households already chosen for it, newest first. */
+export function useHomeSelectionOverview(homeId: string | null) {
+  return useQuery<HomeSelectionOverviewResponse>({
     queryKey: ['home-selections', 'home', homeId],
-    queryFn: () => api.getHomeSelectionsForHome({ homeId: homeId! }),
+    queryFn: () => api.getHomeSelectionOverview({ homeId: homeId! }),
     enabled: !!homeId,
   })
 }
 
-/** Home selections across every home, newest first, optionally only those with <paramref name="status"/>. */
-export function useHomeSelections(pageNumber: number, status?: string) {
+/** The households chosen for homes across every home, newest first. */
+export function useHomeSelections(pageNumber: number) {
   return useQuery<PaginatedResponseOfHomeSelectionListItemResponse>({
-    queryKey: ['home-selections', 'all', pageNumber, status],
-    queryFn: () => api.getHomeSelections({ pageNumber, pageSize: 20, status }),
-  })
-}
-
-export function useHomeSelection(selectionId: string | null) {
-  return useQuery<HomeSelectionResponse>({
-    queryKey: ['home-selection', selectionId],
-    queryFn: () => api.getHomeSelection({ selectionId: selectionId! }),
-    enabled: !!selectionId,
+    queryKey: ['home-selections', 'all', pageNumber],
+    queryFn: () => api.getHomeSelections({ pageNumber, pageSize: 20 }),
   })
 }
 
 /**
- * Completing or cancelling a selection changes the home's selections, the chosen
- * application, the waiting list's pass-over counts, and starts a purchase workflow.
+ * Choosing a household changes the home's selections and sale stage, the chosen application, the waiting
+ * list's pass-over counts, and starts a purchase workflow.
  */
-const invalidateSelection = (qc: ReturnType<typeof useQueryClient>, selectionId: string) => {
-  qc.invalidateQueries({ queryKey: ['home-selection', selectionId] })
+const invalidateChoice = (qc: ReturnType<typeof useQueryClient>, homeId: string) => {
   qc.invalidateQueries({ queryKey: ['home-selections'] })
+  qc.invalidateQueries({ queryKey: ['home', homeId] })
+  qc.invalidateQueries({ queryKey: ['homes'] })
   qc.invalidateQueries({ queryKey: ['homeowner-application'] })
   qc.invalidateQueries({ queryKey: ['homeowner-applications'] })
   qc.invalidateQueries({ queryKey: ['purchase-workflows'] })
-}
-
-export function useStartHomeSelection() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: async (homeId: string) =>
-      await api.startHomeSelection({ homeId }) as StartHomeSelectionResponse,
-    onSuccess: (_data, homeId) => {
-      qc.invalidateQueries({ queryKey: ['home-selections', 'home', homeId] })
-    },
-  })
+  qc.invalidateQueries({ queryKey: ['today'] })
 }
 
 export function useSelectHouseholdByPriority() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ selectionId, request }: { selectionId: string; request: SelectHouseholdByPriorityRequest }) =>
-      api.selectHouseholdByPriority({ selectionId, selectHouseholdByPriorityRequest: request }),
-    onSuccess: (_data, variables) => invalidateSelection(qc, variables.selectionId),
+    mutationFn: ({ homeId, request }: { homeId: string; request: SelectHouseholdByPriorityRequest }) =>
+      api.selectHouseholdByPriority({ homeId, selectHouseholdByPriorityRequest: request }),
+    onSuccess: (_data, variables) => invalidateChoice(qc, variables.homeId),
   })
 }
 
 export function useDrawSelectionLottery() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ selectionId, request }: { selectionId: string; request: DrawSelectionLotteryRequest }) =>
-      api.drawSelectionLottery({ selectionId, drawSelectionLotteryRequest: request }),
-    onSuccess: (_data, variables) => invalidateSelection(qc, variables.selectionId),
-  })
-}
-
-export function useCancelHomeSelection() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ selectionId, request }: { selectionId: string; request: CancelHomeSelectionRequest }) =>
-      api.cancelHomeSelection({ selectionId, cancelHomeSelectionRequest: request }),
-    onSuccess: (_data, variables) => invalidateSelection(qc, variables.selectionId),
+    mutationFn: ({ homeId, request }: { homeId: string; request: DrawSelectionLotteryRequest }) =>
+      api.drawSelectionLottery({ homeId, drawSelectionLotteryRequest: request }),
+    onSuccess: (_data, variables) => invalidateChoice(qc, variables.homeId),
   })
 }

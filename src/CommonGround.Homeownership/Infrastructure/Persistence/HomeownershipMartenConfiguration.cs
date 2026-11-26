@@ -52,10 +52,6 @@ public static class HomeownershipMartenConfiguration
             .Index(x => x.GroundLeaseId)
             .Index(x => x.Status);
         options.Schema.For<HomeLabelView>().DatabaseSchemaName(SchemaName);
-        options.Schema.For<HomeSelectionView>()
-            .DatabaseSchemaName(SchemaName)
-            .UseOptimisticConcurrency(true)
-            .Index(x => x.HomeId);
         options.Schema.For<GroundLeaseTemplateListItemView>()
             .DatabaseSchemaName(SchemaName)
             .Index(x => x.TemplateName);

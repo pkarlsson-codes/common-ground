@@ -36,7 +36,7 @@ test('a household selected for a home is purchasing it, and the two detail pages
   const home = panel(page, homeLabel)
   await expect(currentStep(home)).toContainText('Purchasing')
   await expect(nextStep(home)).toContainText(`The purchase by ${buyer} is waiting on eligibility verification.`)
-  await expect(home.getByRole('button', { name: /^Open Selection:/ })).toContainText('Completed')
+  await expect(home.getByRole('button', { name: /^Open Selection: Chosen / })).toBeVisible()
   await expect(home.getByRole('button', { name: `Open Purchase: ${buyer}` })).toBeVisible()
 
   await home.getByRole('button', { name: `Open Household: ${buyer}` }).click()
@@ -44,23 +44,22 @@ test('a household selected for a home is purchasing it, and the two detail pages
   await expect(currentStep(panel(page, buyer))).toContainText('Purchasing')
 })
 
-test('a failed purchase returns the household to the waiting list and the home to selection', async ({ page }) => {
+test('a failed purchase returns the household to the waiting list and makes the home available, with no selection open', async ({ page }) => {
   const buyer = `Fallen ${uniqueId()}`
   const { apn, workflowId, householdId, homeId } = await createPurchaseWorkflow(page, buyer, { fromApplication: true })
   const email = `${buyer.toLowerCase().replace(/\s+/g, '-')}@example.com`
   const homeLabel = `${apn} Elm St`
-  // Someone else is waiting, so the home gets a new selection.
+  // Someone else is waiting, and still nobody is chosen until staff choose.
   await createApplication(page, `Next ${uniqueId()}`)
 
   await post(page, `/api/v1/purchase-workflows/${workflowId}/fail`, { failureReason: 'Financing fell through', failedDate: isoDate() })
-  // HomeBuyers and PropertyRegistry hear about it from an integration event, so wait for both, and
-  // for the new selection HomeBuyers starts once the home is available again.
+  // HomeBuyers and PropertyRegistry hear about it from an integration event, so wait for both.
   await expect.poll(async () =>
     (await get<{ journey: { stage: string } }>(page, `/api/v1/households/${householdId}`)).journey.stage).toBe('Waiting')
-  await expect.poll(async () => (await get<{ saleStage: string }>(page, `/api/v1/homes/${homeId}`)).saleStage).toBe('InSelection')
+  await expect.poll(async () => (await get<{ saleStage: string }>(page, `/api/v1/homes/${homeId}`)).saleStage).toBe('Offered')
   await expect.poll(async () =>
-    (await get<{ status: string }[]>(page, `/api/v1/homes/${homeId}/home-selections`)).map(s => s.status).sort())
-    .toEqual(['FellThrough', 'Open'])
+    (await get<{ isOffered: boolean; decisions: unknown[] }>(page, `/api/v1/homes/${homeId}/selection`)))
+    .toMatchObject({ isOffered: true, decisions: [expect.anything()] })
 
   const household = await openHousehold(page, email, buyer)
   await expect(currentStep(household)).toContainText('Waiting')
@@ -69,7 +68,8 @@ test('a failed purchase returns the household to the waiting list and the home t
 
   await household.getByRole('button', { name: `Open Home: ${homeLabel}` }).click()
   const home = panel(page, homeLabel)
-  await expect(currentStep(home)).toContainText('Selection')
-  await expect(nextStep(home).getByRole('button', { name: 'Open Selection' })).toBeVisible()
-  await expect(home.getByRole('button', { name: /^Open Selection:/ }).filter({ hasText: 'Fell Through' })).toHaveCount(1)
+  await expect(currentStep(home)).toContainText('Available')
+  await expect(nextStep(home)).toContainText('1 household was chosen for this home before.')
+  await expect(nextStep(home).getByRole('button', { name: 'Choose a Household' })).toBeVisible()
+  await expect(home.getByRole('button', { name: /^Open Selection: Chosen / })).toHaveCount(1)
 })

@@ -1,11 +1,12 @@
 using CommonGround.HomeBuyers.Contracts.Events;
 using CommonGround.PropertyRegistry.Application.ReadModels;
 using Marten;
+using Wolverine;
 using Wolverine.Marten;
 
 namespace CommonGround.PropertyRegistry.Application.EventHandlers;
 
-/// <summary>Shows a home under contract when a household is selected for it.</summary>
+/// <summary>Shows a home under contract when a household is chosen for it.</summary>
 public static class ApplicationSelectedHandler
 {
     /// <summary>Loads the home's availability.</summary>
@@ -17,10 +18,10 @@ public static class ApplicationSelectedHandler
     }
 
     /// <summary>Records the selection on the home's availability.</summary>
-    public static IMartenOp Handle(ApplicationSelected @event, HomeAvailabilityView? availability)
+    public static (IMartenOp, OutgoingMessages) Handle(ApplicationSelected @event, HomeAvailabilityView? availability)
     {
         ArgumentNullException.ThrowIfNull(@event);
 
-        return HomeAvailabilityUpdate.Record(@event.HomeId, availability, view => view.RecordApplicationSelected(@event.HomeSelectionId, @event.ApplicationId, @event.SelectedDate));
+        return HomeAvailabilityUpdate.Record(@event.HomeId, availability, view => view.RecordApplicationSelected(@event.HomeSelectionId, @event.ApplicationId, @event.SelectedDate, @event.OccurredAt));
     }
 }

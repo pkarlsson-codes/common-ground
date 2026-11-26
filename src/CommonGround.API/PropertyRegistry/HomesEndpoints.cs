@@ -76,7 +76,7 @@ public static class HomesEndpoints
             view.UnitType, view.Bedrooms, view.Bathrooms, view.IsAccessible, view.IncomeLimitPercentOfAmi, view.SquareFootage,
             view.YearBuilt, view.AssessedValue, view.LastAssessedDate,
             view.ConditionNotes, view.RegisteredAt,
-            availability.AvailableAgainDate, availability.SelectionOpenedDate, availability.UnderContractDate,
+            availability.AvailableAgainDate, availability.UnderContractDate,
             availability.LeasedDate, availability.ResaleNoticeDate, availability.Occupancy, availability.SaleStage,
             availability.HeldSinceDate, availability.HoldReason, availability.AvailableAgainCause);
 

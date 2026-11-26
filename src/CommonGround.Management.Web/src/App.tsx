@@ -115,7 +115,7 @@ export default function App() {
                 <Route index element={<TodayPage />} />
                 <Route path="/land-parcels"        element={<LandParcelsPage />} />
                 <Route path="/homes"               element={<HomesPage />} />
-                <Route path="/homes/selections/:selectionId" element={<HomeSelectionPage />} />
+                <Route path="/homes/:homeId/selection" element={<HomeSelectionPage />} />
                 <Route path="/home-selections"     element={<HomeSelectionsPage />} />
                 <Route path="/development"         element={<DevelopmentProjectsPage />} />
                 <Route path="/ground-leases"          element={<GroundLeasesPage />} />

@@ -13,9 +13,9 @@ Simplified for the first slice. The system records that the closing happened; th
 6. The resale becomes Closed and leaves the open list on Resales. The Next Step card says the trust bought the home on the closing date
 7. Shortly after:
     - The homeowner's ground lease becomes Inactive, ended on the closing date, and its Resale section shows the closed resale
-    - With "Offer to the waiting list": the home shows Available on Homes, appears on Today as a home with no selection started, and its Next Step card offers "Start Selection"
+    - With "Offer to the waiting list": the home shows Available on Homes, appears on Today as a home available again after the trust bought it back, and its Next Step card offers "Choose a Household". Households chosen for it before the buyback don't stop a new choice
     - With "Hold for now": the home shows Held by Trust on Homes and does not appear on Today. Its Next Step card shows the Hold Reason and offers "Release for Sale"
 
 Continues in: [Release Home for Sale](../homes/release-home-for-sale.md)
-Continues in: [Start Home Selection](../home-selections/start-home-selection.md)
+Continues in: [View Home Selection](../home-selections/view-home-selection.md)
 Continues in: [View Ground Lease Detail](../ground-leases/view-ground-lease-detail.md)

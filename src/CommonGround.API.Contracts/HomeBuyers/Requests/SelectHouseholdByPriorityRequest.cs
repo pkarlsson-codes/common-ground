@@ -1,8 +1,9 @@
 namespace CommonGround.API.Contracts.HomeBuyers.Requests;
 
 /// <summary>
-/// Request to choose a candidate in a home selection by priority. <see cref="Priorities"/> are
-/// the priority names staff cite, such as "LowerIncome" or "WaitingListTenure".
+/// Request to choose a household for a home by priority from the waiting list as it is. <see cref="Priorities"/> are
+/// the priority names staff cite, such as "LowerIncome" or "WaitingListTenure". The waiting list is judged on
+/// <see cref="SelectedDate"/>, which can't be after today.
 /// </summary>
 public sealed record SelectHouseholdByPriorityRequest(
     string ApplicationId,

@@ -6,6 +6,6 @@ For a home the trust bought back and chose to hold. Releasing it offers the home
 2. The Next Step card reads "The trust bought this home on {date} and is holding it: {Hold Reason}.", with "Release for Sale"
 3. User clicks "Release for Sale"
 4. Toast: "Home released for sale"
-5. The home moves to Available. The Next Step card offers "Start Selection", and the home appears on Today as an available home
+5. The home moves to Available. The Next Step card offers "Choose a Household", and the home appears on Today as an available home
 
-Continues in: [Start Home Selection](../home-selections/start-home-selection.md)
+Continues in: [View Home Selection](../home-selections/view-home-selection.md)

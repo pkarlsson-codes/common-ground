@@ -6,67 +6,72 @@ using Marten.Events.Aggregation;
 
 namespace CommonGround.HomeBuyers.Infrastructure.Persistence.Projections;
 
-/// <summary>Builds <see cref="HomeSelectionView"/> from HomeSelection events.</summary>
+/// <summary>Builds <see cref="HomeSelectionView"/> from the one event a HomeSelection stream holds.</summary>
 internal sealed class HomeSelectionViewProjection : SingleStreamProjection<HomeSelectionView, string>
 {
-    public static HomeSelectionView Create(IEvent<HomeSelectionStarted> e) =>
+    public static HomeSelectionView Create(IEvent<HouseholdSelectedByPriority> e)
+    {
+        var data = e.Data;
+        var view = Start(
+            data.AggregateId, data.HomeId, data.ApplicationId, data.SelectedDate, data.SelectedBy, data.OccurredAt,
+            data.GroundLeaseTemplateId, data.PurchasePrice, data.IncomeLimitPercentOfAmi, data.IncomeLimitsEffectiveFrom,
+            data.Applications);
+        view.SelectionMethod = "Priority";
+        view.Priorities = [.. data.Priorities.Select(p => p.DisplayName)];
+        view.SelectionReason = data.Reason;
+        return view;
+    }
+
+    public static HomeSelectionView Create(IEvent<HouseholdSelectedByLottery> e)
+    {
+        var data = e.Data;
+        var view = Start(
+            data.AggregateId, data.HomeId, data.ApplicationId, data.SelectedDate, data.SelectedBy, data.OccurredAt,
+            data.GroundLeaseTemplateId, data.PurchasePrice, data.IncomeLimitPercentOfAmi, data.IncomeLimitsEffectiveFrom,
+            data.Applications);
+        view.SelectionMethod = "Lottery";
+        view.LotteryTiedApplicationIds = data.TiedApplicationIds is null ? null : [.. data.TiedApplicationIds];
+        view.LotteryPoolApplicationIds = [.. data.PoolApplicationIds];
+        view.LotterySeed = data.Seed;
+        return view;
+    }
+
+    private static HomeSelectionView Start(
+        string id,
+        string homeId,
+        string applicationId,
+        DateOnly selectedDate,
+        string selectedBy,
+        DateTimeOffset recordedAt,
+        string groundLeaseTemplateId,
+        decimal purchasePrice,
+        int? incomeLimitPercentOfAmi,
+        DateOnly? incomeLimitsEffectiveFrom,
+        IReadOnlyList<RecordedApplication> applications) =>
         new()
         {
-            Id = e.Data.AggregateId,
-            HomeId = e.Data.HomeId,
-            Status = HomeSelectionStatus.Open.DisplayName,
-            StartedBy = e.Data.StartedBy,
-            StartedAt = e.Data.OccurredAt,
-            IncomeLimitPercentOfAmi = e.Data.IncomeLimitPercentOfAmi,
-            IncomeLimitsEffectiveFrom = e.Data.IncomeLimitsEffectiveFrom,
-            Candidates = [.. e.Data.Candidates.Select(c => new HomeSelectionCandidateEntry
+            Id = id,
+            HomeId = homeId,
+            SelectedApplicationId = applicationId,
+            SelectedHouseholdId = applications.FirstOrDefault(a => a.ApplicationId == applicationId)?.HouseholdId ?? string.Empty,
+            SelectedDate = selectedDate,
+            SelectedBy = selectedBy,
+            RecordedAt = recordedAt,
+            GroundLeaseTemplateId = groundLeaseTemplateId,
+            PurchasePrice = purchasePrice,
+            IncomeLimitPercentOfAmi = incomeLimitPercentOfAmi,
+            IncomeLimitsEffectiveFrom = incomeLimitsEffectiveFrom,
+            Applications = [.. applications.Select(a => new HomeSelectionApplicationEntry
             {
-                ApplicationId = c.ApplicationId,
-                HouseholdId = c.HouseholdId,
-                AnnualIncome = c.AnnualIncome.Amount,
-                HouseholdSize = c.HouseholdSize,
-                RequiresAccessibility = c.RequiresAccessibility,
-                WaitingSince = c.WaitingSince,
-                IncomeLimit = c.IncomeLimit?.Amount,
-                IsOverIncomeLimit = c.IncomeLimit is not null && c.AnnualIncome > c.IncomeLimit,
+                ApplicationId = a.ApplicationId,
+                HouseholdId = a.HouseholdId,
+                AnnualIncome = a.AnnualIncome.Amount,
+                HouseholdSize = a.HouseholdSize,
+                RequiresAccessibility = a.RequiresAccessibility,
+                WaitingSince = a.WaitingSince,
+                IncomeLimit = a.IncomeLimit?.Amount,
+                Outcome = a.Outcome.DisplayName,
+                Reasons = [.. a.Reasons.Select(r => r.DisplayName)],
             })],
         };
-
-    public static void Apply(HomeSelectionView view, HouseholdSelectedByPriority e)
-    {
-        view.Status = HomeSelectionStatus.Completed.DisplayName;
-        view.SelectedApplicationId = e.ApplicationId;
-        view.SelectionMethod = "Priority";
-        view.Priorities = [.. e.Priorities.Select(p => p.DisplayName)];
-        view.SelectionReason = e.Reason;
-        view.ClosedBy = e.SelectedBy;
-        view.ClosedAt = e.OccurredAt;
-    }
-
-    public static void Apply(HomeSelectionView view, HouseholdSelectedByLottery e)
-    {
-        view.Status = HomeSelectionStatus.Completed.DisplayName;
-        view.SelectedApplicationId = e.ApplicationId;
-        view.SelectionMethod = "Lottery";
-        view.LotterySeed = e.Seed;
-        view.LotteryPoolApplicationIds = [.. e.PoolApplicationIds];
-        view.LotteryIneligibleApplicationIds = [.. e.IneligibleApplicationIds];
-        view.ClosedBy = e.DrawnBy;
-        view.ClosedAt = e.OccurredAt;
-    }
-
-    public static void Apply(HomeSelectionView view, HomeSelectionPurchaseFellThrough e)
-    {
-        view.Status = HomeSelectionStatus.FellThrough.DisplayName;
-        view.FellThroughReason = e.Reason;
-        view.FellThroughDate = e.FellThroughDate;
-    }
-
-    public static void Apply(HomeSelectionView view, HomeSelectionCancelled e)
-    {
-        view.Status = HomeSelectionStatus.Cancelled.DisplayName;
-        view.CancellationReason = e.Reason;
-        view.ClosedBy = e.CancelledBy;
-        view.ClosedAt = e.OccurredAt;
-    }
 }

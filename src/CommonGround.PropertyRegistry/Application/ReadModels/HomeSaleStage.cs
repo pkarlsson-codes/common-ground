@@ -11,13 +11,10 @@ public sealed class HomeSaleStage : Enumeration<HomeSaleStage>
     /// <summary>A homeowner gave notice to sell and the trust has not yet decided whether to buy.</summary>
     public static readonly HomeSaleStage AwaitingTrustDecision = new(2, "AwaitingTrustDecision");
 
-    /// <summary>The home is ready for a selection to choose a household.</summary>
+    /// <summary>The home is offered to the waiting list, for staff to choose a household.</summary>
     public static readonly HomeSaleStage Offered = new(3, "Offered");
 
-    /// <summary>A home selection is choosing a household from the waiting list.</summary>
-    public static readonly HomeSaleStage InSelection = new(4, "InSelection");
-
-    /// <summary>A selection chose a household and the sale is pending.</summary>
+    /// <summary>A household was chosen for the home and the sale is pending.</summary>
     public static readonly HomeSaleStage UnderContract = new(5, "UnderContract");
 
     /// <summary>The trust bought the home back and is holding it rather than offering it.</summary>

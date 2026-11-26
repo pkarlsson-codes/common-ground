@@ -20,7 +20,6 @@ const KIND_LABELS: Record<string, string> = {
   'application-awaiting-decision': 'Application to decide',
   'readiness-step-missing': 'Readiness incomplete',
   'prequalification-expiring': 'Prequalification expiring',
-  'selection-open': 'Selection open',
   'home-available': 'Home available',
   'purchase-step-waiting': 'Purchase waiting',
   'purchase-stalled': 'Purchase stalled',

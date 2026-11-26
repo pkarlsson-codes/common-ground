@@ -163,33 +163,70 @@ public static class BusinessRuleViolation
 
     public static class HomeSelection
     {
-        public static class Start
+        public static class Choose
         {
-            public static BusinessRuleViolationException HomeHasActiveSelection(string homeId, HomeSelectionId activeSelectionId)
+            public static BusinessRuleViolationException HomeNotAvailable(string homeId, string saleStage)
                 => new(
-                    "home_buyers.home_selection.start.home_has_active_selection",
+                    "home_buyers.home_selection.choose.home_not_available",
                     new Dictionary<string, object?>
                     {
                         ["homeId"] = homeId,
-                        ["activeSelectionId"] = activeSelectionId.Value,
+                        ["saleStage"] = saleStage,
+                    });
+
+            public static BusinessRuleViolationException SelectedDateInFuture(DateOnly selectedDate, DateOnly today)
+                => new(
+                    "home_buyers.home_selection.choose.selected_date_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["selectedDate"] = selectedDate,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException SelectedDateBeforeAvailable(DateOnly selectedDate, DateOnly availableSince)
+                => new(
+                    "home_buyers.home_selection.choose.selected_date_before_available",
+                    new Dictionary<string, object?>
+                    {
+                        ["selectedDate"] = selectedDate,
+                        ["availableSince"] = availableSince,
                     });
 
             public static BusinessRuleViolationException WaitingListEmpty(string homeId)
                 => new(
-                    "home_buyers.home_selection.start.waiting_list_empty",
+                    "home_buyers.home_selection.choose.waiting_list_empty",
                     new Dictionary<string, object?>
                     {
                         ["homeId"] = homeId,
                     });
 
-            public static BusinessRuleViolationException NoIncomeLimitsInEffect(string homeId, int percentOfAmi, DateOnly today)
+            public static BusinessRuleViolationException NoIncomeLimitsInEffect(string homeId, int percentOfAmi, DateOnly selectedDate)
                 => new(
-                    "home_buyers.home_selection.start.no_income_limits_in_effect",
+                    "home_buyers.home_selection.choose.no_income_limits_in_effect",
                     new Dictionary<string, object?>
                     {
                         ["homeId"] = homeId,
                         ["percentOfAmi"] = percentOfAmi,
-                        ["today"] = today,
+                        ["selectedDate"] = selectedDate,
+                    });
+
+            public static BusinessRuleViolationException NotOnWaitingList(HomeownerApplicationId applicationId)
+                => new(
+                    "home_buyers.home_selection.choose.not_on_waiting_list",
+                    new Dictionary<string, object?>
+                    {
+                        ["applicationId"] = applicationId.Value,
+                    });
+
+            public static BusinessRuleViolationException CannotBeChosen(
+                HomeownerApplicationId applicationId,
+                IEnumerable<CannotBeChosenReason> reasons)
+                => new(
+                    "home_buyers.home_selection.choose.cannot_be_chosen",
+                    new Dictionary<string, object?>
+                    {
+                        ["applicationId"] = applicationId.Value,
+                        ["reasons"] = string.Join(", ", reasons?.Select(r => r.DisplayName) ?? []),
                     });
         }
 
@@ -202,14 +239,6 @@ public static class BusinessRuleViolation
             public static BusinessRuleViolationException ReasonRequired()
                 => new(
                     "home_buyers.home_selection.select_by_priority.reason_required");
-
-            public static BusinessRuleViolationException OverIncomeLimit(HomeownerApplicationId applicationId)
-                => new(
-                    "home_buyers.home_selection.select_by_priority.over_income_limit",
-                    new Dictionary<string, object?>
-                    {
-                        ["applicationId"] = applicationId.Value,
-                    });
         }
 
         public static class DrawLottery
@@ -229,45 +258,6 @@ public static class BusinessRuleViolation
                     new Dictionary<string, object?>
                     {
                         ["poolSize"] = poolSize,
-                    });
-        }
-
-        public static class Cancel
-        {
-            public static BusinessRuleViolationException ReasonRequired()
-                => new(
-                    "home_buyers.home_selection.cancel.reason_required");
-        }
-
-        public static class RecordPurchaseFellThrough
-        {
-            public static BusinessRuleViolationException NotCompleted(HomeSelectionStatus status)
-                => new(
-                    "home_buyers.home_selection.record_purchase_fell_through.not_completed",
-                    new Dictionary<string, object?>
-                    {
-                        ["status"] = status.DisplayName,
-                        ["requiredStatus"] = HomeSelectionStatus.Completed.DisplayName,
-                    });
-        }
-
-        public static class Modify
-        {
-            public static BusinessRuleViolationException NotOpen(HomeSelectionStatus status)
-                => new(
-                    "home_buyers.home_selection.modify.not_open",
-                    new Dictionary<string, object?>
-                    {
-                        ["status"] = status.DisplayName,
-                        ["requiredStatus"] = HomeSelectionStatus.Open.DisplayName,
-                    });
-
-            public static BusinessRuleViolationException NotACandidate(HomeownerApplicationId applicationId)
-                => new(
-                    "home_buyers.home_selection.modify.not_a_candidate",
-                    new Dictionary<string, object?>
-                    {
-                        ["applicationId"] = applicationId.Value,
                     });
         }
     }

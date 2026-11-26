@@ -35,7 +35,7 @@ public sealed record RegisterExistingGroundLease(
 public static class RegisterExistingGroundLeaseHandler
 {
 
-    /// <summary>Finds what the home is already committed to: an active lease, an open purchase or an open selection.</summary>
+    /// <summary>Finds what the home is already committed to: an active lease or an open purchase.</summary>
     public static async Task<HomeCommitments> LoadAsync(RegisterExistingGroundLease command, IQuerySession session, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
@@ -51,12 +51,8 @@ public static class RegisterExistingGroundLeaseHandler
             .Matching(PurchaseWorkflowInProgress<PurchaseWorkflowListItemView>.Instance)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
-        var openSelection = await session.Query<HomeSelectionView>()
-            .Where(v => v.HomeId == command.UnitId && v.Open)
-            .FirstOrDefaultAsync(cancellationToken)
-            .ConfigureAwait(false);
 
-        return HomeCommitments.Create(activeLease?.Id, openPurchase?.Id, openSelection?.Id);
+        return HomeCommitments.Create(activeLease?.Id, openPurchase?.Id);
     }
 
     /// <summary>Starts the new stream.</summary>

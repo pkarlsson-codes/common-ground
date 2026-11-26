@@ -3,7 +3,6 @@
     "seedKey": "sel-downtown-civic-001",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-downtown-civic-001",
-    "startedDate": "today-455d",
     "priority": {
       "householdSeedKey": "hh-whitaker-008",
       "priorities": ["WaitingListTenure", "HouseholdSizeFit"],
@@ -17,7 +16,6 @@
     "seedKey": "sel-harbor-view-201",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-harbor-view-201",
-    "startedDate": "today-258d",
     "priority": {
       "householdSeedKey": "hh-fontaine-009",
       "priorities": ["WaitingListTenure", "LowerIncome"],
@@ -31,7 +29,6 @@
     "seedKey": "sel-downtown-civic-003",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-downtown-civic-003",
-    "startedDate": "today-238d",
     "priority": {
       "householdSeedKey": "hh-osei-010",
       "priorities": ["AccessibilityNeed", "HouseholdSizeFit"],
@@ -45,7 +42,6 @@
     "seedKey": "sel-willow-007a",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-willow-007a",
-    "startedDate": "today-218d",
     "priority": {
       "householdSeedKey": "hh-delgado-011",
       "priorities": ["WaitingListTenure", "HouseholdSizeFit"],
@@ -59,7 +55,6 @@
     "seedKey": "sel-cedar-lane-013a",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-cedar-lane-013a",
-    "startedDate": "today-587d",
     "priority": {
       "householdSeedKey": "hh-haugen-027",
       "priorities": ["WaitingListTenure", "HouseholdSizeFit"],
@@ -73,7 +68,6 @@
     "seedKey": "sel-maple-row-005",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-maple-row-005",
-    "startedDate": "today-160d",
     "priority": {
       "householdSeedKey": "hh-garcia-001",
       "priorities": ["WaitingListTenure", "HouseholdSizeFit"],
@@ -87,7 +81,6 @@
     "seedKey": "sel-harbor-view-004",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-harbor-view-004",
-    "startedDate": "today-136d",
     "priority": {
       "householdSeedKey": "hh-nguyen-002",
       "priorities": ["AccessibilityNeed"],
@@ -101,7 +94,6 @@
     "seedKey": "sel-harbor-view-301",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-harbor-view-301",
-    "startedDate": "today-120d",
     "priority": {
       "householdSeedKey": "hh-okafor-003",
       "priorities": ["WaitingListTenure", "HouseholdSizeFit"],
@@ -115,7 +107,6 @@
     "seedKey": "sel-willow-007b",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-willow-007b",
-    "startedDate": "today-100d",
     "priority": {
       "householdSeedKey": "hh-patel-004",
       "priorities": ["HouseholdSizeFit"],
@@ -129,7 +120,6 @@
     "seedKey": "sel-downtown-civic-002",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-downtown-civic-002",
-    "startedDate": "today-84d",
     "priority": {
       "householdSeedKey": "hh-tran-012",
       "priorities": ["HouseholdSizeFit", "WaitingListTenure"],
@@ -140,20 +130,9 @@
     }
   },
   {
-    "seedKey": "sel-harbor-view-102-first",
-    "trustSeedKey": "dev-default",
-    "homeSeedKey": "home-harbor-view-102",
-    "startedDate": "today-72d",
-    "cancellation": {
-      "date": "today-66d",
-      "reason": "Inspection found a failing water heater and water-damaged flooring. Starting again once the repairs are done."
-    }
-  },
-  {
     "seedKey": "sel-harbor-view-202",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-harbor-view-202",
-    "startedDate": "today-60d",
     "priority": {
       "householdSeedKey": "hh-ramirez-014",
       "priorities": ["HouseholdSizeFit"],
@@ -167,7 +146,6 @@
     "seedKey": "sel-east-grove-003",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-east-grove-003",
-    "startedDate": "today-44d",
     "lottery": {
       "tiedHouseholdSeedKeys": ["hh-castillo-015", "hh-novak-016"],
       "lotterySeed": 20261103,
@@ -180,7 +158,6 @@
     "seedKey": "sel-harbor-view-302",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-harbor-view-302",
-    "startedDate": "today-30d",
     "priority": {
       "householdSeedKey": "hh-mensah-013",
       "priorities": ["WaitingListTenure", "HouseholdSizeFit"],
@@ -194,7 +171,6 @@
     "seedKey": "sel-alder-008",
     "trustSeedKey": "dev-default",
     "homeSeedKey": "home-alder-008",
-    "startedDate": "today-16d",
     "priority": {
       "householdSeedKey": "hh-abdi-018",
       "priorities": ["AccessibilityNeed", "LowerIncome"],
@@ -203,11 +179,5 @@
       "groundLeaseTemplateSeedKey": "glt-ami-index",
       "purchasePrice": 142000
     }
-  },
-  {
-    "seedKey": "sel-harbor-view-102",
-    "trustSeedKey": "dev-default",
-    "homeSeedKey": "home-harbor-view-102",
-    "startedDate": "today-6d"
   }
 ]

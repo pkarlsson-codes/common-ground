@@ -138,7 +138,7 @@ public static ParcelDecommissioned? Handle(
     <thead><tr><th>Type</th><th>What it is</th><th>Where it lives</th></tr></thead>
     <tbody>
       <tr><td><code>DomainEvent(string AggregateId)</code></td><td>A fact an aggregate decided on, stored in its stream. Base record for every domain event.</td><td>The context's <code>Domain/&lt;Aggregate&gt;/Events/</code>.</td></tr>
-      <tr><td><code>IntegrationEvent</code></td><td>A fact one context publishes for others: <code>HomeSelectionStarted</code>, <code>PurchaseClosed</code>. Has its own <code>EventId</code> (a GUID).</td><td>The publishing context's <code>*.Contracts/Events/</code>. Only HomeBuyers, PropertyRegistry and Homeownership have one.</td></tr>
+      <tr><td><code>IntegrationEvent</code></td><td>A fact one context publishes for others: <code>ApplicationSelected</code>, <code>PurchaseClosed</code>. Has its own <code>EventId</code> (a GUID).</td><td>The publishing context's <code>*.Contracts/Events/</code>. Only HomeBuyers, PropertyRegistry and Homeownership have one.</td></tr>
     </tbody>
   </table>
   <p>Both set <code>OccurredAt</code> from <code>TimeProviderContext.Current.UtcNow</code> when the event object is constructed, not from <code>DateTimeOffset.UtcNow</code>. This is what lets seeding and tests fix the time an event happened (<a href="#time">section 8</a>). <code>EventClockMiddleware</code> then runs each handler of the event at that time.</p>
@@ -182,7 +182,7 @@ shared.income_limit_level.limit_not_positive</code></pre>
       <tr><td><code>PhoneNumber</code></td><td>Parsed and formatted with <code>libphonenumber-csharp</code>. <code>FromOptional</code> returns <code>null</code> for blank input.</td></tr>
       <tr><td><code>IanaTimeZone</code></td><td>A time zone ID such as <code>America/Chicago</code>. <code>ToDate</code> turns an instant into the calendar date in that zone; <code>ToInstant</code> goes the other way.</td></tr>
       <tr><td><code>IncomeLimitLevel</code></td><td>One row of a HUD income limit table: a percent of area median income (AMI) and a limit for each household size from 1 to 8.</td></tr>
-      <tr><td><code>IncomeLimitTable</code></td><td>A copy of an income limit schedule as it stood on one day. A home selection keeps the one in effect when it starts and the purchase carries it, so later corrections to the schedule don't change what the purchase is judged by. <code>BandFor(income, householdSize)</code> gives the <code>IncomeBand</code>.</td></tr>
+      <tr><td><code>IncomeLimitTable</code></td><td>A copy of an income limit schedule as it stood on one day. A home selection records the one in effect on the date of the choice and the purchase carries it, so later corrections to the schedule don't change what the purchase is judged by. <code>BandFor(income, householdSize)</code> gives the <code>IncomeBand</code>.</td></tr>
       <tr><td><code>IncomeBand</code></td><td>Which levels a household's income falls between: over one level's limit and at or under the next. Used by HomeBuyers, Homeownership and reports.</td></tr>
     </tbody>
   </table>

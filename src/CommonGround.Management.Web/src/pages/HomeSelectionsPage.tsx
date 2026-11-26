@@ -2,14 +2,10 @@ import PageEyebrow from '../components/PageEyebrow'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Pagination from '../components/Pagination'
-import StatusBadge from '../components/StatusBadge'
 import { formatStepDate } from '../lib/lifecycle'
 import { homeSelectionPath, useHomeSelections } from '../hooks/homeSelections'
 
 const PAGE_SIZE = 20
-
-const STATUSES = ['Open', 'Completed', 'FellThrough', 'Cancelled'] as const
-const STATUS_LABELS: Record<string, string> = { FellThrough: 'Fell Through' }
 
 function SkeletonRows() {
   return (
@@ -19,12 +15,11 @@ function SkeletonRows() {
   )
 }
 
-/** Home selections across every home, newest first; open ones by default. */
+/** The households chosen for homes across every home, newest first. */
 export default function HomeSelectionsPage() {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
-  const [status, setStatus] = useState<string>('Open')
-  const { data, isLoading, isError, refetch } = useHomeSelections(page, status || undefined)
+  const { data, isLoading, isError, refetch } = useHomeSelections(page)
   const selections = data?.items ?? []
 
   return (
@@ -35,23 +30,10 @@ export default function HomeSelectionsPage() {
           <h1 className="page-header__title">Home Selections</h1>
           {data && (
             <div className="page-header__count">
-              {data.totalCount?.toLocaleString()} selection{data.totalCount !== 1 ? 's' : ''} · newest first
+              {data.totalCount?.toLocaleString()} household{data.totalCount !== 1 ? 's' : ''} chosen · newest first
             </div>
           )}
         </div>
-      </div>
-
-      <div className="filter-bar">
-        <select
-          className="form-select"
-          aria-label="Filter by status"
-          value={status}
-          onChange={e => { setStatus(e.target.value); setPage(1) }}
-          style={{ maxWidth: 220 }}
-        >
-          <option value="">All Statuses</option>
-          {STATUSES.map(s => <option key={s} value={s}>{STATUS_LABELS[s] ?? s}</option>)}
-        </select>
       </div>
 
       <div className="registry-table-wrap">
@@ -69,8 +51,8 @@ export default function HomeSelectionsPage() {
 
         {!isLoading && !isError && selections.length === 0 && (
           <div className="empty-state">
-            <div className="empty-state__title">No home selections{status ? ` are ${(STATUS_LABELS[status] ?? status).toLowerCase()}` : ''}</div>
-            <div className="empty-state__sub">Start a selection from an available home's detail panel.</div>
+            <div className="empty-state__title">No households have been chosen yet</div>
+            <div className="empty-state__sub">Choose a household from an available home's selection page.</div>
           </div>
         )}
 
@@ -80,20 +62,20 @@ export default function HomeSelectionsPage() {
               <thead>
                 <tr>
                   <th>Home</th>
-                  <th>Status</th>
-                  <th>Candidates</th>
-                  <th>Started</th>
                   <th>Chosen Household</th>
+                  <th>Method</th>
+                  <th>On the Waiting List</th>
+                  <th>Chosen On</th>
                 </tr>
               </thead>
               <tbody>
                 {selections.map(s => (
-                  <tr key={s.id} onClick={() => navigate(homeSelectionPath(s.id!))}>
+                  <tr key={s.id} onClick={() => navigate(homeSelectionPath(s.homeId!))}>
                     <td>{s.homeLabel ?? '—'}</td>
-                    <td><StatusBadge status={s.status ?? ''} /></td>
-                    <td><span className="cell-mono">{s.candidateCount}</span></td>
-                    <td><span className="cell-mono">{formatStepDate(s.startedAt) ?? '—'}</span></td>
                     <td>{s.chosenContact?.name ?? '—'}</td>
+                    <td>{s.selectionMethod === 'Lottery' ? 'Lottery' : 'Priority'}</td>
+                    <td><span className="cell-mono">{s.applicationCount}</span></td>
+                    <td><span className="cell-mono">{formatStepDate(s.selectedDate) ?? '—'}</span></td>
                   </tr>
                 ))}
               </tbody>

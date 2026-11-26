@@ -6,7 +6,7 @@ using CommonGround.SharedKernel.Domain;
 
 namespace CommonGround.HomeBuyers.Application.WorkItems;
 
-/// <summary>Derives the work items for applicants and home selections from HomeBuyers' read models.</summary>
+/// <summary>Derives the work items for applicants and income limits from HomeBuyers' read models.</summary>
 public static class HomeBuyersWorkItems
 {
     /// <summary>How far ahead a mortgage prequalification counts as expiring.</summary>
@@ -20,9 +20,6 @@ public static class HomeBuyersWorkItems
 
     /// <summary>A household with an open application whose prequalification expires soon.</summary>
     public const string PrequalificationExpiring = "prequalification-expiring";
-
-    /// <summary>A home selection that hasn't chosen a household yet.</summary>
-    public const string SelectionOpen = "selection-open";
 
     /// <summary>A home has an income limit that the limits in effect have no level for.</summary>
     public const string IncomeLimitsMissing = "income-limits-missing";
@@ -50,9 +47,6 @@ public static class HomeBuyersWorkItems
 
     /// <summary>Record the household's mortgage prequalification.</summary>
     public const string RecordMortgagePrequalification = "record-mortgage-prequalification";
-
-    /// <summary>Choose the household a selection goes to.</summary>
-    public const string ChooseHousehold = "choose-household";
 
     /// <summary>Enter a new income limit schedule.</summary>
     public const string EnterIncomeLimits = "enter-income-limits";
@@ -107,22 +101,6 @@ public static class HomeBuyersWorkItems
         }
     }
 
-    /// <summary>The item for a selection that is still open.</summary>
-    /// <param name="selection">The open selection.</param>
-    /// <param name="homeLabel">The label of the home being selected for, if its facts have arrived.</param>
-    /// <param name="zone">The trust's time zone, for the date the selection started.</param>
-    /// <returns>The selection's work item.</returns>
-    public static WorkItem ForSelection(HomeSelectionView selection, string? homeLabel, IanaTimeZone zone)
-    {
-        ArgumentNullException.ThrowIfNull(selection);
-        ArgumentNullException.ThrowIfNull(zone);
-
-        var candidates = selection.Candidates.Count == 1 ? "1 candidate" : $"{selection.Candidates.Count} candidates";
-        return new WorkItem(
-            WorkArea.Selections, SelectionOpen, "selection", selection.Id, homeLabel ?? "Home",
-            $"Open, {candidates} to choose from", null, zone.ToDate(selection.StartedAt), [ChooseHousehold]);
-    }
-
     /// <summary>
     /// The items for the trust's income limits on <paramref name="today"/>: missing when a home's percent has no
     /// level in the schedule in effect (or none is in effect), naming those homes; out of date when the schedule
@@ -159,7 +137,7 @@ public static class HomeBuyersWorkItems
             var more = blocked.Count > BlockedHomesNamed ? $" and {blocked.Count - BlockedHomesNamed} more" : string.Empty;
             yield return new WorkItem(
                 WorkArea.Selections, IncomeLimitsMissing, "income-limits", inEffect?.Id ?? string.Empty, "Income limits",
-                $"No {string.Join(", ", percents)} limits in effect; selections can't start for {named}{more}",
+                $"No {string.Join(", ", percents)} limits in effect; households can't be chosen for {named}{more}",
                 null, today, [EnterIncomeLimits]);
         }
 

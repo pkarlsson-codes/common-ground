@@ -1,32 +1,26 @@
 using System.Text.Json;
 using CommonGround.HomeBuyers.Application.Commands;
-using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
-using CommonGround.HomeBuyers.Domain.Households;
-using CommonGround.HomeBuyers.Domain.IncomeLimitSchedules;
 using CommonGround.HomeBuyers.Infrastructure.Seeding;
 using CommonGround.Homeownership.Infrastructure.Seeding;
-using CommonGround.PropertyRegistry.Application.ReadModels;
 using CommonGround.PropertyRegistry.Infrastructure.Seeding;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Services;
-using CommonGround.SharedKernel.Extensions;
 using CommonGround.SharedKernel.Infrastructure.Seeding;
-using CommonGround.SharedKernel.Specifications;
 using CommonGround.TrustManagement.Infrastructure.Seeding;
 using Marten;
 
 namespace CommonGround.API.Infrastructure.Seeding;
 
 /// <summary>
-/// Seeds development home selections from JSON: open, cancelled, and completed by priority or by
-/// lottery. Completing one selects the household for the home, and propagation puts the home
-/// under contract and starts the household's purchase workflow.
+/// Seeds development home selections from JSON: households chosen for homes by priority or by lottery. Choosing a
+/// household selects it for the home, and propagation puts the home under contract and starts the household's purchase
+/// workflow.
 /// </summary>
 /// <remarks>
-/// Selections are seeded in the order listed, which is the order they started, each one finished
-/// before the next starts, so every selection's candidates are the households waiting on its start date.
+/// Selections are seeded in the order listed, which is the order they were chosen, each one propagated before the next,
+/// so every choice compares the households waiting on its date.
 /// </remarks>
 public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWaiter propagation) : IDevelopmentSeeder
 {
@@ -36,9 +30,6 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
     };
 
     private static readonly UserId SeederUserId = UserId.Create("user-seeder-system");
-
-    private static readonly string[] ActiveStatuses =
-        [HomeSelectionStatus.Open.DisplayName, HomeSelectionStatus.Completed.DisplayName];
 
     /// <inheritdoc/>
     public async Task SeedAsync(SeedRun run, IDocumentStore store, CancellationToken cancellation)
@@ -87,69 +78,38 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
             await SeedClock.RunAsync(timeZone, async clock =>
             {
                 var selectionId = HomeSelectionId.Generate();
-                var startedDate = entry.StartedDate.Resolve(today);
-                clock.MoveTo(startedDate);
+                var selectedDate = (entry.Priority?.SelectedDate ?? entry.Lottery!.SelectedDate).Resolve(today);
+                clock.MoveTo(selectedDate);
 
-                var candidates = await LoadCandidatesAsync(trustSession, startedDate, cancellation).ConfigureAwait(false);
-                var activeSelectionId = await trustSession.Query<HomeSelectionView>()
-                    .Where(v => v.HomeId == homeId && ActiveStatuses.Contains(v.Status))
-                    .Select(v => v.Id)
-                    .FirstOrDefaultAsync(cancellation)
+                var choice = await HomeSelectionChoice
+                    .LoadAsync(trustSession, trustClock, homeId, selectedDate, cancellation)
                     .ConfigureAwait(false);
+                HomeSelectionChoice.EnsureOffered(choice.Home, selectedDate);
 
-                var home = await trustSession
-                    .LoadAsync<HomeFactsView>(homeId, cancellation)
-                    .ConfigureAwait(false)
-                    ?? throw new InvalidOperationException($"HomeBuyers has no facts for home {homeId} (seed key '{entry.HomeSeedKey}').");
-                var scheduleInEffect = await LoadScheduleInEffectAsync(trustSession, startedDate, cancellation).ConfigureAwait(false);
-
-                var started = HomeSelection.Start(
-                    selectionId,
-                    homeId,
-                    candidates,
-                    home.IncomeLimitPercentOfAmi,
-                    scheduleInEffect,
-                    startedDate,
-                    EntityIds.CreateOrNull<HomeSelectionId>(activeSelectionId),
-                    SeederUserId);
-                trustSession.Events.StartStream<HomeSelection>(selectionId.Value, started);
-                await trustSession.SaveChangesAsync(cancellation).ConfigureAwait(false);
-
-                // PropertyRegistry shows the home in selection before anyone is chosen for it. Idle alone
-                // has let the choice race the start here, so wait for the start to reach the home.
-                await propagation.WaitForAsync(
-                    $"home {homeId} to show selection {selectionId.Value} started",
-                    async ct =>
-                    {
-                        var availability = await trustSession.LoadAsync<HomeAvailabilityView>(homeId, ct).ConfigureAwait(false);
-                        return availability?.Selections.Any(s => s.Id == selectionId.Value && s.StartedAt is not null) == true ? availability : null;
-                    },
-                    cancellation).ConfigureAwait(false);
-                await propagation.WaitForIdleAsync(cancellation).ConfigureAwait(false);
-
-                string? selectedApplicationId = null;
+                HomeownerApplicationId selectedApplicationId;
                 if (entry.Priority is { } priority)
                 {
-                    var selectedDate = priority.SelectedDate.Resolve(today);
-                    clock.MoveTo(selectedDate);
-                    var applicationId = await LoadApplicationIdAsync(trustSession, priority.HouseholdSeedKey, entry.SeedKey, cancellation).ConfigureAwait(false);
+                    selectedApplicationId = await LoadApplicationIdAsync(trustSession, priority.HouseholdSeedKey, entry.SeedKey, cancellation).ConfigureAwait(false);
                     var templateId = await LoadTemplateIdAsync(trustSession, priority.GroundLeaseTemplateSeedKey, entry.SeedKey, cancellation).ConfigureAwait(false);
+                    var terms = new SelectionTerms(templateId, priority.PurchasePrice, selectedDate);
 
-                    var selection = await HomeSelectionCompletion.FetchSelectionAsync(trustSession, selectionId, cancellation).ConfigureAwait(false);
-                    var current = selection.Aggregate!;
-                    selection.Decide(s => s.SelectByPriority(
-                        applicationId,
+                    var chosen = HomeSelection.SelectByPriority(
+                        selectionId,
+                        homeId,
+                        choice.Comparison,
+                        selectedApplicationId,
                         [.. priority.Priorities.Select(SelectionPriority.FromDisplayName)],
                         priority.Reason,
-                        SeederUserId));
-                    var chosen = await HomeSelectionCompletion.FetchChosenAsync(trustSession, current, applicationId, cancellation).ConfigureAwait(false);
-                    HomeSelectionCompletion.Complete(current, chosen, templateId, priority.PurchasePrice, selectedDate, SeederUserId);
-                    selectedApplicationId = applicationId.Value;
+                        terms,
+                        choice.Today,
+                        SeederUserId);
+                    await HomeSelectionChoice
+                        .RecordAsync(trustSession, choice, selectionId, chosen, selectedApplicationId, terms, SeederUserId, cancellation)
+                        .ConfigureAwait(false);
                 }
-                else if (entry.Lottery is { } lottery)
+                else
                 {
-                    var selectedDate = lottery.SelectedDate.Resolve(today);
-                    clock.MoveTo(selectedDate);
+                    var lottery = entry.Lottery!;
                     List<HomeownerApplicationId> tiedApplicationIds = [];
                     foreach (var householdSeedKey in lottery.TiedHouseholdSeedKeys)
                     {
@@ -157,29 +117,23 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
                     }
 
                     var templateId = await LoadTemplateIdAsync(trustSession, lottery.GroundLeaseTemplateSeedKey, entry.SeedKey, cancellation).ConfigureAwait(false);
+                    var terms = new SelectionTerms(templateId, lottery.PurchasePrice, selectedDate);
 
-                    // The handler draws with a fresh random seed; the seeder draws with the entry's seed so
-                    // the winner is repeatable, so it reuses only the handler's read of who is eligible.
-                    var pool = await DrawSelectionLotteryHandler.LoadAsync(
-                        new DrawSelectionLottery(selectionId, tiedApplicationIds, templateId, lottery.PurchasePrice, selectedDate, SeederUserId),
-                        trustSession,
-                        cancellation).ConfigureAwait(false);
-                    var current = pool.Selection.Aggregate!;
-                    var drawn = current.DrawLottery(tiedApplicationIds, pool.EligibleApplicationIds, lottery.LotterySeed, SeederUserId);
-                    pool.Selection.AppendOne(drawn);
-
-                    var winnerId = HomeownerApplicationId.Create(drawn.ApplicationId);
-                    var chosen = await HomeSelectionCompletion.FetchChosenAsync(trustSession, current, winnerId, cancellation).ConfigureAwait(false);
-                    HomeSelectionCompletion.Complete(current, chosen, templateId, lottery.PurchasePrice, selectedDate, SeederUserId);
-                    selectedApplicationId = winnerId.Value;
-                }
-                else if (entry.Cancellation is { } cancellationEntry)
-                {
-                    clock.MoveTo(cancellationEntry.Date.Resolve(today));
-                    var stream = await trustSession.Events
-                        .FetchForWriting<HomeSelection>(selectionId.Value, cancellation)
+                    // The handler draws with a fresh random seed; the seeder draws with the entry's seed so the
+                    // winner is repeatable.
+                    var drawn = HomeSelection.DrawLottery(
+                        selectionId,
+                        homeId,
+                        choice.Comparison,
+                        tiedApplicationIds,
+                        lottery.LotterySeed,
+                        terms,
+                        choice.Today,
+                        SeederUserId);
+                    selectedApplicationId = HomeownerApplicationId.Create(drawn.ApplicationId);
+                    await HomeSelectionChoice
+                        .RecordAsync(trustSession, choice, selectionId, drawn, selectedApplicationId, terms, SeederUserId, cancellation)
                         .ConfigureAwait(false);
-                    stream.Decide(selection => selection.Cancel(cancellationEntry.Reason, SeederUserId));
                 }
 
                 trustSession.Store(new HomeSelectionSeedLookup
@@ -187,7 +141,7 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
                     Id = lookupId,
                     SeedKey = entry.SeedKey,
                     HomeSelectionId = selectionId.Value,
-                    SelectedApplicationId = selectedApplicationId,
+                    SelectedApplicationId = selectedApplicationId.Value,
                     SeededAt = DateTimeOffset.UtcNow,
                 });
 
@@ -195,44 +149,6 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
                 await propagation.WaitForIdleAsync(cancellation).ConfigureAwait(false);
             }).ConfigureAwait(false);
         }
-    }
-
-    /// <summary>The income limit schedule in effect on <paramref name="day"/>, if any.</summary>
-    private static async Task<IncomeLimitSchedule?> LoadScheduleInEffectAsync(
-        IQuerySession session,
-        DateOnly day,
-        CancellationToken cancellation)
-    {
-        var schedules = await session.Query<IncomeLimitScheduleView>().ToListAsync(cancellation).ConfigureAwait(false);
-        var inEffect = IncomeLimitScheduleView.InEffectOn(schedules, day);
-        return inEffect is null
-            ? null
-            : await session.LoadAggregateAsync<IncomeLimitSchedule>(inEffect.Id, cancellation).ConfigureAwait(false);
-    }
-
-    /// <summary>The waiting list on <paramref name="startedDate"/>: approved applications approved by then, longest waiting first.</summary>
-    private static async Task<IReadOnlyList<SelectionCandidate>> LoadCandidatesAsync(
-        IQuerySession session,
-        DateOnly startedDate,
-        CancellationToken cancellation)
-    {
-        var approved = await session.Query<HomeownerApplicationView>()
-            .Matching(OnWaitingList<HomeownerApplicationView>.Instance)
-            .OrderBy(v => v.ApprovedDate)
-            .ThenBy(v => v.SubmittedAt)
-            .ToListAsync(cancellation)
-            .ConfigureAwait(false);
-
-        return [.. approved
-            .Where(v => v.ApprovedDate <= startedDate)
-            .Select(v => SelectionCandidate.Create(
-                HomeownerApplicationId.Create(v.Id),
-                HouseholdId.Create(v.HouseholdId),
-                Money.Create(v.AnnualIncome),
-                v.HouseholdSize,
-                v.AccessibilityRequired,
-                v.ApprovedDate!.Value,
-                incomeLimit: null))];
     }
 
     private static async Task<HomeownerApplicationId> LoadApplicationIdAsync(
@@ -296,10 +212,10 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
                 throw new InvalidOperationException($"Duplicate home selection seed key '{duplicate.Key}' in seed JSON.");
             }
 
-            var outcomes = entries.FirstOrDefault(e => new object?[] { e.Priority, e.Lottery, e.Cancellation }.Count(o => o is not null) > 1);
+            var outcomes = entries.FirstOrDefault(e => (e.Priority is null) == (e.Lottery is null));
             if (outcomes is not null)
             {
-                throw new InvalidOperationException($"Home selection seed '{outcomes.SeedKey}' has more than one of priority, lottery and cancellation.");
+                throw new InvalidOperationException($"Home selection seed '{outcomes.SeedKey}' needs exactly one of priority and lottery.");
             }
 
             return entries;
@@ -314,13 +230,9 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
 
         public string HomeSeedKey { get; set; } = string.Empty;
 
-        public SeedDate StartedDate { get; set; }
-
         public PrioritySeedEntry? Priority { get; set; }
 
         public LotterySeedEntry? Lottery { get; set; }
-
-        public CancellationSeedEntry? Cancellation { get; set; }
     }
 
     private sealed class PrioritySeedEntry
@@ -349,12 +261,5 @@ public sealed class HomeSelectionsSeeder(ITrustClock trustClock, PropagationWait
         public string GroundLeaseTemplateSeedKey { get; set; } = string.Empty;
 
         public decimal PurchasePrice { get; set; }
-    }
-
-    private sealed class CancellationSeedEntry
-    {
-        public SeedDate Date { get; set; }
-
-        public string Reason { get; set; } = string.Empty;
     }
 }

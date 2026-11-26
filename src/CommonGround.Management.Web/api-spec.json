@@ -4724,69 +4724,12 @@
         }
       }
     },
-    "/api/v1/homes/{homeId}/home-selections": {
-      "post": {
-        "tags": [
-          "HomeSelections"
-        ],
-        "operationId": "StartHomeSelection",
-        "parameters": [
-          {
-            "name": "homeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StartHomeSelectionResponse"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": ""
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      },
+    "/api/v1/homes/{homeId}/selection": {
       "get": {
         "tags": [
           "HomeSelections"
         ],
-        "operationId": "GetHomeSelectionsForHome",
+        "operationId": "GetHomeSelectionOverview",
         "parameters": [
           {
             "name": "homeId",
@@ -4804,10 +4747,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/HomeSelectionSummaryResponse"
-                  }
+                  "$ref": "#/components/schemas/HomeSelectionOverviewResponse"
                 }
               }
             }
@@ -4857,15 +4797,6 @@
               "format": "int32"
             },
             "x-position": 2
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 3
           }
         ],
         "responses": {
@@ -4900,56 +4831,7 @@
         }
       }
     },
-    "/api/v1/home-selections/{selectionId}": {
-      "get": {
-        "tags": [
-          "HomeSelections"
-        ],
-        "operationId": "GetHomeSelection",
-        "parameters": [
-          {
-            "name": "selectionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HomeSelectionResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": ""
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/home-selections/{selectionId}/select-by-priority": {
+    "/api/v1/homes/{homeId}/home-selections/select-by-priority": {
       "post": {
         "tags": [
           "HomeSelections"
@@ -4957,7 +4839,7 @@
         "operationId": "SelectHouseholdByPriority",
         "parameters": [
           {
-            "name": "selectionId",
+            "name": "homeId",
             "in": "path",
             "required": true,
             "schema": {
@@ -4980,8 +4862,15 @@
           "x-position": 2
         },
         "responses": {
-          "204": {
-            "description": ""
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HomeSelectionCreatedResponse"
+                }
+              }
+            }
           },
           "200": {
             "description": "",
@@ -5014,7 +4903,7 @@
         }
       }
     },
-    "/api/v1/home-selections/{selectionId}/draw-lottery": {
+    "/api/v1/homes/{homeId}/home-selections/draw-lottery": {
       "post": {
         "tags": [
           "HomeSelections"
@@ -5022,7 +4911,7 @@
         "operationId": "DrawSelectionLottery",
         "parameters": [
           {
-            "name": "selectionId",
+            "name": "homeId",
             "in": "path",
             "required": true,
             "schema": {
@@ -5045,73 +4934,15 @@
           "x-position": 2
         },
         "responses": {
-          "204": {
-            "description": ""
-          },
-          "200": {
+          "201": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IResult"
+                  "$ref": "#/components/schemas/HomeSelectionCreatedResponse"
                 }
               }
             }
-          },
-          "404": {
-            "description": ""
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "nullable": true,
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ProblemDetails"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/home-selections/{selectionId}/cancel": {
-      "post": {
-        "tags": [
-          "HomeSelections"
-        ],
-        "operationId": "CancelHomeSelection",
-        "parameters": [
-          {
-            "name": "selectionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "CancelHomeSelectionRequest",
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CancelHomeSelectionRequest"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": ""
           },
           "200": {
             "description": "",
@@ -15434,12 +15265,10 @@
         "properties": {
           "approvedDate": {
             "type": "string",
-            "description": "The day of approval.",
             "format": "date"
           },
           "notes": {
             "type": "string",
-            "description": "Internal notes, if any.",
             "nullable": true
           }
         }
@@ -15592,53 +15421,252 @@
           }
         }
       },
-      "StartHomeSelectionResponse": {
+      "HomeSelectionOverviewResponse": {
         "type": "object",
-        "description": "Response after starting a home selection.",
+        "description": "A home's selection page: the home's facts, whether a household can be chosen for it now, its waiting list compared\nagainst it today in waiting-list order, and the households already chosen for it, newest first.\nSaleStage is \"NotForSale\", \"AwaitingTrustDecision\", \"Offered\", \"UnderContract\" or \"HeldByTrust\";\na household can be chosen only when IsOffered. IncomeLimitPercentOfAmi is the home's\nincome limit, null when it has none, and IncomeLimitsEffectiveFrom the effective date of the\nschedule in effect today, null when none is. Choosing is refused when HasIncomeLimitsInEffect is false.",
         "additionalProperties": false,
         "properties": {
-          "selectionId": {
+          "homeId": {
             "type": "string"
+          },
+          "homeLabel": {
+            "type": "string"
+          },
+          "homeBedrooms": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "homeBathrooms": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "homeSquareFootage": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "homeIsAccessible": {
+            "type": "boolean"
+          },
+          "incomeLimitPercentOfAmi": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "incomeLimitsEffectiveFrom": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "hasIncomeLimitsInEffect": {
+            "type": "boolean"
+          },
+          "saleStage": {
+            "type": "string"
+          },
+          "isOffered": {
+            "type": "boolean"
+          },
+          "today": {
+            "type": "string",
+            "format": "date"
+          },
+          "waitingList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaitingListComparisonEntryDto"
+            }
+          },
+          "decisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HomeSelectionDecisionDto"
+            }
           }
         }
       },
-      "HomeSelectionSummaryResponse": {
+      "WaitingListComparisonEntryDto": {
         "type": "object",
-        "description": "A selection started for a home. Status is \"Open\", \"Completed\" or \"Cancelled\";\nSelectionMethod is \"Priority\" or \"Lottery\" once completed.",
+        "description": "An application on the waiting list compared against the home today. Reasons say why the household\ncan't be chosen: \"OverIncomeLimit\", \"NoPrimaryMember\", \"HousingCounselingIncomplete\", \"CltOrientationIncomplete\",\n\"NoPrequalification\" or \"PrequalificationExpired\"; empty when it can.",
+        "additionalProperties": false,
+        "properties": {
+          "applicationId": {
+            "type": "string"
+          },
+          "householdId": {
+            "type": "string"
+          },
+          "primaryContact": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/HouseholdContactDto"
+              }
+            ]
+          },
+          "annualIncome": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "householdSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requiresAccessibility": {
+            "type": "boolean"
+          },
+          "waitingSince": {
+            "type": "string",
+            "format": "date"
+          },
+          "incomeLimit": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "canBeChosen": {
+            "type": "boolean"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "prequalifiedAmount": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          }
+        }
+      },
+      "HomeSelectionDecisionDto": {
+        "type": "object",
+        "description": "A household chosen for the home. SelectionMethod is \"Priority\" or \"Lottery\". Applications\nis the whole waiting list at that moment. LotteryTiedApplicationIds is null unless a lottery drew from\nonly the households staff found tied.",
         "additionalProperties": false,
         "properties": {
           "id": {
             "type": "string"
           },
-          "homeId": {
+          "selectedApplicationId": {
             "type": "string"
           },
-          "status": {
+          "selectedHouseholdId": {
             "type": "string"
           },
-          "startedBy": {
+          "selectedDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "selectedBy": {
             "type": "string"
           },
-          "startedAt": {
+          "recordedAt": {
             "type": "string",
             "format": "date-time"
           },
-          "candidateCount": {
+          "selectionMethod": {
+            "type": "string"
+          },
+          "groundLeaseTemplateId": {
+            "type": "string"
+          },
+          "purchasePrice": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "incomeLimitPercentOfAmi": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "incomeLimitsEffectiveFrom": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "priorities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "selectionReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "lotteryTiedApplicationIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "lotteryPoolApplicationIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lotterySeed": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "applications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HomeSelectionDecisionApplicationDto"
+            }
+          }
+        }
+      },
+      "HomeSelectionDecisionApplicationDto": {
+        "type": "object",
+        "description": "One application on the waiting list when a household was chosen. Outcome is \"Chosen\", \"PassedOver\" or\n\"CouldNotBeChosen\"; Reasons say why it couldn't be chosen, as on WaitingListComparisonEntryDto.",
+        "additionalProperties": false,
+        "properties": {
+          "applicationId": {
+            "type": "string"
+          },
+          "householdId": {
+            "type": "string"
+          },
+          "primaryContact": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/HouseholdContactDto"
+              }
+            ]
+          },
+          "annualIncome": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "householdSize": {
             "type": "integer",
             "format": "int32"
           },
-          "selectedApplicationId": {
+          "requiresAccessibility": {
+            "type": "boolean"
+          },
+          "waitingSince": {
             "type": "string",
+            "format": "date"
+          },
+          "incomeLimit": {
+            "type": "number",
+            "format": "decimal",
             "nullable": true
           },
-          "selectionMethod": {
-            "type": "string",
-            "nullable": true
+          "outcome": {
+            "type": "string"
           },
-          "closedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -15688,7 +15716,7 @@
       },
       "HomeSelectionListItemResponse": {
         "type": "object",
-        "description": "A home selection in the list across homes.",
+        "description": "A household chosen for a home, in the list across homes. SelectionMethod is \"Priority\" or \"Lottery\".",
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -15701,20 +15729,23 @@
             "type": "string",
             "nullable": true
           },
-          "status": {
-            "type": "string"
+          "selectedDate": {
+            "type": "string",
+            "format": "date"
           },
-          "startedAt": {
+          "recordedAt": {
             "type": "string",
             "format": "date-time"
           },
-          "candidateCount": {
+          "selectionMethod": {
+            "type": "string"
+          },
+          "applicationCount": {
             "type": "integer",
             "format": "int32"
           },
           "selectedApplicationId": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "chosenContact": {
             "nullable": true,
@@ -15723,202 +15754,22 @@
                 "$ref": "#/components/schemas/HouseholdContactDto"
               }
             ]
-          },
-          "closedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "fellThroughDate": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
           }
         }
       },
-      "HomeSelectionResponse": {
+      "HomeSelectionCreatedResponse": {
         "type": "object",
-        "description": "A home selection with the home's facts and each candidate's priority facts side by side, in\nwaiting-list order. Status is \"Open\", \"Completed\" or \"Cancelled\";\nSelectionMethod is \"Priority\" or \"Lottery\" once completed.\nIncomeLimitPercentOfAmi is the home's income limit the candidates were judged against\nwhen the selection started, null when it had none, and IncomeLimitsEffectiveFrom the\neffective date of the income limit schedule in effect then, null when none was. A home with no limit\nstill has the date, since the purchase records the buyer's income band from that schedule.",
+        "description": "Response after choosing a household for a home.",
         "additionalProperties": false,
         "properties": {
-          "id": {
+          "selectionId": {
             "type": "string"
-          },
-          "homeId": {
-            "type": "string"
-          },
-          "homeLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "homeBedrooms": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "homeBathrooms": {
-            "type": "number",
-            "format": "decimal",
-            "nullable": true
-          },
-          "homeSquareFootage": {
-            "type": "number",
-            "format": "decimal",
-            "nullable": true
-          },
-          "homeIsAccessible": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "incomeLimitPercentOfAmi": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "incomeLimitsEffectiveFrom": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "status": {
-            "type": "string"
-          },
-          "startedBy": {
-            "type": "string"
-          },
-          "startedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "candidates": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/HomeSelectionCandidateDto"
-            }
-          },
-          "selectedApplicationId": {
-            "type": "string",
-            "nullable": true
-          },
-          "selectionMethod": {
-            "type": "string",
-            "nullable": true
-          },
-          "priorities": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "selectionReason": {
-            "type": "string",
-            "nullable": true
-          },
-          "lotterySeed": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "lotteryPoolApplicationIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "lotteryIneligibleApplicationIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "cancellationReason": {
-            "type": "string",
-            "nullable": true
-          },
-          "closedBy": {
-            "type": "string",
-            "nullable": true
-          },
-          "closedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "fellThroughReason": {
-            "type": "string",
-            "nullable": true
-          },
-          "fellThroughDate": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          }
-        }
-      },
-      "HomeSelectionCandidateDto": {
-        "type": "object",
-        "description": "A candidate's priority facts as they stood when the selection started, with its household's\ncurrent primary contact and whether its application can still be selected today.\nIncomeLimit is the home's limit for the household's size, null when the home has none;\na candidate with IsOverIncomeLimit can't be selected.\nPrequalifiedAmount is the approved amount of the household's current mortgage prequalification, null when it has none.\nNotSelectableReasons lists every reason in words why CanBeSelected is false, empty when it is true.",
-        "additionalProperties": false,
-        "properties": {
-          "applicationId": {
-            "type": "string"
-          },
-          "householdId": {
-            "type": "string"
-          },
-          "primaryContact": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/HouseholdContactDto"
-              }
-            ]
-          },
-          "annualIncome": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "householdSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "requiresAccessibility": {
-            "type": "boolean"
-          },
-          "waitingSince": {
-            "type": "string",
-            "format": "date"
-          },
-          "incomeLimit": {
-            "type": "number",
-            "format": "decimal",
-            "nullable": true
-          },
-          "isOverIncomeLimit": {
-            "type": "boolean"
-          },
-          "applicationPhase": {
-            "type": "string"
-          },
-          "canBeSelected": {
-            "type": "boolean"
-          },
-          "prequalifiedAmount": {
-            "type": "number",
-            "format": "decimal",
-            "nullable": true
-          },
-          "notSelectableReasons": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         }
       },
       "SelectHouseholdByPriorityRequest": {
         "type": "object",
-        "description": "Request to choose a candidate in a home selection by priority. Priorities are\nthe priority names staff cite, such as \"LowerIncome\" or \"WaitingListTenure\".",
+        "description": "Request to choose a household for a home by priority from the waiting list as it is. Priorities are\nthe priority names staff cite, such as \"LowerIncome\" or \"WaitingListTenure\". The waiting list is judged on\nSelectedDate, which can't be after today.",
         "additionalProperties": false,
         "properties": {
           "applicationId": {
@@ -15948,7 +15799,7 @@
       },
       "DrawSelectionLotteryRequest": {
         "type": "object",
-        "description": "Request to choose a candidate in a home selection by lottery. The draw is among\nTiedApplicationIds when given, otherwise among every candidate.",
+        "description": "Request to choose a household for a home by lottery from the waiting list as it is. The draw is among\nTiedApplicationIds when given, otherwise among the whole waiting list, leaving out households that\ncan't be chosen on SelectedDate, which can't be after today.",
         "additionalProperties": false,
         "properties": {
           "tiedApplicationIds": {
@@ -15968,16 +15819,6 @@
           "selectedDate": {
             "type": "string",
             "format": "date"
-          }
-        }
-      },
-      "CancelHomeSelectionRequest": {
-        "type": "object",
-        "description": "Request to cancel an open home selection without choosing anyone.",
-        "additionalProperties": false,
-        "properties": {
-          "reason": {
-            "type": "string"
           }
         }
       },
@@ -16109,11 +15950,6 @@
             "format": "date-time"
           },
           "availableAgainDate": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "selectionOpenedDate": {
             "type": "string",
             "format": "date",
             "nullable": true

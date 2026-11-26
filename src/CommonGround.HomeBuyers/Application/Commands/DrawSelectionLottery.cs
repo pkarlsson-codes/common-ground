@@ -2,97 +2,81 @@ using System.Security.Cryptography;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using CommonGround.HomeBuyers.Domain.Households;
-using JasperFx.Events;
+using CommonGround.SharedKernel.Domain.Services;
 using Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
 /// <summary>
-/// Chooses a candidate in a home selection by lottery, drawing from
-/// <paramref name="TiedApplicationIds"/> when given, otherwise from every candidate, and selects
-/// the winner's application for the home at <paramref name="PurchasePrice"/>.
+/// Chooses a household for a home by lottery from the waiting list as it is, drawing from
+/// <paramref name="TiedApplicationIds"/> when given, otherwise from the whole waiting list, and selects the winner's
+/// application for the home at <paramref name="PurchasePrice"/>.
 /// </summary>
+/// <param name="SelectionId">The new selection's ID, chosen by the caller.</param>
+/// <param name="HomeId">The home.</param>
+/// <param name="TiedApplicationIds">The applications staff found tied, or null to draw from the whole waiting list.</param>
+/// <param name="GroundLeaseTemplateId">The ground lease template the purchase will use.</param>
+/// <param name="PurchasePrice">The purchase price.</param>
+/// <param name="SelectedDate">The date of the draw; the waiting list is judged on it, and it can't be after today.</param>
+/// <param name="DrawnBy">The staff user drawing.</param>
 public sealed record DrawSelectionLottery(
     HomeSelectionId SelectionId,
+    string HomeId,
     IReadOnlyList<HomeownerApplicationId>? TiedApplicationIds,
     string GroundLeaseTemplateId,
     decimal PurchasePrice,
     DateOnly SelectedDate,
     UserId DrawnBy);
 
-/// <summary>The selection, fetched for writing, and the candidates who can be selected on the selected date.</summary>
-/// <param name="Selection">The selection's stream.</param>
-/// <param name="EligibleApplicationIds">The candidates' applications that can be selected.</param>
-public sealed record LotteryPool(
-    IEventStream<HomeSelection> Selection,
-    IReadOnlySet<HomeownerApplicationId> EligibleApplicationIds);
-
 /// <summary>Handles <see cref="DrawSelectionLottery"/>.</summary>
 public static class DrawSelectionLotteryHandler
 {
-    /// <summary>
-    /// Fetches the selection for writing and reads, without locking, which candidates can be
-    /// selected on the selected date. Only the winner's application is fetched for writing.
-    /// </summary>
-    public static async Task<LotteryPool> LoadAsync(
+    /// <summary>Loads the home and compares the waiting list against it on the date of the draw.</summary>
+    public static Task<HomeChoice> LoadAsync(
         DrawSelectionLottery command,
         IDocumentSession session,
+        ITrustClock trustClock,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
-        ArgumentNullException.ThrowIfNull(session);
 
-        var selection = await HomeSelectionCompletion
-            .FetchSelectionAsync(session, command.SelectionId, cancellationToken)
-            .ConfigureAwait(false);
-
-        var eligible = new HashSet<HomeownerApplicationId>();
-        foreach (var candidate in selection.Aggregate!.Candidates)
-        {
-            var application = await session
-                .LoadAggregateAsync<HomeownerApplication>(candidate.ApplicationId, cancellationToken)
-                .ConfigureAwait(false);
-            var household = await session
-                .LoadAggregateAsync<Household>(candidate.HouseholdId, cancellationToken)
-                .ConfigureAwait(false);
-            if (application.CanBeSelected(household, command.SelectedDate))
-            {
-                eligible.Add(candidate.ApplicationId);
-            }
-        }
-
-        return new LotteryPool(selection, eligible);
+        return HomeSelectionChoice.LoadAsync(session, trustClock, command.HomeId, command.SelectedDate, cancellationToken);
     }
 
     /// <summary>
-    /// Draws with a fresh random seed among the eligible candidates, then fetches the winner's
-    /// application for writing and selects it. The other candidates are passed over afterwards.
+    /// Draws with a fresh random seed among the households that can be chosen, records the draw with the whole
+    /// waiting list, then selects the winner's application. The households passed over are recorded afterwards.
     /// </summary>
-    public static async Task Handle(
+    public static Task Handle(
         DrawSelectionLottery command,
-        LotteryPool pool,
+        HomeChoice choice,
         IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
-        ArgumentNullException.ThrowIfNull(pool);
+        ArgumentNullException.ThrowIfNull(choice);
 
-        var current = pool.Selection.Aggregate!;
-        var seed = RandomNumberGenerator.GetInt32(int.MaxValue);
-        var drawn = current.DrawLottery(command.TiedApplicationIds, pool.EligibleApplicationIds, seed, command.DrawnBy);
-        pool.Selection.AppendOne(drawn);
+        HomeSelectionChoice.EnsureOffered(choice.Home, command.SelectedDate);
 
-        var chosen = await HomeSelectionCompletion
-            .FetchChosenAsync(session, current, HomeownerApplicationId.Create(drawn.ApplicationId), cancellationToken)
-            .ConfigureAwait(false);
-        HomeSelectionCompletion.Complete(
-            current,
-            chosen,
-            command.GroundLeaseTemplateId,
-            command.PurchasePrice,
-            command.SelectedDate,
+        var terms = new SelectionTerms(command.GroundLeaseTemplateId, command.PurchasePrice, command.SelectedDate);
+        var drawn = HomeSelection.DrawLottery(
+            command.SelectionId,
+            command.HomeId,
+            choice.Comparison,
+            command.TiedApplicationIds,
+            RandomNumberGenerator.GetInt32(int.MaxValue),
+            terms,
+            choice.Today,
             command.DrawnBy);
+
+        return HomeSelectionChoice.RecordAsync(
+            session,
+            choice,
+            command.SelectionId,
+            drawn,
+            HomeownerApplicationId.Create(drawn.ApplicationId),
+            terms,
+            command.DrawnBy,
+            cancellationToken);
     }
 }

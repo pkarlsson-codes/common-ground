@@ -1,6 +1,6 @@
 import { trustToday, type CalendarDate } from '../../lib/calendarDate'
 
-/** The terms the purchase workflow starts with once a household is selected. */
+/** The terms the purchase workflow starts with once a household is chosen. */
 export type PurchaseTerms = {
   groundLeaseTemplateId: string
   purchasePrice: number

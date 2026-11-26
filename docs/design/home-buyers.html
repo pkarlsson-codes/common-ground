@@ -61,13 +61,10 @@ classDiagram
   }
   class HomeSelection {
     +string HomeId
-    +HomeSelectionStatus Status
-    +Candidates
-    +int IncomeLimitPercentOfAmi
-    +IncomeLimitTable IncomeLimits
-    +Start()$
-    +SelectByPriority()
-    +DrawLottery()
+    +HomeownerApplicationId SelectedApplicationId
+    +DateOnly SelectedDate
+    +SelectByPriority()$
+    +DrawLottery()$
   }
   class IncomeLimitSchedule {
     +DateOnly EffectiveFrom
@@ -76,8 +73,8 @@ classDiagram
     +Correct()
   }
   HomeownerApplication --> Household : HouseholdId
-  HomeSelection *-- SelectionCandidate
-  SelectionCandidate --> HomeownerApplication : ApplicationId
+  HomeSelection ..> WaitingListComparison : decides from
+  WaitingListComparison --> HomeownerApplication : each application on the waiting list
 </pre>
   </div>
   <p>ID prefixes: <code>household-</code>, <code>household-member-</code>, <code>application-</code>, <code>selection-</code>, <code>incomelimitschedule-</code>.</p>
@@ -89,7 +86,7 @@ classDiagram
   </ul>
   <h3>HomeownerApplication</h3>
   <ul>
-    <li>On submission the application copies the household's size, income and accessibility need (<code>Declaration</code>). Later changes to the household don't change it. Readiness is read from the household when it is selected.</li>
+    <li>On submission the application copies the household's size, income and accessibility need (<code>Declaration</code>). Later changes to the household don't change it. Readiness is read from the household when it is compared and when it is chosen.</li>
     <li>A household can have one open application. <code>Selected</code> counts as open (<code>ApplicationOpen</code>).</li>
     <li>The waiting list is every <code>Approved</code> application, oldest approval first (<code>OnWaitingList</code>). There is no separate list to maintain.</li>
   </ul>
@@ -98,7 +95,7 @@ classDiagram
 stateDiagram-v2
   [*] --> Submitted
   Submitted --> Approved : approve
-  Approved --> Selected : chosen in a selection
+  Approved --> Selected : chosen for a home
   Selected --> Approved : PurchaseFellThrough
   Selected --> Purchased : PurchaseClosed
   Submitted --> Denied
@@ -125,16 +122,16 @@ flowchart LR
   PR[PropertyRegistry]
   HB[HomeBuyers]
   HO[Homeownership]
-  PR -- "HomeRegistered<br/>HomeIncomeLimitSet" --> HB
-  HB -- "HomeSelectionStarted<br/>HomeSelectionCancelled<br/>ApplicationSelected" --> PR
-  HB -- "HomeSelectionStarted<br/>HomeSelectionCancelled<br/>ApplicationSelected" --> HO
+  PR -- "HomeRegistered<br/>HomeIncomeLimitSet<br/>HomeSaleStageChanged" --> HB
+  HB -- "ApplicationSelected" --> PR
+  HB -- "ApplicationSelected" --> HO
   HO -- "PurchaseClosed<br/>PurchaseFellThrough" --> HB
 </pre>
   </div>
   <ul>
-    <li><code>HomeRegistered</code> creates the <code>HomeFactsView</code> copy: label, parcel, bedrooms, accessibility and income limit. <code>HomeIncomeLimitSet</code> updates it, and fails to the dead letter queue if the copy is missing, rather than leave selection on the old limit.</li>
+    <li><code>HomeRegistered</code> creates the <code>HomeFactsView</code> copy: label, parcel, bedrooms, accessibility and income limit. <code>HomeIncomeLimitSet</code> updates it, and fails to the dead letter queue if the copy is missing, rather than leave selection on the old limit. <code>HomeSaleStageChanged</code> keeps the home's sale stage on the copy, so a household is chosen only for a home that is offered.</li>
     <li><code>ApplicationSelected</code> starts the purchase in Homeownership. It carries the buyer's contact details, the price, the ground lease template, and the income, household size and limits the household was judged by, so the purchase records why the buyer qualified.</li>
-    <li>Selection start and cancel tell Homeownership the home can't be leased by hand meanwhile. Property Registry uses all three for home availability.</li>
+    <li>The purchase <code>ApplicationSelected</code> starts is what stops the home being leased by hand. Property Registry uses it for home availability, and publishes the home's new stage back.</li>
     <li><code>PurchaseClosed</code> and <code>PurchaseFellThrough</code> do nothing when the purchase has no <code>ApplicationId</code>: staff started it directly, without a selection.</li>
   </ul>
 </section>
@@ -142,23 +139,17 @@ flowchart LR
 <section id="selection">
   <h2>4. Choosing a household</h2>
   <p>Funders audit this part, and it changes three aggregates without one transaction.</p>
-  <div class="diagram">
-<pre class="mermaid">
-stateDiagram-v2
-  [*] --> Open : start (snapshot waiting list)
-  Open --> Completed : SelectByPriority or DrawLottery
-  Open --> Cancelled : cancel
-  Completed --> FellThrough : PurchaseFellThrough
-</pre>
-  </div>
   <ul>
-    <li><strong>The candidates are a snapshot.</strong> Starting a selection copies every application on the waiting list, with its declared income and size and the home's dollar limit for that size. The limit comes from the home's percent of AMI and the schedule in effect today. The selection keeps that schedule as evidence.</li>
-    <li><strong>A start is refused</strong> when the home already has an open or completed selection, when nobody is waiting, or when the home has a limit that the schedule in effect has no level for. Today shows that last case as <code>income-limits-missing</code>.</li>
-    <li><strong>A household over the limit can't be chosen</strong>, by priority or by lottery. Priorities (<code>SelectionPriority</code>) rank households that qualify. They never decide who qualifies. Choosing by priority needs at least one priority and a written reason.</li>
-    <li><strong>The lottery can be re-run.</strong> It records its seed and draws with SplitMix64, not <code>System.Random</code>, whose seeded sequence can change between .NET versions. The pool leaves out anyone over the limit or not ready on the selection date, so the winner can always be selected.</li>
-    <li><strong>Completing writes two streams.</strong> The selection and the chosen application, through <code>HomeSelectionCompletion</code>. <code>PassOverCandidatesHandler</code> then sends one <code>PassOverApplication</code> per other candidate, so two selections that share candidates can complete at the same time. A candidate who was over the limit or not ready isn't passed over: they never lost to anyone. <code>HouseholdPassOversView</code> keeps the history per household, across applications.</li>
-    <li><strong>A purchase that falls through starts the next selection.</strong> <code>PurchaseFellThroughHandler</code> marks the selection <code>FellThrough</code>, starts a new one for the home, then returns the application to the waiting list. In that order, so the household isn't a candidate for the home it just fell through on. If nobody is waiting or limits are missing, staff start the new selection by hand.</li>
+    <li><strong>One step, from the waiting list as it is.</strong> There is no start and nothing is snapshotted ahead of time. <code>WaitingListComparisonLoader</code> compares every application on the waiting list on the date of the choice against the home, from the inline read models, for both the selection page and the two commands. <code>WaitingListComparison</code> gives each the home's dollar limit for its household size (from the home's percent of AMI and the schedule in effect on the date) and every <code>CannotBeChosenReason</code>. An application approved after the date wasn't waiting yet and is left out.</li>
+    <li><strong>A selection is written once.</strong> <code>HouseholdSelectedByPriority</code> or <code>HouseholdSelectedByLottery</code> starts the stream and is its only event. It records the whole waiting list (<code>RecordedApplication</code>), each marked <code>Chosen</code>, <code>PassedOver</code> or <code>CouldNotBeChosen</code> with its reasons, and the schedule as evidence. Nothing changes it afterwards: whether the purchase closed or fell through is the purchase's.</li>
+    <li><strong>The home's sale stage says whether a household can be chosen</strong>, not an old selection. Property Registry publishes <code>HomeSaleStageChanged</code> and <code>HomeSaleStageChangedHandler</code> keeps the newest on <code>HomeFactsView</code>. A choice is refused unless the home is <code>Offered</code>. Recording a choice also sets <code>HomeFactsView.LatestSelectionId</code>, and the home counts as chosen until a stage arrives that accounts for that selection, so a buyback or a purchase falling through offers it again and a second choice before then is refused.</li>
+    <li><strong>Two choices at the same moment.</strong> <code>HomeFactsView</code> is stored with optimistic concurrency, so the second of two choices for the same home fails, retries, and finds the home chosen. One household chosen for two homes at once is caught by the application stream's version.</li>
+    <li><strong>Choosing is refused</strong> when the date is after today or before the home became available, when nobody is waiting, when the home has a limit the schedule in effect has no level for (Today shows that as <code>income-limits-missing</code>), or when the chosen household can't be chosen on the date. Priorities (<code>SelectionPriority</code>) rank households that qualify. They never decide who qualifies. Choosing by priority needs at least one priority and a written reason. <code>HomeownerApplication.SelectForHome</code> checks the chosen household's own aggregates too.</li>
+    <li><strong>The lottery can be re-run.</strong> It records its seed, the households found tied (if any) and the pool, and draws with SplitMix64, not <code>System.Random</code>, whose seeded sequence can change between .NET versions. The pool leaves out anyone who can't be chosen on the date, so the winner always can be. A tie needs at least two households.</li>
+    <li><strong>Choosing writes three documents.</strong> The selection, the home's facts and the chosen application, through <code>HomeSelectionChoice</code>. <code>PassOverCandidatesHandler</code> then sends one <code>PassOverApplication</code> per application the choice marked passed over, so choices for different homes can be recorded at the same time. A household that couldn't be chosen isn't passed over: it never lost to anyone. <code>HouseholdPassOversView</code> keeps the history per household, across applications.</li>
+    <li><strong>A purchase that falls through starts nothing.</strong> <code>PurchaseFellThroughHandler</code> returns the application to the waiting list with its approval date. The home is offered again through Property Registry, and staff choose the next household.</li>
   </ul>
+  <p>Unconfirmed with a practitioner: whether a trust holds a home for one household before choosing, or fixes the list a committee or board decides from. Neither is modelled.</p>
 </section>
 
 <section id="code">
@@ -166,7 +157,7 @@ stateDiagram-v2
   <ul>
     <li><strong>Layout:</strong> the <a href="./architecture.html#layout">layout every context uses</a>, with no differences.</li>
     <li><strong>Endpoints:</strong> <code>HouseholdEndpoints</code>, <code>HomeownerApplicationsEndpoints</code>, <code>HomeSelectionsEndpoints</code> and <code>IncomeLimitSchedulesEndpoints</code> in <code>src/CommonGround.API/HomeBuyers</code>.</li>
-    <li><strong>Web pages:</strong> <code>HouseholdsPage</code>, <code>ApplicationsPage</code>, <code>WaitingListPage</code>, <code>HomeSelectionsPage</code>, <code>home-selections/HomeSelectionPage</code>, <code>income-limits/IncomeLimitsPage</code>. Journeys: <code>docs/journeys/households</code>, <code>applications</code>, <code>waiting-list</code>, <code>home-selections</code>, <code>income-limits</code>.</li>
+    <li><strong>Web pages:</strong> <code>HouseholdsPage</code>, <code>ApplicationsPage</code>, <code>WaitingListPage</code>, <code>HomeSelectionsPage</code> (the households chosen across homes), <code>home-selections/HomeSelectionPage</code> (a home's waiting list compared against it, at <code>/homes/:homeId/selection</code>), <code>income-limits/IncomeLimitsPage</code>. Journeys: <code>docs/journeys/households</code>, <code>applications</code>, <code>waiting-list</code>, <code>home-selections</code>, <code>income-limits</code>.</li>
     <li><strong>Today:</strong> <code>Application/WorkItems/HomeBuyersWorkItems.cs</code> lists the work item kinds and their thresholds.</li>
     <li><strong>Seed data:</strong> see <a href="./seeding.html">Seeding</a>.</li>
   </ul>
@@ -177,15 +168,14 @@ stateDiagram-v2
   <ul>
     <li>A purchase that staff start directly, without a selection, isn't checked against any income limit.</li>
     <li>The prequalification expiry message runs at 00:00 UTC on the expiry date, not in the trust's time zone, and on the last day the prequalification is still valid.</li>
-    <li><code>DrawSelectionLottery</code> loads every candidate's application and household one at a time to find who is eligible.</li>
   </ul>
 </section>
 
 <section id="changing">
   <h2>7. Changing this context</h2>
   <ul>
-    <li><strong>A new reason a household can't be chosen:</strong> add it to <code>HomeownerApplication.CanBeSelected</code> and <code>SelectForHome</code> together. The lottery pool and pass-overs both use <code>CanBeSelected</code>.</li>
-    <li><strong>A new fact the selection judges by:</strong> put it on <code>SelectionCandidate</code> at start, not read live at completion, and carry it on <code>ApplicationSelected</code> so the purchase keeps it.</li>
+    <li><strong>A new reason a household can't be chosen:</strong> add a <code>CannotBeChosenReason</code>, check it in <code>WaitingListComparison</code> (loading what it needs in <code>WaitingListComparisonLoader</code>), refuse it in <code>HomeownerApplication.SelectForHome</code>, and give it words in the web app's <code>cannotBeChosenReasonLabel</code>. The lottery pool and pass-overs follow the comparison.</li>
+    <li><strong>A new fact the selection judges by:</strong> put it on <code>WaitingApplication</code> and <code>RecordedApplication</code>, so the record shows what the choice was made from, and carry it on <code>ApplicationSelected</code> so the purchase keeps it.</li>
     <li><strong>A new question about the waiting list:</strong> query with <code>OnWaitingList</code>. Don't compare <code>Phase</code> strings in a new place.</li>
   </ul>
 </section>

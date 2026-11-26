@@ -24,10 +24,6 @@ describe('recordLink', () => {
       .toEqual({ to: '/ground-leases', state: { openId: 'gl-1' } })
   })
 
-  it('opens a selection on its own page', () => {
-    expect(recordLink({ recordType: 'selection', recordId: 's-1' })).toEqual({ to: '/homes/selections/s-1' })
-  })
-
   it('has nowhere to go for a record type it does not know', () => {
     expect(recordLink({ recordType: 'mystery', recordId: 'm-1' })).toBeNull()
   })
@@ -45,9 +41,14 @@ describe('actionLink', () => {
       .toEqual({ to: '/income-limits', state: { enter: true } })
   })
 
+  it("opens the home's selection page for Choose household", () => {
+    expect(actionLink({ recordType: 'home', recordId: 'h-1' }, 'choose-household'))
+      .toEqual({ to: '/homes/h-1/selection' })
+  })
+
   it('opens the row record for other actions', () => {
-    expect(actionLink({ recordType: 'home', recordId: 'h-1' }, 'start-selection'))
-      .toEqual({ to: '/homes', state: { openId: 'h-1' } })
+    expect(actionLink({ recordType: 'household', recordId: 'hh-1' }, 'record-housing-counseling'))
+      .toEqual({ to: '/households', state: { openId: 'hh-1' } })
   })
 })
 
@@ -83,9 +84,9 @@ describe('countForFocus', () => {
 
 describe('rowActions', () => {
   it('labels each action in the order given, saying which open over Today', () => {
-    expect(rowActions({ actions: ['approve-application', 'start-selection'] })).toEqual([
+    expect(rowActions({ actions: ['approve-application', 'choose-household'] })).toEqual([
       { key: 'approve-application', label: 'Approve', opensPanel: true },
-      { key: 'start-selection', label: 'Start selection', opensPanel: false },
+      { key: 'choose-household', label: 'Choose household', opensPanel: false },
     ])
   })
 

@@ -12,13 +12,12 @@ using FluentAssertions;
 namespace CommonGround.API.IntegrationTests.Flows;
 
 /// <summary>
-/// Covers the pass-overs recorded for a home selection's other candidates once it chooses a household.
-/// Completing a selection writes only the selection and the chosen application; the pass-overs follow,
-/// one message per candidate, so each step waits for them to finish.
+/// Covers the pass-overs recorded once a household is chosen for a home: exactly the applications the choice marked
+/// passed over. Recording a choice writes only the selection, the home and the chosen application; the pass-overs
+/// follow, one message per application, so each step waits for them to finish.
 ///
-/// The test database is shared across the collection, so every selection snapshots the approved
-/// applications other tests left behind as well. Assertions are therefore limited to the applications
-/// each test creates.
+/// The test database is shared across the collection, so every choice compares the approved applications other tests
+/// left behind as well. Assertions are therefore limited to the applications each test creates.
 /// </summary>
 [Collection(DurableIntegrationCollection.Name)]
 public class HomeSelectionPassOverFlowTests(DurableApiFactory factory)
@@ -29,7 +28,7 @@ public class HomeSelectionPassOverFlowTests(DurableApiFactory factory)
     private readonly FlowTracker _tracker = new(factory);
 
     [Fact]
-    public async Task SelectingByPriority_PassesOverOnlyTheOtherCandidatesStillEligible()
+    public async Task SelectingByPriority_PassesOverOnlyTheOtherHouseholdsThatCouldHaveBeenChosen()
     {
         var client = factory.CreateClient().WithAuthToken();
         var homeId = await CreateHomeAsync(client);
@@ -40,13 +39,12 @@ public class HomeSelectionPassOverFlowTests(DurableApiFactory factory)
         var notReady = await CreateApprovedApplicationAsync(client, ready: false);
         var withdrawn = await CreateApprovedApplicationAsync(client);
 
-        var selectionId = await StartSelectionAsync(client, homeId);
         await _tracker.TrackAsync(async () =>
             (await client.PostAsJsonAsync($"/api/homeowner-applications/{withdrawn}/withdraw",
                 new WithdrawApplicationRequest(new DateOnly(2026, 7, 1), null)))
                 .StatusCode.Should().Be(HttpStatusCode.NoContent));
 
-        await SelectByPriorityAsync(client, selectionId, chosen, templateId);
+        var selectionId = await SelectByPriorityAsync(client, homeId, chosen, templateId);
 
         (await GetApplicationAsync(client, chosen)).PassOvers.Should().BeEmpty();
 
@@ -71,7 +69,7 @@ public class HomeSelectionPassOverFlowTests(DurableApiFactory factory)
     }
 
     [Fact]
-    public async Task DrawingALottery_PassesOverEveryOtherCandidateStillEligible()
+    public async Task DrawingALottery_PassesOverEveryOtherHouseholdThatCouldHaveBeenChosen()
     {
         var client = factory.CreateClient().WithAuthToken();
         var homeId = await CreateHomeAsync(client);
@@ -82,14 +80,13 @@ public class HomeSelectionPassOverFlowTests(DurableApiFactory factory)
         var tiedNotReady = await CreateApprovedApplicationAsync(client, ready: false);
         var untied = await CreateApprovedApplicationAsync(client);
 
-        var selectionId = await StartSelectionAsync(client, homeId);
         await _tracker.TrackAsync(async () =>
-            (await client.PostAsJsonAsync($"/api/home-selections/{selectionId}/draw-lottery",
+            (await client.PostAsJsonAsync($"/api/homes/{homeId}/home-selections/draw-lottery",
                 new DrawSelectionLotteryRequest([tiedA, tiedB, tiedNotReady], templateId, 200000m, SelectedDate)))
-                .StatusCode.Should().Be(HttpStatusCode.NoContent));
+                .StatusCode.Should().Be(HttpStatusCode.Created));
 
-        var winner = (await client.GetFromJsonAsync<HomeSelectionResponse>($"/api/home-selections/{selectionId}"))!
-            .SelectedApplicationId;
+        var winner = (await client.GetFromJsonAsync<HomeSelectionOverviewResponse>($"/api/homes/{homeId}/selection"))!
+            .Decisions.Single().SelectedApplicationId;
         var loser = winner == tiedA ? tiedB : tiedA;
 
         (await GetApplicationAsync(client, winner!)).PassOvers.Should().BeEmpty();
@@ -97,7 +94,7 @@ public class HomeSelectionPassOverFlowTests(DurableApiFactory factory)
             .Should().ContainSingle().Which.Should().Match<PassOverDto>(p =>
                 p.SelectionMethod == "Lottery" && p.SelectionReason == null);
         (await GetApplicationAsync(client, untied)).PassOvers
-            .Should().ContainSingle("every eligible candidate is passed over, tied or not");
+            .Should().ContainSingle("every household that could have been chosen is passed over, tied or not");
         (await GetApplicationAsync(client, tiedNotReady)).PassOvers.Should().BeEmpty();
     }
 
@@ -117,7 +114,7 @@ public class HomeSelectionPassOverFlowTests(DurableApiFactory factory)
                 .StatusCode.Should().Be(HttpStatusCode.NoContent));
         var reapplication = await SubmitAndApproveAsync(client, householdId, new DateOnly(2026, 8, 1));
 
-        var secondSelectionId = await SelectSomeoneElseAsync(client, templateId);
+        var secondSelectionId = await SelectSomeoneElseAsync(client, templateId, new DateOnly(2026, 8, 5));
 
         (await GetApplicationAsync(client, reapplication)).PassOvers.Select(p => (p.ApplicationId, p.SelectionId))
             .Should().Equal((passedOver, firstSelectionId), (reapplication, secondSelectionId));
@@ -126,29 +123,23 @@ public class HomeSelectionPassOverFlowTests(DurableApiFactory factory)
         waitingList[reapplication].PassOverCount.Should().Be(2);
     }
 
-    /// <summary>Starts a selection for a new home and chooses a new applicant, passing over everyone else eligible.</summary>
-    private async Task<string> SelectSomeoneElseAsync(HttpClient client, string templateId)
+    /// <summary>Chooses a new applicant for a new home, passing over everyone else who could have been chosen.</summary>
+    private async Task<string> SelectSomeoneElseAsync(HttpClient client, string templateId, DateOnly? selectedDate = null)
     {
         var homeId = await CreateHomeAsync(client);
         var chosen = await CreateApprovedApplicationAsync(client);
-        var selectionId = await StartSelectionAsync(client, homeId);
-        await SelectByPriorityAsync(client, selectionId, chosen, templateId);
-        return selectionId;
+        return await SelectByPriorityAsync(client, homeId, chosen, templateId, selectedDate);
     }
 
-    private Task SelectByPriorityAsync(HttpClient client, string selectionId, string applicationId, string templateId) =>
-        _tracker.TrackAsync(async () =>
-            (await client.PostAsJsonAsync($"/api/home-selections/{selectionId}/select-by-priority",
-                new SelectHouseholdByPriorityRequest(
-                    applicationId, ["WaitingListTenure"], "Longest on the waiting list", templateId, 200000m, SelectedDate)))
-                .StatusCode.Should().Be(HttpStatusCode.NoContent));
-
-    private Task<string> StartSelectionAsync(HttpClient client, string homeId) =>
+    private Task<string> SelectByPriorityAsync(
+        HttpClient client, string homeId, string applicationId, string templateId, DateOnly? selectedDate = null) =>
         _tracker.TrackAsync(async () =>
         {
-            var response = await client.PostAsync($"/api/homes/{homeId}/home-selections", null);
+            var response = await client.PostAsJsonAsync($"/api/homes/{homeId}/home-selections/select-by-priority",
+                new SelectHouseholdByPriorityRequest(
+                    applicationId, ["WaitingListTenure"], "Longest on the waiting list", templateId, 200000m, selectedDate ?? SelectedDate));
             response.StatusCode.Should().Be(HttpStatusCode.Created);
-            return (await response.Content.ReadFromJsonAsync<StartHomeSelectionResponse>())!.SelectionId;
+            return (await response.Content.ReadFromJsonAsync<HomeSelectionCreatedResponse>())!.SelectionId;
         });
 
     private static async Task<HomeownerApplicationResponse> GetApplicationAsync(HttpClient client, string applicationId) =>

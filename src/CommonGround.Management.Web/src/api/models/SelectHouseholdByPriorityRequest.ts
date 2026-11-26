@@ -23,8 +23,9 @@ import {
 } from './CalendarDate';
 
 /**
- * Request to choose a candidate in a home selection by priority. Priorities are
- * the priority names staff cite, such as "LowerIncome" or "WaitingListTenure".
+ * Request to choose a household for a home by priority from the waiting list as it is. Priorities are
+ * the priority names staff cite, such as "LowerIncome" or "WaitingListTenure". The waiting list is judged on
+ * SelectedDate, which can't be after today.
  * @export
  * @interface SelectHouseholdByPriorityRequest
  */

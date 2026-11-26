@@ -4,7 +4,6 @@ import { HOME_STAGES, homeLabel, homeStage, homeStages } from './lifecycle'
 describe('homeLabel', () => {
   it.each<[string, string, string, string]>([
     ['Vacant', 'Offered', 'Available', 'Available'],
-    ['Vacant', 'InSelection', 'InSelection', 'Selection'],
     ['Vacant', 'UnderContract', 'UnderContract', 'Purchasing'],
     ['Occupied', 'NotForSale', 'Leased', 'Leased'],
     ['Occupied', 'AwaitingTrustDecision', 'Resale', 'Resale'],

@@ -72,21 +72,6 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     }
 
     /// <summary>
-    /// Whether <see cref="SelectForHome"/> would accept this application with
-    /// <paramref name="household"/> on <paramref name="selectedDate"/>.
-    /// </summary>
-    public bool CanBeSelected(Household household, DateOnly selectedDate)
-    {
-        ArgumentNullException.ThrowIfNull(household);
-
-        return household.Id == HouseholdId
-            && Phase == ApplicationPhase.Approved
-            && household.PrimaryMember is not null
-            && household.IsReadinessComplete
-            && household.IsPrequalificationValidOn(selectedDate);
-    }
-
-    /// <summary>
     /// Selects the application for a home in <paramref name="selectionId"/>. The household must be this
     /// application's household, have completed readiness, and hold a prequalification still valid on
     /// <paramref name="selectedDate"/>.
@@ -99,20 +84,17 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     /// <param name="purchasePrice">The purchase price, above zero.</param>
     /// <param name="selectedDate">The date of the selection.</param>
     /// <param name="selectedBy">The staff user choosing.</param>
-    /// <param name="candidate">The application's candidate in the selection: the income and size it was judged on.</param>
     /// <param name="incomeLimitPercentOfAmi">The home's limit the selection judged by, or <see langword="null"/> when the home had none.</param>
-    /// <param name="incomeLimits">The schedule in effect when the selection started, or <see langword="null"/> when none was.</param>
+    /// <param name="incomeLimits">The schedule in effect on <paramref name="selectedDate"/>, or <see langword="null"/> when none was.</param>
     public ApplicationSelectedForHome SelectForHome(
         Household household,
         HomeSelectionId selectionId,
         string homeId, string landParcelId, string groundLeaseTemplateId,
         decimal purchasePrice, DateOnly selectedDate, UserId selectedBy,
-        SelectionCandidate candidate,
         int? incomeLimitPercentOfAmi,
         IncomeLimitTable? incomeLimits)
     {
         ArgumentNullException.ThrowIfNull(household);
-        ArgumentNullException.ThrowIfNull(candidate);
         if (household.Id != HouseholdId)
             throw new ArgumentException("Household does not belong to this application.", nameof(household));
         GuardNotTerminal();
@@ -147,27 +129,23 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
             purchasePrice,
             selectedDate,
             selectedBy.Value,
-            candidate.AnnualIncome,
-            candidate.HouseholdSize,
+            Declaration.Circumstances.AnnualIncome,
+            Declaration.HouseholdSize,
             incomeLimitPercentOfAmi,
             incomeLimits?.EffectiveFrom,
             incomeLimits?.ToEntries());
     }
 
     /// <summary>
-    /// Records that another household was chosen for <paramref name="homeId"/> in <paramref name="selectionId"/>.
-    /// An application that couldn't have been selected on <paramref name="selectedDate"/>, because it withdrew
-    /// or its household's readiness lapsed, was never really in the running, so it isn't passed over.
+    /// Records that another household was chosen for <paramref name="homeId"/> in <paramref name="selectionId"/> while
+    /// this one could have been: the selection marked it passed over.
     /// </summary>
-    /// <returns>
-    /// The passing over, or <see langword="null"/> when the application couldn't have been selected or was
-    /// already passed over in <paramref name="selectionId"/>.
-    /// </returns>
-    public ApplicationPassedOver? PassOver(HomeSelectionId selectionId, string homeId, Household household, DateOnly selectedDate)
+    /// <returns>The passing over, or <see langword="null"/> when it was already recorded for <paramref name="selectionId"/>.</returns>
+    public ApplicationPassedOver? PassOver(HomeSelectionId selectionId, string homeId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
 
-        if (_passedOverIn.Contains(selectionId) || !CanBeSelected(household, selectedDate))
+        if (_passedOverIn.Contains(selectionId))
             return null;
 
         return new ApplicationPassedOver(Id.Value, HouseholdId.Value, selectionId.Value, homeId);

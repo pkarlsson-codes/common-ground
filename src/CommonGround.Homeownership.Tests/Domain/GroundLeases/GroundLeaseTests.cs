@@ -140,16 +140,15 @@ public class GroundLeaseTests
         }
 
         [Theory]
-        [InlineData("groundlease-1", null, null, "homeownership.ground_lease.create.home_has_active_lease")]
-        [InlineData(null, "purchaseworkflow-1", null, "homeownership.ground_lease.create.home_has_open_purchase")]
-        [InlineData(null, null, "homeselection-1", "homeownership.ground_lease.create.home_in_selection")]
+        [InlineData("groundlease-1", null, "homeownership.ground_lease.create.home_has_active_lease")]
+        [InlineData(null, "purchaseworkflow-1", "homeownership.ground_lease.create.home_has_open_purchase")]
         public void GivenHomeAlreadyCommitted_WhenEstablished_ThenThrowsBusinessRuleViolation(
-            string? activeLeaseId, string? openPurchaseWorkflowId, string? openHomeSelectionId, string expectedCode)
+            string? activeLeaseId, string? openPurchaseWorkflowId, string expectedCode)
         {
             var act = () => GroundLease.RegisterExisting(
                 _testBed.LeaseId, TestBed.ParcelId, TestBed.HomeId, _testBed.Homeowner, new DateOnly(2025, 1, 1),
                 99, 60, LeaseFeeTerms.None, MortgageDebtCap.Create(90), Money.Create(200_000m), Money.Create(250_000m), "Terms", ResalePolicyTerms.AppraisalBased(0.25m),
-                HomeCommitments.Create(activeLeaseId, openPurchaseWorkflowId, openHomeSelectionId), _testBed.StaffUser, LeaseFeeTracking.FromLeaseStart(new DateOnly(2025, 1, 1)));
+                HomeCommitments.Create(activeLeaseId, openPurchaseWorkflowId), _testBed.StaffUser, LeaseFeeTracking.FromLeaseStart(new DateOnly(2025, 1, 1)));
 
             act.Should().Throw<BusinessRuleViolationException>().Which.Code.Should().Be(expectedCode);
         }

@@ -129,12 +129,6 @@ export interface HomeResponse {
      * @type {CalendarDate}
      * @memberof HomeResponse
      */
-    selectionOpenedDate?: CalendarDate | null;
-    /**
-     * 
-     * @type {CalendarDate}
-     * @memberof HomeResponse
-     */
     underContractDate?: CalendarDate | null;
     /**
      * 
@@ -213,7 +207,6 @@ export function HomeResponseFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'conditionNotes': json['conditionNotes'] == null ? undefined : json['conditionNotes'],
         'registeredAt': json['registeredAt'] == null ? undefined : (new Date(json['registeredAt'])),
         'availableAgainDate': json['availableAgainDate'] == null ? undefined : CalendarDateFromJSON(json['availableAgainDate']),
-        'selectionOpenedDate': json['selectionOpenedDate'] == null ? undefined : CalendarDateFromJSON(json['selectionOpenedDate']),
         'underContractDate': json['underContractDate'] == null ? undefined : CalendarDateFromJSON(json['underContractDate']),
         'leasedDate': json['leasedDate'] == null ? undefined : CalendarDateFromJSON(json['leasedDate']),
         'resaleNoticeDate': json['resaleNoticeDate'] == null ? undefined : CalendarDateFromJSON(json['resaleNoticeDate']),
@@ -252,7 +245,6 @@ export function HomeResponseToJSONTyped(value?: HomeResponse | null, ignoreDiscr
         'conditionNotes': value['conditionNotes'],
         'registeredAt': value['registeredAt'] == null ? undefined : ((value['registeredAt']).toISOString()),
         'availableAgainDate': CalendarDateToJSON(value['availableAgainDate']),
-        'selectionOpenedDate': CalendarDateToJSON(value['selectionOpenedDate']),
         'underContractDate': CalendarDateToJSON(value['underContractDate']),
         'leasedDate': CalendarDateToJSON(value['leasedDate']),
         'resaleNoticeDate': CalendarDateToJSON(value['resaleNoticeDate']),

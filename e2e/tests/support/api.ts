@@ -47,7 +47,7 @@ const scale = (limits: number[], factor: number) => limits.map(l => Math.round((
 
 /**
  * Enters the income limits every test's homes are judged by, effective 2000-01-01 with 50%, 80% and 120% levels,
- * unless the trust already has them. Without a schedule in effect, a selection for a home with a limit can't start.
+ * unless the trust already has them. Without a schedule in effect, no household can be chosen for a home with a limit.
  */
 export async function ensureBaselineIncomeLimits(page: Page) {
   const schedules = await get<{ effectiveFrom: string }[]>(page, '/api/v1/income-limit-schedules')
@@ -73,6 +73,13 @@ export async function createLandParcel(page: Page) {
     covenantTerms: null,
   })
   return { parcelId, apn }
+}
+
+/** Waits until HomeBuyers has heard of the home, which it learns about from an integration event. */
+export async function waitForHomeBuyersToKnowHome(page: Page, homeId: string) {
+  await expect(async () => {
+    await get(page, `/api/v1/homes/${homeId}/selection`)
+  }).toPass()
 }
 
 export async function createHome(page: Page, landParcelId: string, { incomeLimitPercentOfAmi = 80 as number | null } = {}) {
@@ -170,7 +177,7 @@ export async function createApplication(page: Page, name: string, { approve = tr
 
 /**
  * Starts a purchase workflow on a fresh parcel, home, and lease template. By default it's initiated directly; with
- * `fromApplication` it's started the way the app does it: a home selection picks the approved applicant by priority.
+ * `fromApplication` it's started the way the app does it: the approved applicant is chosen for the home by priority.
  */
 export async function createPurchaseWorkflow(page: Page, buyerName: string, { fromApplication = false } = {}) {
   const { parcelId, apn } = await createLandParcel(page)
@@ -184,11 +191,8 @@ export async function createPurchaseWorkflow(page: Page, buyerName: string, { fr
   if (fromApplication) {
     ;({ applicationId, householdId } = await createApplication(page, buyerName))
     // HomeBuyers learns about the new home from an integration event, so retry until it has.
-    let selectionId = ''
-    await expect(async () => {
-      ;({ selectionId } = await post<{ selectionId: string }>(page, `/api/v1/homes/${homeId}/home-selections`, {}))
-    }).toPass()
-    await post(page, `/api/v1/home-selections/${selectionId}/select-by-priority`, {
+    await waitForHomeBuyersToKnowHome(page, homeId)
+    await post(page, `/api/v1/homes/${homeId}/home-selections/select-by-priority`, {
       applicationId,
       priorities: ['WaitingListTenure'],
       reason: 'E2E selection',

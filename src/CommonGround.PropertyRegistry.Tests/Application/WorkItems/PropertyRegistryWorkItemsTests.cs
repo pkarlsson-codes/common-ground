@@ -23,7 +23,7 @@ public class PropertyRegistryWorkItemsTests
         private readonly TestBed _testBed = new();
 
         [Fact]
-        public void GivenNoAvailabilityYet_WhenDerived_ThenAvailableToStartASelectionWithNoWaitingDate()
+        public void GivenNoAvailabilityYet_WhenDerived_ThenAvailableToChooseAHouseholdWithNoWaitingDate()
         {
             var item = PropertyRegistryWorkItems.ForHome(_testBed.Home, null, "14 Alder Lane");
 
@@ -31,8 +31,9 @@ public class PropertyRegistryWorkItemsTests
             {
                 Kind = PropertyRegistryWorkItems.HomeAvailable,
                 Label = "14 Alder Lane",
+                Detail = "Available",
                 WaitingSince = (DateOnly?)null,
-                Actions = new[] { PropertyRegistryWorkItems.StartSelection },
+                Actions = new[] { PropertyRegistryWorkItems.ChooseHousehold },
             });
         }
 
@@ -49,7 +50,6 @@ public class PropertyRegistryWorkItemsTests
         [Theory]
         [InlineData("NotForSale")]
         [InlineData("AwaitingTrustDecision")]
-        [InlineData("InSelection")]
         [InlineData("UnderContract")]
         public void GivenHomeNotOffered_WhenDerived_ThenNothingIsWaiting(string saleStage)
         {
@@ -61,7 +61,7 @@ public class PropertyRegistryWorkItemsTests
         }
 
         [Fact]
-        public void GivenHomeOffered_WhenDerived_ThenAvailableToStartASelection()
+        public void GivenHomeOffered_WhenDerived_ThenAvailableToChooseAHousehold()
         {
             var availability = new HomeAvailabilityView { Id = "home-1", SaleStage = HomeSaleStage.Offered.DisplayName };
 

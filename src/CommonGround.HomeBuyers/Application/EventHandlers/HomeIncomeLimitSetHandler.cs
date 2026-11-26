@@ -9,7 +9,7 @@ namespace CommonGround.HomeBuyers.Application.EventHandlers;
 public static class HomeIncomeLimitSetHandler
 {
     /// <summary>Loads the home's facts.</summary>
-    public static Task<HomeFactsView?> LoadAsync(HomeIncomeLimitSet @event, IQuerySession session, CancellationToken cancellationToken)
+    public static Task<HomeFactsView?> LoadAsync(HomeIncomeLimitSet @event, IDocumentSession session, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(@event);
         ArgumentNullException.ThrowIfNull(session);
@@ -29,6 +29,6 @@ public static class HomeIncomeLimitSetHandler
             throw new InvalidOperationException($"HomeBuyers has no facts for home {@event.HomeId}, so its income limit can't be recorded.");
 
         facts.IncomeLimitPercentOfAmi = @event.PercentOfAmi;
-        return MartenOps.Store(facts);
+        return MartenOps.Update(facts);
     }
 }

@@ -19,7 +19,7 @@ namespace CommonGround.API.Infrastructure.Seeding;
 /// Seeds progress on the purchase workflows that home selections started, from JSON: the steps
 /// recorded so far, and a scheduled closing, a stall, a failure or a withdrawal. A closed purchase
 /// propagates on to its ground lease and stewardship case. A purchase that fails or is withdrawn
-/// propagates back, returning the household to the waiting list and the home to selection.
+/// propagates back, returning the household to the waiting list and making the home available again.
 /// </summary>
 public sealed class PurchaseWorkflowsSeeder(ITrustClock trustClock, PropagationWaiter propagation, IDocumentBlobStore blobs) : IDevelopmentSeeder
 {

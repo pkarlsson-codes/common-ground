@@ -110,15 +110,16 @@ flowchart LR
   HB[HomeBuyers]
   HO[Homeownership]
   PR[PropertyRegistry]
-  PR -- "HomeRegistered<br/>HomeIncomeLimitSet" --> HB
+  PR -- "HomeRegistered<br/>HomeIncomeLimitSet<br/>HomeSaleStageChanged" --> HB
   PR -- "HomeRegistered" --> HO
-  HB -- "HomeSelectionStarted<br/>HomeSelectionCancelled<br/>ApplicationSelected" --> PR
+  HB -- "ApplicationSelected" --> PR
   HO -- "PurchaseFellThrough<br/>GroundLeaseCreated<br/>ResaleOpened<br/>ResaleWithdrawn<br/>ResaleBoughtBack" --> PR
 </pre>
   </div>
   <ul>
-    <li><code>HomeRegistered</code> carries the home's label, bedrooms, accessibility and income limit. HomeBuyers keeps them to check candidates during selection. Homeownership keeps the label to name the home on purchases.</li>
+    <li><code>HomeRegistered</code> carries the home's label, bedrooms, accessibility and income limit. HomeBuyers keeps them to compare the waiting list against the home. Homeownership keeps the label to name the home on purchases.</li>
     <li><code>HomeIncomeLimitSet</code> updates HomeBuyers' copy of the limit.</li>
+    <li><code>HomeSaleStageChanged</code> tells HomeBuyers where the home now stands, with the date it got there, a sequence number so late news is ignored, and the latest selection it accounts for. HomeBuyers chooses a household only for an <code>Offered</code> home. It is published only when one of those changes, and it is the only use of the stage outside this context; keep it that narrow.</li>
     <li>The domain and integration events share these two names. The handlers alias them <code>DomainHomeRegistered</code> and <code>IntegrationHomeRegistered</code>.</li>
     <li>Parcel and project events stay inside this context.</li>
     <li>Every event it consumes updates home availability, below.</li>
@@ -132,9 +133,7 @@ flowchart LR
 <pre class="mermaid">
 stateDiagram-v2
   [*] --> Offered : home registered
-  Offered --> InSelection : HomeSelectionStarted
-  InSelection --> Offered : HomeSelectionCancelled
-  InSelection --> UnderContract : ApplicationSelected
+  Offered --> UnderContract : ApplicationSelected
   UnderContract --> Offered : PurchaseFellThrough
   UnderContract --> NotForSale : GroundLeaseCreated
   Offered --> NotForSale : GroundLeaseCreated (direct)
@@ -147,10 +146,11 @@ stateDiagram-v2
   </div>
   <ul>
     <li><strong>No view means Offered.</strong> A home has no view until the first event about it arrives.</li>
-    <li><strong>It never refuses an event.</strong> The other contexts already decided. Events can arrive in any order, so the view stores everything it has heard and <code>Refresh()</code> works the stage out again each time.</li>
+    <li><strong>It never refuses an event.</strong> The other contexts already decided. Events can arrive in any order, so the view stores everything it has heard and <code>Refresh()</code> works the stage out again each time. The selection recorded last counts, ordered by when it was recorded, since staff can date a choice earlier.</li>
+    <li><strong>HomeBuyers refuses on it.</strong> Every change to the stage is published as <code>HomeSaleStageChanged</code>, from <code>HomeAvailabilityUpdate.Record</code>, and HomeBuyers won't choose a household for a home that isn't <code>Offered</code>. So the stage decides something after all, in HomeBuyers.</li>
     <li><strong>A buyback starts over.</strong> Leases and selections before the buyback date stop counting.</li>
     <li><strong>Release for sale is the one change staff make here.</strong> <code>POST /api/homes/{id}/release-for-sale</code> moves a home the trust held after a buyback to <code>Offered</code>. It raises no event.</li>
-    <li><strong>Today shows every Offered home</strong> as "Available, no selection started" or "Available again after …" (a purchase fell through, a buyback, or a release).</li>
+    <li><strong>Today shows every Offered home</strong> as "Available" or "Available again after …" (a purchase fell through, a buyback, or a release).</li>
   </ul>
   <p>Code: <code>Application/ReadModels/HomeAvailabilityView.cs</code>, updated only through <code>Application/EventHandlers/HomeAvailabilityUpdate.cs</code>.</p>
 </section>

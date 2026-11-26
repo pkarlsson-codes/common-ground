@@ -32,7 +32,6 @@ models/ApproveApplicationRequest.ts
 models/ApproveImprovementRequestRequest.ts
 models/ApproveMortgageRequestRequest.ts
 models/AttachDocumentRequest.ts
-models/CancelHomeSelectionRequest.ts
 models/CancelPropertyInspectionRequest.ts
 models/CloseHeirTransferRequest.ts
 models/CloseStewardshipCaseRequest.ts
@@ -96,10 +95,11 @@ models/HeirTransferResponse.ts
 models/HomeAssessmentItemResponse.ts
 models/HomeListItemResponse.ts
 models/HomeResponse.ts
-models/HomeSelectionCandidateDto.ts
+models/HomeSelectionCreatedResponse.ts
+models/HomeSelectionDecisionApplicationDto.ts
+models/HomeSelectionDecisionDto.ts
 models/HomeSelectionListItemResponse.ts
-models/HomeSelectionResponse.ts
-models/HomeSelectionSummaryResponse.ts
+models/HomeSelectionOverviewResponse.ts
 models/HomeownerApplicationListItemResponse.ts
 models/HomeownerApplicationResponse.ts
 models/HouseholdApplicationDto.ts
@@ -260,7 +260,6 @@ models/SetInsuranceRequirementsRequest.ts
 models/SetLeaseFeeNoticePolicyRequest.ts
 models/SoftDeleteDocumentRequest.ts
 models/StallWorkflowRequest.ts
-models/StartHomeSelectionResponse.ts
 models/StewardshipCaseResponse.ts
 models/StewardshipCheckInDto.ts
 models/StewardshipQueueItemResponse.ts
@@ -283,6 +282,7 @@ models/UpdateHouseholdMemberRequest.ts
 models/UploadDocumentResponse.ts
 models/VerifyOccupancyRequest.ts
 models/VoidLeaseFeePaymentRequest.ts
+models/WaitingListComparisonEntryDto.ts
 models/WaitingListEntryResponse.ts
 models/WaiveLeaseFeeInterestRequest.ts
 models/WaiveLeaseFeeInterestResponse.ts

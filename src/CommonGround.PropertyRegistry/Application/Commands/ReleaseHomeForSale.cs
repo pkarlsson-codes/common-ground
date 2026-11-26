@@ -4,6 +4,7 @@ using CommonGround.PropertyRegistry.Domain.Homes;
 using CommonGround.PropertyRegistry.Application.Errors;
 using CommonGround.SharedKernel.Domain.Services;
 using Marten;
+using Wolverine;
 using Wolverine.Marten;
 
 namespace CommonGround.PropertyRegistry.Application.Commands;
@@ -38,7 +39,7 @@ public static class ReleaseHomeForSaleHandler
     }
 
     /// <summary>Ends the hold on the home's availability.</summary>
-    public static IMartenOp Handle(ReleaseHomeForSale command, HomeRelease release)
+    public static (IMartenOp, OutgoingMessages) Handle(ReleaseHomeForSale command, HomeRelease release)
     {
         ArgumentNullException.ThrowIfNull(command);
         ArgumentNullException.ThrowIfNull(release);

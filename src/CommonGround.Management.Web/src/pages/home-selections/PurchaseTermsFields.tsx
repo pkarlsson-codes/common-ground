@@ -2,6 +2,7 @@ import { GroundLeaseTemplatesApi } from '../../api'
 import EntityCombobox from '../../components/EntityCombobox'
 import { DateInput } from '../../components/DateInput'
 import { apiConfig } from '../../lib/apiConfig'
+import { trustToday } from '../../lib/calendarDate'
 import { formatCurrency } from '../../lib/currency'
 import type { PurchaseTerms } from './purchaseTerms'
 import { purchasePriceWarnings } from './purchasePriceCheck'
@@ -14,7 +15,7 @@ type Props = {
   /** The home's latest assessed value, or null when it has none. Undefined while it loads. */
   assessedValue?: number | null
   /**
-   * The selected household's prequalified amount, null when it has none. Omit when the household
+   * The chosen household's prequalified amount, null when it has none. Omit when the household
    * isn't known yet, as in a lottery draw.
    */
   prequalifiedAmount?: number | null
@@ -64,9 +65,10 @@ export default function PurchaseTermsFields({ value, onChange, assessedValue, pr
         {warnings.map(w => <div key={w} className="form-warning" role="status">{w}</div>)}
       </div>
       <div className="form-field">
-        <label className="form-label">Selected Date</label>
+        <label className="form-label">Date of the Choice</label>
         <DateInput
           className="form-input"
+          max={trustToday()}
           value={value.selectedDate}
           onChange={v => onChange(t => ({ ...t, selectedDate: v }))}
           required

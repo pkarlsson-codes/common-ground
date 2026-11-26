@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import { createApplication, createHome, createLandParcel, uploadHomeDocument } from '../support/api'
+import { createApplication, createHome, createLandParcel, uploadHomeDocument, waitForHomeBuyersToKnowHome } from '../support/api'
 import { detailValue, expectToast, field, panel, uniqueId } from '../support/ui'
 
 // Journeys: docs/journeys/homes/
@@ -142,20 +142,19 @@ test('setting a home income limit warns when the limits in effect lack that leve
   await expect(detailValue(detail, 'Income Limit')).toHaveText('No income limit')
 })
 
-test('a selection for a home whose income limit level is not in effect is refused', async ({ page }) => {
-  // Someone must be waiting, or the start is refused for that reason instead.
+test('a home whose income limit level is not in effect says so, and offers no household to choose', async ({ page }) => {
   await createApplication(page, `Waiting ${uniqueId()}`)
   await page.goto('/homes')
   const { parcelId, apn } = await createLandParcel(page)
-  await createHome(page, parcelId, { incomeLimitPercentOfAmi: 60 })
+  const homeId = await createHome(page, parcelId, { incomeLimitPercentOfAmi: 60 })
+  await waitForHomeBuyersToKnowHome(page, homeId)
   await (await filterByParcel(page, apn)).click()
   const nextStep = panel(page, `${apn} Elm St`).getByRole('region', { name: 'Next step' })
 
-  // HomeBuyers learns about the new home from an integration event, so retry until the start is refused for its limit.
-  await expect(async () => {
-    await nextStep.getByRole('button', { name: 'Start Selection' }).click()
-    await expect(nextStep).toContainText('No income limits for 60% of AMI are in effect', { timeout: 2000 })
-  }).toPass()
+  await nextStep.getByRole('button', { name: 'Choose a Household' }).click()
+  await expect(page).toHaveURL(new RegExp(`/homes/${homeId}/selection$`))
+  await expect(page.getByText('No 60% of AMI income limits are in effect')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Choose' })).toHaveCount(0)
 })
 
 test('recording an assessment lists it first and updates the home details', async ({ page }) => {

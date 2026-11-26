@@ -1,18 +1,27 @@
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Extensions;
-using JasperFx.Events;
+using CommonGround.SharedKernel.Domain.Services;
 using Marten;
 
 namespace CommonGround.HomeBuyers.Application.Commands;
 
 /// <summary>
-/// Chooses a candidate in a home selection, citing the priorities that put them first, and
-/// selects their application for the home at <paramref name="PurchasePrice"/>.
+/// Chooses a household for a home from the waiting list as it is, citing the priorities that put it first, and
+/// selects its application for the home at <paramref name="PurchasePrice"/>.
 /// </summary>
+/// <param name="SelectionId">The new selection's ID, chosen by the caller.</param>
+/// <param name="HomeId">The home.</param>
+/// <param name="ApplicationId">The chosen application.</param>
+/// <param name="Priorities">The priorities that put the household first.</param>
+/// <param name="Reason">Staff's explanation of the choice.</param>
+/// <param name="GroundLeaseTemplateId">The ground lease template the purchase will use.</param>
+/// <param name="PurchasePrice">The purchase price.</param>
+/// <param name="SelectedDate">The date of the choice; the waiting list is judged on it, and it can't be after today.</param>
+/// <param name="SelectedBy">The staff user choosing.</param>
 public sealed record SelectHouseholdByPriority(
     HomeSelectionId SelectionId,
+    string HomeId,
     HomeownerApplicationId ApplicationId,
     IReadOnlyList<SelectionPriority> Priorities,
     string Reason,
@@ -24,43 +33,46 @@ public sealed record SelectHouseholdByPriority(
 /// <summary>Handles <see cref="SelectHouseholdByPriority"/>.</summary>
 public static class SelectHouseholdByPriorityHandler
 {
-    /// <summary>Fetches the selection for writing.</summary>
-    public static Task<IEventStream<HomeSelection>> LoadAsync(
+    /// <summary>Loads the home and compares the waiting list against it on the date of the choice.</summary>
+    public static Task<HomeChoice> LoadAsync(
         SelectHouseholdByPriority command,
         IDocumentSession session,
+        ITrustClock trustClock,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        return HomeSelectionCompletion.FetchSelectionAsync(session, command.SelectionId, cancellationToken);
+        return HomeSelectionChoice.LoadAsync(session, trustClock, command.HomeId, command.SelectedDate, cancellationToken);
     }
 
     /// <summary>
-    /// Records the choice, then fetches the chosen application for writing and selects it.
-    /// The other candidates are passed over afterwards.
+    /// Records the choice with the whole waiting list, then selects the chosen application.
+    /// The households passed over are recorded afterwards.
     /// </summary>
-    public static async Task Handle(
+    public static Task Handle(
         SelectHouseholdByPriority command,
-        IEventStream<HomeSelection> selection,
+        HomeChoice choice,
         IDocumentSession session,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
-        ArgumentNullException.ThrowIfNull(selection);
+        ArgumentNullException.ThrowIfNull(choice);
 
-        var current = selection.Aggregate!;
-        selection.Decide(s =>
-            s.SelectByPriority(command.ApplicationId, command.Priorities, command.Reason, command.SelectedBy));
+        HomeSelectionChoice.EnsureOffered(choice.Home, command.SelectedDate);
 
-        var chosen = await HomeSelectionCompletion
-            .FetchChosenAsync(session, current, command.ApplicationId, cancellationToken)
-            .ConfigureAwait(false);
-        HomeSelectionCompletion.Complete(
-            current,
-            chosen,
-            command.GroundLeaseTemplateId,
-            command.PurchasePrice,
-            command.SelectedDate,
+        var terms = new SelectionTerms(command.GroundLeaseTemplateId, command.PurchasePrice, command.SelectedDate);
+        var chosen = HomeSelection.SelectByPriority(
+            command.SelectionId,
+            command.HomeId,
+            choice.Comparison,
+            command.ApplicationId,
+            command.Priorities,
+            command.Reason,
+            terms,
+            choice.Today,
             command.SelectedBy);
+
+        return HomeSelectionChoice.RecordAsync(
+            session, choice, command.SelectionId, chosen, command.ApplicationId, terms, command.SelectedBy, cancellationToken);
     }
 }

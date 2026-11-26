@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { createApplication, createGroundLease, createHome, createLandParcel, createPurchaseWorkflow, eligibilityVerified, post, setDocumentExpiry, uploadDocument } from '../support/api'
+import { createApplication, createGroundLease, createHome, createLandParcel, createPurchaseWorkflow, eligibilityVerified, post, setDocumentExpiry, uploadDocument, waitForHomeBuyersToKnowHome } from '../support/api'
 import { expectToast, field, isoDate, panel, uniqueId } from '../support/ui'
 
 // Journeys (docs/journeys/today/):
@@ -46,16 +46,19 @@ test('a household missing a readiness step offers to record just that step, on T
   await expect(page.getByRole('row', { name: new RegExp(`Readiness incomplete ${name}`) })).toHaveCount(0)
 })
 
-test('an action with no panel on Today yet opens the record, where the action is', async ({ page }) => {
+test('an available home is waiting to have a household chosen, and Choose household opens its selection page', async ({ page }) => {
   const { parcelId, apn } = await createLandParcel(page)
-  await createHome(page, parcelId)
+  const homeId = await createHome(page, parcelId)
+  await waitForHomeBuyersToKnowHome(page, homeId)
 
   await page.goto('/')
   const row = section(page, 'Selections').getByRole('row', { name: new RegExp(`Home available ${apn}`) })
-  await row.getByRole('button', { name: /^Start selection: / }).click()
+  await expect(row).toContainText('Available')
+  await expect(row).not.toContainText('no selection started')
+  await row.getByRole('button', { name: /^Choose household: / }).click()
 
-  await expect(page).toHaveURL(/\/homes$/)
-  await expect(panel(page, `${apn} Elm St`).getByRole('button', { name: 'Start Selection' })).toBeVisible()
+  await expect(page).toHaveURL(new RegExp(`/homes/${homeId}/selection$`))
+  await expect(page.getByRole('heading', { name: `${apn} Elm St`, level: 1 })).toBeVisible()
 })
 
 test('a document expiring soon is a Records item with a due chip, and opens the document', async ({ page }) => {

@@ -37,11 +37,11 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
         var landParcelId = await CreateLandParcelAsync(client);
 
         var homeId = await TrackAsync(() => RegisterHomeAsync(client, landParcelId));
-        await CreateApprovedApplicationAsync(client);
+        var applicant = await CreateApprovedApplicationAsync(client);
 
-        var selectionId = await StartSelectionAsync(client, homeId);
-        (await client.GetFromJsonAsync<HomeSelectionResponse>($"/api/home-selections/{selectionId}"))!
-            .Should().BeEquivalentTo(new { HomeId = homeId, HomeBedrooms = 3, HomeIsAccessible = false });
+        var overview = await GetSelectionOverviewAsync(client, homeId);
+        overview.Should().BeEquivalentTo(new { HomeId = homeId, HomeBedrooms = 3, HomeIsAccessible = false, SaleStage = "Offered", IsOffered = true });
+        overview.WaitingList.Should().Contain(c => c.ApplicationId == applicant.ApplicationId);
     }
 
     [Fact]
@@ -122,23 +122,23 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
         var applicant = await CreateApprovedApplicationAsync(client);
 
         (await GetTodayAsync(client)).Items.Should().ContainSingle(i => i.RecordId == homeId)
-            .Which.Should().BeEquivalentTo(new { Area = "selections", Kind = "home-available", Label = "789 Elm St" });
-
-        var selectionId = await TrackAsync(() => StartSelectionAsync(client, homeId));
-        var selecting = await GetTodayAsync(client);
-        selecting.Items.Should().NotContain(i => i.RecordId == homeId);
-        selecting.Items.Should().ContainSingle(i => i.RecordId == selectionId).Which.Kind.Should().Be("selection-open");
+            .Which.Should().BeEquivalentTo(new
+            {
+                Area = "selections",
+                Kind = "home-available",
+                Label = "789 Elm St",
+                Detail = "Available",
+                Actions = new[] { "choose-household" },
+            });
 
         await TrackAsync(async () =>
-            (await client.PostAsJsonAsync($"/api/home-selections/{selectionId}/select-by-priority",
-                new SelectHouseholdByPriorityRequest(
-                    applicant.ApplicationId, ["WaitingListTenure"], "Longest on the waiting list", templateId, 200000m, SelectedDate)))
-                .StatusCode.Should().Be(HttpStatusCode.NoContent));
+            (await ChooseByPriorityAsync(client, homeId, applicant.ApplicationId, templateId, SelectedDate))
+                .StatusCode.Should().Be(HttpStatusCode.Created));
         var workflowId = (await client.GetFromJsonAsync<PaginatedResponse<PurchaseWorkflowListItemResponse>>(
             $"/api/purchase-workflows?homeId={homeId}"))!.Items.Single().Id;
 
         var purchasing = await GetTodayAsync(client);
-        purchasing.Items.Should().NotContain(i => i.RecordId == selectionId || i.RecordId == homeId);
+        purchasing.Items.Should().NotContain(i => i.RecordId == homeId);
         purchasing.Items.Should().ContainSingle(i => i.RecordId == workflowId).Which.Should().BeEquivalentTo(new
         {
             Area = "purchases",
@@ -161,11 +161,11 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
     }
 
     [Fact]
-    public async Task FailingThePurchase_ReturnsTheHouseholdToTheWaitingListAndTheHomeToSelection()
+    public async Task FailingThePurchase_ReturnsTheHouseholdToTheWaitingListAndMakesTheHomeAvailableWithNoSelectionOpen()
     {
         var client = factory.CreateClient().WithAuthToken();
         var purchase = await SelectHouseholdAsync(client);
-        await CreateApprovedApplicationAsync(client);
+        var next = await CreateApprovedApplicationAsync(client);
         var failedDate = SelectedDate.AddDays(20);
 
         await TrackAsync(async () =>
@@ -178,13 +178,20 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
         (await client.GetFromJsonAsync<HouseholdResponse>($"/api/households/{purchase.Applicant.HouseholdId}"))!
             .Journey.Should().BeEquivalentTo(new { Stage = "Waiting", ApprovedDate = ApprovedDate, SelectedDate = (DateOnly?)null });
 
-        var selections = await client.GetFromJsonAsync<List<HomeSelectionSummaryResponse>>($"/api/homes/{purchase.HomeId}/home-selections");
-        selections!.Select(s => s.Status).Should().Equal("Open", "FellThrough");
-        (await client.GetFromJsonAsync<HomeSelectionResponse>($"/api/home-selections/{selections![0].Id}"))!
-            .Candidates.Should().NotContain(c => c.ApplicationId == purchase.Applicant.ApplicationId,
-                "the household isn't a candidate for the home its purchase just fell through on");
         (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{purchase.HomeId}"))!
-            .Should().BeEquivalentTo(new { SaleStage = "InSelection", UnderContractDate = (DateOnly?)null, AvailableAgainDate = failedDate });
+            .Should().BeEquivalentTo(new { SaleStage = "Offered", UnderContractDate = (DateOnly?)null, AvailableAgainDate = failedDate });
+        var overview = await GetSelectionOverviewAsync(client, purchase.HomeId);
+        overview.Should().BeEquivalentTo(new { SaleStage = "Offered", IsOffered = true });
+        overview.Decisions.Should().ContainSingle("no selection is started when a purchase falls through");
+        overview.WaitingList.Should().Contain(c => c.ApplicationId == purchase.Applicant.ApplicationId);
+        (await GetTodayAsync(client)).Items.Should().ContainSingle(i => i.RecordId == purchase.HomeId)
+            .Which.Should().BeEquivalentTo(new { Kind = "home-available", WaitingSince = (DateOnly?)failedDate });
+
+        await TrackAsync(async () =>
+            (await ChooseByPriorityAsync(client, purchase.HomeId, next.ApplicationId, purchase.TemplateId, failedDate))
+                .StatusCode.Should().Be(HttpStatusCode.Created));
+        (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{purchase.HomeId}"))!
+            .Should().BeEquivalentTo(new { SaleStage = "UnderContract", UnderContractDate = failedDate });
     }
 
     [Fact]
@@ -236,22 +243,6 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
     }
 
     [Fact]
-    public async Task CreatingALeaseDirectly_OnAHomeInSelection_IsRefused()
-    {
-        var client = factory.CreateClient().WithAuthToken();
-        var landParcelId = await CreateLandParcelAsync(client);
-        var homeId = await TrackAsync(() => RegisterHomeAsync(client, landParcelId));
-        await CreateApprovedApplicationAsync(client);
-        await TrackAsync(() => StartSelectionAsync(client, homeId));
-
-        var response = await CreateLeaseAsync(client, landParcelId, homeId, new DateOnly(2019, 3, 1));
-
-        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
-        (await response.Content.ReadFromJsonAsync<ProblemDetails>())!.Detail
-            .Should().Be("This home is in a home selection. Cancel the selection before leasing it by hand.");
-    }
-
-    [Fact]
     public async Task CreatingALeaseDirectly_OnAHomeUnderContract_IsRefused()
     {
         var client = factory.CreateClient().WithAuthToken();
@@ -265,18 +256,16 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
     }
 
     [Fact]
-    public async Task CreatingALeaseDirectly_AfterTheHomesSelectionIsCancelled_IsAllowed()
+    public async Task CreatingALeaseDirectly_AfterTheChosenHouseholdsPurchaseFellThrough_IsAllowed()
     {
         var client = factory.CreateClient().WithAuthToken();
-        var landParcelId = await CreateLandParcelAsync(client);
-        var homeId = await TrackAsync(() => RegisterHomeAsync(client, landParcelId));
-        await CreateApprovedApplicationAsync(client);
-        var selectionId = await TrackAsync(() => StartSelectionAsync(client, homeId));
+        var purchase = await SelectHouseholdAsync(client);
         await TrackAsync(async () =>
-            (await client.PostAsJsonAsync($"/api/home-selections/{selectionId}/cancel", new CancelHomeSelectionRequest("Recording an existing lease")))
+            (await client.PostAsJsonAsync($"/api/purchase-workflows/{purchase.WorkflowId}/fail",
+                new FailPurchaseRequest("Recording an existing lease instead", SelectedDate.AddDays(5))))
                 .StatusCode.Should().Be(HttpStatusCode.NoContent));
 
-        var response = await CreateLeaseAsync(client, landParcelId, homeId, new DateOnly(2019, 3, 1));
+        var response = await CreateLeaseAsync(client, purchase.LandParcelId, purchase.HomeId, new DateOnly(2019, 3, 1));
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
     }
@@ -376,6 +365,51 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
 
         (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{homeId}"))!
             .Should().BeEquivalentTo(new { Occupancy = "Vacant", SaleStage = "Offered", AvailableAgainCause = "TrustReleased" });
+    }
+
+    [Fact]
+    public async Task BuyingBackAHomeBoughtThroughASelection_LetsAHouseholdBeChosenForItAgain()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var purchase = await SelectHouseholdAsync(client);
+        await SatisfyAllTracksAsync(client, purchase.WorkflowId);
+        (await client.PostAsJsonAsync($"/api/purchase-workflows/{purchase.WorkflowId}/closing/schedule",
+            new ScheduleClosingRequest(ClosingDate)))
+            .StatusCode.Should().Be(HttpStatusCode.NoContent);
+        await TrackAsync(async () =>
+            (await client.PostAsJsonAsync($"/api/purchase-workflows/{purchase.WorkflowId}/closing/record",
+                new RecordPurchaseClosedRequest(ClosingDate, null)))
+                .StatusCode.Should().Be(HttpStatusCode.NoContent));
+        var leaseId = (await client.GetFromJsonAsync<PaginatedResponse<GroundLeaseListItemResponse>>(
+            $"/api/ground-leases?landParcelId={purchase.LandParcelId}"))!.Items.Single().Id;
+        var today = (await GetTodayAsync(client)).Today;
+
+        (await ChooseByPriorityAsync(client, purchase.HomeId, (await CreateApprovedApplicationAsync(client)).ApplicationId, purchase.TemplateId, today))
+            .StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity, "a leased home isn't offered");
+
+        var resaleId = await TrackAsync(async () =>
+            (await (await client.PostAsJsonAsync($"/api/ground-leases/{leaseId}/intent-to-sell",
+                new RecordIntentToSellRequest(today, "Phone", null))).Content.ReadFromJsonAsync<RecordIntentToSellResponse>())!.ResaleId);
+        await TrackAsync(async () =>
+            (await client.PostAsJsonAsync($"/api/resales/{resaleId}/appraisal",
+                new RecordResaleAppraisalRequest(270_000m, today, "Hollis", null, null))).StatusCode.Should().Be(HttpStatusCode.NoContent));
+        await TrackAsync(async () =>
+            (await client.PostAsJsonAsync($"/api/resales/{resaleId}/exercise-option",
+                new ExercisePurchaseOptionRequest(today, null))).StatusCode.Should().Be(HttpStatusCode.NoContent));
+        await TrackAsync(async () =>
+            (await client.PostAsJsonAsync($"/api/resales/{resaleId}/buyback-closing",
+                new RecordBuybackClosedRequest(today, 205_000m, null, true, null))).StatusCode.Should().Be(HttpStatusCode.NoContent));
+
+        (await GetSelectionOverviewAsync(client, purchase.HomeId)).Should().BeEquivalentTo(new { SaleStage = "Offered", IsOffered = true });
+
+        var nextBuyer = await CreateApprovedApplicationAsync(client);
+        await TrackAsync(async () =>
+            (await ChooseByPriorityAsync(client, purchase.HomeId, nextBuyer.ApplicationId, purchase.TemplateId, today))
+                .StatusCode.Should().Be(HttpStatusCode.Created));
+
+        (await client.GetFromJsonAsync<HomeResponse>($"/api/homes/{purchase.HomeId}"))!
+            .Should().BeEquivalentTo(new { SaleStage = "UnderContract", UnderContractDate = today });
+        (await GetSelectionOverviewAsync(client, purchase.HomeId)).Decisions.Should().HaveCount(2);
     }
 
     [Fact]
@@ -485,13 +519,10 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
             FailingApplicationSelectedHandler.FailForHomes[homeId] = true;
         var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
         var applicant = await CreateApprovedApplicationAsync(client);
-        var selectionId = await StartSelectionAsync(client, homeId);
 
         await TrackAsync(async () =>
-            (await client.PostAsJsonAsync($"/api/home-selections/{selectionId}/select-by-priority",
-                new SelectHouseholdByPriorityRequest(
-                    applicant.ApplicationId, ["WaitingListTenure"], "Longest on the waiting list", templateId, 200000m, SelectedDate)))
-                .StatusCode.Should().Be(HttpStatusCode.NoContent));
+            (await ChooseByPriorityAsync(client, homeId, applicant.ApplicationId, templateId, SelectedDate))
+                .StatusCode.Should().Be(HttpStatusCode.Created));
 
         var workflows = await client.GetFromJsonAsync<PaginatedResponse<PurchaseWorkflowListItemResponse>>(
             $"/api/purchase-workflows?homeId={homeId}");
@@ -538,12 +569,13 @@ public class HomePurchaseFlowTests(DurableApiFactory factory)
         return (await response.Content.ReadFromJsonAsync<CreateGroundLeaseTemplateResponse>())!.GroundLeaseTemplateId;
     }
 
-    private static async Task<string> StartSelectionAsync(HttpClient client, string homeId)
-    {
-        var response = await client.PostAsync($"/api/homes/{homeId}/home-selections", null);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        return (await response.Content.ReadFromJsonAsync<StartHomeSelectionResponse>())!.SelectionId;
-    }
+    private static Task<HttpResponseMessage> ChooseByPriorityAsync(
+        HttpClient client, string homeId, string applicationId, string templateId, DateOnly selectedDate) =>
+        client.PostAsJsonAsync($"/api/homes/{homeId}/home-selections/select-by-priority",
+            new SelectHouseholdByPriorityRequest(applicationId, ["WaitingListTenure"], "Longest on the waiting list", templateId, 200000m, selectedDate));
+
+    private static async Task<HomeSelectionOverviewResponse> GetSelectionOverviewAsync(HttpClient client, string homeId) =>
+        (await client.GetFromJsonAsync<HomeSelectionOverviewResponse>($"/api/homes/{homeId}/selection"))!;
 
     /// <summary>Registers a one-member household ready to buy, and submits and approves its application.</summary>
     private static async Task<Applicant> CreateApprovedApplicationAsync(HttpClient client)

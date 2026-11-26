@@ -30,7 +30,7 @@ import {
 } from './CalendarDate';
 
 /**
- * A home selection in the list across homes.
+ * A household chosen for a home, in the list across homes. SelectionMethod is "Priority" or "Lottery".
  * @export
  * @interface HomeSelectionListItemResponse
  */
@@ -55,46 +55,40 @@ export interface HomeSelectionListItemResponse {
     homeLabel?: string | null;
     /**
      * 
-     * @type {string}
+     * @type {CalendarDate}
      * @memberof HomeSelectionListItemResponse
      */
-    status?: string;
+    selectedDate?: CalendarDate;
     /**
      * 
      * @type {Date}
      * @memberof HomeSelectionListItemResponse
      */
-    startedAt?: Date;
-    /**
-     * 
-     * @type {number}
-     * @memberof HomeSelectionListItemResponse
-     */
-    candidateCount?: number;
+    recordedAt?: Date;
     /**
      * 
      * @type {string}
      * @memberof HomeSelectionListItemResponse
      */
-    selectedApplicationId?: string | null;
+    selectionMethod?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof HomeSelectionListItemResponse
+     */
+    applicationCount?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof HomeSelectionListItemResponse
+     */
+    selectedApplicationId?: string;
     /**
      * 
      * @type {HouseholdContactDto}
      * @memberof HomeSelectionListItemResponse
      */
     chosenContact?: HouseholdContactDto | null;
-    /**
-     * 
-     * @type {Date}
-     * @memberof HomeSelectionListItemResponse
-     */
-    closedAt?: Date | null;
-    /**
-     * 
-     * @type {CalendarDate}
-     * @memberof HomeSelectionListItemResponse
-     */
-    fellThroughDate?: CalendarDate | null;
 }
 
 /**
@@ -117,13 +111,12 @@ export function HomeSelectionListItemResponseFromJSONTyped(json: any, ignoreDisc
         'id': json['id'] == null ? undefined : json['id'],
         'homeId': json['homeId'] == null ? undefined : json['homeId'],
         'homeLabel': json['homeLabel'] == null ? undefined : json['homeLabel'],
-        'status': json['status'] == null ? undefined : json['status'],
-        'startedAt': json['startedAt'] == null ? undefined : (new Date(json['startedAt'])),
-        'candidateCount': json['candidateCount'] == null ? undefined : json['candidateCount'],
+        'selectedDate': json['selectedDate'] == null ? undefined : CalendarDateFromJSON(json['selectedDate']),
+        'recordedAt': json['recordedAt'] == null ? undefined : (new Date(json['recordedAt'])),
+        'selectionMethod': json['selectionMethod'] == null ? undefined : json['selectionMethod'],
+        'applicationCount': json['applicationCount'] == null ? undefined : json['applicationCount'],
         'selectedApplicationId': json['selectedApplicationId'] == null ? undefined : json['selectedApplicationId'],
         'chosenContact': json['chosenContact'] == null ? undefined : HouseholdContactDtoFromJSON(json['chosenContact']),
-        'closedAt': json['closedAt'] == null ? undefined : (new Date(json['closedAt'])),
-        'fellThroughDate': json['fellThroughDate'] == null ? undefined : CalendarDateFromJSON(json['fellThroughDate']),
     };
 }
 
@@ -141,13 +134,12 @@ export function HomeSelectionListItemResponseToJSONTyped(value?: HomeSelectionLi
         'id': value['id'],
         'homeId': value['homeId'],
         'homeLabel': value['homeLabel'],
-        'status': value['status'],
-        'startedAt': value['startedAt'] == null ? undefined : ((value['startedAt']).toISOString()),
-        'candidateCount': value['candidateCount'],
+        'selectedDate': CalendarDateToJSON(value['selectedDate']),
+        'recordedAt': value['recordedAt'] == null ? undefined : ((value['recordedAt']).toISOString()),
+        'selectionMethod': value['selectionMethod'],
+        'applicationCount': value['applicationCount'],
         'selectedApplicationId': value['selectedApplicationId'],
         'chosenContact': HouseholdContactDtoToJSON(value['chosenContact']),
-        'closedAt': value['closedAt'] === null ? null : ((value['closedAt'] as any)?.toISOString()),
-        'fellThroughDate': CalendarDateToJSON(value['fellThroughDate']),
     };
 }
 

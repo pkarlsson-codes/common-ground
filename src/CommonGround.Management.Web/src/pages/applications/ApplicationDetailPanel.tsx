@@ -203,7 +203,7 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
                       <td>{passOver.selectionMethod ?? '—'}</td>
                       <td>{passOver.selectionReason ?? (passOver.selectionMethod === 'Lottery' ? 'Drawn by lottery' : 'No reason recorded')}</td>
                       <td style={{ textAlign: 'right' }}>
-                        <Link className="btn btn-link btn-sm" to={homeSelectionPath(passOver.selectionId!)}>
+                        <Link className="btn btn-link btn-sm" to={homeSelectionPath(passOver.homeId!)}>
                           Open Selection
                         </Link>
                       </td>

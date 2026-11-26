@@ -225,31 +225,33 @@ public class HomesTests(ApiFactory factory)
         var parcelId = await CreateLandParcelAsync();
         var client = factory.CreateClient().WithAuthToken();
         var availableHomeId = await RegisterHomeAsync(client, parcelId);
-        var inSelectionHomeId = await RegisterHomeAsync(client, parcelId);
+        var underContractHomeId = await RegisterHomeAsync(client, parcelId);
         using (var scope = factory.Services.CreateScope())
         {
-            // HomeSelectionStarted has a handler in Homeownership too, so it can't be invoked through the bus.
+            // ApplicationSelected has a handler in Homeownership too, so it can't be invoked through the bus.
             await using var session = scope.ServiceProvider.GetRequiredService<IDocumentStore>().LightweightSession(ApiFactory.TestTrustId);
-            HomeSelectionStartedHandler.Handle(
-                    new HomeSelectionStarted("homeselection-filter", inSelectionHomeId, DateTimeOffset.UtcNow),
-                    availability: null,
-                    openedDate: new DateOnly(2026, 10, 1))
-                .Execute(session);
+            var (op, _) = ApplicationSelectedHandler.Handle(
+                new ApplicationSelected(
+                    "application-filter", "household-filter", "Filter Buyer", "filter@example.com", null, "homeselection-filter",
+                    underContractHomeId, parcelId, "template-filter", 200_000m, new DateOnly(2026, 10, 1), "user-filter",
+                    50_000m, 2, null, null, null),
+                availability: null);
+            op.Execute(session);
             await session.SaveChangesAsync();
         }
 
         var available = await client.GetFromJsonAsync<PaginatedResponse<HomeListItemResponse>>(
             $"/api/homes?landParcelIds={parcelId}&occupancy=Vacant&saleStages=Offered");
-        var inSelection = await client.GetFromJsonAsync<PaginatedResponse<HomeListItemResponse>>(
-            $"/api/homes?landParcelIds={parcelId}&saleStages=InSelection&saleStages=UnderContract");
+        var underContract = await client.GetFromJsonAsync<PaginatedResponse<HomeListItemResponse>>(
+            $"/api/homes?landParcelIds={parcelId}&saleStages=UnderContract&saleStages=HeldByTrust");
 
         var notOffered = await client.GetFromJsonAsync<PaginatedResponse<HomeListItemResponse>>(
             $"/api/homes?landParcelIds={parcelId}&occupancy=Occupied");
 
         available!.Items.Select(h => (h.Id, h.Occupancy, h.SaleStage))
             .Should().Equal((availableHomeId, "Vacant", "Offered"));
-        inSelection!.Items.Select(h => (h.Id, h.Occupancy, h.SaleStage))
-            .Should().Equal((inSelectionHomeId, "Vacant", "InSelection"));
+        underContract!.Items.Select(h => (h.Id, h.Occupancy, h.SaleStage))
+            .Should().Equal((underContractHomeId, "Vacant", "UnderContract"));
         notOffered!.Items.Should().BeEmpty();
     }
 

@@ -1,18 +1,15 @@
 using CommonGround.HomeBuyers.Application.Errors;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections.Events;
-using CommonGround.HomeBuyers.Domain.Households;
-using CommonGround.HomeBuyers.Domain.IncomeLimitSchedules;
 using CommonGround.SharedKernel.Domain;
-using CommonGround.SharedKernel.Domain.Events;
 
 namespace CommonGround.HomeBuyers.Domain.HomeSelections;
 
 /// <summary>
-/// Staff choosing which household on the waiting list gets a home, either by citing
-/// <see cref="SelectionPriority"/> values or by lottery. Staff can cancel it without choosing
-/// anyone, after which a new selection can start for the same home. A new selection can also start once
-/// the purchase a completed selection led to falls through.
+/// Staff choosing which household on the waiting list gets a home, either by citing <see cref="SelectionPriority"/>
+/// values or by lottery. A selection is one decision, recorded once with the whole waiting list as it was compared
+/// against the home, and never changes afterwards. Whether the home can be chosen for at all is the home's sale
+/// stage, not anything a selection records; whatever happens to the purchase later is the purchase's.
 /// </summary>
 public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
 {
@@ -21,90 +18,33 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
 #pragma warning restore CS8618
 
     public string HomeId { get; private set; }
-    public HomeSelectionStatus Status { get; private set; }
-    public UserId StartedBy { get; private set; }
-    public DateTimeOffset StartedAt { get; private set; }
-    public IReadOnlyList<SelectionCandidate> Candidates { get; private set; }
-
-    /// <summary>The home's income limit as a percent of AMI when the selection started, or <see langword="null"/> when it had none.</summary>
-    public int? IncomeLimitPercentOfAmi { get; private set; }
-
-    /// <summary>The income limit schedule in effect when the selection started, or <see langword="null"/> when none was.</summary>
-    public IncomeLimitTable? IncomeLimits { get; private set; }
-
-    /// <summary>The schedule's row for the home's percent that the candidates were judged by, when the home had a limit.</summary>
-    public IncomeLimitLevel? IncomeLimitLevel =>
-        IncomeLimitPercentOfAmi is { } percent ? IncomeLimits?.LevelFor(percent) : null;
-    public HomeownerApplicationId? SelectedApplicationId { get; private set; }
-    public string? CancellationReason { get; private set; }
+    public HomeownerApplicationId SelectedApplicationId { get; private set; }
+    public DateOnly SelectedDate { get; private set; }
 
     /// <summary>
-    /// Starts choosing a household for a home from a snapshot of the waiting list, judging each candidate's
-    /// income against the home's limit for its household size. Rejected when <paramref name="activeSelectionId"/>
-    /// (the home's open or completed selection, if any) is set, when nobody is waiting, or when the home has a
-    /// limit and <paramref name="scheduleInEffect"/> has no level for it.
+    /// Chooses <paramref name="applicationId"/> from <paramref name="comparison"/>, citing the <paramref name="priorities"/>
+    /// that put it ahead of the others and explaining the choice in <paramref name="reason"/>. Rejected when the
+    /// household can't be chosen on the date.
     /// </summary>
     /// <param name="id">The new selection's ID.</param>
-    /// <param name="homeId">The home to choose a household for.</param>
-    /// <param name="candidates">The waiting list. Their income limits are set here; any they carry are replaced.</param>
-    /// <param name="incomeLimitPercentOfAmi">The home's income limit, or <see langword="null"/> when it has none.</param>
-    /// <param name="scheduleInEffect">The income limit schedule in effect on <paramref name="today"/>, if any.</param>
-    /// <param name="today">The trust's today, named in the refusal when no limits are in effect.</param>
-    /// <param name="activeSelectionId">The home's open or completed selection, if any.</param>
-    /// <param name="startedBy">The staff user starting the selection.</param>
-    /// <returns>The start.</returns>
-    public static HomeSelectionStarted Start(
+    /// <param name="homeId">The home.</param>
+    /// <param name="comparison">The waiting list compared against the home on <see cref="SelectionTerms.SelectedDate"/>.</param>
+    /// <param name="applicationId">The chosen application.</param>
+    /// <param name="priorities">The priorities that put the household first; at least one.</param>
+    /// <param name="reason">Staff's explanation of the choice.</param>
+    /// <param name="terms">The purchase's terms and the date of the choice.</param>
+    /// <param name="today">The trust's today; the date of the choice can't be after it.</param>
+    /// <param name="selectedBy">The staff user choosing.</param>
+    /// <returns>The choice.</returns>
+    public static HouseholdSelectedByPriority SelectByPriority(
         HomeSelectionId id,
         string homeId,
-        IReadOnlyList<SelectionCandidate> candidates,
-        int? incomeLimitPercentOfAmi,
-        IncomeLimitSchedule? scheduleInEffect,
-        DateOnly today,
-        HomeSelectionId? activeSelectionId,
-        UserId startedBy)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
-        ArgumentNullException.ThrowIfNull(candidates);
-
-        if (activeSelectionId is not null)
-            throw BusinessRuleViolation.HomeSelection.Start.HomeHasActiveSelection(homeId, activeSelectionId.Value);
-
-        if (candidates.Count == 0)
-            throw BusinessRuleViolation.HomeSelection.Start.WaitingListEmpty(homeId);
-
-        IncomeLimitLevel? level = null;
-        if (incomeLimitPercentOfAmi is { } percent)
-        {
-            level = scheduleInEffect?.LevelFor(percent)
-                ?? throw BusinessRuleViolation.HomeSelection.Start.NoIncomeLimitsInEffect(homeId, percent, today);
-        }
-
-        return new HomeSelectionStarted(
-            id.Value,
-            homeId,
-            [.. candidates.Select(c => new SnapshotCandidate(
-                c.ApplicationId.Value,
-                c.HouseholdId.Value,
-                c.AnnualIncome,
-                c.HouseholdSize,
-                c.RequiresAccessibility,
-                c.WaitingSince,
-                level?.LimitFor(c.HouseholdSize)))],
-            incomeLimitPercentOfAmi,
-            scheduleInEffect?.EffectiveFrom,
-            scheduleInEffect?.Table.ToEntries(),
-            startedBy.Value);
-    }
-
-    /// <summary>
-    /// Chooses <paramref name="applicationId"/>, citing the <paramref name="priorities"/> that put
-    /// it ahead of the other candidates and explaining the choice in <paramref name="reason"/>.
-    /// Rejected when the candidate's income is over the home's income limit.
-    /// </summary>
-    public HouseholdSelectedByPriority SelectByPriority(
+        WaitingListComparison comparison,
         HomeownerApplicationId applicationId,
         IReadOnlyCollection<SelectionPriority> priorities,
         string reason,
+        SelectionTerms terms,
+        DateOnly today,
         UserId selectedBy)
     {
         ArgumentNullException.ThrowIfNull(priorities);
@@ -112,157 +52,153 @@ public sealed class HomeSelection : AggregateRoot<HomeSelectionId>
             throw BusinessRuleViolation.HomeSelection.SelectByPriority.PrioritiesRequired();
         if (string.IsNullOrWhiteSpace(reason))
             throw BusinessRuleViolation.HomeSelection.SelectByPriority.ReasonRequired();
+        EnsureCanChoose(homeId, comparison, terms, today);
 
-        EnsureOpen();
-        var candidate = EnsureCandidate(applicationId);
-        if (candidate.IsOverIncomeLimit)
-            throw BusinessRuleViolation.HomeSelection.SelectByPriority.OverIncomeLimit(applicationId);
+        var chosen = comparison.Find(applicationId)
+            ?? throw BusinessRuleViolation.HomeSelection.Choose.NotOnWaitingList(applicationId);
+        if (!chosen.CanBeChosen)
+            throw BusinessRuleViolation.HomeSelection.Choose.CannotBeChosen(applicationId, chosen.Reasons);
 
         return new HouseholdSelectedByPriority(
-            Id.Value,
+            id.Value,
+            homeId,
             applicationId.Value,
+            terms.SelectedDate,
+            selectedBy.Value,
+            terms.GroundLeaseTemplateId,
+            terms.PurchasePrice,
+            comparison.IncomeLimitPercentOfAmi,
+            comparison.IncomeLimits?.EffectiveFrom,
+            comparison.IncomeLimits?.ToEntries(),
+            Record(comparison, applicationId),
             [.. priorities.Distinct()],
-            reason,
-            selectedBy.Value);
+            reason.Trim());
     }
 
     /// <summary>
-    /// Chooses a candidate by lottery. The draw is over <paramref name="tiedApplicationIds"/> when
-    /// staff found some candidates tied, otherwise every candidate, leaving out anyone over the home's
-    /// income limit or not in <paramref name="eligibleApplicationIds"/> so the winner can always be selected.
+    /// Chooses a household from <paramref name="comparison"/> by lottery. The draw is over
+    /// <paramref name="tiedApplicationIds"/> when staff found some households tied, otherwise the whole waiting list,
+    /// leaving out anyone who can't be chosen on the date so the winner can always be chosen.
     /// <paramref name="seed"/> is recorded so the draw can be re-run and checked.
     /// </summary>
-    public HouseholdSelectedByLottery DrawLottery(
+    /// <param name="id">The new selection's ID.</param>
+    /// <param name="homeId">The home.</param>
+    /// <param name="comparison">The waiting list compared against the home on <see cref="SelectionTerms.SelectedDate"/>.</param>
+    /// <param name="tiedApplicationIds">The applications staff found tied, at least two; <see langword="null"/> to draw from the whole waiting list.</param>
+    /// <param name="seed">The draw's seed.</param>
+    /// <param name="terms">The purchase's terms and the date of the choice.</param>
+    /// <param name="today">The trust's today; the date of the choice can't be after it.</param>
+    /// <param name="drawnBy">The staff user drawing.</param>
+    /// <returns>The choice.</returns>
+    public static HouseholdSelectedByLottery DrawLottery(
+        HomeSelectionId id,
+        string homeId,
+        WaitingListComparison comparison,
         IReadOnlyCollection<HomeownerApplicationId>? tiedApplicationIds,
-        IReadOnlySet<HomeownerApplicationId> eligibleApplicationIds,
         int seed,
+        SelectionTerms terms,
+        DateOnly today,
         UserId drawnBy)
     {
-        ArgumentNullException.ThrowIfNull(eligibleApplicationIds);
+        EnsureCanChoose(homeId, comparison, terms, today);
 
-        EnsureOpen();
-
-        IReadOnlyCollection<HomeownerApplicationId> requested;
+        IReadOnlyList<ComparedApplication> requested;
         if (tiedApplicationIds is null)
         {
-            requested = [.. Candidates.Select(c => c.ApplicationId)];
+            requested = comparison.Applications;
         }
         else
         {
-            requested = [.. tiedApplicationIds.Distinct()];
-            if (requested.Count < 2)
-                throw BusinessRuleViolation.HomeSelection.DrawLottery.TiedPoolTooSmall(requested.Count);
-            foreach (var applicationId in requested)
-                EnsureCandidate(applicationId);
+            var tied = tiedApplicationIds.Distinct().ToList();
+            if (tied.Count < 2)
+                throw BusinessRuleViolation.HomeSelection.DrawLottery.TiedPoolTooSmall(tied.Count);
+            requested = [.. tied.Select(applicationId => comparison.Find(applicationId)
+                ?? throw BusinessRuleViolation.HomeSelection.Choose.NotOnWaitingList(applicationId))];
         }
 
-        var overIncomeLimit = Candidates.Where(c => c.IsOverIncomeLimit).Select(c => c.ApplicationId).ToHashSet();
-        bool CanWin(HomeownerApplicationId id) => eligibleApplicationIds.Contains(id) && !overIncomeLimit.Contains(id);
-        var pool = requested.Where(CanWin).ToList();
-        var ineligible = requested.Where(id => !CanWin(id)).ToList();
+        var pool = requested.Where(a => a.CanBeChosen).Select(a => a.Application.ApplicationId).ToList();
         if (pool.Count == 0)
             throw BusinessRuleViolation.HomeSelection.DrawLottery.NoEligibleCandidates(requested.Count);
 
         var winner = SelectionLottery.Draw(pool, seed);
 
         return new HouseholdSelectedByLottery(
-            Id.Value,
+            id.Value,
+            homeId,
             winner.Value,
-            [.. pool.Select(id => id.Value).Order(StringComparer.Ordinal)],
-            [.. ineligible.Select(id => id.Value).Order(StringComparer.Ordinal)],
-            seed,
-            drawnBy.Value);
+            terms.SelectedDate,
+            drawnBy.Value,
+            terms.GroundLeaseTemplateId,
+            terms.PurchasePrice,
+            comparison.IncomeLimitPercentOfAmi,
+            comparison.IncomeLimits?.EffectiveFrom,
+            comparison.IncomeLimits?.ToEntries(),
+            Record(comparison, winner),
+            tiedApplicationIds is null
+                ? null
+                : [.. requested.Select(a => a.Application.ApplicationId.Value).Order(StringComparer.Ordinal)],
+            [.. pool.Select(applicationId => applicationId.Value).Order(StringComparer.Ordinal)],
+            seed);
     }
 
-    /// <summary>Cancels the selection without choosing anyone, freeing the home for a new selection.</summary>
-    public HomeSelectionCancelled Cancel(string reason, UserId cancelledBy)
+    private static void EnsureCanChoose(string homeId, WaitingListComparison comparison, SelectionTerms terms, DateOnly today)
     {
-        if (string.IsNullOrWhiteSpace(reason))
-            throw BusinessRuleViolation.HomeSelection.Cancel.ReasonRequired();
+        ArgumentException.ThrowIfNullOrWhiteSpace(homeId);
+        ArgumentNullException.ThrowIfNull(comparison);
+        ArgumentNullException.ThrowIfNull(terms);
+        if (comparison.AsOf != terms.SelectedDate)
+            throw new ArgumentException("The waiting list must be compared on the date of the choice.", nameof(comparison));
 
-        EnsureOpen();
+        if (terms.SelectedDate > today)
+            throw BusinessRuleViolation.HomeSelection.Choose.SelectedDateInFuture(terms.SelectedDate, today);
 
-        return new HomeSelectionCancelled(Id.Value, reason, cancelledBy.Value);
+        if (comparison.Applications.Count == 0)
+            throw BusinessRuleViolation.HomeSelection.Choose.WaitingListEmpty(homeId);
+
+        if (!comparison.HasIncomeLimitsInEffect)
+            throw BusinessRuleViolation.HomeSelection.Choose.NoIncomeLimitsInEffect(
+                homeId, comparison.IncomeLimitPercentOfAmi!.Value, terms.SelectedDate);
     }
 
-    /// <summary>Records that the purchase the chosen household started fell through, freeing the home for a new selection.</summary>
-    public HomeSelectionPurchaseFellThrough RecordPurchaseFellThrough(string reason, DateOnly fellThroughDate)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+    private static List<RecordedApplication> Record(WaitingListComparison comparison, HomeownerApplicationId chosen) =>
+        [.. comparison.Applications.Select(a => new RecordedApplication(
+            a.Application.ApplicationId.Value,
+            a.Application.HouseholdId.Value,
+            a.Application.AnnualIncome,
+            a.Application.HouseholdSize,
+            a.Application.RequiresAccessibility,
+            a.Application.WaitingSince,
+            a.IncomeLimit,
+            a.Application.ApplicationId == chosen ? SelectionOutcome.Chosen
+                : a.CanBeChosen ? SelectionOutcome.PassedOver
+                : SelectionOutcome.CouldNotBeChosen,
+            a.Reasons))];
 
-        if (Status != HomeSelectionStatus.Completed)
-            throw BusinessRuleViolation.HomeSelection.RecordPurchaseFellThrough.NotCompleted(Status);
-
-        return new HomeSelectionPurchaseFellThrough(Id.Value, reason, fellThroughDate);
-    }
-
-    private void EnsureOpen()
-    {
-        if (Status != HomeSelectionStatus.Open)
-            throw BusinessRuleViolation.HomeSelection.Modify.NotOpen(Status);
-    }
-
-    private SelectionCandidate EnsureCandidate(HomeownerApplicationId applicationId) =>
-        Candidates.FirstOrDefault(c => c.ApplicationId == applicationId)
-            ?? throw BusinessRuleViolation.HomeSelection.Modify.NotACandidate(applicationId);
-
-    /// <summary>Starts a home selection from its first event.</summary>
-    public static HomeSelection Create(HomeSelectionStarted e)
+    /// <summary>Starts a home selection from its only event.</summary>
+    public static HomeSelection Create(HouseholdSelectedByPriority e)
     {
         ArgumentNullException.ThrowIfNull(e);
 
-        var homeSelection = new HomeSelection();
-        homeSelection.Apply(e);
-        return homeSelection;
+        return new HomeSelection
+        {
+            Id = HomeSelectionId.Create(e.AggregateId),
+            HomeId = e.HomeId,
+            SelectedApplicationId = HomeownerApplicationId.Create(e.ApplicationId),
+            SelectedDate = e.SelectedDate,
+        };
     }
 
-    private void Apply(HomeSelectionStarted e)
+    /// <summary>Starts a home selection from its only event.</summary>
+    public static HomeSelection Create(HouseholdSelectedByLottery e)
     {
-        Id = HomeSelectionId.Create(e.AggregateId);
-        HomeId = e.HomeId;
-        Status = HomeSelectionStatus.Open;
-        StartedBy = UserId.Create(e.StartedBy);
-        StartedAt = e.OccurredAt;
-        Candidates = e.Candidates
-            .Select(c => SelectionCandidate.Create(
-                HomeownerApplicationId.Create(c.ApplicationId),
-                HouseholdId.Create(c.HouseholdId),
-                c.AnnualIncome,
-                c.HouseholdSize,
-                c.RequiresAccessibility,
-                c.WaitingSince,
-                c.IncomeLimit))
-            .ToList();
-        IncomeLimitPercentOfAmi = e.IncomeLimitPercentOfAmi;
-        IncomeLimits = e.IncomeLimitsEffectiveFrom is { } effectiveFrom && e.IncomeLimitLevels is { } levels
-            ? IncomeLimitTable.FromEntries(effectiveFrom, levels)
-            : null;
-    }
+        ArgumentNullException.ThrowIfNull(e);
 
-    /// <summary>Applies <see cref="HouseholdSelectedByPriority"/>.</summary>
-    public void Apply(HouseholdSelectedByPriority e)
-    {
-        SelectedApplicationId = HomeownerApplicationId.Create(e.ApplicationId);
-        Status = HomeSelectionStatus.Completed;
-    }
-
-    /// <summary>Applies <see cref="HouseholdSelectedByLottery"/>.</summary>
-    public void Apply(HouseholdSelectedByLottery e)
-    {
-        SelectedApplicationId = HomeownerApplicationId.Create(e.ApplicationId);
-        Status = HomeSelectionStatus.Completed;
-    }
-
-    /// <summary>Applies <see cref="HomeSelectionPurchaseFellThrough"/>.</summary>
-    public void Apply(HomeSelectionPurchaseFellThrough _)
-    {
-        Status = HomeSelectionStatus.FellThrough;
-    }
-
-    /// <summary>Applies <see cref="HomeSelectionCancelled"/>.</summary>
-    public void Apply(HomeSelectionCancelled e)
-    {
-        CancellationReason = e.Reason;
-        Status = HomeSelectionStatus.Cancelled;
+        return new HomeSelection
+        {
+            Id = HomeSelectionId.Create(e.AggregateId),
+            HomeId = e.HomeId,
+            SelectedApplicationId = HomeownerApplicationId.Create(e.ApplicationId),
+            SelectedDate = e.SelectedDate,
+        };
     }
 }

@@ -300,7 +300,7 @@ internal static class PortfolioImportPlanner
 
             GroundLease.RegisterExisting(
                 id, parcelId, home.Id, homeowner, leaseStart.Value, template.TermYears, template.OptionWindowDays, feeTerms, debtCap,
-                Money.Create(basePrice.Value), Money.Create(appraisedValue.Value), template.CovenantTerms, resaleTerms, HomeCommitments.Create(null, null, null),
+                Money.Create(basePrice.Value), Money.Create(appraisedValue.Value), template.CovenantTerms, resaleTerms, HomeCommitments.None,
                 context.ImportedBy, tracking);
 
             command = new RegisterExistingGroundLease(

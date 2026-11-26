@@ -277,14 +277,6 @@ public static class BusinessRuleViolation
                     {
                         ["purchaseWorkflowId"] = purchaseWorkflowId,
                     });
-
-            public static BusinessRuleViolationException HomeInSelection(string homeSelectionId)
-                => new(
-                    "homeownership.ground_lease.create.home_in_selection",
-                    new Dictionary<string, object?>
-                    {
-                        ["homeSelectionId"] = homeSelectionId,
-                    });
         }
 
         public static class CreateFromTemplate

@@ -178,9 +178,6 @@ public sealed class GroundLease : AggregateRoot<GroundLeaseId>
         if (homeCommitments.OpenPurchaseWorkflowId is { } openPurchaseWorkflowId)
             throw BusinessRuleViolation.GroundLease.Create.HomeHasOpenPurchase(openPurchaseWorkflowId);
 
-        if (homeCommitments.OpenHomeSelectionId is { } openHomeSelectionId)
-            throw BusinessRuleViolation.GroundLease.Create.HomeInSelection(openHomeSelectionId);
-
         if (termYears <= 0)
             throw BusinessRuleViolation.GroundLease.Create.TermYearsNonPositive(termYears);
 

@@ -30,108 +30,93 @@ import {
 } from './CalendarDate';
 
 /**
- * A candidate's priority facts as they stood when the selection started, with its household's
- * current primary contact and whether its application can still be selected today.
- * IncomeLimit is the home's limit for the household's size, null when the home has none;
- * a candidate with IsOverIncomeLimit can't be selected.
- * PrequalifiedAmount is the approved amount of the household's current mortgage prequalification, null when it has none.
- * NotSelectableReasons lists every reason in words why CanBeSelected is false, empty when it is true.
+ * An application on the waiting list compared against the home today. Reasons say why the household
+ * can't be chosen: "OverIncomeLimit", "NoPrimaryMember", "HousingCounselingIncomplete", "CltOrientationIncomplete",
+ * "NoPrequalification" or "PrequalificationExpired"; empty when it can.
  * @export
- * @interface HomeSelectionCandidateDto
+ * @interface WaitingListComparisonEntryDto
  */
-export interface HomeSelectionCandidateDto {
+export interface WaitingListComparisonEntryDto {
     /**
      * 
      * @type {string}
-     * @memberof HomeSelectionCandidateDto
+     * @memberof WaitingListComparisonEntryDto
      */
     applicationId?: string;
     /**
      * 
      * @type {string}
-     * @memberof HomeSelectionCandidateDto
+     * @memberof WaitingListComparisonEntryDto
      */
     householdId?: string;
     /**
      * 
      * @type {HouseholdContactDto}
-     * @memberof HomeSelectionCandidateDto
+     * @memberof WaitingListComparisonEntryDto
      */
     primaryContact?: HouseholdContactDto | null;
     /**
      * 
      * @type {number}
-     * @memberof HomeSelectionCandidateDto
+     * @memberof WaitingListComparisonEntryDto
      */
     annualIncome?: number;
     /**
      * 
      * @type {number}
-     * @memberof HomeSelectionCandidateDto
+     * @memberof WaitingListComparisonEntryDto
      */
     householdSize?: number;
     /**
      * 
      * @type {boolean}
-     * @memberof HomeSelectionCandidateDto
+     * @memberof WaitingListComparisonEntryDto
      */
     requiresAccessibility?: boolean;
     /**
      * 
      * @type {CalendarDate}
-     * @memberof HomeSelectionCandidateDto
+     * @memberof WaitingListComparisonEntryDto
      */
     waitingSince?: CalendarDate;
     /**
      * 
      * @type {number}
-     * @memberof HomeSelectionCandidateDto
+     * @memberof WaitingListComparisonEntryDto
      */
     incomeLimit?: number | null;
     /**
      * 
      * @type {boolean}
-     * @memberof HomeSelectionCandidateDto
+     * @memberof WaitingListComparisonEntryDto
      */
-    isOverIncomeLimit?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof HomeSelectionCandidateDto
-     */
-    applicationPhase?: string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof HomeSelectionCandidateDto
-     */
-    canBeSelected?: boolean;
-    /**
-     * 
-     * @type {number}
-     * @memberof HomeSelectionCandidateDto
-     */
-    prequalifiedAmount?: number | null;
+    canBeChosen?: boolean;
     /**
      * 
      * @type {Array<string>}
-     * @memberof HomeSelectionCandidateDto
+     * @memberof WaitingListComparisonEntryDto
      */
-    notSelectableReasons?: Array<string>;
+    reasons?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof WaitingListComparisonEntryDto
+     */
+    prequalifiedAmount?: number | null;
 }
 
 /**
- * Check if a given object implements the HomeSelectionCandidateDto interface.
+ * Check if a given object implements the WaitingListComparisonEntryDto interface.
  */
-export function instanceOfHomeSelectionCandidateDto(value: object): value is HomeSelectionCandidateDto {
+export function instanceOfWaitingListComparisonEntryDto(value: object): value is WaitingListComparisonEntryDto {
     return true;
 }
 
-export function HomeSelectionCandidateDtoFromJSON(json: any): HomeSelectionCandidateDto {
-    return HomeSelectionCandidateDtoFromJSONTyped(json, false);
+export function WaitingListComparisonEntryDtoFromJSON(json: any): WaitingListComparisonEntryDto {
+    return WaitingListComparisonEntryDtoFromJSONTyped(json, false);
 }
 
-export function HomeSelectionCandidateDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean): HomeSelectionCandidateDto {
+export function WaitingListComparisonEntryDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean): WaitingListComparisonEntryDto {
     if (json == null) {
         return json;
     }
@@ -145,19 +130,17 @@ export function HomeSelectionCandidateDtoFromJSONTyped(json: any, ignoreDiscrimi
         'requiresAccessibility': json['requiresAccessibility'] == null ? undefined : json['requiresAccessibility'],
         'waitingSince': json['waitingSince'] == null ? undefined : CalendarDateFromJSON(json['waitingSince']),
         'incomeLimit': json['incomeLimit'] == null ? undefined : json['incomeLimit'],
-        'isOverIncomeLimit': json['isOverIncomeLimit'] == null ? undefined : json['isOverIncomeLimit'],
-        'applicationPhase': json['applicationPhase'] == null ? undefined : json['applicationPhase'],
-        'canBeSelected': json['canBeSelected'] == null ? undefined : json['canBeSelected'],
+        'canBeChosen': json['canBeChosen'] == null ? undefined : json['canBeChosen'],
+        'reasons': json['reasons'] == null ? undefined : json['reasons'],
         'prequalifiedAmount': json['prequalifiedAmount'] == null ? undefined : json['prequalifiedAmount'],
-        'notSelectableReasons': json['notSelectableReasons'] == null ? undefined : json['notSelectableReasons'],
     };
 }
 
-export function HomeSelectionCandidateDtoToJSON(json: any): HomeSelectionCandidateDto {
-    return HomeSelectionCandidateDtoToJSONTyped(json, false);
+export function WaitingListComparisonEntryDtoToJSON(json: any): WaitingListComparisonEntryDto {
+    return WaitingListComparisonEntryDtoToJSONTyped(json, false);
 }
 
-export function HomeSelectionCandidateDtoToJSONTyped(value?: HomeSelectionCandidateDto | null, ignoreDiscriminator: boolean = false): any {
+export function WaitingListComparisonEntryDtoToJSONTyped(value?: WaitingListComparisonEntryDto | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -172,11 +155,9 @@ export function HomeSelectionCandidateDtoToJSONTyped(value?: HomeSelectionCandid
         'requiresAccessibility': value['requiresAccessibility'],
         'waitingSince': CalendarDateToJSON(value['waitingSince']),
         'incomeLimit': value['incomeLimit'],
-        'isOverIncomeLimit': value['isOverIncomeLimit'],
-        'applicationPhase': value['applicationPhase'],
-        'canBeSelected': value['canBeSelected'],
+        'canBeChosen': value['canBeChosen'],
+        'reasons': value['reasons'],
         'prequalifiedAmount': value['prequalifiedAmount'],
-        'notSelectableReasons': value['notSelectableReasons'],
     };
 }
 

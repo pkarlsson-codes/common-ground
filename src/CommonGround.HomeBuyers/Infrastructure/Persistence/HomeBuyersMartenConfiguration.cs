@@ -1,5 +1,4 @@
 using CommonGround.HomeBuyers.Application.ReadModels;
-using CommonGround.HomeBuyers.Domain.HomeSelections;
 using CommonGround.HomeBuyers.Infrastructure.Persistence.Projections;
 using CommonGround.HomeBuyers.Infrastructure.Seeding;
 using JasperFx.Events.Projections;
@@ -30,18 +29,14 @@ public static class HomeBuyersMartenConfiguration
             .DatabaseSchemaName(SchemaName)
             .Index(x => x.HouseholdId)
             .Index(x => x.Phase);
-        options.Schema.For<HomeFactsView>().DatabaseSchemaName(SchemaName);
-        // One open or completed selection per home. HomeSelection.Start checks this from the
-        // view; the partial unique index catches two starts racing past that check.
+        // Choosing a household marks the home's facts as chosen. Optimistic concurrency makes the second of two
+        // choices racing for the same home fail and retry, and the retry finds the home no longer offered.
+        options.Schema.For<HomeFactsView>()
+            .DatabaseSchemaName(SchemaName)
+            .UseOptimisticConcurrency(true);
         options.Schema.For<HomeSelectionView>()
             .DatabaseSchemaName(SchemaName)
-            .Index(x => x.HomeId, index =>
-            {
-                index.IsUnique = true;
-                index.TenancyScope = TenancyScope.PerTenant;
-                index.Predicate =
-                    $"data ->> 'Status' in ('{HomeSelectionStatus.Open.DisplayName}', '{HomeSelectionStatus.Completed.DisplayName}')";
-            });
+            .Index(x => x.HomeId);
         // One schedule per effective date. IncomeLimitSchedule.Enter and Correct check this from the
         // view; the unique index catches two entries racing past that check.
         options.Schema.For<IncomeLimitScheduleView>()

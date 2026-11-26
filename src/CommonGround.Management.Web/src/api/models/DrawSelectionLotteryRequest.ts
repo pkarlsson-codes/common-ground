@@ -23,8 +23,9 @@ import {
 } from './CalendarDate';
 
 /**
- * Request to choose a candidate in a home selection by lottery. The draw is among
- * TiedApplicationIds when given, otherwise among every candidate.
+ * Request to choose a household for a home by lottery from the waiting list as it is. The draw is among
+ * TiedApplicationIds when given, otherwise among the whole waiting list, leaving out households that
+ * can't be chosen on SelectedDate, which can't be after today.
  * @export
  * @interface DrawSelectionLotteryRequest
  */
