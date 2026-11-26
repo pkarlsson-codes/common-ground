@@ -57,7 +57,8 @@ jobs:
           printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
-          # The server's forced command unpacks stdin into /opt/commonground and runs
+          # The server's forced command (deploy/receive.sh, see docs/hosting.md) replaces
+          # /opt/commonground with this archive, keeping deploy/.env, and runs
           # docker compose up -d --build. This key can do nothing else.
           git archive HEAD | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
             "$DEPLOY_USER@$DEPLOY_HOST"
