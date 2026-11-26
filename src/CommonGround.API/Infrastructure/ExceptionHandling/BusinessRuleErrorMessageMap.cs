@@ -358,6 +358,11 @@ internal static class BusinessRuleErrorMessageMap
             ["stewardship.stewardship_case.submit_occupancy_verification.invalid_status"] = "Occupancy verification cannot be submitted in the current status.",
             ["stewardship.stewardship_case.verify_occupancy.invalid_status"] = "Occupancy verification cannot be approved in the current status.",
 
+            ["reminders.reminder.set.note_required"] = "Write a note saying what to do.",
+            ["reminders.reminder.set.note_too_long"] = "A note can be at most {maxLength} characters; this one is {length}.",
+            ["reminders.reminder.set.remind_on_in_past"] = "A reminder can't be set for {remindOn}, which is before today ({today}).",
+            ["reminders.reminder.set.section_unknown"] = "Today has no section called {section}.",
+
             ["identity.user.remove_from_trust.not_a_member"] = "That person isn't a member of this trust.",
             ["identity.user.remove_from_trust.cannot_remove_self"] = "You can't remove yourself from the trust.",
             ["trust_management.trust.create.name_required"] = "Trust name is required.",

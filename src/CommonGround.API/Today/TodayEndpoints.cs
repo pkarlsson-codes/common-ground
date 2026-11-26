@@ -3,6 +3,8 @@ using CommonGround.Documents.Application.Queries;
 using CommonGround.HomeBuyers.Application.Queries;
 using CommonGround.Homeownership.Application.Queries;
 using CommonGround.PropertyRegistry.Application.Queries;
+using CommonGround.Reminders.Application.Queries;
+using CommonGround.Reminders.Application.WorkItems;
 using CommonGround.SharedKernel.Application.WorkItems;
 using CommonGround.SharedKernel.Domain.Services;
 using CommonGround.Stewardship.Application.Queries;
@@ -14,7 +16,7 @@ namespace CommonGround.API.Today;
 
 /// <summary>
 /// Today: what needs attention across every context. Each context derives its own work items from its own read
-/// models; this asks each of them and puts the answers in one queue.
+/// models; this asks each of them and puts the answers in one queue. Reminders staff set come with them.
 /// </summary>
 public static class TodayEndpoints
 {
@@ -35,15 +37,20 @@ public static class TodayEndpoints
         var homeownership = await bus.InvokeForTenantAsync<WorkItemList>(
             tenantId, new GetHomeownershipWorkItems(today, preventionCases.GroundLeaseIds), cancellationToken).ConfigureAwait(false);
         var documents = await bus.InvokeForTenantAsync<WorkItemList>(tenantId, new GetDocumentsWorkItems(today), cancellationToken).ConfigureAwait(false);
+        var reminders = await bus.InvokeForTenantAsync<WorkItemList>(tenantId, new GetRemindersWorkItems(today), cancellationToken).ConfigureAwait(false);
 
         var all = WorkUrgency.Order([
             .. homeBuyers.Items,
             .. propertyRegistry.Items,
             .. homeownership.Items,
             .. documents.Items,
+            .. reminders.Items,
         ]);
 
-        var requested = areas is { Length: > 0 } ? all.Where(i => areas.Contains(i.Area, StringComparer.Ordinal)) : all;
+        // A reminder belongs to the whole trust, so it is listed whatever areas are asked for.
+        var requested = areas is { Length: > 0 }
+            ? all.Where(i => i.Kind == RemindersWorkItems.Reminder || areas.Contains(i.Area, StringComparer.Ordinal))
+            : all;
 
         WorkItemResponse[] items = [.. requested.Select(i => new WorkItemResponse(
             i.Area, i.Kind, i.RecordType, i.RecordId, i.Label, i.Detail, i.DueDate, i.WaitingSince, i.Actions, WorkUrgency.UrgencyOf(i, today)))];

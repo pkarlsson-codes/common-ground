@@ -20,6 +20,7 @@ import ResalesPage from './pages/ResalesPage'
 import SignupPage from './pages/SignupPage'
 import WelcomePage from './pages/WelcomePage'
 import TodayPage from './pages/TodayPage'
+import RemindersPage from './pages/reminders/RemindersPage'
 import StewardshipPage from './pages/stewardship/StewardshipPage'
 import LeaseFeeNoticesPrintPage from './pages/lease-fee-notices/LeaseFeeNoticesPrintPage'
 import MortgageRequestLetterPage from './pages/ground-leases/MortgageRequestLetterPage'
@@ -113,6 +114,7 @@ export default function App() {
             <Route element={<TrustRoute />}>
               <Route element={<Layout />}>
                 <Route index element={<TodayPage />} />
+                <Route path="/reminders"           element={<RemindersPage />} />
                 <Route path="/land-parcels"        element={<LandParcelsPage />} />
                 <Route path="/homes"               element={<HomesPage />} />
                 <Route path="/homes/:homeId/selection" element={<HomeSelectionPage />} />

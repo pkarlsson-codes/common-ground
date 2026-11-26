@@ -14,6 +14,7 @@ apis/LandParcelsApi.ts
 apis/OidcApi.ts
 apis/PortfolioImportApi.ts
 apis/PurchaseWorkflowsApi.ts
+apis/RemindersApi.ts
 apis/ReportsApi.ts
 apis/ResalesApi.ts
 apis/StewardshipApi.ts
@@ -237,6 +238,8 @@ models/RegisterHouseholdRequest.ts
 models/RegisterHouseholdResponse.ts
 models/RegisterLandParcelRequest.ts
 models/RegisterLandParcelResponse.ts
+models/ReminderListResponse.ts
+models/ReminderResponse.ts
 models/RemoveFromWaitingListRequest.ts
 models/RemoveInsuranceCertificateRequest.ts
 models/RequestForbearanceRequest.ts
@@ -258,6 +261,8 @@ models/ServicerDelinquencyResponse.ts
 models/SetHomeIncomeLimitRequest.ts
 models/SetInsuranceRequirementsRequest.ts
 models/SetLeaseFeeNoticePolicyRequest.ts
+models/SetReminderRequest.ts
+models/SetReminderResponse.ts
 models/SoftDeleteDocumentRequest.ts
 models/StallWorkflowRequest.ts
 models/StewardshipCaseResponse.ts

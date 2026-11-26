@@ -2,9 +2,22 @@ import { useState, type ReactNode } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import type { WorkItemResponse } from '../api'
 import { useToday } from '../hooks/today'
+import { useMarkReminderDone } from '../hooks/reminders'
+import { useToast } from '../hooks/useToast'
 import type { LayoutContext } from '../components/Layout'
 import { daysBetween, formatCalendarDate, type CalendarDate } from '../lib/calendarDate'
-import { TODAY_SECTIONS, actionLink, areasForFocus, recordLink, rowActions, type TodaySection } from '../lib/today'
+import { getErrorMessage } from '../lib/getErrorMessage'
+import {
+  MARK_REMINDER_DONE,
+  REMINDER_KIND,
+  TODAY_SECTIONS,
+  actionLink,
+  areasForFocus,
+  recordLink,
+  rowActions,
+  shownItems,
+  type TodaySection,
+} from '../lib/today'
 import ApproveApplicationPanel from './applications/ApproveApplicationPanel'
 import DenyApplicationPanel from './applications/DenyApplicationPanel'
 import RecordCltOrientationPanel from './households/RecordCltOrientationPanel'
@@ -15,6 +28,7 @@ import TodayImprovementRequestPanel from './ground-leases/TodayImprovementReques
 import TodayInsuranceCertificatePanel from './ground-leases/TodayInsuranceCertificatePanel'
 import TodayResalePriceStatementPanel from './ground-leases/TodayResalePriceStatementPanel'
 import TodayResalePanel from './resales/TodayResalePanel'
+import NewReminderPanel from './reminders/NewReminderPanel'
 
 const KIND_LABELS: Record<string, string> = {
   'application-awaiting-decision': 'Application to decide',
@@ -38,6 +52,7 @@ const KIND_LABELS: Record<string, string> = {
   'document-expiring': 'Document expiring',
   'income-limits-missing': 'Income limits missing',
   'income-limits-stale': 'Income limits out of date',
+  reminder: 'Reminder',
 }
 
 type ActivePanel = { action: string; recordId: string }
@@ -64,6 +79,11 @@ const ACTION_PANELS: Record<string, (recordId: string, onClose: () => void) => R
 const plural = (n: number, word: string) => `${n.toLocaleString()} ${word}${n === 1 ? '' : 's'}`
 
 function DueChip({ item, today }: { item: WorkItemResponse; today: CalendarDate }) {
+  // A reminder's date is when it starts showing, not a deadline, so it never reads as overdue.
+  if (item.kind === REMINDER_KIND && item.waitingSince) {
+    return <span className="due-chip due-chip--waiting">Set for {formatCalendarDate(item.waitingSince)}</span>
+  }
+
   if (item.dueDate) {
     const due = formatCalendarDate(item.dueDate)
     return (
@@ -79,13 +99,25 @@ function DueChip({ item, today }: { item: WorkItemResponse; today: CalendarDate 
   return <span className="due-chip due-chip--waiting">{days > 0 ? `Waiting ${plural(days, 'day')}` : 'Since today'}</span>
 }
 
-function SectionTable({ section, items, today, onAction }: {
+function SectionTable({ section, items, today, onAction, onNewReminder }: {
   section: TodaySection
   items: WorkItemResponse[]
   today: CalendarDate
   onAction: (panel: ActivePanel) => void
+  onNewReminder: (section: string | null) => void
 }) {
   const navigate = useNavigate()
+  const markDone = useMarkReminderDone()
+  const { success, error } = useToast()
+
+  const markReminderDone = async (item: WorkItemResponse) => {
+    try {
+      await markDone.mutateAsync(item.recordId!)
+      success('Reminder marked done')
+    } catch (err) {
+      error(await getErrorMessage(err, 'Could not mark the reminder done.'))
+    }
+  }
 
   return (
     <section className="today-section" aria-labelledby={`today-${section.area}`}>
@@ -93,6 +125,14 @@ function SectionTable({ section, items, today, onAction }: {
         <h2 id={`today-${section.area}`} className="today-section__title">
           {section.label} <span className="today-section__count">{items.length}</span>
         </h2>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          aria-label={`New reminder in ${section.label}`}
+          onClick={() => onNewReminder(section.area === 'reminders' ? null : section.area)}
+        >
+          New reminder
+        </button>
       </div>
       <div className="registry-table-wrap">
         <table className="registry-table">
@@ -112,8 +152,14 @@ function SectionTable({ section, items, today, onAction }: {
               return (
                 <tr key={`${item.kind}-${item.recordId}`} onClick={open}>
                   <td>{KIND_LABELS[item.kind ?? ''] ?? item.kind}</td>
-                  <td>{item.label}</td>
-                  <td style={{ color: 'var(--text-secondary)' }}>{item.detail}</td>
+                  {item.kind === REMINDER_KIND ? (
+                    <td colSpan={2}>{item.label}</td>
+                  ) : (
+                    <>
+                      <td>{item.label}</td>
+                      <td style={{ color: 'var(--text-secondary)' }}>{item.detail}</td>
+                    </>
+                  )}
                   <td><DueChip item={item} today={today} /></td>
                   <td>
                     <div className="today-actions">
@@ -123,9 +169,11 @@ function SectionTable({ section, items, today, onAction }: {
                           type="button"
                           className="btn btn-secondary btn-sm"
                           aria-label={`${action.label}: ${item.label}`}
+                          disabled={action.key === MARK_REMINDER_DONE && markDone.isPending}
                           onClick={e => {
                             e.stopPropagation()
-                            if (action.opensPanel) onAction({ action: action.key, recordId: item.recordId! })
+                            if (action.key === MARK_REMINDER_DONE) void markReminderDone(item)
+                            else if (action.opensPanel) onAction({ action: action.key, recordId: item.recordId! })
                             else {
                               const target = actionLink(item, action.key)
                               if (target) navigate(target.to, { state: target.state })
@@ -153,14 +201,16 @@ export default function TodayPage() {
   const { focus } = useOutletContext<LayoutContext>()
   const [showAll, setShowAll] = useState(false)
   const [panel, setPanel] = useState<ActivePanel | null>(null)
+  // undefined: no panel; null: a reminder in no section; otherwise the section to preselect.
+  const [newReminder, setNewReminder] = useState<string | null | undefined>(undefined)
 
   const focusAreas = areasForFocus(focus)
   const shownAreas = showAll ? areasForFocus('everything') : focusAreas
   const items = data?.items ?? []
-  const shown = items.filter(i => (shownAreas as readonly string[]).includes(i.area ?? ''))
+  // Reminders show whatever the focus, so a reminder can bring a section outside it onto the page.
+  const shown = shownItems(items, shownAreas)
   const hiddenCount = items.length - shown.length
   const sections = TODAY_SECTIONS
-    .filter(s => shownAreas.includes(s.area))
     .map(s => ({ section: s, items: shown.filter(i => i.area === s.area) }))
     .filter(s => s.items.length > 0)
 
@@ -176,12 +226,15 @@ export default function TodayPage() {
             </div>
           )}
         </div>
-        {focus !== 'everything' && (
-          <div className="today-toggle" role="group" aria-label="Areas shown">
-            <button type="button" className="btn btn-secondary btn-sm" aria-pressed={!showAll} onClick={() => setShowAll(false)}>My areas</button>
-            <button type="button" className="btn btn-secondary btn-sm" aria-pressed={showAll} onClick={() => setShowAll(true)}>All areas</button>
-          </div>
-        )}
+        <div className="today-header-actions">
+          {focus !== 'everything' && (
+            <div className="today-toggle" role="group" aria-label="Areas shown">
+              <button type="button" className="btn btn-secondary btn-sm" aria-pressed={!showAll} onClick={() => setShowAll(false)}>My areas</button>
+              <button type="button" className="btn btn-secondary btn-sm" aria-pressed={showAll} onClick={() => setShowAll(true)}>All areas</button>
+            </div>
+          )}
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => setNewReminder(null)}>New reminder</button>
+        </div>
       </div>
 
       {!showAll && hiddenCount > 0 && (
@@ -213,10 +266,18 @@ export default function TodayPage() {
       )}
 
       {data?.today && sections.map(({ section, items: sectionItems }) => (
-        <SectionTable key={section.area} section={section} items={sectionItems} today={data.today!} onAction={setPanel} />
+        <SectionTable
+          key={section.area}
+          section={section}
+          items={sectionItems}
+          today={data.today!}
+          onAction={setPanel}
+          onNewReminder={setNewReminder}
+        />
       ))}
 
       {panel && ACTION_PANELS[panel.action]?.(panel.recordId, () => setPanel(null))}
+      {newReminder !== undefined && <NewReminderPanel section={newReminder} onClose={() => setNewReminder(undefined)} />}
     </div>
   )
 }

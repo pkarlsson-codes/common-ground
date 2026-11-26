@@ -88,6 +88,9 @@ internal static class CorePlatformClientExtensions
         services.AddApiClient<ITodayApiClient, TodayApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 
+        services.AddApiClient<IRemindersApiClient, RemindersApiClient>(corePlatformUri)
+            .AddHttpMessageHandler<InternalGatewayAuthHandler>();
+
         services.AddApiClient<IIncomeLimitSchedulesApiClient, IncomeLimitSchedulesApiClient>(corePlatformUri)
             .AddHttpMessageHandler<InternalGatewayAuthHandler>();
 

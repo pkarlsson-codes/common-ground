@@ -1,6 +1,7 @@
 using CommonGround.API.Today;
 using CommonGround.HomeBuyers.Application.WorkItems;
 using CommonGround.Homeownership.Application.WorkItems;
+using CommonGround.Reminders.Application.WorkItems;
 using CommonGround.SharedKernel.Application.WorkItems;
 using FluentAssertions;
 
@@ -69,6 +70,19 @@ public class WorkUrgencyTests
             WorkUrgency.Order(items).Select(i => i.Label).Should().Equal(
                 "resale decision", "default", "mortgage request", "improvement", "short", "lapsed",
                 "fee notice", "resale closing", "loan closing", "statement", "ending soon");
+        }
+
+        [Fact]
+        public void GivenAReminderAndOverdueWork_WhenOrdered_ThenTheReminderComesFirst()
+        {
+            var today = _testBed.Today;
+            var items = new[]
+            {
+                _testBed.Item("overdue default", HomeownershipWorkItems.LeaseDefaultUncured, today.AddDays(-30), today.AddDays(-60)),
+                _testBed.Item("call the lender", RemindersWorkItems.Reminder, null, today),
+            };
+
+            WorkUrgency.Order(items).Select(i => i.Label).Should().Equal("call the lender", "overdue default");
         }
 
         [Fact]

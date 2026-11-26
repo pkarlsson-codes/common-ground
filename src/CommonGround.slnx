@@ -12,6 +12,8 @@
   <Project Path="CommonGround.PropertyRegistry.Contracts/CommonGround.PropertyRegistry.Contracts.csproj" />
   <Project Path="CommonGround.PropertyRegistry.Tests/CommonGround.PropertyRegistry.Tests.csproj" />
   <Project Path="CommonGround.PropertyRegistry/CommonGround.PropertyRegistry.csproj" />
+  <Project Path="CommonGround.Reminders.Tests/CommonGround.Reminders.Tests.csproj" />
+  <Project Path="CommonGround.Reminders/CommonGround.Reminders.csproj" />
   <Project Path="CommonGround.SharedKernel.Tests/CommonGround.SharedKernel.Tests.csproj" />
   <Project Path="CommonGround.SharedKernel/CommonGround.SharedKernel.csproj" />
   <Project Path="CommonGround.Stewardship.Tests/CommonGround.Stewardship.Tests.csproj" />

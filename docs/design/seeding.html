@@ -39,7 +39,8 @@
     <li><code>HomeSelectionsSeeder</code>: choosing a household for a home, in one step from the waiting list on the choice's date, starts its purchase.</li>
     <li><code>PurchaseWorkflowsSeeder</code>: progress on those purchases. A closed purchase creates its ground lease and stewardship case.</li>
     <li><code>GroundLeasesSeeder</code>: activity on those leases, and leases created directly.</li>
-    <li><code>StewardshipCasesSeeder</code>, <code>ForeclosurePreventionCasesSeeder</code>, <code>ResalesSeeder</code>, <code>LeaseFeesSeeder</code></li>
+    <li><code>StewardshipCasesSeeder</code>, <code>ForeclosurePreventionCasesSeeder</code>, <code>ResalesSeeder</code>, <code>ImprovementRequestsSeeder</code>, <code>HeirTransfersSeeder</code>, <code>LeaseFeesSeeder</code></li>
+    <li><code>RemindersSeeder</code>: reminders the seeder sets, dated so some show on Today, some are upcoming, one was done lately and one was done too long ago for the Reminders page to list.</li>
   </ol>
   <p>Seeders from <code>UsersSeeder</code> on are in the API project, because they read records from several contexts. Context projects don't reference each other, with one exception: PropertyRegistry references TrustManagement for <code>TrustSeedLookup</code>.</p>
 </section>

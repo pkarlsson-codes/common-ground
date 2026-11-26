@@ -59,7 +59,7 @@ public class TodayTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task GetToday_WithAreas_ListsOnlyThoseAreasButCountsEveryArea()
+    public async Task GetToday_WithAreas_ListsOnlyThoseAreasAndRemindersButCountsEveryArea()
     {
         var client = factory.CreateClient().WithAuthToken();
         await SubmitAsync(client, await RegisterHouseholdAsync(client, "today-filtered@example.com"));
@@ -67,8 +67,11 @@ public class TodayTests(ApiFactory factory)
 
         var applicants = await GetTodayAsync(client, "?areas=applicants&areas=records");
 
-        applicants.Items.Should().NotBeEmpty().And.OnlyContain(i => i.Area == "applicants" || i.Area == "records");
-        applicants.Items.Count.Should().Be(everything.Items.Count(i => i.Area == "applicants" || i.Area == "records"));
+        // Reminders belong to the whole trust, so they come whatever areas are asked for.
+        static bool Asked(WorkItemResponse i) => i.Area == "applicants" || i.Area == "records" || i.Kind == "reminder";
+        applicants.Items.Should().NotBeEmpty();
+        applicants.Items.All(Asked).Should().BeTrue();
+        applicants.Items.Count.Should().Be(everything.Items.Count(Asked));
         applicants.AreaCounts.Should().BeEquivalentTo(everything.AreaCounts);
         applicants.TotalCount.Should().Be(everything.Items.Count);
     }

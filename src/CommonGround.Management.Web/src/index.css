@@ -1242,6 +1242,7 @@ body {
   margin-left: 6px;
 }
 .today-toggle { display: flex; gap: 6px; }
+.today-header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .today-actions { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
 .today-toggle .btn[aria-pressed='true'] {
   background: var(--amber-dim);

@@ -1,8 +1,14 @@
 import type { WorkCountResponse, WorkItemResponse } from '../api'
 import { FOCUS_AREAS, type Focus } from './navigation'
 
-/** The areas Today groups items into, as the API names them. Records sits outside any focus. */
-export type TodayArea = 'applicants' | 'selections' | 'purchases' | 'stewardship' | 'records'
+/** The areas Today groups items into, as the API names them. Reminders and Records sit outside any focus. */
+export type TodayArea = 'reminders' | 'applicants' | 'selections' | 'purchases' | 'stewardship' | 'records'
+
+/** The kind of a reminder's row. A reminder shows whatever the focus, in the section it was set in. */
+export const REMINDER_KIND = 'reminder'
+
+/** The action that marks a reminder done, straight from its row. */
+export const MARK_REMINDER_DONE = 'mark-reminder-done'
 
 export interface TodaySection {
   area: TodayArea
@@ -11,6 +17,7 @@ export interface TodaySection {
 
 /** Today's sections, in work order. */
 export const TODAY_SECTIONS: readonly TodaySection[] = [
+  { area: 'reminders', label: 'Reminders' },
   { area: 'applicants', label: 'Applicants' },
   { area: 'selections', label: 'Selections' },
   { area: 'purchases', label: 'Purchases' },
@@ -18,11 +25,27 @@ export const TODAY_SECTIONS: readonly TodaySection[] = [
   { area: 'records', label: 'Records' },
 ]
 
-/** The areas Today shows for a focus: everything, or the focus's own areas plus Records. */
+/** The sections a reminder can be set in: every Today section but Reminders, which holds those set in none. */
+export const REMINDER_SECTIONS: readonly TodaySection[] = TODAY_SECTIONS.filter(s => s.area !== 'reminders')
+
+/** The name of the Today section a reminder shows in. */
+export function reminderSectionLabel(section: string | null | undefined): string {
+  return TODAY_SECTIONS.find(s => s.area === (section ?? 'reminders'))?.label ?? section ?? 'Reminders'
+}
+
+/** The areas Today shows for a focus: everything, or the focus's own areas plus Reminders and Records. */
 export function areasForFocus(focus: Focus): readonly TodayArea[] {
   if (focus === 'everything') return TODAY_SECTIONS.map(s => s.area)
   const areas = FOCUS_AREAS[focus] as readonly string[]
-  return TODAY_SECTIONS.map(s => s.area).filter(a => a === 'records' || areas.includes(a))
+  return TODAY_SECTIONS.map(s => s.area).filter(a => a === 'reminders' || a === 'records' || areas.includes(a))
+}
+
+/**
+ * The items Today shows for the areas shown: those in the areas, and every reminder, since a reminder belongs to the
+ * whole trust.
+ */
+export function shownItems<T extends Pick<WorkItemResponse, 'area' | 'kind'>>(items: readonly T[], areas: readonly TodayArea[]): T[] {
+  return items.filter(i => i.kind === REMINDER_KIND || (areas as readonly string[]).includes(i.area ?? ''))
 }
 
 export interface RecordLink {
@@ -52,6 +75,8 @@ export function recordLink(item: Pick<WorkItemResponse, 'recordType' | 'recordId
 
 /** The sidebar page each kind of item is worked from, and the Today section it appears in. */
 const KINDS: Record<string, { page: string; area: TodayArea }> = {
+  // A reminder's own section varies; it counts under Reminders, which every focus shows.
+  reminder: { page: '/reminders', area: 'reminders' },
   'application-awaiting-decision': { page: '/applications', area: 'applicants' },
   'readiness-step-missing': { page: '/households', area: 'applicants' },
   'prequalification-expiring': { page: '/households', area: 'applicants' },
@@ -123,6 +148,7 @@ const ACTION_LABELS: Record<string, string> = {
   'exercise-purchase-option': 'Buy the home',
   'record-buyback-closing': 'Record buyback closing',
   'enter-income-limits': 'Enter limits',
+  'mark-reminder-done': 'Mark done',
 }
 
 /** Actions that lead somewhere other than the row's record. */

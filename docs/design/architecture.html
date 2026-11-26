@@ -92,6 +92,7 @@ flowchart LR
       <tr><td><code>TrustManagement</code></td><td>The trust itself: settings, policy, members, invitations</td><td>Trust, TrustInvitation</td><td>No</td></tr>
       <tr><td><code>Identity</code></td><td>Users, linked to their Keycloak subject</td><td>User</td><td>No</td></tr>
       <tr><td><code>Documents</code></td><td>Uploaded files attached to any record</td><td>Document</td><td>No</td></tr>
+      <tr><td><code>Reminders</code></td><td>Dated notes staff set so work with no record behind it shows on Today</td><td>Reminder</td><td>No</td></tr>
     </tbody>
   </table>
   <p>A context that publishes integration events has a <code>CommonGround.&lt;Context&gt;.Contracts</code> project; its <code>Events</code> folder holds the event types other contexts may react to. Which contexts talk to which can be read from the project references to <code>*.Contracts</code>.</p>
@@ -240,7 +241,7 @@ sequenceDiagram
 
 <section id="today">
   <h2>11. Today: the work queue</h2>
-  <p>The Today page lists everything that needs a staff member: an application awaiting a decision, a lease fee notice coming due, a document to review. No context owns this list. Each context derives <code>WorkItem</code>s from its own read models in response to a query (<code>GetHomeBuyersWorkItems</code>, <code>GetDocumentsWorkItems</code>, and so on), and <code>src/CommonGround.API/Today/TodayEndpoints.cs</code> asks each one and merges the answers. A new kind of work item needs no change outside its own context, except the web app, which skips kinds it doesn't know.</p>
+  <p>The Today page lists everything that needs a staff member: an application awaiting a decision, a lease fee notice coming due, a document to review. No context owns this list. Each context derives <code>WorkItem</code>s from its own read models in response to a query (<code>GetHomeBuyersWorkItems</code>, <code>GetDocumentsWorkItems</code>, <code>GetRemindersWorkItems</code>, and so on), and <code>src/CommonGround.API/Today/TodayEndpoints.cs</code> asks each one and merges the answers. A new kind of work item needs no change outside its own context, except the web app, which skips kinds it doesn't know.</p>
 </section>
 
 <section id="documents">

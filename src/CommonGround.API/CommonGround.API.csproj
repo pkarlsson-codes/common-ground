@@ -20,6 +20,7 @@
     <ProjectReference Include="..\CommonGround.TrustManagement\CommonGround.TrustManagement.csproj" />
     <ProjectReference Include="..\CommonGround.PropertyRegistry\CommonGround.PropertyRegistry.csproj" />
     <ProjectReference Include="..\CommonGround.Stewardship\CommonGround.Stewardship.csproj" />
+    <ProjectReference Include="..\CommonGround.Reminders\CommonGround.Reminders.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -7887,6 +7887,155 @@
         }
       }
     },
+    "/api/v1/reminders": {
+      "post": {
+        "tags": [
+          "Reminders"
+        ],
+        "operationId": "SetReminder",
+        "requestBody": {
+          "x-name": "SetReminderRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetReminderRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetReminderResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Reminders"
+        ],
+        "operationId": "ListReminders",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReminderListResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reminders/{reminderId}/done": {
+      "post": {
+        "tags": [
+          "Reminders"
+        ],
+        "operationId": "MarkReminderDone",
+        "parameters": [
+          {
+            "name": "reminderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/reports/funder": {
       "get": {
         "tags": [
@@ -17960,6 +18109,120 @@
           }
         }
       },
+      "SetReminderResponse": {
+        "type": "object",
+        "description": "The ID of a reminder just set.",
+        "additionalProperties": false,
+        "properties": {
+          "reminderId": {
+            "type": "string",
+            "description": "The reminder's ID."
+          }
+        }
+      },
+      "SetReminderRequest": {
+        "type": "object",
+        "description": "Request to set a reminder for the trust.",
+        "additionalProperties": false,
+        "properties": {
+          "remindOn": {
+            "type": "string",
+            "description": "The day it starts showing on Today; not before the trust's today.",
+            "format": "date"
+          },
+          "note": {
+            "type": "string",
+            "description": "What to do; not empty, at most 500 characters."
+          },
+          "section": {
+            "type": "string",
+            "description": "The Today section it shows in: applicants, selections, purchases, stewardship or records. None puts it in Today's\nReminders section.",
+            "nullable": true
+          }
+        }
+      },
+      "ReminderListResponse": {
+        "type": "object",
+        "description": "The trust's reminders, by where they stand.",
+        "additionalProperties": false,
+        "properties": {
+          "today": {
+            "type": "string",
+            "description": "The trust's today.",
+            "format": "date"
+          },
+          "showing": {
+            "type": "array",
+            "description": "Showing on Today: the date has come and no one has marked them done. Oldest date first.",
+            "items": {
+              "$ref": "#/components/schemas/ReminderResponse"
+            }
+          },
+          "upcoming": {
+            "type": "array",
+            "description": "Not yet showing: the date is after today. Soonest first.",
+            "items": {
+              "$ref": "#/components/schemas/ReminderResponse"
+            }
+          },
+          "done": {
+            "type": "array",
+            "description": "Marked done in the last 30 days. Most recent first.",
+            "items": {
+              "$ref": "#/components/schemas/ReminderResponse"
+            }
+          }
+        }
+      },
+      "ReminderResponse": {
+        "type": "object",
+        "description": "A reminder.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The reminder's ID."
+          },
+          "remindOn": {
+            "type": "string",
+            "description": "The day it starts showing on Today.",
+            "format": "date"
+          },
+          "note": {
+            "type": "string",
+            "description": "What to do."
+          },
+          "section": {
+            "type": "string",
+            "description": "The Today section it shows in, or none for Today's Reminders section.",
+            "nullable": true
+          },
+          "setBy": {
+            "type": "string",
+            "description": "The ID of the staff user who set it."
+          },
+          "setAt": {
+            "type": "string",
+            "description": "When it was set.",
+            "format": "date-time"
+          },
+          "isDone": {
+            "type": "boolean",
+            "description": "Whether someone has marked it done."
+          },
+          "doneBy": {
+            "type": "string",
+            "description": "The ID of the staff user who marked it done, once someone has.",
+            "nullable": true
+          },
+          "doneAt": {
+            "type": "string",
+            "description": "When it was marked done, once it has been.",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
       "FunderReportResponse": {
         "type": "object",
         "description": "What the trust held on the last day of a period, whom it sold to in the period, and what it bought back.",
@@ -19533,7 +19796,7 @@
         "properties": {
           "area": {
             "type": "string",
-            "description": "The area it belongs to: applicants, selections, purchases or records."
+            "description": "The area it belongs to: reminders, applicants, selections, purchases, stewardship or records."
           },
           "kind": {
             "type": "string",

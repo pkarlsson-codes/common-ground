@@ -2,6 +2,7 @@ using CommonGround.Documents.Application.WorkItems;
 using CommonGround.HomeBuyers.Application.WorkItems;
 using CommonGround.Homeownership.Application.WorkItems;
 using CommonGround.PropertyRegistry.Application.WorkItems;
+using CommonGround.Reminders.Application.WorkItems;
 using CommonGround.SharedKernel.Application.WorkItems;
 
 namespace CommonGround.API.Today;
@@ -27,6 +28,9 @@ public static class WorkUrgency
     /// </summary>
     private static readonly string[] KindOrder =
     [
+
+        // A reminder leads whatever section it is in: staff set it for that day on purpose.
+        RemindersWorkItems.Reminder,
 
         // Applicants
         HomeBuyersWorkItems.ApplicationAwaitingDecision,

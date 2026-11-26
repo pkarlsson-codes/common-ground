@@ -1,0 +1,58 @@
+[
+  {
+    "seedKey": "rem-lender-rate-lock",
+    "trustSeedKey": "dev-default",
+    "setOn": "today-4d",
+    "remindOn": "today-1d",
+    "section": "purchases",
+    "note": "Call the buyer's lender about the rate lock before it runs out."
+  },
+  {
+    "seedKey": "rem-board-default",
+    "trustSeedKey": "dev-default",
+    "setOn": "today-6d",
+    "remindOn": "today",
+    "section": "stewardship",
+    "note": "Bring the lease default to the board meeting tonight."
+  },
+  {
+    "seedKey": "rem-binders",
+    "trustSeedKey": "dev-default",
+    "setOn": "today-2d",
+    "remindOn": "today",
+    "note": "Order more lease binders for the closing packets."
+  },
+  {
+    "seedKey": "rem-counseling-follow-up",
+    "trustSeedKey": "dev-default",
+    "setOn": "today-1d",
+    "remindOn": "today+3d",
+    "section": "applicants",
+    "note": "Ask the households from the spring orientation whether they have booked housing counseling."
+  },
+  {
+    "seedKey": "rem-funder-report",
+    "trustSeedKey": "dev-default",
+    "setOn": "today-3d",
+    "remindOn": "today+10d",
+    "note": "Send the draft funder report to the director for review."
+  },
+  {
+    "seedKey": "rem-appraiser",
+    "trustSeedKey": "dev-default",
+    "setOn": "today-12d",
+    "remindOn": "today-7d",
+    "section": "stewardship",
+    "note": "Confirm the appraiser has the resale appointment.",
+    "doneOn": "today-6d"
+  },
+  {
+    "seedKey": "rem-insurance-letters",
+    "trustSeedKey": "dev-default",
+    "setOn": "today-65d",
+    "remindOn": "today-60d",
+    "section": "records",
+    "note": "Mail the annual insurance certificate request letters.",
+    "doneOn": "today-58d"
+  }
+]

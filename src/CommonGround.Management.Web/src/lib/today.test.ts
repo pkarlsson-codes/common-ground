@@ -1,15 +1,35 @@
 import { describe, expect, it } from 'vitest'
 import type { Focus } from './navigation'
-import { actionLink, areasForFocus, countForFocus, countsByPage, recordLink, rowActions, type TodayArea } from './today'
+import { actionLink, areasForFocus, countForFocus, countsByPage, recordLink, reminderSectionLabel, rowActions, shownItems, type TodayArea } from './today'
 
 describe('areasForFocus', () => {
   it.each<[Focus, TodayArea[]]>([
-    ['everything', ['applicants', 'selections', 'purchases', 'stewardship', 'records']],
-    ['intake', ['applicants', 'records']],
-    ['sales', ['selections', 'purchases', 'records']],
-    ['stewardship', ['stewardship', 'records']],
-  ])('shows %s its own areas plus Records, in work order', (focus, areas) => {
+    ['everything', ['reminders', 'applicants', 'selections', 'purchases', 'stewardship', 'records']],
+    ['intake', ['reminders', 'applicants', 'records']],
+    ['sales', ['reminders', 'selections', 'purchases', 'records']],
+    ['stewardship', ['reminders', 'stewardship', 'records']],
+  ])('shows %s its own areas plus Reminders and Records, in Today order', (focus, areas) => {
     expect(areasForFocus(focus)).toEqual(areas)
+  })
+})
+
+describe('shownItems', () => {
+  it('keeps the items in the areas shown, and every reminder whatever its section', () => {
+    const items = [
+      { area: 'applicants', kind: 'application-awaiting-decision' },
+      { area: 'stewardship', kind: 'lease-fee-notice-due' },
+      { area: 'stewardship', kind: 'reminder' },
+      { area: 'reminders', kind: 'reminder' },
+    ]
+
+    expect(shownItems(items, areasForFocus('intake'))).toEqual([items[0], items[2], items[3]])
+  })
+})
+
+describe('reminderSectionLabel', () => {
+  it('names the section a reminder shows in, and Reminders for one set in none', () => {
+    expect(reminderSectionLabel('stewardship')).toBe('Stewardship')
+    expect(reminderSectionLabel(null)).toBe('Reminders')
   })
 })
 
@@ -58,8 +78,9 @@ describe('countsByPage', () => {
       { key: 'readiness-step-missing', count: 2 },
       { key: 'prequalification-expiring', count: 1 },
       { key: 'closing-scheduled', count: 3 },
+      { key: 'reminder', count: 2 },
       { key: 'mystery', count: 9 },
-    ])).toEqual({ '/households': 3, '/purchase-workflows': 3 })
+    ])).toEqual({ '/households': 3, '/purchase-workflows': 3, '/reminders': 2 })
   })
 })
 
@@ -69,15 +90,16 @@ describe('countForFocus', () => {
     { key: 'home-available', count: 4 },
     { key: 'purchase-stalled', count: 3 },
     { key: 'document-expiring', count: 1 },
+    { key: 'reminder', count: 5 },
     { key: 'mystery', count: 9 },
   ]
 
   it.each<[Focus, number]>([
-    ['everything', 10],
-    ['intake', 3],
-    ['sales', 8],
-    ['stewardship', 1],
-  ])('counts the kinds %s shows, plus Records', (focus, expected) => {
+    ['everything', 15],
+    ['intake', 8],
+    ['sales', 13],
+    ['stewardship', 6],
+  ])('counts the kinds %s shows, plus Records and every reminder', (focus, expected) => {
     expect(countForFocus(kindCounts, focus)).toBe(expected)
   })
 })
@@ -87,6 +109,12 @@ describe('rowActions', () => {
     expect(rowActions({ actions: ['approve-application', 'choose-household'] })).toEqual([
       { key: 'approve-application', label: 'Approve', opensPanel: true },
       { key: 'choose-household', label: 'Choose household', opensPanel: false },
+    ])
+  })
+
+  it('offers Mark done on a reminder, straight from its row', () => {
+    expect(rowActions({ actions: ['mark-reminder-done'] })).toEqual([
+      { key: 'mark-reminder-done', label: 'Mark done', opensPanel: false },
     ])
   })
 

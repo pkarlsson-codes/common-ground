@@ -14,7 +14,7 @@ public sealed record TodayResponse(
     IReadOnlyList<WorkCountResponse> KindCounts);
 
 /// <summary>Something that needs a staff member.</summary>
-/// <param name="Area">The area it belongs to: applicants, selections, purchases or records.</param>
+/// <param name="Area">The area it belongs to: reminders, applicants, selections, purchases, stewardship or records.</param>
 /// <param name="Kind">What is waiting, e.g. <c>application-awaiting-decision</c>.</param>
 /// <param name="RecordType">The kind of record it is about, e.g. <c>application</c>.</param>
 /// <param name="RecordId">The record's ID.</param>

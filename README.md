@@ -13,6 +13,7 @@ A CLT owns land and leases it to homeowners under a long-term ground lease, whic
 - **Homeownership:** ground leases and lease templates, purchase workflows, mortgages, resales with payoff and price statements, lease fees, improvements and heir transfers.
 - **Stewardship:** inspections, notices of default, cure periods and cases.
 - **Documents:** versioned files attached to leases and homes.
+- **Reminders:** dated notes for work with no record behind it, shown on Today from their date until marked done.
 - **Trusts and team:** one install can host several trusts. Staff are invited to a trust by email.
 - **Reports:** funder report with CSV downloads, and a CSV import for an existing portfolio.
 - **Demo mode:** each visitor who signs up gets a sample trust that is deleted after a set number of days. A demo runs at <https://commonground.dotnetexperiments.com>. Signing up needs a working email address for the confirmation link.
@@ -21,7 +22,7 @@ Terminology follows the Grounded Solutions Network's [CLT Technical Manual](http
 
 ## How it is built
 
-- .NET 10 modular monolith, one project group per bounded context (`PropertyRegistry`, `HomeBuyers`, `Homeownership`, `Stewardship`, `Documents`, `TrustManagement`, `Identity`).
+- .NET 10 modular monolith, one project group per bounded context (`PropertyRegistry`, `HomeBuyers`, `Homeownership`, `Stewardship`, `Documents`, `Reminders`, `TrustManagement`, `Identity`).
 - Event sourcing with [Marten](https://martendb.io) on PostgreSQL, messaging with [Wolverine](https://wolverinefx.net).
 - Two backend-for-frontend gateways (`Management.Gateway`, `Homeowner.Gateway`) that handle OIDC login, sessions and proxying to the API.
 - React, TypeScript, Vite and Tailwind for the Management web app, with an API client generated from the OpenAPI spec.

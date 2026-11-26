@@ -221,8 +221,23 @@
   </table>
 </section>
 
+<section id="reminders">
+  <h2>9. Reminders</h2>
+  <p>Work that has no record behind it, which staff set for a day so it shows on Today. A reminder reads nothing from other contexts.</p>
+  <table>
+    <tr><th>Term</th><th>Meaning</th><th>Do not use</th></tr>
+    <tr><td><strong>Reminder</strong></td><td>A dated note set for the trust so the work shows on Today. It belongs to the trust: every member sees it, whatever their focus. It is not a task: it has no owner, status or priority. Code: <code>Reminder</code>.</td><td>task, to-do, follow-up, alert</td></tr>
+    <tr><td><strong>Note</strong></td><td>What to do, in staff's own words. At most 500 characters.</td><td>description, message</td></tr>
+    <tr><td><strong>Date</strong> (remind on)</td><td>The day the reminder starts showing on Today. Not a deadline: a reminder is never due or overdue. Code: <code>RemindOn</code>.</td><td>due date, deadline</td></tr>
+    <tr><td><strong>Section</strong></td><td>The Today section a reminder shows in: Applicants, Selections, Purchases, Stewardship or Records. A reminder set in none shows in the Reminders section.</td><td>area (for a reminder), category</td></tr>
+    <tr><td><strong>Upcoming</strong> / <strong>showing</strong> / <strong>done</strong></td><td>Where a reminder stands: upcoming before its date, showing on Today from its date until someone marks it done, then done.</td><td>pending, active, open, closed</td></tr>
+    <tr class="verb"><td><strong>set</strong></td><td>Staff set a reminder for a date, with a note and optionally a section. Event: <code>ReminderSet</code>.</td><td>create, add, schedule</td></tr>
+    <tr class="verb"><td><strong>mark done</strong></td><td>Any member of the trust marks a reminder done, and it leaves Today. Event: <code>ReminderMarkedDone</code>.</td><td>complete, close, dismiss, resolve</td></tr>
+  </table>
+</section>
+
 <section id="app">
-  <h2>9. Docs and UI words</h2>
+  <h2>10. Docs and UI words</h2>
   <p>Not domain language; words for the app and its docs.</p>
   <table>
     <tr><th>Term</th><th>Meaning</th><th>Do not use</th></tr>
@@ -232,7 +247,7 @@
 </section>
 
 <section id="gaps">
-  <h2>10. Not yet matching</h2>
+  <h2>11. Not yet matching</h2>
   <ul>
     <li><strong>Code <code>HomeownerApplication</code> vs "application".</strong> Not renamed yet: it appears in hundreds of identifiers (<code>HomeownerApplicationId</code> alone about 87) and in event names. The name misleads because the household is not yet a homeowner.</li>
     <li><strong>Code <code>UnitAssessment</code></strong> (in <code>HomeAssessment.cs</code>) vs "home assessment". It also carries an <code>AppraiserName</code>, which blurs assessment and appraisal.</li>

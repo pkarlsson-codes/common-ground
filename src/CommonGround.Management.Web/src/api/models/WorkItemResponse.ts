@@ -29,7 +29,7 @@ import {
  */
 export interface WorkItemResponse {
     /**
-     * The area it belongs to: applicants, selections, purchases or records.
+     * The area it belongs to: reminders, applicants, selections, purchases, stewardship or records.
      * @type {string}
      * @memberof WorkItemResponse
      */

@@ -11,6 +11,7 @@ using CommonGround.Identity.Infrastructure;
 using CommonGround.Identity.Infrastructure.Persistence;
 using CommonGround.PropertyRegistry.Infrastructure;
 using CommonGround.PropertyRegistry.Infrastructure.Persistence;
+using CommonGround.Reminders.Infrastructure.Persistence;
 using CommonGround.SharedKernel.Extensions;
 using CommonGround.Stewardship.Infrastructure;
 using CommonGround.Stewardship.Infrastructure.Persistence;
@@ -88,6 +89,7 @@ internal static class CommonGroundServiceCollectionExtensions
             TrustManagementMartenConfiguration.Configure(opts);
             StewardshipMartenConfiguration.Configure(opts);
             DocumentsMartenConfiguration.Configure(opts);
+            RemindersMartenConfiguration.Configure(opts);
         });
 
         return services;

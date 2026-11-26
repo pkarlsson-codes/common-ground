@@ -1,4 +1,4 @@
-import { CalendarCheck, ChevronRight } from 'lucide-react'
+import { BellRing, CalendarCheck, ChevronRight } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useToday } from '../hooks/today'
@@ -50,6 +50,7 @@ export default function Layout() {
         </div>
         <nav className="sidebar-nav">
           <NavItemLink item={{ to: '/', icon: CalendarCheck, label: 'Today' }} count={todayCount} />
+          <NavItemLink item={{ to: '/reminders', icon: BellRing, label: 'Reminders' }} count={counts['/reminders']} />
           {focus === 'everything' ? (
             <>
               <div className="sidebar-nav__section">Work</div>

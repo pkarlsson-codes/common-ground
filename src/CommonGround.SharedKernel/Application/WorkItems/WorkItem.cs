@@ -27,9 +27,12 @@ public sealed record WorkItem(
     DateOnly? WaitingSince,
     IReadOnlyList<string> Actions);
 
-/// <summary>The areas work items belong to, in the order the CLT's work runs.</summary>
+/// <summary>The areas work items belong to: reminders set on no section, then the areas in the order the CLT's work runs.</summary>
 public static class WorkArea
 {
+    /// <summary>Reminders staff set on no section. Shown whatever areas a staff member works in.</summary>
+    public const string Reminders = "reminders";
+
     /// <summary>Households, their applications and readiness.</summary>
     public const string Applicants = "applicants";
 
@@ -45,8 +48,8 @@ public static class WorkArea
     /// <summary>Records such as documents, outside any one area.</summary>
     public const string Records = "records";
 
-    /// <summary>Every area, in work order.</summary>
-    public static IReadOnlyList<string> All { get; } = [Applicants, Selections, Purchases, Stewardship, Records];
+    /// <summary>Every area, in the order Today shows them.</summary>
+    public static IReadOnlyList<string> All { get; } = [Reminders, Applicants, Selections, Purchases, Stewardship, Records];
 }
 
 /// <summary>

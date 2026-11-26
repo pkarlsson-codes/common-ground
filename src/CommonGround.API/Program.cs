@@ -8,6 +8,7 @@ using CommonGround.HomeBuyers.Infrastructure;
 using CommonGround.Homeownership.Infrastructure;
 using CommonGround.Identity.Infrastructure;
 using CommonGround.PropertyRegistry.Infrastructure;
+using CommonGround.Reminders;
 using CommonGround.SharedKernel.Infrastructure.Messaging;
 using CommonGround.Stewardship;
 using CommonGround.TrustManagement.Infrastructure;
@@ -62,6 +63,7 @@ try
         typeof(IdentityAssemblyReference).Assembly,
         typeof(StewardshipAssemblyReference).Assembly,
         typeof(DocumentsAssemblyReference).Assembly,
+        typeof(RemindersAssemblyReference).Assembly,
         typeof(TrustManagementAssemblyReference).Assembly,
     ];
 
