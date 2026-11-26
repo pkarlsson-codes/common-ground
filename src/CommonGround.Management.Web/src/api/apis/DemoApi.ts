@@ -21,6 +21,7 @@ import type {
   DemoResponse,
   DemoSandboxResponse,
   ProblemDetails,
+  SendDemoFeedbackRequest,
 } from '../models/index';
 import {
     CurrentDemoSandboxResponseFromJSON,
@@ -33,7 +34,13 @@ import {
     DemoSandboxResponseToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
+    SendDemoFeedbackRequestFromJSON,
+    SendDemoFeedbackRequestToJSON,
 } from '../models/index';
+
+export interface SendFeedbackRequest {
+    sendDemoFeedbackRequest: SendDemoFeedbackRequest;
+}
 
 /**
  * DemoApi - interface
@@ -77,6 +84,19 @@ export interface DemoApiInterface {
     /**
      */
     getMode(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DemoModeResponse>;
+
+    /**
+     * 
+     * @param {SendDemoFeedbackRequest} sendDemoFeedbackRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DemoApiInterface
+     */
+    sendFeedbackRaw(requestParameters: SendFeedbackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    sendFeedback(requestParameters: SendFeedbackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -176,6 +196,50 @@ export class DemoApi extends runtime.BaseAPI implements DemoApiInterface {
     async getMode(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DemoModeResponse> {
         const response = await this.getModeRaw(initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async sendFeedbackRaw(requestParameters: SendFeedbackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['sendDemoFeedbackRequest'] == null) {
+            throw new runtime.RequiredError(
+                'sendDemoFeedbackRequest',
+                'Required parameter "sendDemoFeedbackRequest" was null or undefined when calling sendFeedback().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/demo/feedback`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: SendDemoFeedbackRequestToJSON(requestParameters['sendDemoFeedbackRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async sendFeedback(requestParameters: SendFeedbackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.sendFeedbackRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
     }
 
     /**

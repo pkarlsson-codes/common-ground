@@ -257,6 +257,7 @@ models/ResolveForeclosurePreventionCaseRequest.ts
 models/ScheduleClosingRequest.ts
 models/SchedulePropertyInspectionRequest.ts
 models/SelectHouseholdByPriorityRequest.ts
+models/SendDemoFeedbackRequest.ts
 models/ServicerDelinquencyResponse.ts
 models/SetHomeIncomeLimitRequest.ts
 models/SetInsuranceRequirementsRequest.ts

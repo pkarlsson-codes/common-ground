@@ -309,9 +309,14 @@ body {
 }
 .demo-banner__feedback {
   flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--warning);
+  font: inherit;
   font-weight: 600;
   text-decoration: underline;
+  cursor: pointer;
 }
 
 .page {

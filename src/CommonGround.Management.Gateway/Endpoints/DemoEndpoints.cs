@@ -1,4 +1,5 @@
 using CommonGround.API.Clients;
+using CommonGround.API.Contracts.Demo.Requests;
 using CommonGround.API.Contracts.Demo.Responses;
 using CommonGround.Management.Gateway.Configuration;
 using CommonGround.Management.Gateway.Services;
@@ -33,6 +34,20 @@ public static class DemoEndpoints
     {
         var result = await client.GetDemoAsync(cancellationToken).ConfigureAwait(false);
         return Results.Ok(result);
+    }
+
+    // 404 when the server is not in demo mode or the trust is not a sandbox.
+    [WolverinePost("/api/v1/demo/feedback")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public static async Task<IResult> SendFeedback(
+        SendDemoFeedbackRequest request,
+        IDemoApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        await client.SendFeedbackAsync(request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
     }
 
     [WolverinePost("/api/v1/demo/sandboxes")]

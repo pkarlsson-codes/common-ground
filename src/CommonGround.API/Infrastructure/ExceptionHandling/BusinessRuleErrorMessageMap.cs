@@ -373,5 +373,7 @@ internal static class BusinessRuleErrorMessageMap
             ["trust_management.trust_invitation.cancel.already_accepted"] = "This invite has already been used, so it can't be cancelled.",
 
             ["demo.full"] = "The demo is full right now. Try again tomorrow.",
+            ["demo.feedback.empty"] = "Write something before sending.",
+            ["demo.feedback.too_long"] = "Feedback can be at most 4,000 characters.",
         };
 }

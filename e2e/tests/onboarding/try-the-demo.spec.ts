@@ -44,7 +44,11 @@ test('a new visitor starts a sample trust and is taken into it', async ({ page }
 
   await expect(page).toHaveURL(/:3000\/$/, { timeout: 150_000 })
   await expect(page.getByText(/Sample data for trying CommonGround\. Don't enter real personal information\./)).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Send feedback' })).toHaveAttribute('href', 'mailto:demo@example.org')
+
+  await page.getByRole('button', { name: 'Send feedback' }).click()
+  await page.getByLabel('Feedback').fill('The resale price section is clear.')
+  await page.getByRole('button', { name: 'Send', exact: true }).click()
+  await expect(page.getByText('Thanks, your feedback was sent')).toBeVisible()
 
   await page.goto('/homes')
   await expect(page.locator('tbody tr').first()).toBeVisible()

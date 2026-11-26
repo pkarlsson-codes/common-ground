@@ -235,6 +235,7 @@ export * from './ResolveForeclosurePreventionCaseRequest';
 export * from './ScheduleClosingRequest';
 export * from './SchedulePropertyInspectionRequest';
 export * from './SelectHouseholdByPriorityRequest';
+export * from './SendDemoFeedbackRequest';
 export * from './ServicerDelinquencyResponse';
 export * from './SetHomeIncomeLimitRequest';
 export * from './SetInsuranceRequirementsRequest';

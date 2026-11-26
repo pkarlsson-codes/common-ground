@@ -107,10 +107,11 @@ Demo mode is for a public demo server. Each visitor who signs up gets a sample t
 
 - Do not turn it on for a server that holds a real CLT's records.
 - Turn it on only on a fresh database. A trust created before demo mode was on is never deleted.
-- Set `DEMO_ENABLED=true` and `DEMO_FEEDBACK_URL` (a `mailto:` link or a form's `https` address) in `.env`.
+- Set `DEMO_ENABLED=true` in `.env`.
 - Visitors confirm their email, so SMTP must work. With `DEMO_ENABLED=true` and an empty `SMTP_HOST`, nobody can sign up.
 - Keycloak accounts are not deleted with the trust. Remove them in the admin console if a visitor asks.
 - `DEMO_MAX_SANDBOXES` caps how many sample and empty trusts exist at once. Past it, onboarding says the demo is full.
+- Visitors send feedback from the banner. It is kept after their trust is deleted, with their sign-in email if they allowed a reply. Read it with `deploy/feedback.sh` (the last 30 days), `deploy/feedback.sh 7` or `deploy/feedback.sh all`.
 
 ## Logs
 

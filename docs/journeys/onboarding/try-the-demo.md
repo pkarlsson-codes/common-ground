@@ -9,7 +9,7 @@ Only on a server with demo mode on. For CLT staff who want to look at CommonGrou
 5. The page shows "Filling your sample trust with a few years of records…" until it is ready, then takes the visitor to [Today](../today/work-through-today.md) in "Sample Land Trust"
 6. If filling fails, the page says "Could not set up the sample trust." with a "Try again" button
 7. If the demo already holds its maximum number of sample trusts, the page says "The demo is full right now. Try again tomorrow." and no sample trust is started
-8. Every page in the trust shows a banner: "Sample data for trying CommonGround. Don't enter real personal information. This trust is deleted on {date}." with a "Send feedback" link that opens the operator's feedback address or form
+8. Every page in the trust shows a banner: "Sample data for trying CommonGround. Don't enter real personal information. This trust is deleted on {date}." with a "Send feedback" button. It opens a panel with a text box and a ticked "You can reply to me at {email}" box. Sending saves the message, the page they were on, and their email if the box is ticked, then says "Thanks, your feedback was sent"
 9. A visitor who signs in again before the delete date returns to the same trust with their changes
 10. Within an hour after the delete date the trust and everything in it is deleted: records, document files and scheduled reminders. On their next visit the visitor lands on Onboarding and can start a new sample trust
 

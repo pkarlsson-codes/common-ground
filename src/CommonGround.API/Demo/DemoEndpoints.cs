@@ -1,6 +1,8 @@
+using CommonGround.API.Contracts.Demo.Requests;
 using CommonGround.API.Contracts.Demo.Responses;
 using CommonGround.API.Infrastructure.Auth;
 using CommonGround.Identity.Application.Queries;
+using CommonGround.Identity.Application.ReadModels;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Services;
 using Marten;
@@ -45,7 +47,55 @@ public static class DemoEndpoints
         }
 
         var deletesOn = await trustClock.ToTrustDateAsync(trustId, sandbox.DeletesAt, cancellationToken).ConfigureAwait(false);
-        return Results.Ok(new DemoResponse(deletesOn, demo.FeedbackUrl!));
+        return Results.Ok(new DemoResponse(deletesOn));
+    }
+
+    // Saves what a visitor wrote with "Send feedback", outside their sandbox trust so it outlives it.
+    // 404 when demo mode is off or the trust has no sandbox record, like the banner it is sent from.
+    [WolverinePost("/api/demo/feedback")]
+    public static async Task<IResult> SendFeedback(
+        SendDemoFeedbackRequest request,
+        HttpContext httpContext,
+        IOptions<DemoOptions> options,
+        IDocumentStore store,
+        ILogger<DemoFeedback> logger,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (!options.Value.Enabled)
+        {
+            return Results.NotFound();
+        }
+
+        var trustId = httpContext.GetTenantId().Value;
+        var userId = httpContext.GetUserId().Value;
+        var session = store.LightweightSession();
+        await using var sessionDisposal = session.ConfigureAwait(false);
+        if (await session.LoadAsync<DemoSandbox>(trustId, cancellationToken).ConfigureAwait(false) is null)
+        {
+            return Results.NotFound();
+        }
+
+        string? replyTo = null;
+        if (request.MayReply)
+        {
+            var user = await session.Query<UserView>()
+                .FirstOrDefaultAsync(u => u.UserId == userId, cancellationToken)
+                .ConfigureAwait(false);
+            replyTo = user?.Email;
+        }
+
+        var feedback = DemoFeedback.Send(trustId, userId, replyTo, request.Page, request.Message, TimeProviderContext.Current.UtcNow);
+        session.Store(feedback);
+        await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation("Demo feedback {FeedbackId} sent from trust {TrustId}", feedback.Id, trustId);
+        }
+
+        return Results.NoContent();
     }
 
     // Starts a sample trust for a user who has no trust. A user whose sample trust is still being filled gets that one back.

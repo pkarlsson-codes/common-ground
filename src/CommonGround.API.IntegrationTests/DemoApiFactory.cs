@@ -12,9 +12,6 @@ namespace CommonGround.API.IntegrationTests;
 /// </summary>
 public class DemoApiFactory : DurableApiFactory
 {
-    /// <summary>The feedback link the demo server is configured with.</summary>
-    public const string FeedbackUrl = "mailto:demo@example.org";
-
     /// <inheritdoc />
     /// <remarks>Leaves daemon polling to demo mode, so the sample trust test measures what a demo server does.</remarks>
     protected override void ConfigureWolverine(IServiceCollection services) =>
@@ -27,7 +24,6 @@ public class DemoApiFactory : DurableApiFactory
         builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["Demo:Enabled"] = "true",
-            ["Demo:FeedbackUrl"] = FeedbackUrl,
         }));
     }
 }

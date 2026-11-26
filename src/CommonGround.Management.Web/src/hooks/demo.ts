@@ -72,3 +72,11 @@ export function useDemoMode(enabled: boolean) {
     retry: false,
   })
 }
+
+/** Sends what a visitor wrote with "Send feedback" on a demo server. */
+export function useSendDemoFeedback() {
+  return useMutation({
+    mutationFn: (feedback: { message: string; page: string; mayReply: boolean }) =>
+      api.sendFeedback({ sendDemoFeedbackRequest: feedback }),
+  })
+}

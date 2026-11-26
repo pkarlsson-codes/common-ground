@@ -1,21 +1,23 @@
 using System.Net;
 using System.Net.Http.Json;
+using CommonGround.API.Contracts.Demo.Requests;
 using CommonGround.API.Contracts.Demo.Responses;
+using CommonGround.API.Demo;
 using CommonGround.API.Contracts.Identity.Requests;
 using CommonGround.API.Contracts.Identity.Responses;
 using CommonGround.API.Contracts.TrustManagement.Requests;
 using CommonGround.API.Contracts.TrustManagement.Responses;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Marten;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CommonGround.API.IntegrationTests.Demo;
 
 [Collection(IntegrationCollection.Name)]
 public class DemoTests(ApiFactory factory)
 {
-    private const string FeedbackUrl = "mailto:demo@example.org";
-
     [Fact]
     public async Task GetMode_DemoModeOff_Returns404()
     {
@@ -46,14 +48,13 @@ public class DemoTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task GetDemo_TrustCreatedInDemoMode_ReturnsDeleteDateAndFeedbackUrl()
+    public async Task GetDemo_TrustCreatedInDemoMode_ReturnsDeleteDate()
     {
         await using var demo = factory.WithWebHostBuilder(builder => builder.ConfigureAppConfiguration((_, config) =>
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Demo:Enabled"] = "true",
                 ["Demo:SandboxDays"] = "14",
-                ["Demo:FeedbackUrl"] = FeedbackUrl,
             })));
         var client = await ClientInNewTrustAsync(demo);
 
@@ -63,7 +64,7 @@ public class DemoTests(ApiFactory factory)
         var body = await response.Content.ReadFromJsonAsync<DemoResponse>();
         var denver = TimeZoneInfo.FindSystemTimeZoneById("America/Denver");
         var expected = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow.AddDays(14), denver).DateTime);
-        body.Should().Be(new DemoResponse(expected, FeedbackUrl));
+        body.Should().Be(new DemoResponse(expected));
     }
 
     [Fact]
@@ -102,6 +103,63 @@ public class DemoTests(ApiFactory factory)
         await ShouldBeDemoFullAsync(response);
     }
 
+    [Fact]
+    public async Task SendFeedback_DemoModeOff_Returns404()
+    {
+        var client = await ClientInNewTrustAsync(factory);
+
+        var response = await client.PostAsJsonAsync("/api/demo/feedback", new SendDemoFeedbackRequest("Hello", "/", MayReply: true));
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task SendFeedback_MayReply_StoresMessagePageAndSignInEmail()
+    {
+        await using var demo = DemoHost(maxSandboxes: 100);
+        var client = await ClientInNewTrustAsync(demo);
+        var message = $"  The resale price is wrong {Guid.NewGuid():N}  ";
+
+        var response = await client.PostAsJsonAsync("/api/demo/feedback", new SendDemoFeedbackRequest(message, "/resales", MayReply: true));
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var stored = await StoredFeedbackAsync(demo, message.Trim());
+        stored.Should().BeEquivalentTo(new { Message = message.Trim(), Page = "/resales", ReplyTo = "demo@example.org" });
+        stored.TrustId.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task SendFeedback_MayNotReply_StoresNoEmail()
+    {
+        await using var demo = DemoHost(maxSandboxes: 100);
+        var client = await ClientInNewTrustAsync(demo);
+        var message = $"No reply needed {Guid.NewGuid():N}";
+
+        var response = await client.PostAsJsonAsync("/api/demo/feedback", new SendDemoFeedbackRequest(message, null, MayReply: false));
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        (await StoredFeedbackAsync(demo, message)).ReplyTo.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task SendFeedback_BlankMessage_Returns422FeedbackEmpty()
+    {
+        await using var demo = DemoHost(maxSandboxes: 100);
+        var client = await ClientInNewTrustAsync(demo);
+
+        var response = await client.PostAsJsonAsync("/api/demo/feedback", new SendDemoFeedbackRequest("   ", "/", MayReply: true));
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        var problem = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        problem!["code"].ToString().Should().Be("demo.feedback.empty");
+    }
+
+    private static async Task<DemoFeedback> StoredFeedbackAsync(WebApplicationFactory<Program> host, string message)
+    {
+        await using var session = host.Services.GetRequiredService<IDocumentStore>().QuerySession();
+        return await session.Query<DemoFeedback>().SingleAsync(f => f.Message == message);
+    }
+
     private static async Task ShouldBeDemoFullAsync(HttpResponseMessage response)
     {
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
@@ -115,7 +173,6 @@ public class DemoTests(ApiFactory factory)
             {
                 ["Demo:Enabled"] = "true",
                 ["Demo:MaxSandboxes"] = maxSandboxes.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                ["Demo:FeedbackUrl"] = FeedbackUrl,
             })));
 
     private static async Task<string> EnsureUserAsync(WebApplicationFactory<Program> host)

@@ -44,7 +44,7 @@ public class SampleTrustTests(DemoApiFactory factory, ITestOutputHelper output)
         trust!.Name.Should().Be("Sample Land Trust");
 
         var demo = await member.GetFromJsonAsync<DemoResponse>("/api/demo");
-        demo!.FeedbackUrl.Should().Be(DemoApiFactory.FeedbackUrl);
+        demo.Should().NotBeNull();
 
         var homes = await member.GetAsync("/api/homes");
         homes.StatusCode.Should().Be(HttpStatusCode.OK);

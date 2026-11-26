@@ -7,7 +7,7 @@ namespace CommonGround.API.Demo;
 internal static class DemoServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="DemoOptions"/>, checked at startup, and the <see cref="DemoSandbox"/> document. In demo
+    /// Registers <see cref="DemoOptions"/>, checked at startup, and the <see cref="DemoSandbox"/> and <see cref="DemoFeedback"/> documents. In demo
     /// mode, the workers that fill sample trusts and delete expired sandboxes run, and the daemon polls faster.
     /// </summary>
     /// <param name="services">The service collection.</param>
@@ -20,7 +20,11 @@ internal static class DemoServiceCollectionExtensions
             .ValidateOnStart();
         services.AddSingleton<Microsoft.Extensions.Options.IValidateOptions<DemoOptions>, DemoOptionsValidator>();
 
-        services.ConfigureMarten(options => options.Schema.For<DemoSandbox>().DatabaseSchemaName("demo"));
+        services.ConfigureMarten(options =>
+        {
+            options.Schema.For<DemoSandbox>().DatabaseSchemaName("demo");
+            options.Schema.For<DemoFeedback>().DatabaseSchemaName("demo");
+        });
 
         // Registered either way and read DemoOptions when they run: config added by a test host isn't
         // visible while services are registered.

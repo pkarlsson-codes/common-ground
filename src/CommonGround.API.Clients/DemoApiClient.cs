@@ -1,3 +1,4 @@
+using CommonGround.API.Contracts.Demo.Requests;
 using CommonGround.API.Contracts.Demo.Responses;
 using CommonGround.SharedKernel.Infrastructure.API;
 using Microsoft.Extensions.Logging;
@@ -16,6 +17,13 @@ public sealed class DemoApiClient(
     /// <inheritdoc/>
     public async Task<DemoResponse> GetDemoAsync(CancellationToken ct = default)
         => await GetAsync<DemoResponse>("api/demo", ct).ConfigureAwait(false);
+
+    /// <inheritdoc/>
+    public async Task SendFeedbackAsync(SendDemoFeedbackRequest request, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync("api/demo/feedback", request, ct).ConfigureAwait(false);
+    }
 
     /// <inheritdoc/>
     public async Task<DemoSandboxResponse> StartSandboxAsync(CancellationToken ct = default)

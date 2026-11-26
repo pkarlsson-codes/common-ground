@@ -89,6 +89,60 @@
         }
       }
     },
+    "/api/v1/demo/feedback": {
+      "post": {
+        "tags": [
+          "Demo"
+        ],
+        "operationId": "SendFeedback",
+        "requestBody": {
+          "x-name": "SendDemoFeedbackRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendDemoFeedbackRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "404": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/demo/sandboxes": {
       "post": {
         "tags": [
@@ -11306,10 +11360,31 @@
             "type": "string",
             "description": "The date the trust is deleted, in the trust's time zone.",
             "format": "date"
-          },
-          "feedbackUrl": {
+          }
+        }
+      },
+      "IResult": {
+        "type": "object",
+        "x-abstract": true,
+        "additionalProperties": false
+      },
+      "SendDemoFeedbackRequest": {
+        "type": "object",
+        "description": "Feedback a visitor sends from the demo banner.",
+        "additionalProperties": false,
+        "properties": {
+          "message": {
             "type": "string",
-            "description": "Where \"Send feedback\" goes: a mailto: link or a form's web address."
+            "description": "What they want to say; not empty, at most 4,000 characters."
+          },
+          "page": {
+            "type": "string",
+            "description": "The page they were on, such as /resales/resale-01…; cut at 500 characters.",
+            "nullable": true
+          },
+          "mayReply": {
+            "type": "boolean",
+            "description": "Whether the operator may reply to the visitor's sign-in email address."
           }
         }
       },
@@ -11468,11 +11543,6 @@
             "type": "string"
           }
         }
-      },
-      "IResult": {
-        "type": "object",
-        "x-abstract": true,
-        "additionalProperties": false
       },
       "InitiateDevelopmentProjectRequest": {
         "type": "object",

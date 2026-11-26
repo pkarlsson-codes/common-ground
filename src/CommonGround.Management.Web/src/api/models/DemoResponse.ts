@@ -34,12 +34,6 @@ export interface DemoResponse {
      * @memberof DemoResponse
      */
     deletesOn?: CalendarDate;
-    /**
-     * Where "Send feedback" goes: a mailto: link or a form's web address.
-     * @type {string}
-     * @memberof DemoResponse
-     */
-    feedbackUrl?: string;
 }
 
 /**
@@ -60,7 +54,6 @@ export function DemoResponseFromJSONTyped(json: any, ignoreDiscriminator: boolea
     return {
         
         'deletesOn': json['deletesOn'] == null ? undefined : CalendarDateFromJSON(json['deletesOn']),
-        'feedbackUrl': json['feedbackUrl'] == null ? undefined : json['feedbackUrl'],
     };
 }
 
@@ -76,7 +69,6 @@ export function DemoResponseToJSONTyped(value?: DemoResponse | null, ignoreDiscr
     return {
         
         'deletesOn': CalendarDateToJSON(value['deletesOn']),
-        'feedbackUrl': value['feedbackUrl'],
     };
 }
 
