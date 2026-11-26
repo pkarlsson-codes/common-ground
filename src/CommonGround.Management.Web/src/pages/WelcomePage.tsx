@@ -107,7 +107,7 @@ export default function WelcomePage({ sandboxDays }: { sandboxDays?: number }) {
             <p style={textStyle}>
               Create an account, confirm your email, and you get your own sample trust with a few years of records:
               homes and land parcels, households and their applications, ground leases and lease fees, resales,
-              stewardship cases, and last year's funder report. The sample trust is in Portland, Oregon. Change
+              stewardship cases, and last year's funder report. The sample trust is in Missoula, Montana. Change
               anything you like. No one else sees your trust, and it is deleted{' '}
               {sandboxDays ? `${sandboxDays} days after you start it.` : 'a set number of days after you start it.'}
             </p>

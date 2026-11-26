@@ -5,7 +5,7 @@
     "landParcelSeedKey": "lp-north-field-010",
     "type": "NewConstruction",
     "name": "North Field Cottages",
-    "description": "Twelve one- and two-bedroom cottages around a shared green, built to Earth Advantage standards.",
+    "description": "Twelve one- and two-bedroom cottages around a shared green, built to ENERGY STAR standards.",
     "initiatedDate": "today-6m"
   },
   {
@@ -13,7 +13,7 @@
     "trustSeedKey": "dev-default",
     "landParcelSeedKey": "lp-harbor-view-004",
     "type": "NewConstruction",
-    "name": "Harbor View Phase II",
+    "name": "Sentinel View Phase II",
     "description": "A second four-storey building on the parking lot at the north end of the parcel, adding 16 condo units.",
     "initiatedDate": "today-3w"
   },

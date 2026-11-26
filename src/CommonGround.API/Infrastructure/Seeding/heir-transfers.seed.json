@@ -6,13 +6,13 @@
     "diedOn": "today-200d",
     "noticeReceivedOn": "today-185d",
     "notifiedBy": "Jan Kowalczyk, brother",
-    "notifiedByContact": "(503) 555-0142",
+    "notifiedByContact": "(406) 555-0142",
     "notes": "Called the office the week after the funeral.",
     "heir": {
       "date": "today-170d",
       "fullName": "Halina Kowalczyk",
       "email": "halina.kowalczyk@example.com",
-      "phone": "(503) 555-0187",
+      "phone": "(406) 555-0187",
       "relationship": "Spouse"
     },
     "completed": { "date": "today-150d", "notes": "Both letters signed at the office. Fee notices and the insurance record now name Halina." }

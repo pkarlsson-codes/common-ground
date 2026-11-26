@@ -121,7 +121,7 @@ public sealed class LeaseFeesSeeder(ITrustClock trustClock) : IDevelopmentSeeder
         }
 
         var trust = await GetTrustHandler.Handle(new GetTrust(trustId), store, cancellation).ConfigureAwait(false);
-        var signOff = $"{trust?.Name ?? "Community Land Trust"}\nStewardship Team\n(503) 555-0100 · stewardship@example.org";
+        var signOff = $"{trust?.Name ?? "Community Land Trust"}\nStewardship Team\n(406) 555-0100 · stewardship@example.org";
         stream.AppendOne(LeaseFeeNoticePolicy.Set(id, LeaseFeeNoticeSchedule.Default, DefaultCurePeriod.Default, signOff, SeederUserId));
     }
 
