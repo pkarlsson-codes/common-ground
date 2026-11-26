@@ -61,6 +61,24 @@ Keycloak refuses connections for a short time after a restart, until its health 
 
 The API applies its database changes at startup.
 
+## Deploying from CI
+
+The `deploy` job in `.github/workflows/ci.yml` pipes `git archive HEAD` over SSH on every push to `main`. On the server, the deploy key's forced command is `deploy/receive.sh`. It unpacks the archive, replaces the whole tree in `/opt/commonground` except `deploy/.env`, and runs `docker compose up -d --build`. Because it replaces the tree, a file deleted in git is deleted on the server too.
+
+Install it once, as root:
+
+```
+install -m 755 /opt/commonground/deploy/receive.sh /usr/local/bin/commonground-deploy
+```
+
+In the deploy user's `~/.ssh/authorized_keys`, start the key's line with:
+
+```
+command="/usr/local/bin/commonground-deploy",restrict ssh-ed25519 AAAA...
+```
+
+The installed copy does not update itself when `deploy/receive.sh` changes in git. Install it again after such a change. The deploy user needs write access to `/opt/commonground` and permission to run `docker`.
+
 ## Backup and restore
 
 `deploy/backup.sh` writes three things to `/var/backups/commonground` and deletes copies older than 7 days:
