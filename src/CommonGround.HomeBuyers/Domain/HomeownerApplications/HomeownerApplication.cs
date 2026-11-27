@@ -10,7 +10,9 @@ namespace CommonGround.HomeBuyers.Domain.HomeownerApplications;
 
 /// <summary>
 /// A household's application to buy a CLT home, from submission through approval to selection
-/// for a specific home. Captures a snapshot of the household at submission.
+/// for a specific home. Its declaration starts as the household at submission and follows the household's
+/// changes while the application is open (<see cref="FollowHousehold"/>); once selected it keeps the figures it
+/// was chosen on.
 /// </summary>
 public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
 {
@@ -28,6 +30,12 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
 
     /// <summary>The day the application was approved; <see langword="null"/> before approval.</summary>
     public DateOnly? ApprovedDate { get; private set; }
+
+    /// <summary>
+    /// Set while an approved application's income or size differs from the figures staff last checked, until staff
+    /// confirm the household still qualifies; <see langword="null"/> otherwise. A marked application can't be selected.
+    /// </summary>
+    public QualificationToConfirmMark? QualificationToConfirm { get; private set; }
 
     private readonly HashSet<HomeSelectionId> _passedOverIn = [];
 
@@ -72,6 +80,86 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
     }
 
     /// <summary>
+    /// Takes the household's current figures. A submitted application just takes them. An approved one is also
+    /// marked for staff to confirm it still qualifies when its income or size now differs from the figures staff
+    /// last checked; a mark already open stays open from its first change, and clears if the figures go back to the
+    /// checked ones. A change to the accessibility need alone marks nothing. A selected application keeps the figures
+    /// it was chosen on, and a closed one keeps its last.
+    /// </summary>
+    /// <param name="current">The household's declaration now.</param>
+    /// <param name="changedDate">Today in the trust's time zone.</param>
+    /// <returns>The update, or <see langword="null"/> when nothing changed or the application no longer follows the household.</returns>
+    public ApplicationDeclarationUpdated? FollowHousehold(Declaration current, DateOnly changedDate)
+    {
+        ArgumentNullException.ThrowIfNull(current);
+
+        if (Phase != ApplicationPhase.Submitted && Phase != ApplicationPhase.Approved)
+            return null;
+
+        if (current.Equals(Declaration))
+            return null;
+
+        var mark = Phase == ApplicationPhase.Approved ? MarkAfter(current, changedDate) : null;
+
+        return new ApplicationDeclarationUpdated(
+            Id.Value,
+            HouseholdId.Value,
+            current.HouseholdSize,
+            current.Circumstances.AnnualIncome,
+            current.Circumstances.RequiresAccessibility,
+            changedDate,
+            mark);
+    }
+
+    /// <summary>
+    /// Records that staff checked the changed figures and the household still qualifies, clearing the mark. The
+    /// application stays approved and keeps its place on the waiting list. Staff whose check finds the household no
+    /// longer qualifies remove it from the waiting list instead.
+    /// </summary>
+    /// <param name="confirmedDate">The day of the check; not after <paramref name="today"/> or before the mark's first change.</param>
+    /// <param name="today">Today in the trust's time zone.</param>
+    /// <param name="confirmedBy">The staff user confirming.</param>
+    public ApplicationQualificationConfirmed ConfirmQualification(DateOnly confirmedDate, DateOnly today, UserId confirmedBy)
+    {
+        GuardNotTerminal();
+
+        if (Phase != ApplicationPhase.Approved)
+            throw BusinessRuleViolation.HomeownerApplication.ConfirmQualification.PhaseNotApproved(Phase);
+
+        if (QualificationToConfirm is not { } mark)
+            throw BusinessRuleViolation.HomeownerApplication.ConfirmQualification.NothingToConfirm();
+
+        if (confirmedDate > today)
+            throw BusinessRuleViolation.HomeownerApplication.ConfirmQualification.ConfirmedDateInFuture(confirmedDate, today);
+
+        if (confirmedDate < mark.Since)
+            throw BusinessRuleViolation.HomeownerApplication.ConfirmQualification.ConfirmedDateBeforeChange(confirmedDate, mark.Since);
+
+        return new ApplicationQualificationConfirmed(
+            Id.Value,
+            HouseholdId.Value,
+            confirmedDate,
+            Declaration.Circumstances.AnnualIncome,
+            Declaration.HouseholdSize,
+            confirmedBy.Value);
+    }
+
+    private QualificationToConfirmMark? MarkAfter(Declaration current, DateOnly changedDate)
+    {
+        // The figures staff last checked: those the open mark holds, or else the declaration as it stands.
+        var qualifiedIncome = QualificationToConfirm?.QualifiedAnnualIncome ?? Declaration.Circumstances.AnnualIncome;
+        var qualifiedSize = QualificationToConfirm?.QualifiedHouseholdSize ?? Declaration.HouseholdSize;
+
+        if (current.Circumstances.AnnualIncome == qualifiedIncome && current.HouseholdSize == qualifiedSize)
+            return null;
+
+        return new QualificationToConfirmMark(
+            QualificationToConfirm?.Since ?? changedDate,
+            qualifiedIncome,
+            qualifiedSize);
+    }
+
+    /// <summary>
     /// Selects the application for a home in <paramref name="selectionId"/>. The household must be this
     /// application's household, have completed readiness, and hold a prequalification still valid on
     /// <paramref name="selectedDate"/>.
@@ -101,6 +189,9 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
 
         if (Phase != ApplicationPhase.Approved)
             throw BusinessRuleViolation.HomeownerApplication.SelectApplicant.PhaseNotApproved(Phase);
+
+        if (QualificationToConfirm is { } mark)
+            throw BusinessRuleViolation.HomeownerApplication.SelectApplicant.QualificationToConfirm(mark.Since);
 
         if (purchasePrice <= 0)
             throw BusinessRuleViolation.HomeownerApplication.SelectApplicant.PurchasePriceNonPositive(purchasePrice);
@@ -267,6 +358,19 @@ public sealed class HomeownerApplication : AggregateRoot<HomeownerApplicationId>
         ApprovedDate = e.ApprovedDate;
     }
     
+    /// <summary>Applies <see cref="ApplicationDeclarationUpdated"/>.</summary>
+    public void Apply(ApplicationDeclarationUpdated e)
+    {
+        Declaration = new Declaration(e.HouseholdSize, HouseholdCircumstances.Create(e.AccessibilityRequired, e.AnnualIncome));
+        QualificationToConfirm = e.QualificationToConfirm;
+    }
+
+    /// <summary>Applies <see cref="ApplicationQualificationConfirmed"/>.</summary>
+    public void Apply(ApplicationQualificationConfirmed _)
+    {
+        QualificationToConfirm = null;
+    }
+
     /// <summary>Applies <see cref="ApplicationReturnedToWaitingList"/>.</summary>
     public void Apply(ApplicationReturnedToWaitingList _)
     {

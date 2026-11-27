@@ -87,6 +87,8 @@ public sealed class WaitingListComparison
             reasons.Add(CannotBeChosenReason.NoPrequalification);
         else if (expiry < asOf)
             reasons.Add(CannotBeChosenReason.PrequalificationExpired);
+        if (application.QualificationToConfirmSince is not null)
+            reasons.Add(CannotBeChosenReason.QualificationToConfirm);
 
         return new ComparedApplication(application, incomeLimit, reasons);
     }

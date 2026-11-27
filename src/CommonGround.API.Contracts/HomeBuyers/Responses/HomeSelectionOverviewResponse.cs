@@ -25,9 +25,11 @@ public sealed record HomeSelectionOverviewResponse(
     IReadOnlyList<HomeSelectionDecisionDto> Decisions);
 
 /// <summary>
-/// An application on the waiting list compared against the home today. <see cref="Reasons"/> say why the household
-/// can't be chosen: "OverIncomeLimit", "NoPrimaryMember", "HousingCounselingIncomplete", "CltOrientationIncomplete",
-/// "NoPrequalification" or "PrequalificationExpired"; empty when it can.
+/// An application on the waiting list compared against the home today. <see cref="AnnualIncome"/> and
+/// <see cref="HouseholdSize"/> are the application's, which follow the household. <see cref="Reasons"/> say why the
+/// household can't be chosen: "OverIncomeLimit", "NoPrimaryMember", "HousingCounselingIncomplete",
+/// "CltOrientationIncomplete", "NoPrequalification", "PrequalificationExpired" or "QualificationToConfirm"; empty
+/// when it can.
 /// </summary>
 public sealed record WaitingListComparisonEntryDto(
     string ApplicationId,

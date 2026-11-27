@@ -60,6 +60,31 @@ public class HomeBuyersWorkItemsTests
         }
 
         [Fact]
+        public void GivenApprovedApplicationWithAQualificationToConfirm_WhenDerived_ThenAsksToConfirmSayingWhatChangedSinceWhen()
+        {
+            var household = _testBed.ReadyHousehold(_testBed.Today.AddDays(90));
+            var application = _testBed.Application("Approved");
+            application.AnnualIncome = 61000m;
+            application.HouseholdSize = 4;
+            application.QualificationToConfirmSince = new DateOnly(2026, 10, 28);
+            application.QualifiedAnnualIncome = 52000m;
+            application.QualifiedHouseholdSize = 3;
+
+            var items = HomeBuyersWorkItems.ForApplication(application, household, _testBed.Today, _testBed.Zone);
+
+            items.Should().ContainSingle().Which.Should().BeEquivalentTo(new
+            {
+                Kind = HomeBuyersWorkItems.QualificationToConfirm,
+                RecordType = "application",
+                RecordId = "application-1",
+                Label = "Alice Johnson",
+                Detail = "Confirm they still qualify: income $52,000 → $61,000, household size 3 → 4",
+                WaitingSince = new DateOnly(2026, 10, 28),
+                Actions = new[] { HomeBuyersWorkItems.ConfirmQualification },
+            });
+        }
+
+        [Fact]
         public void GivenApprovedApplicationOfReadyHousehold_WhenDerived_ThenNothingIsWaiting()
         {
             var household = _testBed.ReadyHousehold(_testBed.Today.AddDays(90));

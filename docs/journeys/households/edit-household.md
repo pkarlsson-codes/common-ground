@@ -1,6 +1,6 @@
 # Edit Household
 
-Changes apply to the household from now on. Applications already submitted keep the size, income and accessibility declared at submission.
+Changes apply to the household from now on. A submitted or approved application takes the new household size, income and accessibility need a moment after they are saved. An approved application whose income or size changed is marked "Qualification to confirm", and the household can't be chosen for a home until staff [confirm it still qualifies](../applications/confirm-qualification.md). A selected application keeps the figures it was chosen on.
 
 1. User opens the household detail from Households
 2. To change circumstances, user clicks "Edit Circumstances", changes Annual Income ($) and/or "Accessibility accommodations required", and clicks "Save Circumstances" (or "Cancel")

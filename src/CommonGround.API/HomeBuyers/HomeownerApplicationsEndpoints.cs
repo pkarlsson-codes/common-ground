@@ -120,7 +120,8 @@ public static class HomeownerApplicationsEndpoints
             e.Household?.MortgagePrequalificationExpiryDate,
             e.IsReadyForSelection,
             e.NeedsReverification,
-            e.PassOverCount));
+            e.PassOverCount,
+            e.Application.QualificationToConfirmSince));
 
         return Results.Ok(response);
     }
@@ -201,6 +202,27 @@ public static class HomeownerApplicationsEndpoints
         return Results.NoContent();
     }
 
+    [WolverinePost("/api/homeowner-applications/{applicationId}/confirm-qualification")]
+    public static async Task<IResult> ConfirmQualification(
+        string applicationId,
+        ConfirmQualificationRequest request,
+        HttpContext httpContext,
+        IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        await bus.InvokeForTenantAsync(bus.TenantId!,
+            new ConfirmQualification(
+                HomeownerApplicationId.Create(applicationId),
+                request.ConfirmedDate,
+                httpContext.GetUserId()),
+            cancellationToken);
+
+        return Results.NoContent();
+    }
+
     private static HomeownerApplicationResponse MapToResponse(HomeownerApplicationDetails details)
     {
         var view = details.Application;
@@ -225,7 +247,12 @@ public static class HomeownerApplicationsEndpoints
             view.SelectedHomeId,
             view.SelectedLandParcelId,
             view.SelectedBy,
-            [.. details.PassOvers.Select(MapPassOver)]);
+            [.. details.PassOvers.Select(MapPassOver)],
+            view.QualificationToConfirmSince,
+            view.QualifiedAnnualIncome,
+            view.QualifiedHouseholdSize,
+            view.QualificationConfirmedDate,
+            view.QualificationConfirmedBy);
     }
 
     private static PassOverDto MapPassOver(HouseholdPassOver passOver) =>

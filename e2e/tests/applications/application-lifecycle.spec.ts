@@ -66,9 +66,9 @@ test('submitted application shows its declared snapshot, phase-appropriate actio
   const detail = await openApplication(page, primary.name)
   await expect(detail.locator('.slideover-header__subtitle')).toHaveText(primary.email)
   await expect(detailValue(detail, 'Phase')).toHaveText('Submitted')
-  await expect(detailValue(detail, 'Declared Household Size')).toHaveText('2')
-  await expect(detailValue(detail, 'Declared Annual Income')).toHaveText('$65,000')
-  await expect(detailValue(detail, 'Declared Accessibility Need')).toHaveText('No')
+  await expect(detailValue(detail, 'Household Size')).toHaveText('2')
+  await expect(detailValue(detail, 'Annual Income')).toHaveText('$65,000')
+  await expect(detailValue(detail, 'Accessibility Need')).toHaveText('No')
 
   // Fields for later phases and an empty Passed Over section are not shown.
   for (const label of ['Approved Date', 'Selected Date', 'Denial Reason', 'Withdrawal Reason']) {

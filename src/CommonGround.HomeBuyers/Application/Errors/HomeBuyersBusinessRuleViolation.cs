@@ -67,6 +67,14 @@ public static class BusinessRuleViolation
                         ["selectedDate"] = selectedDate,
                     });
 
+            public static BusinessRuleViolationException QualificationToConfirm(DateOnly since)
+                => new(
+                    "home_buyers.homeowner_application.select_applicant.qualification_to_confirm",
+                    new Dictionary<string, object?>
+                    {
+                        ["since"] = since,
+                    });
+
             public static BusinessRuleViolationException PurchasePriceNonPositive(decimal purchasePrice)
                 => new(
                     "home_buyers.homeowner_application.select_applicant.purchase_price_non_positive",
@@ -108,6 +116,41 @@ public static class BusinessRuleViolation
                     {
                         ["removedDate"] = removedDate,
                         ["approvedDate"] = approvedDate,
+                    });
+        }
+
+        public static class ConfirmQualification
+        {
+            private const string Prefix = "home_buyers.homeowner_application.confirm_qualification.";
+
+            public static BusinessRuleViolationException PhaseNotApproved(ApplicationPhase phase)
+                => new(
+                    Prefix + "phase_not_approved",
+                    new Dictionary<string, object?>
+                    {
+                        ["phase"] = phase.DisplayName,
+                        ["requiredPhase"] = ApplicationPhase.Approved.DisplayName,
+                    });
+
+            public static BusinessRuleViolationException NothingToConfirm()
+                => new(Prefix + "nothing_to_confirm", new Dictionary<string, object?>());
+
+            public static BusinessRuleViolationException ConfirmedDateInFuture(DateOnly confirmedDate, DateOnly today)
+                => new(
+                    Prefix + "confirmed_date_in_future",
+                    new Dictionary<string, object?>
+                    {
+                        ["confirmedDate"] = confirmedDate,
+                        ["today"] = today,
+                    });
+
+            public static BusinessRuleViolationException ConfirmedDateBeforeChange(DateOnly confirmedDate, DateOnly since)
+                => new(
+                    Prefix + "confirmed_date_before_change",
+                    new Dictionary<string, object?>
+                    {
+                        ["confirmedDate"] = confirmedDate,
+                        ["since"] = since,
                     });
         }
 

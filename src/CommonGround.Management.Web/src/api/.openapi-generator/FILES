@@ -38,6 +38,7 @@ models/CloseHeirTransferRequest.ts
 models/CloseStewardshipCaseRequest.ts
 models/CompleteHeirTransferRequest.ts
 models/CompletePropertyInspectionRequest.ts
+models/ConfirmQualificationRequest.ts
 models/CorrectAppraisalRequest.ts
 models/CorrectEligibilityRequest.ts
 models/CorrectFinancingRequest.ts

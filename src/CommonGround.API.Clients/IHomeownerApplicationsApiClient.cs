@@ -35,6 +35,9 @@ public interface IHomeownerApplicationsApiClient
 
     /// <summary>Takes an approved homeowner application off the waiting list.</summary>
     Task RemoveFromWaitingListAsync(string applicationId, RemoveFromWaitingListRequest request, CancellationToken cancellationToken);
+
+    /// <summary>Confirms an approved household still qualifies on its changed income or size.</summary>
+    Task ConfirmQualificationAsync(string applicationId, ConfirmQualificationRequest request, CancellationToken cancellationToken);
 }
 
 #pragma warning restore SA1615

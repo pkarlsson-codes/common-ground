@@ -3,6 +3,7 @@ import {
   HomeownerApplicationsApi,
   HouseholdApi,
   type ApproveApplicationRequest,
+  type ConfirmQualificationRequest,
   type DenyApplicationRequest,
   type HomeownerApplicationResponse,
   type PaginatedResponseOfHomeownerApplicationListItemResponse,
@@ -139,6 +140,20 @@ export function useRemoveFromWaitingList() {
     onSuccess: (_data, variables) => {
       invalidateApplication(qc, variables.applicationId)
       qc.invalidateQueries({ queryKey: ['households'] })
+    },
+  })
+}
+
+/** Confirms an approved household still qualifies on its changed income or size, so it can be chosen again. */
+export function useConfirmQualification() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ applicationId, request }: { applicationId: string; request: ConfirmQualificationRequest }) =>
+      api.confirmQualification({ applicationId, confirmQualificationRequest: request }),
+    onSuccess: (_data, variables) => {
+      invalidateApplication(qc, variables.applicationId)
+      qc.invalidateQueries({ queryKey: ['home-selections'] })
+      qc.invalidateQueries({ queryKey: ['today'] })
     },
   })
 }

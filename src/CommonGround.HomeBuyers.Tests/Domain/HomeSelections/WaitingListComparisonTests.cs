@@ -36,6 +36,17 @@ public class WaitingListComparisonTests
         }
 
         [Fact]
+        public void GivenHouseholdWithAQualificationToConfirm_WhenCompared_ThenCantBeChosenUntilStaffConfirm()
+        {
+            var marked = _testBed.Waiting[0] with { QualificationToConfirmSince = new DateOnly(2026, 11, 1) };
+
+            var sut = _testBed.Compare(waiting: [marked, _testBed.Waiting[1]]);
+
+            sut.Applications[0].Reasons.Should().Equal(CannotBeChosenReason.QualificationToConfirm);
+            sut.Applications[1].CanBeChosen.Should().BeTrue();
+        }
+
+        [Fact]
         public void GivenHouseholdMissingEveryReadinessStep_WhenCompared_ThenGivesEveryReason()
         {
             var notReady = SelectionTestBed.Ready("application-d", 40000m, 1, false, new DateOnly(2026, 6, 1)) with

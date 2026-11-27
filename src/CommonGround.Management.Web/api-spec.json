@@ -4778,6 +4778,71 @@
         }
       }
     },
+    "/api/v1/homeowner-applications/{applicationId}/confirm-qualification": {
+      "post": {
+        "tags": [
+          "HomeownerApplications"
+        ],
+        "operationId": "ConfirmQualification",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "ConfirmQualificationRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmQualificationRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/homes/{homeId}/selection": {
       "get": {
         "tags": [
@@ -15356,7 +15421,7 @@
       },
       "HomeownerApplicationResponse": {
         "type": "object",
-        "description": "Detail response for a homeowner application. Household size, income and accessibility are the\nsnapshot taken at submission; current household state is served by HouseholdResponse.\nRemovalReason (NoLongerEligible, NoResponse, FalseInformation or Other), RemovalNote and\nRemovedDate are set when the application was removed from the waiting list.\nPassOvers covers all of the household's applications, oldest first.",
+        "description": "Detail response for a homeowner application. Household size, income and accessibility follow the household\nwhile the application is submitted or approved; a selected application keeps the figures it was chosen on.\nQualificationToConfirmSince is set while an approved household's income or size has changed since\nstaff last checked it, with QualifiedAnnualIncome and QualifiedHouseholdSize the figures\nthey checked. QualificationConfirmedDate and QualificationConfirmedBy record the last\nconfirmation.\nRemovalReason (NoLongerEligible, NoResponse, FalseInformation or Other), RemovalNote and\nRemovedDate are set when the application was removed from the waiting list.\nPassOvers covers all of the household's applications, oldest first.",
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -15442,6 +15507,30 @@
             "items": {
               "$ref": "#/components/schemas/PassOverDto"
             }
+          },
+          "qualificationToConfirmSince": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "qualifiedAnnualIncome": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "qualifiedHouseholdSize": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "qualificationConfirmedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "qualificationConfirmedBy": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -15538,7 +15627,7 @@
       },
       "WaitingListEntryResponse": {
         "type": "object",
-        "description": "An approved application on the waiting list, with its household's readiness as of today and the\nnumber of home selections the household was passed over in.",
+        "description": "An approved application on the waiting list, with its household's readiness as of today and the\nnumber of home selections the household was passed over in. QualificationToConfirmSince is set while\nthe household's income or size has changed since staff last checked it still qualifies.",
         "additionalProperties": false,
         "properties": {
           "applicationId": {
@@ -15587,6 +15676,11 @@
           "passOverCount": {
             "type": "integer",
             "format": "int32"
+          },
+          "qualificationToConfirmSince": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
           }
         }
       },
@@ -15636,6 +15730,17 @@
           "removedDate": {
             "type": "string",
             "description": "The day of removal; not in the future or before the approved date.",
+            "format": "date"
+          }
+        }
+      },
+      "ConfirmQualificationRequest": {
+        "type": "object",
+        "description": "Request to confirm that an approved household still qualifies on its changed income or size.",
+        "additionalProperties": false,
+        "properties": {
+          "confirmedDate": {
+            "type": "string",
             "format": "date"
           }
         }
@@ -15705,7 +15810,7 @@
       },
       "WaitingListComparisonEntryDto": {
         "type": "object",
-        "description": "An application on the waiting list compared against the home today. Reasons say why the household\ncan't be chosen: \"OverIncomeLimit\", \"NoPrimaryMember\", \"HousingCounselingIncomplete\", \"CltOrientationIncomplete\",\n\"NoPrequalification\" or \"PrequalificationExpired\"; empty when it can.",
+        "description": "An application on the waiting list compared against the home today. AnnualIncome and\nHouseholdSize are the application's, which follow the household. Reasons say why the\nhousehold can't be chosen: \"OverIncomeLimit\", \"NoPrimaryMember\", \"HousingCounselingIncomplete\",\n\"CltOrientationIncomplete\", \"NoPrequalification\", \"PrequalificationExpired\" or \"QualificationToConfirm\"; empty\nwhen it can.",
         "additionalProperties": false,
         "properties": {
           "applicationId": {

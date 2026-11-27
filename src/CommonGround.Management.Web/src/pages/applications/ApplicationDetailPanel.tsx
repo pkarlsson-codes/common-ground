@@ -10,6 +10,8 @@ import DenyApplicationPanel from './DenyApplicationPanel'
 import ApplicationPhaseBadge from './ApplicationPhaseBadge'
 import WithdrawApplicationPanel from './WithdrawApplicationPanel'
 import RemoveFromWaitingListPanel from './RemoveFromWaitingListPanel'
+import ConfirmQualificationPanel from './ConfirmQualificationPanel'
+import { qualificationChanges } from './qualification'
 import { waitingListRemovalReasonLabel } from './waitingListRemovalReasons'
 import { getResponseStatus } from '../../lib/getErrorMessage'
 import { formatPhoneDisplay } from '../../lib/phone'
@@ -42,6 +44,7 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
     | 'deny-application'
     | 'withdraw-application'
     | 'remove-from-waiting-list'
+    | 'confirm-qualification'
     | null
   >(null)
 
@@ -53,6 +56,7 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
   const isSelectedPhase = phase === 'selected'
   const isRemovedPhase = phase === 'removed'
   const passOvers = detail?.passOvers ?? []
+  const qualificationToConfirm = isApprovedPhase && !!detail?.qualificationToConfirmSince
 
   return (
     <SlideOver
@@ -88,6 +92,13 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
 
       {!isLoading && !isError && detail && (
         <>
+          {qualificationToConfirm && (
+            <div className="form-warning" role="status" style={{ marginBottom: 16 }}>
+              <strong>Qualification to confirm</strong> since {fmtDate(detail.qualificationToConfirmSince)}:{' '}
+              {qualificationChanges(detail).join(', ') || 'income or household size changed'}. This household can’t be
+              chosen for a home until staff confirm it still qualifies.
+            </div>
+          )}
           <div className="detail-grid">
             <div className="detail-field">
               <div className="detail-field__label">Phase</div>
@@ -106,23 +117,32 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
               <div className="detail-field__value">{formatPhoneDisplay(detail.primaryContact?.phone) ?? '—'}</div>
             </div>
             <div className="detail-field">
-              <div className="detail-field__label">Declared Household Size</div>
+              <div className="detail-field__label">Household Size</div>
               <div className="detail-field__value mono">{detail.householdSize ?? '—'}</div>
             </div>
             <div className="detail-field">
-              <div className="detail-field__label">Declared Annual Income</div>
+              <div className="detail-field__label">Annual Income</div>
               <div className="detail-field__value mono">
                 {typeof detail.annualIncome === 'number' ? fmtCurrency(detail.annualIncome) : '—'}
               </div>
             </div>
             <div className="detail-field">
-              <div className="detail-field__label">Declared Accessibility Need</div>
+              <div className="detail-field__label">Accessibility Need</div>
               <div className="detail-field__value">{detail.accessibilityRequired ? 'Yes' : 'No'}</div>
             </div>
             {(isApprovedPhase || isSelectedPhase || isRemovedPhase) && (
               <div className="detail-field">
                 <div className="detail-field__label">Approved Date</div>
                 <div className="detail-field__value mono">{fmtDate(detail.approvedDate)}</div>
+              </div>
+            )}
+            {detail.qualificationConfirmedDate && (
+              <div className="detail-field">
+                <div className="detail-field__label">Qualification Confirmed</div>
+                <div className="detail-field__value">
+                  <span className="mono">{fmtDate(detail.qualificationConfirmedDate)}</span>
+                  {detail.qualificationConfirmedBy && <> by <UserName id={detail.qualificationConfirmedBy} /></>}
+                </div>
               </div>
             )}
             {isSelectedPhase && (
@@ -222,6 +242,11 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
                   Approve Application
                 </button>
               )}
+              {qualificationToConfirm && (
+                <button className="btn btn-primary btn-sm" onClick={() => setActionPanel('confirm-qualification')}>
+                  Confirm Still Qualifies
+                </button>
+              )}
 
               {!isOpen && (
                 <div className="detail-field__value">No actions available for this phase.</div>
@@ -260,6 +285,9 @@ export default function ApplicationDetailPanel({ applicationId, onClose }: Props
           approvedDate={detail?.approvedDate}
           onClose={() => setActionPanel(null)}
         />
+      )}
+      {actionPanel === 'confirm-qualification' && (
+        <ConfirmQualificationPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />
       )}
       {actionPanel === 'withdraw-application' && (
         <WithdrawApplicationPanel applicationId={applicationId} onClose={() => setActionPanel(null)} />

@@ -395,6 +395,209 @@ public class HomeownerApplicationTests
         }
     }
 
+    public class TheFollowHouseholdMethod
+    {
+        private readonly TestBed _testBed = new();
+        private static readonly DateOnly ChangedDate = new(2026, 8, 3);
+
+        private static Declaration Declared(int size, decimal income, bool accessibility = false) =>
+            new(size, HouseholdCircumstances.Create(accessibility, Money.Create(income)));
+
+        [Fact]
+        public void GivenTheSameFigures_WhenFollowed_ThenDecidesNothing()
+        {
+            var application = _testBed.ApprovedApplication();
+
+            application.FollowHousehold(_testBed.Household.Declare(), ChangedDate).Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenSubmittedApplication_WhenIncomeChanges_ThenTakesTheIncomeWithNoMark()
+        {
+            var application = _testBed.SubmittedApplication();
+
+            application = application.Decide(a => a.FollowHousehold(Declared(2, 72000m), ChangedDate)).Aggregate;
+
+            application.Declaration.Circumstances.AnnualIncome.Should().Be(Money.Create(72000m));
+            application.QualificationToConfirm.Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenApprovedApplication_WhenIncomeChanges_ThenTakesTheIncomeAndIsMarkedWithTheFiguresLastChecked()
+        {
+            var application = _testBed.ApprovedApplication();
+
+            application = application.Decide(a => a.FollowHousehold(Declared(2, 72000m), ChangedDate)).Aggregate;
+
+            application.Phase.Should().Be(ApplicationPhase.Approved);
+            application.ApprovedDate.Should().Be(new DateOnly(2026, 6, 1));
+            application.Declaration.Circumstances.AnnualIncome.Should().Be(Money.Create(72000m));
+            application.QualificationToConfirm.Should().Be(new QualificationToConfirmMark(ChangedDate, Money.Create(65000m), 2));
+        }
+
+        [Fact]
+        public void GivenApprovedApplication_WhenHouseholdSizeChanges_ThenIsMarked()
+        {
+            var application = _testBed.ApprovedApplication();
+
+            application = application.Decide(a => a.FollowHousehold(Declared(3, 65000m), ChangedDate)).Aggregate;
+
+            application.Declaration.HouseholdSize.Should().Be(3);
+            application.QualificationToConfirm.Should().NotBeNull();
+        }
+
+        [Fact]
+        public void GivenApprovedApplication_WhenOnlyTheAccessibilityNeedChanges_ThenTakesItWithNoMark()
+        {
+            var application = _testBed.ApprovedApplication();
+
+            application = application.Decide(a => a.FollowHousehold(Declared(2, 65000m, accessibility: true), ChangedDate)).Aggregate;
+
+            application.Declaration.Circumstances.RequiresAccessibility.Should().BeTrue();
+            application.QualificationToConfirm.Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenAnOpenMark_WhenAnotherChangeArrives_ThenTheMarkKeepsItsFirstDateAndTheFiguresLastChecked()
+        {
+            var application = _testBed.ApprovedApplication();
+            application = application.Decide(a => a.FollowHousehold(Declared(2, 72000m), ChangedDate)).Aggregate;
+
+            application = application.Decide(a => a.FollowHousehold(Declared(3, 75000m), ChangedDate.AddDays(9))).Aggregate;
+
+            application.Declaration.Should().Be(Declared(3, 75000m));
+            application.QualificationToConfirm.Should().Be(new QualificationToConfirmMark(ChangedDate, Money.Create(65000m), 2));
+        }
+
+        [Fact]
+        public void GivenAnOpenMark_WhenTheFiguresGoBackToTheOnesLastChecked_ThenTheMarkClears()
+        {
+            var application = _testBed.ApprovedApplication();
+            application = application.Decide(a => a.FollowHousehold(Declared(2, 72000m), ChangedDate)).Aggregate;
+
+            application = application.Decide(a => a.FollowHousehold(Declared(2, 65000m), ChangedDate.AddDays(1))).Aggregate;
+
+            application.QualificationToConfirm.Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenSelectedApplication_WhenIncomeChanges_ThenKeepsTheFiguresItWasChosenOn()
+        {
+            var application = _testBed.SelectedApplication();
+
+            application.FollowHousehold(Declared(2, 72000m), ChangedDate).Should().BeNull();
+        }
+
+        [Fact]
+        public void GivenWithdrawnApplication_WhenIncomeChanges_ThenDecidesNothing()
+        {
+            var application = _testBed.SubmittedApplication();
+            application = application.Decide(a => a.Withdraw(new DateOnly(2026, 6, 5), null, _testBed.StaffUser)).Aggregate;
+
+            application.FollowHousehold(Declared(2, 72000m), ChangedDate).Should().BeNull();
+        }
+    }
+
+    public class TheConfirmQualificationMethod
+    {
+        private readonly TestBed _testBed = new();
+        private static readonly DateOnly ChangedDate = new(2026, 8, 3);
+        private static readonly DateOnly Today = new(2026, 8, 10);
+
+        private HomeownerApplication MarkedApplication()
+        {
+            var application = _testBed.ApprovedApplication();
+            return application.Decide(a => a.FollowHousehold(
+                new Declaration(2, HouseholdCircumstances.Create(false, Money.Create(72000m))), ChangedDate)).Aggregate;
+        }
+
+        [Fact]
+        public void GivenAMarkedApplication_WhenConfirmed_ThenTheMarkClearsAndTheApplicationKeepsItsPlace()
+        {
+            var application = MarkedApplication();
+
+            var confirmed = application.ConfirmQualification(Today, Today, _testBed.StaffUser);
+            application = application.Evolve(confirmed)!;
+
+            confirmed.AnnualIncome.Should().Be(Money.Create(72000m));
+            confirmed.HouseholdSize.Should().Be(2);
+            confirmed.ConfirmedBy.Should().Be(_testBed.StaffUser.Value);
+            application.QualificationToConfirm.Should().BeNull();
+            application.Phase.Should().Be(ApplicationPhase.Approved);
+            application.ApprovedDate.Should().Be(new DateOnly(2026, 6, 1));
+        }
+
+        [Fact]
+        public void GivenAConfirmedApplication_WhenIncomeChangesAgain_ThenTheMarkComparesWithTheConfirmedFigures()
+        {
+            var application = MarkedApplication();
+            application = application.Decide(a => a.ConfirmQualification(Today, Today, _testBed.StaffUser)).Aggregate;
+
+            application = application.Decide(a => a.FollowHousehold(
+                new Declaration(2, HouseholdCircumstances.Create(false, Money.Create(80000m))), Today.AddDays(5))).Aggregate;
+
+            application.QualificationToConfirm.Should().Be(new QualificationToConfirmMark(Today.AddDays(5), Money.Create(72000m), 2));
+        }
+
+        [Fact]
+        public void GivenNoMark_WhenConfirmed_ThenThrowsNothingToConfirm()
+        {
+            var application = _testBed.ApprovedApplication();
+
+            var act = () => application.ConfirmQualification(Today, Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.confirm_qualification.nothing_to_confirm");
+        }
+
+        [Fact]
+        public void GivenSubmittedApplication_WhenConfirmed_ThenThrowsPhaseNotApproved()
+        {
+            var application = _testBed.SubmittedApplication();
+
+            var act = () => application.ConfirmQualification(Today, Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.confirm_qualification.phase_not_approved");
+        }
+
+        [Fact]
+        public void GivenDateAfterToday_WhenConfirmed_ThenThrowsConfirmedDateInFuture()
+        {
+            var application = MarkedApplication();
+
+            var act = () => application.ConfirmQualification(Today.AddDays(1), Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.confirm_qualification.confirmed_date_in_future");
+        }
+
+        [Fact]
+        public void GivenDateBeforeTheChange_WhenConfirmed_ThenThrowsConfirmedDateBeforeChange()
+        {
+            var application = MarkedApplication();
+
+            var act = () => application.ConfirmQualification(ChangedDate.AddDays(-1), Today, _testBed.StaffUser);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.confirm_qualification.confirmed_date_before_change");
+        }
+
+        [Fact]
+        public void GivenAMarkedApplication_WhenSelected_ThenThrowsQualificationToConfirm()
+        {
+            _testBed.WithReadiness();
+            var application = MarkedApplication();
+
+            var act = () => application.SelectForHome(
+                _testBed.Household, _testBed.SelectionId, "home-1", "land-parcel-1", "ground-lease-template-1",
+                200000m, _testBed.SelectedDate, _testBed.StaffUser, null, null);
+
+            act.Should().Throw<BusinessRuleViolationException>()
+                .Which.Code.Should().Be("home_buyers.homeowner_application.select_applicant.qualification_to_confirm");
+        }
+    }
+
     public class ThePassOverMethod
     {
         private readonly TestBed _testBed = new();

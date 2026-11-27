@@ -26,6 +26,13 @@ const fmtDate = (value?: CalendarDate | null) => (value ? formatCalendarDate(val
 const daysSince = (value?: CalendarDate | null) => (value ? daysBetween(value, trustToday()) : '—')
 
 function ReadinessBadge({ entry }: { entry: WaitingListEntryResponse }) {
+  if (entry.qualificationToConfirmSince) {
+    return (
+      <span className="badge badge-stalled" title={`Income or household size changed on ${fmtDate(entry.qualificationToConfirmSince)}`}>
+        Qualification to confirm
+      </span>
+    )
+  }
   if (entry.needsReverification) return <span className="badge badge-stalled">Needs re-verification</span>
   if (entry.isReadyForSelection) return <span className="badge badge-available">Ready</span>
   return <span className="badge badge-default">Not ready</span>

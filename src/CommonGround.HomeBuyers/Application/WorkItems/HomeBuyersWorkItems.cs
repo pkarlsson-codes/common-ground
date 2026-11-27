@@ -15,6 +15,9 @@ public static class HomeBuyersWorkItems
     /// <summary>A submitted application waiting for staff to approve or deny it.</summary>
     public const string ApplicationAwaitingDecision = "application-awaiting-decision";
 
+    /// <summary>An approved household whose income or size changed, waiting for staff to confirm it still qualifies.</summary>
+    public const string QualificationToConfirm = "qualification-to-confirm";
+
     /// <summary>A household with an open application that hasn't finished readiness.</summary>
     public const string ReadinessStepMissing = "readiness-step-missing";
 
@@ -39,6 +42,9 @@ public static class HomeBuyersWorkItems
     /// <summary>Deny a submitted application.</summary>
     public const string DenyApplication = "deny-application";
 
+    /// <summary>Confirm the household still qualifies on its changed figures.</summary>
+    public const string ConfirmQualification = "confirm-qualification";
+
     /// <summary>Record that the household completed housing counseling.</summary>
     public const string RecordHousingCounseling = "record-housing-counseling";
 
@@ -52,8 +58,9 @@ public static class HomeBuyersWorkItems
     public const string EnterIncomeLimits = "enter-income-limits";
 
     /// <summary>
-    /// The items for an open (submitted or approved) application: a decision while it is submitted, and its
-    /// household's missing readiness or expiring prequalification as of <paramref name="today"/>. Readiness of
+    /// The items for an open (submitted or approved) application: a decision while it is submitted, a qualification
+    /// to confirm while it is marked, and its household's missing readiness or expiring prequalification as of
+    /// <paramref name="today"/>. Readiness of
     /// households that haven't applied isn't anyone's work yet.
     /// </summary>
     /// <param name="application">The application.</param>
@@ -79,6 +86,14 @@ public static class HomeBuyersWorkItems
                 WorkArea.Applicants, ApplicationAwaitingDecision, "application", application.Id, label,
                 "Submitted, waiting for a decision", null, submittedOn,
                 [ApproveApplication, DenyApplication]);
+        }
+
+        if (application.Phase == ApplicationPhase.Approved.DisplayName && application.QualificationToConfirmSince is { } since)
+        {
+            yield return new WorkItem(
+                WorkArea.Applicants, QualificationToConfirm, "application", application.Id, label,
+                $"Confirm they still qualify: {WhatChanged(application)}", null, since,
+                [ConfirmQualification]);
         }
 
         if (household is null)
@@ -152,6 +167,22 @@ public static class HomeBuyersWorkItems
                 null, inEffect.EffectiveFrom.AddMonths(IncomeLimitsStaleMonths), [EnterIncomeLimits]);
         }
     }
+
+    /// <summary>What changed since staff last checked the household, e.g. "income $52,000 → $61,000, household size 3 → 4".</summary>
+    public static string WhatChanged(HomeownerApplicationListItemView application)
+    {
+        ArgumentNullException.ThrowIfNull(application);
+
+        var changes = new List<string>();
+        if (application.QualifiedAnnualIncome is { } income && income != application.AnnualIncome)
+            changes.Add($"income {Dollars(income)} → {Dollars(application.AnnualIncome)}");
+        if (application.QualifiedHouseholdSize is { } size && size != application.HouseholdSize)
+            changes.Add($"household size {size} → {application.HouseholdSize}");
+        return changes.Count > 0 ? string.Join(", ", changes) : "income or household size changed";
+    }
+
+    private static string Dollars(decimal amount) =>
+        amount.ToString("C0", CultureInfo.GetCultureInfo("en-US"));
 
     private static List<(string Step, string Action)> MissingReadiness(HouseholdListItemView household, DateOnly today)
     {

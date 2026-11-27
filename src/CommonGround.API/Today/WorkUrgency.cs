@@ -34,6 +34,7 @@ public static class WorkUrgency
 
         // Applicants
         HomeBuyersWorkItems.ApplicationAwaitingDecision,
+        HomeBuyersWorkItems.QualificationToConfirm,
         HomeBuyersWorkItems.ReadinessStepMissing,
         HomeBuyersWorkItems.PrequalificationExpiring,
 

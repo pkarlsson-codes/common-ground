@@ -26,6 +26,7 @@ const CANNOT_BE_CHOSEN_REASONS: Record<string, string> = {
   CltOrientationIncomplete: 'CLT orientation not completed',
   NoPrequalification: 'No mortgage prequalification',
   PrequalificationExpired: 'Prequalification expired',
+  QualificationToConfirm: 'Income or size changed; confirm they still qualify',
 }
 
 export const cannotBeChosenReasonLabel = (value: string) => CANNOT_BE_CHOSEN_REASONS[value] ?? value

@@ -17,6 +17,7 @@
 import * as runtime from '../runtime';
 import type {
   ApproveApplicationRequest,
+  ConfirmQualificationRequest,
   DenyApplicationRequest,
   HomeownerApplicationResponse,
   PaginatedResponseOfHomeownerApplicationListItemResponse,
@@ -30,6 +31,8 @@ import type {
 import {
     ApproveApplicationRequestFromJSON,
     ApproveApplicationRequestToJSON,
+    ConfirmQualificationRequestFromJSON,
+    ConfirmQualificationRequestToJSON,
     DenyApplicationRequestFromJSON,
     DenyApplicationRequestToJSON,
     HomeownerApplicationResponseFromJSON,
@@ -53,6 +56,11 @@ import {
 export interface ApproveApplicationOperationRequest {
     applicationId: string;
     approveApplicationRequest: ApproveApplicationRequest;
+}
+
+export interface ConfirmQualificationOperationRequest {
+    applicationId: string;
+    confirmQualificationRequest: ConfirmQualificationRequest;
 }
 
 export interface DenyApplicationOperationRequest {
@@ -110,6 +118,20 @@ export interface HomeownerApplicationsApiInterface {
     /**
      */
     approveApplication(requestParameters: ApproveApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
+
+    /**
+     * 
+     * @param {string} applicationId 
+     * @param {ConfirmQualificationRequest} confirmQualificationRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof HomeownerApplicationsApiInterface
+     */
+    confirmQualificationRaw(requestParameters: ConfirmQualificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>>;
+
+    /**
+     */
+    confirmQualification(requestParameters: ConfirmQualificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined >;
 
     /**
      * 
@@ -258,6 +280,58 @@ export class HomeownerApplicationsApi extends runtime.BaseAPI implements Homeown
      */
     async approveApplication(requestParameters: ApproveApplicationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
         const response = await this.approveApplicationRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 204:
+                return null;
+            case 200:
+                return await response.value();
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
+    async confirmQualificationRaw(requestParameters: ConfirmQualificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters['applicationId'] == null) {
+            throw new runtime.RequiredError(
+                'applicationId',
+                'Required parameter "applicationId" was null or undefined when calling confirmQualification().'
+            );
+        }
+
+        if (requestParameters['confirmQualificationRequest'] == null) {
+            throw new runtime.RequiredError(
+                'confirmQualificationRequest',
+                'Required parameter "confirmQualificationRequest" was null or undefined when calling confirmQualification().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/homeowner-applications/{applicationId}/confirm-qualification`;
+        urlPath = urlPath.replace(`{${"applicationId"}}`, encodeURIComponent(String(requestParameters['applicationId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ConfirmQualificationRequestToJSON(requestParameters['confirmQualificationRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     */
+    async confirmQualification(requestParameters: ConfirmQualificationOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object | null | undefined > {
+        const response = await this.confirmQualificationRaw(requestParameters, initOverrides);
         switch (response.raw.status) {
             case 204:
                 return null;

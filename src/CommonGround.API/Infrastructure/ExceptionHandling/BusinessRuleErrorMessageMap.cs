@@ -32,6 +32,10 @@ internal static class BusinessRuleErrorMessageMap
             ["home_buyers.income_limit_schedule.levels.required"] = "Enter at least one income limit level.",
 
             ["home_buyers.homeowner_application.approve.phase_not_submitted"] = "Only submitted applications can be approved. This application is {phase}.",
+            ["home_buyers.homeowner_application.confirm_qualification.confirmed_date_before_change"] = "Confirmed date can't be before the household's figures changed, {since}.",
+            ["home_buyers.homeowner_application.confirm_qualification.confirmed_date_in_future"] = "Confirmed date can't be in the future.",
+            ["home_buyers.homeowner_application.confirm_qualification.nothing_to_confirm"] = "This household's income and size haven't changed since it was last checked, so there is nothing to confirm.",
+            ["home_buyers.homeowner_application.confirm_qualification.phase_not_approved"] = "Only a household on the waiting list can have its qualification confirmed. This application is {phase}.",
             ["home_buyers.homeowner_application.deny.phase_not_submitted"] = "Only submitted applications can be denied. This application is {phase}. To take an approved household off the list, remove it from the waiting list.",
             ["home_buyers.homeowner_application.deny.reason_required"] = "A reason is required to deny an application.",
             ["home_buyers.homeowner_application.modify.selected_for_purchase"] = "This application is selected for a home. Fail or withdraw that purchase first; the application then returns to the waiting list.",
@@ -45,6 +49,7 @@ internal static class BusinessRuleErrorMessageMap
             ["home_buyers.homeowner_application.select_applicant.household_readiness_incomplete"] = "The household has not completed housing counseling, CLT orientation and mortgage prequalification.",
             ["home_buyers.homeowner_application.select_applicant.phase_not_approved"] = "Only approved applications can be selected. This application is {phase}.",
             ["home_buyers.homeowner_application.select_applicant.prequalification_expired"] = "The household's mortgage prequalification expired on {expiryDate}.",
+            ["home_buyers.homeowner_application.select_applicant.qualification_to_confirm"] = "The household's income or size changed on {since}. Confirm it still qualifies before choosing it.",
             ["home_buyers.homeowner_application.select_applicant.purchase_price_non_positive"] = "Purchase price must be greater than zero.",
             ["home_buyers.homeowner_application.submit.household_has_open_application"] = "This household already has an open application.",
             ["home_buyers.household.circumstances.annual_income_negative"] = "Annual income cannot be negative.",

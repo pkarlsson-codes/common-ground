@@ -37,4 +37,19 @@ public class HomeownerApplicationView : IHomeownerApplicationPhaseView
     public string? SelectedLandParcelId { get; set; }
 
     public string? SelectedBy { get; set; }
+
+    /// <summary>The day the household's income or size changed after approval, while staff haven't confirmed it still qualifies.</summary>
+    public DateOnly? QualificationToConfirmSince { get; set; }
+
+    /// <summary>While <see cref="QualificationToConfirmSince"/> is set, the income staff last checked.</summary>
+    public decimal? QualifiedAnnualIncome { get; set; }
+
+    /// <summary>While <see cref="QualificationToConfirmSince"/> is set, the household size staff last checked.</summary>
+    public int? QualifiedHouseholdSize { get; set; }
+
+    /// <summary>The day staff last confirmed the household still qualifies on changed figures, if they have.</summary>
+    public DateOnly? QualificationConfirmedDate { get; set; }
+
+    /// <summary>The staff user who last confirmed the household still qualifies, if anyone has.</summary>
+    public string? QualificationConfirmedBy { get; set; }
 }

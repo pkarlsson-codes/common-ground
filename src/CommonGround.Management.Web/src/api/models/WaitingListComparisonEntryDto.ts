@@ -30,9 +30,11 @@ import {
 } from './CalendarDate';
 
 /**
- * An application on the waiting list compared against the home today. Reasons say why the household
- * can't be chosen: "OverIncomeLimit", "NoPrimaryMember", "HousingCounselingIncomplete", "CltOrientationIncomplete",
- * "NoPrequalification" or "PrequalificationExpired"; empty when it can.
+ * An application on the waiting list compared against the home today. AnnualIncome and
+ * HouseholdSize are the application's, which follow the household. Reasons say why the
+ * household can't be chosen: "OverIncomeLimit", "NoPrimaryMember", "HousingCounselingIncomplete",
+ * "CltOrientationIncomplete", "NoPrequalification", "PrequalificationExpired" or "QualificationToConfirm"; empty
+ * when it can.
  * @export
  * @interface WaitingListComparisonEntryDto
  */

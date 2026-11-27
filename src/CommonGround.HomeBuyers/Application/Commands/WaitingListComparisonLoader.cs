@@ -71,7 +71,8 @@ public static class WaitingListComparisonLoader
                     HasPrimaryMember: !string.IsNullOrEmpty(household?.PrimaryMemberId),
                     IsHousingCounselingCompleted: household?.IsHousingCounselingCompleted ?? false,
                     IsCltOrientationCompleted: household?.IsCltOrientationCompleted ?? false,
-                    PrequalificationExpiryDate: household?.MortgagePrequalificationExpiryDate);
+                    PrequalificationExpiryDate: household?.MortgagePrequalificationExpiryDate,
+                    QualificationToConfirmSince: v.QualificationToConfirmSince);
             })
             .ToList();
 

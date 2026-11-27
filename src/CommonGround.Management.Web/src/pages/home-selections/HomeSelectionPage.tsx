@@ -153,7 +153,7 @@ function WaitingList({
               <tr>
                 {canChoose && <th>Tied</th>}
                 <th>Applicant</th>
-                <th>Income</th>
+                <th title="Income and household size as on the application, which follows the household">Income (Application)</th>
                 <th>Prequalified</th>
                 <th>Waiting Since</th>
                 <th>Can Be Chosen</th>
@@ -279,7 +279,7 @@ function Decision({ decision, homeIsAccessible }: { decision: HomeSelectionDecis
           <thead>
             <tr>
               <th>Applicant</th>
-              <th>Income</th>
+              <th title="Income and household size as on the application, which follows the household">Income (Application)</th>
               <th>Waiting Since</th>
               <th>Outcome</th>
             </tr>

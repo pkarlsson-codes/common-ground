@@ -19,6 +19,7 @@ import {
   type TodaySection,
 } from '../lib/today'
 import ApproveApplicationPanel from './applications/ApproveApplicationPanel'
+import ConfirmQualificationPanel from './applications/ConfirmQualificationPanel'
 import DenyApplicationPanel from './applications/DenyApplicationPanel'
 import RecordCltOrientationPanel from './households/RecordCltOrientationPanel'
 import RecordHousingCounselingPanel from './households/RecordHousingCounselingPanel'
@@ -32,6 +33,7 @@ import NewReminderPanel from './reminders/NewReminderPanel'
 
 const KIND_LABELS: Record<string, string> = {
   'application-awaiting-decision': 'Application to decide',
+  'qualification-to-confirm': 'Qualification to confirm',
   'readiness-step-missing': 'Readiness incomplete',
   'prequalification-expiring': 'Prequalification expiring',
   'home-available': 'Home available',
@@ -61,6 +63,7 @@ type ActivePanel = { action: string; recordId: string }
 const ACTION_PANELS: Record<string, (recordId: string, onClose: () => void) => ReactNode> = {
   'approve-application': (id, onClose) => <ApproveApplicationPanel applicationId={id} onClose={onClose} />,
   'deny-application': (id, onClose) => <DenyApplicationPanel applicationId={id} onClose={onClose} />,
+  'confirm-qualification': (id, onClose) => <ConfirmQualificationPanel applicationId={id} onClose={onClose} />,
   'record-housing-counseling': (id, onClose) => <RecordHousingCounselingPanel householdId={id} onClose={onClose} />,
   'record-clt-orientation': (id, onClose) => <RecordCltOrientationPanel householdId={id} onClose={onClose} />,
   'record-mortgage-prequalification': (id, onClose) => <RecordMortgagePrequalificationPanel householdId={id} onClose={onClose} />,

@@ -15,6 +15,7 @@ internal sealed class HomeownerApplicationListItemViewProjection : SingleStreamP
             Id = e.Data.AggregateId,
             HouseholdId = e.Data.HouseholdId,
             HouseholdSize = e.Data.HouseholdSize,
+            AnnualIncome = e.Data.AnnualIncome.Amount,
             AccessibilityRequired = e.Data.AccessibilityRequired,
             Phase = ApplicationPhase.Submitted.DisplayName,
             SubmittedAt = e.Data.OccurredAt,
@@ -62,5 +63,22 @@ internal sealed class HomeownerApplicationListItemViewProjection : SingleStreamP
     {
         view.Phase = ApplicationPhase.Removed.DisplayName;
         view.ClosedDate = e.RemovedDate;
+    }
+
+    public static void Apply(HomeownerApplicationListItemView view, ApplicationDeclarationUpdated e)
+    {
+        view.HouseholdSize = e.HouseholdSize;
+        view.AnnualIncome = e.AnnualIncome.Amount;
+        view.AccessibilityRequired = e.AccessibilityRequired;
+        view.QualificationToConfirmSince = e.QualificationToConfirm?.Since;
+        view.QualifiedAnnualIncome = e.QualificationToConfirm?.QualifiedAnnualIncome.Amount;
+        view.QualifiedHouseholdSize = e.QualificationToConfirm?.QualifiedHouseholdSize;
+    }
+
+    public static void Apply(HomeownerApplicationListItemView view, ApplicationQualificationConfirmed _)
+    {
+        view.QualificationToConfirmSince = null;
+        view.QualifiedAnnualIncome = null;
+        view.QualifiedHouseholdSize = null;
     }
 }

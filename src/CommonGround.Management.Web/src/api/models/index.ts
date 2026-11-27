@@ -16,6 +16,7 @@ export * from './CloseHeirTransferRequest';
 export * from './CloseStewardshipCaseRequest';
 export * from './CompleteHeirTransferRequest';
 export * from './CompletePropertyInspectionRequest';
+export * from './ConfirmQualificationRequest';
 export * from './CorrectAppraisalRequest';
 export * from './CorrectEligibilityRequest';
 export * from './CorrectFinancingRequest';

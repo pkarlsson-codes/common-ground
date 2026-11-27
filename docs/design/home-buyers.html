@@ -54,8 +54,11 @@ classDiagram
     +Declaration Declaration
     +ApplicationPhase Phase
     +PassedOverIn
+    +QualificationToConfirm
     +Submit()$
     +Approve()
+    +FollowHousehold()
+    +ConfirmQualification()
     +SelectForHome()
     +PassOver()
   }
@@ -86,7 +89,8 @@ classDiagram
   </ul>
   <h3>HomeownerApplication</h3>
   <ul>
-    <li>On submission the application copies the household's size, income and accessibility need (<code>Declaration</code>). Later changes to the household don't change it. Readiness is read from the household when it is compared and when it is chosen.</li>
+    <li>On submission the application copies the household's size, income and accessibility need (<code>Declaration</code>). While it is <code>Submitted</code> or <code>Approved</code> it follows the household: <code>HouseholdChangedHandler</code> handles <code>HouseholdCircumstancesUpdated</code>, <code>HouseholdMemberAdded</code> and <code>HouseholdMemberRemoved</code>, loads the household as it is now, and calls <code>FollowHousehold</code> with its current <code>Declare()</code>. It reads current state rather than the event, so a late or repeated message still leaves the application matching the household, and an unchanged declaration decides nothing. A <code>Selected</code> application keeps the figures it was chosen on; Homeownership checks eligibility before closing. If the purchase falls through, <code>PurchaseFellThroughHandler</code> returns the application and then has it follow the household, so a change made during the purchase marks it. Readiness is read from the household when it is compared and when it is chosen.</li>
+    <li>When an <code>Approved</code> application's income or size changes, <code>ApplicationDeclarationUpdated</code> carries a <code>QualificationToConfirmMark</code>: the date of the first change and the income and size staff last checked (at approval or the last confirmation). Later changes keep that date and those figures, so staff confirm once against the latest. If the figures go back to exactly the checked ones the mark clears; any other change, a drop in income too, keeps it, because qualifying also checks the income is enough for a mortgage. A change to the accessibility need alone marks nothing. <code>ConfirmQualification</code> clears the mark (<code>ApplicationQualificationConfirmed</code>), dated no later than today and no earlier than the change. The application stays <code>Approved</code> throughout, so its approval date and place on the waiting list don't change.</li>
     <li>A household can have one open application. <code>Selected</code> counts as open (<code>ApplicationOpen</code>).</li>
     <li>The waiting list is every <code>Approved</code> application, oldest approval first (<code>OnWaitingList</code>). There is no separate list to maintain.</li>
   </ul>
@@ -140,16 +144,16 @@ flowchart LR
   <h2>4. Choosing a household</h2>
   <p>Funders audit this part, and it changes three aggregates without one transaction.</p>
   <ul>
-    <li><strong>One step, from the waiting list as it is.</strong> There is no start and nothing is snapshotted ahead of time. <code>WaitingListComparisonLoader</code> compares every application on the waiting list on the date of the choice against the home, from the inline read models, for both the selection page and the two commands. <code>WaitingListComparison</code> gives each the home's dollar limit for its household size (from the home's percent of AMI and the schedule in effect on the date) and every <code>CannotBeChosenReason</code>. An application approved after the date wasn't waiting yet and is left out.</li>
+    <li><strong>One step, from the waiting list as it is.</strong> There is no start and nothing is snapshotted ahead of time. <code>WaitingListComparisonLoader</code> compares every application on the waiting list on the date of the choice against the home, from the inline read models, for both the selection page and the two commands. <code>WaitingListComparison</code> gives each the home's dollar limit for its household size (from the home's percent of AMI and the schedule in effect on the date) and every <code>CannotBeChosenReason</code>, including <code>QualificationToConfirm</code> while the application is marked. Incomes and sizes are the application's, which follow the household. An application approved after the date wasn't waiting yet and is left out.</li>
     <li><strong>A selection is written once.</strong> <code>HouseholdSelectedByPriority</code> or <code>HouseholdSelectedByLottery</code> starts the stream and is its only event. It records the whole waiting list (<code>RecordedApplication</code>), each marked <code>Chosen</code>, <code>PassedOver</code> or <code>CouldNotBeChosen</code> with its reasons, and the schedule as evidence. Nothing changes it afterwards: whether the purchase closed or fell through is the purchase's.</li>
     <li><strong>The home's sale stage says whether a household can be chosen</strong>, not an old selection. Property Registry publishes <code>HomeSaleStageChanged</code> and <code>HomeSaleStageChangedHandler</code> keeps the newest on <code>HomeFactsView</code>. A choice is refused unless the home is <code>Offered</code>. Recording a choice also sets <code>HomeFactsView.LatestSelectionId</code>, and the home counts as chosen until a stage arrives that accounts for that selection, so a buyback or a purchase falling through offers it again and a second choice before then is refused.</li>
     <li><strong>Two choices at the same moment.</strong> <code>HomeFactsView</code> is stored with optimistic concurrency, so the second of two choices for the same home fails, retries, and finds the home chosen. One household chosen for two homes at once is caught by the application stream's version.</li>
-    <li><strong>Choosing is refused</strong> when the date is after today or before the home became available, when nobody is waiting, when the home has a limit the schedule in effect has no level for (Today shows that as <code>income-limits-missing</code>), or when the chosen household can't be chosen on the date. Priorities (<code>SelectionPriority</code>) rank households that qualify. They never decide who qualifies. Choosing by priority needs at least one priority and a written reason. <code>HomeownerApplication.SelectForHome</code> checks the chosen household's own aggregates too.</li>
+    <li><strong>Choosing is refused</strong> when the date is after today or before the home became available, when nobody is waiting, when the home has a limit the schedule in effect has no level for (Today shows that as <code>income-limits-missing</code>), or when the chosen household can't be chosen on the date. Priorities (<code>SelectionPriority</code>) rank households that qualify. They never decide who qualifies. Choosing by priority needs at least one priority and a written reason. <code>HomeownerApplication.SelectForHome</code> checks the chosen household's own aggregates too, and refuses an application with a qualification to confirm.</li>
     <li><strong>The lottery can be re-run.</strong> It records its seed, the households found tied (if any) and the pool, and draws with SplitMix64, not <code>System.Random</code>, whose seeded sequence can change between .NET versions. The pool leaves out anyone who can't be chosen on the date, so the winner always can be. A tie needs at least two households.</li>
     <li><strong>Choosing writes three documents.</strong> The selection, the home's facts and the chosen application, through <code>HomeSelectionChoice</code>. <code>PassOverCandidatesHandler</code> then sends one <code>PassOverApplication</code> per application the choice marked passed over, so choices for different homes can be recorded at the same time. A household that couldn't be chosen isn't passed over: it never lost to anyone. <code>HouseholdPassOversView</code> keeps the history per household, across applications.</li>
-    <li><strong>A purchase that falls through starts nothing.</strong> <code>PurchaseFellThroughHandler</code> returns the application to the waiting list with its approval date. The home is offered again through Property Registry, and staff choose the next household.</li>
+    <li><strong>A purchase that falls through starts nothing.</strong> <code>PurchaseFellThroughHandler</code> returns the application to the waiting list with its approval date, and it takes the household's current figures, marked for staff to confirm if its income or size changed during the purchase. The home is offered again through Property Registry, and staff choose the next household.</li>
   </ul>
-  <p>Unconfirmed with a practitioner: whether a trust holds a home for one household before choosing, or fixes the list a committee or board decides from. Neither is modelled.</p>
+  <p>Unconfirmed with a practitioner: whether a trust holds a home for one household before choosing, or fixes the list a committee or board decides from. Neither is modelled. Also unconfirmed: whether a trust re-checks a waiting household that reports a change, whether a marked household should be blocked from being chosen or only flagged, and whether the mark should clear on its own when the figures go back to the ones checked (issue #23).</p>
 </section>
 
 <section id="code">
@@ -167,6 +171,7 @@ flowchart LR
   <h2>6. Gaps</h2>
   <ul>
     <li>A purchase that staff start directly, without a selection, isn't checked against any income limit.</li>
+    <li>The application follows the household through a message, so it can lag the household by a moment after staff save a change.</li>
     <li>The prequalification expiry message runs at 00:00 UTC on the expiry date, not in the trust's time zone, and on the last day the prequalification is still valid.</li>
   </ul>
 </section>

@@ -31,7 +31,8 @@ import {
 
 /**
  * An approved application on the waiting list, with its household's readiness as of today and the
- * number of home selections the household was passed over in.
+ * number of home selections the household was passed over in. QualificationToConfirmSince is set while
+ * the household's income or size has changed since staff last checked it still qualifies.
  * @export
  * @interface WaitingListEntryResponse
  */
@@ -108,6 +109,12 @@ export interface WaitingListEntryResponse {
      * @memberof WaitingListEntryResponse
      */
     passOverCount?: number;
+    /**
+     * 
+     * @type {CalendarDate}
+     * @memberof WaitingListEntryResponse
+     */
+    qualificationToConfirmSince?: CalendarDate | null;
 }
 
 /**
@@ -139,6 +146,7 @@ export function WaitingListEntryResponseFromJSONTyped(json: any, ignoreDiscrimin
         'isReadyForSelection': json['isReadyForSelection'] == null ? undefined : json['isReadyForSelection'],
         'needsReverification': json['needsReverification'] == null ? undefined : json['needsReverification'],
         'passOverCount': json['passOverCount'] == null ? undefined : json['passOverCount'],
+        'qualificationToConfirmSince': json['qualificationToConfirmSince'] == null ? undefined : CalendarDateFromJSON(json['qualificationToConfirmSince']),
     };
 }
 
@@ -165,6 +173,7 @@ export function WaitingListEntryResponseToJSONTyped(value?: WaitingListEntryResp
         'isReadyForSelection': value['isReadyForSelection'],
         'needsReverification': value['needsReverification'],
         'passOverCount': value['passOverCount'],
+        'qualificationToConfirmSince': CalendarDateToJSON(value['qualificationToConfirmSince']),
     };
 }
 

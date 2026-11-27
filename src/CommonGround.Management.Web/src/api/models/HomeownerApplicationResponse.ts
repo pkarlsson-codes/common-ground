@@ -37,8 +37,12 @@ import {
 } from './PassOverDto';
 
 /**
- * Detail response for a homeowner application. Household size, income and accessibility are the
- * snapshot taken at submission; current household state is served by HouseholdResponse.
+ * Detail response for a homeowner application. Household size, income and accessibility follow the household
+ * while the application is submitted or approved; a selected application keeps the figures it was chosen on.
+ * QualificationToConfirmSince is set while an approved household's income or size has changed since
+ * staff last checked it, with QualifiedAnnualIncome and QualifiedHouseholdSize the figures
+ * they checked. QualificationConfirmedDate and QualificationConfirmedBy record the last
+ * confirmation.
  * RemovalReason (NoLongerEligible, NoResponse, FalseInformation or Other), RemovalNote and
  * RemovedDate are set when the application was removed from the waiting list.
  * PassOvers covers all of the household's applications, oldest first.
@@ -166,6 +170,36 @@ export interface HomeownerApplicationResponse {
      * @memberof HomeownerApplicationResponse
      */
     passOvers?: Array<PassOverDto>;
+    /**
+     * 
+     * @type {CalendarDate}
+     * @memberof HomeownerApplicationResponse
+     */
+    qualificationToConfirmSince?: CalendarDate | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof HomeownerApplicationResponse
+     */
+    qualifiedAnnualIncome?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof HomeownerApplicationResponse
+     */
+    qualifiedHouseholdSize?: number | null;
+    /**
+     * 
+     * @type {CalendarDate}
+     * @memberof HomeownerApplicationResponse
+     */
+    qualificationConfirmedDate?: CalendarDate | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof HomeownerApplicationResponse
+     */
+    qualificationConfirmedBy?: string | null;
 }
 
 /**
@@ -205,6 +239,11 @@ export function HomeownerApplicationResponseFromJSONTyped(json: any, ignoreDiscr
         'selectedLandParcelId': json['selectedLandParcelId'] == null ? undefined : json['selectedLandParcelId'],
         'selectedBy': json['selectedBy'] == null ? undefined : json['selectedBy'],
         'passOvers': json['passOvers'] == null ? undefined : ((json['passOvers'] as Array<any>).map(PassOverDtoFromJSON)),
+        'qualificationToConfirmSince': json['qualificationToConfirmSince'] == null ? undefined : CalendarDateFromJSON(json['qualificationToConfirmSince']),
+        'qualifiedAnnualIncome': json['qualifiedAnnualIncome'] == null ? undefined : json['qualifiedAnnualIncome'],
+        'qualifiedHouseholdSize': json['qualifiedHouseholdSize'] == null ? undefined : json['qualifiedHouseholdSize'],
+        'qualificationConfirmedDate': json['qualificationConfirmedDate'] == null ? undefined : CalendarDateFromJSON(json['qualificationConfirmedDate']),
+        'qualificationConfirmedBy': json['qualificationConfirmedBy'] == null ? undefined : json['qualificationConfirmedBy'],
     };
 }
 
@@ -239,6 +278,11 @@ export function HomeownerApplicationResponseToJSONTyped(value?: HomeownerApplica
         'selectedLandParcelId': value['selectedLandParcelId'],
         'selectedBy': value['selectedBy'],
         'passOvers': value['passOvers'] == null ? undefined : ((value['passOvers'] as Array<any>).map(PassOverDtoToJSON)),
+        'qualificationToConfirmSince': CalendarDateToJSON(value['qualificationToConfirmSince']),
+        'qualifiedAnnualIncome': value['qualifiedAnnualIncome'],
+        'qualifiedHouseholdSize': value['qualifiedHouseholdSize'],
+        'qualificationConfirmedDate': CalendarDateToJSON(value['qualificationConfirmedDate']),
+        'qualificationConfirmedBy': value['qualificationConfirmedBy'],
     };
 }
 

@@ -110,4 +110,18 @@ public static class HomeownerApplicationsEndpoints
         await client.RemoveFromWaitingListAsync(applicationId, request, cancellationToken).ConfigureAwait(false);
         return Results.NoContent();
     }
+
+    [WolverinePost("/api/v1/homeowner-applications/{applicationId}/confirm-qualification")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public static async Task<IResult> ConfirmQualification(
+        string applicationId,
+        ConfirmQualificationRequest request,
+        IHomeownerApplicationsApiClient client,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
+        ArgumentNullException.ThrowIfNull(request);
+        await client.ConfirmQualificationAsync(applicationId, request, cancellationToken).ConfigureAwait(false);
+        return Results.NoContent();
+    }
 }

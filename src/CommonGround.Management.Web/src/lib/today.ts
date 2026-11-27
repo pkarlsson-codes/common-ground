@@ -78,6 +78,7 @@ const KINDS: Record<string, { page: string; area: TodayArea }> = {
   // A reminder's own section varies; it counts under Reminders, which every focus shows.
   reminder: { page: '/reminders', area: 'reminders' },
   'application-awaiting-decision': { page: '/applications', area: 'applicants' },
+  'qualification-to-confirm': { page: '/waiting-list', area: 'applicants' },
   'readiness-step-missing': { page: '/households', area: 'applicants' },
   'prequalification-expiring': { page: '/households', area: 'applicants' },
   'home-available': { page: '/homes', area: 'selections' },
@@ -123,6 +124,7 @@ export function countForFocus(kindCounts: readonly WorkCountResponse[], focus: F
 const ACTION_LABELS: Record<string, string> = {
   'approve-application': 'Approve',
   'deny-application': 'Deny',
+  'confirm-qualification': 'Confirm still qualifies',
   'record-housing-counseling': 'Record counseling',
   'record-clt-orientation': 'Record orientation',
   'record-mortgage-prequalification': 'Record prequalification',
@@ -167,6 +169,7 @@ export function actionLink(item: Pick<WorkItemResponse, 'recordType' | 'recordId
 const PANEL_ACTIONS = new Set([
   'approve-application',
   'deny-application',
+  'confirm-qualification',
   'record-housing-counseling',
   'record-clt-orientation',
   'record-mortgage-prequalification',

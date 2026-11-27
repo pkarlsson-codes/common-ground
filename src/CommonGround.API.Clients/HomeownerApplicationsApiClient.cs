@@ -75,4 +75,12 @@ public sealed class HomeownerApplicationsApiClient(
         ArgumentNullException.ThrowIfNull(request);
         await PostAsync($"api/homeowner-applications/{applicationId}/remove-from-waiting-list", request, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task ConfirmQualificationAsync(string applicationId, ConfirmQualificationRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
+        ArgumentNullException.ThrowIfNull(request);
+        await PostAsync($"api/homeowner-applications/{applicationId}/confirm-qualification", request, cancellationToken).ConfigureAwait(false);
+    }
 }

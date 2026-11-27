@@ -70,4 +70,23 @@ internal sealed class HomeownerApplicationViewProjection : SingleStreamProjectio
         view.RemovalNote = e.Note;
         view.RemovedDate = e.RemovedDate;
     }
+
+    public static void Apply(HomeownerApplicationView view, ApplicationDeclarationUpdated e)
+    {
+        view.HouseholdSize = e.HouseholdSize;
+        view.AnnualIncome = e.AnnualIncome.Amount;
+        view.AccessibilityRequired = e.AccessibilityRequired;
+        view.QualificationToConfirmSince = e.QualificationToConfirm?.Since;
+        view.QualifiedAnnualIncome = e.QualificationToConfirm?.QualifiedAnnualIncome.Amount;
+        view.QualifiedHouseholdSize = e.QualificationToConfirm?.QualifiedHouseholdSize;
+    }
+
+    public static void Apply(HomeownerApplicationView view, ApplicationQualificationConfirmed e)
+    {
+        view.QualificationToConfirmSince = null;
+        view.QualifiedAnnualIncome = null;
+        view.QualifiedHouseholdSize = null;
+        view.QualificationConfirmedDate = e.ConfirmedDate;
+        view.QualificationConfirmedBy = e.ConfirmedBy;
+    }
 }
