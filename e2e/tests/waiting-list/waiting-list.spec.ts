@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { createApplication, post } from '../support/api'
-import { expectToast, field, isoDate, panel, uniqueId } from '../support/ui'
+import { detailValue, expectToast, field, isoDate, panel, uniqueId } from '../support/ui'
 
 // Journeys: docs/journeys/waiting-list/
 //   view-waiting-list
@@ -23,8 +23,9 @@ test('approved households are listed with readiness; others are not', async ({ p
   await expect(row.getByRole('cell').nth(3)).toHaveText('0')
   await expect(row).toContainText('Ready')
 
+  // A row is the household's application; the panel shows the application's phase.
   await row.click()
-  await expect(panel(page, approved.name)).toBeVisible()
+  await expect(detailValue(panel(page, approved.name), 'Phase')).toHaveText('Approved · on waiting list')
 })
 
 test('a lapsed prequalification needs re-verification until a new one is recorded', async ({ page }) => {
@@ -37,7 +38,10 @@ test('a lapsed prequalification needs re-verification until a new one is recorde
   const row = page.getByRole('row', { name: new RegExp(name) })
   await expect(row).toContainText('Needs re-verification')
 
+  // Readiness is kept on the household: the row opens the application, which links to it.
   await row.click()
+  await panel(page, name).getByRole('button', { name: 'Open Household' }).click()
+  await expect(page).toHaveURL(/\/households/)
   const detail = panel(page, name)
   // "Record" once the scheduled expiry has cleared the old prequalification, "Update" if it hasn't run yet.
   await detail.getByRole('button', { name: /^(Record|Update) Mortgage Prequalification$/ }).click()
@@ -48,6 +52,7 @@ test('a lapsed prequalification needs re-verification until a new one is recorde
   await prequal.getByRole('button', { name: 'Record Prequalification' }).click()
   await expectToast(page, 'Mortgage prequalification recorded')
 
+  await searchWaitingList(page, name)
   await expect(row).toContainText('Ready')
   await expect(row).not.toContainText('Needs re-verification')
 })

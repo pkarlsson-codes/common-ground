@@ -1,7 +1,7 @@
 import PageEyebrow from '../components/PageEyebrow'
 import { useEffect, useState } from 'react'
 import { useWaitingList } from '../hooks/applications'
-import HouseholdDetailPanel from './households/HouseholdDetailPanel'
+import ApplicationDetailPanel from './applications/ApplicationDetailPanel'
 import WaitingListTable from './waiting-list/WaitingListTable'
 
 const PAGE_SIZE = 20
@@ -10,7 +10,7 @@ export default function WaitingListPage() {
   const [page, setPage] = useState(1)
   const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
-  const [selectedHouseholdId, setSelectedHouseholdId] = useState<string | null>(null)
+  const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null)
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -57,19 +57,19 @@ export default function WaitingListPage() {
         isLoading={isLoading}
         isError={isError}
         error={error}
-        selectedHouseholdId={selectedHouseholdId}
+        selectedApplicationId={selectedApplicationId}
         page={page}
         totalPages={Number(data?.totalPages ?? 0)}
         totalCount={Number(data?.totalCount ?? 0)}
         pageSize={PAGE_SIZE}
         hasFilters={Boolean(search)}
-        onRowClick={setSelectedHouseholdId}
+        onRowClick={setSelectedApplicationId}
         onPage={setPage}
         onRetry={() => { void refetch() }}
       />
 
-      {selectedHouseholdId && (
-        <HouseholdDetailPanel householdId={selectedHouseholdId} onClose={() => setSelectedHouseholdId(null)} />
+      {selectedApplicationId && (
+        <ApplicationDetailPanel applicationId={selectedApplicationId} onClose={() => setSelectedApplicationId(null)} />
       )}
     </div>
   )

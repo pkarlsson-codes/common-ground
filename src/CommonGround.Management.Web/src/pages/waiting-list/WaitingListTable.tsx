@@ -8,13 +8,14 @@ type Props = {
   isLoading: boolean
   isError: boolean
   error: unknown
-  selectedHouseholdId: string | null
+  selectedApplicationId: string | null
   page: number
   totalPages: number
   totalCount: number
   pageSize: number
   hasFilters: boolean
-  onRowClick: (householdId: string) => void
+  /** Opens the application: the waiting list is made of applications, shown with their households' details. */
+  onRowClick: (applicationId: string) => void
   onPage: (page: number) => void
   onRetry: () => void
 }
@@ -43,7 +44,7 @@ export default function WaitingListTable({
   isLoading,
   isError,
   error,
-  selectedHouseholdId,
+  selectedApplicationId,
   page,
   totalPages,
   totalCount,
@@ -102,8 +103,8 @@ export default function WaitingListTable({
               {entries.map(entry => (
                 <tr
                   key={entry.applicationId!}
-                  onClick={() => onRowClick(entry.householdId!)}
-                  className={selectedHouseholdId === entry.householdId ? 'row--selected' : ''}
+                  onClick={() => onRowClick(entry.applicationId!)}
+                  className={selectedApplicationId === entry.applicationId ? 'row--selected' : ''}
                 >
                   <td>{entry.primaryContact?.name ?? '—'}</td>
                   <td><span className="cell-mono">{entry.householdSize ?? '—'}</span></td>
