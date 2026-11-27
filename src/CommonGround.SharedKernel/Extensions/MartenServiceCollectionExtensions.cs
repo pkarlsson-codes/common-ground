@@ -1,10 +1,12 @@
 using CommonGround.SharedKernel.Domain;
+using CommonGround.SharedKernel.Infrastructure;
 using JasperFx.Events;
 using JasperFx.Events.Daemon;
 using JasperFx.MultiTenancy;
 using Marten;
 using Marten.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Wolverine.Marten;
 
 namespace CommonGround.SharedKernel.Extensions;
@@ -51,6 +53,15 @@ public static class MartenServiceCollectionExtensions
 
         marten.AddAsyncDaemon(DaemonMode.Solo);
         marten.ApplyAllDatabaseChangesOnStartup();
+
+        // Marten puts its schema step at the front of the hosted services; the warm-up must run right after it,
+        // before the daemon, Wolverine or anything else can use a session.
+        var activator = services.SingleOrDefault(x =>
+            x.ServiceType == typeof(IHostedService) && x.ImplementationType?.FullName == "Marten.Services.MartenActivator")
+            ?? throw new InvalidOperationException("Marten's MartenActivator hosted service was not found; MartenAggregateMappingWarmup has nothing to follow.");
+        services.Insert(
+            services.IndexOf(activator) + 1,
+            ServiceDescriptor.Singleton<IHostedService, MartenAggregateMappingWarmup>());
 
         return services;
     }
