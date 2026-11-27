@@ -186,7 +186,7 @@ test('the trust appraises, buys the home back, holds it and releases it for sale
   await expect(home.locator('.next-step-card')).toContainText('is holding it: Roof replacement before it is offered again.')
   await home.getByRole('button', { name: 'Release for Sale' }).click()
   await expectToast(page, 'Home released for sale')
-  await expect(home.locator('.next-step-card')).toContainText('Choose a household from the waiting list')
+  await expect(home.locator('.next-step-card').getByRole('button', { name: 'Choose a Household' })).toBeVisible()
 
   const lease = await openLease(page, homeowner)
   await expect(lease.locator('.slideover-header')).toContainText('Inactive')

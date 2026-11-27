@@ -161,6 +161,8 @@ test('creating a lease on a home that already has one is refused and keeps the p
   await field(form, 'Original Appraised Value ($)').fill('240000')
   await field(form, 'Covenant Terms').fill('Standard covenant terms')
   await field(form, 'Debt Cap (% of purchase option price)').fill('90')
+  await field(form, 'Fees Tracked From').fill(isoDate())
+  await field(form, 'Owed on That Day ($)').fill('0')
   await form.getByRole('button', { name: 'Create Lease' }).click()
 
   await expect(form.locator('.form-error')).toHaveText('This home already has an active ground lease.')
