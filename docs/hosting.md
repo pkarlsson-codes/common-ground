@@ -63,7 +63,7 @@ The API applies its database changes at startup.
 
 ## Deploying from CI
 
-The `deploy` job in `.github/workflows/ci.yml` pipes `git archive HEAD` over SSH on every push to `main`. On the server, the deploy key's forced command is `deploy/receive.sh`. It unpacks the archive, replaces the whole tree in `/opt/commonground` except `deploy/.env`, and runs `docker compose up -d --build`. Because it replaces the tree, a file deleted in git is deleted on the server too.
+The `deploy` job in `.github/workflows/ci.yml` pipes `git archive HEAD` over SSH on every push to `main`. On the server, the deploy key's forced command is `deploy/receive.sh`. It unpacks the archive, replaces the whole tree in `/opt/commonground` except `deploy/.env`, and runs `docker compose up -d --build --force-recreate`. Because it replaces the tree, a file deleted in git is deleted on the server too. Every container is recreated, because a running one keeps its bind mounts (the Caddyfile, the Keycloak themes) on the deleted folders.
 
 Install it once, as root:
 

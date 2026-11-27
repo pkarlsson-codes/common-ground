@@ -26,5 +26,7 @@ find "$APP_DIR" -mindepth 1 ! -path "$APP_DIR/deploy" ! -path "$APP_DIR/deploy/.
 cp -R "$STAGE/." "$APP_DIR/"
 
 cd "$APP_DIR/deploy"
-docker compose up -d --build --remove-orphans </dev/null
+# --force-recreate: bind mounts (Caddyfile, Keycloak themes) point at the folders
+# that were just deleted, so a container left running would keep serving empty ones.
+docker compose up -d --build --remove-orphans --force-recreate </dev/null
 docker image prune -f
