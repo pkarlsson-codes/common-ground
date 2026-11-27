@@ -4,6 +4,7 @@
   "sslRequired": "none",
   "registrationAllowed": true,
   "verifyEmail": false,
+  "registrationEmailAsUsername": true,
   "loginWithEmailAllowed": true,
   "resetPasswordAllowed": true,
   "accessTokenLifespan": 900,

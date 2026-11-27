@@ -7,6 +7,7 @@
   "sslRequired": "external",
   "registrationAllowed": true,
   "verifyEmail": true,
+  "registrationEmailAsUsername": true,
   "loginWithEmailAllowed": true,
   "resetPasswordAllowed": true,
   "accessTokenLifespan": 900,
