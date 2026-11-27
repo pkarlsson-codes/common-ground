@@ -18,6 +18,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
+    // Node 25+ has its own localStorage global, which hides jsdom's and is undefined without a storage file.
+    execArgv: ['--no-experimental-webstorage'],
   },
   server: {
     port: 3000,
