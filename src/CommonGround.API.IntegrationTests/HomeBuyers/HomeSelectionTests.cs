@@ -12,6 +12,7 @@ using CommonGround.HomeBuyers.Application.EventHandlers;
 using CommonGround.HomeBuyers.Application.ReadModels;
 using CommonGround.HomeBuyers.Domain.HomeownerApplications;
 using CommonGround.HomeBuyers.Domain.HomeSelections;
+using CommonGround.HomeBuyers.Domain.Households;
 using CommonGround.PropertyRegistry.Contracts.Events;
 using CommonGround.SharedKernel.Domain;
 using CommonGround.SharedKernel.Domain.Services;
@@ -21,6 +22,7 @@ using Marten;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Wolverine;
 
 namespace CommonGround.API.IntegrationTests.HomeBuyers;
 
@@ -205,6 +207,28 @@ public class HomeSelectionTests(ApiFactory factory)
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
         (await ReadProblemCodeAsync(response)).Should().Be("home_buyers.home_selection.choose.selected_date_before_available");
+    }
+
+    [Fact]
+    public async Task SelectByPriority_DatedBeforeAPrequalificationThatHasSinceLapsed_ChoosesTheHousehold()
+    {
+        var client = factory.CreateClient().WithAuthToken();
+        var homeId = await CreateHomeAsync(client);
+        var templateId = await CreateActiveGroundLeaseTemplateAsync(client);
+        var applicant = await CreateApprovedApplicationAsync(client, new DateOnly(2026, 6, 1));
+        var expiry = SelectedDate.AddDays(10);
+        (await client.PostAsJsonAsync($"/api/households/{applicant.HouseholdId}/mortgage-prequalification",
+            new RecordMortgagePrequalificationRequest("Test Lender", 210000m, expiry)))
+            .StatusCode.Should().Be(HttpStatusCode.NoContent);
+        using (var scope = factory.Services.CreateScope())
+        {
+            await scope.ServiceProvider.GetRequiredService<IMessageBus>().InvokeForTenantAsync(
+                ApiFactory.TestTrustId, new ExpireMortgagePrequalification(HouseholdId.Create(applicant.HouseholdId), expiry));
+        }
+
+        var response = await SelectByPriorityAsync(client, homeId, applicant.ApplicationId, templateId);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
     }
 
     [Fact]

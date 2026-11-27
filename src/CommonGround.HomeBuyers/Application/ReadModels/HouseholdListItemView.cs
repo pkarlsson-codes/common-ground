@@ -24,7 +24,10 @@ public class HouseholdListItemView
 
     public bool IsCltOrientationCompleted { get; set; }
 
-    /// <summary>Gets or sets the current mortgage prequalification's expiry date, if one is on record.</summary>
+    /// <summary>
+    /// Gets or sets the latest mortgage prequalification's expiry date, if one is on record. It is kept after the
+    /// prequalification lapses; whether it is valid is always judged against a date.
+    /// </summary>
     public DateOnly? MortgagePrequalificationExpiryDate { get; set; }
 
     /// <summary>

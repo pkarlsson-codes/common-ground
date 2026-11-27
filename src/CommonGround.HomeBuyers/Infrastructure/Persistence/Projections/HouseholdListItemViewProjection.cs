@@ -72,9 +72,8 @@ internal sealed class HouseholdListItemViewProjection : SingleStreamProjection<H
         view.MortgagePrequalificationLapsedOn = null;
     }
 
-    public static void Apply(HouseholdListItemView view, MortgagePrequalificationExpired e)
-    {
-        view.MortgagePrequalificationExpiryDate = null;
+    // The expiry date stays: readers judge it against their own date, so a choice dated before the expiry sees the
+    // prequalification as valid whenever the scheduled expiry happened to run.
+    public static void Apply(HouseholdListItemView view, MortgagePrequalificationExpired e) =>
         view.MortgagePrequalificationLapsedOn = e.OriginalExpiryDate;
-    }
 }

@@ -88,7 +88,7 @@ public class WaitingListTests(ApiFactory factory)
         });
         waitingList[lapsedId].Should().BeEquivalentTo(new
         {
-            MortgagePrequalificationExpiryDate = (string?)null,
+            MortgagePrequalificationExpiryDate = new DateOnly(2026, 2, 1),
             IsReadyForSelection = false,
             NeedsReverification = true,
         });
