@@ -25,7 +25,6 @@ internal static class DevelopmentSeeder
     /// <item>Foreclosure prevention cases on those leases, and the interventions recorded on them.</item>
     /// <item>Resales: homeowners' notices of intent to sell on those leases, and their withdrawals.</item>
     /// <item>Lease fee payments on every lease, with a few leases left behind.</item>
-    /// <item>Reminders staff set, some showing on Today, some upcoming and some done.</item>
     /// </list>
     /// </summary>
     /// <param name="services">The service collection.</param>
@@ -53,7 +52,6 @@ internal static class DevelopmentSeeder
         services.AddTransient<IDevelopmentSeeder, ImprovementRequestsSeeder>();
         services.AddTransient<IDevelopmentSeeder, HeirTransfersSeeder>();
         services.AddTransient<IDevelopmentSeeder, LeaseFeesSeeder>();
-        services.AddTransient<IDevelopmentSeeder, RemindersSeeder>();
         return services;
     }
 }
