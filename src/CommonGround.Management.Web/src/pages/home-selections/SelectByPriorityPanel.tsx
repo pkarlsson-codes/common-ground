@@ -73,8 +73,8 @@ export default function SelectByPriorityPanel({ homeId, entry, assessedValue, on
           The waiting list is judged again on the date of the choice, and recorded with it.
         </div>
         <div className="form-grid">
-          <div className="form-field full">
-            <label className="form-label">Priorities That Justify This Choice</label>
+          <fieldset className="form-field full" style={{ border: 0, padding: 0, margin: 0 }}>
+            <legend className="form-label" style={{ marginBottom: 6 }}>Priorities That Justify This Choice</legend>
             {SELECTION_PRIORITIES.map(p => (
               <label key={p.value} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
                 <input
@@ -85,10 +85,11 @@ export default function SelectByPriorityPanel({ homeId, entry, assessedValue, on
                 {p.label}
               </label>
             ))}
-          </div>
+          </fieldset>
           <div className="form-field full">
-            <label className="form-label">Reason</label>
+            <label className="form-label" htmlFor="selection-reason">Reason</label>
             <textarea
+              id="selection-reason"
               className="form-textarea"
               value={reason}
               onChange={e => setReason(e.target.value)}

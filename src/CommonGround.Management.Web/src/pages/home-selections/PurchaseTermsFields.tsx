@@ -27,8 +27,9 @@ export default function PurchaseTermsFields({ value, onChange, assessedValue, pr
   return (
     <>
       <div className="form-field full">
-        <label className="form-label">Ground Lease Template</label>
+        <label className="form-label" htmlFor="purchase-terms-template">Ground Lease Template</label>
         <EntityCombobox
+          id="purchase-terms-template"
           value={value.groundLeaseTemplateId || null}
           onChange={id => onChange(t => ({ ...t, groundLeaseTemplateId: id ?? '' }))}
           fetchOptions={async q => {
@@ -46,8 +47,9 @@ export default function PurchaseTermsFields({ value, onChange, assessedValue, pr
         />
       </div>
       <div className="form-field">
-        <label className="form-label">Purchase Price ($)</label>
+        <label className="form-label" htmlFor="purchase-terms-price">Purchase Price ($)</label>
         <input
+          id="purchase-terms-price"
           className="form-input"
           type="number"
           min="1"
@@ -65,8 +67,9 @@ export default function PurchaseTermsFields({ value, onChange, assessedValue, pr
         {warnings.map(w => <div key={w} className="form-warning" role="status">{w}</div>)}
       </div>
       <div className="form-field">
-        <label className="form-label">Date of the Choice</label>
+        <label className="form-label" htmlFor="purchase-terms-date">Date of the Choice</label>
         <DateInput
+          id="purchase-terms-date"
           className="form-input"
           max={trustToday()}
           value={value.selectedDate}
