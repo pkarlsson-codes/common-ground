@@ -5,7 +5,7 @@ name: commonground
 
 services:
   caddy:
-    image: caddy:2.10-alpine
+    image: caddy:2.11.9-alpine
     restart: unless-stopped
     ports:
       - "80:80"
@@ -38,7 +38,7 @@ services:
       retries: 10
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.4
+    image: quay.io/keycloak/keycloak:26.8.2
     restart: unless-stopped
     command: ["start", "--import-realm"]
     environment:

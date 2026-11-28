@@ -20,7 +20,7 @@ services:
 
   keycloak:
     # Same major version as deploy/compose.yml. 26 opens the registration form for prompt=create (the demo's "Try the demo").
-    image: quay.io/keycloak/keycloak:26.4
+    image: quay.io/keycloak/keycloak:26.8.2
     container_name: commonground_keycloak
     depends_on:
       postgres:
